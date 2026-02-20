@@ -112,6 +112,41 @@ export function turnPlayer(camera, sign = 1) {
   onMoved();
 }
 
+// sign =  1 → strafe right (perpendicular clockwise from facing)
+// sign = -1 → strafe left  (perpendicular counter-clockwise from facing)
+export function strafePlayer(camera, sign = 1) {
+  if (player.moving) return;
+
+  // The strafe direction is 90° to the right of current facing (+1 turn),
+  // or 90° to the left (-1 turn), without changing player.facing.
+  const strafeDir = DIR[((player.facing + sign) + 4) % 4];
+  const newRow    = player.gridRow + strafeDir.dz;
+  const newCol    = player.gridCol + strafeDir.dx;
+
+  if (!isPassable(newRow, newCol)) {
+    bumpFeedback(camera);
+    return;
+  }
+
+  player.moving  = true;
+  player.gridRow = newRow;
+  player.gridCol = newCol;
+
+  const target = cellToWorld(newRow, newCol);
+
+  new Tween(camera.position, tweenGroup)
+    .to({ x: target.x, z: target.z }, MOVE_MS)
+    .easing(Easing.Quadratic.InOut)
+    .onComplete(() => {
+      player.moving = false;
+      onMoved();
+      if (dungeonMap[newRow][newCol] === CELL_EXIT) onReached();
+    })
+    .start();
+
+  onMoved();
+}
+
 // Brief recoil when walking into a wall
 function bumpFeedback(camera) {
   const dir  = DIR[player.facing];
@@ -134,14 +169,19 @@ function bumpFeedback(camera) {
 // ─────────────────────────────────────────────
 export function initInput(camera) {
   const keyMap = {
-    'w': () => moveForward(camera,  1),
-    'ArrowUp':    () => moveForward(camera,  1),
-    's': () => moveForward(camera, -1),
-    'ArrowDown':  () => moveForward(camera, -1),
-    'a': () => turnPlayer(camera, -1),
-    'ArrowLeft':  () => turnPlayer(camera, -1),
-    'd': () => turnPlayer(camera,  1),
-    'ArrowRight': () => turnPlayer(camera,  1),
+    // Move forward / back
+    'w'          : () => moveForward(camera,  1),
+    'ArrowUp'    : () => moveForward(camera,  1),
+    's'          : () => moveForward(camera, -1),
+    'ArrowDown'  : () => moveForward(camera, -1),
+    // Turn left / right
+    'q'          : () => turnPlayer(camera, -1),
+    'ArrowLeft'  : () => turnPlayer(camera, -1),
+    'e'          : () => turnPlayer(camera,  1),
+    'ArrowRight' : () => turnPlayer(camera,  1),
+    // Strafe left / right
+    'a'          : () => strafePlayer(camera, -1),
+    'd'          : () => strafePlayer(camera,  1),
   };
 
   document.addEventListener('keydown', (e) => {

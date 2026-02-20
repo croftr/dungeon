@@ -1,8 +1,9 @@
 import { party } from './party.js';
 import { getItemDef } from './items.js';
-import { playAction  } from './actions.js';
+import { playAction } from './actions.js';
 import { attackMonster, monsters } from './monster.js';
 import { showMessage } from './minimap.js';
+import { dropMember } from './recruits.js';
 
 // ─────────────────────────────────────────────
 //  CONSTANTS
@@ -19,19 +20,19 @@ const INVENTORY_SIZE = 20; // 4 cols × 5 rows
 
 // Human-readable slot labels for the detail panel
 const SLOT_LABELS = {
-  head      : 'Head',
-  cloak     : 'Cloak',
-  neck      : 'Neck',
-  chest     : 'Chest',
-  leftHand  : 'Left Hand',
-  rightHand : 'Right Hand',
-  bothHands : 'Both Hands',
-  belt      : 'Belt',
-  hands     : 'Gauntlets',
-  ring1     : 'Ring',
-  ring2     : 'Ring',
-  legs      : 'Legs',
-  feet      : 'Feet',
+  head: 'Head',
+  cloak: 'Cloak',
+  neck: 'Neck',
+  chest: 'Chest',
+  leftHand: 'Left Hand',
+  rightHand: 'Right Hand',
+  bothHands: 'Both Hands',
+  belt: 'Belt',
+  hands: 'Gauntlets',
+  ring1: 'Ring',
+  ring2: 'Ring',
+  legs: 'Legs',
+  feet: 'Feet',
 };
 
 // ─────────────────────────────────────────────
@@ -42,8 +43,11 @@ let activeCharIndex = null;
 // ─────────────────────────────────────────────
 //  DATA SETUP  — extends party member objects
 // ─────────────────────────────────────────────
-function extendPartyData() {
+export function extendPartyData() {
   party.forEach((m) => {
+    if (m.isEmpty) return;
+    if (m.equipment) return; // Already initialized
+
     // All slots empty by default
     m.equipment = Object.fromEntries(SLOT_KEYS.map((k) => [k, null]));
     // Every character starts with a Shawl on their head
@@ -51,24 +55,24 @@ function extendPartyData() {
     // Seed left/right hand from party card data (skip '—' placeholder)
     // For bothHands items, fill both slots with the same item object reference
     if (m.leftHand && m.leftHand !== '—') {
-      const def  = getItemDef(m.leftHand);
+      const def = getItemDef(m.leftHand);
       const slot = def?.slot ?? 'leftHand';
       if (slot === 'bothHands') {
         const item = { name: m.leftHand, slot: 'bothHands' };
-        m.equipment.leftHand  = item;
+        m.equipment.leftHand = item;
         m.equipment.rightHand = item;
       } else {
         m.equipment.leftHand = { name: m.leftHand, slot: 'leftHand' };
       }
     }
     if (m.rightHand && m.rightHand !== '—') {
-      const def  = getItemDef(m.rightHand);
+      const def = getItemDef(m.rightHand);
       const slot = def?.slot ?? 'rightHand';
       // Only seed rightHand if not already filled by a bothHands item
       if (slot === 'bothHands') {
         if (!m.equipment.leftHand) {
           const item = { name: m.rightHand, slot: 'bothHands' };
-          m.equipment.leftHand  = item;
+          m.equipment.leftHand = item;
           m.equipment.rightHand = item;
         }
       } else {
@@ -93,11 +97,11 @@ function renderModal(memberIndex) {
   // For bothHands items the same object sits in both leftHand and rightHand.
   // We show the name in full on the primary (leftHand) slot and faded on rightHand.
   SLOT_KEYS.forEach((key) => {
-    const el   = document.getElementById(`pd-${key}`);
+    const el = document.getElementById(`pd-${key}`);
     const item = m.equipment[key];
     const isBothHands = item?.slot === 'bothHands';
     const isSecondary = isBothHands && key === 'rightHand';
-    el.classList.toggle('occupied',             item !== null);
+    el.classList.toggle('occupied', item !== null);
     el.classList.toggle('both-hands-secondary', isSecondary);
     el.querySelector('.pd-item').textContent = item ? item.name : '';
   });
@@ -145,11 +149,11 @@ const TOOLTIP_OFFSET_X = 14;
 const TOOLTIP_OFFSET_Y = 14;
 
 function positionTooltip(mouseX, mouseY) {
-  const panel  = document.getElementById('item-detail-panel');
-  const pw     = panel.offsetWidth  || 190;
-  const ph     = panel.offsetHeight || 120;
-  const vw     = window.innerWidth;
-  const vh     = window.innerHeight;
+  const panel = document.getElementById('item-detail-panel');
+  const pw = panel.offsetWidth || 190;
+  const ph = panel.offsetHeight || 120;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
 
   // Default: place to the right and below cursor
   let x = mouseX + TOOLTIP_OFFSET_X;
@@ -161,7 +165,7 @@ function positionTooltip(mouseX, mouseY) {
   if (y + ph > vh - 8) y = mouseY - ph - TOOLTIP_OFFSET_Y;
 
   panel.style.left = x + 'px';
-  panel.style.top  = y + 'px';
+  panel.style.top = y + 'px';
 }
 
 function populateTooltip(item) {
@@ -252,7 +256,7 @@ function useHand(memberIndex, hand) {
   if (!m) return;
 
   const slotKey = hand === 'left' ? 'leftHand' : 'rightHand';
-  const item    = m.equipment?.[slotKey];
+  const item = m.equipment?.[slotKey];
   if (!item) return;
 
   const def = getItemDef(item.name);
@@ -265,9 +269,9 @@ function useHand(memberIndex, hand) {
   const target = monsters[0];
   if (!target?.alive) return;
 
-  const baseDamage  = def.baseDamage  ?? 0;
-  const heroStr     = m.stats?.strength ?? 10;
-  const result      = attackMonster(baseDamage, heroStr);
+  const baseDamage = def.baseDamage ?? 0;
+  const heroStr = m.stats?.strength ?? 10;
+  const result = attackMonster(baseDamage, heroStr);
 
   if (result.hit) {
     if (result.killed) {
@@ -286,8 +290,8 @@ function useHand(memberIndex, hand) {
 // For bothHands items, both hand slots are cleared with one inventory entry.
 function onPaperdollSlotClick(e) {
   if (activeCharIndex === null) return;
-  const key  = e.currentTarget.dataset.slot;
-  const m    = party[activeCharIndex];
+  const key = e.currentTarget.dataset.slot;
+  const m = party[activeCharIndex];
   const item = m.equipment[key];
   if (!item) return; // empty slot — nothing to do
 
@@ -303,7 +307,7 @@ function onPaperdollSlotClick(e) {
   m.equipment[key] = null;
   // If it was a bothHands item, clear the mirrored slot too
   if (item.slot === 'bothHands') {
-    m.equipment.leftHand  = null;
+    m.equipment.leftHand = null;
     m.equipment.rightHand = null;
   }
   renderModal(activeCharIndex);
@@ -316,8 +320,8 @@ function onPaperdollSlotClick(e) {
 function onInventoryCellClick(e) {
   if (activeCharIndex === null) return;
   const invIndex = Number(e.currentTarget.dataset.index);
-  const m        = party[activeCharIndex];
-  const item     = m.inventory[invIndex];
+  const m = party[activeCharIndex];
+  const item = m.inventory[invIndex];
   if (!item) return; // empty cell
 
   // Clear this inventory cell first
@@ -330,7 +334,7 @@ function onInventoryCellClick(e) {
       .filter((d, idx, arr) => arr.indexOf(d) === idx);
 
     // Clear and equip both slots
-    m.equipment.leftHand  = item;
+    m.equipment.leftHand = item;
     m.equipment.rightHand = item;
 
     // Return any displaced items to inventory
@@ -356,8 +360,8 @@ function buildInventoryGrid() {
   grid.innerHTML = '';
   for (let i = 0; i < INVENTORY_SIZE; i++) {
     const cell = document.createElement('div');
-    cell.className      = 'inv-cell';
-    cell.dataset.index  = i;
+    cell.className = 'inv-cell';
+    cell.dataset.index = i;
     cell.addEventListener('click', onInventoryCellClick);
     // Hover tooltip — reads live item each time in case it changed
     attachTooltipListeners(cell, () => {
@@ -426,6 +430,14 @@ function attachOverlayListeners() {
     }
   });
 }
+
+// Drop button
+document.getElementById('equip-drop').addEventListener('click', () => {
+  if (activeCharIndex !== null) {
+    dropMember(activeCharIndex);
+    closeModal();
+  }
+});
 
 // ─────────────────────────────────────────────
 //  PUBLIC INIT

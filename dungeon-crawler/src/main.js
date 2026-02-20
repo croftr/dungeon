@@ -7,24 +7,25 @@ import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.j
 import { initParty } from './party.js';
 import { initEquipment } from './equipment.js';
 import { initMonsters, updateMonsters } from './monster.js';
+import { initRecruits } from './recruits.js';
 
 import './style.css';
 
 // ─────────────────────────────────────────────
 //  RENDERER
 // ─────────────────────────────────────────────
-const canvas   = document.getElementById('renderer-canvas');
+const canvas = document.getElementById('renderer-canvas');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 // ─────────────────────────────────────────────
 //  SCENE  &  CAMERA
 // ─────────────────────────────────────────────
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x050505);
-scene.fog        = new THREE.Fog(0x050505, 2, 12);
+scene.fog = new THREE.Fog(0x050505, 2, 12);
 
 const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 100);
 
@@ -72,6 +73,7 @@ drawMinimap();
 updateStatus();
 initParty();
 initEquipment();
+initRecruits(scene, camera);
 
 // ─────────────────────────────────────────────
 //  MONSTERS
@@ -100,4 +102,4 @@ animate(performance.now());
 //  DEV INFO
 // ─────────────────────────────────────────────
 console.log('%c Grid Dungeon Crawler ', 'background:#333;color:#e8c87a;font-size:14px;padding:4px 8px;');
-console.log('Map: 0=floor 1=wall 2=start 3=exit | Controls: WASD / Arrow keys');
+console.log('Map: 0=floor 1=wall 2=start 3=exit | Controls: W/S=move  Q/E=turn  A/D=strafe  Arrows=move+turn');
