@@ -4,29 +4,29 @@ import * as THREE from 'three';
 //  MAP DATA  (0=floor, 1=wall, 2=start, 3=exit)
 // ─────────────────────────────────────────────
 export const dungeonMap = [
-  [1, 1, 1, 1, 1, 1, 1, 1, 1],
-  [1, 2, 0, 0, 1, 0, 0, 0, 1],
-  [1, 0, 1, 0, 1, 0, 1, 0, 1],
-  [1, 0, 1, 0, 0, 0, 1, 0, 1],
-  [1, 0, 1, 1, 1, 0, 1, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 1, 1, 0, 1, 1, 1, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 3, 1],
-  [1, 1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 2, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+  [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1],
+  [1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1],
+  [1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1],
+  [1, 0, 0, 0, 0, 0, 0, 3, 1, 1, 1, 1, 1, 1, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ];
 
 export const ROWS = dungeonMap.length;
 export const COLS = dungeonMap[0].length;
 
 // World-space constants
-export const CELL   = 2;    // units per grid cell
+export const CELL = 2;    // units per grid cell
 export const WALL_H = 2;    // wall height
 
 // Cell type constants
 export const CELL_FLOOR = 0;
-export const CELL_WALL  = 1;
+export const CELL_WALL = 1;
 export const CELL_START = 2;
-export const CELL_EXIT  = 3;
+export const CELL_EXIT = 3;
 
 // ─────────────────────────────────────────────
 //  PROCEDURAL TEXTURES
@@ -65,7 +65,7 @@ function makeBrickTexture() {
 
     for (let c2 = -1; c2 <= COLS_B; c2++) {
       const x = c2 * brickW + offsetX + mortarT / 2;
-      const y = r  * brickH             + mortarT / 2;
+      const y = r * brickH + mortarT / 2;
       const w = brickW - mortarT;
       const h = brickH - mortarT;
 
@@ -114,7 +114,7 @@ function makeFloorTexture() {
   // Flagstone grid: 2×2 tiles per texture
   const tiles = 2;
   const tileS = S / tiles;
-  const gap   = 4;
+  const gap = 4;
 
   for (let tr = 0; tr < tiles; tr++) {
     for (let tc = 0; tc < tiles; tc++) {
@@ -152,14 +152,14 @@ const floorTex = makeFloorTexture();
 // ─────────────────────────────────────────────
 //  MATERIALS
 // ─────────────────────────────────────────────
-const wallMat  = new THREE.MeshLambertMaterial({ map: brickTex });
+const wallMat = new THREE.MeshLambertMaterial({ map: brickTex });
 const floorMat = new THREE.MeshLambertMaterial({ map: floorTex });
-const ceilMat  = new THREE.MeshLambertMaterial({ color: 0x111008 });
-const exitMat  = new THREE.MeshLambertMaterial({ color: 0x226622, emissive: 0x113311 });
+const ceilMat = new THREE.MeshLambertMaterial({ color: 0x111008 });
+const exitMat = new THREE.MeshLambertMaterial({ color: 0x226622, emissive: 0x113311 });
 
 // Shared geometries
-const wallGeo  = new THREE.BoxGeometry(CELL, WALL_H, CELL);
-const tileGeo  = new THREE.PlaneGeometry(CELL, CELL);
+const wallGeo = new THREE.BoxGeometry(CELL, WALL_H, CELL);
+const tileGeo = new THREE.PlaneGeometry(CELL, CELL);
 
 // ─────────────────────────────────────────────
 //  LEVEL BUILDER
@@ -204,7 +204,7 @@ export function buildLevel(scene) {
       if (cell === CELL_WALL) {
         const mesh = new THREE.Mesh(wallGeo, wallMat);
         mesh.position.set(wx, WALL_H / 2, wz);
-        mesh.castShadow    = true;
+        mesh.castShadow = true;
         mesh.receiveShadow = true;
         scene.add(mesh);
       } else {
