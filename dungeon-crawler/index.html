@@ -145,6 +145,7 @@
           <div id="inventory-grid">
             <!-- cells injected by equipment.js -->
           </div>
+
         </section>
 
         <!-- RIGHT: Body silhouette + slot overlays -->
@@ -348,6 +349,18 @@
       </div><!-- /#equip-body -->
     </div><!-- /#equip-modal -->
   </div><!-- /#equip-overlay -->
+
+  <!-- Floating item tooltip — positioned by JS on hover, lives at body level -->
+  <div id="item-detail-panel" class="detail-hidden">
+    <div id="item-detail-name"></div>
+    <div id="item-detail-slot"></div>
+    <div id="item-detail-action"></div>
+    <div id="item-detail-desc"></div>
+    <div id="item-detail-stats">
+      <div class="detail-stat-row"><span>Value</span><span id="item-detail-value"></span></div>
+      <div class="detail-stat-row"><span>Weight</span><span id="item-detail-weight"></span></div>
+    </div>
+  </div>
 
   <script type="module" src="/src/main.js"></script>
 </body>

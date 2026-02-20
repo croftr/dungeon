@@ -1,3 +1,5 @@
+import { getItemDef } from './items.js';
+
 // ─────────────────────────────────────────────
 //  PARTY DATA  — 4 members
 // ─────────────────────────────────────────────
@@ -16,7 +18,7 @@ export const party = [
     id: 1, name: 'Seraphina',
     hp: 60,  hpMax: 80,
     mp: 95,  mpMax: 120,
-    leftHand: 'Grimoire', rightHand: 'Staff',
+    leftHand: 'Staff', rightHand: 'Staff',
     skinLight: '#e8c8a0', skinDark: '#b08050',
     hairColor: '#8a1a1a',  // auburn
     irisColor: '#2a6a3a',  // green
@@ -34,7 +36,7 @@ export const party = [
     id: 3, name: 'Lyra',
     hp: 50,  hpMax: 70,
     mp: 80,  mpMax: 90,
-    leftHand: 'Bow', rightHand: '—',
+    leftHand: 'Bow', rightHand: 'Bow',
     skinLight: '#f0d8b0', skinDark: '#c09860',
     hairColor: '#c8b040',  // blonde
     irisColor: '#1a4a7a',  // blue
@@ -200,10 +202,27 @@ function refreshMember(m) {
   const lhSlot = document.getElementById(`slot-lh-${i}`);
   const rhSlot = document.getElementById(`slot-rh-${i}`);
 
+  // Check if the left-hand item is bothHands — if so, right slot shows it faded
+  const lhDef       = m.leftHand && m.leftHand !== '—' ? getItemDef(m.leftHand) : null;
+  const lhBothHands = lhDef?.slot === 'bothHands';
+
+  // For single-hand items with no action (e.g. Shield), fade the slot to show it's passive
+  const lhNoAction  = lhDef !== null && lhDef?.action == null && !lhBothHands;
+  const rhDef       = !lhBothHands && m.rightHand && m.rightHand !== '—' ? getItemDef(m.rightHand) : null;
+  const rhNoAction  = rhDef !== null && rhDef?.action == null;
+
   if (lhEl) lhEl.textContent = m.leftHand  || '—';
-  if (rhEl) rhEl.textContent = m.rightHand || '—';
-  if (lhSlot) lhSlot.classList.toggle('slot-empty', !m.leftHand || m.leftHand === '—');
-  if (rhSlot) rhSlot.classList.toggle('slot-empty', !m.rightHand || m.rightHand === '—');
+  if (rhEl) rhEl.textContent = lhBothHands ? m.leftHand : (m.rightHand || '—');
+
+  if (lhSlot) {
+    lhSlot.classList.toggle('slot-empty',    !m.leftHand || m.leftHand === '—');
+    lhSlot.classList.toggle('slot-no-action', lhNoAction);
+  }
+  if (rhSlot) {
+    rhSlot.classList.toggle('slot-empty',           !lhBothHands && (!m.rightHand || m.rightHand === '—'));
+    rhSlot.classList.toggle('both-hands-secondary', lhBothHands);
+    rhSlot.classList.toggle('slot-no-action',       !lhBothHands && rhNoAction);
+  }
 }
 
 // ─────────────────────────────────────────────

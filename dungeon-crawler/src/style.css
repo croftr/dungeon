@@ -461,6 +461,30 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   z-index: 1;
 }
 
+/* Both-hands secondary slot — item name shown faded to indicate it mirrors
+   the primary (leftHand) slot. Applies to paperdoll #pd-rightHand and
+   hero card #slot-rh-{i} when a bothHands weapon is equipped. */
+.both-hands-secondary {
+  opacity: 0.45;
+  border-color: #3a2a10 !important;
+}
+.both-hands-secondary .pd-item,
+.both-hands-secondary .slot-item {
+  color: #6a5828;
+  font-style: italic;
+}
+
+/* No-action slot — item is equipped but has no active use (e.g. Shield).
+   Shown slightly faded with a cooler blue-grey tint to indicate "passive only". */
+.slot-no-action {
+  opacity: 0.55;
+  border-color: #2a3040 !important;
+}
+.slot-no-action .slot-item {
+  color: #7080a0;
+  font-style: italic;
+}
+
 /* Faint icon inside any slot that has one */
 #pd-hands .pd-hands-icon,
 .pd-slot .pd-slot-icon {
@@ -488,3 +512,144 @@ body { background: #000; overflow: hidden; font-family: monospace; }
 #pd-ring2     { top: 96%;  left: 122%;  }  /* right bottom — ring 2          */
 #pd-legs      { top: 75%;  left: 50%;   }  /* mid legs                       */
 #pd-feet      { top: 96%;  left: 50%;   }  /* feet — same level as hands/rings */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   WEAPON ACTION ANIMATIONS
+   An overlay div #action-anim is injected over the dungeon view and gets one
+   of the action classes: .anim-swipe | .anim-bash | .anim-shoot | .anim-block
+   The SVG inside it plays the keyframe animation then the element is removed.
+───────────────────────────────────────────────────────────────────────────── */
+#action-anim {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#action-anim svg {
+  width: min(45vw, 45vh);
+  height: min(45vw, 45vh);
+  filter: drop-shadow(0 0 12px rgba(200, 160, 60, 0.7));
+}
+
+/* ── SWIPE ── diagonal slash arc from upper-left to lower-right ── */
+@keyframes swipe-arc {
+  0%   { transform: translate(-35%, -35%) rotate(-60deg) scale(0.5); opacity: 0; }
+  20%  { opacity: 1; }
+  60%  { transform: translate(0%, 0%) rotate(20deg) scale(1.1); opacity: 0.9; }
+  100% { transform: translate(30%, 30%) rotate(60deg) scale(0.8); opacity: 0; }
+}
+.anim-swipe svg { animation: swipe-arc 0.45s ease-in forwards; }
+
+/* ── BASH ── straight thrust forward then recoil ── */
+@keyframes bash-thrust {
+  0%   { transform: scale(0.6) translateY(20%); opacity: 0; }
+  25%  { transform: scale(1.2) translateY(-8%); opacity: 1; }
+  55%  { transform: scale(1.0) translateY(0%);  opacity: 1; }
+  100% { transform: scale(0.7) translateY(30%); opacity: 0; }
+}
+.anim-bash svg { animation: bash-thrust 0.5s ease-out forwards; }
+
+/* ── SHOOT ── arrow flies from lower-left to upper-right ── */
+@keyframes shoot-fly {
+  0%   { transform: translate(-40%, 40%) rotate(-45deg) scale(0.4); opacity: 0; }
+  15%  { opacity: 1; }
+  70%  { transform: translate(20%, -20%) rotate(-45deg) scale(1.0); opacity: 0.9; }
+  100% { transform: translate(60%, -60%) rotate(-45deg) scale(0.6); opacity: 0; }
+}
+.anim-shoot svg { animation: shoot-fly 0.5s ease-in forwards; }
+
+/* ── PUNCH ── fist drives in from the side, impact, recoils ── */
+@keyframes punch-drive {
+  0%   { transform: translateX(-50%) scale(0.7); opacity: 0; }
+  20%  { transform: translateX(-10%) scale(1.05); opacity: 1; }
+  50%  { transform: translateX(0%)   scale(1.0);  opacity: 1; }
+  75%  { transform: translateX(4%)   scale(0.95); opacity: 0.8; }
+  100% { transform: translateX(-20%) scale(0.8);  opacity: 0; }
+}
+.anim-punch svg { animation: punch-drive 0.42s ease-out forwards; }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   ITEM TOOLTIP
+   Fixed floating panel positioned near the cursor by JS.
+   Triggered by hovering over any inventory cell or equipped paperdoll slot.
+───────────────────────────────────────────────────────────────────────────── */
+#item-detail-panel {
+  position: fixed;
+  width: 190px;
+  background: rgba(8, 6, 3, 0.97);
+  border: 1px solid #6a5030;
+  border-radius: 4px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  box-shadow:
+    0 6px 24px rgba(0,0,0,0.85),
+    inset 0 1px 0 rgba(255,220,120,0.07);
+  pointer-events: none;
+  z-index: 1100;
+  /* fade in smoothly */
+  opacity: 1;
+  transition: opacity 0.1s ease;
+}
+
+#item-detail-panel.detail-hidden {
+  opacity: 0;
+  pointer-events: none;
+  /* keep in DOM but invisible so transitions work; use visibility to fully hide */
+  visibility: hidden;
+}
+
+#item-detail-name {
+  font-size: 11px;
+  font-weight: bold;
+  color: #e8c87a;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #3a2a10;
+  padding-bottom: 5px;
+  text-transform: uppercase;
+}
+
+#item-detail-slot {
+  font-size: 9px;
+  color: #8a7040;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+#item-detail-action {
+  font-size: 9px;
+  color: #c87040;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+#item-detail-desc {
+  font-size: 9px;
+  color: #a09070;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+#item-detail-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border-top: 1px solid #3a2a10;
+  padding-top: 6px;
+}
+
+.detail-stat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: #7a6a50;
+}
+
+.detail-stat-row span:last-child {
+  color: #c8a84a;
+}

@@ -3,7 +3,8 @@
     "allow": [
       "Bash(node --version:*)",
       "Bash(npm:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(cmd /c:*)"
     ]
   }
 }
