@@ -5,6 +5,7 @@ import { initPlayer, initInput, setCallbacks, tweenGroup } from './player.js';
 import { initLighting, updateLighting } from './lighting.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
 import { initParty } from './party.js';
+import { initEquipment } from './equipment.js';
 
 import './style.css';
 
@@ -69,6 +70,7 @@ initMinimap();
 drawMinimap();
 updateStatus();
 initParty();
+initEquipment();
 
 // ─────────────────────────────────────────────
 //  RENDER LOOP
