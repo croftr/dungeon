@@ -1,10 +1,25 @@
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: #000; overflow: hidden; font-family: monospace; }
-#renderer-canvas { display: block; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #000;
+  overflow: hidden;
+  font-family: monospace;
+}
+
+#renderer-canvas {
+  display: block;
+}
 
 #hud {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   pointer-events: none;
 }
 
@@ -21,11 +36,12 @@ body { background: #000; overflow: hidden; font-family: monospace; }
 
 /* Minimap */
 #minimap-wrap {
-  background: rgba(0,0,0,0.7);
+  background: rgba(0, 0, 0, 0.7);
   border: 1px solid #555;
   padding: 6px;
   border-radius: 4px;
 }
+
 #minimap-wrap h3 {
   color: #aaa;
   font-size: 10px;
@@ -33,7 +49,10 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   margin-bottom: 4px;
   letter-spacing: 1px;
 }
-#minimap { display: block; }
+
+#minimap {
+  display: block;
+}
 
 /* Controls legend — bottom-left */
 #controls {
@@ -45,18 +64,21 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   color: #888;
   font-size: 11px;
   line-height: 1.7;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   padding: 8px 10px;
   border-radius: 4px;
   border: 1px solid #333;
 }
-#controls span { color: #ccc; }
+
+#controls span {
+  color: #ccc;
+}
 
 /* Status bar — flows naturally below minimap inside #top-right */
 #status {
   color: #aaa;
   font-size: 11px;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   padding: 6px 10px;
   border-radius: 4px;
   border: 1px solid #333;
@@ -64,12 +86,16 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   line-height: 1.6;
   white-space: nowrap;
 }
-#status .facing { color: #e8c87a; }
+
+#status .facing {
+  color: #e8c87a;
+}
 
 /* Victory / message overlay */
 #message {
   position: absolute;
-  top: 50%; left: 50%;
+  top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%);
   color: #e8c87a;
   font-size: 28px;
@@ -104,7 +130,7 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   flex-direction: column;
   gap: 5px;
   /* Inner bevel feel */
-  box-shadow: inset 0 1px 0 rgba(255,220,120,0.08), 0 2px 8px rgba(0,0,0,0.7);
+  box-shadow: inset 0 1px 0 rgba(255, 220, 120, 0.08), 0 2px 8px rgba(0, 0, 0, 0.7);
 }
 
 /* ── Top row: portrait + bars ── */
@@ -123,8 +149,9 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   border-radius: 3px;
   overflow: hidden;
   background: #0d0a06;
-  box-shadow: inset 0 0 6px rgba(0,0,0,0.8);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.8);
 }
+
 .portrait-canvas {
   display: block;
   width: 100%;
@@ -158,7 +185,7 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   position: relative;
   flex: 1;
   height: 13px;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   border: 1px solid #3a3020;
   border-radius: 2px;
   overflow: hidden;
@@ -166,7 +193,9 @@ body { background: #000; overflow: hidden; font-family: monospace; }
 
 .bar-fill {
   position: absolute;
-  left: 0; top: 0; bottom: 0;
+  left: 0;
+  top: 0;
+  bottom: 0;
   border-radius: 2px;
   transition: width 0.4s ease;
 }
@@ -187,7 +216,7 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   top: 50%;
   transform: translateY(-50%);
   font-size: 8px;
-  color: rgba(255,255,255,0.75);
+  color: rgba(255, 255, 255, 0.75);
   pointer-events: none;
   text-shadow: 0 0 3px #000;
   white-space: nowrap;
@@ -210,7 +239,7 @@ body { background: #000; overflow: hidden; font-family: monospace; }
 .equip-slot {
   flex: 1;
   height: 36px;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   border: 1px solid #4a3a20;
   border-radius: 3px;
   display: flex;
@@ -219,7 +248,7 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   justify-content: center;
   gap: 1px;
   position: relative;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.6);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 .equip-slot:hover {
@@ -254,18 +283,34 @@ body { background: #000; overflow: hidden; font-family: monospace; }
 /* Crosshair */
 #crosshair {
   position: absolute;
-  top: 50%; left: 50%;
+  top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%);
-  width: 16px; height: 16px;
+  width: 16px;
+  height: 16px;
   pointer-events: none;
 }
-#crosshair::before, #crosshair::after {
+
+#crosshair::before,
+#crosshair::after {
   content: '';
   position: absolute;
-  background: rgba(255,255,255,0.35);
+  background: rgba(255, 255, 255, 0.35);
 }
-#crosshair::before { width: 2px; height: 16px; left: 7px; top: 0; }
-#crosshair::after  { width: 16px; height: 2px; left: 0; top: 7px; }
+
+#crosshair::before {
+  width: 2px;
+  height: 16px;
+  left: 7px;
+  top: 0;
+}
+
+#crosshair::after {
+  width: 16px;
+  height: 2px;
+  left: 0;
+  top: 7px;
+}
 
 /* ═══════════════════════════════════════════════
    EQUIPMENT MODAL
@@ -276,11 +321,12 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   pointer-events: auto;
   cursor: pointer;
 }
+
 .member-card:hover {
   border-color: #8a7040;
   box-shadow:
-    inset 0 1px 0 rgba(255,220,120,0.18),
-    0 0 12px rgba(200,160,60,0.2);
+    inset 0 1px 0 rgba(255, 220, 120, 0.18),
+    0 0 12px rgba(200, 160, 60, 0.2);
 }
 
 /* Overlay backdrop */
@@ -294,7 +340,10 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   z-index: 1000;
   backdrop-filter: blur(2px);
 }
-.equip-hidden { display: none !important; }
+
+.equip-hidden {
+  display: none !important;
+}
 
 /* Modal box */
 #equip-modal {
@@ -304,7 +353,7 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   background: rgba(10, 7, 4, 0.97);
   border: 1px solid #5a4a30;
   border-radius: 6px;
-  box-shadow: 0 0 50px rgba(0,0,0,0.95), inset 0 1px 0 rgba(255,220,120,0.07);
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 220, 120, 0.07);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -318,21 +367,24 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   justify-content: space-between;
   padding: 10px 14px;
   border-bottom: 1px solid #3a2e18;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
   flex-shrink: 0;
 }
+
 #equip-char-name {
   font-size: 13px;
   color: #c8a84a;
   letter-spacing: 2px;
   text-transform: uppercase;
 }
+
 #equip-close {
   background: none;
   border: 1px solid #4a3a20;
   color: #888;
   font-size: 18px;
-  width: 28px; height: 28px;
+  width: 28px;
+  height: 28px;
   border-radius: 3px;
   cursor: pointer;
   display: flex;
@@ -340,7 +392,11 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   justify-content: center;
   line-height: 1;
 }
-#equip-close:hover { border-color: #8a7040; color: #c8a84a; }
+
+#equip-close:hover {
+  border-color: #8a7040;
+  color: #c8a84a;
+}
 
 /* Three-column body: inventory | stats+skills | paperdoll */
 #equip-body {
@@ -349,6 +405,7 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   overflow: hidden;
   flex: 1;
 }
+
 .equip-section-title {
   font-size: 9px;
   color: #5a5040;
@@ -373,15 +430,17 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   flex-direction: column;
   overflow-y: auto;
 }
+
 #inventory-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 5px;
   padding: 10px;
 }
+
 .inv-cell {
   aspect-ratio: 1;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   border: 1px solid #2a2010;
   border-radius: 3px;
   display: flex;
@@ -391,19 +450,21 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   color: #c0a060;
   text-align: center;
   padding: 3px;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.6);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
   word-break: break-word;
   line-height: 1.3;
   cursor: default;
 }
+
 .inv-cell.occupied {
   border-color: #6a5030;
   color: #e8c87a;
   cursor: pointer;
 }
+
 .inv-cell.occupied:hover {
   border-color: #a08050;
-  background: rgba(60,40,10,0.45);
+  background: rgba(60, 40, 10, 0.45);
 }
 
 /* ── Character stats panel ── */
@@ -419,7 +480,7 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   justify-content: space-between;
   align-items: center;
   padding: 4px 8px;
-  background: rgba(0,0,0,0.3);
+  background: rgba(0, 0, 0, 0.3);
   border: 1px solid #2a2010;
   border-radius: 2px;
 }
@@ -457,7 +518,7 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   flex-direction: column;
   gap: 3px;
   padding: 7px 9px;
-  background: rgba(0,0,0,0.35);
+  background: rgba(0, 0, 0, 0.35);
   border: 1px solid #3a2e14;
   border-radius: 3px;
 }
@@ -488,6 +549,7 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   flex-direction: column;
   overflow: visible;
 }
+
 #paperdoll-wrap {
   position: relative;
   width: 160px;
@@ -495,6 +557,7 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   /* height is driven by the SVG aspect ratio: viewBox 100×220 → 220% */
   overflow: visible;
 }
+
 #body-silhouette {
   display: block;
   width: 100%;
@@ -510,7 +573,7 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   position: absolute;
   width: 64px;
   height: 64px;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0, 0, 0, 0.7);
   border: 1px solid #4a3a20;
   border-radius: 3px;
   display: flex;
@@ -518,21 +581,24 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   align-items: center;
   justify-content: center;
   gap: 2px;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.7);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.7);
   /* Centre box on anchor point */
   transform: translate(-50%, -50%);
   cursor: default;
   user-select: none;
   overflow: hidden;
 }
+
 .pd-slot.occupied {
   border-color: #7a5a28;
   cursor: pointer;
 }
+
 .pd-slot.occupied:hover {
   border-color: #b08040;
-  background: rgba(50,35,10,0.75);
+  background: rgba(50, 35, 10, 0.75);
 }
+
 .pd-item {
   font-size: 8px;
   color: #c8a84a;
@@ -552,6 +618,7 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   opacity: 0.45;
   border-color: #3a2a10 !important;
 }
+
 .both-hands-secondary .pd-item,
 .both-hands-secondary .slot-item {
   color: #6a5828;
@@ -564,6 +631,7 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   opacity: 0.55;
   border-color: #2a3040 !important;
 }
+
 .slot-no-action .slot-item {
   color: #7080a0;
   font-style: italic;
@@ -584,18 +652,78 @@ body { background: #000; overflow: hidden; font-family: monospace; }
    SVG viewBox 100×220: left = x/100 * 100%, top = y/220 * 100%
    Side slots use negative/over-100% left to hang outside the body silhouette,
    pushed far enough out that they sit near the four corners of the panel.     */
-#pd-head      { top: 10%;  left: 50%;   }  /* centre of head ellipse         */
-#pd-cloak     { top: 16%;  left: -22%;  }  /* top-left — cloak               */
-#pd-neck      { top: 16%;  left: 122%;  }  /* top-right — pendant            */
-#pd-chest     { top: 40%;  left: 50%;   }  /* centre of torso                */
-#pd-leftHand  { top: 44%;  left: -22%;  }  /* left — below cloak             */
-#pd-rightHand { top: 44%;  left: 122%;  }  /* right — below neck             */
-#pd-belt      { top: 75%;  left: -22%;  }  /* left — belt above gauntlets    */
-#pd-hands     { top: 96%;  left: -22%;  }  /* left bottom — gauntlets        */
-#pd-ring1     { top: 75%;  left: 122%;  }  /* right near-bottom — ring 1     */
-#pd-ring2     { top: 96%;  left: 122%;  }  /* right bottom — ring 2          */
-#pd-legs      { top: 75%;  left: 50%;   }  /* mid legs                       */
-#pd-feet      { top: 96%;  left: 50%;   }  /* feet — same level as hands/rings */
+#pd-head {
+  top: 10%;
+  left: 50%;
+}
+
+/* centre of head ellipse         */
+#pd-cloak {
+  top: 16%;
+  left: -22%;
+}
+
+/* top-left — cloak               */
+#pd-neck {
+  top: 16%;
+  left: 122%;
+}
+
+/* top-right — pendant            */
+#pd-chest {
+  top: 40%;
+  left: 50%;
+}
+
+/* centre of torso                */
+#pd-leftHand {
+  top: 44%;
+  left: -22%;
+}
+
+/* left — below cloak             */
+#pd-rightHand {
+  top: 44%;
+  left: 122%;
+}
+
+/* right — below neck             */
+#pd-belt {
+  top: 75%;
+  left: -22%;
+}
+
+/* left — belt above gauntlets    */
+#pd-hands {
+  top: 96%;
+  left: -22%;
+}
+
+/* left bottom — gauntlets        */
+#pd-ring1 {
+  top: 75%;
+  left: 122%;
+}
+
+/* right near-bottom — ring 1     */
+#pd-ring2 {
+  top: 96%;
+  left: 122%;
+}
+
+/* right bottom — ring 2          */
+#pd-legs {
+  top: 75%;
+  left: 50%;
+}
+
+/* mid legs                       */
+#pd-feet {
+  top: 96%;
+  left: 50%;
+}
+
+/* feet — same level as hands/rings */
 
 /* ─────────────────────────────────────────────────────────────────────────────
    WEAPON ACTION ANIMATIONS
@@ -621,40 +749,131 @@ body { background: #000; overflow: hidden; font-family: monospace; }
 
 /* ── SWIPE ── diagonal slash arc from upper-left to lower-right ── */
 @keyframes swipe-arc {
-  0%   { transform: translate(-35%, -35%) rotate(-60deg) scale(0.5); opacity: 0; }
-  20%  { opacity: 1; }
-  60%  { transform: translate(0%, 0%) rotate(20deg) scale(1.1); opacity: 0.9; }
-  100% { transform: translate(30%, 30%) rotate(60deg) scale(0.8); opacity: 0; }
+  0% {
+    transform: translate(-45%, -45%) rotate(-70deg) scale(0.4);
+    opacity: 0;
+    filter: blur(5px);
+  }
+
+  15% {
+    opacity: 1;
+    filter: blur(0px);
+  }
+
+  50% {
+    transform: translate(10%, 10%) rotate(25deg) scale(1.4);
+    opacity: 0.95;
+  }
+
+  100% {
+    transform: translate(40%, 40%) rotate(60deg) scale(0.9);
+    opacity: 0;
+    filter: blur(4px);
+  }
 }
-.anim-swipe svg { animation: swipe-arc 0.45s ease-in forwards; }
+
+.anim-swipe svg {
+  animation: swipe-arc 0.4s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+}
 
 /* ── BASH ── straight thrust forward then recoil ── */
 @keyframes bash-thrust {
-  0%   { transform: scale(0.6) translateY(20%); opacity: 0; }
-  25%  { transform: scale(1.2) translateY(-8%); opacity: 1; }
-  55%  { transform: scale(1.0) translateY(0%);  opacity: 1; }
-  100% { transform: scale(0.7) translateY(30%); opacity: 0; }
-}
-.anim-bash svg { animation: bash-thrust 0.5s ease-out forwards; }
+  0% {
+    transform: scale(0.3) translateY(40%);
+    opacity: 0;
+    filter: blur(10px);
+  }
 
-/* ── SHOOT ── arrow flies from lower-left to upper-right ── */
-@keyframes shoot-fly {
-  0%   { transform: translate(-40%, 40%) rotate(-45deg) scale(0.4); opacity: 0; }
-  15%  { opacity: 1; }
-  70%  { transform: translate(20%, -20%) rotate(-45deg) scale(1.0); opacity: 0.9; }
-  100% { transform: translate(60%, -60%) rotate(-45deg) scale(0.6); opacity: 0; }
+  15% {
+    transform: scale(1.5) translateY(-20%);
+    opacity: 1;
+    filter: blur(0px);
+  }
+
+  45% {
+    transform: scale(1.1) translateY(-2%);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(0.5) translateY(50%);
+    opacity: 0;
+    filter: blur(5px);
+  }
 }
-.anim-shoot svg { animation: shoot-fly 0.5s ease-in forwards; }
+
+.anim-bash svg {
+  animation: bash-thrust 0.5s cubic-bezier(0.2, 1, 0.3, 1) forwards;
+}
+
+/* ── SHOOT ── arrow flies straight into the screen depth ── */
+@keyframes shoot-fly {
+  0% {
+    transform: translateY(0) scale(1.0);
+    opacity: 0;
+    filter: blur(2px);
+  }
+
+  10% {
+    opacity: 1;
+    filter: blur(0px);
+  }
+
+  40% {
+    transform: translateY(0) scale(0.35);
+    opacity: 1;
+  }
+
+  80% {
+    transform: translateY(0) scale(0.15);
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: translateY(0) scale(0.05);
+    opacity: 0;
+    filter: blur(1px);
+  }
+}
+
+.anim-shoot svg {
+  animation: shoot-fly 0.35s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
+}
 
 /* ── PUNCH ── fist drives in from the side, impact, recoils ── */
 @keyframes punch-drive {
-  0%   { transform: translateX(-50%) scale(0.7); opacity: 0; }
-  20%  { transform: translateX(-10%) scale(1.05); opacity: 1; }
-  50%  { transform: translateX(0%)   scale(1.0);  opacity: 1; }
-  75%  { transform: translateX(4%)   scale(0.95); opacity: 0.8; }
-  100% { transform: translateX(-20%) scale(0.8);  opacity: 0; }
+  0% {
+    transform: translateX(-60%) scale(0.4) rotate(-15deg);
+    opacity: 0;
+    filter: blur(6px);
+  }
+
+  18% {
+    transform: translateX(15%) scale(1.3) rotate(8deg);
+    opacity: 1;
+    filter: blur(0px);
+  }
+
+  45% {
+    transform: translateX(0%) scale(1.0) rotate(0deg);
+    opacity: 1;
+  }
+
+  75% {
+    transform: translateX(6%) scale(0.9);
+    opacity: 0.7;
+  }
+
+  100% {
+    transform: translateX(-35%) scale(0.6);
+    opacity: 0;
+    filter: blur(4px);
+  }
 }
-.anim-punch svg { animation: punch-drive 0.42s ease-out forwards; }
+
+.anim-punch svg {
+  animation: punch-drive 0.45s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+}
 
 /* ─────────────────────────────────────────────────────────────────────────────
    ITEM TOOLTIP
@@ -672,8 +891,8 @@ body { background: #000; overflow: hidden; font-family: monospace; }
   flex-direction: column;
   gap: 7px;
   box-shadow:
-    0 6px 24px rgba(0,0,0,0.85),
-    inset 0 1px 0 rgba(255,220,120,0.07);
+    0 6px 24px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 220, 120, 0.07);
   pointer-events: none;
   z-index: 1100;
   /* fade in smoothly */
