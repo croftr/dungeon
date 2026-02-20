@@ -224,12 +224,12 @@ const SOUND_MAP = {
 };
 
 /**
- * Play the sound for a given action type.
- * @param {string|null} action — 'swipe' | 'bash' | 'shoot' | null
+ * Play the sound for a given attack type.
+ * @param {string|null} attackType — 'swipe' | 'bash' | 'shoot' | 'punch' | null
  */
-export function playActionSound(action) {
-  if (!action) return;
-  const fn = SOUND_MAP[action];
+export function playActionSound(attackType) {
+  if (!attackType) return;
+  const fn = SOUND_MAP[attackType];
   if (!fn) return;
   try {
     fn();

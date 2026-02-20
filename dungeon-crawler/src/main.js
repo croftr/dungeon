@@ -6,6 +6,7 @@ import { initLighting, updateLighting } from './lighting.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
 import { initParty } from './party.js';
 import { initEquipment } from './equipment.js';
+import { initMonsters, updateMonsters } from './monster.js';
 
 import './style.css';
 
@@ -73,6 +74,11 @@ initParty();
 initEquipment();
 
 // ─────────────────────────────────────────────
+//  MONSTERS
+// ─────────────────────────────────────────────
+initMonsters(scene);
+
+// ─────────────────────────────────────────────
 //  RENDER LOOP
 // ─────────────────────────────────────────────
 let lastTime = performance.now();
@@ -84,6 +90,7 @@ function animate(now) {
 
   tweenGroup.update(now);
   updateLighting(lights, camera, dt);
+  updateMonsters(dt);
   renderer.render(scene, camera);
 }
 

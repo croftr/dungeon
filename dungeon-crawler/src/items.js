@@ -5,9 +5,10 @@
 //    name        {string}  — display name
 //    slot        {string}  — which equipment slot it belongs to; must be one of
 //                            SLOT_KEYS or 'bothHands' (occupies leftHand+rightHand)
-//    action      {string|null} — combat action when used from the party panel
+//    attackType  {string|null} — combat action when used from the party panel
 //                            one of: 'swipe' | 'bash' | 'shoot' | 'punch' | null
-//                            (block is passive — no action)
+//                            (block is passive — no attackType)
+//    baseDamage  {number|null} — base damage dealt per hit; null for non-weapons
 //    description {string}  — flavour text shown in the item detail panel
 //    value       {number}  — base gold value
 //    weight      {number}  — encumbrance (future use)
@@ -26,7 +27,8 @@ export const ITEMS = [
   {
     name        : 'Shawl',
     slot        : 'head',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'A worn cloth shawl pulled over the head. Offers little protection but keeps out the chill.',
     value       : 2,
     weight      : 0.2,
@@ -34,7 +36,8 @@ export const ITEMS = [
   {
     name        : 'Leather Cap',
     slot        : 'head',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'A simple cap of boiled leather. Better than nothing.',
     value       : 12,
     weight      : 0.5,
@@ -42,7 +45,8 @@ export const ITEMS = [
   {
     name        : 'Iron Helm',
     slot        : 'head',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'A sturdy iron helmet that covers the skull and cheeks.',
     value       : 40,
     weight      : 2.5,
@@ -52,7 +56,8 @@ export const ITEMS = [
   {
     name        : 'Travelling Cloak',
     slot        : 'cloak',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'A heavy wool cloak that keeps wind and rain at bay.',
     value       : 8,
     weight      : 1.0,
@@ -60,7 +65,8 @@ export const ITEMS = [
   {
     name        : 'Shadow Cloak',
     slot        : 'cloak',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'A dark cloak woven with shadow-silk. Hard to see in dim light.',
     value       : 80,
     weight      : 0.4,
@@ -70,7 +76,8 @@ export const ITEMS = [
   {
     name        : 'Amulet of Warding',
     slot        : 'neck',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'A silver amulet engraved with protective runes.',
     value       : 60,
     weight      : 0.1,
@@ -78,7 +85,8 @@ export const ITEMS = [
   {
     name        : 'Pendant of Focus',
     slot        : 'neck',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'A crystal pendant that sharpens the mind and aids concentration.',
     value       : 75,
     weight      : 0.1,
@@ -88,7 +96,8 @@ export const ITEMS = [
   {
     name        : 'Padded Vest',
     slot        : 'chest',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'Thick quilted padding stitched into a vest. Absorbs blows.',
     value       : 15,
     weight      : 2.0,
@@ -96,7 +105,8 @@ export const ITEMS = [
   {
     name        : 'Chain Shirt',
     slot        : 'chest',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'Interlocking iron rings form a flexible shirt of armour.',
     value       : 90,
     weight      : 5.0,
@@ -104,7 +114,8 @@ export const ITEMS = [
   {
     name        : 'Plate Cuirass',
     slot        : 'chest',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'Heavy forged steel chest plate. Near impenetrable — if you can move in it.',
     value       : 250,
     weight      : 12.0,
@@ -114,7 +125,8 @@ export const ITEMS = [
   {
     name        : 'Leather Belt',
     slot        : 'belt',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'A plain leather belt with iron buckle. Holds pouches and scabbards.',
     value       : 5,
     weight      : 0.3,
@@ -122,7 +134,8 @@ export const ITEMS = [
   {
     name        : 'Adventurer\'s Belt',
     slot        : 'belt',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'A wide belt with multiple loops and pouches for quick-draw access.',
     value       : 25,
     weight      : 0.5,
@@ -132,7 +145,8 @@ export const ITEMS = [
   {
     name        : 'Leather Gloves',
     slot        : 'hands',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'Soft leather gloves. Improve grip and protect the knuckles.',
     value       : 8,
     weight      : 0.3,
@@ -140,7 +154,8 @@ export const ITEMS = [
   {
     name        : 'Iron Gauntlets',
     slot        : 'hands',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'Articulated iron gauntlets. Protect the hands from blade and fire.',
     value       : 50,
     weight      : 2.0,
@@ -150,7 +165,8 @@ export const ITEMS = [
   {
     name        : 'Gold Ring',
     slot        : 'ring1',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'A plain gold ring. Valuable, but otherwise unremarkable.',
     value       : 30,
     weight      : 0.05,
@@ -158,7 +174,8 @@ export const ITEMS = [
   {
     name        : 'Ring of Vigour',
     slot        : 'ring1',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'A carved bone ring that pulses with vitality. Bolsters the wearer\'s constitution.',
     value       : 120,
     weight      : 0.05,
@@ -166,7 +183,8 @@ export const ITEMS = [
   {
     name        : 'Signet Ring',
     slot        : 'ring2',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'A heavy signet ring bearing a forgotten noble crest.',
     value       : 45,
     weight      : 0.05,
@@ -174,7 +192,8 @@ export const ITEMS = [
   {
     name        : 'Ring of Swiftness',
     slot        : 'ring2',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'A thin silver band engraved with speed runes. The wearer moves with uncanny quickness.',
     value       : 140,
     weight      : 0.05,
@@ -184,7 +203,8 @@ export const ITEMS = [
   {
     name        : 'Cloth Trousers',
     slot        : 'legs',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'Sturdy travelling trousers. Not much protection but allow easy movement.',
     value       : 4,
     weight      : 0.5,
@@ -192,7 +212,8 @@ export const ITEMS = [
   {
     name        : 'Chainmail Leggings',
     slot        : 'legs',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'Riveted chain leggings that protect the thighs and shins.',
     value       : 70,
     weight      : 4.0,
@@ -202,7 +223,8 @@ export const ITEMS = [
   {
     name        : 'Worn Boots',
     slot        : 'feet',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'A pair of well-worn leather boots. Comfortable for long marches.',
     value       : 6,
     weight      : 0.8,
@@ -210,7 +232,8 @@ export const ITEMS = [
   {
     name        : 'Iron-Shod Boots',
     slot        : 'feet',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'Reinforced leather boots with iron toe-caps. Sturdy and intimidating.',
     value       : 35,
     weight      : 2.0,
@@ -220,7 +243,8 @@ export const ITEMS = [
   {
     name        : 'Torch',
     slot        : 'leftHand',
-    action      : ACTIONS.BASH,
+    attackType  : ACTIONS.BASH,
+    baseDamage  : 10,
     description : 'A burning torch. Lights the way and can be thrust into an enemy\'s face.',
     value       : 1,
     weight      : 0.6,
@@ -228,7 +252,8 @@ export const ITEMS = [
   {
     name        : 'Shield',
     slot        : 'leftHand',
-    action      : null,
+    attackType  : null,
+    baseDamage  : null,
     description : 'A round iron-banded shield. Passively deflects incoming blows.',
     value       : 55,
     weight      : 4.5,
@@ -236,7 +261,8 @@ export const ITEMS = [
   {
     name        : 'Bow',
     slot        : 'bothHands',
-    action      : ACTIONS.SHOOT,
+    attackType  : ACTIONS.SHOOT,
+    baseDamage  : 10,
     description : 'A recurve hunting bow requiring both hands to draw. Loose to strike enemies at range.',
     value       : 40,
     weight      : 1.2,
@@ -244,7 +270,8 @@ export const ITEMS = [
   {
     name        : 'Dagger',
     slot        : 'leftHand',
-    action      : ACTIONS.SWIPE,
+    attackType  : ACTIONS.SWIPE,
+    baseDamage  : 10,
     description : 'A short, double-edged blade. Quick and easy to slip past armour.',
     value       : 20,
     weight      : 0.4,
@@ -254,7 +281,8 @@ export const ITEMS = [
   {
     name        : 'Sword',
     slot        : 'rightHand',
-    action      : ACTIONS.SWIPE,
+    attackType  : ACTIONS.SWIPE,
+    baseDamage  : 10,
     description : 'A straight iron sword. The classic weapon of choice for adventurers.',
     value       : 65,
     weight      : 1.8,
@@ -262,7 +290,8 @@ export const ITEMS = [
   {
     name        : 'Staff',
     slot        : 'bothHands',
-    action      : ACTIONS.BASH,
+    attackType  : ACTIONS.BASH,
+    baseDamage  : 10,
     description : 'A gnarled wooden staff requiring both hands. Useful for walking — and for cracking skulls.',
     value       : 18,
     weight      : 1.5,
@@ -270,7 +299,8 @@ export const ITEMS = [
   {
     name        : 'Axe',
     slot        : 'rightHand',
-    action      : ACTIONS.SWIPE,
+    attackType  : ACTIONS.SWIPE,
+    baseDamage  : 10,
     description : 'A heavy war axe. Slower than a sword but hits with devastating force.',
     value       : 50,
     weight      : 2.8,
@@ -278,7 +308,8 @@ export const ITEMS = [
   {
     name        : 'Mace',
     slot        : 'rightHand',
-    action      : ACTIONS.BASH,
+    attackType  : ACTIONS.BASH,
+    baseDamage  : 10,
     description : 'An iron mace with a flanged head. Excellent against armoured foes.',
     value       : 45,
     weight      : 2.2,
@@ -286,7 +317,8 @@ export const ITEMS = [
   {
     name        : 'Crossbow',
     slot        : 'rightHand',
-    action      : ACTIONS.SHOOT,
+    attackType  : ACTIONS.SHOOT,
+    baseDamage  : 10,
     description : 'A compact crossbow with a steel prod. Deadly at short to medium range.',
     value       : 90,
     weight      : 3.0,
@@ -296,7 +328,8 @@ export const ITEMS = [
   {
     name        : 'Greatsword',
     slot        : 'bothHands',
-    action      : ACTIONS.SWIPE,
+    attackType  : ACTIONS.SWIPE,
+    baseDamage  : 10,
     description : 'A massive two-handed blade that cleaves through enemies in a single arc.',
     value       : 150,
     weight      : 5.5,
@@ -304,7 +337,8 @@ export const ITEMS = [
   {
     name        : 'War Hammer',
     slot        : 'bothHands',
-    action      : ACTIONS.BASH,
+    attackType  : ACTIONS.BASH,
+    baseDamage  : 10,
     description : 'A two-handed war hammer. Slow to swing but crushes stone and bone alike.',
     value       : 130,
     weight      : 7.0,
@@ -312,7 +346,8 @@ export const ITEMS = [
   {
     name        : 'Longbow',
     slot        : 'bothHands',
-    action      : ACTIONS.SHOOT,
+    attackType  : ACTIONS.SHOOT,
+    baseDamage  : 10,
     description : 'A tall yew longbow requiring both hands. Tremendous range and power.',
     value       : 75,
     weight      : 1.8,

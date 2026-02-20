@@ -9,6 +9,11 @@ export const party = [
     hp: 80,  hpMax: 100,
     mp: 55,  mpMax: 100,
     leftHand: 'Torch', rightHand: 'Sword',
+    stats: { strength: 10, dexterity: 10, vitality: 10, intelligence: 10, resilience: 10 },
+    skills: [
+      { name: 'Dual-Wielding',          description: 'Equip a weapon in the off-hand slot. Attacking triggers two cooldowns — one per weapon.' },
+      { name: 'Whirlwind',              description: 'With a two-handed weapon, strikes the enemy ahead and the two diagonal enemies simultaneously.' },
+    ],
     // Portrait palette overrides
     skinLight: '#d4a070', skinDark: '#8a5830',
     hairColor: '#1a0e04',
@@ -19,6 +24,11 @@ export const party = [
     hp: 60,  hpMax: 80,
     mp: 95,  mpMax: 120,
     leftHand: 'Staff', rightHand: 'Staff',
+    stats: { strength: 10, dexterity: 10, vitality: 10, intelligence: 10, resilience: 10 },
+    skills: [
+      { name: 'Runic Scholar',          description: 'Read ancient wall inscriptions to uncover puzzle hints or gain permanent stat buffs.' },
+      { name: 'Field Medic',            description: 'Use Bandages or Heal actions during combat, not just while resting.' },
+    ],
     skinLight: '#e8c8a0', skinDark: '#b08050',
     hairColor: '#8a1a1a',  // auburn
     irisColor: '#2a6a3a',  // green
@@ -28,6 +38,11 @@ export const party = [
     hp: 110, hpMax: 130,
     mp: 20,  mpMax: 40,
     leftHand: 'Shield', rightHand: 'Axe',
+    stats: { strength: 10, dexterity: 10, vitality: 10, intelligence: 10, resilience: 10 },
+    skills: [
+      { name: 'Trap Disarming',         description: 'Highlights pressure plates within 2 tiles. Right-click to disable them before they trigger.' },
+      { name: 'Lockpicking',            description: 'Open iron doors or chests without a key, or by consuming a Lockpick item.' },
+    ],
     skinLight: '#b07840', skinDark: '#6a3818',
     hairColor: '#3a2808',  // dark brown
     irisColor: '#4a3020',  // brown
@@ -37,6 +52,11 @@ export const party = [
     hp: 50,  hpMax: 70,
     mp: 80,  mpMax: 90,
     leftHand: 'Bow', rightHand: 'Bow',
+    stats: { strength: 10, dexterity: 10, vitality: 10, intelligence: 10, resilience: 10 },
+    skills: [
+      { name: 'Point-Blank Shot',       description: 'No accuracy penalty when firing a Bow or Crossbow at an enemy in the adjacent tile.' },
+      { name: 'Botanist',               description: '50% chance to find two Herbs instead of one when clicking a Herb on the ground.' },
+    ],
     skinLight: '#f0d8b0', skinDark: '#c09860',
     hairColor: '#c8b040',  // blonde
     irisColor: '#1a4a7a',  // blue
@@ -206,10 +226,10 @@ function refreshMember(m) {
   const lhDef       = m.leftHand && m.leftHand !== '—' ? getItemDef(m.leftHand) : null;
   const lhBothHands = lhDef?.slot === 'bothHands';
 
-  // For single-hand items with no action (e.g. Shield), fade the slot to show it's passive
-  const lhNoAction  = lhDef !== null && lhDef?.action == null && !lhBothHands;
+  // For single-hand items with no attackType (e.g. Shield), fade the slot to show it's passive
+  const lhNoAction  = lhDef !== null && lhDef?.attackType == null && !lhBothHands;
   const rhDef       = !lhBothHands && m.rightHand && m.rightHand !== '—' ? getItemDef(m.rightHand) : null;
-  const rhNoAction  = rhDef !== null && rhDef?.action == null;
+  const rhNoAction  = rhDef !== null && rhDef?.attackType == null;
 
   if (lhEl) lhEl.textContent = m.leftHand  || '—';
   if (rhEl) rhEl.textContent = lhBothHands ? m.leftHand : (m.rightHand || '—');

@@ -145,6 +145,39 @@
           <div id="inventory-grid">
             <!-- cells injected by equipment.js -->
           </div>
+        </section>
+
+        <!-- MIDDLE: Stats + Skills -->
+        <section id="equip-charinfo">
+
+          <h4 class="equip-section-title">Stats</h4>
+          <div id="char-stats">
+            <div class="stat-row">
+              <span class="stat-name">Strength</span>
+              <span class="stat-value" id="stat-strength"></span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-name">Dexterity</span>
+              <span class="stat-value" id="stat-dexterity"></span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-name">Vitality</span>
+              <span class="stat-value" id="stat-vitality"></span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-name">Intelligence</span>
+              <span class="stat-value" id="stat-intelligence"></span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-name">Resilience</span>
+              <span class="stat-value" id="stat-resilience"></span>
+            </div>
+          </div>
+
+          <h4 class="equip-section-title equip-section-title--skills">Skills</h4>
+          <div id="char-skills">
+            <!-- skill cards injected by equipment.js -->
+          </div>
 
         </section>
 
@@ -357,6 +390,7 @@
     <div id="item-detail-action"></div>
     <div id="item-detail-desc"></div>
     <div id="item-detail-stats">
+      <div class="detail-stat-row"><span>Damage</span><span id="item-detail-damage"></span></div>
       <div class="detail-stat-row"><span>Value</span><span id="item-detail-value"></span></div>
       <div class="detail-stat-row"><span>Weight</span><span id="item-detail-weight"></span></div>
     </div>

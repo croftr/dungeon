@@ -1,6 +1,8 @@
 import { party } from './party.js';
 import { getItemDef } from './items.js';
 import { playAction  } from './actions.js';
+import { attackMonster, monsters } from './monster.js';
+import { showMessage } from './minimap.js';
 
 // ─────────────────────────────────────────────
 //  CONSTANTS
@@ -107,6 +109,33 @@ function renderModal(memberIndex) {
     cell.textContent = item ? item.name : '';
     cell.classList.toggle('occupied', item !== null);
   });
+
+  // ── Character stats ──
+  const stats = m.stats ?? {};
+  ['strength', 'dexterity', 'vitality', 'intelligence', 'resilience'].forEach((key) => {
+    const el = document.getElementById(`stat-${key}`);
+    if (el) el.textContent = stats[key] ?? '—';
+  });
+
+  // ── Skills ──
+  const skillsEl = document.getElementById('char-skills');
+  if (skillsEl) {
+    skillsEl.innerHTML = '';
+    const skills = m.skills ?? [];
+    if (skills.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'skill-empty';
+      empty.textContent = 'No skills learned.';
+      skillsEl.appendChild(empty);
+    } else {
+      skills.forEach((skill) => {
+        const card = document.createElement('div');
+        card.className = 'skill-card';
+        card.innerHTML = `<span class="skill-name">${skill.name}</span><span class="skill-desc">${skill.description}</span>`;
+        skillsEl.appendChild(card);
+      });
+    }
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -142,11 +171,13 @@ function populateTooltip(item) {
   document.getElementById('item-detail-slot').textContent =
     'Slot: ' + (SLOT_LABELS[def?.slot ?? item.slot] ?? item.slot);
   document.getElementById('item-detail-action').textContent =
-    def?.action
-      ? 'Action: ' + def.action.charAt(0).toUpperCase() + def.action.slice(1)
+    def?.attackType
+      ? 'Attack: ' + def.attackType.charAt(0).toUpperCase() + def.attackType.slice(1)
       : '';
   document.getElementById('item-detail-desc').textContent =
     def?.description ?? '—';
+  document.getElementById('item-detail-damage').textContent =
+    def?.baseDamage != null ? def.baseDamage : '—';
   document.getElementById('item-detail-value').textContent =
     def != null ? def.value + ' gp' : '—';
   document.getElementById('item-detail-weight').textContent =
@@ -208,7 +239,11 @@ function closeModal() {
 // ─────────────────────────────────────────────
 /**
  * Called when a player clicks a hand slot on the party panel during dungeon view.
- * Looks up the item in that slot and plays the corresponding action animation.
+ * Looks up the item in that slot, plays the action animation, and applies
+ * damage to the nearest living monster.
+ *
+ * Damage formula:  baseDamage + hero.stats.strength - monster.defence
+ *
  * @param {number} memberIndex  — 0-3
  * @param {'left'|'right'} hand
  */
@@ -221,9 +256,26 @@ function useHand(memberIndex, hand) {
   if (!item) return;
 
   const def = getItemDef(item.name);
-  if (!def?.action) return; // item has no action (e.g. Grimoire)
+  if (!def?.attackType) return; // item has no attack (e.g. Shield)
 
-  playAction(def.action, hand);
+  // Play the visual + audio animation
+  playAction(def.attackType, hand);
+
+  // Apply damage to monster 0 if it is alive
+  const target = monsters[0];
+  if (!target?.alive) return;
+
+  const baseDamage  = def.baseDamage  ?? 0;
+  const heroStr     = m.stats?.strength ?? 10;
+  const result      = attackMonster(baseDamage, heroStr);
+
+  if (result.hit) {
+    if (result.killed) {
+      showMessage(`${m.name} slays the ${target.name}!`);
+    } else {
+      showMessage(`${m.name} hits ${target.name} for <b>${result.damage}</b> damage! &nbsp;(${result.monsterHp} / ${target.hpMax} HP)`);
+    }
+  }
 }
 
 // ─────────────────────────────────────────────

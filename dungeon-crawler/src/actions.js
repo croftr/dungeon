@@ -1,8 +1,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 //  WEAPON ACTION ANIMATIONS
 //
-//  Exported function: playAction(action, hand)
-//    action — one of 'swipe' | 'bash' | 'shoot' | 'punch' | null
+//  Exported function: playAction(attackType, hand)
+//    attackType — one of 'swipe' | 'bash' | 'shoot' | 'punch' | null
 //
 //  Creates a full-screen overlay div over the dungeon view, inserts the
 //  appropriate SVG icon, plays the CSS keyframe animation, then removes itself.
@@ -95,14 +95,14 @@ const ACTION_SVG = {
 
 /**
  * Play the weapon action animation overlay on the dungeon view.
- * @param {string|null} action  — one of ACTIONS values, or null (no-op)
- * @param {string}      hand    — 'left' | 'right'  (mirrors swipe/shoot/punch for right hand)
+ * @param {string|null} attackType  — one of ACTIONS values, or null (no-op)
+ * @param {string}      hand        — 'left' | 'right'  (mirrors swipe/shoot/punch for right hand)
  */
-export function playAction(action, hand = 'left') {
-  if (!action || !ACTION_SVG[action]) return;
+export function playAction(attackType, hand = 'left') {
+  if (!attackType || !ACTION_SVG[attackType]) return;
 
   // Play the matching sound simultaneously
-  playActionSound(action);
+  playActionSound(attackType);
 
   // Remove any existing animation that hasn't finished yet
   const existing = document.getElementById('action-anim');
@@ -110,11 +110,11 @@ export function playAction(action, hand = 'left') {
 
   const el = document.createElement('div');
   el.id = 'action-anim';
-  el.classList.add(`anim-${action}`);
-  el.innerHTML = ACTION_SVG[action];
+  el.classList.add(`anim-${attackType}`);
+  el.innerHTML = ACTION_SVG[attackType];
 
   // Mirror the graphic for right-hand attacks
-  if (hand === 'right' && (action === ACTIONS.SWIPE || action === ACTIONS.SHOOT || action === ACTIONS.PUNCH)) {
+  if (hand === 'right' && (attackType === ACTIONS.SWIPE || attackType === ACTIONS.SHOOT || attackType === ACTIONS.PUNCH)) {
     el.querySelector('svg').style.transform = 'scaleX(-1)';
   }
 

@@ -45,7 +45,7 @@ Which equipment slot the item belongs to. Determines where it can be equipped on
 
 ---
 
-### `action` · `string | null` · **required**
+### `attackType` · `string | null` · **required**
 
 The combat action triggered when a party member uses this item from the dungeon
 view by clicking their L or R hand slot. Controls both the on-screen animation
@@ -62,7 +62,20 @@ Set to `null` for items with no active use (armour, passive accessories, etc.).
 | `null`    | No animation                                 | No sound                           | All armour, Shield, rings  |
 
 > **Block is passive.** A Shield equipped in the left hand provides its defensive
-> benefit automatically — it has no active `action`. Do not assign `'block'` to any item.
+> benefit automatically — it has no active `attackType`. Do not assign `'block'` to any item.
+
+---
+
+### `baseDamage` · `number | null` · **required**
+
+The base damage dealt per hit when this item is used. Only applies to items with
+a non-null `attackType` — all other items must set this to `null`.
+Must be a positive integer when present.
+
+```
+baseDamage: 10   // weapon deals 10 base damage
+baseDamage: null // armour / passive item — no damage
+```
 
 ---
 
@@ -109,7 +122,8 @@ weight: 0.05  // Ring weighs 0.05 kg
 {
   name        : 'Sword',
   slot        : 'rightHand',
-  action      : 'swipe',
+  attackType  : 'swipe',
+  baseDamage  : 10,
   description : 'A straight iron sword. The classic weapon of choice for adventurers.',
   value       : 65,
   weight      : 1.8,
@@ -120,7 +134,8 @@ weight: 0.05  // Ring weighs 0.05 kg
 {
   name        : 'Staff',
   slot        : 'bothHands',
-  action      : 'bash',
+  attackType  : 'bash',
+  baseDamage  : 10,
   description : 'A gnarled wooden staff requiring both hands. Useful for walking — and for cracking skulls.',
   value       : 18,
   weight      : 1.5,
@@ -131,7 +146,8 @@ weight: 0.05  // Ring weighs 0.05 kg
 {
   name        : 'Iron Helm',
   slot        : 'head',
-  action      : null,
+  attackType  : null,
+  baseDamage  : null,
   description : 'A sturdy iron helmet that covers the skull and cheeks.',
   value       : 40,
   weight      : 2.5,
@@ -147,7 +163,7 @@ head · cloak · neck · chest · belt · hands · ring1 · ring2 · legs · fee
 leftHand · rightHand · bothHands
 ```
 
-## Valid Action Values (quick reference)
+## Valid Attack Type Values (quick reference)
 
 ```
 'swipe' · 'bash' · 'shoot' · 'punch' · null
