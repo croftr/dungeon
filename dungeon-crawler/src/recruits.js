@@ -3,7 +3,7 @@ import { party } from './party.js';
 import { extendPartyData } from './equipment.js';
 import { CELL, WALL_H, findCell } from './map.js';
 
-// The 4 D&D characters
+// The 5 D&D characters
 export const RECRUITS = [
     {
         id: 'recruit_1',
@@ -67,6 +67,22 @@ export const RECRUITS = [
         image: '/human_wizard_head.png',
         leftHand: 'Staff', rightHand: '—',
         gridCol: 13, gridRow: 0, facing: 'front', // North wall
+        isRecruited: false
+    },
+    {
+        id: 'recruit_5',
+        name: 'Korg',
+        job: 'Barbarian',
+        race: 'Human',
+        hp: 135, hpMax: 135, mp: 25, mpMax: 25,
+        stats: { strength: 19, dexterity: 14, vitality: 17, intelligence: 9, resilience: 14 },
+        skills: [
+            { name: 'Whirlwind', description: 'With a two-handed weapon, strikes the enemy ahead and the two diagonal enemies simultaneously.' },
+            { name: 'Trap Disarming', description: 'Automatically highlights floor pressure plates within a 2-tile radius and allows the player to right-click to disable them before triggering.' }
+        ],
+        image: '/human_barbarian_head.png',
+        leftHand: 'Axe', rightHand: '—',
+        gridCol: 11, gridRow: 0, facing: 'front', // North wall
         isRecruited: false
     }
 ];
