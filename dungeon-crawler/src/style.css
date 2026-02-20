@@ -1,0 +1,268 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #000; overflow: hidden; font-family: monospace; }
+#renderer-canvas { display: block; }
+
+#hud {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+}
+
+/* Top-right column — minimap + status stacked */
+#top-right {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
+}
+
+/* Minimap */
+#minimap-wrap {
+  background: rgba(0,0,0,0.7);
+  border: 1px solid #555;
+  padding: 6px;
+  border-radius: 4px;
+}
+#minimap-wrap h3 {
+  color: #aaa;
+  font-size: 10px;
+  text-align: center;
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+}
+#minimap { display: block; }
+
+/* Controls legend — bottom-left */
+#controls {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  top: auto;
+  right: auto;
+  color: #888;
+  font-size: 11px;
+  line-height: 1.7;
+  background: rgba(0,0,0,0.6);
+  padding: 8px 10px;
+  border-radius: 4px;
+  border: 1px solid #333;
+}
+#controls span { color: #ccc; }
+
+/* Status bar — flows naturally below minimap inside #top-right */
+#status {
+  color: #aaa;
+  font-size: 11px;
+  background: rgba(0,0,0,0.6);
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid #333;
+  text-align: center;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+#status .facing { color: #e8c87a; }
+
+/* Victory / message overlay */
+#message {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  color: #e8c87a;
+  font-size: 28px;
+  font-weight: bold;
+  text-shadow: 0 0 20px #e8c87a;
+  display: none;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════
+   PARTY PANEL  (bottom-left)
+═══════════════════════════════════════════ */
+#party-panel {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 6px;
+}
+
+/* One member card */
+.member-card {
+  width: 260px;
+  background: rgba(8, 6, 4, 0.88);
+  border: 1px solid #5a4a30;
+  border-radius: 4px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  /* Inner bevel feel */
+  box-shadow: inset 0 1px 0 rgba(255,220,120,0.08), 0 2px 8px rgba(0,0,0,0.7);
+}
+
+/* ── Top row: portrait + bars ── */
+.member-top {
+  display: flex;
+  gap: 7px;
+  align-items: flex-start;
+}
+
+/* Portrait box */
+.portrait {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border: 1px solid #5a4a30;
+  border-radius: 3px;
+  overflow: hidden;
+  background: #0d0a06;
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.8);
+}
+.portrait-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Bars column */
+.bars {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.bar-label {
+  font-size: 9px;
+  color: #888;
+  width: 14px;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.bar-track {
+  position: relative;
+  flex: 1;
+  height: 13px;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid #3a3020;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.bar-hp {
+  background: linear-gradient(90deg, #7a0a0a 0%, #c0190f 60%, #e03020 100%);
+  box-shadow: 0 0 6px rgba(200, 30, 20, 0.5);
+}
+
+.bar-mp {
+  background: linear-gradient(90deg, #0a1a6a 0%, #1530b0 60%, #2050d0 100%);
+  box-shadow: 0 0 6px rgba(30, 60, 200, 0.5);
+}
+
+.bar-value {
+  position: absolute;
+  right: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 8px;
+  color: rgba(255,255,255,0.75);
+  pointer-events: none;
+  text-shadow: 0 0 3px #000;
+  white-space: nowrap;
+}
+
+.member-name {
+  font-size: 10px;
+  color: #c8a84a;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+
+/* ── Bottom row: equipment slots ── */
+.member-equip {
+  display: flex;
+  gap: 5px;
+}
+
+.equip-slot {
+  flex: 1;
+  height: 36px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid #4a3a20;
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  position: relative;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.6);
+}
+
+.equip-slot:hover {
+  border-color: #8a7040;
+}
+
+.slot-label {
+  font-size: 7px;
+  color: #5a5040;
+  letter-spacing: 1px;
+  position: absolute;
+  top: 2px;
+  left: 4px;
+}
+
+.slot-item {
+  font-size: 9px;
+  color: #c0a060;
+  text-align: center;
+  padding: 0 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.slot-empty .slot-item {
+  color: #3a3020;
+  font-style: italic;
+}
+
+/* Crosshair */
+#crosshair {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px; height: 16px;
+  pointer-events: none;
+}
+#crosshair::before, #crosshair::after {
+  content: '';
+  position: absolute;
+  background: rgba(255,255,255,0.35);
+}
+#crosshair::before { width: 2px; height: 16px; left: 7px; top: 0; }
+#crosshair::after  { width: 16px; height: 2px; left: 0; top: 7px; }

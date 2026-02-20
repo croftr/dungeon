@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grid Dungeon Crawler</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+
+  <canvas id="renderer-canvas"></canvas>
+
+  <div id="hud">
+    <!-- top-right column: minimap + status stacked -->
+    <div id="top-right">
+      <div id="minimap-wrap">
+        <h3>MINIMAP</h3>
+        <canvas id="minimap"></canvas>
+      </div>
+      <div id="status">
+        Pos: <span id="st-pos">—</span><br>
+        <span id="st-facing" class="facing">—</span>
+      </div>
+    </div>
+
+    <!-- bottom-left: controls -->
+    <div id="controls">
+      <span>W / ↑</span> Move Forward<br>
+      <span>S / ↓</span> Move Backward<br>
+      <span>A / ←</span> Turn Left<br>
+      <span>D / →</span> Turn Right
+    </div>
+
+    <!-- ── PARTY PANEL (bottom-left, 2×2 grid) ── -->
+    <div id="party-panel">
+
+      <!-- Member 0: Aldric -->
+      <div class="member-card" id="member-0">
+        <div class="member-top">
+          <div class="portrait"><canvas class="portrait-canvas" id="portrait-0" width="56" height="56"></canvas></div>
+          <div class="bars">
+            <div class="bar-row">
+              <span class="bar-label">HP</span>
+              <div class="bar-track"><div class="bar-fill bar-hp" id="bar-hp-0"></div><span class="bar-value" id="val-hp-0"></span></div>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">MP</span>
+              <div class="bar-track"><div class="bar-fill bar-mp" id="bar-mp-0"></div><span class="bar-value" id="val-mp-0"></span></div>
+            </div>
+            <div class="member-name" id="name-0"></div>
+          </div>
+        </div>
+        <div class="member-equip">
+          <div class="equip-slot" id="slot-lh-0"><span class="slot-label">L</span><span class="slot-item" id="item-lh-0"></span></div>
+          <div class="equip-slot" id="slot-rh-0"><span class="slot-label">R</span><span class="slot-item" id="item-rh-0"></span></div>
+        </div>
+      </div>
+
+      <!-- Member 1: Seraphina -->
+      <div class="member-card" id="member-1">
+        <div class="member-top">
+          <div class="portrait"><canvas class="portrait-canvas" id="portrait-1" width="56" height="56"></canvas></div>
+          <div class="bars">
+            <div class="bar-row">
+              <span class="bar-label">HP</span>
+              <div class="bar-track"><div class="bar-fill bar-hp" id="bar-hp-1"></div><span class="bar-value" id="val-hp-1"></span></div>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">MP</span>
+              <div class="bar-track"><div class="bar-fill bar-mp" id="bar-mp-1"></div><span class="bar-value" id="val-mp-1"></span></div>
+            </div>
+            <div class="member-name" id="name-1"></div>
+          </div>
+        </div>
+        <div class="member-equip">
+          <div class="equip-slot" id="slot-lh-1"><span class="slot-label">L</span><span class="slot-item" id="item-lh-1"></span></div>
+          <div class="equip-slot" id="slot-rh-1"><span class="slot-label">R</span><span class="slot-item" id="item-rh-1"></span></div>
+        </div>
+      </div>
+
+      <!-- Member 2: Dorak -->
+      <div class="member-card" id="member-2">
+        <div class="member-top">
+          <div class="portrait"><canvas class="portrait-canvas" id="portrait-2" width="56" height="56"></canvas></div>
+          <div class="bars">
+            <div class="bar-row">
+              <span class="bar-label">HP</span>
+              <div class="bar-track"><div class="bar-fill bar-hp" id="bar-hp-2"></div><span class="bar-value" id="val-hp-2"></span></div>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">MP</span>
+              <div class="bar-track"><div class="bar-fill bar-mp" id="bar-mp-2"></div><span class="bar-value" id="val-mp-2"></span></div>
+            </div>
+            <div class="member-name" id="name-2"></div>
+          </div>
+        </div>
+        <div class="member-equip">
+          <div class="equip-slot" id="slot-lh-2"><span class="slot-label">L</span><span class="slot-item" id="item-lh-2"></span></div>
+          <div class="equip-slot" id="slot-rh-2"><span class="slot-label">R</span><span class="slot-item" id="item-rh-2"></span></div>
+        </div>
+      </div>
+
+      <!-- Member 3: Lyra -->
+      <div class="member-card" id="member-3">
+        <div class="member-top">
+          <div class="portrait"><canvas class="portrait-canvas" id="portrait-3" width="56" height="56"></canvas></div>
+          <div class="bars">
+            <div class="bar-row">
+              <span class="bar-label">HP</span>
+              <div class="bar-track"><div class="bar-fill bar-hp" id="bar-hp-3"></div><span class="bar-value" id="val-hp-3"></span></div>
+            </div>
+            <div class="bar-row">
+              <span class="bar-label">MP</span>
+              <div class="bar-track"><div class="bar-fill bar-mp" id="bar-mp-3"></div><span class="bar-value" id="val-mp-3"></span></div>
+            </div>
+            <div class="member-name" id="name-3"></div>
+          </div>
+        </div>
+        <div class="member-equip">
+          <div class="equip-slot" id="slot-lh-3"><span class="slot-label">L</span><span class="slot-item" id="item-lh-3"></span></div>
+          <div class="equip-slot" id="slot-rh-3"><span class="slot-label">R</span><span class="slot-item" id="item-rh-3"></span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="message"></div>
+    <div id="crosshair"></div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

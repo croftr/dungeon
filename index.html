@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grid Dungeon Crawler</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #000; overflow: hidden; font-family: monospace; }
+    #renderer-canvas { display: block; }
+
+    #hud {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+    }
+
+    /* Minimap */
+    #minimap-wrap {
+      position: absolute;
+      top: 12px; right: 12px;
+      background: rgba(0,0,0,0.7);
+      border: 1px solid #555;
+      padding: 6px;
+      border-radius: 4px;
+    }
+    #minimap-wrap h3 {
+      color: #aaa;
+      font-size: 10px;
+      text-align: center;
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+    }
+    #minimap { display: block; }
+
+    /* Controls legend */
+    #controls {
+      position: absolute;
+      bottom: 12px; left: 12px;
+      color: #888;
+      font-size: 11px;
+      line-height: 1.7;
+      background: rgba(0,0,0,0.6);
+      padding: 8px 10px;
+      border-radius: 4px;
+      border: 1px solid #333;
+    }
+    #controls span { color: #ccc; }
+
+    /* Status bar */
+    #status {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #aaa;
+      font-size: 12px;
+      background: rgba(0,0,0,0.6);
+      padding: 6px 14px;
+      border-radius: 4px;
+      border: 1px solid #333;
+      text-align: center;
+      min-width: 200px;
+    }
+    #status .facing { color: #e8c87a; }
+
+    /* Victory / message overlay */
+    #message {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      color: #e8c87a;
+      font-size: 28px;
+      font-weight: bold;
+      text-shadow: 0 0 20px #e8c87a;
+      display: none;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    /* Crosshair */
+    #crosshair {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 16px; height: 16px;
+      pointer-events: none;
+    }
+    #crosshair::before, #crosshair::after {
+      content: '';
+      position: absolute;
+      background: rgba(255,255,255,0.35);
+    }
+    #crosshair::before { width: 2px; height: 16px; left: 7px; top: 0; }
+    #crosshair::after  { width: 16px; height: 2px; left: 0; top: 7px; }
+  </style>
+</head>
+<body>
+
+<canvas id="renderer-canvas"></canvas>
+
+<div id="hud">
+  <div id="minimap-wrap">
+    <h3>MINIMAP</h3>
+    <canvas id="minimap" width="130" height="130"></canvas>
+  </div>
+
+  <div id="controls">
+    <span>W / ↑</span> Move Forward<br>
+    <span>S / ↓</span> Move Backward<br>
+    <span>A / ←</span> Turn Left<br>
+    <span>D / →</span> Turn Right
+  </div>
+
+  <div id="status">
+    Pos: <span id="st-pos">—</span> &nbsp;|&nbsp;
+    Facing: <span id="st-facing" class="facing">—</span>
+  </div>
+
+  <div id="message"></div>
+  <div id="crosshair"></div>
+</div>
+
+<!-- Three.js r165 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- Tween.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+
+<script>
+// ─────────────────────────────────────────────
+//  MAP  (0=floor, 1=wall, 2=start, 3=exit)
+// ─────────────────────────────────────────────
+const dungeonMap = [
+  [1, 1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 2, 0, 0, 1, 0, 0, 0, 1],
+  [1, 0, 1, 0, 1, 0, 1, 0, 1],
+  [1, 0, 1, 0, 0, 0, 1, 0, 1],
+  [1, 0, 1, 1, 1, 0, 1, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 1, 1, 0, 1, 1, 1, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 3, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1],
+];
+
+const ROWS = dungeonMap.length;
+const COLS = dungeonMap[0].length;
+const CELL  = 2;          // world-units per grid cell
+const WALL_H = 2;         // wall height
+const MOVE_MS = 300;      // tween duration (ms)
+
+// Facing directions: 0=North(-Z), 1=East(+X), 2=South(+Z), 3=West(-X)
+const FACING_NAMES = ['North', 'East', 'South', 'West'];
+const DIR_VECTORS  = [
+  { dx:  0, dz: -1 },  // North
+  { dx:  1, dz:  0 },  // East
+  { dx:  0, dz:  1 },  // South
+  { dx: -1, dz:  0 },  // West
+];
+const FACING_ANGLES = [0, -Math.PI/2, Math.PI, Math.PI/2]; // Y rotation per facing
+
+// ─────────────────────────────────────────────
+//  THREE.JS SETUP
+// ─────────────────────────────────────────────
+const canvas   = document.getElementById('renderer-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
+
+const scene  = new THREE.Scene();
+scene.background = new THREE.Color(0x050505);
+scene.fog        = new THREE.Fog(0x050505, 2, 12);
+
+const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 100);
+
+function onResize() {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', onResize);
+onResize();
+
+// ─────────────────────────────────────────────
+//  LIGHTING
+// ─────────────────────────────────────────────
+const ambient = new THREE.AmbientLight(0x111122, 0.4);
+scene.add(ambient);
+
+// Torch light that follows camera
+const torchLight = new THREE.PointLight(0xff9933, 2.5, 8, 2);
+torchLight.castShadow = true;
+torchLight.shadow.mapSize.set(256, 256);
+scene.add(torchLight);
+
+// Subtle secondary fill
+const fillLight = new THREE.PointLight(0x223344, 0.6, 6, 2);
+scene.add(fillLight);
+
+// Exit glow (added later when we find exit cell)
+let exitLight = null;
+
+// ─────────────────────────────────────────────
+//  MATERIALS
+// ─────────────────────────────────────────────
+const wallMat = new THREE.MeshLambertMaterial({ color: 0x4a3b2c });
+const floorMat = new THREE.MeshLambertMaterial({ color: 0x2a2218 });
+const ceilMat  = new THREE.MeshLambertMaterial({ color: 0x1a1510 });
+const exitMat  = new THREE.MeshLambertMaterial({ color: 0x226622, emissive: 0x113311 });
+
+// ─────────────────────────────────────────────
+//  LEVEL GENERATION
+// ─────────────────────────────────────────────
+// Shared geometries
+const wallGeo  = new THREE.BoxGeometry(CELL, WALL_H, CELL);
+const floorGeo = new THREE.PlaneGeometry(CELL, CELL);
+
+let startCell = { row: 1, col: 1 };
+
+for (let row = 0; row < ROWS; row++) {
+  for (let col = 0; col < COLS; col++) {
+    const cell = dungeonMap[row][col];
+    const wx = col * CELL;
+    const wz = row * CELL;
+
+    if (cell === 1) {
+      // Wall
+      const mesh = new THREE.Mesh(wallGeo, wallMat);
+      mesh.position.set(wx, WALL_H / 2, wz);
+      mesh.castShadow    = true;
+      mesh.receiveShadow = true;
+      scene.add(mesh);
+    } else {
+      // Floor tile for every non-wall cell
+      const floorTile = new THREE.Mesh(floorGeo, cell === 3 ? exitMat : floorMat);
+      floorTile.rotation.x = -Math.PI / 2;
+      floorTile.position.set(wx, 0, wz);
+      floorTile.receiveShadow = true;
+      scene.add(floorTile);
+
+      // Ceiling tile
+      const ceilTile = new THREE.Mesh(floorGeo, ceilMat);
+      ceilTile.rotation.x = Math.PI / 2;
+      ceilTile.position.set(wx, WALL_H, wz);
+      scene.add(ceilTile);
+
+      if (cell === 2) startCell = { row, col };
+
+      if (cell === 3) {
+        exitLight = new THREE.PointLight(0x44ff44, 1.5, 5, 2);
+        exitLight.position.set(wx, 1, wz);
+        scene.add(exitLight);
+      }
+    }
+  }
+}
+
+// ─────────────────────────────────────────────
+//  PLAYER STATE
+// ─────────────────────────────────────────────
+const player = {
+  gridRow: startCell.row,
+  gridCol: startCell.col,
+  facing: 0,      // 0=North, 1=East, 2=South, 3=West
+  moving: false,  // locked during tween
+};
+
+function cellToWorld(row, col) {
+  return { x: col * CELL, y: WALL_H / 2, z: row * CELL };
+}
+
+// Position camera at start
+const startWorld = cellToWorld(player.gridRow, player.gridCol);
+camera.position.set(startWorld.x, startWorld.y, startWorld.z);
+camera.rotation.order = 'YXZ';
+camera.rotation.y = FACING_ANGLES[player.facing];
+
+// ─────────────────────────────────────────────
+//  COLLISION
+// ─────────────────────────────────────────────
+function isPassable(row, col) {
+  if (row < 0 || row >= ROWS || col < 0 || col >= COLS) return false;
+  const cell = dungeonMap[row][col];
+  return cell === 0 || cell === 2 || cell === 3;
+}
+
+// ─────────────────────────────────────────────
+//  MOVEMENT  (Tween-based)
+// ─────────────────────────────────────────────
+function moveForward(sign = 1) {
+  if (player.moving) return;
+  const dir  = DIR_VECTORS[player.facing];
+  const newRow = player.gridRow + dir.dz * sign;
+  const newCol = player.gridCol + dir.dx * sign;
+
+  if (!isPassable(newRow, newCol)) {
+    bumpFeedback();
+    return;
+  }
+
+  player.moving = true;
+  player.gridRow = newRow;
+  player.gridCol = newCol;
+
+  const target = cellToWorld(newRow, newCol);
+
+  new TWEEN.Tween(camera.position)
+    .to({ x: target.x, z: target.z }, MOVE_MS)
+    .easing(TWEEN.Easing.Quadratic.InOut)
+    .onComplete(() => {
+      player.moving = false;
+      checkCell();
+      updateHUD();
+    })
+    .start();
+
+  updateHUD();
+}
+
+function turnPlayer(sign = 1) {
+  if (player.moving) return;
+  player.moving = true;
+
+  const newFacing = ((player.facing + sign) + 4) % 4;
+  player.facing   = newFacing;
+
+  // Tween the rotation (handle wrap-around)
+  const currentY = camera.rotation.y;
+  const targetY  = FACING_ANGLES[newFacing];
+
+  // Find shortest angular path
+  let delta = targetY - currentY;
+  // Normalise to [-PI, PI]
+  while (delta >  Math.PI) delta -= Math.PI * 2;
+  while (delta < -Math.PI) delta += Math.PI * 2;
+
+  const rotObj = { y: currentY };
+  new TWEEN.Tween(rotObj)
+    .to({ y: currentY + delta }, MOVE_MS)
+    .easing(TWEEN.Easing.Quadratic.InOut)
+    .onUpdate(() => { camera.rotation.y = rotObj.y; })
+    .onComplete(() => {
+      camera.rotation.y = targetY; // snap exact
+      player.moving = false;
+      updateHUD();
+    })
+    .start();
+
+  updateHUD();
+}
+
+// Brief screen shake on wall collision
+function bumpFeedback() {
+  const origin = { ...camera.position };
+  const dir    = DIR_VECTORS[player.facing];
+  const bump   = 0.12;
+
+  new TWEEN.Tween(camera.position)
+    .to({ x: origin.x + dir.dx * bump, z: origin.z + dir.dz * bump }, 80)
+    .easing(TWEEN.Easing.Quadratic.Out)
+    .chain(
+      new TWEEN.Tween(camera.position)
+        .to({ x: origin.x, z: origin.z }, 100)
+        .easing(TWEEN.Easing.Quadratic.In)
+    )
+    .start();
+}
+
+function checkCell() {
+  const cell = dungeonMap[player.gridRow][player.gridCol];
+  if (cell === 3) {
+    showMessage('YOU ESCAPED!<br><small style="font-size:14px;color:#aaa">The dungeon is conquered.</small>');
+  }
+}
+
+// ─────────────────────────────────────────────
+//  INPUT
+// ─────────────────────────────────────────────
+const KEY_MAP = {
+  'w': () => moveForward(1),  'ArrowUp':    () => moveForward(1),
+  's': () => moveForward(-1), 'ArrowDown':  () => moveForward(-1),
+  'a': () => turnPlayer(-1),  'ArrowLeft':  () => turnPlayer(-1),
+  'd': () => turnPlayer(1),   'ArrowRight': () => turnPlayer(1),
+};
+
+document.addEventListener('keydown', (e) => {
+  const handler = KEY_MAP[e.key];
+  if (handler) { e.preventDefault(); handler(); }
+});
+
+// ─────────────────────────────────────────────
+//  MINIMAP
+// ─────────────────────────────────────────────
+const mmCanvas  = document.getElementById('minimap');
+const mmCtx     = mmCanvas.getContext('2d');
+const MM_CELL   = Math.floor(mmCanvas.width / Math.max(ROWS, COLS));
+mmCanvas.width  = COLS * MM_CELL;
+mmCanvas.height = ROWS * MM_CELL;
+
+const CELL_COLORS = {
+  0: '#2a2218',  // floor
+  1: '#7a6a55',  // wall
+  2: '#3355aa',  // start
+  3: '#22aa44',  // exit
+};
+
+function drawMinimap() {
+  mmCtx.clearRect(0, 0, mmCanvas.width, mmCanvas.height);
+
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const cell = dungeonMap[r][c];
+      mmCtx.fillStyle = CELL_COLORS[cell] ?? '#000';
+      mmCtx.fillRect(c * MM_CELL, r * MM_CELL, MM_CELL - 1, MM_CELL - 1);
+    }
+  }
+
+  // Player arrow
+  const px = player.gridCol * MM_CELL + MM_CELL / 2;
+  const py = player.gridRow * MM_CELL + MM_CELL / 2;
+  const angle = FACING_ANGLES[player.facing] + Math.PI; // arrow points forward
+
+  mmCtx.save();
+  mmCtx.translate(px, py);
+  mmCtx.rotate(-angle);                 // canvas Y is flipped relative to world Z
+
+  // Draw arrow
+  const r = MM_CELL * 0.38;
+  mmCtx.fillStyle = '#e8c87a';
+  mmCtx.beginPath();
+  mmCtx.moveTo(0, -r);
+  mmCtx.lineTo( r * 0.55,  r * 0.7);
+  mmCtx.lineTo(0,          r * 0.35);
+  mmCtx.lineTo(-r * 0.55,  r * 0.7);
+  mmCtx.closePath();
+  mmCtx.fill();
+
+  mmCtx.restore();
+}
+
+// ─────────────────────────────────────────────
+//  STATUS HUD
+// ─────────────────────────────────────────────
+const stPos    = document.getElementById('st-pos');
+const stFacing = document.getElementById('st-facing');
+
+function updateHUD() {
+  stPos.textContent    = `(${player.gridCol}, ${player.gridRow})`;
+  stFacing.textContent = FACING_NAMES[player.facing];
+  drawMinimap();
+}
+
+function showMessage(html) {
+  const el = document.getElementById('message');
+  el.innerHTML = html;
+  el.style.display = 'block';
+}
+
+// ─────────────────────────────────────────────
+//  TORCH FLICKER (subtle)
+// ─────────────────────────────────────────────
+let flickerTime = 0;
+function updateTorch(dt) {
+  flickerTime += dt * 3.5;
+  const flicker = 1 + 0.08 * Math.sin(flickerTime) + 0.04 * Math.sin(flickerTime * 2.3);
+  torchLight.intensity = 2.5 * flicker;
+  torchLight.position.copy(camera.position);
+  torchLight.position.y = WALL_H / 2;
+
+  fillLight.position.copy(camera.position);
+  fillLight.position.y = WALL_H / 2 - 0.5;
+}
+
+// ─────────────────────────────────────────────
+//  RENDER LOOP
+// ─────────────────────────────────────────────
+let lastTime = performance.now();
+
+function animate(now) {
+  requestAnimationFrame(animate);
+  const dt = Math.min((now - lastTime) / 1000, 0.1);
+  lastTime = now;
+
+  TWEEN.update(now);
+  updateTorch(dt);
+  renderer.render(scene, camera);
+}
+
+// ─────────────────────────────────────────────
+//  BOOT
+// ─────────────────────────────────────────────
+updateHUD();
+animate(performance.now());
+
+console.log('%c Grid Dungeon Crawler ', 'background:#333;color:#e8c87a;font-size:14px;padding:4px 8px;');
+console.log('Map legend: 0=floor, 1=wall, 2=start, 3=exit');
+console.log('Controls: W/S = forward/back | A/D = turn');
+</script>
+</body>
+</html>
