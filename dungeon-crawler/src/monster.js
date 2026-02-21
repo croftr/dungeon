@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Tween, Easing } from '@tweenjs/tween.js';
-import { tweenGroup } from './player.js';
+import { tweenGroup, player } from './player.js';
 import { CELL } from './map.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
@@ -13,13 +13,28 @@ export const monsters = [
     id: 0,
     type: 'glb',
     name: 'TreeKin',
-    gridRow: 2,
-    gridCol: 10,
+    gridRow: 4,
+    gridCol: 13,
     hp: 150, hpMax: 150,
     stats: { strength: 18, dexterity: 6, vitality: 15, intelligence: 12, resilience: 12 },
     defence: 15, alive: true, mesh: null, mixer: null, actions: {},
-    glbIdle:   '/monsters/meshy-AI-treeKin/Meshy_AI_Animation_Walking_withSkin.glb',
+    glbIdle: '/monsters/meshy-AI-treeKin/Meshy_AI_Animation_Walking_withSkin.glb',
     glbAttack: '/monsters/meshy-AI-treeKin/Meshy_AI_Animation_mage_soell_cast_withSkin.glb',
+    attackSound: '/monsters/meshy-AI-treeKin/treeKin-attack.mp3',
+    scale: 0.45
+  },
+  {
+    id: 1,
+    type: 'glb',
+    name: 'Goblin',
+    gridRow: 4,
+    gridCol: 9,
+    hp: 80, hpMax: 80,
+    stats: { strength: 12, dexterity: 15, vitality: 8, intelligence: 5, resilience: 5 },
+    defence: 8, alive: true, mesh: null, mixer: null, actions: {},
+    glbIdle: '/monsters/meshy-AI-goblin/Meshy_AI_Animation_Walking_withSkin.glb',
+    glbAttack: '/monsters/meshy-AI-goblin/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    attackSound: '/monsters/meshy-AI-goblin/goblin-attack.wav',
     scale: 0.45
   }
 ];
@@ -58,6 +73,10 @@ export function initMonsters(scene) {
             child.material.depthWrite = true;
             if (child.material.metalness !== undefined) child.material.metalness = 0.0;
             if (child.material.roughness !== undefined) child.material.roughness = 1.0;
+
+            if (m.name === 'Goblin' && child.material.color) {
+              child.material.color.setHex(0x55aa55);
+            }
           }
         }
       });
@@ -108,6 +127,20 @@ export function updateMonsters(dt, playerCamera) {
     if (m.mesh && playerCamera && m.lookAtPlayer) {
       m.lookAtPlayer(playerCamera.position);
     }
+
+    // Proximity attack logic: if player is adjacent, attack them periodically
+    const distRow = Math.abs(m.gridRow - player.gridRow);
+    const distCol = Math.abs(m.gridCol - player.gridCol);
+    if (distRow <= 1 && distCol <= 1) {
+      m.attackCooldown = (m.attackCooldown || 0) - dt;
+      if (m.attackCooldown <= 0) {
+        triggerMonsterAttack(m.id);
+        m.attackCooldown = 2.5 + Math.random(); // Next attack in 2.5 - 3.5 seconds
+      }
+    } else {
+      // Ready to attack immediately when player steps close
+      m.attackCooldown = 0;
+    }
   });
 }
 
@@ -148,6 +181,12 @@ export function triggerMonsterAttack(monsterId) {
     m.actions.attack.setEffectiveWeight(1);
     m.actions.attack.play();
     m.actions.idle.crossFadeTo(m.actions.attack, 0.2, true);
+
+    if (m.attackSound) {
+      const audio = new Audio(m.attackSound);
+      audio.volume = 0.6;
+      audio.play().catch(e => console.warn('Audio play prevented:', e));
+    }
   }
 }
 
