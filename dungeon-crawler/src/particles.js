@@ -102,3 +102,44 @@ export function createHitSpark(position) {
         }, 500);
     }, 100);
 }
+
+export function createCritSpark(position) {
+    if (!proton) return;
+
+    const emitter = new Proton.Emitter();
+
+    // 3× particle count vs normal hit spark (45–65 vs 15–25)
+    emitter.rate = new Proton.Rate(new Proton.Span(45, 65), new Proton.Span(0.01));
+
+    emitter.addInitialize(new Proton.Mass(1));
+    emitter.addInitialize(new Proton.Radius(0.8, 2.5));  // larger than normal (0.5–1.5)
+    emitter.addInitialize(new Proton.Life(0.3, 0.6));    // longer than normal (0.2–0.4)
+    emitter.addInitialize(new Proton.V(8, new Proton.Vector3D(0, 1, 0), 180)); // faster than normal (5)
+
+    // Gold SpriteMaterial — same setup as createHitSpark but distinct colour
+    const material = new THREE.SpriteMaterial({
+        map: sparkTexture,
+        color: 0xffffff,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        depthWrite: false,
+    });
+    emitter.addInitialize(new Proton.Body(new THREE.Sprite(material)));
+
+    if (position) {
+        emitter.addInitialize(new Proton.Position(new Proton.PointZone(position.x, position.y + 0.5, position.z)));
+    }
+
+    emitter.addBehaviour(new Proton.Alpha(1, 0));
+    emitter.addBehaviour(new Proton.Scale(1.5, 0.1));
+    emitter.addBehaviour(new Proton.Color('#ffffff', '#ffcc00')); // white → gold
+    emitter.addBehaviour(new Proton.RandomDrift(2.5, 2.5, 2.5, 0.05));
+
+    emitter.emit();
+    proton.addEmitter(emitter);
+
+    setTimeout(() => {
+        emitter.stopEmit();
+        setTimeout(() => { proton.removeEmitter(emitter); }, 700);
+    }, 100);
+}

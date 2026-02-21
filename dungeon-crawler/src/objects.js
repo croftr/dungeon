@@ -2,8 +2,9 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { CELL, dungeonMap, CELL_FLOOR } from './map.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
-import { tweenGroup, isInFrontOfPlayer } from './player.js';
+import { tweenGroup, isInFrontOfPlayer, player } from './player.js';
 import { showMessage } from './minimap.js';
+import { getItemDef } from './items.js';
 
 export const objects = [];
 
@@ -82,9 +83,27 @@ export function initObjects(scene, camera) {
                     showMessage("You can't reach that from here.");
                 }
                 break;
+            } else if (obj.userData.isChest) {
+                // Check if player is standing on the same square as the chest
+                const isOnSameSquare = (player.gridRow === obj.userData.gridRow && player.gridCol === obj.userData.gridCol);
+
+                if (isOnSameSquare) {
+                    openChestModal();
+                } else {
+                    showMessage("Stand on the chest to open it.");
+                }
+                break;
             }
         }
     });
+
+    // Modal Close Logic
+    const closeBtn = document.getElementById('chest-close');
+    if (closeBtn) {
+        closeBtn.onclick = () => {
+            document.getElementById('chest-overlay').classList.add('chest-hidden');
+        };
+    }
 }
 
 function addChest(scene, loader, col, row, rotY, offsetZ = 0) {
@@ -98,6 +117,9 @@ function addChest(scene, loader, col, row, rotY, offsetZ = 0) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.userData.isChest = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
             }
         });
 
@@ -124,4 +146,43 @@ function openPortcullis(p) {
             dungeonMap[p.gridRow][p.gridCol] = CELL_FLOOR;
         })
         .start();
+}
+
+function openChestModal() {
+    const overlay = document.getElementById('chest-overlay');
+    overlay.classList.remove('chest-hidden');
+
+    const slots = document.querySelectorAll('.chest-slot');
+    const boots = getItemDef('Leather Boots');
+
+    slots.forEach((slot, i) => {
+        slot.innerHTML = '';
+        slot.classList.remove('occupied');
+        slot.onclick = null; // Clear previous handlers
+
+        if (i === 0 && boots) {
+            slot.classList.add('occupied');
+            const img = document.createElement('img');
+            img.src = boots.icon;
+            img.title = boots.name;
+            slot.appendChild(img);
+
+            slot.onclick = () => {
+                // Top-left character is index 0
+                import('./equipment.js').then(m => {
+                    const success = m.addItemToInventory(0, boots.name);
+                    if (success) {
+                        showMessage(`Aldric picks up ${boots.name}.`);
+                        slot.innerHTML = '';
+                        slot.classList.remove('occupied');
+                        slot.onclick = null;
+                        // Close modal after picking up the item
+                        overlay.classList.add('chest-hidden');
+                    } else {
+                        showMessage("Inventory is full!");
+                    }
+                });
+            };
+        }
+    });
 }

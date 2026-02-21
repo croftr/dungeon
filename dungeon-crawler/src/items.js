@@ -240,6 +240,16 @@ export const ITEMS = [
     value: 35,
     weight: 2.0,
   },
+  {
+    name: 'Leather Boots',
+    slot: 'feet',
+    attackType: null,
+    baseDamage: null,
+    icon: '/leather_boots.png',
+    description: 'Rugged brown leather boots, perfect for exploring dark damp corridors.',
+    value: 15,
+    weight: 1.0,
+  },
 
   // ── Left Hand ─────────────────────────────────────────────────────────────
   {

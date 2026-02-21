@@ -69,6 +69,33 @@ export async function playActionSound(attackType) {
 }
 
 
+/**
+ * Play a critical-hit version of the attack sound — same buffer but at 1.5× playback rate,
+ * giving a sharper, punchier crack without needing a separate audio file.
+ * @param {string|null} attackType — 'swipe' | 'bash' | 'shoot' | 'punch' | 'fireball' | null
+ */
+export async function playCritSound(attackType) {
+  const def = SOUND_MAP[attackType] ?? SOUND_MAP.swipe;
+  const buffer = await getBuffer(def.url);
+  if (!buffer) return;
+
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.playbackRate.value = 1.5; // Pitch up for the sharper crit impact
+
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.85; // Slightly louder than the normal 0.6
+
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0, def.offset || 0);
+  } catch (err) {
+    console.warn('[audio] playCritSound failed:', err);
+  }
+}
+
 let currentMusicIndex = 0;
 const MUSIC_TRACKS = ['/sounds/back1.mp3', '/sounds/back2.mp3'];
 const BATTLE_TRACK = '/sounds/backing/battle.mp3';

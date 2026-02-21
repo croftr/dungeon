@@ -7,6 +7,7 @@ import { showMessage } from './minimap.js';
 import { dropMember } from './recruits.js';
 import { isInFrontOfPlayer } from './player.js';
 import { canMelee } from './combat-rules.js';
+import { playCritSound } from './audio.js';
 
 // ─────────────────────────────────────────────
 //  CONSTANTS
@@ -387,11 +388,22 @@ function useHand(memberIndex, hand) {
     return;
   }
 
-  const baseDamage = item ? (def?.baseDamage ?? 0) : 0; // bare fists: no base damage
-  const heroStr = m.stats?.strength ?? 10;
-  const result = attackMonster(target.id, baseDamage, heroStr, attackType);
+  // Pass character object + weapon def; hit chance and damage are resolved in combat-rules.js
+  const result = attackMonster(target.id, m, def, attackType);
 
-  if (result.hit) {
+  if (!result.hit) {
+    showMessage(`${m.name} swings at the ${target.name} — and misses!`);
+    return;
+  }
+
+  if (result.crit) {
+    playCritSound(attackType);
+    if (result.killed) {
+      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${m.name} obliterates the ${target.name}!`, 3000);
+    } else {
+      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${m.name} strikes the ${target.name} for <b>${result.damage}</b> damage! &nbsp;(${result.monsterHp} / ${target.hpMax} HP)`, 3000);
+    }
+  } else {
     if (result.killed) {
       showMessage(`${m.name} slays the ${target.name}!`);
     } else {
@@ -645,6 +657,25 @@ document.getElementById('equip-drop').addEventListener('click', () => {
     closeModal();
   }
 });
+
+/**
+ * Public helper to add an item to a specific character's inventory.
+ * Returns true if successful, false if inventory is full.
+ */
+export function addItemToInventory(charIndex, itemName) {
+  const m = party[charIndex];
+  if (!m || m.isEmpty) return false;
+
+  // Item definitions expect a name and its default slot
+  const def = getItemDef(itemName);
+  if (!def) return false;
+
+  const freeIndex = m.inventory.indexOf(null);
+  if (freeIndex === -1) return false;
+
+  m.inventory[freeIndex] = { name: itemName, slot: def.slot };
+  return true;
+}
 
 // ─────────────────────────────────────────────
 //  PUBLIC INIT

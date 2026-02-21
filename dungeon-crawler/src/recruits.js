@@ -11,8 +11,8 @@ export const RECRUITS = [
         name: 'Elrond',
         job: 'Ranger',
         race: 'Elf',
-        hp: 85, hpMax: 85, mp: 40, mpMax: 40, sp: 100, spMax: 100,
-        stats: { strength: 12, dexterity: 18, vitality: 11, intelligence: 14, resilience: 10 },
+        hp: 42, hpMax: 42, mp: 40, mpMax: 40, sp: 100, spMax: 100,
+        stats: { strength: 6, dexterity: 9, vitality: 5, intelligence: 7, resilience: 5 },
         skills: [
             { name: 'Point-Blank Shot', description: 'No accuracy penalty when firing a Bow or Crossbow at an enemy in the adjacent tile.' },
             { name: 'Botanist', description: '50% chance to find two Herbs instead of one when clicking a Herb on the ground.' }
@@ -27,8 +27,8 @@ export const RECRUITS = [
         name: 'Gareth',
         job: 'Paladin',
         race: 'Human',
-        hp: 120, hpMax: 120, mp: 60, mpMax: 60, sp: 100, spMax: 100,
-        stats: { strength: 18, dexterity: 10, vitality: 16, intelligence: 12, resilience: 18 },
+        hp: 60, hpMax: 60, mp: 60, mpMax: 60, sp: 100, spMax: 100,
+        stats: { strength: 9, dexterity: 5, vitality: 8, intelligence: 6, resilience: 9 },
         skills: [
             { name: 'Field Medic', description: 'Use Bandages or Heal actions during combat, not just while resting.' },
             { name: 'Whirlwind', description: 'With a two-handed weapon, strikes the enemy ahead and the two diagonal enemies simultaneously.' }
@@ -43,8 +43,8 @@ export const RECRUITS = [
         name: 'Thorek',
         job: 'Barbarian',
         race: 'Dwarf',
-        hp: 140, hpMax: 140, mp: 20, mpMax: 20, sp: 100, spMax: 100,
-        stats: { strength: 20, dexterity: 12, vitality: 18, intelligence: 8, resilience: 15 },
+        hp: 70, hpMax: 70, mp: 20, mpMax: 20, sp: 100, spMax: 100,
+        stats: { strength: 10, dexterity: 6, vitality: 9, intelligence: 4, resilience: 7 },
         skills: [
             { name: 'Dual-Wielding', description: 'Equip a weapon in the off-hand slot. Attacking triggers two cooldowns — one per weapon.' },
             { name: 'Shadow-Step', description: '25% chance to not trigger enemy aggression when moving backward or sideways.' }
@@ -59,8 +59,8 @@ export const RECRUITS = [
         name: 'Merlin',
         job: 'Wizard',
         race: 'Human',
-        hp: 60, hpMax: 60, mp: 150, mpMax: 150, sp: 100, spMax: 100,
-        stats: { strength: 6, dexterity: 10, vitality: 8, intelligence: 20, resilience: 10 },
+        hp: 30, hpMax: 30, mp: 150, mpMax: 150, sp: 100, spMax: 100,
+        stats: { strength: 3, dexterity: 5, vitality: 4, intelligence: 10, resilience: 5 },
         skills: [
             { name: 'Runic Scholar', description: 'Read ancient wall inscriptions to uncover puzzle hints or gain permanent stat buffs.' },
             { name: 'Lockpicking', description: 'Open iron doors or chests without a key, or by consuming a Lockpick item.' }
@@ -75,8 +75,8 @@ export const RECRUITS = [
         name: 'Korg',
         job: 'Barbarian',
         race: 'Human',
-        hp: 135, hpMax: 135, mp: 25, mpMax: 25, sp: 100, spMax: 100,
-        stats: { strength: 19, dexterity: 14, vitality: 17, intelligence: 9, resilience: 14 },
+        hp: 67, hpMax: 67, mp: 25, mpMax: 25, sp: 100, spMax: 100,
+        stats: { strength: 9, dexterity: 7, vitality: 8, intelligence: 4, resilience: 7 },
         skills: [
             { name: 'Whirlwind', description: 'With a two-handed weapon, strikes the enemy ahead and the two diagonal enemies simultaneously.' },
             { name: 'Trap Disarming', description: 'Automatically highlights floor pressure plates within a 2-tile radius and allows the player to right-click to disable them before triggering.' }

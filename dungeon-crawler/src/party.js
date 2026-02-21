@@ -604,6 +604,15 @@ export function flashPortraitHit(index) {
   setTimeout(() => portrait.classList.remove('portrait--hit'), 500);
 }
 
+export function flashPortraitCrit(index) {
+  const portrait = document.querySelector(`#member-${index} .portrait`);
+  if (!portrait) return;
+  portrait.classList.remove('portrait--crit', 'portrait--hit');
+  void portrait.offsetWidth;   // force reflow to restart animation
+  portrait.classList.add('portrait--crit');
+  setTimeout(() => portrait.classList.remove('portrait--crit'), 800);
+}
+
 export function setMp(index, value) {
   const m = party[index];
   if (!m) return;
