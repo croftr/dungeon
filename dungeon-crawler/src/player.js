@@ -6,15 +6,15 @@ import { isPassable, cellToWorld, CELL_EXIT, dungeonMap } from './map.js';
 // ─────────────────────────────────────────────
 //  CONSTANTS
 // ─────────────────────────────────────────────
-export const FACING_NAMES  = ['North', 'East', 'South', 'West'];
+export const FACING_NAMES = ['North', 'East', 'South', 'West'];
 export const FACING_ANGLES = [0, -Math.PI / 2, Math.PI, Math.PI / 2]; // camera Y rotation
 
 // dx/dz deltas per facing direction
 const DIR = [
-  { dx:  0, dz: -1 }, // 0 North
-  { dx:  1, dz:  0 }, // 1 East
-  { dx:  0, dz:  1 }, // 2 South
-  { dx: -1, dz:  0 }, // 3 West
+  { dx: 0, dz: -1 }, // 0 North
+  { dx: 1, dz: 0 }, // 1 East
+  { dx: 0, dz: 1 }, // 2 South
+  { dx: -1, dz: 0 }, // 3 West
 ];
 
 const MOVE_MS = 300; // tween duration
@@ -25,16 +25,16 @@ const MOVE_MS = 300; // tween duration
 export const player = {
   gridRow: 1,
   gridCol: 1,
-  facing:  0,      // 0-3
-  moving:  false,  // input lock during tween
+  facing: 0,      // 0-3
+  moving: false,  // input lock during tween
 };
 
 // Callbacks set by main.js
-let onMoved   = () => {};
-let onReached = () => {};
+let onMoved = () => { };
+let onReached = () => { };
 
 export function setCallbacks({ moved, reached }) {
-  onMoved   = moved   ?? onMoved;
+  onMoved = moved ?? onMoved;
   onReached = reached ?? onReached;
 }
 
@@ -44,7 +44,7 @@ export function setCallbacks({ moved, reached }) {
 export function initPlayer(startRow, startCol, camera) {
   player.gridRow = startRow;
   player.gridCol = startCol;
-  player.facing  = 0;
+  player.facing = 0;
 
   const w = cellToWorld(startRow, startCol);
   camera.position.set(w.x, w.y, w.z);
@@ -55,7 +55,7 @@ export function initPlayer(startRow, startCol, camera) {
 export function moveForward(camera, sign = 1) {
   if (player.moving) return;
 
-  const dir    = DIR[player.facing];
+  const dir = DIR[player.facing];
   const newRow = player.gridRow + dir.dz * sign;
   const newCol = player.gridCol + dir.dx * sign;
 
@@ -64,7 +64,7 @@ export function moveForward(camera, sign = 1) {
     return;
   }
 
-  player.moving  = true;
+  player.moving = true;
   player.gridRow = newRow;
   player.gridCol = newCol;
 
@@ -90,11 +90,11 @@ export function turnPlayer(camera, sign = 1) {
   player.facing = ((player.facing + sign) + 4) % 4;
 
   const currentY = camera.rotation.y;
-  const targetY  = FACING_ANGLES[player.facing];
+  const targetY = FACING_ANGLES[player.facing];
 
   // Shortest angular path
   let delta = targetY - currentY;
-  while (delta >  Math.PI) delta -= Math.PI * 2;
+  while (delta > Math.PI) delta -= Math.PI * 2;
   while (delta < -Math.PI) delta += Math.PI * 2;
 
   const rot = { y: currentY };
@@ -120,15 +120,15 @@ export function strafePlayer(camera, sign = 1) {
   // The strafe direction is 90° to the right of current facing (+1 turn),
   // or 90° to the left (-1 turn), without changing player.facing.
   const strafeDir = DIR[((player.facing + sign) + 4) % 4];
-  const newRow    = player.gridRow + strafeDir.dz;
-  const newCol    = player.gridCol + strafeDir.dx;
+  const newRow = player.gridRow + strafeDir.dz;
+  const newCol = player.gridCol + strafeDir.dx;
 
   if (!isPassable(newRow, newCol)) {
     bumpFeedback(camera);
     return;
   }
 
-  player.moving  = true;
+  player.moving = true;
   player.gridRow = newRow;
   player.gridCol = newCol;
 
@@ -149,7 +149,7 @@ export function strafePlayer(camera, sign = 1) {
 
 // Brief recoil when walking into a wall
 function bumpFeedback(camera) {
-  const dir  = DIR[player.facing];
+  const dir = DIR[player.facing];
   const bump = 0.12;
   const origin = { x: camera.position.x, z: camera.position.z };
 
@@ -200,18 +200,23 @@ export function isInFrontOfPlayer(targetRow, targetCol, maxSteps = 1) {
 export function initInput(camera) {
   const keyMap = {
     // Move forward / back
-    'w'          : () => moveForward(camera,  1),
-    'ArrowUp'    : () => moveForward(camera,  1),
-    's'          : () => moveForward(camera, -1),
-    'ArrowDown'  : () => moveForward(camera, -1),
+    'w': () => moveForward(camera, 1),
+    'ArrowUp': () => moveForward(camera, 1),
+    's': () => moveForward(camera, -1),
+    'ArrowDown': () => moveForward(camera, -1),
     // Turn left / right
-    'q'          : () => turnPlayer(camera, -1),
-    'ArrowLeft'  : () => turnPlayer(camera, -1),
-    'e'          : () => turnPlayer(camera,  1),
-    'ArrowRight' : () => turnPlayer(camera,  1),
+    'q': () => turnPlayer(camera, -1),
+    'ArrowLeft': () => turnPlayer(camera, -1),
+    'e': () => turnPlayer(camera, 1),
+    'ArrowRight': () => turnPlayer(camera, 1),
     // Strafe left / right
-    'a'          : () => strafePlayer(camera, -1),
-    'd'          : () => strafePlayer(camera,  1),
+    'a': () => strafePlayer(camera, -1),
+    'd': () => strafePlayer(camera, 1),
+    'm': () => {
+      document.getElementById('minimap-wrap').classList.toggle('hud-hidden');
+      document.getElementById('controls').classList.toggle('hud-hidden');
+      document.getElementById('status').classList.toggle('hud-hidden');
+    }
   };
 
   document.addEventListener('keydown', (e) => {

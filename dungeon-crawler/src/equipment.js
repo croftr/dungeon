@@ -15,7 +15,7 @@ const SLOT_KEYS = [
   'leftHand', 'rightHand',
   'belt', 'hands',
   'ring1', 'ring2',
-  'legs', 'feet',
+  'legs', 'feet', 'skill',
 ];
 
 const INVENTORY_SIZE = 20; // 4 cols × 5 rows
@@ -35,6 +35,7 @@ const SLOT_LABELS = {
   ring2: 'Ring',
   legs: 'Legs',
   feet: 'Feet',
+  skill: 'Skill',
 };
 
 // ─────────────────────────────────────────────
@@ -99,6 +100,9 @@ export function extendPartyData() {
           m.equipment.rightHand = { name: m.rightHand, slot: 'rightHand' };
         }
       }
+    }
+    if (m.startingSkill) {
+      m.equipment.skill = { name: m.startingSkill, slot: 'skill' };
     }
     // 20-slot inventory, all empty
     m.inventory = Array(INVENTORY_SIZE).fill(null);
@@ -339,6 +343,22 @@ function useHand(memberIndex, hand) {
 }
 
 // ─────────────────────────────────────────────
+//  USE SKILL
+// ─────────────────────────────────────────────
+function useSkill(memberIndex) {
+  const m = party[memberIndex];
+  if (!m) return;
+
+  const skill = m.equipment?.skill;
+  if (!skill) {
+    showMessage(`${m.name} has no skill equipped!`);
+    return;
+  }
+
+  showMessage(`${m.name} uses ${skill.name}! (Skill logic not yet implemented)`);
+}
+
+// ─────────────────────────────────────────────
 //  CLICK HANDLERS
 // ─────────────────────────────────────────────
 
@@ -500,6 +520,14 @@ function attachCardListeners() {
       rhSlot.addEventListener('click', (e) => {
         e.stopPropagation();
         useHand(i, 'right');
+      });
+    }
+
+    const skSlot = document.getElementById(`slot-sk-${i}`);
+    if (skSlot) {
+      skSlot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        useSkill(i);
       });
     }
   });

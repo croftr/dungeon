@@ -40,6 +40,13 @@ body {
   border: 1px solid #555;
   padding: 6px;
   border-radius: 4px;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+#minimap-wrap.hud-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(20px);
 }
 
 #minimap-wrap h3 {
@@ -68,6 +75,13 @@ body {
   padding: 8px 10px;
   border-radius: 4px;
   border: 1px solid #333;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+#controls.hud-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-20px);
 }
 
 #controls span {
@@ -85,6 +99,13 @@ body {
   text-align: center;
   line-height: 1.6;
   white-space: nowrap;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+#status.hud-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(20px);
 }
 
 #status .facing {
@@ -347,21 +368,21 @@ body {
 
 /* One member card */
 .member-card {
-  width: 260px;
+  width: 180px;
   background: rgba(8, 6, 4, 0.88);
   border: 1px solid #5a4a30;
   border-radius: 4px;
-  padding: 6px;
+  padding: 4px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
   box-shadow: inset 0 1px 0 rgba(255, 220, 120, 0.08), 0 2px 8px rgba(0, 0, 0, 0.7);
 }
 
 /* ── Top row: portrait + bars ── */
 .member-top {
   display: flex;
-  gap: 7px;
+  gap: 6px;
   align-items: flex-start;
 }
 
@@ -398,13 +419,7 @@ body {
   gap: 5px;
 }
 
-.bar-label {
-  font-size: 9px;
-  color: #888;
-  width: 14px;
-  flex-shrink: 0;
-  letter-spacing: 0.5px;
-}
+
 
 .bar-track {
   position: relative;
@@ -435,6 +450,11 @@ body {
   box-shadow: 0 0 6px rgba(30, 60, 200, 0.5);
 }
 
+.bar-sp {
+  background: linear-gradient(90deg, #7a6a0a 0%, #c0a019 60%, #e0c020 100%);
+  box-shadow: 0 0 6px rgba(200, 160, 20, 0.5);
+}
+
 .bar-value {
   position: absolute;
   right: 3px;
@@ -458,12 +478,15 @@ body {
 /* ── Bottom row: equipment slots ── */
 .member-equip {
   display: flex;
-  gap: 5px;
+  gap: 4px;
+  justify-content: space-between;
+  padding: 2px 2px 0;
 }
 
 .equip-slot {
-  flex: 1;
-  height: 36px;
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
   background: rgba(0, 0, 0, 0.5);
   border: 1px solid #4a3a20;
   border-radius: 3px;
@@ -502,8 +525,8 @@ body {
 }
 
 .slot-item img {
-  width: 22px;
-  height: 22px;
+  width: 80%;
+  height: 80%;
   object-fit: contain;
   display: block;
   pointer-events: none;
@@ -519,16 +542,33 @@ body {
   cursor: pointer;
 }
 
-/* Hand outline icon shown when a hand slot is empty */
-.equip-slot.slot-empty::before {
+/* HAND placeholder — only for L/R slots */
+[id^="slot-lh"].slot-empty::before,
+[id^="slot-rh"].slot-empty::before,
+#pd-leftHand.slot-empty::before,
+#pd-rightHand.slot-empty::before {
   content: '';
   position: absolute;
   inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 26' fill='none' stroke='%23c8a84a' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='3' y='5' width='3' height='9' rx='1.5'/%3E%3Crect x='7' y='3' width='3' height='11' rx='1.5'/%3E%3Crect x='11' y='3.5' width='3' height='10.5' rx='1.5'/%3E%3Crect x='15' y='6' width='2.5' height='7.5' rx='1.25'/%3E%3Cpath d='M3 14 Q1 13 1 10 Q1 7 3 7'/%3E%3Cpath d='M3 14 Q3 18 5 20 Q7 23 11 23 Q15 23 16.5 20 Q18 17 17.5 14'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 28%;
-  opacity: 0.25;
+  background-size: 50%;
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+/* SKILL placeholder — only for S slot */
+[id^="slot-sk"].slot-empty::before,
+#pd-skill.slot-empty::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='%23c8a84a' stroke-width='1.0' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 45%;
+  opacity: 0.05;
   pointer-events: none;
 }
 
@@ -976,6 +1016,10 @@ body {
 }
 
 /* feet — same level as hands/rings */
+#pd-skill {
+  top: 115%;
+  left: 50%;
+}
 
 /* ─────────────────────────────────────────────────────────────────────────────
    WEAPON ACTION ANIMATIONS

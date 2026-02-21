@@ -11,14 +11,14 @@ export const RECRUITS = [
         name: 'Elrond',
         job: 'Ranger',
         race: 'Elf',
-        hp: 85, hpMax: 85, mp: 40, mpMax: 40,
+        hp: 85, hpMax: 85, mp: 40, mpMax: 40, sp: 100, spMax: 100,
         stats: { strength: 12, dexterity: 18, vitality: 11, intelligence: 14, resilience: 10 },
         skills: [
             { name: 'Point-Blank Shot', description: 'No accuracy penalty when firing a Bow or Crossbow at an enemy in the adjacent tile.' },
             { name: 'Botanist', description: '50% chance to find two Herbs instead of one when clicking a Herb on the ground.' }
         ],
         image: '/elf_ranger_head.png',
-        leftHand: 'Bow', rightHand: 'Bow',
+        leftHand: 'Bow', rightHand: 'Bow', startingSkill: 'Focus',
         gridCol: 9, gridRow: 0, facing: 'front', // North wall
         isRecruited: false
     },
@@ -27,14 +27,14 @@ export const RECRUITS = [
         name: 'Gareth',
         job: 'Paladin',
         race: 'Human',
-        hp: 120, hpMax: 120, mp: 60, mpMax: 60,
+        hp: 120, hpMax: 120, mp: 60, mpMax: 60, sp: 100, spMax: 100,
         stats: { strength: 18, dexterity: 10, vitality: 16, intelligence: 12, resilience: 18 },
         skills: [
             { name: 'Field Medic', description: 'Use Bandages or Heal actions during combat, not just while resting.' },
             { name: 'Whirlwind', description: 'With a two-handed weapon, strikes the enemy ahead and the two diagonal enemies simultaneously.' }
         ],
         image: '/human_paladin_head.png',
-        leftHand: 'Sword', rightHand: 'Shield',
+        leftHand: 'Sword', rightHand: 'Shield', startingSkill: 'Holy Shield',
         gridCol: 10, gridRow: 0, facing: 'front', // North wall
         isRecruited: false
     },
@@ -43,14 +43,14 @@ export const RECRUITS = [
         name: 'Thorek',
         job: 'Barbarian',
         race: 'Dwarf',
-        hp: 140, hpMax: 140, mp: 20, mpMax: 20,
+        hp: 140, hpMax: 140, mp: 20, mpMax: 20, sp: 100, spMax: 100,
         stats: { strength: 20, dexterity: 12, vitality: 18, intelligence: 8, resilience: 15 },
         skills: [
             { name: 'Dual-Wielding', description: 'Equip a weapon in the off-hand slot. Attacking triggers two cooldowns — one per weapon.' },
             { name: 'Shadow-Step', description: '25% chance to not trigger enemy aggression when moving backward or sideways.' }
         ],
         image: '/dwarf_barbarian_head.png',
-        leftHand: 'Axe', rightHand: 'Torch',
+        leftHand: 'Axe', rightHand: 'Torch', startingSkill: 'Rage',
         gridCol: 12, gridRow: 0, facing: 'front', // North wall
         isRecruited: false
     },
@@ -59,14 +59,14 @@ export const RECRUITS = [
         name: 'Merlin',
         job: 'Wizard',
         race: 'Human',
-        hp: 60, hpMax: 60, mp: 150, mpMax: 150,
+        hp: 60, hpMax: 60, mp: 150, mpMax: 150, sp: 100, spMax: 100,
         stats: { strength: 6, dexterity: 10, vitality: 8, intelligence: 20, resilience: 10 },
         skills: [
             { name: 'Runic Scholar', description: 'Read ancient wall inscriptions to uncover puzzle hints or gain permanent stat buffs.' },
             { name: 'Lockpicking', description: 'Open iron doors or chests without a key, or by consuming a Lockpick item.' }
         ],
         image: '/human_wizard_head.png',
-        leftHand: 'Staff', rightHand: '—',
+        leftHand: 'Staff', rightHand: '—', startingSkill: 'Magic Arrow',
         gridCol: 13, gridRow: 0, facing: 'front', // North wall
         isRecruited: false
     },
@@ -75,14 +75,14 @@ export const RECRUITS = [
         name: 'Korg',
         job: 'Barbarian',
         race: 'Human',
-        hp: 135, hpMax: 135, mp: 25, mpMax: 25,
+        hp: 135, hpMax: 135, mp: 25, mpMax: 25, sp: 100, spMax: 100,
         stats: { strength: 19, dexterity: 14, vitality: 17, intelligence: 9, resilience: 14 },
         skills: [
             { name: 'Whirlwind', description: 'With a two-handed weapon, strikes the enemy ahead and the two diagonal enemies simultaneously.' },
             { name: 'Trap Disarming', description: 'Automatically highlights floor pressure plates within a 2-tile radius and allows the player to right-click to disable them before triggering.' }
         ],
         image: '/human_barbarian_head.png',
-        leftHand: 'Axe', rightHand: '—',
+        leftHand: 'Axe', rightHand: '—', startingSkill: 'Battle Cry',
         gridCol: 11, gridRow: 0, facing: 'front', // North wall
         isRecruited: false
     }
@@ -282,10 +282,12 @@ function recruitCharacter(r) {
         name: r.name,
         hp: r.hp, hpMax: r.hpMax,
         mp: r.mp, mpMax: r.mpMax,
+        sp: r.sp, spMax: r.spMax,
         stats: { ...r.stats },
         skills: JSON.parse(JSON.stringify(r.skills)),
         leftHand: r.leftHand,
         rightHand: r.rightHand,
+        startingSkill: r.startingSkill,
         image: r.image, // Include image in party slot
         // Add fake portrait palette so it does not crash drawPortrait
         skinLight: '#e8c8a0', skinDark: '#b08050',

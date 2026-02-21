@@ -177,22 +177,29 @@ function refreshMember(m) {
   }
   if (card) card.style.display = 'flex';
 
-  document.getElementById(`name-${i}`).textContent = m.name;
+  const nameEl = document.getElementById(`name-${i}`);
+  if (nameEl) nameEl.textContent = m.name;
 
   const hpFill = document.getElementById(`bar-hp-${i}`);
   const mpFill = document.getElementById(`bar-mp-${i}`);
+  const spFill = document.getElementById(`bar-sp-${i}`);
   if (hpFill) hpFill.style.width = pct(m.hp, m.hpMax);
   if (mpFill) mpFill.style.width = pct(m.mp, m.mpMax);
+  if (spFill) spFill.style.width = pct(m.sp ?? 100, m.spMax ?? 100);
 
   const hpVal = document.getElementById(`val-hp-${i}`);
   const mpVal = document.getElementById(`val-mp-${i}`);
+  const spVal = document.getElementById(`val-sp-${i}`);
   if (hpVal) hpVal.textContent = `${m.hp}/${m.hpMax}`;
   if (mpVal) mpVal.textContent = `${m.mp}/${m.mpMax}`;
+  if (spVal) spVal.textContent = `${m.sp ?? 100}/${m.spMax ?? 100}`;
 
   const lhEl = document.getElementById(`item-lh-${i}`);
   const rhEl = document.getElementById(`item-rh-${i}`);
+  const skEl = document.getElementById(`item-sk-${i}`);
   const lhSlot = document.getElementById(`slot-lh-${i}`);
   const rhSlot = document.getElementById(`slot-rh-${i}`);
+  const skSlot = document.getElementById(`slot-sk-${i}`);
 
   // Use m.equipment as the authoritative source when it exists (after the equipment
   // modal has initialised it), otherwise fall back to the initial hand-assignment strings.
@@ -202,12 +209,16 @@ function refreshMember(m) {
   const rhName = m.equipment
     ? (m.equipment.rightHand?.name ?? null)
     : (m.rightHand && m.rightHand !== '—' ? m.rightHand : null);
+  const skName = m.equipment
+    ? (m.equipment.skill?.name ?? null)
+    : null;
 
   let lhDef = null;
   let rhDef = null;
   try {
     if (lhName) lhDef = getItemDef(lhName);
     if (rhName) rhDef = getItemDef(rhName);
+    if (skName) getItemDef(skName);
   } catch (e) {
     console.warn('Could not get item def:', e);
   }
@@ -220,6 +231,7 @@ function refreshMember(m) {
 
   if (lhEl) renderItemIcon(lhName ? { name: lhName } : null, lhEl);
   if (rhEl) renderItemIcon((lhBothHands ? lhName : rhName) ? { name: lhBothHands ? lhName : rhName } : null, rhEl);
+  if (skEl) renderItemIcon(skName ? { name: skName } : null, skEl);
 
   if (lhSlot) {
     lhSlot.classList.toggle('slot-empty', !lhName);
@@ -229,6 +241,9 @@ function refreshMember(m) {
     rhSlot.classList.toggle('slot-empty', !lhBothHands && !rhName);
     rhSlot.classList.toggle('both-hands-secondary', lhBothHands);
     rhSlot.classList.toggle('slot-no-action', !lhBothHands && rhNoAction);
+  }
+  if (skSlot) {
+    skSlot.classList.toggle('slot-empty', !skName);
   }
 }
 

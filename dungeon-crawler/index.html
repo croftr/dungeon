@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Grid Dungeon Crawler</title>
   <link rel="stylesheet" href="/src/style.css" />
 </head>
+
 <body>
 
   <canvas id="renderer-canvas"></canvas>
@@ -13,24 +15,25 @@
   <div id="hud">
     <!-- top-right column: minimap + status stacked -->
     <div id="top-right">
-      <div id="minimap-wrap">
+      <div id="minimap-wrap" class="hud-hidden">
         <h3>MINIMAP</h3>
         <canvas id="minimap"></canvas>
       </div>
-      <div id="status">
+      <div id="status" class="hud-hidden">
         Pos: <span id="st-pos">—</span><br>
         <span id="st-facing" class="facing">—</span>
       </div>
     </div>
 
     <!-- bottom-left: controls -->
-    <div id="controls">
+    <div id="controls" class="hud-hidden">
       <span>W / ↑</span> Move Forward<br>
       <span>S / ↓</span> Move Backward<br>
       <span>Q / ←</span> Turn Left<br>
       <span>E / →</span> Turn Right<br>
       <span>A / D</span> Strafe Left / Right<br>
-      <span>P</span> Party Tactics
+      <span>P</span> Party Tactics<br>
+      <span>M</span> Toggle HUD
     </div>
 
     <!-- ── PARTY PANEL (bottom-left, 2×2 grid) ── -->
@@ -45,19 +48,29 @@
           <div class="portrait"><canvas class="portrait-canvas" id="portrait-0" width="56" height="56"></canvas></div>
           <div class="bars">
             <div class="bar-row">
-              <span class="bar-label">HP</span>
-              <div class="bar-track"><div class="bar-fill bar-hp" id="bar-hp-0"></div><span class="bar-value" id="val-hp-0"></span></div>
+              <div class="bar-track">
+                <div class="bar-fill bar-hp" id="bar-hp-0"></div><span class="bar-value" id="val-hp-0"></span>
+              </div>
             </div>
             <div class="bar-row">
-              <span class="bar-label">MP</span>
-              <div class="bar-track"><div class="bar-fill bar-mp" id="bar-mp-0"></div><span class="bar-value" id="val-mp-0"></span></div>
+              <div class="bar-track">
+                <div class="bar-fill bar-mp" id="bar-mp-0"></div><span class="bar-value" id="val-mp-0"></span>
+              </div>
             </div>
-            <div class="member-name" id="name-0"></div>
+            <div class="bar-row">
+              <div class="bar-track">
+                <div class="bar-fill bar-sp" id="bar-sp-0"></div><span class="bar-value" id="val-sp-0"></span>
+              </div>
+            </div>
           </div>
         </div>
         <div class="member-equip">
-          <div class="equip-slot" id="slot-lh-0"><span class="slot-label">L</span><span class="slot-item" id="item-lh-0"></span></div>
-          <div class="equip-slot" id="slot-rh-0"><span class="slot-label">R</span><span class="slot-item" id="item-rh-0"></span></div>
+          <div class="equip-slot" id="slot-lh-0"><span class="slot-label">L</span><span class="slot-item"
+              id="item-lh-0"></span></div>
+          <div class="equip-slot" id="slot-rh-0"><span class="slot-label">R</span><span class="slot-item"
+              id="item-rh-0"></span></div>
+          <div class="equip-slot" id="slot-sk-0"><span class="slot-label">S</span><span class="slot-item"
+              id="item-sk-0"></span></div>
         </div>
       </div>
 
@@ -67,19 +80,29 @@
           <div class="portrait"><canvas class="portrait-canvas" id="portrait-1" width="56" height="56"></canvas></div>
           <div class="bars">
             <div class="bar-row">
-              <span class="bar-label">HP</span>
-              <div class="bar-track"><div class="bar-fill bar-hp" id="bar-hp-1"></div><span class="bar-value" id="val-hp-1"></span></div>
+              <div class="bar-track">
+                <div class="bar-fill bar-hp" id="bar-hp-1"></div><span class="bar-value" id="val-hp-1"></span>
+              </div>
             </div>
             <div class="bar-row">
-              <span class="bar-label">MP</span>
-              <div class="bar-track"><div class="bar-fill bar-mp" id="bar-mp-1"></div><span class="bar-value" id="val-mp-1"></span></div>
+              <div class="bar-track">
+                <div class="bar-fill bar-mp" id="bar-mp-1"></div><span class="bar-value" id="val-mp-1"></span>
+              </div>
             </div>
-            <div class="member-name" id="name-1"></div>
+            <div class="bar-row">
+              <div class="bar-track">
+                <div class="bar-fill bar-sp" id="bar-sp-1"></div><span class="bar-value" id="val-sp-1"></span>
+              </div>
+            </div>
           </div>
         </div>
         <div class="member-equip">
-          <div class="equip-slot" id="slot-lh-1"><span class="slot-label">L</span><span class="slot-item" id="item-lh-1"></span></div>
-          <div class="equip-slot" id="slot-rh-1"><span class="slot-label">R</span><span class="slot-item" id="item-rh-1"></span></div>
+          <div class="equip-slot" id="slot-lh-1"><span class="slot-label">L</span><span class="slot-item"
+              id="item-lh-1"></span></div>
+          <div class="equip-slot" id="slot-rh-1"><span class="slot-label">R</span><span class="slot-item"
+              id="item-rh-1"></span></div>
+          <div class="equip-slot" id="slot-sk-1"><span class="slot-label">S</span><span class="slot-item"
+              id="item-sk-1"></span></div>
         </div>
       </div>
 
@@ -89,19 +112,29 @@
           <div class="portrait"><canvas class="portrait-canvas" id="portrait-2" width="56" height="56"></canvas></div>
           <div class="bars">
             <div class="bar-row">
-              <span class="bar-label">HP</span>
-              <div class="bar-track"><div class="bar-fill bar-hp" id="bar-hp-2"></div><span class="bar-value" id="val-hp-2"></span></div>
+              <div class="bar-track">
+                <div class="bar-fill bar-hp" id="bar-hp-2"></div><span class="bar-value" id="val-hp-2"></span>
+              </div>
             </div>
             <div class="bar-row">
-              <span class="bar-label">MP</span>
-              <div class="bar-track"><div class="bar-fill bar-mp" id="bar-mp-2"></div><span class="bar-value" id="val-mp-2"></span></div>
+              <div class="bar-track">
+                <div class="bar-fill bar-mp" id="bar-mp-2"></div><span class="bar-value" id="val-mp-2"></span>
+              </div>
             </div>
-            <div class="member-name" id="name-2"></div>
+            <div class="bar-row">
+              <div class="bar-track">
+                <div class="bar-fill bar-sp" id="bar-sp-2"></div><span class="bar-value" id="val-sp-2"></span>
+              </div>
+            </div>
           </div>
         </div>
         <div class="member-equip">
-          <div class="equip-slot" id="slot-lh-2"><span class="slot-label">L</span><span class="slot-item" id="item-lh-2"></span></div>
-          <div class="equip-slot" id="slot-rh-2"><span class="slot-label">R</span><span class="slot-item" id="item-rh-2"></span></div>
+          <div class="equip-slot" id="slot-lh-2"><span class="slot-label">L</span><span class="slot-item"
+              id="item-lh-2"></span></div>
+          <div class="equip-slot" id="slot-rh-2"><span class="slot-label">R</span><span class="slot-item"
+              id="item-rh-2"></span></div>
+          <div class="equip-slot" id="slot-sk-2"><span class="slot-label">S</span><span class="slot-item"
+              id="item-sk-2"></span></div>
         </div>
       </div>
 
@@ -111,19 +144,29 @@
           <div class="portrait"><canvas class="portrait-canvas" id="portrait-3" width="56" height="56"></canvas></div>
           <div class="bars">
             <div class="bar-row">
-              <span class="bar-label">HP</span>
-              <div class="bar-track"><div class="bar-fill bar-hp" id="bar-hp-3"></div><span class="bar-value" id="val-hp-3"></span></div>
+              <div class="bar-track">
+                <div class="bar-fill bar-hp" id="bar-hp-3"></div><span class="bar-value" id="val-hp-3"></span>
+              </div>
             </div>
             <div class="bar-row">
-              <span class="bar-label">MP</span>
-              <div class="bar-track"><div class="bar-fill bar-mp" id="bar-mp-3"></div><span class="bar-value" id="val-mp-3"></span></div>
+              <div class="bar-track">
+                <div class="bar-fill bar-mp" id="bar-mp-3"></div><span class="bar-value" id="val-mp-3"></span>
+              </div>
             </div>
-            <div class="member-name" id="name-3"></div>
+            <div class="bar-row">
+              <div class="bar-track">
+                <div class="bar-fill bar-sp" id="bar-sp-3"></div><span class="bar-value" id="val-sp-3"></span>
+              </div>
+            </div>
           </div>
         </div>
         <div class="member-equip">
-          <div class="equip-slot" id="slot-lh-3"><span class="slot-label">L</span><span class="slot-item" id="item-lh-3"></span></div>
-          <div class="equip-slot" id="slot-rh-3"><span class="slot-label">R</span><span class="slot-item" id="item-rh-3"></span></div>
+          <div class="equip-slot" id="slot-lh-3"><span class="slot-label">L</span><span class="slot-item"
+              id="item-lh-3"></span></div>
+          <div class="equip-slot" id="slot-rh-3"><span class="slot-label">R</span><span class="slot-item"
+              id="item-rh-3"></span></div>
+          <div class="equip-slot" id="slot-sk-3"><span class="slot-label">S</span><span class="slot-item"
+              id="item-sk-3"></span></div>
         </div>
       </div>
 
@@ -139,7 +182,9 @@
 
       <div id="equip-header">
         <span id="equip-char-name"></span>
-        <button id="equip-drop" style="margin-left:auto; margin-right: 15px; color:#ff4040; background:none; border:1px solid #c04040; border-radius:3px; font-family:monospace; font-size:12px; padding:2px 8px; cursor:pointer;" aria-label="Drop Member">Drop Member</button>
+        <button id="equip-drop"
+          style="margin-left:auto; margin-right: 15px; color:#ff4040; background:none; border:1px solid #c04040; border-radius:3px; font-family:monospace; font-size:12px; padding:2px 8px; cursor:pointer;"
+          aria-label="Drop Member">Drop Member</button>
         <button id="equip-close" aria-label="Close">&times;</button>
       </div>
 
@@ -195,44 +240,45 @@
             <!-- Inline SVG human silhouette -->
             <svg id="body-silhouette" viewBox="0 0 100 220" xmlns="http://www.w3.org/2000/svg">
               <!-- Head -->
-              <ellipse cx="50" cy="22" rx="14" ry="17"/>
+              <ellipse cx="50" cy="22" rx="14" ry="17" />
               <!-- Neck -->
-              <rect x="44" y="38" width="12" height="8" rx="2"/>
+              <rect x="44" y="38" width="12" height="8" rx="2" />
               <!-- Torso -->
-              <path d="M28 46 Q22 58 22 80 L22 130 Q22 132 24 132 L76 132 Q78 132 78 130 L78 80 Q78 58 72 46 Z"/>
+              <path d="M28 46 Q22 58 22 80 L22 130 Q22 132 24 132 L76 132 Q78 132 78 130 L78 80 Q78 58 72 46 Z" />
               <!-- Left upper arm -->
-              <rect x="10" y="48" width="14" height="42" rx="6"/>
+              <rect x="10" y="48" width="14" height="42" rx="6" />
               <!-- Right upper arm -->
-              <rect x="76" y="48" width="14" height="42" rx="6"/>
+              <rect x="76" y="48" width="14" height="42" rx="6" />
               <!-- Left forearm -->
-              <rect x="8"  y="92" width="14" height="34" rx="6"/>
+              <rect x="8" y="92" width="14" height="34" rx="6" />
               <!-- Right forearm -->
-              <rect x="78" y="92" width="14" height="34" rx="6"/>
+              <rect x="78" y="92" width="14" height="34" rx="6" />
               <!-- Left leg -->
-              <rect x="28" y="132" width="18" height="56" rx="7"/>
+              <rect x="28" y="132" width="18" height="56" rx="7" />
               <!-- Right leg -->
-              <rect x="54" y="132" width="18" height="56" rx="7"/>
+              <rect x="54" y="132" width="18" height="56" rx="7" />
               <!-- Left foot -->
-              <ellipse cx="37" cy="192" rx="11" ry="6"/>
+              <ellipse cx="37" cy="192" rx="11" ry="6" />
               <!-- Right foot -->
-              <ellipse cx="63" cy="192" rx="11" ry="6"/>
+              <ellipse cx="63" cy="192" rx="11" ry="6" />
             </svg>
 
             <!-- Equipment slot boxes overlaid on the silhouette -->
-            <div class="pd-slot" id="pd-head"      data-slot="head">
+            <div class="pd-slot" id="pd-head" data-slot="head">
               <span class="pd-item"></span>
             </div>
             <!-- Left hand — below cloak, left side -->
             <div class="pd-slot" id="pd-leftHand" data-slot="leftHand">
               <!-- faint left-hand outline icon -->
-              <svg class="pd-slot-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#c8a84a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <svg class="pd-slot-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none"
+                stroke="#c8a84a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
                 <g transform="translate(10,4)">
-                  <rect x="2"  y="22" width="28" height="20" rx="4"/>
-                  <rect x="5"  y="6"  width="6" height="18" rx="3"/>
-                  <rect x="12" y="3"  width="6" height="21" rx="3"/>
-                  <rect x="19" y="5"  width="6" height="19" rx="3"/>
-                  <rect x="24" y="10" width="5" height="14" rx="2.5"/>
-                  <rect x="0"  y="20" width="5" height="13" rx="2.5" transform="rotate(-20 2.5 26)"/>
+                  <rect x="2" y="22" width="28" height="20" rx="4" />
+                  <rect x="5" y="6" width="6" height="18" rx="3" />
+                  <rect x="12" y="3" width="6" height="21" rx="3" />
+                  <rect x="19" y="5" width="6" height="19" rx="3" />
+                  <rect x="24" y="10" width="5" height="14" rx="2.5" />
+                  <rect x="0" y="20" width="5" height="13" rx="2.5" transform="rotate(-20 2.5 26)" />
                 </g>
               </svg>
               <span class="pd-item"></span>
@@ -240,14 +286,15 @@
             <!-- Right hand — below neck, right side -->
             <div class="pd-slot" id="pd-rightHand" data-slot="rightHand">
               <!-- faint right-hand outline icon (mirrored) -->
-              <svg class="pd-slot-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#c8a84a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <svg class="pd-slot-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none"
+                stroke="#c8a84a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
                 <g transform="translate(54,4) scale(-1,1)">
-                  <rect x="2"  y="22" width="28" height="20" rx="4"/>
-                  <rect x="5"  y="6"  width="6" height="18" rx="3"/>
-                  <rect x="12" y="3"  width="6" height="21" rx="3"/>
-                  <rect x="19" y="5"  width="6" height="19" rx="3"/>
-                  <rect x="24" y="10" width="5" height="14" rx="2.5"/>
-                  <rect x="0"  y="20" width="5" height="13" rx="2.5" transform="rotate(-20 2.5 26)"/>
+                  <rect x="2" y="22" width="28" height="20" rx="4" />
+                  <rect x="5" y="6" width="6" height="18" rx="3" />
+                  <rect x="12" y="3" width="6" height="21" rx="3" />
+                  <rect x="19" y="5" width="6" height="19" rx="3" />
+                  <rect x="24" y="10" width="5" height="14" rx="2.5" />
+                  <rect x="0" y="20" width="5" height="13" rx="2.5" transform="rotate(-20 2.5 26)" />
                 </g>
               </svg>
               <span class="pd-item"></span>
@@ -255,130 +302,139 @@
             <!-- Cloak — top-left of silhouette -->
             <div class="pd-slot" id="pd-cloak" data-slot="cloak">
               <!-- faint cloak outline icon -->
-              <svg class="pd-slot-icon" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#c8a84a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <svg class="pd-slot-icon" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg" fill="none"
+                stroke="#c8a84a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
                 <!-- Hood -->
-                <path d="M24 6 Q32 2 40 6 Q38 14 32 16 Q26 14 24 6 Z"/>
+                <path d="M24 6 Q32 2 40 6 Q38 14 32 16 Q26 14 24 6 Z" />
                 <!-- Left wing of cloak -->
-                <path d="M24 6 Q14 12 10 22 Q8 32 12 42 L28 38 Q26 28 28 20 Q30 16 32 16"/>
+                <path d="M24 6 Q14 12 10 22 Q8 32 12 42 L28 38 Q26 28 28 20 Q30 16 32 16" />
                 <!-- Right wing of cloak -->
-                <path d="M40 6 Q50 12 54 22 Q56 32 52 42 L36 38 Q38 28 36 20 Q34 16 32 16"/>
+                <path d="M40 6 Q50 12 54 22 Q56 32 52 42 L36 38 Q38 28 36 20 Q34 16 32 16" />
                 <!-- Clasp at neck -->
-                <circle cx="32" cy="17" r="2.5"/>
+                <circle cx="32" cy="17" r="2.5" />
               </svg>
               <span class="pd-item"></span>
             </div>
             <!-- Neck/pendant — top-right of silhouette -->
             <div class="pd-slot" id="pd-neck" data-slot="neck">
               <!-- faint pendant/necklace outline icon -->
-              <svg class="pd-slot-icon" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#c8a84a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <svg class="pd-slot-icon" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg" fill="none"
+                stroke="#c8a84a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
                 <!-- Chain arc across the neck -->
-                <path d="M16 10 Q32 18 48 10"/>
+                <path d="M16 10 Q32 18 48 10" />
                 <!-- Chain drops -->
-                <line x1="16" y1="10" x2="18" y2="24"/>
-                <line x1="48" y1="10" x2="46" y2="24"/>
+                <line x1="16" y1="10" x2="18" y2="24" />
+                <line x1="48" y1="10" x2="46" y2="24" />
                 <!-- Pendant bottom chain -->
-                <line x1="18" y1="24" x2="32" y2="32"/>
-                <line x1="46" y1="24" x2="32" y2="32"/>
+                <line x1="18" y1="24" x2="32" y2="32" />
+                <line x1="46" y1="24" x2="32" y2="32" />
                 <!-- Pendant gem (diamond shape) -->
-                <polygon points="32,30 37,35 32,42 27,35"/>
+                <polygon points="32,30 37,35 32,42 27,35" />
                 <!-- Gem highlight -->
-                <line x1="32" y1="30" x2="35" y2="35"/>
+                <line x1="32" y1="30" x2="35" y2="35" />
               </svg>
               <span class="pd-item"></span>
             </div>
-            <div class="pd-slot" id="pd-chest"     data-slot="chest">
+            <div class="pd-slot" id="pd-chest" data-slot="chest">
               <span class="pd-item"></span>
             </div>
             <div class="pd-slot" id="pd-belt" data-slot="belt">
               <!-- faint belt/buckle outline icon -->
-              <svg class="pd-slot-icon" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#c8a84a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <svg class="pd-slot-icon" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg" fill="none"
+                stroke="#c8a84a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
                 <!-- Belt strap across -->
-                <rect x="4" y="18" width="56" height="8" rx="3"/>
+                <rect x="4" y="18" width="56" height="8" rx="3" />
                 <!-- Buckle frame -->
-                <rect x="24" y="14" width="16" height="16" rx="2"/>
+                <rect x="24" y="14" width="16" height="16" rx="2" />
                 <!-- Buckle pin -->
-                <line x1="32" y1="14" x2="32" y2="30"/>
+                <line x1="32" y1="14" x2="32" y2="30" />
                 <!-- Buckle bar -->
-                <line x1="24" y1="22" x2="40" y2="22"/>
+                <line x1="24" y1="22" x2="40" y2="22" />
               </svg>
               <span class="pd-item"></span>
             </div>
             <div class="pd-slot" id="pd-hands" data-slot="hands">
               <!-- faint two-hands outline icon -->
-              <svg class="pd-hands-icon" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#c8a84a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <svg class="pd-hands-icon" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg" fill="none"
+                stroke="#c8a84a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
                 <!-- Left hand (palm facing viewer, fingers pointing up) -->
                 <g transform="translate(6,4)">
                   <!-- palm -->
-                  <rect x="2" y="16" width="18" height="14" rx="3"/>
+                  <rect x="2" y="16" width="18" height="14" rx="3" />
                   <!-- index finger -->
-                  <rect x="4"  y="4"  width="4" height="14" rx="2"/>
+                  <rect x="4" y="4" width="4" height="14" rx="2" />
                   <!-- middle finger -->
-                  <rect x="9"  y="2"  width="4" height="16" rx="2"/>
+                  <rect x="9" y="2" width="4" height="16" rx="2" />
                   <!-- ring finger -->
-                  <rect x="14" y="4"  width="4" height="14" rx="2"/>
+                  <rect x="14" y="4" width="4" height="14" rx="2" />
                   <!-- pinky -->
-                  <rect x="17" y="8"  width="3" height="10" rx="1.5"/>
+                  <rect x="17" y="8" width="3" height="10" rx="1.5" />
                   <!-- thumb -->
-                  <rect x="0"  y="14" width="3" height="9"  rx="1.5" transform="rotate(-18 1.5 18)"/>
+                  <rect x="0" y="14" width="3" height="9" rx="1.5" transform="rotate(-18 1.5 18)" />
                 </g>
                 <!-- Right hand (mirrored) -->
                 <g transform="translate(58,4) scale(-1,1)">
                   <!-- palm -->
-                  <rect x="2" y="16" width="18" height="14" rx="3"/>
+                  <rect x="2" y="16" width="18" height="14" rx="3" />
                   <!-- index finger -->
-                  <rect x="4"  y="4"  width="4" height="14" rx="2"/>
+                  <rect x="4" y="4" width="4" height="14" rx="2" />
                   <!-- middle finger -->
-                  <rect x="9"  y="2"  width="4" height="16" rx="2"/>
+                  <rect x="9" y="2" width="4" height="16" rx="2" />
                   <!-- ring finger -->
-                  <rect x="14" y="4"  width="4" height="14" rx="2"/>
+                  <rect x="14" y="4" width="4" height="14" rx="2" />
                   <!-- pinky -->
-                  <rect x="17" y="8"  width="3" height="10" rx="1.5"/>
+                  <rect x="17" y="8" width="3" height="10" rx="1.5" />
                   <!-- thumb -->
-                  <rect x="0"  y="14" width="3" height="9"  rx="1.5" transform="rotate(-18 1.5 18)"/>
+                  <rect x="0" y="14" width="3" height="9" rx="1.5" transform="rotate(-18 1.5 18)" />
                 </g>
               </svg>
               <span class="pd-item"></span>
             </div>
             <div class="pd-slot" id="pd-ring1" data-slot="ring1">
               <!-- faint ring outline icon -->
-              <svg class="pd-slot-icon" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#c8a84a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <svg class="pd-slot-icon" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg" fill="none"
+                stroke="#c8a84a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
                 <!-- Ring band — outer circle -->
-                <circle cx="32" cy="22" r="14"/>
+                <circle cx="32" cy="22" r="14" />
                 <!-- Ring band — inner circle (hole) -->
-                <circle cx="32" cy="22" r="8"/>
+                <circle cx="32" cy="22" r="8" />
                 <!-- Gem setting — small square on top -->
-                <rect x="27" y="5" width="10" height="8" rx="1.5"/>
+                <rect x="27" y="5" width="10" height="8" rx="1.5" />
                 <!-- Gem facet lines -->
-                <line x1="32" y1="5" x2="32" y2="13"/>
-                <line x1="27" y1="9" x2="37" y2="9"/>
+                <line x1="32" y1="5" x2="32" y2="13" />
+                <line x1="27" y1="9" x2="37" y2="9" />
                 <!-- Side prongs -->
-                <line x1="27" y1="7"  x2="25" y2="5"/>
-                <line x1="37" y1="7"  x2="39" y2="5"/>
+                <line x1="27" y1="7" x2="25" y2="5" />
+                <line x1="37" y1="7" x2="39" y2="5" />
               </svg>
               <span class="pd-item"></span>
             </div>
             <div class="pd-slot" id="pd-ring2" data-slot="ring2">
               <!-- faint ring outline icon -->
-              <svg class="pd-slot-icon" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#c8a84a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <svg class="pd-slot-icon" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg" fill="none"
+                stroke="#c8a84a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
                 <!-- Ring band — outer circle -->
-                <circle cx="32" cy="22" r="14"/>
+                <circle cx="32" cy="22" r="14" />
                 <!-- Ring band — inner circle (hole) -->
-                <circle cx="32" cy="22" r="8"/>
+                <circle cx="32" cy="22" r="8" />
                 <!-- Gem setting — small square on top -->
-                <rect x="27" y="5" width="10" height="8" rx="1.5"/>
+                <rect x="27" y="5" width="10" height="8" rx="1.5" />
                 <!-- Gem facet lines -->
-                <line x1="32" y1="5" x2="32" y2="13"/>
-                <line x1="27" y1="9" x2="37" y2="9"/>
+                <line x1="32" y1="5" x2="32" y2="13" />
+                <line x1="27" y1="9" x2="37" y2="9" />
                 <!-- Side prongs -->
-                <line x1="27" y1="7"  x2="25" y2="5"/>
-                <line x1="37" y1="7"  x2="39" y2="5"/>
+                <line x1="27" y1="7" x2="25" y2="5" />
+                <line x1="37" y1="7" x2="39" y2="5" />
               </svg>
               <span class="pd-item"></span>
             </div>
-            <div class="pd-slot" id="pd-legs"      data-slot="legs">
+            <div class="pd-slot" id="pd-legs" data-slot="legs">
               <span class="pd-item"></span>
             </div>
-            <div class="pd-slot" id="pd-feet"      data-slot="feet">
+            <div class="pd-slot" id="pd-feet" data-slot="feet">
+              <span class="pd-item"></span>
+            </div>
+            <div class="pd-slot" id="pd-skill" data-slot="skill">
               <span class="pd-item"></span>
             </div>
 
@@ -404,4 +460,5 @@
 
   <script type="module" src="/src/main.js"></script>
 </body>
+
 </html>

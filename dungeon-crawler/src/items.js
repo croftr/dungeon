@@ -370,6 +370,46 @@ export const ITEMS = [
     value: 75,
     weight: 1.8,
   },
+  {
+    name: 'Battle Cry',
+    slot: 'skill',
+    icon: '/icons/skill_generic.svg',
+    description: 'A terrifying shout that demoralizes enemies.',
+    value: 0,
+    weight: 0,
+  },
+  {
+    name: 'Focus',
+    slot: 'skill',
+    icon: '/icons/skill_generic.svg',
+    description: 'Concentrate for increased critical hit chance.',
+    value: 0,
+    weight: 0,
+  },
+  {
+    name: 'Holy Shield',
+    slot: 'skill',
+    icon: '/icons/skill_generic.svg',
+    description: 'Divine protection against physical attacks.',
+    value: 0,
+    weight: 0,
+  },
+  {
+    name: 'Rage',
+    slot: 'skill',
+    icon: '/icons/skill_generic.svg',
+    description: 'Unleash inner fury for increased damage.',
+    value: 0,
+    weight: 0,
+  },
+  {
+    name: 'Magic Arrow',
+    slot: 'skill',
+    icon: '/icons/skill_generic.svg',
+    description: 'A bolt of pure magical force.',
+    value: 0,
+    weight: 0,
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
