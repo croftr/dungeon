@@ -55,8 +55,8 @@ function makeBrickTexture() {
   const brickW = W / COLS_B;
   const mortarT = 6; // mortar thickness px
 
-  // Base mortar colour
-  ctx.fillStyle = '#1a1410';
+  // Base mortar colour - dark grey
+  ctx.fillStyle = '#141517';
   ctx.fillRect(0, 0, W, H);
 
   for (let r = 0; r < ROWS_B; r++) {
@@ -69,26 +69,34 @@ function makeBrickTexture() {
       const w = brickW - mortarT;
       const h = brickH - mortarT;
 
-      // Base brick colour with slight random variation
-      const v = Math.floor(rng() * 30);
-      const base = `rgb(${100 + v}, ${60 + v}, ${40 + v})`;
-      ctx.fillStyle = base;
+      // Neutral dark grey base
+      const v = Math.floor(rng() * 15);
+      const grey = 45 + v;
+
+      ctx.fillStyle = `rgb(${grey}, ${grey}, ${grey})`;
       ctx.fillRect(x, y, w, h);
 
-      // Noise pass — small darker patches for age/weathering
-      for (let i = 0; i < 18; i++) {
+      // Noise pass — heavy dark/light pitting only (no moss)
+      for (let i = 0; i < 40; i++) {
         const nx = x + rng() * w;
         const ny = y + rng() * h;
-        const nr = 4 + rng() * 14;
-        const alpha = 0.08 + rng() * 0.18;
+        const nr = 2 + rng() * 12;
+        const alpha = 0.05 + rng() * 0.15;
+
         ctx.beginPath();
         ctx.arc(nx, ny, nr, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(0,0,0,${alpha.toFixed(2)})`;
+
+        const noiseType = rng();
+        if (noiseType > 0.8) {
+          ctx.fillStyle = `rgba(255,255,255,${(alpha * 0.5).toFixed(2)})`; // light highlights
+        } else {
+          ctx.fillStyle = `rgba(15,15,15,${(alpha * 1.4).toFixed(2)})`; // dark pitting
+        }
         ctx.fill();
       }
 
       // Highlight edge (top-left catch the light)
-      ctx.strokeStyle = `rgba(255,220,160,0.06)`;
+      ctx.strokeStyle = `rgba(255,255,255,0.04)`;
       ctx.lineWidth = 1.5;
       ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
     }

@@ -92,43 +92,57 @@ let uiContainer = null;
 export function initRecruits(scene, camera) {
     const loader = new THREE.TextureLoader();
 
-    // BoxGeometry for a picture frame (width: 1.4, height: 1.4, depth: 0.1)
-    const frameGeo = new THREE.BoxGeometry(1.4, 1.4, 0.1);
+    // Create soft blending alpha map to blend the portraits into the stone walls seamlessly
+    const alphaCanvas = document.createElement('canvas');
+    alphaCanvas.width = 128;
+    alphaCanvas.height = 128;
+    const ax = alphaCanvas.getContext('2d');
 
-    // Draw them as embedded picture frames on the walls
+    // Fill background black (fully transparent)
+    ax.fillStyle = 'black';
+    ax.fillRect(0, 0, 128, 128);
+
+    // Draw white gradient in center (fully opaque fading to transparent)
+    const grad = ax.createRadialGradient(64, 64, 35, 64, 64, 60);
+    grad.addColorStop(0, 'white');
+    grad.addColorStop(1, 'black');
+    ax.fillStyle = grad;
+    ax.fillRect(0, 0, 128, 128);
+
+    const alphaTex = new THREE.CanvasTexture(alphaCanvas);
+
+    // PlaneGeometry for wall frescoes (width: 1.5, height: 1.5)
+    const frameGeo = new THREE.PlaneGeometry(1.5, 1.5);
+
+    // Draw them as embedded wall frescoes
     RECRUITS.forEach(r => {
         const map = loader.load(r.image);
-        // materials: [right, left, top, bottom, front, back]
-        // Three.js BoxGeometry front face is index 4.
-        const picMat = new THREE.MeshBasicMaterial({ map, color: 0xffffff });
-        const frameMat = new THREE.MeshLambertMaterial({ color: 0x1f1008 });
+        // We use transparent: true and our alphaMap so edges fade into the procedural wall
+        const picMat = new THREE.MeshLambertMaterial({
+            map,
+            alphaMap: alphaTex,
+            transparent: true,
+            color: 0xffffff,
+            depthWrite: false // prevents z-sorting transparency artifacts
+        });
 
-        const materials = [
-            frameMat, // right
-            frameMat, // left
-            frameMat, // top
-            frameMat, // bottom
-            picMat,   // front
-            frameMat  // back
-        ];
+        const mesh = new THREE.Mesh(frameGeo, picMat);
 
-        const mesh = new THREE.Mesh(frameGeo, materials);
-
-        // Position them flush against the walls of the new room!
+        // Position them just slightly proud of the walls!
         let wx = r.gridCol * CELL;
         let wz = r.gridRow * CELL;
 
         if (r.facing === 'front') {   // Look South (+Z)
-            wz += 1.05;
+            wz += 1.01;
             mesh.rotation.y = 0;
         } else if (r.facing === 'back') { // Look North (-Z)
-            wz -= 1.05;
+            wz -= 1.01;
             mesh.rotation.y = Math.PI;
         } else if (r.facing === 'left') { // Look West (-X)
-            wx -= 1.05;
+            wx -= 1.01;
             mesh.rotation.y = -Math.PI / 2;
         } else if (r.facing === 'right') { // Look East (+X)
-            wx += 1.05;
+            wx += 1.01;
             mesh.rotation.y = Math.PI / 2;
         }
 
