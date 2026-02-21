@@ -43,10 +43,10 @@ function drawPortrait(canvas, member) {
     ctx.strokeStyle = '#28180e';
     ctx.lineWidth = W * 0.052;
     ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(W*0.10, H*0.26); ctx.lineTo(W*0.90, H*0.92); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(W*0.90, H*0.26); ctx.lineTo(W*0.10, H*0.92); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(W * 0.10, H * 0.26); ctx.lineTo(W * 0.90, H * 0.92); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(W * 0.90, H * 0.26); ctx.lineTo(W * 0.10, H * 0.92); ctx.stroke();
     ctx.fillStyle = '#28180e';
-    for (const [bx, by] of [[W*0.10,H*0.26],[W*0.90,H*0.92],[W*0.90,H*0.26],[W*0.10,H*0.92]]) {
+    for (const [bx, by] of [[W * 0.10, H * 0.26], [W * 0.90, H * 0.92], [W * 0.90, H * 0.26], [W * 0.10, H * 0.92]]) {
       ctx.beginPath(); ctx.arc(bx, by, W * 0.058, 0, Math.PI * 2); ctx.fill();
     }
 
@@ -57,9 +57,9 @@ function drawPortrait(canvas, member) {
       cx - skW * 0.22, cy - skH * 0.28, 0,
       cx + skW * 0.05, cy, Math.max(skW, skH) * 1.15
     );
-    skullGrad.addColorStop(0,    '#8a7860');  // lit highlight
+    skullGrad.addColorStop(0, '#8a7860');  // lit highlight
     skullGrad.addColorStop(0.42, '#62503a');  // midtone
-    skullGrad.addColorStop(1,    '#251808');  // shadow edge
+    skullGrad.addColorStop(1, '#251808');  // shadow edge
     ctx.fillStyle = skullGrad;
     ctx.beginPath();
     ctx.ellipse(cx, cy, skW, skH, 0, 0, Math.PI * 2);
@@ -80,15 +80,15 @@ function drawPortrait(canvas, member) {
     ctx.ellipse(cx - skW * 0.43, cy - skH * 0.07, skW * 0.26, skH * 0.31, -0.12, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.ellipse(cx + skW * 0.43, cy - skH * 0.07, skW * 0.26, skH * 0.31,  0.12, 0, Math.PI * 2);
+    ctx.ellipse(cx + skW * 0.43, cy - skH * 0.07, skW * 0.26, skH * 0.31, 0.12, 0, Math.PI * 2);
     ctx.fill();
 
     // Hellfire glow inside sockets
     const eyeGlow = (ex, ey) => {
       const g = ctx.createRadialGradient(ex, ey + skH * 0.1, 0, ex, ey, skW * 0.22);
-      g.addColorStop(0,   'rgba(170, 20, 5, 0.75)');
+      g.addColorStop(0, 'rgba(170, 20, 5, 0.75)');
       g.addColorStop(0.5, 'rgba(70, 8, 2, 0.30)');
-      g.addColorStop(1,   'rgba(0,0,0,0)');
+      g.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = g;
       ctx.beginPath();
       ctx.ellipse(ex, ey - skH * 0.07, skW * 0.26, skH * 0.31, 0, 0, Math.PI * 2);
@@ -101,8 +101,8 @@ function drawPortrait(canvas, member) {
     ctx.fillStyle = '#080402';
     ctx.beginPath();
     ctx.moveTo(cx, cy + skH * 0.17);
-    ctx.bezierCurveTo(cx - skW*0.11, cy + skH*0.27, cx - skW*0.09, cy + skH*0.42, cx, cy + skH*0.44);
-    ctx.bezierCurveTo(cx + skW*0.09, cy + skH*0.42, cx + skW*0.11, cy + skH*0.27, cx, cy + skH*0.17);
+    ctx.bezierCurveTo(cx - skW * 0.11, cy + skH * 0.27, cx - skW * 0.09, cy + skH * 0.42, cx, cy + skH * 0.44);
+    ctx.bezierCurveTo(cx + skW * 0.09, cy + skH * 0.42, cx + skW * 0.11, cy + skH * 0.27, cx, cy + skH * 0.17);
     ctx.fill();
 
     // Grimace — tight clenched line, no grinning teeth
@@ -111,7 +111,7 @@ function drawPortrait(canvas, member) {
     ctx.lineCap = 'round';
     ctx.beginPath();
     ctx.moveTo(cx - skW * 0.27, cy + skH * 0.64);
-    ctx.bezierCurveTo(cx - skW*0.10, cy + skH*0.59, cx + skW*0.10, cy + skH*0.59, cx + skW * 0.27, cy + skH * 0.64);
+    ctx.bezierCurveTo(cx - skW * 0.10, cy + skH * 0.59, cx + skW * 0.10, cy + skH * 0.59, cx + skW * 0.27, cy + skH * 0.64);
     ctx.stroke();
 
     // Forehead crack
@@ -127,9 +127,9 @@ function drawPortrait(canvas, member) {
 
     // Heavy vignette — skull emerges from darkness
     const vig = ctx.createRadialGradient(cx, cy - H * 0.04, H * 0.06, cx, cy, H * 0.62);
-    vig.addColorStop(0,    'rgba(0,0,0,0)');
+    vig.addColorStop(0, 'rgba(0,0,0,0)');
     vig.addColorStop(0.62, 'rgba(0,0,0,0.18)');
-    vig.addColorStop(1,    'rgba(0,0,0,0.94)');
+    vig.addColorStop(1, 'rgba(0,0,0,0.94)');
     ctx.fillStyle = vig;
     ctx.fillRect(0, 0, W, H);
     return;
@@ -626,4 +626,22 @@ export function setEquip(index, hand, itemName) {
   if (hand === 'left') m.leftHand = itemName;
   if (hand === 'right') m.rightHand = itemName;
   refreshMember(m);
+}
+
+export function resurrectAll() {
+  party.forEach((m) => {
+    if (m.isEmpty) return;
+    m.hp = m.hpMax;
+    m.isDead = false;
+    const canvas = document.getElementById(`portrait-${m.id}`);
+    if (canvas) {
+      canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+      drawPortrait(canvas, m);
+    }
+    refreshMember(m);
+  });
+
+  // Hide Game Over if it was showing
+  const el = document.getElementById('game-over');
+  if (el) el.classList.remove('active');
 }

@@ -96,6 +96,42 @@ export async function playCritSound(attackType) {
   }
 }
 
+/**
+ * Synthesizes a magical rising chime sound for healing/resurrection.
+ */
+export async function playHealSound() {
+  try {
+    const ctx = getCtx();
+    const now = ctx.currentTime;
+
+    // Create a series of rising notes (chimes)
+    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+
+    notes.forEach((freq, i) => {
+      const startTime = now + (i * 0.1);
+
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, startTime);
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.5, startTime + 0.4);
+
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.2, startTime + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.4);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(startTime);
+      osc.stop(startTime + 0.4);
+    });
+  } catch (err) {
+    console.warn('[audio] playHealSound failed:', err);
+  }
+}
+
 let currentMusicIndex = 0;
 const MUSIC_TRACKS = ['/sounds/back1.mp3', '/sounds/back2.mp3'];
 const BATTLE_TRACK = '/sounds/backing/battle.mp3';

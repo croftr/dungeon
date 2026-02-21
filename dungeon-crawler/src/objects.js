@@ -5,6 +5,8 @@ import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, isInFrontOfPlayer, player } from './player.js';
 import { showMessage } from './minimap.js';
 import { getItemDef } from './items.js';
+import { resurrectAll } from './party.js';
+import { playHealSound } from './audio.js';
 
 export const objects = [];
 
@@ -16,6 +18,9 @@ export function initObjects(scene, camera) {
 
     // New Chest at the end of the long passage: Row 1, Col 7.
     addChest(scene, gltfLoader, 7, 1, 0, -0.7);
+
+    // Crystals in the starter room: Row 11, Col 9 (against the West wall)
+    addCrystals(scene, gltfLoader, 9, 11, 0, -0.7);
 
     // Portcullis: Row 7, Col 7.
     const portcullis = {
@@ -93,6 +98,34 @@ export function initObjects(scene, camera) {
                     showMessage("Stand on the chest to open it.");
                 }
                 break;
+            } else if (obj.userData.isCrystal) {
+                // Check if player is standing on the same square as the crystal
+                const isOnSameSquare = (player.gridRow === obj.userData.gridRow && player.gridCol === obj.userData.gridCol);
+
+                if (isOnSameSquare) {
+                    resurrectAll();
+                    playHealSound();
+                    showMessage("The glowing crystals pulse with life-giving energy!");
+
+                    // Small flash of light animation
+                    if (obj.userData.light) {
+                        const originalIntensity = obj.userData.light.intensity;
+                        new Tween({ i: originalIntensity })
+                            .to({ i: originalIntensity * 4 }, 200)
+                            .easing(Easing.Quadratic.Out)
+                            .onUpdate((o) => { obj.userData.light.intensity = o.i; })
+                            .chain(
+                                new Tween({ i: originalIntensity * 4 })
+                                    .to({ i: originalIntensity }, 800)
+                                    .easing(Easing.Quadratic.In)
+                                    .onUpdate((o) => { obj.userData.light.intensity = o.i; })
+                            )
+                            .start();
+                    }
+                } else {
+                    showMessage("Stand on the crystals to feel their power.");
+                }
+                break;
             }
         }
     });
@@ -120,6 +153,40 @@ function addChest(scene, loader, col, row, rotY, offsetZ = 0) {
                 child.userData.isChest = true;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
+            }
+        });
+
+        scene.add(model);
+    });
+}
+
+function addCrystals(scene, loader, col, row, rotY, offsetX = 0) {
+    loader.load('/items/Meshy_AI_Crystals_0221193313_texture.glb', (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(0.7);
+        // Positioned at 0.5 to touch the floor
+        model.position.set(col * CELL + offsetX, 0.5, row * CELL);
+        model.rotation.y = rotY;
+
+        // Add a mystical light source at the crystals
+        const light = new THREE.PointLight(0x00ffff, 5, 3);
+        light.position.set(col * CELL + offsetX, 0.8, row * CELL);
+        scene.add(light);
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.userData.isCrystal = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+                child.userData.light = light; // Store light reference for animation
+
+                if (child.material) {
+                    // Give them a nice cyan mystical glow
+                    child.material.emissive = new THREE.Color(0x00ffff);
+                    child.material.emissiveIntensity = 0.5;
+                }
             }
         });
 
