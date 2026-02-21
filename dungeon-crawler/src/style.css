@@ -107,16 +107,227 @@ body {
 }
 
 /* ═══════════════════════════════════════════
-   PARTY PANEL  (bottom-left)
+   PARTY PANEL  (bottom-right)
+   col 1 = tactics button | col 2-3 = two cards
+   row 1 = front row      | row 2  = back row
 ═══════════════════════════════════════════ */
 #party-panel {
   position: absolute;
   bottom: 12px;
   right: 12px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 28px 1fr 1fr;
   grid-template-rows: auto auto;
   gap: 6px;
+  align-items: start;
+}
+
+/* Tactics button — spans the full height of both card rows */
+#tactics-btn {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  align-self: stretch;
+  pointer-events: auto;
+  background: rgba(10, 7, 4, 0.88);
+  border: 1px solid #4a3a20;
+  color: #5a4a28;
+  font-size: 7px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  font-family: monospace;
+  border-radius: 3px;
+  cursor: pointer;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  padding: 10px 4px;
+}
+
+#tactics-btn:hover {
+  color: #c8a84a;
+  border-color: #8a7040;
+  background: rgba(30, 20, 8, 0.92);
+}
+
+/* Member cards */
+#member-0 { grid-column: 2; grid-row: 1; }
+#member-1 { grid-column: 3; grid-row: 1; }
+#member-2 { grid-column: 2; grid-row: 2; }
+#member-3 { grid-column: 3; grid-row: 2; }
+
+/* ═══════════════════════════════════════════
+   PARTY TACTICS MODAL
+═══════════════════════════════════════════ */
+#tactics-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+#tactics-modal {
+  background: rgba(10, 7, 4, 0.97);
+  border: 1px solid #5a4a30;
+  border-radius: 6px;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 220, 120, 0.07);
+  font-family: monospace;
+  min-width: 340px;
+  overflow: hidden;
+}
+
+#tactics-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid #3a2e18;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+#tactics-header span {
+  font-size: 13px;
+  color: #c8a84a;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+#tactics-close {
+  background: none;
+  border: 1px solid #4a3a20;
+  color: #888;
+  font-size: 18px;
+  width: 28px;
+  height: 28px;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+#tactics-close:hover {
+  border-color: #8a7040;
+  color: #c8a84a;
+}
+
+#tactics-body {
+  padding: 16px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.tactics-row-label {
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #c8a84a;
+  align-self: flex-start;
+}
+
+.tactics-row-label--back {
+  color: #5a4a28;
+}
+
+.tactics-row {
+  display: flex;
+  gap: 12px;
+}
+
+.tactics-slot {
+  width: 120px;
+  min-height: 96px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #3a2e14;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.tactics-slot:hover {
+  border-color: #7a6030;
+  background: rgba(30, 20, 8, 0.6);
+}
+
+.tactics-slot.selected {
+  border-color: #e8c87a;
+  background: rgba(50, 35, 10, 0.6);
+  box-shadow: 0 0 14px rgba(232, 200, 122, 0.4);
+}
+
+.tactics-slot.empty-slot {
+  border-style: dashed;
+  opacity: 0.35;
+  cursor: default;
+}
+
+.tactics-portrait {
+  display: block;
+  width: 56px;
+  height: 56px;
+  border: 1px solid #4a3a20;
+  border-radius: 3px;
+}
+
+.tactics-name {
+  font-size: 9px;
+  color: #c8a84a;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.tactics-job {
+  font-size: 8px;
+  color: #6a5838;
+  text-align: center;
+}
+
+.tactics-empty {
+  font-size: 9px;
+  color: #3a3020;
+  font-style: italic;
+}
+
+#tactics-swap-rows {
+  background: rgba(10, 7, 4, 0.8);
+  border: 1px solid #4a3a20;
+  color: #6a5a38;
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-family: monospace;
+  padding: 5px 16px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+#tactics-swap-rows:hover {
+  color: #c8a84a;
+  border-color: #7a6030;
+}
+
+.tactics-hint {
+  font-size: 9px;
+  color: #4a4030;
+  text-align: center;
+  padding-top: 8px;
+  border-top: 1px solid #2a2010;
+  width: 100%;
+  line-height: 1.5;
 }
 
 /* One member card */
@@ -248,6 +459,7 @@ body {
   justify-content: center;
   gap: 1px;
   position: relative;
+  overflow: hidden;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
@@ -275,9 +487,35 @@ body {
   max-width: 100%;
 }
 
+.slot-item img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+}
+
 .slot-empty .slot-item {
   color: #3a3020;
   font-style: italic;
+}
+
+/* Clickable cursor for empty hand slots (click to punch) */
+.equip-slot.slot-empty {
+  cursor: pointer;
+}
+
+/* Hand outline icon shown when a hand slot is empty */
+.equip-slot.slot-empty::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 26' fill='none' stroke='%23c8a84a' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='3' y='5' width='3' height='9' rx='1.5'/%3E%3Crect x='7' y='3' width='3' height='11' rx='1.5'/%3E%3Crect x='11' y='3.5' width='3' height='10.5' rx='1.5'/%3E%3Crect x='15' y='6' width='2.5' height='7.5' rx='1.25'/%3E%3Cpath d='M3 14 Q1 13 1 10 Q1 7 3 7'/%3E%3Cpath d='M3 14 Q3 18 5 20 Q7 23 11 23 Q15 23 16.5 20 Q18 17 17.5 14'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 28%;
+  opacity: 0.25;
+  pointer-events: none;
 }
 
 /* Crosshair */

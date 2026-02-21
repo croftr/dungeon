@@ -3,6 +3,7 @@ import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup } from './player.js';
 import { CELL } from './map.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  MONSTER DATA
@@ -21,16 +22,6 @@ export const monsters = [
   },
   {
     id: 1,
-    type: 'sprite',
-    name: '2D Sprite Zombie',
-    gridRow: 2,
-    gridCol: 9, // One cell to the left
-    hp: 100, hpMax: 100,
-    stats: { strength: 10, dexterity: 10, vitality: 10, intelligence: 10, resilience: 10 },
-    defence: 10, alive: true, mesh: null, mixer: null, actions: {}
-  },
-  {
-    id: 2,
     type: 'procedural',
     name: '3D Block Zombie',
     gridRow: 2,
@@ -39,6 +30,29 @@ export const monsters = [
     stats: { strength: 10, dexterity: 10, vitality: 10, intelligence: 10, resilience: 10 },
     defence: 10, alive: true, mesh: null, mixer: null, actions: {}
   },
+  {
+    id: 2,
+    type: 'glb',
+    name: 'Goblin',
+    gridRow: 2,
+    gridCol: 12, // One cell to the right of the block zombie
+    hp: 80, hpMax: 80,
+    stats: { strength: 12, dexterity: 15, vitality: 8, intelligence: 5, resilience: 5 },
+    defence: 8, alive: true, mesh: null, mixer: null, actions: {}
+  },
+  {
+    id: 3,
+    type: 'glb',
+    name: 'TreeKin',
+    gridRow: 2,
+    gridCol: 13, // One cell to the right of the Goblin
+    hp: 150, hpMax: 150, // Tree kin are tanky
+    stats: { strength: 18, dexterity: 6, vitality: 15, intelligence: 12, resilience: 12 },
+    defence: 15, alive: true, mesh: null, mixer: null, actions: {},
+    glbIdle: '/monsters/meshy-AI-treeKin/Meshy_AI_Animation_Walking_withSkin.glb',
+    glbAttack: '/monsters/meshy-AI-treeKin/Meshy_AI_Animation_mage_soell_cast_withSkin.glb',
+    scale: 0.45 // Standard Meshy scale from our guide
+  }
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -46,39 +60,8 @@ export const monsters = [
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  PROCEDURAL & SPRITE GENERATORS
+//  PROCEDURAL GENERATOR
 // ─────────────────────────────────────────────────────────────────────────────
-
-function makeSpriteTexture() {
-  const canvas = document.createElement('canvas');
-  canvas.width = 64; canvas.height = 128;
-  const ctx = canvas.getContext('2d');
-
-  ctx.clearRect(0, 0, 64, 128);
-
-  // Body
-  ctx.fillStyle = '#4e5c54';
-  ctx.fillRect(16, 40, 32, 50);
-  // Head
-  ctx.fillStyle = '#56825c';
-  ctx.fillRect(18, 12, 28, 28);
-  // Eyes
-  ctx.fillStyle = '#cc2222';
-  ctx.fillRect(22, 22, 6, 6);
-  ctx.fillRect(36, 22, 6, 6);
-  // Arms
-  ctx.fillStyle = '#4e5c54';
-  ctx.fillRect(4, 40, 12, 40);
-  ctx.fillRect(48, 40, 12, 40);
-  // Legs
-  ctx.fillStyle = '#3a453e';
-  ctx.fillRect(16, 90, 12, 38);
-  ctx.fillRect(36, 90, 12, 38);
-
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.magFilter = THREE.NearestFilter;
-  return tex;
-}
 
 function makeProceduralZombie() {
   const group = new THREE.Group();
@@ -86,24 +69,55 @@ function makeProceduralZombie() {
   const matHead = new THREE.MeshLambertMaterial({ color: 0x56825c });
   const matLegs = new THREE.MeshLambertMaterial({ color: 0x3a453e });
 
-  const head = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), matHead);
+  // Use capsules / cylinders to soften the rigid box look
+  const headGeo = new THREE.CylinderGeometry(0.3, 0.25, 0.6, 12);
+  const head = new THREE.Mesh(headGeo, matHead);
   head.position.y = 1.9;
+
+  // Facial features
+  const matEye = new THREE.MeshLambertMaterial({ color: 0xff0000 });
+  const matNose = new THREE.MeshLambertMaterial({ color: 0x2a352e });
+  const matMouth = new THREE.MeshLambertMaterial({ color: 0x000000 });
+
+  const eyeGeo = new THREE.BoxGeometry(0.08, 0.05, 0.08);
+  const eyeL = new THREE.Mesh(eyeGeo, matEye);
+  eyeL.position.set(-0.12, 0.1, 0.26);
+  head.add(eyeL);
+
+  const eyeR = new THREE.Mesh(eyeGeo, matEye);
+  eyeR.position.set(0.12, 0.1, 0.26);
+  head.add(eyeR);
+
+  const noseGeo = new THREE.BoxGeometry(0.06, 0.06, 0.08);
+  const nose = new THREE.Mesh(noseGeo, matNose);
+  nose.position.set(0, 0, 0.27);
+  head.add(nose);
+
+  const mouthGeo = new THREE.BoxGeometry(0.18, 0.04, 0.08);
+  const mouth = new THREE.Mesh(mouthGeo, matMouth);
+  mouth.position.set(0, -0.15, 0.25);
+  head.add(mouth);
+
   group.add(head);
 
-  const body = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.0, 0.4), matBody);
+  // Soften body
+  const bodyGeo = new THREE.CylinderGeometry(0.45, 0.35, 1.0, 10);
+  const body = new THREE.Mesh(bodyGeo, matBody);
   body.position.y = 1.1;
+  // Flatten cylinder front-to-back to look like a torso
+  bodyGeo.scale(1, 1, 0.6);
   group.add(body);
 
-  const armGeo = new THREE.BoxGeometry(0.3, 0.9, 0.3);
+  const armGeo = new THREE.CylinderGeometry(0.12, 0.1, 0.9, 8);
   const armL = new THREE.Mesh(armGeo, matBody);
-  armL.position.set(-0.6, 1.1, 0);
+  armL.position.set(-0.6, 1.25, 0);
   group.add(armL);
 
   const armR = new THREE.Mesh(armGeo, matBody);
-  armR.position.set(0.6, 1.1, 0);
+  armR.position.set(0.6, 1.25, 0);
   group.add(armR);
 
-  const legGeo = new THREE.BoxGeometry(0.35, 0.6, 0.35);
+  const legGeo = new THREE.CylinderGeometry(0.18, 0.15, 0.6, 8);
   const legL = new THREE.Mesh(legGeo, matLegs);
   legL.position.set(-0.25, 0.3, 0);
   group.add(legL);
@@ -124,6 +138,9 @@ function makeProceduralZombie() {
     }
   });
 
+  // Make it a lot smaller
+  group.scale.set(0.35, 0.35, 0.35);
+
   return { mesh: group, limbs: { armL, armR, legL, legR, head, body } };
 }
 
@@ -137,27 +154,7 @@ export function initMonsters(scene) {
   monsters.forEach((m) => {
     if (!m.alive) return;
 
-    if (m.type === 'sprite') {
-      const tex = makeSpriteTexture();
-      const mat = new THREE.MeshLambertMaterial({ map: tex, transparent: true, side: THREE.DoubleSide });
-      // Width 1.25, Height 2.5
-      const plane = new THREE.Mesh(new THREE.PlaneGeometry(1.25, 2.5), mat);
-      m.mesh = plane;
-      const wx = m.gridCol * CELL;
-      const wz = m.gridRow * CELL;
-
-      plane.position.set(wx, 1.25, wz);
-      m.lookAtPlayer = (playerPos) => {
-        plane.lookAt(playerPos.x, plane.position.y, playerPos.z);
-      };
-
-      // Make it cast shadows! Wait, a simple plane casting shadows is fine
-      plane.castShadow = true;
-      plane.receiveShadow = true;
-
-      scene.add(plane);
-
-    } else if (m.type === 'procedural') {
+    if (m.type === 'procedural') {
       const { mesh, limbs } = makeProceduralZombie();
       m.mesh = mesh;
       m.limbs = limbs;
@@ -242,6 +239,78 @@ export function initMonsters(scene) {
           }
         });
       });
+    } else if (m.type === 'glb') {
+      const gltfLoader = new GLTFLoader();
+
+      // Use properties if defined on the object, else fall back to hardcoded goblin paths
+      const idlePath = m.glbIdle || '/monsters/meshy_AI_goblin/Meshy_AI_Animation_Idle_withSkin.glb';
+      const attackPath = m.glbAttack || '/monsters/meshy_AI_goblin/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb';
+      const meshScale = m.scale || 0.45;
+
+      // Load the idle/main GLB
+      gltfLoader.load(idlePath, (gltf) => {
+        const model = gltf.scene;
+        m.mesh = model;
+
+        // Scale it appropriately 
+        model.scale.setScalar(meshScale);
+
+        const wx = m.gridCol * CELL;
+        const wz = m.gridRow * CELL;
+        model.position.set(wx, 0.0, wz);
+
+        m.lookAtPlayer = (playerPos) => {
+          model.lookAt(playerPos.x, model.position.y, playerPos.z);
+        };
+
+        model.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+            if (child.material) {
+              // Fix weird texture rendering often found in Meshy outputs
+              child.material.transparent = false;
+              child.material.depthWrite = true;
+              if (child.material.metalness !== undefined) child.material.metalness = 0.0;
+              if (child.material.roughness !== undefined) child.material.roughness = 1.0;
+
+              // Apply a green tint ONLY if it's the Goblin without a specific config
+              if (m.name === 'Goblin' && child.material.color) {
+                child.material.color.setHex(0x55aa55);
+              }
+            }
+          }
+        });
+
+        m.mixer = new THREE.AnimationMixer(model);
+
+        if (gltf.animations && gltf.animations.length > 0) {
+          const idleAction = m.mixer.clipAction(gltf.animations[0]);
+          m.actions.idle = idleAction;
+          idleAction.play();
+        }
+
+        scene.add(model);
+
+        // Load attack animation
+        gltfLoader.load(attackPath, (animGltf) => {
+          if (animGltf.animations && animGltf.animations.length > 0) {
+            const attackClip = animGltf.animations[0];
+            const attackAction = m.mixer.clipAction(attackClip);
+            m.actions.attack = attackAction;
+
+            attackAction.setLoop(THREE.LoopOnce, 1);
+            attackAction.clampWhenFinished = true;
+
+            m.mixer.addEventListener('finished', (e) => {
+              if (e.action === m.actions.attack && m.actions.idle) {
+                m.actions.idle.reset().play();
+                m.actions.attack.crossFadeTo(m.actions.idle, 0.25, false);
+              }
+            });
+          }
+        });
+      });
     }
   });
 
@@ -276,11 +345,6 @@ export function updateMonsters(dt, playerCamera) {
       m.mesh.position.y = Math.sin(t * 2) * 0.04;
       m.limbs.armL.rotation.x = -Math.PI / 2 + Math.sin(t * 3) * 0.1;
       m.limbs.armR.rotation.x = -Math.PI / 2 + Math.cos(t * 3) * 0.1;
-    }
-
-    if (m.type === 'sprite' && m.mesh) {
-      const t = performance.now() * 0.002;
-      m.mesh.position.y = 1.25 + Math.sin(t * 2.5) * 0.08;
     }
 
     // Make the monster look at the player camera if it's alive and loaded
@@ -323,7 +387,7 @@ export function triggerMonsterAttack(monsterId) {
   const m = monsters.find((x) => x.id === monsterId && x.alive);
   if (!m) return;
 
-  if (m.type === 'fbx' && m.actions.attack && m.actions.idle) {
+  if ((m.type === 'fbx' || m.type === 'glb') && m.actions.attack && m.actions.idle) {
     // Reset and enable the attack action
     m.actions.attack.reset();
     m.actions.attack.setEffectiveTimeScale(1);
@@ -338,13 +402,6 @@ export function triggerMonsterAttack(monsterId) {
     new Tween(m.limbs.armR.position, tweenGroup)
       .to({ z: origZ + 0.5 }, 150)
       .yoyo(true).repeat(1).start();
-  } else if (m.type === 'sprite' && m.mesh) {
-    // Rapid shake
-    const origX = m.mesh.position.x;
-    new Tween(m.mesh.position, tweenGroup)
-      .to({ x: origX + 0.3 }, 50)
-      .yoyo(true).repeat(3)
-      .onComplete(() => m.mesh.position.x = origX).start();
   }
 }
 

@@ -43,8 +43,8 @@ export function updateLighting({ torch, fill }, camera, dt) {
   }
 
   // Default dim light if no torch, bright light if torch is held
-  const targetIntensity = hasTorch ? 3.8 : 1.0;
-  const targetDistance = hasTorch ? 14 : 5;
+  const targetIntensity = hasTorch ? 6.0 : 1.0;
+  const targetDistance = hasTorch ? 22 : 5;
 
   // Sine-wave flicker on the torch intensity
   const flicker = 1 + 0.08 * Math.sin(flickerTime) + 0.04 * Math.sin(flickerTime * 2.3);

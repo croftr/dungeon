@@ -1,4 +1,5 @@
 import { getItemDef } from './items.js';
+import { renderItemIcon } from './equipment.js';
 
 // ─────────────────────────────────────────────
 //  PARTY DATA  — 4 members
@@ -193,33 +194,176 @@ function refreshMember(m) {
   const lhSlot = document.getElementById(`slot-lh-${i}`);
   const rhSlot = document.getElementById(`slot-rh-${i}`);
 
+  // Use m.equipment as the authoritative source when it exists (after the equipment
+  // modal has initialised it), otherwise fall back to the initial hand-assignment strings.
+  const lhName = m.equipment
+    ? (m.equipment.leftHand?.name ?? null)
+    : (m.leftHand && m.leftHand !== '—' ? m.leftHand : null);
+  const rhName = m.equipment
+    ? (m.equipment.rightHand?.name ?? null)
+    : (m.rightHand && m.rightHand !== '—' ? m.rightHand : null);
+
   let lhDef = null;
   let rhDef = null;
   try {
-    if (m.leftHand && m.leftHand !== '—') lhDef = getItemDef(m.leftHand);
-    if (m.rightHand && m.rightHand !== '—') rhDef = getItemDef(m.rightHand);
+    if (lhName) lhDef = getItemDef(lhName);
+    if (rhName) rhDef = getItemDef(rhName);
   } catch (e) {
-    console.warn("Could not get item def:", e);
+    console.warn('Could not get item def:', e);
   }
 
   const lhBothHands = lhDef?.slot === 'bothHands';
 
-  // For single-hand items with no attackType (e.g. Shield), fade the slot to show it's passive
+  // Passive items (no attackType, e.g. Shield) are shown faded
   const lhNoAction = lhDef !== null && lhDef?.attackType == null && !lhBothHands;
   const rhNoAction = rhDef !== null && rhDef?.attackType == null && !lhBothHands;
 
-  if (lhEl) lhEl.textContent = m.leftHand || '—';
-  if (rhEl) rhEl.textContent = lhBothHands ? m.leftHand : (m.rightHand || '—');
+  if (lhEl) renderItemIcon(lhName ? { name: lhName } : null, lhEl);
+  if (rhEl) renderItemIcon((lhBothHands ? lhName : rhName) ? { name: lhBothHands ? lhName : rhName } : null, rhEl);
 
   if (lhSlot) {
-    lhSlot.classList.toggle('slot-empty', !m.leftHand || m.leftHand === '—');
+    lhSlot.classList.toggle('slot-empty', !lhName);
     lhSlot.classList.toggle('slot-no-action', lhNoAction);
   }
   if (rhSlot) {
-    rhSlot.classList.toggle('slot-empty', !lhBothHands && (!m.rightHand || m.rightHand === '—'));
+    rhSlot.classList.toggle('slot-empty', !lhBothHands && !rhName);
     rhSlot.classList.toggle('both-hands-secondary', lhBothHands);
     rhSlot.classList.toggle('slot-no-action', !lhBothHands && rhNoAction);
   }
+}
+
+// ─────────────────────────────────────────────
+//  SWAP HELPERS
+// ─────────────────────────────────────────────
+
+/** Swaps two party slots (by index), keeping id fields correct, then redraws. */
+function swapSlots(a, b) {
+  const tmp = { ...party[a] };
+  party[a] = { ...party[b], id: a };
+  party[b] = { ...tmp, id: b };
+  refreshAll();
+}
+
+function refreshAll() {
+  party.forEach((member) => {
+    const canvas = document.getElementById(`portrait-${member.id}`);
+    if (canvas) {
+      canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+      if (!member.isEmpty) drawPortrait(canvas, member);
+    }
+    refreshMember(member);
+  });
+}
+
+// ─────────────────────────────────────────────
+//  PARTY TACTICS MODAL
+// ─────────────────────────────────────────────
+
+let tacticsOverlay = null;
+let tacticsSel = null; // currently selected slot index (null = none)
+
+function buildTacticsOverlay() {
+  tacticsOverlay = document.createElement('div');
+  tacticsOverlay.id = 'tactics-overlay';
+  tacticsOverlay.style.display = 'none';
+  tacticsOverlay.innerHTML = `
+    <div id="tactics-modal">
+      <div id="tactics-header">
+        <span>Party Tactics</span>
+        <button id="tactics-close" aria-label="Close">&times;</button>
+      </div>
+      <div id="tactics-body">
+        <div class="tactics-row-label">Front Row &mdash; Melee &amp; Ranged</div>
+        <div class="tactics-row" id="tactics-front"></div>
+        <button id="tactics-swap-rows">&#8597; Swap Rows</button>
+        <div class="tactics-row-label tactics-row-label--back">Back Row &mdash; Ranged only</div>
+        <div class="tactics-row" id="tactics-back"></div>
+        <p class="tactics-hint">Click a character to select &bull; Click another slot to move them</p>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(tacticsOverlay);
+
+  document.getElementById('tactics-close').addEventListener('click', closeTacticsModal);
+  document.getElementById('tactics-swap-rows').addEventListener('click', () => {
+    tacticsSel = null;
+    swapSlots(0, 2);
+    swapSlots(1, 3);
+    renderTacticsSlots();
+  });
+  // Close on backdrop click
+  tacticsOverlay.addEventListener('click', (e) => {
+    if (e.target === tacticsOverlay) closeTacticsModal();
+  });
+}
+
+function renderTacticsSlots() {
+  const frontEl = document.getElementById('tactics-front');
+  const backEl = document.getElementById('tactics-back');
+  if (!frontEl || !backEl) return;
+
+  [frontEl, backEl].forEach(el => (el.innerHTML = ''));
+
+  party.forEach((m, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'tactics-slot' +
+      (m.isEmpty ? ' empty-slot' : '') +
+      (i === tacticsSel ? ' selected' : '');
+
+    if (m.isEmpty) {
+      cell.innerHTML = '<span class="tactics-empty">Empty</span>';
+    } else {
+      const canvas = document.createElement('canvas');
+      canvas.className = 'tactics-portrait';
+      canvas.width = 56;
+      canvas.height = 56;
+      cell.appendChild(canvas);
+      drawPortrait(canvas, m);
+
+      const nameEl = document.createElement('span');
+      nameEl.className = 'tactics-name';
+      nameEl.textContent = m.name;
+      cell.appendChild(nameEl);
+
+      if (m.job) {
+        const jobEl = document.createElement('span');
+        jobEl.className = 'tactics-job';
+        jobEl.textContent = m.job;
+        cell.appendChild(jobEl);
+      }
+
+      cell.addEventListener('click', () => handleTacticsSlotClick(i));
+    }
+
+    (i < 2 ? frontEl : backEl).appendChild(cell);
+  });
+}
+
+function handleTacticsSlotClick(index) {
+  if (party[index].isEmpty) return;
+
+  if (tacticsSel === null) {
+    tacticsSel = index;
+    renderTacticsSlots();
+  } else if (tacticsSel === index) {
+    tacticsSel = null;
+    renderTacticsSlots();
+  } else {
+    swapSlots(tacticsSel, index);
+    tacticsSel = null;
+    renderTacticsSlots();
+  }
+}
+
+export function openTacticsModal() {
+  tacticsSel = null;
+  renderTacticsSlots();
+  tacticsOverlay.style.display = 'flex';
+}
+
+function closeTacticsModal() {
+  tacticsSel = null;
+  tacticsOverlay.style.display = 'none';
 }
 
 // ─────────────────────────────────────────────
@@ -231,19 +375,34 @@ export function initParty() {
     if (canvas && !member.isEmpty) drawPortrait(canvas, member);
     refreshMember(member);
   });
+
+  buildTacticsOverlay();
+
+  // Tactics button (bottom-right panel)
+  document.getElementById('tactics-btn')?.addEventListener('click', openTacticsModal);
+
+  // P key opens/closes the tactics modal
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'p' || e.key === 'P') {
+      if (tacticsOverlay.style.display === 'none') {
+        openTacticsModal();
+      } else {
+        closeTacticsModal();
+      }
+    }
+    if (e.key === 'Escape' && tacticsOverlay.style.display !== 'none') {
+      closeTacticsModal();
+    }
+  });
+}
+
+/** Called by equipment.js whenever the equipment modal closes, so party cards stay in sync. */
+export function refreshPartyCards() {
+  refreshAll();
 }
 
 window.onPartyChanged = () => {
-  // We need to re-initialize equipment slots for the new recruit if they came in
-  // but let's just make sure UI updates. For a brand new recruit, they need empty inv.
-  // We did that in recruits.js
-
-  // also draw portraits and refresh HTML cards
-  party.forEach((member) => {
-    const canvas = document.getElementById(`portrait-${member.id}`);
-    if (canvas && !member.isEmpty) drawPortrait(canvas, member);
-    refreshMember(member);
-  });
+  refreshAll();
 };
 
 // ─────────────────────────────────────────────

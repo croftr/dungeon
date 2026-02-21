@@ -165,6 +165,36 @@ function bumpFeedback(camera) {
 }
 
 // ─────────────────────────────────────────────
+//  RANGE HELPERS
+// ─────────────────────────────────────────────
+
+/**
+ * Returns the grid deltas (dx, dz) for the direction the player is facing.
+ */
+export function facingDir() {
+  return DIR[player.facing];
+}
+
+/**
+ * Returns true if the given grid cell (targetRow, targetCol) is directly in
+ * front of the player within `maxSteps` steps along the facing direction.
+ * The cell must be along the exact forward axis — no diagonals.
+ *
+ * @param {number} targetRow
+ * @param {number} targetCol
+ * @param {number} maxSteps  — 1 for melee, 3 for ranged
+ */
+export function isInFrontOfPlayer(targetRow, targetCol, maxSteps = 1) {
+  const dir = DIR[player.facing];
+  for (let step = 1; step <= maxSteps; step++) {
+    const checkRow = player.gridRow + dir.dz * step;
+    const checkCol = player.gridCol + dir.dx * step;
+    if (checkRow === targetRow && checkCol === targetCol) return true;
+  }
+  return false;
+}
+
+// ─────────────────────────────────────────────
 //  INPUT
 // ─────────────────────────────────────────────
 export function initInput(camera) {

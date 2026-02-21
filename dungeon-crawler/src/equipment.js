@@ -1,9 +1,11 @@
-import { party } from './party.js';
+import { party, refreshPartyCards } from './party.js';
 import { getItemDef } from './items.js';
+import { ACTIONS } from './items.js';
 import { playAction } from './actions.js';
 import { attackMonster, monsters } from './monster.js';
 import { showMessage } from './minimap.js';
 import { dropMember } from './recruits.js';
+import { isInFrontOfPlayer } from './player.js';
 
 // ─────────────────────────────────────────────
 //  CONSTANTS
@@ -87,6 +89,19 @@ export function extendPartyData() {
 // ─────────────────────────────────────────────
 //  RENDER
 // ─────────────────────────────────────────────
+export function renderItemIcon(item, containerEl) {
+  if (!item) {
+    containerEl.innerHTML = '';
+    return;
+  }
+  const def = getItemDef(item.name);
+  if (def && def.icon) {
+    containerEl.innerHTML = `<img src="${def.icon}" alt="${item.name}" draggable="false" style="width: 100%; height: 100%; object-fit: contain; pointer-events: none;" />`;
+  } else {
+    containerEl.innerHTML = `<span>${item.name}</span>`;
+  }
+}
+
 function renderModal(memberIndex) {
   const m = party[memberIndex];
 
@@ -103,15 +118,16 @@ function renderModal(memberIndex) {
     const isSecondary = isBothHands && key === 'rightHand';
     el.classList.toggle('occupied', item !== null);
     el.classList.toggle('both-hands-secondary', isSecondary);
-    el.querySelector('.pd-item').textContent = item ? item.name : '';
+    const pdItemEl = el.querySelector('.pd-item') || el;
+    renderItemIcon(item, pdItemEl);
   });
 
   // ── Inventory cells ──
   const cells = document.querySelectorAll('.inv-cell');
   cells.forEach((cell, i) => {
     const item = m.inventory[i];
-    cell.textContent = item ? item.name : '';
     cell.classList.toggle('occupied', item !== null);
+    renderItemIcon(item, cell);
   });
 
   // ── Character stats ──
@@ -236,6 +252,8 @@ function closeModal() {
   hideTooltip();
   document.getElementById('equip-overlay').classList.add('equip-hidden');
   activeCharIndex = null;
+  // Sync party card HUD to reflect any equipment changes (weapons, torch, etc.)
+  refreshPartyCards();
 }
 
 // ─────────────────────────────────────────────
@@ -257,19 +275,38 @@ function useHand(memberIndex, hand) {
 
   const slotKey = hand === 'left' ? 'leftHand' : 'rightHand';
   const item = m.equipment?.[slotKey];
-  if (!item) return;
+  const def = item ? getItemDef(item.name) : null;
 
-  const def = getItemDef(item.name);
-  if (!def?.attackType) return; // item has no attack (e.g. Shield)
+  // Empty hand → punch; items with no attackType (e.g. Shield) → no action
+  const attackType = item ? (def?.attackType ?? null) : ACTIONS.PUNCH;
+  if (!attackType) return;
 
-  // Play the visual + audio animation
-  playAction(def.attackType, hand);
+  // Slots 0 and 1 are the front row; slots 2 and 3 are the back row.
+  // Back-row members can only attack with ranged weapons (SHOOT).
+  const isRanged = attackType === ACTIONS.SHOOT;
+  const isBackRow = memberIndex >= 2;
 
-  // Apply damage to the first alive monster
-  const target = monsters.find(m => m.alive);
-  if (!target) return;
+  if (isBackRow && !isRanged) {
+    showMessage(`${m.name} is in the back row — only ranged attacks can reach the enemy!`);
+    return;
+  }
 
-  const baseDamage = def.baseDamage ?? 0;
+  const maxRange = isRanged ? 3 : 1;
+
+  // Find the first alive monster that is in range and directly in front
+  const target = monsters.find(
+    t => t.alive && isInFrontOfPlayer(t.gridRow, t.gridCol, maxRange)
+  );
+
+  if (!target) {
+    showMessage(isRanged ? 'No target in range (up to 3 squares ahead).' : 'No target directly in front of you.');
+    return;
+  }
+
+  // Play the visual + audio animation only when a valid target is in range
+  playAction(attackType, hand);
+
+  const baseDamage = item ? (def?.baseDamage ?? 0) : 0; // bare fists: no base damage
   const heroStr = m.stats?.strength ?? 10;
   const result = attackMonster(target.id, baseDamage, heroStr);
 

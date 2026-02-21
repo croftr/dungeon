@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { party } from './party.js';
 import { extendPartyData } from './equipment.js';
 import { CELL, WALL_H, findCell } from './map.js';
+import { isInFrontOfPlayer } from './player.js';
 
 // The 5 D&D characters
 export const RECRUITS = [
@@ -189,7 +190,12 @@ export function initRecruits(scene, camera) {
 
         for (let hit of intersects) {
             if (hit.object.userData.isRecruit && hit.object.visible) {
-                openRecruitModal(hit.object.userData.recruitId);
+                const recruitId = hit.object.userData.recruitId;
+                const r = RECRUITS.find(x => x.id === recruitId);
+                // Only allow interaction if the player is directly facing the recruit
+                if (r && isInFrontOfPlayer(r.gridRow, r.gridCol, 1)) {
+                    openRecruitModal(recruitId);
+                }
                 break;
             }
         }
