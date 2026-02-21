@@ -56,6 +56,15 @@ export function extendPartyData() {
     m.equipment.head = { name: 'Shawl', slot: 'head' };
     // Seed left/right hand from party card data (skip '—' placeholder)
     // For bothHands items, fill both slots with the same item object reference
+
+    // Update legacy starting items to new names if needed
+    if (m.leftHand === 'Shield') m.leftHand = 'Bronze Shield';
+    if (m.leftHand === 'Bow') m.leftHand = 'Short Bow';
+    if (m.leftHand === 'Staff') m.leftHand = 'Oak Staff';
+    if (m.rightHand === 'Shield') m.rightHand = 'Bronze Shield';
+    if (m.rightHand === 'Bow') m.rightHand = 'Short Bow';
+    if (m.rightHand === 'Staff') m.rightHand = 'Oak Staff';
+
     if (m.leftHand && m.leftHand !== '—') {
       const def = getItemDef(m.leftHand);
       const slot = def?.slot ?? 'leftHand';
