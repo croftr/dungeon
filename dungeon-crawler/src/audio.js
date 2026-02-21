@@ -71,32 +71,91 @@ export async function playActionSound(attackType) {
 
 let currentMusicIndex = 0;
 const MUSIC_TRACKS = ['/sounds/back1.mp3', '/sounds/back2.mp3'];
+const BATTLE_TRACK = '/sounds/backing/battle.mp3';
+
 let musicSource = null;
+let musicGainNode = null;
+let isCombatMusicPlaying = false;
+let combatTimer = 0; // seconds
 
 export async function startMusic() {
   if (musicSource) return; // already playing
   playNextTrack();
 }
 
+/**
+ * Call this when a combat event occurs (hit or attack)
+ */
+export function setInCombat() {
+  combatTimer = 10.0; // Stay in combat music for 10 seconds after last event
+}
+
+export function updateAudio(dt) {
+  combatTimer = Math.max(0, combatTimer - dt);
+
+  const shouldBeInCombat = combatTimer > 0;
+
+  if (shouldBeInCombat && !isCombatMusicPlaying) {
+    switchToCombatMusic();
+  } else if (!shouldBeInCombat && isCombatMusicPlaying) {
+    switchToNormalMusic();
+  }
+}
+
+async function switchToCombatMusic() {
+  if (isCombatMusicPlaying) return;
+  isCombatMusicPlaying = true;
+
+  if (musicSource) {
+    musicSource.stop();
+    musicSource = null;
+  }
+
+  playTrack(BATTLE_TRACK, true); // Loop the battle track
+}
+
+async function switchToNormalMusic() {
+  if (!isCombatMusicPlaying) return;
+  isCombatMusicPlaying = false;
+
+  if (musicSource) {
+    musicSource.stop();
+    musicSource = null;
+  }
+
+  playNextTrack();
+}
+
 async function playNextTrack() {
+  if (isCombatMusicPlaying) return; // Don't play next normal track if in combat
   const url = MUSIC_TRACKS[currentMusicIndex];
+  await playTrack(url, false);
+}
+
+async function playTrack(url, loop) {
   const buffer = await getBuffer(url);
   if (!buffer) return;
 
   const ctx = getCtx();
-  musicSource = ctx.createBufferSource();
-  musicSource.buffer = buffer;
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  source.loop = loop;
 
   const gainNode = ctx.createGain();
   gainNode.gain.value = 0.3; // Music should be background level
 
-  musicSource.connect(gainNode);
+  source.connect(gainNode);
   gainNode.connect(ctx.destination);
 
-  musicSource.onended = () => {
-    currentMusicIndex = (currentMusicIndex + 1) % MUSIC_TRACKS.length;
-    playNextTrack();
+  source.onended = () => {
+    if (isCombatMusicPlaying && loop) return; // Handled by loop property
+    if (!isCombatMusicPlaying && source === musicSource) {
+      currentMusicIndex = (currentMusicIndex + 1) % MUSIC_TRACKS.length;
+      playNextTrack();
+    }
   };
 
-  musicSource.start(0);
+  musicSource = source;
+  musicGainNode = gainNode;
+  source.start(0);
 }

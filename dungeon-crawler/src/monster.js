@@ -4,6 +4,10 @@ import { tweenGroup, player } from './player.js';
 import { createHitSpark } from './particles.js';
 import { CELL } from './map.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { party, setHp, flashPortraitHit } from './party.js';
+import { showMessage } from './minimap.js';
+import { MONSTER_HIT_CHANCE, MONSTER_HIT_DAMAGE, pickRandomFrontLineTarget } from './combat-rules.js';
+import { setInCombat } from './audio.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  MONSTER DATA
@@ -14,7 +18,7 @@ export const monsters = [
     id: 0,
     type: 'glb',
     name: 'TreeKin',
-    gridRow: 5,
+    gridRow: 13,
     gridCol: 5,
     hp: 150, hpMax: 150,
     stats: { strength: 18, dexterity: 6, vitality: 15, intelligence: 12, resilience: 12 },
@@ -28,7 +32,7 @@ export const monsters = [
     id: 1,
     type: 'glb',
     name: 'Goblin',
-    gridRow: 1,
+    gridRow: 9,
     gridCol: 2,
     hp: 80, hpMax: 80,
     stats: { strength: 12, dexterity: 15, vitality: 8, intelligence: 5, resilience: 5 },
@@ -41,22 +45,22 @@ export const monsters = [
   {
     id: 2,
     type: 'glb',
-    name: 'Zombie',
-    gridRow: 7,
+    name: 'Albino Goblin',
+    gridRow: 15,
     gridCol: 3,
-    hp: 100, hpMax: 100,
-    stats: { strength: 14, dexterity: 4, vitality: 10, intelligence: 2, resilience: 8 },
-    defence: 5, alive: true, mesh: null, mixer: null, actions: {},
-    glbIdle: '/monsters/meshy-AI-zombie/Meshy_AI_Animation_Walking_withSkin.glb',
-    glbAttack: '/monsters/meshy-AI-zombie/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    attackSound: '/monsters/meshy-AI-zombie/zombie-attack.mp3',
+    hp: 90, hpMax: 90,
+    stats: { strength: 14, dexterity: 18, vitality: 10, intelligence: 5, resilience: 6 },
+    defence: 8, alive: true, mesh: null, mixer: null, actions: {},
+    glbIdle: '/monsters/meshy-AI-abbino-goblin/Meshy_AI_Animation_Walking_withSkin.glb',
+    glbAttack: '/monsters/meshy-AI-abbino-goblin/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    attackSound: '/monsters/meshy-AI-abbino-goblin/albino-goblin-attack.mp3',
     scale: 0.45
   },
   {
     id: 4,
     type: 'glb',
     name: 'Zombie',
-    gridRow: 11,
+    gridRow: 19,
     gridCol: 7,
     hp: 100, hpMax: 100,
     stats: { strength: 14, dexterity: 4, vitality: 10, intelligence: 2, resilience: 8 },
@@ -70,7 +74,7 @@ export const monsters = [
     id: 5,
     type: 'glb',
     name: 'Ghoul',
-    gridRow: 9,
+    gridRow: 17,
     gridCol: 3,
     hp: 110, hpMax: 110,
     stats: { strength: 16, dexterity: 12, vitality: 10, intelligence: 4, resilience: 6 },
@@ -84,15 +88,43 @@ export const monsters = [
     id: 3,
     type: 'glb',
     name: 'IceMan',
-    gridRow: 13,
+    gridRow: 21,
     gridCol: 1,
     hp: 120, hpMax: 120,
     stats: { strength: 15, dexterity: 8, vitality: 12, intelligence: 10, resilience: 10 },
     defence: 12, alive: true, mesh: null, mixer: null, actions: {},
     glbIdle: '/monsters/meshy-AI-iceMan/Meshy_AI_Animation_Walking_withSkin.glb',
     glbAttack: '/monsters/meshy-AI-iceMan/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    attackSound: '/monsters/meshy-AI-iceman/iceman-attack.mp3',
+    attackSound: '/monsters/meshy-AI-iceMan/iceman-attack.mp3',
     scale: 0.6
+  },
+  {
+    id: 6,
+    type: 'glb',
+    name: 'Albino Goblin',
+    gridRow: 19,
+    gridCol: 3,
+    hp: 90, hpMax: 90,
+    stats: { strength: 14, dexterity: 18, vitality: 10, intelligence: 5, resilience: 6 },
+    defence: 8, alive: true, mesh: null, mixer: null, actions: {},
+    glbIdle: '/monsters/meshy-AI-abbino-goblin/Meshy_AI_Animation_Walking_withSkin.glb',
+    glbAttack: '/monsters/meshy-AI-abbino-goblin/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    attackSound: '/monsters/meshy-AI-abbino-goblin/albino-goblin-attack.mp3',
+    scale: 0.45
+  },
+  {
+    id: 7,
+    type: 'glb',
+    name: 'Orc',
+    gridRow: 21,
+    gridCol: 12,
+    hp: 150, hpMax: 150,
+    stats: { strength: 20, dexterity: 8, vitality: 15, intelligence: 6, resilience: 12 },
+    defence: 12, alive: true, mesh: null, mixer: null, actions: {},
+    glbIdle: '/monsters/meshy-AI-orc/Meshy_AI_Animation_Walking_withSkin.glb',
+    glbAttack: '/monsters/meshy-AI-orc/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    attackSound: '/monsters/meshy-AI-orc/orc-attack.mp3',
+    scale: 0.5
   }
 ];
 
@@ -216,6 +248,8 @@ export function hitMonster(monsterId, rawDamage, attackType) {
   const damage = Math.max(1, rawDamage - m.defence);
   m.hp = Math.max(0, m.hp - damage);
 
+  setInCombat();
+
   if (m.hp === 0) {
     m.alive = false;
     _playDeathAnimation(m);
@@ -236,6 +270,8 @@ export function triggerMonsterAttack(monsterId) {
   const m = monsters.find((x) => x.id === monsterId && x.alive);
   if (!m) return;
 
+  setInCombat();
+
   if (m.actions.attack && m.actions.idle) {
     m.actions.attack.reset();
     m.actions.attack.setEffectiveTimeScale(1);
@@ -248,6 +284,26 @@ export function triggerMonsterAttack(monsterId) {
       audio.volume = 0.6;
       audio.play().catch(e => console.warn('Audio play prevented:', e));
     }
+  }
+
+  // Apply damage timed to mid-swing (~300ms in)
+  setTimeout(() => { _applyMonsterDamage(m); }, 300);
+}
+
+function _applyMonsterDamage(monster) {
+  if (Math.random() >= MONSTER_HIT_CHANCE) return;   // miss
+
+  const target = pickRandomFrontLineTarget(party);
+  if (!target) return;   // entire party wiped
+
+  const newHp = target.hp - MONSTER_HIT_DAMAGE;
+  setHp(target.id, newHp);
+  flashPortraitHit(target.id);
+
+  if (target.isDead) {
+    showMessage(`${monster.name} strikes <b>${target.name}</b> — they have fallen!`, 3500);
+  } else {
+    showMessage(`${monster.name} hits <b>${target.name}</b> for <b>${MONSTER_HIT_DAMAGE}</b> damage! (${target.hp}/${target.hpMax} HP)`);
   }
 }
 

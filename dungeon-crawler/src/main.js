@@ -9,7 +9,8 @@ import { initParty } from './party.js';
 import { initEquipment } from './equipment.js';
 import { initMonsters, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits } from './recruits.js';
-import { startMusic } from './audio.js';
+import { initObjects } from './objects.js';
+import { startMusic, updateAudio } from './audio.js';
 
 import './style.css';
 
@@ -80,6 +81,7 @@ updateStatus();
 initParty();
 initEquipment();
 initRecruits(scene, camera);
+initObjects(scene, camera);
 
 // ─────────────────────────────────────────────
 //  MONSTERS
@@ -100,6 +102,7 @@ function animate(now) {
   updateLighting(lights, camera, dt);
   updateMonsters(dt, camera);
   updateParticles(dt);
+  updateAudio(dt);
   renderer.render(scene, camera);
 }
 

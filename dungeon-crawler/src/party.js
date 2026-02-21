@@ -11,6 +11,8 @@ export const party = [
   { id: 3, isEmpty: true },
 ];
 
+export const lastAttackTimes = {};
+
 // ─────────────────────────────────────────────
 //  PORTRAIT RENDERER
 // ─────────────────────────────────────────────
@@ -18,6 +20,120 @@ function drawPortrait(canvas, member) {
   const W = canvas.width;
   const H = canvas.height;
   const ctx = canvas.getContext('2d');
+
+  // ── DEAD STATE ────────────────────────────────────────────────────────────
+  if (member.isDead) {
+    const cx = W * 0.5;
+    const cy = H * 0.43;
+
+    // Near-black background
+    ctx.fillStyle = '#050302';
+    ctx.fillRect(0, 0, W, H);
+
+    // Blood-red ember glow rising from below
+    const ember = ctx.createRadialGradient(cx, H * 1.05, 0, cx, H * 0.75, H * 0.75);
+    ember.addColorStop(0, 'rgba(100, 10, 3, 0.55)');
+    ember.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = ember;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.save();
+
+    // Crossbones — drawn first (behind skull), near-black so they recede
+    ctx.strokeStyle = '#28180e';
+    ctx.lineWidth = W * 0.052;
+    ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(W*0.10, H*0.26); ctx.lineTo(W*0.90, H*0.92); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(W*0.90, H*0.26); ctx.lineTo(W*0.10, H*0.92); ctx.stroke();
+    ctx.fillStyle = '#28180e';
+    for (const [bx, by] of [[W*0.10,H*0.26],[W*0.90,H*0.92],[W*0.90,H*0.26],[W*0.10,H*0.92]]) {
+      ctx.beginPath(); ctx.arc(bx, by, W * 0.058, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Skull cranium — elongated ellipse, gradient-shaded for depth
+    const skW = W * 0.34;
+    const skH = H * 0.31;
+    const skullGrad = ctx.createRadialGradient(
+      cx - skW * 0.22, cy - skH * 0.28, 0,
+      cx + skW * 0.05, cy, Math.max(skW, skH) * 1.15
+    );
+    skullGrad.addColorStop(0,    '#8a7860');  // lit highlight
+    skullGrad.addColorStop(0.42, '#62503a');  // midtone
+    skullGrad.addColorStop(1,    '#251808');  // shadow edge
+    ctx.fillStyle = skullGrad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, skW, skH, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Lower jaw / cheek — darker, narrower
+    const jawGrad = ctx.createLinearGradient(0, cy + skH * 0.15, 0, cy + skH * 0.85);
+    jawGrad.addColorStop(0, '#4e3c28');
+    jawGrad.addColorStop(1, '#160e06');
+    ctx.fillStyle = jawGrad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + skH * 0.52, skW * 0.72, skH * 0.37, 0, 0, Math.PI);
+    ctx.fill();
+
+    // Eye sockets — large dark voids, slightly angled
+    ctx.fillStyle = '#080402';
+    ctx.beginPath();
+    ctx.ellipse(cx - skW * 0.43, cy - skH * 0.07, skW * 0.26, skH * 0.31, -0.12, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(cx + skW * 0.43, cy - skH * 0.07, skW * 0.26, skH * 0.31,  0.12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Hellfire glow inside sockets
+    const eyeGlow = (ex, ey) => {
+      const g = ctx.createRadialGradient(ex, ey + skH * 0.1, 0, ex, ey, skW * 0.22);
+      g.addColorStop(0,   'rgba(170, 20, 5, 0.75)');
+      g.addColorStop(0.5, 'rgba(70, 8, 2, 0.30)');
+      g.addColorStop(1,   'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.ellipse(ex, ey - skH * 0.07, skW * 0.26, skH * 0.31, 0, 0, Math.PI * 2);
+      ctx.fill();
+    };
+    eyeGlow(cx - skW * 0.43, cy);
+    eyeGlow(cx + skW * 0.43, cy);
+
+    // Nose cavity — inverted teardrop
+    ctx.fillStyle = '#080402';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + skH * 0.17);
+    ctx.bezierCurveTo(cx - skW*0.11, cy + skH*0.27, cx - skW*0.09, cy + skH*0.42, cx, cy + skH*0.44);
+    ctx.bezierCurveTo(cx + skW*0.09, cy + skH*0.42, cx + skW*0.11, cy + skH*0.27, cx, cy + skH*0.17);
+    ctx.fill();
+
+    // Grimace — tight clenched line, no grinning teeth
+    ctx.strokeStyle = '#160e06';
+    ctx.lineWidth = 1.3;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(cx - skW * 0.27, cy + skH * 0.64);
+    ctx.bezierCurveTo(cx - skW*0.10, cy + skH*0.59, cx + skW*0.10, cy + skH*0.59, cx + skW * 0.27, cy + skH * 0.64);
+    ctx.stroke();
+
+    // Forehead crack
+    ctx.strokeStyle = 'rgba(15, 8, 3, 0.65)';
+    ctx.lineWidth = 0.9;
+    ctx.beginPath();
+    ctx.moveTo(cx + skW * 0.07, cy - skH * 0.82);
+    ctx.lineTo(cx - skW * 0.04, cy - skH * 0.52);
+    ctx.lineTo(cx + skW * 0.09, cy - skH * 0.28);
+    ctx.stroke();
+
+    ctx.restore();
+
+    // Heavy vignette — skull emerges from darkness
+    const vig = ctx.createRadialGradient(cx, cy - H * 0.04, H * 0.06, cx, cy, H * 0.62);
+    vig.addColorStop(0,    'rgba(0,0,0,0)');
+    vig.addColorStop(0.62, 'rgba(0,0,0,0.18)');
+    vig.addColorStop(1,    'rgba(0,0,0,0.94)');
+    ctx.fillStyle = vig;
+    ctx.fillRect(0, 0, W, H);
+    return;
+  }
 
   if (member.image) {
     const img = new Image();
@@ -176,6 +292,7 @@ function refreshMember(m) {
     return;
   }
   if (card) card.style.display = 'flex';
+  if (card) card.classList.toggle('member-card--dead', !!m.isDead);
 
   const nameEl = document.getElementById(`name-${i}`);
   if (nameEl) nameEl.textContent = m.name;
@@ -233,14 +350,46 @@ function refreshMember(m) {
   if (rhEl) renderItemIcon((lhBothHands ? lhName : rhName) ? { name: lhBothHands ? lhName : rhName } : null, rhEl);
   if (skEl) renderItemIcon(skName ? { name: skName } : null, skEl);
 
+  if (!m.cooldownTimers) m.cooldownTimers = {};
+
   if (lhSlot) {
     lhSlot.classList.toggle('slot-empty', !lhName);
     lhSlot.classList.toggle('slot-no-action', lhNoAction);
+
+    // Check cooldown for left slot
+    const lhDelaySec = (lhDef?.delay ?? 2);
+    const lhCanAttack = (performance.now() - (lastAttackTimes[`${i}-left`] || 0)) >= (lhDelaySec * 1000);
+    lhSlot.classList.toggle('slot-cooling-down', !lhCanAttack);
+    // Auto-refresh when cooldown expires if it's currently on cooldown
+    if (!lhCanAttack && !m.cooldownTimers['left']) {
+      m.cooldownTimers['left'] = setTimeout(() => {
+        m.cooldownTimers['left'] = null;
+        refreshMember(m);
+      }, (lhDelaySec * 1000) - (performance.now() - lastAttackTimes[`${i}-left`]));
+    }
   }
   if (rhSlot) {
     rhSlot.classList.toggle('slot-empty', !lhBothHands && !rhName);
     rhSlot.classList.toggle('both-hands-secondary', lhBothHands);
     rhSlot.classList.toggle('slot-no-action', !lhBothHands && rhNoAction);
+
+    // Check cooldown for right slot
+    const rhActualDef = lhBothHands ? lhDef : rhDef;
+    const rhDelaySec = (rhActualDef?.delay ?? 2);
+    const rhCanAttack = lhBothHands
+      ? (performance.now() - (lastAttackTimes[`${i}-left`] || 0)) >= (rhDelaySec * 1000)
+      : (performance.now() - (lastAttackTimes[`${i}-right`] || 0)) >= (rhDelaySec * 1000);
+
+    rhSlot.classList.toggle('slot-cooling-down', !rhCanAttack);
+    if (!rhCanAttack && !m.cooldownTimers['right']) {
+      const remaining = lhBothHands
+        ? (rhDelaySec * 1000) - (performance.now() - lastAttackTimes[`${i}-left`])
+        : (rhDelaySec * 1000) - (performance.now() - lastAttackTimes[`${i}-right`]);
+      m.cooldownTimers['right'] = setTimeout(() => {
+        m.cooldownTimers['right'] = null;
+        refreshMember(m);
+      }, remaining);
+    }
   }
   if (skSlot) {
     skSlot.classList.toggle('slot-empty', !skName);
@@ -393,9 +542,6 @@ export function initParty() {
 
   buildTacticsOverlay();
 
-  // Tactics button (bottom-right panel)
-  document.getElementById('tactics-btn')?.addEventListener('click', openTacticsModal);
-
   // P key opens/closes the tactics modal
   document.addEventListener('keydown', (e) => {
     if (e.key === 'p' || e.key === 'P') {
@@ -427,7 +573,35 @@ export function setHp(index, value) {
   const m = party[index];
   if (!m) return;
   m.hp = Math.max(0, Math.min(m.hpMax, value));
+
+  if (m.hp === 0 && !m.isDead) {
+    m.isDead = true;
+    const canvas = document.getElementById(`portrait-${m.id}`);
+    if (canvas) drawPortrait(canvas, m);
+    const deathAudio = new Audio('sounds/actions/death.mp3');
+    deathAudio.volume = 1.0;
+    deathAudio.play().catch(e => console.warn('Death audio play prevented:', e));
+
+    const partyWiped = party.every(p => p.isEmpty || p.isDead);
+    if (partyWiped) _showGameOver();
+  }
+
   refreshMember(m);
+}
+
+function _showGameOver() {
+  const el = document.getElementById('game-over');
+  if (!el) return;
+  el.classList.add('active');
+}
+
+export function flashPortraitHit(index) {
+  const portrait = document.querySelector(`#member-${index} .portrait`);
+  if (!portrait) return;
+  portrait.classList.remove('portrait--hit');
+  void portrait.offsetWidth;   // force reflow to restart animation
+  portrait.classList.add('portrait--hit');
+  setTimeout(() => portrait.classList.remove('portrait--hit'), 500);
 }
 
 export function setMp(index, value) {

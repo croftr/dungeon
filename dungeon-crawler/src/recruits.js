@@ -19,7 +19,7 @@ export const RECRUITS = [
         ],
         image: '/elf_ranger_head.png',
         leftHand: 'Bow', rightHand: 'Bow', startingSkill: 'Focus',
-        gridCol: 9, gridRow: 0, facing: 'front', // North wall
+        gridCol: 9, gridRow: 8, facing: 'front', // North wall
         isRecruited: false
     },
     {
@@ -35,7 +35,7 @@ export const RECRUITS = [
         ],
         image: '/human_paladin_head.png',
         leftHand: 'Sword', rightHand: 'Shield', startingSkill: 'Holy Shield',
-        gridCol: 10, gridRow: 0, facing: 'front', // North wall
+        gridCol: 10, gridRow: 8, facing: 'front', // North wall
         isRecruited: false
     },
     {
@@ -51,7 +51,7 @@ export const RECRUITS = [
         ],
         image: '/dwarf_barbarian_head.png',
         leftHand: 'Axe', rightHand: 'Torch', startingSkill: 'Rage',
-        gridCol: 12, gridRow: 0, facing: 'front', // North wall
+        gridCol: 12, gridRow: 8, facing: 'front', // North wall
         isRecruited: false
     },
     {
@@ -67,7 +67,7 @@ export const RECRUITS = [
         ],
         image: '/human_wizard_head.png',
         leftHand: 'Staff', rightHand: '—', startingSkill: 'Magic Arrow',
-        gridCol: 13, gridRow: 0, facing: 'front', // North wall
+        gridCol: 13, gridRow: 8, facing: 'front', // North wall
         isRecruited: false
     },
     {
@@ -83,7 +83,7 @@ export const RECRUITS = [
         ],
         image: '/human_barbarian_head.png',
         leftHand: 'Axe', rightHand: '—', startingSkill: 'Battle Cry',
-        gridCol: 11, gridRow: 0, facing: 'front', // North wall
+        gridCol: 11, gridRow: 8, facing: 'front', // North wall
         isRecruited: false
     }
 ];
@@ -174,8 +174,10 @@ export function initRecruits(scene, camera) {
     document.body.appendChild(uiContainer);
 
     window.addEventListener('click', (e) => {
+        // If the click was inside the recruitment modal, ignore it here
+        if (uiContainer.contains(e.target)) return;
+
         if (uiContainer.style.display === 'block') {
-            // close on background click could be handled, but let's just add a close button
             return;
         }
 
@@ -239,16 +241,19 @@ function openRecruitModal(recruitId) {
 
     uiContainer.style.display = 'block';
 
-    document.getElementById('btn-recruit-close').onclick = () => { uiContainer.style.display = 'none'; };
+    document.getElementById('btn-recruit-close').addEventListener('click', (e) => {
+        e.stopPropagation();
+        uiContainer.style.display = 'none';
+    });
 
     const addBtn = document.getElementById('btn-recruit-add');
     if (addBtn) {
-        addBtn.onclick = () => {
+        addBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             recruitCharacter(r);
             uiContainer.style.display = 'none';
             updateRecruitsMeshState();
-            // Need a way to re-render the HUD or reload party data. We will update the global party refresh.
-        };
+        });
     }
 }
 

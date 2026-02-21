@@ -3,8 +3,23 @@ import * as THREE from 'three';
 // ─────────────────────────────────────────────
 //  MAP DATA  (0=floor, 1=wall, 2=start, 3=exit)
 // ─────────────────────────────────────────────
+// Cell type constants
+export const CELL_FLOOR = 0;
+export const CELL_WALL = 1;
+export const CELL_START = 2;
+export const CELL_EXIT = 3;
+export const CELL_PORTCULLIS = 4;
+
 export const dungeonMap = [
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 0 (New Dead End)
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1], // 1
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1], // 2
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1], // 3
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1], // 4
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1], // 5
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1], // 6 (Now Floor)
+  [1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1], // 7 (Now Portcullis)
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1], // 8 (Spacer - CONNECTED)
   [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
   [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1],
   [1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 2, 1, 0, 0, 1],
@@ -28,11 +43,6 @@ export const COLS = dungeonMap[0].length;
 export const CELL = 2;    // units per grid cell
 export const WALL_H = 2;    // wall height
 
-// Cell type constants
-export const CELL_FLOOR = 0;
-export const CELL_WALL = 1;
-export const CELL_START = 2;
-export const CELL_EXIT = 3;
 
 // ─────────────────────────────────────────────
 //  PROCEDURAL TEXTURES
@@ -193,6 +203,7 @@ export function findCell(type) {
 export function isPassable(row, col) {
   if (row < 0 || row >= ROWS || col < 0 || col >= COLS) return false;
   const cell = dungeonMap[row][col];
+  // Portcullis blocks movement until it's opened.
   return cell === CELL_FLOOR || cell === CELL_START || cell === CELL_EXIT;
 }
 
@@ -222,7 +233,7 @@ export function buildLevel(scene) {
         mesh.receiveShadow = true;
         scene.add(mesh);
       } else {
-        // Floor
+        // Floor (Portcullis also has floor)
         const floor = new THREE.Mesh(tileGeo, cell === CELL_EXIT ? exitMat : floorMat);
         floor.rotation.x = -Math.PI / 2;
         floor.position.set(wx, 0, wz);

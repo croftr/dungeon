@@ -39,9 +39,6 @@
     <!-- ── PARTY PANEL (bottom-left, 2×2 grid) ── -->
     <div id="party-panel">
 
-      <!-- Party tactics button — spans both card rows in column 1 -->
-      <button id="tactics-btn" title="Party Tactics (P)">TACTICS</button>
-
       <!-- Member 0: Aldric -->
       <div class="member-card" id="member-0">
         <div class="member-top">
@@ -173,7 +170,14 @@
     </div>
 
     <div id="message"></div>
-    <div id="crosshair"></div>
+  </div>
+
+  <!-- ── GAME OVER OVERLAY ── -->
+  <div id="game-over">
+    <div id="game-over-inner">
+      <div id="game-over-title">You Have Died</div>
+      <div id="game-over-sub">Your party has been slain</div>
+    </div>
   </div>
 
   <!-- ── EQUIPMENT MODAL (outside #hud so pointer-events work freely) ── -->
@@ -222,6 +226,24 @@
             <div class="stat-row">
               <span class="stat-name">Resilience</span>
               <span class="stat-value" id="stat-resilience"></span>
+            </div>
+          </div>
+
+          <div class="bars" style="padding: 10px; border-bottom: 1px solid #2a2010; pointer-events: auto;">
+            <div class="bar-row" id="equip-row-hp" style="cursor:help;">
+              <div class="bar-track">
+                <div class="bar-fill bar-hp" id="equip-bar-hp"></div><span class="bar-value" id="equip-val-hp"></span>
+              </div>
+            </div>
+            <div class="bar-row" id="equip-row-mp" style="cursor:help;">
+              <div class="bar-track">
+                <div class="bar-fill bar-mp" id="equip-bar-mp"></div><span class="bar-value" id="equip-val-mp"></span>
+              </div>
+            </div>
+            <div class="bar-row" id="equip-row-sp" style="cursor:help;">
+              <div class="bar-track">
+                <div class="bar-fill bar-sp" id="equip-bar-sp"></div><span class="bar-value" id="equip-val-sp"></span>
+              </div>
             </div>
           </div>
 

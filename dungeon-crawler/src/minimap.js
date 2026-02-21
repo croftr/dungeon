@@ -75,8 +75,14 @@ export function updateStatus() {
 // ─────────────────────────────────────────────
 //  VICTORY MESSAGE
 // ─────────────────────────────────────────────
-export function showMessage(html) {
+let _messageDismissTimer = null;
+export function showMessage(html, duration = 2500) {
   const el = document.getElementById('message');
   el.innerHTML  = html;
   el.style.display = 'block';
+  if (_messageDismissTimer) clearTimeout(_messageDismissTimer);
+  _messageDismissTimer = setTimeout(() => {
+    el.style.display = 'none';
+    _messageDismissTimer = null;
+  }, duration);
 }

@@ -1,4 +1,4 @@
-import { party, refreshPartyCards } from './party.js';
+import { party, refreshPartyCards, lastAttackTimes } from './party.js';
 import { getItemDef } from './items.js';
 import { ACTIONS } from './items.js';
 import { playAction } from './actions.js';
@@ -6,6 +6,7 @@ import { attackMonster, monsters } from './monster.js';
 import { showMessage } from './minimap.js';
 import { dropMember } from './recruits.js';
 import { isInFrontOfPlayer } from './player.js';
+import { canMelee } from './combat-rules.js';
 
 // ─────────────────────────────────────────────
 //  CONSTANTS
@@ -49,6 +50,7 @@ let activeCharIndex = null;
 export function extendPartyData() {
   party.forEach((m) => {
     if (m.isEmpty) return;
+    if (m.isDead === undefined) m.isDead = false;
     if (m.equipment) return; // Already initialized
 
     // All slots empty by default
@@ -160,6 +162,23 @@ function renderModal(memberIndex) {
     if (el) el.textContent = stats[key] ?? '—';
   });
 
+  // ── Stat bars (HP/MP/SP) ──
+  const pctHelper = (val, max) => Math.max(0, Math.min(100, (val / max) * 100)).toFixed(1) + '%';
+
+  const hpFill = document.getElementById('equip-bar-hp');
+  const mpFill = document.getElementById('equip-bar-mp');
+  const spFill = document.getElementById('equip-bar-sp');
+  const hpVal = document.getElementById('equip-val-hp');
+  const mpVal = document.getElementById('equip-val-mp');
+  const spVal = document.getElementById('equip-val-sp');
+
+  if (hpFill) hpFill.style.width = pctHelper(m.hp, m.hpMax);
+  if (mpFill) mpFill.style.width = pctHelper(m.mp, m.mpMax);
+  if (spFill) spFill.style.width = pctHelper(m.sp ?? 100, m.spMax ?? 100);
+  if (hpVal) hpVal.textContent = `${m.hp}/${m.hpMax}`;
+  if (mpVal) mpVal.textContent = `${m.mp}/${m.mpMax}`;
+  if (spVal) spVal.textContent = `${m.sp ?? 100}/${m.spMax ?? 100}`;
+
   // ── Skills ──
   const skillsEl = document.getElementById('char-skills');
   if (skillsEl) {
@@ -208,16 +227,33 @@ function positionTooltip(mouseX, mouseY) {
 }
 
 function populateTooltip(item) {
+  const isCustom = !!item.isCustom;
+  const nameEl = document.getElementById('item-detail-name');
+  const slotEl = document.getElementById('item-detail-slot');
+  const actionEl = document.getElementById('item-detail-action');
+  const descEl = document.getElementById('item-detail-desc');
+  const statsEl = document.getElementById('item-detail-stats');
+
+  nameEl.textContent = item.name;
+
+  if (isCustom) {
+    slotEl.textContent = '';
+    actionEl.textContent = '';
+    descEl.textContent = item.description;
+    statsEl.style.display = 'none';
+    return;
+  }
+
+  statsEl.style.display = 'flex';
   const def = getItemDef(item.name);
 
-  document.getElementById('item-detail-name').textContent = item.name;
-  document.getElementById('item-detail-slot').textContent =
+  slotEl.textContent =
     'Slot: ' + (SLOT_LABELS[def?.slot ?? item.slot] ?? item.slot);
-  document.getElementById('item-detail-action').textContent =
+  actionEl.textContent =
     def?.attackType
       ? 'Attack: ' + def.attackType.charAt(0).toUpperCase() + def.attackType.slice(1)
       : '';
-  document.getElementById('item-detail-desc').textContent =
+  descEl.textContent =
     def?.description ?? '—';
   document.getElementById('item-detail-damage').textContent =
     def?.baseDamage != null ? def.baseDamage : '—';
@@ -304,12 +340,29 @@ function useHand(memberIndex, hand) {
   const attackType = item ? (def?.attackType ?? null) : ACTIONS.PUNCH;
   if (!attackType) return;
 
-  // Slots 0 and 1 are the front row; slots 2 and 3 are the back row.
-  // Back-row members can only attack with ranged weapons (SHOOT or FIREBALL).
-  const isRanged = attackType === ACTIONS.SHOOT || attackType === ACTIONS.FIREBALL;
-  const isBackRow = memberIndex >= 2;
+  // Cooldown validation
+  const isBothHands = def?.slot === 'bothHands';
+  const delaySec = def?.delay ?? 2;
 
-  if (isBackRow && !isRanged) {
+  // Check cooldown timer
+  // A 'bothHands' weapon is driven by the left or right hand click but acts as 
+  // one cooldown, we only care about its primary slot timer (left).
+  const timeKey = isBothHands ? `${memberIndex}-left` : `${memberIndex}-${hand}`;
+  const now = performance.now();
+  if (lastAttackTimes[timeKey]) {
+    if (now - lastAttackTimes[timeKey] < delaySec * 1000) {
+      return; // Attempted to attack while on cooldown
+    }
+  }
+
+  // Dead members cannot act.
+  if (m.isDead) return;
+
+  const isRanged = attackType === ACTIONS.SHOOT || attackType === ACTIONS.FIREBALL;
+
+  // Back-row members can only melee if their front partner is dead (stepped up).
+  // canMelee() centralises this logic — see combat-rules.js.
+  if (!isRanged && !canMelee(party, memberIndex)) {
     showMessage(`${m.name} is in the back row — only ranged attacks can reach the enemy!`);
     return;
   }
@@ -321,13 +374,18 @@ function useHand(memberIndex, hand) {
     t => t.alive && isInFrontOfPlayer(t.gridRow, t.gridCol, maxRange)
   );
 
+  // Set the cooldown timer and force HUD re-render.
+  // If `bothHands` weapon (e.g., Short Bow), set the cooldown for left hand, 
+  // which is correctly polled by both HUD visual slots.
+  lastAttackTimes[timeKey] = now;
+  refreshPartyCards();
+
+  // Play the visual + audio animation regardless of whether a target exists
+  playAction(attackType, hand);
+
   if (!target) {
-    showMessage(isRanged ? 'No target in range (up to 3 squares ahead).' : 'No target directly in front of you.');
     return;
   }
-
-  // Play the visual + audio animation only when a valid target is in range
-  playAction(attackType, hand);
 
   const baseDamage = item ? (def?.baseDamage ?? 0) : 0; // bare fists: no base damage
   const heroStr = m.stats?.strength ?? 10;
@@ -498,6 +556,33 @@ function attachPaperdollListeners() {
   });
 }
 
+function attachBarTooltipListeners() {
+  const hpRow = document.getElementById('equip-row-hp');
+  if (hpRow) {
+    attachTooltipListeners(hpRow, () => ({
+      name: 'Health',
+      description: 'Represents your physical well-being. If this reaches zero, the character is knocked out and can no longer fight.',
+      isCustom: true
+    }));
+  }
+  const mpRow = document.getElementById('equip-row-mp');
+  if (mpRow) {
+    attachTooltipListeners(mpRow, () => ({
+      name: 'Mana',
+      description: 'The magical energy needed to cast spells and channel divine power.',
+      isCustom: true
+    }));
+  }
+  const spRow = document.getElementById('equip-row-sp');
+  if (spRow) {
+    attachTooltipListeners(spRow, () => ({
+      name: 'Stamina',
+      description: 'Physical endurance used for sprinting, heavy lifting, and advanced combat techniques.',
+      isCustom: true
+    }));
+  }
+}
+
 function attachCardListeners() {
   party.forEach((m, i) => {
     const card = document.getElementById(`member-${i}`);
@@ -568,6 +653,7 @@ export function initEquipment() {
   extendPartyData();
   buildInventoryGrid();
   attachPaperdollListeners();
+  attachBarTooltipListeners();
   attachCardListeners();
   attachOverlayListeners();
 }
