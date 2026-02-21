@@ -195,10 +195,13 @@ export function playAction(attackType, hand = 'left') {
     el.querySelector('svg').style.transform = 'scaleX(-1)';
   }
 
-  document.body.appendChild(el);
+  // Delay the animation display slightly so the audio can start and lead it
+  setTimeout(() => {
+    document.body.appendChild(el);
 
-  // Remove after animation ends
-  el.addEventListener('animationend', () => el.remove(), { once: true });
-  // Safety fallback in case animationend never fires
-  setTimeout(() => { if (el.parentNode) el.remove(); }, 900);
+    // Remove after animation ends
+    el.addEventListener('animationend', () => el.remove(), { once: true });
+    // Safety fallback in case animationend never fires
+    setTimeout(() => { if (el.parentNode) el.remove(); }, 900);
+  }, 100);
 }
