@@ -168,41 +168,8 @@ const ACTION_SVG = {
       </g>
     </svg>`,
 
-  // Fireball — blazing orb moving forward with trails
-  [ACTIONS.FIREBALL]: `
-    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"
-         fill="none" stroke-linecap="round" stroke-linejoin="round">
-      <defs>
-        <filter id="glowFire" x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur stdDeviation="4" result="blur" />
-          <feComposite in="SourceGraphic" in2="blur" operator="over" />
-        </filter>
-        <radialGradient id="fireCore" cx="70%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
-          <stop offset="40%" stop-color="#ffff00" stop-opacity="0.9"/>
-          <stop offset="80%" stop-color="#ff6600" stop-opacity="0.7"/>
-          <stop offset="100%" stop-color="#cc0000" stop-opacity="0"/>
-        </radialGradient>
-      </defs>
-      <g filter="url(#glowFire)">
-        <!-- Fire trails moving forward -->
-        <path d="M10 40 Q40 30 70 50" stroke-width="6" stroke="#ff3300" opacity="0.6"/>
-        <path d="M15 60 Q50 65 75 55" stroke-width="8" stroke="#ff6600" opacity="0.7"/>
-        <path d="M20 80 Q45 90 70 60" stroke-width="5" stroke="#cc0000" opacity="0.5"/>
-        
-        <!-- Main Fireball Core -->
-        <circle cx="80" cy="55" r="22" fill="url(#fireCore)" />
-        
-        <!-- Flare sparks -->
-        <path d="M70 55 L85 30 L85 55 L110 55 L85 65 L85 90 Z" fill="#ffff99" opacity="0.8"/>
-        
-        <!-- Embers -->
-        <circle cx="100" cy="35" r="2" fill="#ffcc00" opacity="0.9"/>
-        <circle cx="95" cy="80" r="1.5" fill="#ff6600" opacity="0.8"/>
-        <circle cx="50" cy="20" r="2.5" fill="#ff3300" opacity="0.6"/>
-        <circle cx="40" cy="90" r="2" fill="#cc0000" opacity="0.5"/>
-      </g>
-    </svg>`,
+  // Fireball now uses 3D particles instead of a 2D SVG overlay.
+  [ACTIONS.FIREBALL]: null,
 
 };
 
@@ -212,7 +179,7 @@ const ACTION_SVG = {
  * @param {string}      hand        — 'left' | 'right'  (mirrors swipe/shoot/punch for right hand)
  */
 export function playAction(attackType, hand = 'left') {
-  if (!attackType || !ACTION_SVG[attackType]) return;
+  if (!attackType) return;
 
   // Play the matching sound simultaneously
   playActionSound(attackType);
@@ -220,6 +187,9 @@ export function playAction(attackType, hand = 'left') {
   // Remove any existing animation that hasn't finished yet
   const existing = document.getElementById('action-anim');
   if (existing) existing.remove();
+
+  // If there's no defined SVG (like Fireball, which uses 3D particles), we stop here
+  if (!ACTION_SVG[attackType]) return;
 
   const el = document.createElement('div');
   el.id = 'action-anim';

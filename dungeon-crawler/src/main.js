@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { buildLevel, findCell, CELL_START } from './map.js';
 import { initPlayer, initInput, setCallbacks, tweenGroup } from './player.js';
 import { initLighting, updateLighting } from './lighting.js';
+import { initParticles, updateParticles } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
 import { initParty } from './party.js';
 import { initEquipment } from './equipment.js';
@@ -47,6 +48,7 @@ buildLevel(scene);
 //  LIGHTING
 // ─────────────────────────────────────────────
 const lights = initLighting(scene);
+initParticles(scene, camera);
 
 // ─────────────────────────────────────────────
 //  PLAYER
@@ -97,6 +99,7 @@ function animate(now) {
   tweenGroup.update(now);
   updateLighting(lights, camera, dt);
   updateMonsters(dt, camera);
+  updateParticles(dt);
   renderer.render(scene, camera);
 }
 

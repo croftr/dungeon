@@ -331,7 +331,7 @@ function useHand(memberIndex, hand) {
 
   const baseDamage = item ? (def?.baseDamage ?? 0) : 0; // bare fists: no base damage
   const heroStr = m.stats?.strength ?? 10;
-  const result = attackMonster(target.id, baseDamage, heroStr);
+  const result = attackMonster(target.id, baseDamage, heroStr, attackType);
 
   if (result.hit) {
     if (result.killed) {

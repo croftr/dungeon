@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
+import { createHitSpark } from './particles.js';
 import { CELL } from './map.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
@@ -208,7 +209,7 @@ export function updateMonsters(dt, playerCamera) {
 //  HIT / DAMAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function hitMonster(monsterId, rawDamage) {
+export function hitMonster(monsterId, rawDamage, attackType) {
   const m = monsters.find((x) => x.id === monsterId && x.alive);
   if (!m) return { hit: false, damage: 0, killed: false, monsterHp: 0 };
 
@@ -220,15 +221,15 @@ export function hitMonster(monsterId, rawDamage) {
     _playDeathAnimation(m);
   } else {
 
-    _playHitAnimation(m);
+    _playHitAnimation(m, attackType);
   }
 
   return { hit: true, damage, killed: m.hp === 0, monsterHp: m.hp };
 }
 
-export function attackMonster(monsterId, baseDamage, heroStrength) {
+export function attackMonster(monsterId, baseDamage, heroStrength, attackType) {
   const rawDamage = (baseDamage ?? 0) + (heroStrength ?? 10);
-  return hitMonster(monsterId, rawDamage);
+  return hitMonster(monsterId, rawDamage, attackType);
 }
 
 export function triggerMonsterAttack(monsterId) {
@@ -254,9 +255,13 @@ export function triggerMonsterAttack(monsterId) {
 //  HIT / DEATH TWEENS
 // ─────────────────────────────────────────────────────────────────────────────
 
-function _playHitAnimation(m) {
+function _playHitAnimation(m, attackType) {
   if (!m.mesh) return;
   const mesh = m.mesh;
+
+  if (attackType === 'fireball') {
+    createHitSpark(mesh.position);
+  }
 
   // Flash red on emissive channel
   mesh.traverse((child) => {
