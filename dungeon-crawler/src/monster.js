@@ -36,6 +36,20 @@ export const monsters = [
     glbAttack: '/monsters/meshy-AI-goblin/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
     attackSound: '/monsters/meshy-AI-goblin/goblin-attack.wav',
     scale: 0.45
+  },
+  {
+    id: 2,
+    type: 'glb',
+    name: 'IceMan',
+    gridRow: 5,
+    gridCol: 4,
+    hp: 120, hpMax: 120,
+    stats: { strength: 15, dexterity: 8, vitality: 12, intelligence: 10, resilience: 10 },
+    defence: 12, alive: true, mesh: null, mixer: null, actions: {},
+    glbIdle: '/monsters/meshy-AI-iceMan/Meshy_AI_Animation_Walking_withSkin.glb',
+    glbAttack: '/monsters/meshy-AI-iceMan/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    attackSound: '/monsters/meshy-AI-iceMan/iceman-attack.mp3',
+    scale: 0.6
   }
 ];
 
@@ -135,7 +149,7 @@ export function updateMonsters(dt, playerCamera) {
       m.attackCooldown = (m.attackCooldown || 0) - dt;
       if (m.attackCooldown <= 0) {
         triggerMonsterAttack(m.id);
-        m.attackCooldown = 2.5 + Math.random(); // Next attack in 2.5 - 3.5 seconds
+        m.attackCooldown = 5.0 + (Math.random() * 2.0); // Next attack in 5.0 - 7.0 seconds
       }
     } else {
       // Ready to attack immediately when player steps close

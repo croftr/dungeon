@@ -1,0 +1,21 @@
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <defs>
+    <filter id="glowFire" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <radialGradient id="fireCore" cx="70%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="40%" stop-color="#ffff00" stop-opacity="0.9"/>
+      <stop offset="80%" stop-color="#ff6600" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#cc0000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <g filter="url(#glowFire)">
+    <path d="M40 90 Q20 50 60 20" stroke-width="6" stroke="#ff3300" opacity="0.6"/>
+    <path d="M30 75 Q15 65 55 15" stroke-width="8" stroke="#ff6600" opacity="0.7"/>
+    <path d="M50 100 Q45 80 80 20" stroke-width="5" stroke="#cc0000" opacity="0.5"/>
+    <circle cx="60" cy="65" r="28" fill="url(#fireCore)" />
+    <path d="M55 65 L40 40 L65 45 L80 15 L75 55 L100 70 Z" fill="#ffff99" opacity="0.8"/>
+  </g>
+</svg>

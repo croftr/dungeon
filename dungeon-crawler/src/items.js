@@ -19,6 +19,7 @@ export const ACTIONS = Object.freeze({
   BASH: 'bash',
   SHOOT: 'shoot',
   PUNCH: 'punch',
+  FIREBALL: 'fireball',
 });
 
 export const ITEMS = [
@@ -294,13 +295,23 @@ export const ITEMS = [
   },
   {
     name: 'Oak Staff',
-    slot: 'bothHands',
+    slot: 'enable-spell',
     attackType: ACTIONS.BASH,
     baseDamage: 10,
     icon: '/icons/oak_staff.png',
-    description: 'A gnarled wooden staff requiring both hands. Useful for walking — and for cracking skulls.',
+    description: 'A gnarled wooden staff. Requires one hand, but enables a spell in the offhand.',
     value: 18,
     weight: 1.5,
+  },
+  {
+    name: 'Fireball',
+    slot: 'spell',
+    attackType: ACTIONS.FIREBALL,
+    baseDamage: 25,
+    icon: '/icons/fireball.svg',
+    description: 'A blazing orb of magical fire. Cast to roast your enemies.',
+    value: 0,
+    weight: 0,
   },
   {
     name: 'Axe',

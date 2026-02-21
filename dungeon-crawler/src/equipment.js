@@ -72,6 +72,9 @@ export function extendPartyData() {
         const item = { name: m.leftHand, slot: 'bothHands' };
         m.equipment.leftHand = item;
         m.equipment.rightHand = item;
+      } else if (slot === 'enable-spell') {
+        m.equipment.leftHand = { name: m.leftHand, slot: 'enable-spell' };
+        m.equipment.rightHand = { name: 'Fireball', slot: 'spell' };
       } else {
         m.equipment.leftHand = { name: m.leftHand, slot: 'leftHand' };
       }
@@ -86,8 +89,15 @@ export function extendPartyData() {
           m.equipment.leftHand = item;
           m.equipment.rightHand = item;
         }
+      } else if (slot === 'enable-spell') {
+        if (!m.equipment.rightHand && !m.equipment.leftHand) {
+          m.equipment.rightHand = { name: m.rightHand, slot: 'enable-spell' };
+          m.equipment.leftHand = { name: 'Fireball', slot: 'spell' };
+        }
       } else {
-        m.equipment.rightHand = { name: m.rightHand, slot: 'rightHand' };
+        if (m.equipment.rightHand?.slot !== 'spell') {
+          m.equipment.rightHand = { name: m.rightHand, slot: 'rightHand' };
+        }
       }
     }
     // 20-slot inventory, all empty
@@ -291,8 +301,8 @@ function useHand(memberIndex, hand) {
   if (!attackType) return;
 
   // Slots 0 and 1 are the front row; slots 2 and 3 are the back row.
-  // Back-row members can only attack with ranged weapons (SHOOT).
-  const isRanged = attackType === ACTIONS.SHOOT;
+  // Back-row members can only attack with ranged weapons (SHOOT or FIREBALL).
+  const isRanged = attackType === ACTIONS.SHOOT || attackType === ACTIONS.FIREBALL;
   const isBackRow = memberIndex >= 2;
 
   if (isBackRow && !isRanged) {
@@ -340,6 +350,7 @@ function onPaperdollSlotClick(e) {
   const m = party[activeCharIndex];
   const item = m.equipment[key];
   if (!item) return; // empty slot — nothing to do
+  if (item.slot === 'spell') return; // Cannot manually unequip spell
 
   const freeIndex = m.inventory.indexOf(null);
   if (freeIndex === -1) {
@@ -355,6 +366,9 @@ function onPaperdollSlotClick(e) {
   if (item.slot === 'bothHands') {
     m.equipment.leftHand = null;
     m.equipment.rightHand = null;
+  } else if (item.slot === 'enable-spell') {
+    if (key === 'leftHand' && m.equipment.rightHand?.slot === 'spell') m.equipment.rightHand = null;
+    if (key === 'rightHand' && m.equipment.leftHand?.slot === 'spell') m.equipment.leftHand = null;
   }
   renderModal(activeCharIndex);
 }
@@ -377,7 +391,8 @@ function onInventoryCellClick(e) {
     const displaced = [m.equipment.leftHand, m.equipment.rightHand]
       .filter((d) => d !== null && d !== m.equipment.leftHand || d === m.equipment.rightHand)
       // deduplicate — bothHands items share the same reference
-      .filter((d, idx, arr) => arr.indexOf(d) === idx);
+      .filter((d, idx, arr) => arr.indexOf(d) === idx)
+      .filter((d) => d.slot !== 'spell');
 
     // Clear and equip both slots
     m.equipment.leftHand = item;
@@ -389,10 +404,43 @@ function onInventoryCellClick(e) {
       const fi = m.inventory.indexOf(null);
       if (fi !== -1) m.inventory[fi] = d;
     });
+  } else if (item.slot === 'enable-spell') {
+    const displaced = [m.equipment.leftHand, m.equipment.rightHand]
+      .filter((d) => d !== null)
+      .filter((d, idx, arr) => arr.indexOf(d) === idx)
+      .filter((d) => d.slot !== 'spell');
+
+    m.equipment.leftHand = item;
+    m.equipment.rightHand = { name: 'Fireball', slot: 'spell' };
+
+    displaced.forEach((d) => {
+      if (!d) return;
+      const fi = m.inventory.indexOf(null);
+      if (fi !== -1) m.inventory[fi] = d;
+    });
   } else {
-    const currentlyWorn = m.equipment[item.slot];
+    let currentlyWorn = m.equipment[item.slot];
+
+    // Check if we are displacing an enable-spell item
+    if (currentlyWorn?.slot === 'enable-spell') {
+      if (item.slot === 'leftHand' && m.equipment.rightHand?.slot === 'spell') m.equipment.rightHand = null;
+      if (item.slot === 'rightHand' && m.equipment.leftHand?.slot === 'spell') m.equipment.leftHand = null;
+    } else if (currentlyWorn?.slot === 'spell') {
+      const otherSlot = item.slot === 'leftHand' ? 'rightHand' : 'leftHand';
+      const otherItem = m.equipment[otherSlot];
+      if (otherItem?.slot === 'enable-spell') {
+        // Send the staff to inventory since it lost its spell component
+        const fi = m.inventory.indexOf(null);
+        if (fi !== -1) m.inventory[fi] = otherItem;
+        m.equipment[otherSlot] = null;
+      }
+      currentlyWorn = null; // Spell disappears
+    }
+
     m.equipment[item.slot] = item;
-    if (currentlyWorn) m.inventory[invIndex] = currentlyWorn;
+    if (currentlyWorn && currentlyWorn.slot !== 'spell') {
+      m.inventory[invIndex] = currentlyWorn;
+    }
   }
 
   renderModal(activeCharIndex);

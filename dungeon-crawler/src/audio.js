@@ -18,6 +18,7 @@ const SOUND_MAP = {
   bash: { url: '/sounds/actions/bash.mp3', offset: 0.05 },
   shoot: { url: '/sounds/actions/shoot.mp3', offset: 0.05 },
   punch: { url: '/sounds/actions/bash.mp3', offset: 0.05 },
+  fireball: { url: '/sounds/actions/fireball.mp3', offset: 0.0 },
 };
 
 const bufferCache = new Map();
