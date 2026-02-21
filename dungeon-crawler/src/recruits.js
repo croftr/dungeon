@@ -49,7 +49,7 @@ export const RECRUITS = [
             { name: 'Shadow-Step', description: '25% chance to not trigger enemy aggression when moving backward or sideways.' }
         ],
         image: '/dwarf_barbarian_head.png',
-        leftHand: 'Axe', rightHand: '—',
+        leftHand: 'Axe', rightHand: 'Torch',
         gridCol: 12, gridRow: 0, facing: 'front', // North wall
         isRecruited: false
     },

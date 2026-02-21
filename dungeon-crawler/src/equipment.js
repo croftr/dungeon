@@ -265,13 +265,13 @@ function useHand(memberIndex, hand) {
   // Play the visual + audio animation
   playAction(def.attackType, hand);
 
-  // Apply damage to monster 0 if it is alive
-  const target = monsters[0];
-  if (!target?.alive) return;
+  // Apply damage to the first alive monster
+  const target = monsters.find(m => m.alive);
+  if (!target) return;
 
   const baseDamage = def.baseDamage ?? 0;
   const heroStr = m.stats?.strength ?? 10;
-  const result = attackMonster(baseDamage, heroStr);
+  const result = attackMonster(target.id, baseDamage, heroStr);
 
   if (result.hit) {
     if (result.killed) {

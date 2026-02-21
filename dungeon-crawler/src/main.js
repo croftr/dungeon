@@ -6,7 +6,7 @@ import { initLighting, updateLighting } from './lighting.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
 import { initParty } from './party.js';
 import { initEquipment } from './equipment.js';
-import { initMonsters, updateMonsters } from './monster.js';
+import { initMonsters, updateMonsters, triggerMonsterAttack, monsters } from './monster.js';
 import { initRecruits } from './recruits.js';
 
 import './style.css';
@@ -92,7 +92,7 @@ function animate(now) {
 
   tweenGroup.update(now);
   updateLighting(lights, camera, dt);
-  updateMonsters(dt);
+  updateMonsters(dt, camera);
   renderer.render(scene, camera);
 }
 
