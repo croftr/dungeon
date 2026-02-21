@@ -32,10 +32,12 @@ export const player = {
 // Callbacks set by main.js
 let onMoved = () => { };
 let onReached = () => { };
+let isBlocked = () => false;
 
-export function setCallbacks({ moved, reached }) {
+export function setCallbacks({ moved, reached, blocked }) {
   onMoved = moved ?? onMoved;
   onReached = reached ?? onReached;
+  isBlocked = blocked ?? isBlocked;
 }
 
 // ─────────────────────────────────────────────
@@ -59,7 +61,7 @@ export function moveForward(camera, sign = 1) {
   const newRow = player.gridRow + dir.dz * sign;
   const newCol = player.gridCol + dir.dx * sign;
 
-  if (!isPassable(newRow, newCol)) {
+  if (!isPassable(newRow, newCol) || isBlocked(newRow, newCol)) {
     bumpFeedback(camera);
     return;
   }
@@ -123,7 +125,7 @@ export function strafePlayer(camera, sign = 1) {
   const newRow = player.gridRow + strafeDir.dz;
   const newCol = player.gridCol + strafeDir.dx;
 
-  if (!isPassable(newRow, newCol)) {
+  if (!isPassable(newRow, newCol) || isBlocked(newRow, newCol)) {
     bumpFeedback(camera);
     return;
   }

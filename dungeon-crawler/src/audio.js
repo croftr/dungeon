@@ -68,3 +68,35 @@ export async function playActionSound(attackType) {
   }
 }
 
+
+let currentMusicIndex = 0;
+const MUSIC_TRACKS = ['/sounds/back1.mp3', '/sounds/back2.mp3'];
+let musicSource = null;
+
+export async function startMusic() {
+  if (musicSource) return; // already playing
+  playNextTrack();
+}
+
+async function playNextTrack() {
+  const url = MUSIC_TRACKS[currentMusicIndex];
+  const buffer = await getBuffer(url);
+  if (!buffer) return;
+
+  const ctx = getCtx();
+  musicSource = ctx.createBufferSource();
+  musicSource.buffer = buffer;
+
+  const gainNode = ctx.createGain();
+  gainNode.gain.value = 0.3; // Music should be background level
+
+  musicSource.connect(gainNode);
+  gainNode.connect(ctx.destination);
+
+  musicSource.onended = () => {
+    currentMusicIndex = (currentMusicIndex + 1) % MUSIC_TRACKS.length;
+    playNextTrack();
+  };
+
+  musicSource.start(0);
+}

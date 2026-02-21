@@ -40,18 +40,64 @@ export const monsters = [
   {
     id: 2,
     type: 'glb',
-    name: 'IceMan',
+    name: 'Zombie',
     gridRow: 7,
     gridCol: 3,
+    hp: 100, hpMax: 100,
+    stats: { strength: 14, dexterity: 4, vitality: 10, intelligence: 2, resilience: 8 },
+    defence: 5, alive: true, mesh: null, mixer: null, actions: {},
+    glbIdle: '/monsters/meshy-AI-zombie/Meshy_AI_Animation_Walking_withSkin.glb',
+    glbAttack: '/monsters/meshy-AI-zombie/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    attackSound: '/monsters/meshy-AI-zombie/zombie-attack.mp3',
+    scale: 0.45
+  },
+  {
+    id: 4,
+    type: 'glb',
+    name: 'Zombie',
+    gridRow: 11,
+    gridCol: 7,
+    hp: 100, hpMax: 100,
+    stats: { strength: 14, dexterity: 4, vitality: 10, intelligence: 2, resilience: 8 },
+    defence: 5, alive: true, mesh: null, mixer: null, actions: {},
+    glbIdle: '/monsters/meshy-AI-zombie/Meshy_AI_Animation_Walking_withSkin.glb',
+    glbAttack: '/monsters/meshy-AI-zombie/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    attackSound: '/monsters/meshy-AI-zombie/zombie-attack.mp3',
+    scale: 0.45
+  },
+  {
+    id: 5,
+    type: 'glb',
+    name: 'Ghoul',
+    gridRow: 9,
+    gridCol: 3,
+    hp: 110, hpMax: 110,
+    stats: { strength: 16, dexterity: 12, vitality: 10, intelligence: 4, resilience: 6 },
+    defence: 7, alive: true, mesh: null, mixer: null, actions: {},
+    glbIdle: '/monsters/meshy-AI-ghoul/Meshy_AI_Animation_Walking_withSkin.glb',
+    glbAttack: '/monsters/meshy-AI-ghoul/Meshy_AI_Animation_Basic_Jump_withSkin.glb',
+    attackSound: '/monsters/meshy-AI-ghoul/ghoul-attack.mp3',
+    scale: 0.45
+  },
+  {
+    id: 3,
+    type: 'glb',
+    name: 'IceMan',
+    gridRow: 13,
+    gridCol: 1,
     hp: 120, hpMax: 120,
     stats: { strength: 15, dexterity: 8, vitality: 12, intelligence: 10, resilience: 10 },
     defence: 12, alive: true, mesh: null, mixer: null, actions: {},
     glbIdle: '/monsters/meshy-AI-iceMan/Meshy_AI_Animation_Walking_withSkin.glb',
     glbAttack: '/monsters/meshy-AI-iceMan/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    attackSound: '/monsters/meshy-AI-iceMan/iceman-attack.mp3',
+    attackSound: '/monsters/meshy-AI-iceman/iceman-attack.mp3',
     scale: 0.6
   }
 ];
+
+export function isMonsterAt(row, col) {
+  return monsters.some(m => m.alive && m.gridRow === row && m.gridCol === col);
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  INIT
@@ -173,7 +219,7 @@ export function hitMonster(monsterId, rawDamage) {
     m.alive = false;
     _playDeathAnimation(m);
   } else {
-    triggerMonsterAttack(monsterId);
+
     _playHitAnimation(m);
   }
 

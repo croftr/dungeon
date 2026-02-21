@@ -6,8 +6,9 @@ import { initLighting, updateLighting } from './lighting.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
 import { initParty } from './party.js';
 import { initEquipment } from './equipment.js';
-import { initMonsters, updateMonsters, triggerMonsterAttack, monsters } from './monster.js';
+import { initMonsters, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits } from './recruits.js';
+import { startMusic } from './audio.js';
 
 import './style.css';
 
@@ -61,6 +62,9 @@ setCallbacks({
   reached() {
     showMessage('YOU ESCAPED!<br><small style="font-size:14px;color:#aaa">The dungeon is conquered.</small>');
   },
+  blocked(r, c) {
+    return isMonsterAt(r, c);
+  }
 });
 
 initInput(camera);
@@ -101,5 +105,16 @@ animate(performance.now());
 // ─────────────────────────────────────────────
 //  DEV INFO
 // ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+//  MUSIC
+// ─────────────────────────────────────────────
+function handleFirstInteraction() {
+  startMusic();
+  window.removeEventListener('click', handleFirstInteraction);
+  window.removeEventListener('keydown', handleFirstInteraction);
+}
+window.addEventListener('click', handleFirstInteraction);
+window.addEventListener('keydown', handleFirstInteraction);
+
 console.log('%c Grid Dungeon Crawler ', 'background:#333;color:#e8c87a;font-size:14px;padding:4px 8px;');
 console.log('Map: 0=floor 1=wall 2=start 3=exit | Controls: W/S=move  Q/E=turn  A/D=strafe  Arrows=move+turn');
