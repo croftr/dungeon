@@ -206,7 +206,7 @@ export function spawnObjectsForLevel() {
             'Adventurer\'s Belt', 'Leather Gloves', 'Cloth Trousers', 'Worn Boots',
             'Dagger', 'Chain Shirt', 'Plate Cuirass', 'Iron Gauntlets',
             'Chainmail Leggings', 'Iron-Shod Boots', 'Mace', 'Greatsword',
-            'War Hammer', 'Longbow'
+            'War Hammer', 'Longbow', 'Axe'
         ]);
         // New Chest at the end of the long passage
         addChest(objectsGroup, gltfLoader, 7, 1, 0, -0.7, []);
@@ -217,9 +217,9 @@ export function spawnObjectsForLevel() {
         // Bone pile in the starter room area
         addBonePile(objectsGroup, gltfLoader, 11, 12);
 
-        // Shop against the east wall of the big room, centre row
-        // col 30 is the last floor cell before the east wall (col 31); offsetX pushes it flush
-        addShop(objectsGroup, gltfLoader, 30, 11, -Math.PI / 2, -0.2, 0);
+        // Shop against the east wall of the 8×8 room, centre row
+        // col 23 is the last floor cell before the east wall (col 24); offsetX pushes it flush
+        addShop(objectsGroup, gltfLoader, 23, 11, -Math.PI / 2, -0.2, 0);
 
         // Portal to Level 2
         // Positioned at col 13, row 13 against the East wall.

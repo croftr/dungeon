@@ -3,6 +3,7 @@ import { party } from './party.js';
 import { extendPartyData } from './equipment.js';
 import { CELL, WALL_H, findCell } from './map.js';
 import { isInFrontOfPlayer } from './player.js';
+import { getItemDef } from './items.js';
 
 // The 5 D&D characters
 export const RECRUITS = [
@@ -18,7 +19,7 @@ export const RECRUITS = [
             { name: "Hunter's Eye", description: "Reveal full stats of the engaged monster — HP, STR, DEX, VIT, INT, RES and Defence. Only usable in combat.", icon: '/skills/hunters-eye.png' },
         ],
         image: '/elf_ranger_head.png',
-        leftHand: 'Bow', rightHand: 'Bow', ammo: 'Wooden Arrows', startingSkill: "Hunter's Eye",
+        leftHand: 'Short Bow', rightHand: 'Short Bow', ammo: 'Wooden Arrows', startingSkill: "Hunter's Eye",
         gridCol: 9, gridRow: 8, facing: 'front', // North wall
         isRecruited: false
     },
@@ -28,7 +29,7 @@ export const RECRUITS = [
         job: 'Paladin',
         race: 'Human',
         hp: 60, hpMax: 60, mp: 60, mpMax: 60, sp: 100, spMax: 100,
-        stats: { strength: 9, dexterity: 5, vitality: 8, intelligence: 6, resilience: 9 },
+        stats: { strength: 7, dexterity: 5, vitality: 9, intelligence: 6, resilience: 9 },
         skills: [
             { name: 'Sanctuary', description: 'Surrounds the party in divine light, reducing all damage received by 10% for 60 seconds. Cooldown: 120s.', icon: '/skills/sancturary.png' },
             { name: 'Holy Radiance', description: 'Calls down a pulse of holy energy, restoring 10 HP to every living party member. Cooldown: 120s.', icon: '/skills/holy-radiance.png' },
@@ -41,10 +42,10 @@ export const RECRUITS = [
     {
         id: 'recruit_3',
         name: 'Thorek',
-        job: 'Barbarian',
+        job: 'Warrior',
         race: 'Dwarf',
         hp: 70, hpMax: 70, mp: 20, mpMax: 20, sp: 100, spMax: 100,
-        stats: { strength: 10, dexterity: 6, vitality: 9, intelligence: 4, resilience: 7 },
+        stats: { strength: 8, dexterity: 6, vitality: 8, intelligence: 4, resilience: 7 },
         skills: [
             { name: 'Sunder Armor', description: 'Crushes the targeted monster, halving its defence stats for 30s. Only usable in combat. Cooldown: 60s.', icon: '/skills/sunder-armor.png' },
         ],
@@ -76,13 +77,12 @@ export const RECRUITS = [
         job: 'Barbarian',
         race: 'Human',
         hp: 67, hpMax: 67, mp: 25, mpMax: 25, sp: 100, spMax: 100,
-        stats: { strength: 9, dexterity: 7, vitality: 8, intelligence: 4, resilience: 7 },
+        stats: { strength: 9, dexterity: 7, vitality: 7, intelligence: 4, resilience: 7 },
         skills: [
-            { name: 'Whirlwind', description: 'With a two-handed weapon, strikes the enemy ahead and the two diagonal enemies simultaneously.' },
-            { name: 'Trap Disarming', description: 'Automatically highlights floor pressure plates within a 2-tile radius and allows the player to right-click to disable them before triggering.' }
+            { name: 'Berserk', description: 'Enters a state of roaring fury, boosting all damage dealt by 20% (after other calculations) for 30s. Cooldown: 60s.', icon: '/skills/berserk.png' }
         ],
         image: '/human_barbarian_head.png',
-        leftHand: 'Axe', rightHand: '—', startingSkill: 'Battle Cry',
+        leftHand: 'Greataxe', rightHand: '—', startingSkill: 'Berserk',
         gridCol: 11, gridRow: 8, facing: 'front', // North wall
         isRecruited: false
     }
@@ -224,21 +224,62 @@ function openRecruitModal(recruitId) {
     const freeSlot = party.find(m => m.isEmpty);
     const canRecruit = !!freeSlot;
 
+    const lhDef = r.leftHand && r.leftHand !== '—' ? getItemDef(r.leftHand) : null;
+    const rhDef = r.rightHand && r.rightHand !== '—' ? getItemDef(r.rightHand) : null;
+    const ammoDef = r.ammo && r.ammo !== '—' ? getItemDef(r.ammo) : null;
+
+    function renderEqSlot(def, fallback) {
+        if (!def) {
+            return `<div style="width:48px; height:48px; background:rgba(0,0,0,0.5); border:1px solid #3a2a10; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#5a4a2a; font-size:8px; border-radius:3px;">${fallback}</div>`;
+        }
+        return `<div style="width:48px; height:48px; background:rgba(0,0,0,0.7); border:1px solid #7a5a28; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; border-radius:3px; overflow:hidden;" title="${def.name}">
+            <img src="${def.icon}" style="position:absolute; inset:0; width:100%; height:100%; opacity:0.18; pointer-events:none; object-fit:contain; padding:2px;">
+            <span style="font-size:8px; color:#c8a84a; z-index:1; padding:2px; text-align:center; word-break:break-word;">${def.name}</span>
+        </div>`;
+    }
+
     uiContainer.innerHTML = `
-    <h2 style="margin-top:0; color:#fff">${r.name}</h2>
-    <p><strong>Race:</strong> ${r.race} &nbsp;&nbsp; <strong>Job:</strong> ${r.job}</p>
-    <p><strong>HP:</strong> ${r.hp}/${r.hpMax} &nbsp;&nbsp; <strong>MP:</strong> ${r.mp}/${r.mpMax}</p>
+    <div style="display:flex; gap:15px; margin-bottom:10px;">
+        <img src="${r.image}" style="width:80px; height:80px; border:1px solid #6a5030; border-radius:4px; image-rendering:pixelated; background:#000;">
+        <div>
+            <h2 style="margin:0 0 5px 0; color:#fff">${r.name}</h2>
+            <p style="margin:0; font-size:12px;"><strong>${r.race} ${r.job}</strong></p>
+            <p style="margin:4px 0 0 0; font-size:11px; color:#e8c87a;">HP: ${r.hp}/${r.hpMax} &nbsp;&nbsp; MP: ${r.mp}/${r.mpMax}</p>
+        </div>
+    </div>
+    
+    <div style="border-top:1px solid #4a3a20; padding-top:10px; display:flex; justify-content:space-between; font-size:11px;">
+      <div>STR: <span style="color:#c8a84a">${r.stats.strength}</span></div>
+      <div>DEX: <span style="color:#c8a84a">${r.stats.dexterity}</span></div>
+      <div>VIT: <span style="color:#c8a84a">${r.stats.vitality}</span></div>
+      <div>INT: <span style="color:#c8a84a">${r.stats.intelligence}</span></div>
+      <div>RES: <span style="color:#c8a84a">${r.stats.resilience}</span></div>
+    </div>
+
     <div style="border-top:1px solid #4a3a20; padding-top:10px; margin-top:10px;">
-      <p style="margin:2px 0;">STR: ${r.stats.strength} | DEX: ${r.stats.dexterity} | VIT: ${r.stats.vitality}</p>
-      <p style="margin:2px 0;">INT: ${r.stats.intelligence} | RES: ${r.stats.resilience}</p>
+      <h3 style="margin:0 0 8px; color:#c8a84a; font-size:11px; text-transform:uppercase; letter-spacing:1px;">Equipped</h3>
+      <div style="display:flex; gap:8px;">
+          ${renderEqSlot(lhDef, 'L.Hand')}
+          ${renderEqSlot(rhDef, 'R.Hand')}
+          ${renderEqSlot(ammoDef, 'Ammo')}
+      </div>
     </div>
-    <div style="border-top:1px solid #4a3a20; padding-top:10px; margin-top:10px; font-size:12px;">
-      <h3 style="margin:0 0 5px; color:#c8a84a">Skills</h3>
-      ${r.skills.map(s => `<p style="margin:2px 0;"><b>${s.name}</b>: ${s.description}</p>`).join('')}
+
+    <div style="border-top:1px solid #4a3a20; padding-top:10px; margin-top:10px; font-size:11px;">
+      <h3 style="margin:0 0 8px; color:#c8a84a; font-size:11px; text-transform:uppercase; letter-spacing:1px;">Known Skills</h3>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        ${r.skills.map(s => `
+            <div style="background:rgba(0,0,0,0.3); border:1px solid #3a2e14; padding:6px 8px; border-radius:3px;">
+                <div style="color:#c8a84a; font-weight:bold; margin-bottom:2px;">${s.name}</div>
+                <div style="color:#7a6a50; font-size:9px; line-height:1.4;">${s.description}</div>
+            </div>
+        `).join('')}
+      </div>
     </div>
+
     <div style="margin-top:20px; text-align:right;">
-      <button id="btn-recruit-close" style="padding:5px 10px; cursor:pointer;" aria-label="Close">Close</button>
-      ${canRecruit ? `<button id="btn-recruit-add" style="padding:5px 10px; cursor:pointer; background:#2a1e10; color:#e8c87a; border:1px solid #c8a84a; margin-left:10px;">Recruit</button>` : '<span style="color:red; margin-left:10px;">Party Full! Drop a member first.</span>'}
+      <button id="btn-recruit-close" style="padding:6px 12px; cursor:pointer; background:transparent; border:1px solid #6a5030; color:#a09070;">Close</button>
+      ${canRecruit ? `<button id="btn-recruit-add" style="padding:6px 12px; cursor:pointer; background:rgba(200, 168, 74, 0.15); color:#e8c87a; border:1px solid #c8a84a; margin-left:10px; font-weight:bold;">Recruit to Party</button>` : '<span style="color:#cc4444; margin-left:10px; font-size:11px;">Party Full!</span>'}
     </div>
   `;
 

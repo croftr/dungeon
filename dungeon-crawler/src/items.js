@@ -450,6 +450,17 @@ export const ITEMS = [
     weight: 5.5,
   },
   {
+    name: 'Greataxe',
+    slot: 'bothHands',
+    attackType: ACTIONS.SWIPE,
+    baseDamage: 20,
+    delay: 4,
+    icon: '/icons/greataxe.png',
+    description: 'A massive two-handed axe that cleaves through enemies in a single arc.',
+    value: 150,
+    weight: 5.5,
+  },
+  {
     name: 'War Hammer',
     slot: 'bothHands',
     attackType: ACTIONS.BASH,

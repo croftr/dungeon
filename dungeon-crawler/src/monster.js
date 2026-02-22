@@ -115,42 +115,6 @@ export const monsters = [
     '/monsters/meshy-AI-iceMan/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/meshy-AI-iceMan/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
     '/monsters/meshy-AI-iceMan/iceman-attack.mp3', 0.6),
-  // ── East room showcase — one of every type lined up with 1-square gaps ──────
-  //    Row 11 (same row as the western entrance), cols 17 → 29 every 2 cols.
-  inst(D.treekin, 10, 11, 17,
-    '/monsters/meshy-AI-treeKin/Meshy_AI_Animation_Walking_withSkin.glb',
-    '/monsters/meshy-AI-treeKin/Meshy_AI_Animation_mage_soell_cast_withSkin.glb',
-    '/monsters/meshy-AI-treeKin/treeKin-attack.mp3', 0.45),
-
-  inst(D.goblin, 11, 11, 19,
-    '/monsters/meshy-AI-goblin/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
-    '/monsters/meshy-AI-goblin/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    '/monsters/meshy-AI-goblin/goblin-attack.wav'),
-
-  inst(D.albino_goblin, 12, 11, 21,
-    '/monsters/meshy-AI-abbino-goblin/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
-    '/monsters/meshy-AI-abbino-goblin/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/meshy-AI-abbino-goblin/albino-goblin-attack.mp3'),
-
-  inst(D.zombie, 13, 11, 23,
-    '/monsters/meshy-AI-zombie/Meshy_AI_Animation_Walking_withSkin.glb',
-    '/monsters/meshy-AI-zombie/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    '/monsters/meshy-AI-zombie/zombie-attack.mp3'),
-
-  inst(D.ghoul, 14, 11, 25,
-    '/monsters/meshy-AI-ghoul/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
-    '/monsters/meshy-AI-ghoul/Meshy_AI_Animation_Basic_Jump_withSkin.glb',
-    '/monsters/meshy-AI-ghoul/ghoul-attack.mp3'),
-
-  inst(D.orc, 15, 11, 27,
-    '/monsters/meshy-AI-orc/Meshy_AI_Animation_Walking_withSkin.glb',
-    '/monsters/meshy-AI-orc/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    '/monsters/meshy-AI-orc/orc-attack.mp3', 0.5),
-
-  inst(D.iceman, 16, 11, 29,
-    '/monsters/meshy-AI-iceMan/Meshy_AI_Animation_Walking_withSkin.glb',
-    '/monsters/meshy-AI-iceMan/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    '/monsters/meshy-AI-iceMan/iceman-attack.mp3', 0.6),
 ];
 
 export function isMonsterAt(row, col) {
@@ -455,6 +419,12 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     refreshPartyCards();                  // remove the glow from the skill slot
   }
 
+  // Berserk — applies a x1.2 damage multiplier after everything else
+  const berserkActive = skillsState.berserk?.active && skillsState.berserk?.actorName === character.name;
+  if (berserkActive) {
+    damage = Math.round(damage * 1.2);
+  }
+
   const formula = {
     weaponBase: weaponDef?.baseDamage ?? 0,
     statBonus: isMagic ? (character.stats?.intelligence ?? 10) : (character.stats?.strength ?? 10),
@@ -462,6 +432,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     preCritDamage,
     critMultiplier: isCrit ? CRIT_MULTIPLIER : 1,
     runicScholar: runicActive,
+    berserkMultiplier: berserkActive ? 1.2 : 1.0,
     ammoModifier: ammoDef?.damageModifier ?? null,
   };
 

@@ -24,10 +24,17 @@ export const skillsState = {
     expiresAt: 0,
     targetId: null,
   },
-  /** Sunder Armor - Halves defence stats for the targeted monster */
+  /** Sunder Armor — cuts a specific monster's defence by 50% */
   sunderArmor: {
     active: false,
-    expiresAt: 0,
     targetId: null,
+    expiresAt: 0,
+  },
+
+  /** Berserk — boots Korg's damage by 20% */
+  berserk: {
+    active: false,
+    actorName: null, // to restrict the buff to just the user
+    expiresAt: 0,
   },
 };

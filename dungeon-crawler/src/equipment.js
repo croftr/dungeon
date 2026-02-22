@@ -884,6 +884,7 @@ function useSkill(memberIndex) {
   if (skill.name === 'Mana Tap') { _useManaTap(m, memberIndex); return; }
   if (skill.name === 'Entangle') { _useEntangle(m, memberIndex); return; }
   if (skill.name === 'Sunder Armor') { _useSunderArmor(m, memberIndex); return; }
+  if (skill.name === 'Berserk') { _useBerserk(m, memberIndex); return; }
 
   showMessage(`${m.name} uses ${skill.name}! (Skill logic not yet implemented)`);
 }
@@ -989,6 +990,42 @@ function _useSunderArmor(member, memberIndex) {
   }, SUNDER_ARMOR_DURATION_MS);
 
   _startSkillCooldownUI(memberIndex, _sunderArmorCooldownEnd);
+}
+
+// ── Berserk (Korg) ─────────────────────────────────────────────────────────
+const BERSERK_COOLDOWN_MS = 60_000;
+const BERSERK_DURATION_MS = 30_000;
+let _berserkCooldownEnd = 0;
+let _berserkExpireTimer = null;
+
+function _useBerserk(member, memberIndex) {
+  const now = performance.now();
+  if (now < _berserkCooldownEnd) {
+    const remaining = Math.ceil((_berserkCooldownEnd - now) / 1000);
+    showMessage(`<span style="color:#ff5050">Berserk</span> — ready in ${remaining}s`, 2000);
+    return;
+  }
+
+  skillsState.berserk.active = true;
+  skillsState.berserk.actorName = member.name;
+  skillsState.berserk.expiresAt = now + BERSERK_DURATION_MS;
+  _berserkCooldownEnd = now + BERSERK_COOLDOWN_MS;
+
+  showMessage(
+    `<span style="color:#ff5050">✦ Berserk</span> — ${member.name} roars in fury! Damage +20% for 30s.`,
+    3000
+  );
+  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Berserk' });
+
+  if (_berserkExpireTimer) clearTimeout(_berserkExpireTimer);
+  _berserkExpireTimer = setTimeout(() => {
+    skillsState.berserk.active = false;
+    skillsState.berserk.actorName = null;
+    showMessage(`<span style="color:#ff5050">Berserk</span> fades — the rage subsides.`, 2500);
+    _berserkExpireTimer = null;
+  }, BERSERK_DURATION_MS);
+
+  _startSkillCooldownUI(memberIndex, _berserkCooldownEnd);
 }
 
 // ── Sanctuary (Alaric) ────────────────────────────────────────────────────
