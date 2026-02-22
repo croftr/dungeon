@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { WALL_H } from './map.js';
 import { party } from './party.js';
+import { skillsState } from './skills-state.js';
 
 // ─────────────────────────────────────────────
 //  LIGHTING SETUP
@@ -31,13 +32,18 @@ let flickerTime = 0;
 export function updateLighting({ torch, fill }, camera, dt) {
   flickerTime += dt * 3.5;
 
-  let hasTorch = false;
-  for (let i = 0; i < party.length; i++) {
-    const m = party[i];
-    if (!m.isEmpty && m.equipment) {
-      if (m.equipment.leftHand?.name === 'Torch' || m.equipment.rightHand?.name === 'Torch') {
-        hasTorch = true;
-        break;
+  // Physical torch equipped by any party member, OR Arcane Lantern skill active
+  let hasTorch = skillsState.arcaneLight.active &&
+    performance.now() < skillsState.arcaneLight.expiresAt;
+
+  if (!hasTorch) {
+    for (let i = 0; i < party.length; i++) {
+      const m = party[i];
+      if (!m.isEmpty && m.equipment) {
+        if (m.equipment.leftHand?.name === 'Torch' || m.equipment.rightHand?.name === 'Torch') {
+          hasTorch = true;
+          break;
+        }
       }
     }
   }

@@ -5,7 +5,7 @@ import { createHitSpark } from './particles.js';
 import { CELL } from './map.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
-import { party, setHp, flashPortraitHit, showMemberDamage } from './party.js';
+import { party, setHp, flashPortraitHit, showMemberDamage, refreshPartyCards } from './party.js';
 import { showMessage } from './minimap.js';
 import {
   playerHitChance, monsterHitChance,
@@ -17,6 +17,34 @@ import {
 import { setInCombat, playCritSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { MONSTER_DEFS as D } from './monster-defs.js';
+import { skillsState } from './skills-state.js';
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  HUNTER'S EYE STATE  — tracks which monster is currently being analysed
+// ─────────────────────────────────────────────────────────────────────────────
+let _huntersEyeTargetId = null;
+
+/** Returns the id of the monster currently targeted by Hunter's Eye, or null. */
+export function getHuntersEyeTargetId() { return _huntersEyeTargetId; }
+
+/** Show or hide the detailed stats panel above the chosen monster. Pass null to hide all. */
+export function setHuntersEyeTarget(id) {
+  _huntersEyeTargetId = id;
+  monsters.forEach((m) => {
+    const show = id !== null && m.id === id && m.alive;
+    if (m.statsLabel) m.statsLabel.visible = show;
+    if (show && m.statsPanel) _updateStatsPanel(m);
+  });
+}
+
+/** Returns the first alive monster within melee range of the player, or null. */
+export function getInRangeMonster() {
+  return monsters.find(
+    (m) => m.alive &&
+      Math.abs(m.gridRow - player.gridRow) <= 1 &&
+      Math.abs(m.gridCol - player.gridCol) <= 1
+  ) ?? null;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  MONSTER INSTANCES
@@ -87,6 +115,24 @@ export function isMonsterAt(row, col) {
 //  INIT
 // ─────────────────────────────────────────────────────────────────────────────
 
+/** Rebuild the HTML content of a monster's Hunter's Eye stats panel. */
+function _updateStatsPanel(m) {
+  if (!m.statsPanel) return;
+  const s = m.stats ?? {};
+  m.statsPanel.innerHTML =
+    `<div class="hep-name">${m.name}</div>` +
+    `<div class="hep-row"><span class="hep-label">HP</span><span class="hep-val">${m.hp} / ${m.hpMax}</span></div>` +
+    `<div class="hep-divider"></div>` +
+    `<div class="hep-grid">` +
+    `<span class="hep-stat">STR <b>${s.strength ?? '—'}</b></span>` +
+    `<span class="hep-stat">DEX <b>${s.dexterity ?? '—'}</b></span>` +
+    `<span class="hep-stat">VIT <b>${s.vitality ?? '—'}</b></span>` +
+    `<span class="hep-stat">INT <b>${s.intelligence ?? '—'}</b></span>` +
+    `<span class="hep-stat">RES <b>${s.resilience ?? '—'}</b></span>` +
+    `<span class="hep-stat">DEF <b>${m.defence ?? '—'}</b></span>` +
+    `</div>`;
+}
+
 export function initMonsters(scene) {
   const gltfLoader = new GLTFLoader();
 
@@ -148,6 +194,18 @@ export function initMonsters(scene) {
       model.add(hpLabel);
       m.hpLabel = hpLabel;
 
+      // ── Hunter's Eye stats panel (CSS2DObject) ─────────────────────────
+      const statsDiv = document.createElement('div');
+      statsDiv.className = 'monster-stats-panel';
+      _updateStatsPanel({ ...m, statsPanel: statsDiv }); // seed initial HTML
+      m.statsPanel = statsDiv;
+
+      const statsLabel = new CSS2DObject(statsDiv);
+      statsLabel.position.set(0, 2.6, 0); // above the HP bar
+      statsLabel.visible = false;
+      model.add(statsLabel);
+      m.statsLabel = statsLabel;
+
       // Load the attack animation GLB
       gltfLoader.load(m.glbAttack, (animGltf) => {
         if (animGltf.animations && animGltf.animations.length > 0) {
@@ -180,6 +238,8 @@ export function updateMonsters(dt, playerCamera, scene) {
   monsters.forEach((m) => {
     if (!m.alive || currentLevel !== 1) {
       if (m.hpLabel) m.hpLabel.visible = false;
+      if (m.statsLabel) m.statsLabel.visible = false;
+      if (_huntersEyeTargetId === m.id) _huntersEyeTargetId = null;
       if (m.mesh) m.mesh.visible = false;
       return;
     }
@@ -199,12 +259,22 @@ export function updateMonsters(dt, playerCamera, scene) {
 
     if (m.hpLabel) m.hpLabel.visible = inRange;
 
+    // Auto-deactivate Hunter's Eye if the player disengages from this monster
+    if (_huntersEyeTargetId === m.id && !inRange) {
+      _huntersEyeTargetId = null;
+      if (m.statsLabel) m.statsLabel.visible = false;
+    }
+
     // Proximity attack logic: if player is adjacent, attack them periodically
     if (inRange) {
       m.attackCooldown = (m.attackCooldown || 0) - dt;
       if (m.attackCooldown <= 0) {
         triggerMonsterAttack(m.id);
-        m.attackCooldown = 5.0 + (Math.random() * 2.0); // Next attack in 5.0 - 7.0 seconds
+        let nextAttack = 5.0 + (Math.random() * 2.0); // Next attack in 5.0 - 7.0 seconds
+        if (skillsState.entangle?.active && skillsState.entangle?.targetId === m.id) {
+          nextAttack *= 2.0;
+        }
+        m.attackCooldown = nextAttack;
       }
     } else {
       // Ready to attack immediately when player steps close
@@ -230,6 +300,9 @@ export function hitMonster(monsterId, finalDamage, attackType) {
     const pct = m.hpMax > 0 ? (m.hp / m.hpMax) * 100 : 0;
     m.hpBarFill.style.width = `${pct}%`;
   }
+
+  // Keep the Hunter's Eye panel in sync if it's currently showing
+  if (m.statsLabel?.visible) _updateStatsPanel(m);
 
   setInCombat();
 
@@ -264,7 +337,15 @@ export function attackMonster(monsterId, character, weaponDef, attackType) {
 
   // 5% chance to critically hit — triples the calculated damage
   const isCrit = Math.random() < CRIT_CHANCE;
-  const damage = isCrit ? Math.round(preCritDamage * CRIT_MULTIPLIER) : preCritDamage;
+  let damage = isCrit ? Math.round(preCritDamage * CRIT_MULTIPLIER) : preCritDamage;
+
+  // Runic Scholar — doubles final spell damage after ALL other modifiers (including crit)
+  const runicActive = isMagic && character.runicScholarActive;
+  if (runicActive) {
+    damage = damage * 2;
+    character.runicScholarActive = false; // consume the buff
+    refreshPartyCards();                  // remove the glow from the skill slot
+  }
 
   const formula = {
     weaponBase: weaponDef?.baseDamage ?? 0,
@@ -272,6 +353,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType) {
     mitigation: isMagic ? (m.stats?.resilience ?? 0) : (m.defence ?? 0),
     preCritDamage,
     critMultiplier: isCrit ? CRIT_MULTIPLIER : 1,
+    runicScholar: runicActive,
   };
 
   const result = hitMonster(monsterId, damage, attackType);
@@ -322,7 +404,14 @@ function _applyMonsterDamage(monster) {
 
   // 5% chance to critically hit — triples the calculated damage
   const isCrit = Math.random() < CRIT_CHANCE;
-  const damage = isCrit ? Math.round(preCritDamage * CRIT_MULTIPLIER) : preCritDamage;
+  let damage = isCrit ? Math.round(preCritDamage * CRIT_MULTIPLIER) : preCritDamage;
+
+  // Sanctuary buff — Alaric's shield reduces all incoming party damage by 10%
+  const sanctuaryUp = skillsState.sanctuary.active &&
+    performance.now() < skillsState.sanctuary.expiresAt;
+  if (sanctuaryUp) {
+    damage = Math.max(1, Math.floor(damage * 0.9));
+  }
 
   setHp(target.id, target.hp - damage);
   flashPortraitHit(target.id);

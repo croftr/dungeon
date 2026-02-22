@@ -14,27 +14,27 @@ export const RECRUITS = [
         hp: 42, hpMax: 42, mp: 40, mpMax: 40, sp: 100, spMax: 100,
         stats: { strength: 6, dexterity: 9, vitality: 5, intelligence: 7, resilience: 5 },
         skills: [
-            { name: 'Point-Blank Shot', description: 'No accuracy penalty when firing a Bow or Crossbow at an enemy in the adjacent tile.' },
-            { name: 'Botanist', description: '50% chance to find two Herbs instead of one when clicking a Herb on the ground.' }
+            { name: 'Entangle', description: 'Halves the attack speed of the monster currently being fought for 30s. Only usable in combat. Cooldown: 60s.', icon: '/skills/entangle.png' },
+            { name: "Hunter's Eye", description: "Reveal full stats of the engaged monster — HP, STR, DEX, VIT, INT, RES and Defence. Only usable in combat.", icon: '/skills/hunters-eye.png' },
         ],
         image: '/elf_ranger_head.png',
-        leftHand: 'Bow', rightHand: 'Bow', startingSkill: 'Focus',
+        leftHand: 'Bow', rightHand: 'Bow', startingSkill: "Hunter's Eye",
         gridCol: 9, gridRow: 8, facing: 'front', // North wall
         isRecruited: false
     },
     {
         id: 'recruit_2',
-        name: 'Gareth',
+        name: 'Alaric',
         job: 'Paladin',
         race: 'Human',
         hp: 60, hpMax: 60, mp: 60, mpMax: 60, sp: 100, spMax: 100,
         stats: { strength: 9, dexterity: 5, vitality: 8, intelligence: 6, resilience: 9 },
         skills: [
-            { name: 'Field Medic', description: 'Use Bandages or Heal actions during combat, not just while resting.' },
-            { name: 'Whirlwind', description: 'With a two-handed weapon, strikes the enemy ahead and the two diagonal enemies simultaneously.' }
+            { name: 'Sanctuary', description: 'Surrounds the party in divine light, reducing all damage received by 10% for 60 seconds. Cooldown: 120s.', icon: '/skills/sancturary.png' },
+            { name: 'Holy Radiance', description: 'Calls down a pulse of holy energy, restoring 10 HP to every living party member. Cooldown: 120s.', icon: '/skills/holy-radiance.png' },
         ],
         image: '/human_paladin_head.png',
-        leftHand: 'Sword', rightHand: 'Shield', startingSkill: 'Holy Shield',
+        leftHand: 'Sword', rightHand: 'Shield', startingSkill: 'Sanctuary',
         gridCol: 10, gridRow: 8, facing: 'front', // North wall
         isRecruited: false
     },
@@ -62,11 +62,11 @@ export const RECRUITS = [
         hp: 30, hpMax: 30, mp: 150, mpMax: 150, sp: 100, spMax: 100,
         stats: { strength: 3, dexterity: 5, vitality: 4, intelligence: 10, resilience: 5 },
         skills: [
-            { name: 'Runic Scholar', description: 'Read ancient wall inscriptions to uncover puzzle hints or gain permanent stat buffs.' },
-            { name: 'Lockpicking', description: 'Open iron doors or chests without a key, or by consuming a Lockpick item.' }
+            { name: 'Arcane Lantern', description: 'Conjures a sphere of magical light that illuminates the dungeon as brightly as a torch for 60 seconds. Cooldown: 60s.', icon: '/skills/arcane-lantern.png' },
+            { name: 'Runic Scholar', description: 'Channels arcane power into the next spell cast, doubling its damage after all other modifiers are applied.', icon: '/skills/runic-scholar.png' },
         ],
         image: '/human_wizard_head.png',
-        leftHand: 'Staff', rightHand: '—', startingSkill: 'Magic Arrow',
+        leftHand: 'Staff', rightHand: '—', startingSkill: 'Runic Scholar',
         gridCol: 13, gridRow: 8, facing: 'front', // North wall
         isRecruited: false
     },

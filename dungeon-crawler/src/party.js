@@ -349,7 +349,7 @@ function refreshMember(m) {
 
   if (lhEl) renderItemIcon(lhName ? { name: lhName } : null, lhEl);
   if (rhEl) renderItemIcon((lhBothHands ? lhName : rhName) ? { name: lhBothHands ? lhName : rhName } : null, rhEl);
-  if (skEl) renderItemIcon(skName ? { name: skName } : null, skEl);
+  if (skEl) renderItemIcon(m.equipment?.skill ?? null, skEl);
 
   if (!m.cooldownTimers) m.cooldownTimers = {};
 
@@ -394,6 +394,7 @@ function refreshMember(m) {
   }
   if (skSlot) {
     skSlot.classList.toggle('slot-empty', !skName);
+    skSlot.classList.toggle('skill-runic-active', !!m.runicScholarActive);
   }
 }
 

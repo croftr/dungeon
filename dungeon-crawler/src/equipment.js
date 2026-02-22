@@ -1,14 +1,15 @@
-import { party, refreshPartyCards, lastAttackTimes } from './party.js';
+import { party, refreshPartyCards, lastAttackTimes, setHp } from './party.js';
 import { getItemDef } from './items.js';
 import { ACTIONS } from './items.js';
 import { playAction } from './actions.js';
-import { attackMonster, monsters } from './monster.js';
+import { attackMonster, monsters, getInRangeMonster, setHuntersEyeTarget, getHuntersEyeTargetId } from './monster.js';
 import { showMessage } from './minimap.js';
 import { dropMember } from './recruits.js';
 import { isInFrontOfPlayer } from './player.js';
 import { canMelee } from './combat-rules.js';
 import { playCritSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
+import { skillsState } from './skills-state.js';
 
 // ─────────────────────────────────────────────
 //  CONSTANTS
@@ -106,7 +107,8 @@ export function extendPartyData() {
       }
     }
     if (m.startingSkill) {
-      m.equipment.skill = { name: m.startingSkill, slot: 'skill' };
+      const skillDef = (m.skills ?? []).find((s) => s.name === m.startingSkill);
+      m.equipment.skill = { name: m.startingSkill, slot: 'skill', icon: skillDef?.icon ?? null };
     }
     // 20-slot inventory, all empty
     m.inventory = Array(INVENTORY_SIZE).fill(null);
@@ -122,8 +124,11 @@ export function renderItemIcon(item, containerEl) {
     return;
   }
   const def = getItemDef(item.name);
-  if (def && def.icon) {
-    containerEl.innerHTML = `<img src="${def.icon}" alt="${item.name}" draggable="false" style="width: 100%; height: 100%; object-fit: contain; pointer-events: none;" />`;
+  // Prefer the item definition icon, then fall back to an icon stored directly
+  // on the item object (used by skills such as Hunter's Eye).
+  const iconSrc = def?.icon || item.icon || null;
+  if (iconSrc) {
+    containerEl.innerHTML = `<img src="${iconSrc}" alt="${item.name}" draggable="false" style="width: 100%; height: 100%; object-fit: contain; pointer-events: none;" />`;
   } else {
     containerEl.innerHTML = `<span>${item.name}</span>`;
   }
@@ -200,7 +205,7 @@ function renderModal(memberIndex) {
         card.innerHTML = `<span class="skill-name">${skill.name}</span><span class="skill-desc">${skill.description}</span>`;
         // Click to equip — clicking the already-equipped skill unequips it
         card.addEventListener('click', () => {
-          m.equipment.skill = isEquipped ? null : { name: skill.name, slot: 'skill' };
+          m.equipment.skill = isEquipped ? null : { name: skill.name, slot: 'skill', icon: skill.icon ?? null };
           renderModal(activeCharIndex);
           refreshPartyCards();
         });
@@ -452,11 +457,30 @@ function useHand(memberIndex, hand) {
 }
 
 // ─────────────────────────────────────────────
-//  USE SKILL
+//  USE SKILL  — dispatcher + per-skill implementations
 // ─────────────────────────────────────────────
+
+// ── Cooldown timestamps (performance.now epoch when the skill becomes ready) ──
+const HUNTERS_EYE_COOLDOWN_MS = 60_000;
+const SANCTUARY_COOLDOWN_MS = 120_000;
+const SANCTUARY_DURATION_MS = 60_000;
+const HOLY_RADIANCE_COOLDOWN_MS = 120_000;
+const HOLY_RADIANCE_HEAL = 10;
+
+let _huntersEyeCooldownEnd = 0;
+let _sanctuaryCooldownEnd = 0;
+let _holyRadianceCooldownEnd = 0;
+let _sanctuaryExpireTimer = null;
+
+const ENTANGLE_COOLDOWN_MS = 60_000;
+const ENTANGLE_DURATION_MS = 30_000;
+let _entangleCooldownEnd = 0;
+let _entangleExpireTimer = null;
+
+// ── Dispatcher ────────────────────────────────────────────────────────────────
 function useSkill(memberIndex) {
   const m = party[memberIndex];
-  if (!m) return;
+  if (!m || m.isDead) return;
 
   const skill = m.equipment?.skill;
   if (!skill) {
@@ -464,7 +488,236 @@ function useSkill(memberIndex) {
     return;
   }
 
+  if (skill.name === "Hunter's Eye") { _useHuntersEye(m, memberIndex); return; }
+  if (skill.name === 'Sanctuary') { _useSanctuary(m, memberIndex); return; }
+  if (skill.name === 'Holy Radiance') { _useHolyRadiance(m, memberIndex); return; }
+  if (skill.name === 'Arcane Lantern') { _useArcaneLantern(m, memberIndex); return; }
+  if (skill.name === 'Runic Scholar') { _useRunicScholar(m, memberIndex); return; }
+  if (skill.name === 'Entangle') { _useEntangle(m, memberIndex); return; }
+
   showMessage(`${m.name} uses ${skill.name}! (Skill logic not yet implemented)`);
+}
+
+// ── Hunter's Eye (Elrond) ──────────────────────────────────────────────────
+function _useHuntersEye(member, memberIndex) {
+  // Always allow manual deactivation
+  if (getHuntersEyeTargetId() !== null) {
+    setHuntersEyeTarget(null);
+    showMessage(`${member.name} lowers Hunter's Eye.`);
+    return;
+  }
+
+  const now = performance.now();
+  if (now < _huntersEyeCooldownEnd) {
+    const remaining = Math.ceil((_huntersEyeCooldownEnd - now) / 1000);
+    showMessage(`<span style="color:#f0b040">Hunter's Eye</span> — ready in ${remaining}s`, 2000);
+    return;
+  }
+
+  const target = getInRangeMonster();
+  if (!target) {
+    showMessage(`<span style="color:#f0b040">Hunter's Eye</span> — no enemy in range. Engage a monster first!`, 2500);
+    return;
+  }
+
+  _huntersEyeCooldownEnd = now + HUNTERS_EYE_COOLDOWN_MS;
+  setHuntersEyeTarget(target.id);
+  showMessage(`<span style="color:#f0b040">Hunter's Eye</span> — ${member.name} reads the ${target.name}!`, 2500);
+  _startSkillCooldownUI(memberIndex, _huntersEyeCooldownEnd);
+}
+
+// ── Entangle (Elara) ──────────────────────────────────────────────────────
+function _useEntangle(member, memberIndex) {
+  const now = performance.now();
+  if (now < _entangleCooldownEnd) {
+    const remaining = Math.ceil((_entangleCooldownEnd - now) / 1000);
+    showMessage(`<span style="color:#80ff80">Entangle</span> — ready in ${remaining}s`, 2000);
+    return;
+  }
+
+  const target = getInRangeMonster();
+  if (!target) {
+    showMessage(`<span style="color:#80ff80">Entangle</span> — no enemy in range. Engage a monster first!`, 2500);
+    return;
+  }
+
+  skillsState.entangle.active = true;
+  skillsState.entangle.targetId = target.id;
+  skillsState.entangle.expiresAt = now + ENTANGLE_DURATION_MS;
+  _entangleCooldownEnd = now + ENTANGLE_COOLDOWN_MS;
+
+  showMessage(
+    `<span style="color:#80ff80">✦ Entangle</span> — ${member.name} roots the ${target.name}! Attack speed halved for 30s.`,
+    3000
+  );
+
+  if (_entangleExpireTimer) clearTimeout(_entangleExpireTimer);
+  _entangleExpireTimer = setTimeout(() => {
+    skillsState.entangle.active = false;
+    skillsState.entangle.targetId = null;
+    showMessage(`<span style="color:#80ff80">Entangle</span> fades — the roots wither away.`, 2500);
+    _entangleExpireTimer = null;
+  }, ENTANGLE_DURATION_MS);
+
+  _startSkillCooldownUI(memberIndex, _entangleCooldownEnd);
+}
+
+// ── Sanctuary (Alaric) ────────────────────────────────────────────────────
+function _useSanctuary(member, memberIndex) {
+  const now = performance.now();
+  if (now < _sanctuaryCooldownEnd) {
+    const remaining = Math.ceil((_sanctuaryCooldownEnd - now) / 1000);
+    showMessage(`<span style="color:#f0d080">Sanctuary</span> — ready in ${remaining}s`, 2000);
+    return;
+  }
+
+  // Activate the buff
+  skillsState.sanctuary.active = true;
+  skillsState.sanctuary.expiresAt = now + SANCTUARY_DURATION_MS;
+  _sanctuaryCooldownEnd = now + SANCTUARY_COOLDOWN_MS;
+
+  // Golden glow on the party panel while the shield holds
+  document.getElementById('party-panel')?.classList.add('sanctuary-active');
+
+  showMessage(
+    `<span style="color:#f0d080">✦ Sanctuary</span> — ${member.name} shields the party! Damage −10% for 60s.`,
+    3000
+  );
+
+  // Auto-expire the visual when the 60s buff ends
+  if (_sanctuaryExpireTimer) clearTimeout(_sanctuaryExpireTimer);
+  _sanctuaryExpireTimer = setTimeout(() => {
+    skillsState.sanctuary.active = false;
+    document.getElementById('party-panel')?.classList.remove('sanctuary-active');
+    showMessage(`<span style="color:#f0d080">Sanctuary</span> fades — the shield dissipates.`, 2500);
+    _sanctuaryExpireTimer = null;
+  }, SANCTUARY_DURATION_MS);
+
+  _startSkillCooldownUI(memberIndex, _sanctuaryCooldownEnd);
+}
+
+// ── Holy Radiance (Alaric) ────────────────────────────────────────────────
+function _useHolyRadiance(member, memberIndex) {
+  const now = performance.now();
+  if (now < _holyRadianceCooldownEnd) {
+    const remaining = Math.ceil((_holyRadianceCooldownEnd - now) / 1000);
+    showMessage(`<span style="color:#f8f8a0">Holy Radiance</span> — ready in ${remaining}s`, 2000);
+    return;
+  }
+
+  _holyRadianceCooldownEnd = now + HOLY_RADIANCE_COOLDOWN_MS;
+
+  let healed = 0;
+  party.forEach((m) => {
+    if (!m.isEmpty && !m.isDead && m.hp < m.hpMax) {
+      setHp(m.id, Math.min(m.hp + HOLY_RADIANCE_HEAL, m.hpMax));
+      healed++;
+    }
+  });
+
+  if (healed > 0) {
+    showMessage(
+      `<span style="color:#f8f8a0">✦ Holy Radiance</span> — ${member.name} calls down divine light! Each member heals ${HOLY_RADIANCE_HEAL} HP.`,
+      3000
+    );
+  } else {
+    showMessage(`<span style="color:#f8f8a0">Holy Radiance</span> — the party is already at full health.`, 2000);
+  }
+
+  _startSkillCooldownUI(memberIndex, _holyRadianceCooldownEnd);
+}
+
+// ── Arcane Lantern (Merlin) ───────────────────────────────────────────────
+const ARCANE_LANTERN_COOLDOWN_MS = 60_000;
+const ARCANE_LANTERN_DURATION_MS = 60_000;
+let _arcaneLanternCooldownEnd = 0;
+let _arcaneLanternExpireTimer = null;
+
+function _useArcaneLantern(member, memberIndex) {
+  const now = performance.now();
+  if (now < _arcaneLanternCooldownEnd) {
+    const remaining = Math.ceil((_arcaneLanternCooldownEnd - now) / 1000);
+    showMessage(`<span style="color:#a0d8ff">Arcane Lantern</span> — ready in ${remaining}s`, 2000);
+    return;
+  }
+
+  skillsState.arcaneLight.active = true;
+  skillsState.arcaneLight.expiresAt = now + ARCANE_LANTERN_DURATION_MS;
+  _arcaneLanternCooldownEnd = now + ARCANE_LANTERN_COOLDOWN_MS;
+
+  showMessage(
+    `<span style="color:#a0d8ff">✦ Arcane Lantern</span> — ${member.name} conjures magical light for 60s.`,
+    3000
+  );
+
+  if (_arcaneLanternExpireTimer) clearTimeout(_arcaneLanternExpireTimer);
+  _arcaneLanternExpireTimer = setTimeout(() => {
+    skillsState.arcaneLight.active = false;
+    showMessage(`<span style="color:#a0d8ff">Arcane Lantern</span> fades — darkness returns.`, 2500);
+    _arcaneLanternExpireTimer = null;
+  }, ARCANE_LANTERN_DURATION_MS);
+
+  _startSkillCooldownUI(memberIndex, _arcaneLanternCooldownEnd);
+}
+
+// ── Runic Scholar (Merlin) ────────────────────────────────────────────────
+function _useRunicScholar(member, memberIndex) {
+  // Toggle off if already primed (lets the player cancel the buff)
+  if (member.runicScholarActive) {
+    member.runicScholarActive = false;
+    refreshPartyCards();
+    showMessage(`<span style="color:#c080ff">Runic Scholar</span> — ${member.name} releases the charge.`, 2000);
+    return;
+  }
+
+  member.runicScholarActive = true;
+  refreshPartyCards(); // immediately lights up the skill slot glow
+
+  showMessage(
+    `<span style="color:#c080ff">✦ Runic Scholar</span> — ${member.name} channels the runes! Next spell deals ×2 damage.`,
+    3000
+  );
+}
+
+// ── Generic cooldown badge ────────────────────────────────────────────────
+/**
+ * Shows a countdown badge on the skill slot of the given party member.
+ * @param {number} memberIndex - Party slot index (0-3)
+ * @param {number} expiresAt   - performance.now() timestamp when cooldown ends
+ */
+function _startSkillCooldownUI(memberIndex, expiresAt) {
+  const slotEl = document.getElementById(`slot-sk-${memberIndex}`);
+  if (!slotEl) return;
+
+  // Cancel any existing timer stored on this element
+  if (slotEl._cdTimer) clearInterval(slotEl._cdTimer);
+
+  let badge = slotEl.querySelector('.skill-cd-badge');
+  if (!badge) {
+    badge = document.createElement('span');
+    badge.className = 'skill-cd-badge';
+    slotEl.appendChild(badge);
+  }
+
+  slotEl.classList.add('slot-cooling-down');
+  // Re-enable pointer events so clicking shows the remaining time message
+  slotEl.style.pointerEvents = 'auto';
+
+  function tick() {
+    const remaining = Math.ceil((expiresAt - performance.now()) / 1000);
+    if (remaining <= 0) {
+      clearInterval(slotEl._cdTimer);
+      slotEl._cdTimer = null;
+      slotEl.classList.remove('slot-cooling-down');
+      slotEl.style.pointerEvents = '';
+      badge.remove();
+    } else {
+      badge.textContent = remaining + 's';
+    }
+  }
+
+  tick();
+  slotEl._cdTimer = setInterval(tick, 500);
 }
 
 // ─────────────────────────────────────────────
