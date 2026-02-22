@@ -482,7 +482,7 @@
       </div>
       <div id="chest-body">
         <div id="chest-grid">
-          <!-- 12 slots injected via JS -->
+          <!-- 25 slots (5×5) -->
           <div class="chest-slot" data-index="0"></div>
           <div class="chest-slot" data-index="1"></div>
           <div class="chest-slot" data-index="2"></div>
@@ -495,9 +495,30 @@
           <div class="chest-slot" data-index="9"></div>
           <div class="chest-slot" data-index="10"></div>
           <div class="chest-slot" data-index="11"></div>
+          <div class="chest-slot" data-index="12"></div>
+          <div class="chest-slot" data-index="13"></div>
+          <div class="chest-slot" data-index="14"></div>
+          <div class="chest-slot" data-index="15"></div>
+          <div class="chest-slot" data-index="16"></div>
+          <div class="chest-slot" data-index="17"></div>
+          <div class="chest-slot" data-index="18"></div>
+          <div class="chest-slot" data-index="19"></div>
+          <div class="chest-slot" data-index="20"></div>
+          <div class="chest-slot" data-index="21"></div>
+          <div class="chest-slot" data-index="22"></div>
+          <div class="chest-slot" data-index="23"></div>
+          <div class="chest-slot" data-index="24"></div>
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Right-click context menu for inventory items -->
+  <div id="inv-context-menu" class="inv-ctx-hidden">
+    <div class="inv-ctx-item inv-ctx-equip" id="inv-ctx-equip">⚔ Equip</div>
+    <div class="inv-ctx-divider"></div>
+    <div class="inv-ctx-give-label" id="inv-ctx-give-label">Give to</div>
+    <div id="inv-ctx-give-list"></div>
   </div>
 
   <!-- Floating item tooltip — positioned by JS on hover, lives at body level -->
@@ -508,6 +529,8 @@
     <div id="item-detail-desc"></div>
     <div id="item-detail-stats">
       <div class="detail-stat-row" id="detail-row-damage"><span>Damage</span><span id="item-detail-damage"></span></div>
+      <div class="detail-stat-row" id="detail-row-defence"><span>Defence</span><span id="item-detail-defence"></span></div>
+      <div class="detail-stat-row" id="detail-row-block"><span>Block Chance</span><span id="item-detail-block"></span></div>
       <div class="detail-stat-row" id="detail-row-value"><span>Value</span><span id="item-detail-value"></span></div>
       <div class="detail-stat-row" id="detail-row-weight"><span>Weight</span><span id="item-detail-weight"></span></div>
       <div class="detail-stat-row" id="detail-row-ammo-mod"><span>Multiplier</span><span

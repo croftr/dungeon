@@ -47,6 +47,7 @@ const SLOT_LABELS = {
 //  STATE
 // ─────────────────────────────────────────────
 let activeCharIndex = null;
+let _ctxInvIndex = null;   // inventory slot most recently right-clicked
 
 // ─────────────────────────────────────────────
 //  DATA SETUP  — extends party member objects
@@ -380,9 +381,13 @@ function populateTooltip(item) {
   const def = getItemDef(item.name);
 
   const isAmmo = (def?.slot === 'ammo');
+  const hasDefence = !isAmmo && def?.defence != null && def.defence > 0;
+  const hasBlock = !isAmmo && def?.blockChance != null && def.blockChance > 0;
 
-  // Hide/show rows based on item type
+  // Hide/show rows based on item type and available stats
   document.getElementById('detail-row-damage').style.display = isAmmo ? 'none' : 'flex';
+  document.getElementById('detail-row-defence').style.display = hasDefence ? 'flex' : 'none';
+  document.getElementById('detail-row-block').style.display = hasBlock ? 'flex' : 'none';
   document.getElementById('detail-row-value').style.display = isAmmo ? 'none' : 'flex';
   document.getElementById('detail-row-weight').style.display = isAmmo ? 'none' : 'flex';
   document.getElementById('detail-row-ammo-mod').style.display = isAmmo ? 'flex' : 'none';
@@ -403,6 +408,12 @@ function populateTooltip(item) {
   } else {
     document.getElementById('item-detail-damage').textContent =
       def?.baseDamage != null ? def.baseDamage : '—';
+    if (hasDefence) {
+      document.getElementById('item-detail-defence').textContent = def.defence;
+    }
+    if (hasBlock) {
+      document.getElementById('item-detail-block').textContent = def.blockChance + '%';
+    }
     document.getElementById('item-detail-value').textContent =
       def != null ? def.value + ' gp' : '—';
     document.getElementById('item-detail-weight').textContent =
@@ -449,30 +460,15 @@ function attachTooltipListeners(el, getItem) {
 // ─────────────────────────────────────────────
 
 /**
- * Handle Shift + Click for quick transfer to the next party member.
+ * Core equip logic — moves item at invIndex from inventory into the
+ * appropriate equipment slot (handles bothHands, enable-spell, and
+ * regular slots). Shared by left-click and the context menu.
  */
-function onInventoryCellClick(e) {
-  if (activeCharIndex === null) return;
-  const invIndex = Number(e.currentTarget.dataset.index);
-  const m = party[activeCharIndex];
+function _equipItem(memberIndex, invIndex) {
+  const m = party[memberIndex];
   const item = m.inventory[invIndex];
   if (!item) return;
 
-  // Shift + Click = Quick Giving to next member
-  if (e.shiftKey) {
-    let nextIdx = (activeCharIndex + 1) % 4;
-    let attempts = 0;
-    while (party[nextIdx].isEmpty && attempts < 4) {
-      nextIdx = (nextIdx + 1) % 4;
-      attempts++;
-    }
-    if (nextIdx !== activeCharIndex) {
-      transferItem(activeCharIndex, nextIdx, invIndex);
-    }
-    return;
-  }
-
-  // Regular Click = Equip
   m.inventory[invIndex] = null;
 
   if (item.slot === 'bothHands') {
@@ -526,8 +522,121 @@ function onInventoryCellClick(e) {
     }
   }
 
-  renderModal(activeCharIndex);
+  renderModal(memberIndex);
   refreshPartyCards();
+}
+
+/**
+ * Left-click: equip immediately.
+ * Shift+click: quick-give to the next party member.
+ * Right-click: handled separately by onInventoryCellContextMenu.
+ */
+function onInventoryCellClick(e) {
+  if (activeCharIndex === null) return;
+  const invIndex = Number(e.currentTarget.dataset.index);
+  const m = party[activeCharIndex];
+  const item = m.inventory[invIndex];
+  if (!item) return;
+
+  // Shift + Click = Quick Giving to next member (original shortcut kept)
+  if (e.shiftKey) {
+    let nextIdx = (activeCharIndex + 1) % 4;
+    let attempts = 0;
+    while (party[nextIdx].isEmpty && attempts < 4) {
+      nextIdx = (nextIdx + 1) % 4;
+      attempts++;
+    }
+    if (nextIdx !== activeCharIndex) {
+      transferItem(activeCharIndex, nextIdx, invIndex);
+    }
+    return;
+  }
+
+  _equipItem(activeCharIndex, invIndex);
+}
+
+/** Right-click on an inventory cell → open the context menu. */
+function onInventoryCellContextMenu(e) {
+  if (activeCharIndex === null) return;
+  const invIndex = Number(e.currentTarget.dataset.index);
+  const m = party[activeCharIndex];
+  if (!m.inventory[invIndex]) return;   // empty cell — no menu
+
+  e.preventDefault();
+  hideTooltip();
+  _showContextMenu(e.clientX, e.clientY, invIndex);
+}
+
+// ─────────────────────────────────────────────
+//  CONTEXT MENU
+// ─────────────────────────────────────────────
+
+function _showContextMenu(cursorX, cursorY, invIndex) {
+  _ctxInvIndex = invIndex;
+
+  const menu = document.getElementById('inv-context-menu');
+  const giveList = document.getElementById('inv-ctx-give-list');
+  const giveLabel = document.getElementById('inv-ctx-give-label');
+
+  // ── Equip button ──
+  document.getElementById('inv-ctx-equip').onclick = () => {
+    _equipItem(activeCharIndex, _ctxInvIndex);
+    _hideContextMenu();
+  };
+
+  // ── Give-to list ──
+  giveList.innerHTML = '';
+  const targets = party.filter((p, i) => i !== activeCharIndex && !p.isEmpty);
+
+  if (targets.length === 0) {
+    giveLabel.style.display = 'none';
+    const none = document.createElement('div');
+    none.className = 'inv-ctx-no-targets';
+    none.textContent = 'No other party members';
+    giveList.appendChild(none);
+  } else {
+    giveLabel.style.display = '';
+    targets.forEach((target) => {
+      const targetIdx = party.indexOf(target);
+      const row = document.createElement('div');
+      row.className = 'inv-ctx-give-item';
+
+      // Small portrait
+      const canvas = document.createElement('canvas');
+      canvas.width = 26;
+      canvas.height = 26;
+      drawPortrait(canvas, target);
+
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = target.name;
+
+      row.appendChild(canvas);
+      row.appendChild(nameSpan);
+      row.addEventListener('click', () => {
+        transferItem(activeCharIndex, targetIdx, _ctxInvIndex);
+        _hideContextMenu();
+      });
+      giveList.appendChild(row);
+    });
+  }
+
+  // ── Position near cursor, flip if near viewport edges ──
+  menu.classList.remove('inv-ctx-hidden');
+  const mw = menu.offsetWidth || 180;
+  const mh = menu.offsetHeight || 130;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  let x = cursorX + 6;
+  let y = cursorY + 4;
+  if (x + mw > vw - 8) x = cursorX - mw - 6;
+  if (y + mh > vh - 8) y = cursorY - mh - 4;
+  menu.style.left = x + 'px';
+  menu.style.top  = y + 'px';
+}
+
+function _hideContextMenu() {
+  document.getElementById('inv-context-menu').classList.add('inv-ctx-hidden');
+  _ctxInvIndex = null;
 }
 
 // Clicking a body slot with an item → move it to first free inventory cell
@@ -1054,6 +1163,7 @@ function buildInventoryGrid() {
     cell.className = 'inv-cell';
     cell.dataset.index = i;
     cell.addEventListener('click', onInventoryCellClick);
+    cell.addEventListener('contextmenu', onInventoryCellContextMenu);
     // Hover tooltip — reads live item each time in case it changed
     attachTooltipListeners(cell, () => {
       if (activeCharIndex === null) return null;
@@ -1154,11 +1264,38 @@ function attachOverlayListeners() {
       if (e.target === document.getElementById('equip-overlay')) closeModal();
     });
 
-  // Escape key
+  // Escape key — close context menu first, then modal
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && activeCharIndex !== null) {
-      e.stopPropagation();
-      closeModal();
+    if (e.key === 'Escape') {
+      if (_ctxInvIndex !== null) {
+        e.stopPropagation();
+        _hideContextMenu();
+        return;
+      }
+      if (activeCharIndex !== null) {
+        e.stopPropagation();
+        closeModal();
+      }
+    }
+
+    // C key — open character inventory for the first available member
+    if (e.key === 'c' || e.key === 'C') {
+      if (activeCharIndex !== null) return; // already open
+      const overlayOpen = ['tactics-overlay', 'chest-overlay', 'main-menu-overlay'].some(id => {
+        const el = document.getElementById(id);
+        return el && window.getComputedStyle(el).display !== 'none';
+      });
+      if (overlayOpen) return;
+      const firstIndex = party.findIndex(m => !m.isEmpty && !m.isDead);
+      if (firstIndex !== -1) openModal(firstIndex);
+    }
+  });
+
+  // Click outside the context menu → dismiss it
+  document.addEventListener('mousedown', (e) => {
+    const menu = document.getElementById('inv-context-menu');
+    if (!menu.classList.contains('inv-ctx-hidden') && !menu.contains(e.target)) {
+      _hideContextMenu();
     }
   });
 }

@@ -55,6 +55,7 @@ function _buildModal() {
           <div class="mm-key-row"><span class="mm-key">Q / ←</span><span class="mm-desc">Turn Left</span></div>
           <div class="mm-key-row"><span class="mm-key">E / →</span><span class="mm-desc">Turn Right</span></div>
           <div class="mm-key-row"><span class="mm-key">A / D</span><span class="mm-desc">Strafe Left / Right</span></div>
+          <div class="mm-key-row"><span class="mm-key">C</span><span class="mm-desc">Character Inventory</span></div>
           <div class="mm-key-row"><span class="mm-key">P</span><span class="mm-desc">Party Tactics</span></div>
           <div class="mm-key-row"><span class="mm-key">B</span><span class="mm-desc">Battle Log</span></div>
           <div class="mm-key-row"><span class="mm-key">M</span><span class="mm-desc">Map</span></div>

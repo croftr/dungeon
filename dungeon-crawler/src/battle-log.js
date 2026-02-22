@@ -158,9 +158,11 @@ function _formula(e) {
   }
 
   // monster attack
-  const raw = e.statBonus + e.baseBonus - e.mitigation;
+  const defMit = e.defenceMitigation ?? 0;
+  const raw = e.statBonus + e.baseBonus - e.mitigation - defMit;
   const crit = e.crit ? ` ×${e.critMultiplier}` : '';
   const stunText = e.stunned ? ' (Stunned!)' : '';
   const poisonText = e.poisoned ? ' (Poisoned!)' : '';
-  return `(STR${e.statBonus}+${e.baseBonus}−mit${e.mitigation}=${raw}${crit})${stunText}${poisonText}`;
+  const defStr = defMit > 0 ? `−def${defMit}` : '';
+  return `(STR${e.statBonus}+${e.baseBonus}−res${e.mitigation}${defStr}=${raw}${crit})${stunText}${poisonText}`;
 }

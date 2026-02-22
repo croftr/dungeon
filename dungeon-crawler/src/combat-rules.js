@@ -105,16 +105,18 @@ export function calcPlayerMagicDamage(character, weaponDef, monster) {
 
 /**
  * Damage dealt by a monster's attack on a party member.
- * Scales with monster STR; reduced by the character's resilience.
+ * Scales with monster STR; reduced by the character's RES (resilience stat)
+ * and DEF (physical defence from equipped armour).
  *
- * @param {object} monster    Monster (needs stats.strength)
- * @param {object} character  Party member (needs stats.resilience)
- * @returns {number}          Final damage (minimum 1)
+ * @param {object} monster              Monster (needs stats.strength)
+ * @param {object} character            Party member (needs stats.resilience)
+ * @param {number} [characterDefence=0] Total physical defence from equipment
+ * @returns {number}                    Final damage (minimum 1)
  */
-export function calcMonsterDamage(monster, character) {
+export function calcMonsterDamage(monster, character, characterDefence = 0) {
   const raw = (monster.stats?.strength ?? 10) + MONSTER_BASE_ATTACK;
-  const mitigation = Math.floor((character.stats?.resilience ?? 0) * RESILIENCE_DAMAGE_FACTOR);
-  return Math.max(1, raw - mitigation);
+  const resMitigation = Math.floor((character.stats?.resilience ?? 0) * RESILIENCE_DAMAGE_FACTOR);
+  return Math.max(1, raw - resMitigation - characterDefence);
 }
 
 // ── Formation layout ─────────────────────────────────────────────────────────

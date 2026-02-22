@@ -519,8 +519,19 @@ function _applyMonsterDamage(monster) {
     return;
   }
 
-  const preCritDamage = calcMonsterDamage(monster, target);
-  const mitigation = Math.floor((target.stats?.resilience ?? 0) * RESILIENCE_DAMAGE_FACTOR);
+  // Calculate character's total physical defence from equipped armour
+  let charDefence = 0;
+  const _counted = new Set();
+  Object.values(target.equipment ?? {}).forEach(item => {
+    if (item && !_counted.has(item)) {
+      _counted.add(item);
+      const itemDef = getItemDef(item.name);
+      if (itemDef?.defence) charDefence += itemDef.defence;
+    }
+  });
+
+  const preCritDamage = calcMonsterDamage(monster, target, charDefence);
+  const resMitigation = Math.floor((target.stats?.resilience ?? 0) * RESILIENCE_DAMAGE_FACTOR);
 
   // 5% chance to critically hit — triples the calculated damage
   const isCrit = Math.random() < CRIT_CHANCE;
@@ -546,7 +557,8 @@ function _applyMonsterDamage(monster) {
     attackType: 'attack', hitChance, hit: true, crit: isCrit,
     statBonus: monster.stats?.strength ?? 10,
     baseBonus: MONSTER_BASE_ATTACK,
-    mitigation,
+    mitigation: resMitigation,
+    defenceMitigation: charDefence,
     preCritDamage,
     finalDamage: damage,
     critMultiplier: isCrit ? CRIT_MULTIPLIER : 1,

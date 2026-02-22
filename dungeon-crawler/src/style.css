@@ -1485,6 +1485,89 @@ body {
   color: #c8a84a;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   INVENTORY CONTEXT MENU
+   Right-click popup on inventory items — equip or give to another character.
+───────────────────────────────────────────────────────────────────────────── */
+#inv-context-menu {
+  position: fixed;
+  min-width: 175px;
+  background: rgba(8, 6, 3, 0.97);
+  border: 1px solid #7a5a28;
+  border-radius: 5px;
+  padding: 4px 0;
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 220, 120, 0.07);
+  z-index: 1200;
+  user-select: none;
+}
+
+#inv-context-menu.inv-ctx-hidden {
+  display: none;
+}
+
+.inv-ctx-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  color: #e8c87a;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  transition: background 0.1s ease;
+}
+
+.inv-ctx-item:hover {
+  background: rgba(200, 168, 74, 0.18);
+}
+
+.inv-ctx-equip {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.inv-ctx-divider {
+  border-top: 1px solid #4a3418;
+  margin: 3px 0;
+}
+
+.inv-ctx-give-label {
+  font-size: 0.72rem;
+  color: #806840;
+  padding: 3px 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.inv-ctx-give-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 16px;
+  cursor: pointer;
+  color: #c8a87a;
+  font-size: 0.84rem;
+  white-space: nowrap;
+  transition: background 0.1s ease;
+}
+
+.inv-ctx-give-item:hover {
+  background: rgba(200, 168, 74, 0.18);
+  color: #e8d89a;
+}
+
+.inv-ctx-give-item canvas {
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid #6a5030;
+}
+
+.inv-ctx-no-targets {
+  padding: 6px 16px;
+  color: #5a4828;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
 /* ── Dead party member card ─────────────────────────────────────────────── */
 .member-card--dead {
   border-color: #5a1010 !important;
@@ -1800,7 +1883,7 @@ body {
 }
 
 #chest-modal {
-  width: 320px;
+  width: 390px;
   background: rgba(10, 7, 4, 0.97);
   border: 1px solid #5a4a30;
   border-radius: 6px;
@@ -1862,7 +1945,7 @@ body {
 
 #chest-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 8px;
   padding: 15px;
 }
