@@ -631,14 +631,21 @@ body {
   font-weight: bold;
   color: #f0d870;
   pointer-events: none;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
   z-index: 2;
 }
 
 /* ── Sanctuary active buff — golden glow on the party panel ─────────────── */
 @keyframes sanctuary-pulse {
-  0%, 100% { box-shadow: 0 0 10px rgba(240, 210, 70, 0.35), inset 0 0 8px rgba(240, 210, 70, 0.08); }
-  50%       { box-shadow: 0 0 20px rgba(240, 210, 70, 0.60), inset 0 0 14px rgba(240, 210, 70, 0.18); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(240, 210, 70, 0.35), inset 0 0 8px rgba(240, 210, 70, 0.08);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(240, 210, 70, 0.60), inset 0 0 14px rgba(240, 210, 70, 0.18);
+  }
 }
 
 #party-panel.sanctuary-active {
@@ -652,8 +659,15 @@ body {
 
 /* ── Runic Scholar primed — arcane purple glow on the skill slot ─────────── */
 @keyframes runic-pulse {
-  0%, 100% { box-shadow: 0 0 6px rgba(180, 100, 255, 0.7),  inset 0 0 4px rgba(180, 100, 255, 0.2); }
-  50%       { box-shadow: 0 0 14px rgba(200, 130, 255, 1.0), inset 0 0 8px rgba(200, 130, 255, 0.4); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 6px rgba(180, 100, 255, 0.7), inset 0 0 4px rgba(180, 100, 255, 0.2);
+  }
+
+  50% {
+    box-shadow: 0 0 14px rgba(200, 130, 255, 1.0), inset 0 0 8px rgba(200, 130, 255, 0.4);
+  }
 }
 
 .skill-runic-active {
@@ -1116,6 +1130,11 @@ body {
   left: 50%;
 }
 
+#pd-ammo {
+  top: 103%;
+  left: -22%;
+}
+
 /* feet — same level as hands/rings */
 #pd-skill {
   top: 103%;
@@ -1482,7 +1501,7 @@ body {
   pointer-events: none;
   white-space: nowrap;
   min-width: 120px;
-  box-shadow: 0 0 10px rgba(200, 160, 50, 0.35), 0 2px 6px rgba(0,0,0,0.8);
+  box-shadow: 0 0 10px rgba(200, 160, 50, 0.35), 0 2px 6px rgba(0, 0, 0, 0.8);
 }
 
 .monster-stats-panel .hep-name {
@@ -1530,6 +1549,19 @@ body {
 
 .monster-stats-panel .hep-stat b {
   color: #e8d090;
+}
+
+.monster-stats-panel .hep-debuffs {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.monster-stats-panel .hep-debuff {
+  font-size: 10px;
+  text-align: center;
+  font-weight: bold;
 }
 
 /* ── Damage number popup on action button ──────────────────────────────── */
@@ -1905,6 +1937,33 @@ body {
   text-shadow: 0 0 4px rgba(255, 0, 0, 0.4);
 }
 
+.bl--skill {
+  color: #a0d8ff;
+}
+
+.bl--skill .bl-badge {
+  color: #00bfff;
+  text-shadow: 0 0 4px rgba(0, 191, 255, 0.4);
+}
+
+.bl--block {
+  color: #aaddff;
+}
+
+.bl--block .bl-badge {
+  color: #88ccff;
+  text-shadow: 0 0 4px rgba(136, 204, 255, 0.4);
+}
+
+.bl--stun {
+  color: #e0d0ff;
+}
+
+.bl--stun .bl-badge {
+  color: #c090ff;
+  text-shadow: 0 0 4px rgba(192, 144, 255, 0.4);
+}
+
 .bl-badge {
   width: 12px;
   flex-shrink: 0;
@@ -1925,7 +1984,7 @@ body {
 }
 
 .bl-dmg {
-  min-width: 52px;
+  min-width: 76px;
   text-align: right;
   flex-shrink: 0;
 }

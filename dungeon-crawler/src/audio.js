@@ -19,6 +19,7 @@ const SOUND_MAP = {
   shoot: { url: '/sounds/actions/shoot.mp3', offset: 0.05 },
   punch: { url: '/sounds/actions/bash.mp3', offset: 0.05 },
   fireball: { url: '/sounds/actions/fireball.mp3', offset: 0.0 },
+  'shield-bash': { url: '/sounds/actions/bash.mp3', offset: 0.05 },
 };
 
 const bufferCache = new Map();
@@ -96,37 +97,22 @@ export async function playCritSound(attackType) {
   }
 }
 
-/**
- * Synthesizes a magical rising chime sound for healing/resurrection.
- */
 export async function playHealSound() {
+  const buffer = await getBuffer('/sounds/actions/life-crystal.mp3');
+  if (!buffer) return;
+
   try {
     const ctx = getCtx();
-    const now = ctx.currentTime;
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
 
-    // Create a series of rising notes (chimes)
-    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.8;
 
-    notes.forEach((freq, i) => {
-      const startTime = now + (i * 0.1);
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
 
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq, startTime);
-      osc.frequency.exponentialRampToValueAtTime(freq * 1.5, startTime + 0.4);
-
-      gain.gain.setValueAtTime(0, startTime);
-      gain.gain.linearRampToValueAtTime(0.2, startTime + 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.4);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(startTime);
-      osc.stop(startTime + 0.4);
-    });
+    source.start(0);
   } catch (err) {
     console.warn('[audio] playHealSound failed:', err);
   }
@@ -191,6 +177,10 @@ export async function startMusic() {
  */
 export function setInCombat() {
   combatTimer = 10.0; // Stay in combat music for 10 seconds after last event
+}
+
+export function isInCombat() {
+  return combatTimer > 0;
 }
 
 export function updateAudio(dt) {

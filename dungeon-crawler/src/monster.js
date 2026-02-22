@@ -16,6 +16,7 @@ import {
 } from './combat-rules.js';
 import { setInCombat, playCritSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
+import { getItemDef } from './items.js';
 import { MONSTER_DEFS as D } from './monster-defs.js';
 import { skillsState } from './skills-state.js';
 
@@ -119,6 +120,36 @@ export function isMonsterAt(row, col) {
 function _updateStatsPanel(m) {
   if (!m.statsPanel) return;
   const s = m.stats ?? {};
+
+  const isSundered = skillsState.sunderArmor?.active && skillsState.sunderArmor?.targetId === m.id;
+  const defVal = m.defence ?? '—';
+  const resVal = s.resilience ?? '—';
+
+  const displayDef = isSundered && defVal !== '—' ? `<span style="color:#ff8080">${Math.floor(defVal / 2)}</span>` : defVal;
+  const displayRes = isSundered && resVal !== '—' ? `<span style="color:#ff8080">${Math.floor(resVal / 2)}</span>` : resVal;
+
+  const isEntangled = skillsState.entangle?.active && skillsState.entangle?.targetId === m.id;
+  const isStunned = m.stunUntil && performance.now() < m.stunUntil;
+  const isPoisoned = m.poisonUntil && performance.now() < m.poisonUntil;
+
+  let debuffsHtml = '';
+  if (isSundered || isEntangled || isStunned || isPoisoned) {
+    debuffsHtml += `<div class="hep-divider"></div><div class="hep-debuffs">`;
+    if (isSundered) {
+      debuffsHtml += `<div class="hep-debuff" style="color:#ff8080">Sunder Armor (DEF/RES ½)</div>`;
+    }
+    if (isEntangled) {
+      debuffsHtml += `<div class="hep-debuff" style="color:#80ff80">Entangle (Atk Spd ½)</div>`;
+    }
+    if (isStunned) {
+      debuffsHtml += `<div class="hep-debuff" style="color:#ffd040">Stunned (Cannot Act)</div>`;
+    }
+    if (isPoisoned) {
+      debuffsHtml += `<div class="hep-debuff" style="color:#50ff50">Poisoned (1 HP / 2s)</div>`;
+    }
+    debuffsHtml += `</div>`;
+  }
+
   m.statsPanel.innerHTML =
     `<div class="hep-name">${m.name}</div>` +
     `<div class="hep-row"><span class="hep-label">HP</span><span class="hep-val">${m.hp} / ${m.hpMax}</span></div>` +
@@ -128,9 +159,10 @@ function _updateStatsPanel(m) {
     `<span class="hep-stat">DEX <b>${s.dexterity ?? '—'}</b></span>` +
     `<span class="hep-stat">VIT <b>${s.vitality ?? '—'}</b></span>` +
     `<span class="hep-stat">INT <b>${s.intelligence ?? '—'}</b></span>` +
-    `<span class="hep-stat">RES <b>${s.resilience ?? '—'}</b></span>` +
-    `<span class="hep-stat">DEF <b>${m.defence ?? '—'}</b></span>` +
-    `</div>`;
+    `<span class="hep-stat">RES <b>${displayRes}</b></span>` +
+    `<span class="hep-stat">DEF <b>${displayDef}</b></span>` +
+    `</div>` +
+    debuffsHtml;
 }
 
 export function initMonsters(scene) {
@@ -245,6 +277,17 @@ export function updateMonsters(dt, playerCamera, scene) {
     }
     if (m.mesh) m.mesh.visible = true;
 
+    // Poison Tick Logic
+    if (m.poisonUntil && performance.now() < m.poisonUntil) {
+      m.poisonTimer = (m.poisonTimer || 0) + dt;
+      if (m.poisonTimer >= 2.0) {
+        m.poisonTimer = 0;
+        hitMonster(m.id, 1, 'poison-dot');
+      }
+    } else {
+      m.poisonTimer = 0;
+    }
+
     if (m.mixer) m.mixer.update(dt);
 
     if (m.mesh && playerCamera && m.lookAtPlayer) {
@@ -267,14 +310,18 @@ export function updateMonsters(dt, playerCamera, scene) {
 
     // Proximity attack logic: if player is adjacent, attack them periodically
     if (inRange) {
-      m.attackCooldown = (m.attackCooldown || 0) - dt;
-      if (m.attackCooldown <= 0) {
-        triggerMonsterAttack(m.id);
-        let nextAttack = 5.0 + (Math.random() * 2.0); // Next attack in 5.0 - 7.0 seconds
-        if (skillsState.entangle?.active && skillsState.entangle?.targetId === m.id) {
-          nextAttack *= 2.0;
+      if (m.stunUntil && performance.now() < m.stunUntil) {
+        // Monster is stunned; cooldown timer doesn't tick down yet
+      } else {
+        m.attackCooldown = (m.attackCooldown || 0) - dt;
+        if (m.attackCooldown <= 0) {
+          triggerMonsterAttack(m.id);
+          let nextAttack = 5.0 + (Math.random() * 2.0); // Next attack in 5.0 - 7.0 seconds
+          if (skillsState.entangle?.active && skillsState.entangle?.targetId === m.id) {
+            nextAttack *= 2.0;
+          }
+          m.attackCooldown = nextAttack;
         }
-        m.attackCooldown = nextAttack;
       }
     } else {
       // Ready to attack immediately when player steps close
@@ -318,7 +365,7 @@ export function hitMonster(monsterId, finalDamage, attackType) {
   return { hit: true, damage, killed: m.hp === 0, monsterHp: m.hp };
 }
 
-export function attackMonster(monsterId, character, weaponDef, attackType) {
+export function attackMonster(monsterId, character, weaponDef, attackType, ammoDef = null) {
   const m = monsters.find((x) => x.id === monsterId && x.alive);
   if (!m) return { hit: false, damage: 0, killed: false, monsterHp: 0, crit: false, hitChance: 0, formula: null, monsterName: '' };
 
@@ -331,9 +378,21 @@ export function attackMonster(monsterId, character, weaponDef, attackType) {
 
   // Fireball uses INT + monster magic resilience; all other attacks use STR + monster defence
   const isMagic = attackType === 'fireball';
+
+  // Apply Sunder Armor penalty
+  const isSundered = skillsState.sunderArmor?.active && skillsState.sunderArmor?.targetId === m.id;
+  const effectiveDefence = isSundered ? Math.floor((m.defence ?? 0) / 2) : (m.defence ?? 0);
+  const effectiveResilience = isSundered ? Math.floor((m.stats?.resilience ?? 0) / 2) : (m.stats?.resilience ?? 0);
+
+  const mSunder = {
+    ...m,
+    defence: effectiveDefence,
+    stats: { ...m.stats, resilience: effectiveResilience }
+  };
+
   const preCritDamage = isMagic
-    ? calcPlayerMagicDamage(character, weaponDef, m)
-    : calcPlayerPhysicalDamage(character, weaponDef, m);
+    ? calcPlayerMagicDamage(character, weaponDef, mSunder)
+    : calcPlayerPhysicalDamage(character, weaponDef, mSunder, ammoDef);
 
   // 5% chance to critically hit — triples the calculated damage
   const isCrit = Math.random() < CRIT_CHANCE;
@@ -350,14 +409,36 @@ export function attackMonster(monsterId, character, weaponDef, attackType) {
   const formula = {
     weaponBase: weaponDef?.baseDamage ?? 0,
     statBonus: isMagic ? (character.stats?.intelligence ?? 10) : (character.stats?.strength ?? 10),
-    mitigation: isMagic ? (m.stats?.resilience ?? 0) : (m.defence ?? 0),
+    mitigation: isMagic ? effectiveResilience : effectiveDefence,
     preCritDamage,
     critMultiplier: isCrit ? CRIT_MULTIPLIER : 1,
     runicScholar: runicActive,
+    ammoModifier: ammoDef?.damageModifier ?? null,
   };
 
   const result = hitMonster(monsterId, damage, attackType);
-  return { ...result, crit: isCrit, hitChance, formula, monsterName: m.name };
+
+  let stunned = false;
+  if (attackType === 'shield-bash' && result.hit && !result.killed) {
+    if (Math.random() < 0.5) {
+      stunned = true;
+      m.stunUntil = performance.now() + 5000;
+      showMessage(`${m.name} is stunned by the shield bash!`);
+      if (m.statsLabel?.visible) _updateStatsPanel(m);
+      setTimeout(() => { if (m.statsLabel?.visible) _updateStatsPanel(m); }, 5000); // refresh UI when it drops
+    }
+  }
+
+  // Poison Logic
+  if (ammoDef && ammoDef.damageType === 'poison' && result.hit && !result.killed) {
+    m.poisonUntil = performance.now() + 30000;
+    m.poisonTimer = 1.9; // Fast-forward first tick to feel impactful (0.1s later)
+    showMessage(`${m.name} is poisoned!`);
+    if (m.statsLabel?.visible) _updateStatsPanel(m);
+    setTimeout(() => { if (m.statsLabel?.visible) _updateStatsPanel(m); }, 30000);
+  }
+
+  return { ...result, crit: isCrit, hitChance, formula, monsterName: m.name, stunned };
 }
 
 export function triggerMonsterAttack(monsterId) {
@@ -396,6 +477,43 @@ function _applyMonsterDamage(monster) {
       attacker: monster.name, target: target.name,
       attackType: 'attack', hitChance, hit: false, crit: false,
     });
+    return;
+  }
+
+  // Shield Block Check
+  let blocked = false;
+  const leftItem = target.equipment?.leftHand ? getItemDef(target.equipment.leftHand.name) : null;
+  const rightItem = target.equipment?.rightHand ? getItemDef(target.equipment.rightHand.name) : null;
+
+  const blockChance = Math.max(
+    leftItem?.blockChance ?? 0,
+    rightItem?.blockChance ?? 0
+  );
+
+  if (blockChance > 0 && Math.random() * 100 < blockChance) {
+    blocked = true;
+  }
+
+  if (blocked) {
+    addLogEntry({
+      time: Date.now(), actor: 'monster',
+      attacker: monster.name, target: target.name,
+      attackType: 'attack', hitChance, hit: true, crit: false,
+      blocked: true,
+    });
+
+    // UI Feedback for block
+    const memberTop = document.querySelector(`#member-${target.id} .member-top`);
+    if (memberTop) {
+      const popup = document.createElement('span');
+      popup.className = 'damage-popup damage-popup--incoming';
+      popup.style.color = '#a0d8ff';
+      popup.textContent = 'BLOCKED';
+      memberTop.appendChild(popup);
+      setTimeout(() => popup.remove(), 900);
+    }
+
+    showMessage(`<b>${target.name}</b> blocks the ${monster.name}'s attack!`);
     return;
   }
 

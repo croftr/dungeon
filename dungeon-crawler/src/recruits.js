@@ -18,7 +18,7 @@ export const RECRUITS = [
             { name: "Hunter's Eye", description: "Reveal full stats of the engaged monster — HP, STR, DEX, VIT, INT, RES and Defence. Only usable in combat.", icon: '/skills/hunters-eye.png' },
         ],
         image: '/elf_ranger_head.png',
-        leftHand: 'Bow', rightHand: 'Bow', startingSkill: "Hunter's Eye",
+        leftHand: 'Bow', rightHand: 'Bow', ammo: 'Wooden Arrows', startingSkill: "Hunter's Eye",
         gridCol: 9, gridRow: 8, facing: 'front', // North wall
         isRecruited: false
     },
@@ -46,11 +46,10 @@ export const RECRUITS = [
         hp: 70, hpMax: 70, mp: 20, mpMax: 20, sp: 100, spMax: 100,
         stats: { strength: 10, dexterity: 6, vitality: 9, intelligence: 4, resilience: 7 },
         skills: [
-            { name: 'Dual-Wielding', description: 'Equip a weapon in the off-hand slot. Attacking triggers two cooldowns — one per weapon.' },
-            { name: 'Shadow-Step', description: '25% chance to not trigger enemy aggression when moving backward or sideways.' }
+            { name: 'Sunder Armor', description: 'Crushes the targeted monster, halving its defence stats for 30s. Only usable in combat. Cooldown: 60s.', icon: '/skills/sunder-armor.png' },
         ],
         image: '/dwarf_barbarian_head.png',
-        leftHand: 'Axe', rightHand: 'Torch', startingSkill: 'Rage',
+        leftHand: 'Axe', rightHand: 'Torch', startingSkill: 'Sunder Armor',
         gridCol: 12, gridRow: 8, facing: 'front', // North wall
         isRecruited: false
     },
@@ -59,7 +58,7 @@ export const RECRUITS = [
         name: 'Merlin',
         job: 'Wizard',
         race: 'Human',
-        hp: 30, hpMax: 30, mp: 150, mpMax: 150, sp: 100, spMax: 100,
+        hp: 30, hpMax: 30, mp: 50, mpMax: 50, sp: 100, spMax: 100,
         stats: { strength: 3, dexterity: 5, vitality: 4, intelligence: 10, resilience: 5 },
         skills: [
             { name: 'Arcane Lantern', description: 'Conjures a sphere of magical light that illuminates the dungeon as brightly as a torch for 60 seconds. Cooldown: 60s.', icon: '/skills/arcane-lantern.png' },
@@ -294,6 +293,7 @@ function recruitCharacter(r) {
         leftHand: r.leftHand,
         rightHand: r.rightHand,
         startingSkill: r.startingSkill,
+        ammo: r.ammo,
         image: r.image, // Include image in party slot
         // Add fake portrait palette so it does not crash drawPortrait
         skinLight: '#e8c8a0', skinDark: '#b08050',

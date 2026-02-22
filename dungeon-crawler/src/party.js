@@ -1,6 +1,7 @@
 import { getItemDef } from './items.js';
 import { renderItemIcon } from './equipment.js';
 import { addLogEntry } from './battle-log.js';
+import { isInCombat } from './audio.js';
 
 // ─────────────────────────────────────────────
 //  PARTY DATA  — 4 members
@@ -659,4 +660,23 @@ export function resurrectAll() {
   // Hide Game Over if it was showing
   const el = document.getElementById('game-over');
   if (el) el.classList.remove('active');
+}
+
+let mpRegenTimer = 0;
+
+export function updateParty(dt) {
+  if (isInCombat()) {
+    mpRegenTimer = 0;
+    return;
+  }
+
+  mpRegenTimer += dt;
+  if (mpRegenTimer >= 1.0) { // 1 MP per second
+    mpRegenTimer -= 1.0;
+    party.forEach((m) => {
+      if (!m.isEmpty && !m.isDead && m.mp < m.mpMax) {
+        setMp(m.id, m.mp + 1);
+      }
+    });
+  }
 }

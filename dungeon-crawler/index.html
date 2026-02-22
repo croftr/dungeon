@@ -215,6 +215,10 @@
               <span class="stat-name">Resilience</span>
               <span class="stat-value" id="stat-resilience"></span>
             </div>
+            <div class="stat-row" style="margin-top: 5px; border-top: 1px solid #3a3020; padding-top: 5px;">
+              <span class="stat-name" style="color: #c8a84a;">Defence</span>
+              <span class="stat-value" id="stat-total-defence" style="color: #fff; font-weight: bold;">0</span>
+            </div>
           </div>
 
           <div class="bars" style="padding: 10px; border-bottom: 1px solid #2a2010; pointer-events: auto;">
@@ -444,6 +448,17 @@
             <div class="pd-slot" id="pd-feet" data-slot="feet">
               <span class="pd-item"></span>
             </div>
+            <div class="pd-slot" id="pd-ammo" data-slot="ammo">
+              <!-- faint quiver/arrow outline icon -->
+              <svg class="pd-slot-icon" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg" fill="none"
+                stroke="#c8a84a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M40 8 L32 40 L24 8" />
+                <line x1="32" y1="4" x2="32" y2="40" />
+                <line x1="28" y1="4" x2="36" y2="4" />
+                <line x1="20" y1="12" x2="44" y2="12" />
+              </svg>
+              <span class="pd-item"></span>
+            </div>
             <div class="pd-slot" id="pd-skill" data-slot="skill">
               <span class="pd-item"></span>
             </div>
@@ -492,9 +507,13 @@
     <div id="item-detail-action"></div>
     <div id="item-detail-desc"></div>
     <div id="item-detail-stats">
-      <div class="detail-stat-row"><span>Damage</span><span id="item-detail-damage"></span></div>
-      <div class="detail-stat-row"><span>Value</span><span id="item-detail-value"></span></div>
-      <div class="detail-stat-row"><span>Weight</span><span id="item-detail-weight"></span></div>
+      <div class="detail-stat-row" id="detail-row-damage"><span>Damage</span><span id="item-detail-damage"></span></div>
+      <div class="detail-stat-row" id="detail-row-value"><span>Value</span><span id="item-detail-value"></span></div>
+      <div class="detail-stat-row" id="detail-row-weight"><span>Weight</span><span id="item-detail-weight"></span></div>
+      <div class="detail-stat-row" id="detail-row-ammo-mod"><span>Multiplier</span><span
+          id="item-detail-ammo-mod"></span></div>
+      <div class="detail-stat-row" id="detail-row-ammo-type"><span>Type</span><span id="item-detail-ammo-type"></span>
+      </div>
     </div>
   </div>
 

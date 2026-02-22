@@ -9,7 +9,7 @@ function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 // ── Hit chance constants ──────────────────────────────────────────────────────
 
 /** Base probability (0–1) that a player's attack hits a monster. */
-export const BASE_PLAYER_HIT_CHANCE  = 0.80;
+export const BASE_PLAYER_HIT_CHANCE = 0.80;
 
 /** Base probability (0–1) that a monster's attack hits a party member. */
 export const BASE_MONSTER_HIT_CHANCE = 0.45;
@@ -81,8 +81,11 @@ export function monsterHitChance(monster, character) {
  * @param {object} monster    Monster (needs defence)
  * @returns {number}          Final damage (minimum 1)
  */
-export function calcPlayerPhysicalDamage(character, weaponDef, monster) {
-  const raw = (weaponDef?.baseDamage ?? 0) + (character.stats?.strength ?? 10);
+export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef = null) {
+  let raw = (weaponDef?.baseDamage ?? 0) + (character.stats?.strength ?? 10);
+  if (ammoDef && ammoDef.damageModifier) {
+    raw = Math.round(raw * ammoDef.damageModifier);
+  }
   return Math.max(1, raw - (monster.defence ?? 0));
 }
 
@@ -149,7 +152,7 @@ export function getEffectiveFrontLine(party) {
   const frontLine = [];
   for (const [frontIdx, backIdx] of [[0, 2], [1, 3]]) {
     const front = party[frontIdx];
-    const back  = party[backIdx];
+    const back = party[backIdx];
     if (front && !front.isEmpty && !front.isDead) {
       frontLine.push(front);
     } else if (back && !back.isEmpty && !back.isDead) {

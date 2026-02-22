@@ -24,4 +24,10 @@ export const skillsState = {
     expiresAt: 0,
     targetId: null,
   },
+  /** Sunder Armor - Halves defence stats for the targeted monster */
+  sunderArmor: {
+    active: false,
+    expiresAt: 0,
+    targetId: null,
+  },
 };

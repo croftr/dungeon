@@ -184,17 +184,19 @@ export function playAction(attackType, hand = 'left') {
   // Play the matching sound simultaneously
   playActionSound(attackType);
 
+  const visualType = attackType === ACTIONS.SHIELD_BASH ? ACTIONS.BASH : attackType;
+
   // Remove any existing animation that hasn't finished yet
   const existing = document.getElementById('action-anim');
   if (existing) existing.remove();
 
   // If there's no defined SVG (like Fireball, which uses 3D particles), we stop here
-  if (!ACTION_SVG[attackType]) return;
+  if (!ACTION_SVG[visualType]) return;
 
   const el = document.createElement('div');
   el.id = 'action-anim';
-  el.classList.add(`anim-${attackType}`);
-  el.innerHTML = ACTION_SVG[attackType];
+  el.classList.add(`anim-${visualType}`);
+  el.innerHTML = ACTION_SVG[visualType];
 
   // Mirror the graphic for right-hand attacks
   if (hand === 'right' && (attackType === ACTIONS.SWIPE || attackType === ACTIONS.SHOOT || attackType === ACTIONS.PUNCH)) {

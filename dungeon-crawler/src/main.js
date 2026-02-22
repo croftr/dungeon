@@ -6,7 +6,7 @@ import { initPlayer, initInput, setCallbacks, tweenGroup, player } from './playe
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
-import { initParty } from './party.js';
+import { initParty, updateParty } from './party.js';
 import { initEquipment } from './equipment.js';
 import { initMonsters, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState } from './recruits.js';
@@ -116,6 +116,7 @@ function animate(now) {
   updateMonsters(dt, camera, scene);
   updateParticles(dt);
   updateAudio(dt);
+  updateParty(dt);
   renderer.render(scene, camera);
   css2dRenderer.render(scene, camera);
 }

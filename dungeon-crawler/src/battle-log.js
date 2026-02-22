@@ -76,6 +76,9 @@ function _prependRow(entry) {
   const row = document.createElement('div');
   let typeClass = 'bl--hit';
   if (entry.type === 'death') typeClass = 'bl--death';
+  else if (entry.type === 'skill') typeClass = 'bl--skill';
+  else if (entry.blocked) typeClass = 'bl--block';
+  else if (entry.stunned) typeClass = 'bl--stun';
   else if (entry.crit) typeClass = 'bl--crit';
   else if (!entry.hit) typeClass = 'bl--miss';
 
@@ -103,10 +106,24 @@ function _buildRowHtml(e) {
     return `<span class="bl-badge">💀</span>` +
       `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.target}</b> has been slain!</span>`;
   }
+  if (e.type === 'skill') {
+    return `<span class="bl-badge">✦</span>` +
+      `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.actor}</b> uses ${e.skillName}!</span>`;
+  }
 
-  const badge = e.crit ? '⚡' : e.hit ? '●' : '○';
+  const badge = e.blocked ? '🛡' : (e.crit ? '⚡' : e.hit ? '●' : '○');
   const type = TYPE_ABBR[e.attackType] ?? e.attackType;
-  const dmgPart = e.hit ? `<b>${e.finalDamage}</b> dmg` : 'miss';
+
+  let dmgPart = 'miss';
+  if (e.blocked) {
+    dmgPart = 'blocked';
+  } else if (e.hit) {
+    if (e.crit) {
+      dmgPart = `<b>CRIT! ${e.finalDamage}</b><span style="font-size:10px;">dmg</span>`;
+    } else {
+      dmgPart = `<b>${e.finalDamage}</b> dmg`;
+    }
+  }
   const formula = _formula(e);
 
   return `<span class="bl-badge">${badge}</span>` +
@@ -117,6 +134,10 @@ function _buildRowHtml(e) {
 }
 
 function _formula(e) {
+  if (e.blocked) {
+    return '(Shield Block)';
+  }
+
   if (!e.hit) {
     return `(${Math.round(e.hitChance * 100)}% hit chance)`;
   }
@@ -124,13 +145,16 @@ function _formula(e) {
   if (e.actor === 'player') {
     const stat = e.attackType === 'fireball' ? 'INT' : 'STR';
     const mit = e.attackType === 'fireball' ? 'RES' : 'DEF';
+    const ammoLine = e.ammoModifier && e.ammoModifier !== 1 ? ` ×${e.ammoModifier}ammo` : '';
     const raw = e.statBonus + e.weaponBase - e.mitigation;
     const crit = e.crit ? ` ×${e.critMultiplier}` : '';
-    return `(${stat}${e.statBonus}+base${e.weaponBase}−${mit}${e.mitigation}=${raw}${crit})`;
+    const stunText = e.stunned ? ' (Stunned!)' : '';
+    return `(${stat}${e.statBonus}+base${e.weaponBase}${ammoLine}−${mit}${e.mitigation}=${raw}${crit})${stunText}`;
   }
 
   // monster attack
   const raw = e.statBonus + e.baseBonus - e.mitigation;
   const crit = e.crit ? ` ×${e.critMultiplier}` : '';
-  return `(STR${e.statBonus}+${e.baseBonus}−mit${e.mitigation}=${raw}${crit})`;
+  const stunText = e.stunned ? ' (Stunned!)' : '';
+  return `(STR${e.statBonus}+${e.baseBonus}−mit${e.mitigation}=${raw}${crit})${stunText}`;
 }

@@ -1,4 +1,4 @@
-import { party, refreshPartyCards, lastAttackTimes, setHp } from './party.js';
+import { party, refreshPartyCards, lastAttackTimes, setHp, setMp } from './party.js';
 import { getItemDef } from './items.js';
 import { ACTIONS } from './items.js';
 import { playAction } from './actions.js';
@@ -19,7 +19,7 @@ const SLOT_KEYS = [
   'leftHand', 'rightHand',
   'belt', 'hands',
   'ring1', 'ring2',
-  'legs', 'feet', 'skill',
+  'legs', 'feet', 'ammo', 'skill',
 ];
 
 const INVENTORY_SIZE = 20; // 4 cols × 5 rows
@@ -39,6 +39,7 @@ const SLOT_LABELS = {
   ring2: 'Ring',
   legs: 'Legs',
   feet: 'Feet',
+  ammo: 'Ammunition',
   skill: 'Skill',
 };
 
@@ -110,6 +111,11 @@ export function extendPartyData() {
       const skillDef = (m.skills ?? []).find((s) => s.name === m.startingSkill);
       m.equipment.skill = { name: m.startingSkill, slot: 'skill', icon: skillDef?.icon ?? null };
     }
+
+    if (m.ammo) {
+      m.equipment.ammo = { name: m.ammo, slot: 'ammo' };
+    }
+
     // 20-slot inventory, all empty
     m.inventory = Array(INVENTORY_SIZE).fill(null);
   });
@@ -168,6 +174,22 @@ function renderModal(memberIndex) {
     const el = document.getElementById(`stat-${key}`);
     if (el) el.textContent = stats[key] ?? '—';
   });
+
+  // ── Total Defence ──
+  let totalDef = 0;
+  // Use a Set to avoid double-counting bothHands items which are in both slots
+  const countedItems = new Set();
+  Object.values(m.equipment).forEach(item => {
+    if (item && !countedItems.has(item)) {
+      countedItems.add(item);
+      const def = getItemDef(item.name);
+      if (def?.defence) {
+        totalDef += def.defence;
+      }
+    }
+  });
+  const defEl = document.getElementById('stat-total-defence');
+  if (defEl) defEl.textContent = totalDef;
 
   // ── Stat bars (HP/MP/SP) ──
   const pctHelper = (val, max) => Math.max(0, Math.min(100, (val / max) * 100)).toFixed(1) + '%';
@@ -262,6 +284,15 @@ function populateTooltip(item) {
   statsEl.style.display = 'flex';
   const def = getItemDef(item.name);
 
+  const isAmmo = (def?.slot === 'ammo');
+
+  // Hide/show rows based on item type
+  document.getElementById('detail-row-damage').style.display = isAmmo ? 'none' : 'flex';
+  document.getElementById('detail-row-value').style.display = isAmmo ? 'none' : 'flex';
+  document.getElementById('detail-row-weight').style.display = isAmmo ? 'none' : 'flex';
+  document.getElementById('detail-row-ammo-mod').style.display = isAmmo ? 'flex' : 'none';
+  document.getElementById('detail-row-ammo-type').style.display = isAmmo ? 'flex' : 'none';
+
   slotEl.textContent =
     'Slot: ' + (SLOT_LABELS[def?.slot ?? item.slot] ?? item.slot);
   actionEl.textContent =
@@ -270,12 +301,18 @@ function populateTooltip(item) {
       : '';
   descEl.textContent =
     def?.description ?? '—';
-  document.getElementById('item-detail-damage').textContent =
-    def?.baseDamage != null ? def.baseDamage : '—';
-  document.getElementById('item-detail-value').textContent =
-    def != null ? def.value + ' gp' : '—';
-  document.getElementById('item-detail-weight').textContent =
-    def != null ? def.weight + ' kg' : '—';
+
+  if (isAmmo) {
+    document.getElementById('item-detail-ammo-mod').textContent = '×' + (def?.damageModifier ?? 1.0);
+    document.getElementById('item-detail-ammo-type').textContent = (def?.damageType ?? 'normal').toUpperCase();
+  } else {
+    document.getElementById('item-detail-damage').textContent =
+      def?.baseDamage != null ? def.baseDamage : '—';
+    document.getElementById('item-detail-value').textContent =
+      def != null ? def.value + ' gp' : '—';
+    document.getElementById('item-detail-weight').textContent =
+      def != null ? def.weight + ' kg' : '—';
+  }
 }
 
 function showTooltip(item, mouseX, mouseY) {
@@ -400,6 +437,17 @@ function useHand(memberIndex, hand) {
   // Set the cooldown timer and force HUD re-render.
   // If `bothHands` weapon (e.g., Short Bow), set the cooldown for left hand, 
   // which is correctly polled by both HUD visual slots.
+
+  // Apply mana cost if applicable
+  const mpCost = def?.mpCost ?? 0;
+  if (mpCost > 0) {
+    if (m.mp < mpCost) {
+      showMessage(`${m.name} does not have enough mana!`);
+      return;
+    }
+    setMp(m.id, m.mp - mpCost);
+  }
+
   lastAttackTimes[timeKey] = now;
   refreshPartyCards();
 
@@ -411,7 +459,9 @@ function useHand(memberIndex, hand) {
   }
 
   // Pass character object + weapon def; hit chance and damage are resolved in combat-rules.js
-  const result = attackMonster(target.id, m, def, attackType);
+  const ammoItem = m.equipment?.ammo;
+  const ammoDef = ammoItem ? getItemDef(ammoItem.name) : null;
+  const result = attackMonster(target.id, m, def, attackType, ammoDef);
 
   addLogEntry({
     time: Date.now(),
@@ -428,6 +478,8 @@ function useHand(memberIndex, hand) {
     preCritDamage: result.formula?.preCritDamage ?? 0,
     finalDamage: result.damage,
     critMultiplier: result.formula?.critMultiplier ?? 1,
+    stunned: result.stunned ?? false,
+    ammoModifier: result.formula?.ammoModifier ?? null,
   });
 
   if (!result.hit) {
@@ -477,6 +529,11 @@ const ENTANGLE_DURATION_MS = 30_000;
 let _entangleCooldownEnd = 0;
 let _entangleExpireTimer = null;
 
+const SUNDER_ARMOR_COOLDOWN_MS = 60_000;
+const SUNDER_ARMOR_DURATION_MS = 30_000;
+let _sunderArmorCooldownEnd = 0;
+let _sunderArmorExpireTimer = null;
+
 // ── Dispatcher ────────────────────────────────────────────────────────────────
 function useSkill(memberIndex) {
   const m = party[memberIndex];
@@ -494,6 +551,7 @@ function useSkill(memberIndex) {
   if (skill.name === 'Arcane Lantern') { _useArcaneLantern(m, memberIndex); return; }
   if (skill.name === 'Runic Scholar') { _useRunicScholar(m, memberIndex); return; }
   if (skill.name === 'Entangle') { _useEntangle(m, memberIndex); return; }
+  if (skill.name === 'Sunder Armor') { _useSunderArmor(m, memberIndex); return; }
 
   showMessage(`${m.name} uses ${skill.name}! (Skill logic not yet implemented)`);
 }
@@ -523,6 +581,7 @@ function _useHuntersEye(member, memberIndex) {
   _huntersEyeCooldownEnd = now + HUNTERS_EYE_COOLDOWN_MS;
   setHuntersEyeTarget(target.id);
   showMessage(`<span style="color:#f0b040">Hunter's Eye</span> — ${member.name} reads the ${target.name}!`, 2500);
+  addLogEntry({ type: 'skill', actor: member.name, skillName: "Hunter's Eye" });
   _startSkillCooldownUI(memberIndex, _huntersEyeCooldownEnd);
 }
 
@@ -550,6 +609,7 @@ function _useEntangle(member, memberIndex) {
     `<span style="color:#80ff80">✦ Entangle</span> — ${member.name} roots the ${target.name}! Attack speed halved for 30s.`,
     3000
   );
+  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Entangle' });
 
   if (_entangleExpireTimer) clearTimeout(_entangleExpireTimer);
   _entangleExpireTimer = setTimeout(() => {
@@ -560,6 +620,43 @@ function _useEntangle(member, memberIndex) {
   }, ENTANGLE_DURATION_MS);
 
   _startSkillCooldownUI(memberIndex, _entangleCooldownEnd);
+}
+
+// ── Sunder Armor (Thorek) ──────────────────────────────────────────────────
+function _useSunderArmor(member, memberIndex) {
+  const now = performance.now();
+  if (now < _sunderArmorCooldownEnd) {
+    const remaining = Math.ceil((_sunderArmorCooldownEnd - now) / 1000);
+    showMessage(`<span style="color:#ff8080">Sunder Armor</span> — ready in ${remaining}s`, 2000);
+    return;
+  }
+
+  const target = getInRangeMonster();
+  if (!target) {
+    showMessage(`<span style="color:#ff8080">Sunder Armor</span> — no enemy in range. Engage a monster first!`, 2500);
+    return;
+  }
+
+  skillsState.sunderArmor.active = true;
+  skillsState.sunderArmor.targetId = target.id;
+  skillsState.sunderArmor.expiresAt = now + SUNDER_ARMOR_DURATION_MS;
+  _sunderArmorCooldownEnd = now + SUNDER_ARMOR_COOLDOWN_MS;
+
+  showMessage(
+    `<span style="color:#ff8080">✦ Sunder Armor</span> — ${member.name} crushes the ${target.name}! Defence halved for 30s.`,
+    3000
+  );
+  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Sunder Armor' });
+
+  if (_sunderArmorExpireTimer) clearTimeout(_sunderArmorExpireTimer);
+  _sunderArmorExpireTimer = setTimeout(() => {
+    skillsState.sunderArmor.active = false;
+    skillsState.sunderArmor.targetId = null;
+    showMessage(`<span style="color:#ff8080">Sunder Armor</span> fades — the armor naturally mends.`, 2500);
+    _sunderArmorExpireTimer = null;
+  }, SUNDER_ARMOR_DURATION_MS);
+
+  _startSkillCooldownUI(memberIndex, _sunderArmorCooldownEnd);
 }
 
 // ── Sanctuary (Alaric) ────────────────────────────────────────────────────
@@ -583,6 +680,7 @@ function _useSanctuary(member, memberIndex) {
     `<span style="color:#f0d080">✦ Sanctuary</span> — ${member.name} shields the party! Damage −10% for 60s.`,
     3000
   );
+  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Sanctuary' });
 
   // Auto-expire the visual when the 60s buff ends
   if (_sanctuaryExpireTimer) clearTimeout(_sanctuaryExpireTimer);
@@ -620,6 +718,7 @@ function _useHolyRadiance(member, memberIndex) {
       `<span style="color:#f8f8a0">✦ Holy Radiance</span> — ${member.name} calls down divine light! Each member heals ${HOLY_RADIANCE_HEAL} HP.`,
       3000
     );
+    addLogEntry({ type: 'skill', actor: member.name, skillName: 'Holy Radiance' });
   } else {
     showMessage(`<span style="color:#f8f8a0">Holy Radiance</span> — the party is already at full health.`, 2000);
   }
@@ -649,6 +748,7 @@ function _useArcaneLantern(member, memberIndex) {
     `<span style="color:#a0d8ff">✦ Arcane Lantern</span> — ${member.name} conjures magical light for 60s.`,
     3000
   );
+  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Arcane Lantern' });
 
   if (_arcaneLanternExpireTimer) clearTimeout(_arcaneLanternExpireTimer);
   _arcaneLanternExpireTimer = setTimeout(() => {
@@ -677,6 +777,7 @@ function _useRunicScholar(member, memberIndex) {
     `<span style="color:#c080ff">✦ Runic Scholar</span> — ${member.name} channels the runes! Next spell deals ×2 damage.`,
     3000
   );
+  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Runic Scholar' });
 }
 
 // ── Generic cooldown badge ────────────────────────────────────────────────

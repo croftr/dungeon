@@ -5,7 +5,7 @@ import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, isInFrontOfPlayer, player } from './player.js';
 import { showMessage } from './minimap.js';
 import { getItemDef } from './items.js';
-import { resurrectAll } from './party.js';
+import { party, resurrectAll } from './party.js';
 import { playHealSound, playBoneSound } from './audio.js';
 
 export const objects = [];
@@ -56,7 +56,7 @@ export function initObjects(scene, camera) {
                 const isOnSameSquare = (player.gridRow === obj.userData.gridRow && player.gridCol === obj.userData.gridCol);
 
                 if (isOnSameSquare) {
-                    openChestModal();
+                    openChestModal(obj);
                 } else {
                     showMessage("Stand on the chest to open it.");
                 }
@@ -133,9 +133,9 @@ export function spawnObjectsForLevel() {
 
     if (level === 1) {
         // Chest in the starter room
-        addChest(objectsGroup, gltfLoader, 11, 13, 0, 0.7);
+        addChest(objectsGroup, gltfLoader, 11, 13, 0, 0.7, ['Leather Boots', 'Steel Arrows', 'Poison Arrows']);
         // New Chest at the end of the long passage
-        addChest(objectsGroup, gltfLoader, 7, 1, 0, -0.7);
+        addChest(objectsGroup, gltfLoader, 7, 1, 0, -0.7, []);
         // Crystals in the starter room
         addCrystals(objectsGroup, gltfLoader, 9, 11, 0, -0.7);
         // Bone pile in the passage
@@ -219,7 +219,7 @@ function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offsetX = 0, 
     });
 }
 
-function addChest(scene, loader, col, row, rotY, offsetZ = 0) {
+function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = []) {
     loader.load('/items/Meshy_AI_Treasure_Chest_0221184131_texture.glb', (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.3);
@@ -233,6 +233,7 @@ function addChest(scene, loader, col, row, rotY, offsetZ = 0) {
                 child.userData.isChest = true;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
+                child.userData.contents = contents; // Link contents to the chest object
             }
         });
 
@@ -295,35 +296,44 @@ function openPortcullis(p) {
         .start();
 }
 
-function openChestModal() {
+function openChestModal(chestObj) {
     const overlay = document.getElementById('chest-overlay');
     overlay.classList.remove('chest-hidden');
 
     const slots = document.querySelectorAll('.chest-slot');
-    const boots = getItemDef('Leather Boots');
+    const contents = chestObj.userData.contents || [];
+
+    const firstMember = party.find(m => !m.isEmpty);
 
     slots.forEach((slot, i) => {
         slot.innerHTML = '';
         slot.classList.remove('occupied');
         slot.onclick = null; // Clear previous handlers
 
-        if (i === 0 && boots) {
+        if (!firstMember) return;
+
+        const itemName = contents[i];
+        if (itemName) {
+            const itemDef = getItemDef(itemName);
+            if (!itemDef) return;
+
             slot.classList.add('occupied');
             const img = document.createElement('img');
-            img.src = boots.icon;
-            img.title = boots.name;
+            img.src = itemDef.icon;
+            img.title = itemDef.name;
             slot.appendChild(img);
 
             slot.onclick = () => {
-                // Top-left character is index 0
                 import('./equipment.js').then(m => {
-                    const success = m.addItemToInventory(0, boots.name);
+                    const success = m.addItemToInventory(firstMember.id, itemDef.name);
                     if (success) {
-                        showMessage(`Aldric picks up ${boots.name}.`);
+                        showMessage(`${firstMember.name} picks up ${itemDef.name}.`);
+                        // Remove from chest data
+                        contents[i] = null;
+                        // Update UI
                         slot.innerHTML = '';
                         slot.classList.remove('occupied');
                         slot.onclick = null;
-                        // Close modal after picking up the item
                         overlay.classList.add('chest-hidden');
                     } else {
                         showMessage("Inventory is full!");
