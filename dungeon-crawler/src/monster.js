@@ -35,43 +35,45 @@ function inst(def, id, gridRow, gridCol, glbIdle, glbAttack, attackSound, scale 
   };
 }
 
+// All monsters lined up in the test room (row 11, cols 18-25).
+// Enter the test room from the starter room heading east — they're waiting in a row.
 export const monsters = [
-  inst(D.treekin, 0, 13, 5,
+  inst(D.treekin, 0, 11, 18,
     '/monsters/meshy-AI-treeKin/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/meshy-AI-treeKin/Meshy_AI_Animation_mage_soell_cast_withSkin.glb',
     '/monsters/meshy-AI-treeKin/treeKin-attack.mp3', 0.45),
 
-  inst(D.goblin, 1, 9, 2,
+  inst(D.goblin, 1, 11, 19,
     '/monsters/meshy-AI-goblin/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/meshy-AI-goblin/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
     '/monsters/meshy-AI-goblin/goblin-attack.wav'),
 
-  inst(D.albino_goblin, 2, 15, 3,
+  inst(D.albino_goblin, 2, 11, 20,
     '/monsters/meshy-AI-abbino-goblin/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/meshy-AI-abbino-goblin/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
     '/monsters/meshy-AI-abbino-goblin/albino-goblin-attack.mp3'),
 
-  inst(D.zombie, 4, 19, 7,
+  inst(D.zombie, 3, 11, 21,
     '/monsters/meshy-AI-zombie/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/meshy-AI-zombie/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
     '/monsters/meshy-AI-zombie/zombie-attack.mp3'),
 
-  inst(D.ghoul, 5, 17, 3,
+  inst(D.ghoul, 4, 11, 22,
     '/monsters/meshy-AI-ghoul/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/meshy-AI-ghoul/Meshy_AI_Animation_Basic_Jump_withSkin.glb',
     '/monsters/meshy-AI-ghoul/ghoul-attack.mp3'),
 
-  inst(D.iceman, 3, 21, 1,
+  inst(D.iceman, 5, 11, 23,
     '/monsters/meshy-AI-iceMan/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/meshy-AI-iceMan/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
     '/monsters/meshy-AI-iceMan/iceman-attack.mp3', 0.6),
 
-  inst(D.albino_goblin, 6, 19, 3,
+  inst(D.albino_goblin, 6, 11, 24,
     '/monsters/meshy-AI-abbino-goblin/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/meshy-AI-abbino-goblin/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
     '/monsters/meshy-AI-abbino-goblin/albino-goblin-attack.mp3'),
 
-  inst(D.orc, 7, 21, 12,
+  inst(D.orc, 7, 11, 25,
     '/monsters/meshy-AI-orc/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/meshy-AI-orc/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
     '/monsters/meshy-AI-orc/orc-attack.mp3', 0.5),
