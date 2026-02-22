@@ -1923,6 +1923,18 @@ body {
   text-transform: uppercase;
 }
 
+#chest-sent-label {
+  flex: 1;
+  text-align: right;
+  font-size: 11px;
+  color: #8a7040;
+  font-style: italic;
+  padding-right: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 #chest-close {
   background: none;
   border: 1px solid #4a3a20;
@@ -1950,7 +1962,7 @@ body {
   padding: 15px;
 }
 
-.chest-slot {
+.chest-slot, .merchant-slot {
   aspect-ratio: 1;
   background: rgba(0, 0, 0, 0.5);
   border: 1px solid #2a2010;
@@ -1969,20 +1981,225 @@ body {
   position: relative;
 }
 
-.chest-slot:hover {
+.chest-slot:hover, .merchant-slot:hover {
   border-color: #a08050;
   background: rgba(60, 40, 10, 0.45);
 }
 
-.chest-slot.occupied {
+.chest-slot.occupied, .merchant-slot.occupied {
   border-color: #6a5030;
   color: #e8c87a;
 }
 
-.chest-slot img {
+.chest-slot img, .merchant-slot img {
   width: 85%;
   height: 85%;
   object-fit: contain;
+}
+
+/* ── Merchant modal ─────────────────────────────────────────────────────── */
+#merchant-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.merchant-hidden {
+  display: none !important;
+}
+
+#merchant-modal {
+  width: 700px;
+  background: rgba(10, 7, 4, 0.97);
+  border: 1px solid #5a4a30;
+  border-radius: 6px;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 220, 120, 0.07);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: monospace;
+}
+
+#merchant-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid #3a2e18;
+  background: rgba(0, 0, 0, 0.4);
+  flex-shrink: 0;
+}
+
+#merchant-title {
+  font-size: 13px;
+  color: #c8a84a;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+#merchant-close {
+  background: none;
+  border: 1px solid #4a3a20;
+  color: #888;
+  font-size: 18px;
+  width: 28px;
+  height: 28px;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+#merchant-close:hover {
+  border-color: #8a7040;
+  color: #c8a84a;
+}
+
+#merchant-body {
+  display: flex;
+  gap: 0;
+  min-height: 340px;
+}
+
+#merchant-shop-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  border-right: 1px solid #3a2e18;
+}
+
+#merchant-basket-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+}
+
+.merchant-panel-label {
+  font-size: 10px;
+  color: #6a5830;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+#merchant-grid,
+#merchant-basket-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  flex: 1;
+  align-content: start;
+}
+
+#merchant-basket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid #3a2e18;
+  border-radius: 3px;
+}
+
+#merchant-total-label {
+  font-size: 11px;
+  color: #c8a84a;
+}
+
+#merchant-gold-label {
+  font-size: 11px;
+  color: #7a9040;
+}
+
+#merchant-buy-btn {
+  margin-top: 12px;
+  padding: 8px 0;
+  background: rgba(60, 80, 20, 0.6);
+  border: 1px solid #6a8030;
+  border-radius: 3px;
+  color: #a8c850;
+  font-family: monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+#merchant-buy-btn:hover:not(:disabled) {
+  background: rgba(80, 110, 25, 0.75);
+  border-color: #8ab040;
+  color: #c8e870;
+}
+
+#merchant-buy-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ── Merchant item slots (shop & basket) ─────────────────────────────── */
+.merch-slot {
+  aspect-ratio: 1;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #2a2010;
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 2px 2px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.1s, background 0.1s;
+}
+
+.merch-slot:hover {
+  border-color: #a08050;
+  background: rgba(60, 40, 10, 0.45);
+}
+
+.merch-slot img {
+  width: 72%;
+  height: 72%;
+  object-fit: contain;
+}
+
+.merch-price {
+  font-size: 7px;
+  color: #c8a840;
+  margin-top: 2px;
+  line-height: 1;
+  font-family: monospace;
+}
+
+/* ── Chest right-click context menu ────────────────────────────────────── */
+#chest-ctx-menu {
+  position: fixed;
+  min-width: 160px;
+  background: rgba(8, 6, 3, 0.97);
+  border: 1px solid #7a5a28;
+  border-radius: 5px;
+  padding: 4px 0;
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 220, 120, 0.07);
+  z-index: 1200;
+  user-select: none;
+}
+
+.chest-ctx-hidden {
+  display: none;
 }
 
 /* ── Battle Log panel ───────────────────────────────────────────────────── */

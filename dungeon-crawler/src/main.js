@@ -10,7 +10,7 @@ import { initParty, updateParty } from './party.js';
 import { initEquipment } from './equipment.js';
 import { initMonsters, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState } from './recruits.js';
-import { initObjects, clearObjects, spawnObjectsForLevel } from './objects.js';
+import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt } from './objects.js';
 import { startMusic, updateAudio } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initMainMenu } from './main-menu.js';
@@ -77,7 +77,7 @@ setCallbacks({
     showMessage('YOU ESCAPED!<br><small style="font-size:14px;color:#aaa">The dungeon is conquered.</small>');
   },
   blocked(r, c) {
-    return isMonsterAt(r, c);
+    return isMonsterAt(r, c) || isShopAt(r, c);
   }
 });
 

@@ -429,13 +429,13 @@ function showTooltip(item, mouseX, mouseY) {
   positionTooltip(mouseX, mouseY);
 }
 
-function hideTooltip() {
+export function hideTooltip() {
   document.getElementById('item-detail-panel').classList.add('detail-hidden');
 }
 
 /** Attach hover tooltip listeners to any hoverable item element.
  *  getItem() is called each time to get the current item (may change). */
-function attachTooltipListeners(el, getItem) {
+export function attachTooltipListeners(el, getItem) {
   el.addEventListener('mouseenter', (e) => {
     const item = getItem();
     if (item) showTooltip(item, e.clientX, e.clientY);
@@ -631,7 +631,7 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
   if (x + mw > vw - 8) x = cursorX - mw - 6;
   if (y + mh > vh - 8) y = cursorY - mh - 4;
   menu.style.left = x + 'px';
-  menu.style.top  = y + 'px';
+  menu.style.top = y + 'px';
 }
 
 function _hideContextMenu() {
@@ -881,6 +881,7 @@ function useSkill(memberIndex) {
   if (skill.name === 'Holy Radiance') { _useHolyRadiance(m, memberIndex); return; }
   if (skill.name === 'Arcane Lantern') { _useArcaneLantern(m, memberIndex); return; }
   if (skill.name === 'Runic Scholar') { _useRunicScholar(m, memberIndex); return; }
+  if (skill.name === 'Mana Tap') { _useManaTap(m, memberIndex); return; }
   if (skill.name === 'Entangle') { _useEntangle(m, memberIndex); return; }
   if (skill.name === 'Sunder Armor') { _useSunderArmor(m, memberIndex); return; }
 
@@ -1111,6 +1112,34 @@ function _useRunicScholar(member, memberIndex) {
   addLogEntry({ type: 'skill', actor: member.name, skillName: 'Runic Scholar' });
 }
 
+// ── Mana Tap (Merlin) ─────────────────────────────────────────────────────
+const MANA_TAP_COOLDOWN_MS = 120_000;
+let _manaTapCooldownEnd = 0;
+
+function _useManaTap(member, memberIndex) {
+  const now = performance.now();
+  if (now < _manaTapCooldownEnd) {
+    const remaining = Math.ceil((_manaTapCooldownEnd - now) / 1000);
+    showMessage(`<span style="color:#40c0ff">Mana Tap</span> — ready in ${remaining}s`, 2000);
+    return;
+  }
+
+  if (member.mp >= member.mpMax) {
+    showMessage(`<span style="color:#40c0ff">Mana Tap</span> — ${member.name}'s mana is already full.`, 2000);
+    return;
+  }
+
+  _manaTapCooldownEnd = now + MANA_TAP_COOLDOWN_MS;
+  setMp(member.id, member.mpMax);
+
+  showMessage(
+    `<span style="color:#40c0ff">✦ Mana Tap</span> — ${member.name} draws on hidden reserves! Mana fully restored.`,
+    3000
+  );
+  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Mana Tap' });
+  _startSkillCooldownUI(memberIndex, _manaTapCooldownEnd);
+}
+
 // ── Generic cooldown badge ────────────────────────────────────────────────
 /**
  * Shows a countdown badge on the skill slot of the given party member.
@@ -1281,7 +1310,7 @@ function attachOverlayListeners() {
     // C key — open character inventory for the first available member
     if (e.key === 'c' || e.key === 'C') {
       if (activeCharIndex !== null) return; // already open
-      const overlayOpen = ['tactics-overlay', 'chest-overlay', 'main-menu-overlay'].some(id => {
+      const overlayOpen = ['tactics-overlay', 'chest-overlay', 'merchant-overlay', 'main-menu-overlay'].some(id => {
         const el = document.getElementById(id);
         return el && window.getComputedStyle(el).display !== 'none';
       });

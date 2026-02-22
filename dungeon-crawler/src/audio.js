@@ -188,16 +188,38 @@ let musicGainNode = null;
 let isCombatMusicPlaying = false;
 let combatTimer = 0; // seconds
 
+// ── Generation counter — increments every time intent changes. ──────────────
+// A playTrack() call that started before the latest increment is stale and
+// discards itself once its buffer resolves, preventing orphaned tracks.
+let _musicGen = 0;
+
 export async function startMusic() {
   if (musicSource) return; // already playing
-  playNextTrack();
+  _playNextTrack();
 }
 
 /**
- * Call this when a combat event occurs (hit or attack)
+ * Call this when a combat event occurs (hit or attack).
  */
 export function setInCombat() {
-  combatTimer = 10.0; // Stay in combat music for 10 seconds after last event
+  combatTimer = 15.0; // Stay in combat music for 15s after last event
+}
+
+export async function playShopkeeperSound() {
+  const buffer = await getBuffer('/sounds/actions/shopkeeper.mp3');
+  if (!buffer) return;
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.85;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playShopkeeperSound failed:', err);
+  }
 }
 
 export function isInCombat() {
@@ -210,45 +232,53 @@ export function updateAudio(dt) {
   const shouldBeInCombat = combatTimer > 0;
 
   if (shouldBeInCombat && !isCombatMusicPlaying) {
-    switchToCombatMusic();
+    _switchToCombatMusic();
   } else if (!shouldBeInCombat && isCombatMusicPlaying) {
-    switchToNormalMusic();
+    _switchToNormalMusic();
   }
 }
 
-async function switchToCombatMusic() {
+// ── Internal helpers ──────────────────────────────────────────────────────────
+
+function _stopCurrent() {
+  if (musicSource) {
+    try { musicSource.stop(); } catch (_) { }
+    musicSource = null;
+  }
+}
+
+function _switchToCombatMusic() {
   if (isCombatMusicPlaying) return;
   isCombatMusicPlaying = true;
-
-  if (musicSource) {
-    musicSource.stop();
-    musicSource = null;
-  }
-
-  playTrack(BATTLE_TRACK, true); // Loop the battle track
+  _musicGen++;                  // invalidate any pending normal-track load
+  _stopCurrent();
+  _playTrack(BATTLE_TRACK, true, _musicGen);
 }
 
-async function switchToNormalMusic() {
+function _switchToNormalMusic() {
   if (!isCombatMusicPlaying) return;
   isCombatMusicPlaying = false;
-
-  if (musicSource) {
-    musicSource.stop();
-    musicSource = null;
-  }
-
-  playNextTrack();
+  _musicGen++;                  // invalidate any pending battle-track load
+  _stopCurrent();
+  _playNextTrack();
 }
 
-async function playNextTrack() {
-  if (isCombatMusicPlaying) return; // Don't play next normal track if in combat
+function _playNextTrack() {
+  if (isCombatMusicPlaying) return;
+  const gen = _musicGen;
   const url = MUSIC_TRACKS[currentMusicIndex];
-  await playTrack(url, false);
+  _playTrack(url, false, gen);
 }
 
-async function playTrack(url, loop) {
+async function _playTrack(url, loop, gen) {
   const buffer = await getBuffer(url);
   if (!buffer) return;
+
+  // Check if the intent has changed while the buffer was loading — if so, abort.
+  if (gen !== _musicGen) return;
+
+  // Stop whatever was playing (might have been set by a parallel call)
+  _stopCurrent();
 
   const ctx = getCtx();
   const source = ctx.createBufferSource();
@@ -256,16 +286,17 @@ async function playTrack(url, loop) {
   source.loop = loop;
 
   const gainNode = ctx.createGain();
-  gainNode.gain.value = 0.3; // Music should be background level
+  gainNode.gain.value = 0.3;
 
   source.connect(gainNode);
   gainNode.connect(ctx.destination);
 
   source.onended = () => {
-    if (isCombatMusicPlaying && loop) return; // Handled by loop property
-    if (!isCombatMusicPlaying && source === musicSource) {
+    // Only advance to the next ambient track if we are still the active generation
+    if (gen !== _musicGen) return;
+    if (!isCombatMusicPlaying && !loop) {
       currentMusicIndex = (currentMusicIndex + 1) % MUSIC_TRACKS.length;
-      playNextTrack();
+      _playNextTrack();
     }
   };
 

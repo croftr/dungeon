@@ -5,10 +5,48 @@ import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, isInFrontOfPlayer, player } from './player.js';
 import { showMessage } from './minimap.js';
 import { getItemDef } from './items.js';
-import { party, resurrectAll } from './party.js';
-import { playHealSound, playBoneSound, playPortalSound } from './audio.js';
+import { party, drawPortrait, resurrectAll } from './party.js';
+import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound } from './audio.js';
 
 export const objects = [];
+
+// ─────────────────────────────────────────────
+//  CHEST / MERCHANT SHARED STATE
+// ─────────────────────────────────────────────
+let _chestCtxOpen = false;
+// Tracks which modal's "Sent to" label to update ('chest-sent-label' or 'merchant-sent-label')
+let _activeSentLabelId = 'chest-sent-label';
+
+// ─────────────────────────────────────────────
+//  SHOP GRID BLOCKING
+// ─────────────────────────────────────────────
+const _shopGridCells = new Set(); // "row,col" keys — treated as impassable
+
+export function isShopAt(r, c) {
+    return _shopGridCells.has(`${r},${c}`);
+}
+
+// ─────────────────────────────────────────────
+//  MERCHANT STOCK & PRICES
+// ─────────────────────────────────────────────
+const MERCHANT_STOCK = [
+    'Sword', 'Dagger', 'Mace', 'Longbow', 'Fireball',
+    'Bronze Shield', 'Iron Helm', 'Chain Shirt', 'Iron Gauntlets',
+    'Leather Boots', 'Travelling Cloak', 'Amulet of Warding',
+    'Gold Ring', 'Torch', 'Steel Arrows',
+];
+
+const MERCHANT_PRICES = {
+    'Sword': 120, 'Dagger': 60, 'Mace': 90, 'Longbow': 150, 'Fireball': 200,
+    'Bronze Shield': 80, 'Iron Helm': 70, 'Chain Shirt': 100, 'Iron Gauntlets': 65,
+    'Leather Boots': 45, 'Travelling Cloak': 55, 'Amulet of Warding': 180,
+    'Gold Ring': 110, 'Torch': 20, 'Steel Arrows': 35,
+};
+
+// Items still available for sale (items bought are removed permanently)
+let _merchantAvailable = [...MERCHANT_STOCK];
+// Items the player has added to the basket this session (cleared on close without buying)
+let _merchantBasket = [];
 
 let objectsGroup = new THREE.Group();
 
@@ -114,6 +152,16 @@ export function initObjects(scene, camera) {
                     showMessage("Step closer to the portal to enter.");
                 }
                 break;
+            } else if (obj.userData.isShop) {
+                const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
+                const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
+                if (distRow <= 1 && distCol <= 1) {
+                    playShopkeeperSound();
+                    openMerchantModal();
+                } else {
+                    showMessage("The merchant watches you from behind the counter.");
+                }
+                break;
             }
         }
     });
@@ -123,8 +171,26 @@ export function initObjects(scene, camera) {
     if (closeBtn) {
         closeBtn.onclick = () => {
             document.getElementById('chest-overlay').classList.add('chest-hidden');
+            _hideChestCtxMenu();
+            import('./equipment.js').then(m => m.hideTooltip());
         };
     }
+
+    // Merchant modal close
+    const merchantCloseBtn = document.getElementById('merchant-close');
+    if (merchantCloseBtn) {
+        merchantCloseBtn.onclick = () => {
+            document.getElementById('merchant-overlay').classList.add('merchant-hidden');
+            _hideChestCtxMenu();
+        };
+    }
+
+    // Dismiss chest context menu on outside click
+    document.addEventListener('mousedown', (e) => {
+        if (!_chestCtxOpen) return;
+        const menu = document.getElementById('chest-ctx-menu');
+        if (!menu.contains(e.target)) _hideChestCtxMenu();
+    });
 }
 
 export function spawnObjectsForLevel() {
@@ -137,18 +203,23 @@ export function spawnObjectsForLevel() {
         addChest(objectsGroup, gltfLoader, 11, 13, 0, 0.7, [
             'Leather Boots', 'Steel Arrows', 'Poison Arrows', 'Torch',
             'Leather Cap', 'Iron Helm', 'Padded Vest', 'Leather Belt',
-            'Adventurer\'s Belt', 'Leather Gloves', 'Cloth Trousers', 'Worn Boots'
+            'Adventurer\'s Belt', 'Leather Gloves', 'Cloth Trousers', 'Worn Boots',
+            'Dagger', 'Chain Shirt', 'Plate Cuirass', 'Iron Gauntlets',
+            'Chainmail Leggings', 'Iron-Shod Boots', 'Mace', 'Greatsword',
+            'War Hammer', 'Longbow'
         ]);
         // New Chest at the end of the long passage
-        addChest(objectsGroup, gltfLoader, 7, 1, 0, -0.7, [
-            'Chain Shirt', 'Plate Cuirass', 'Iron Gauntlets', 'Chainmail Leggings', 'Iron-Shod Boots'
-        ]);
+        addChest(objectsGroup, gltfLoader, 7, 1, 0, -0.7, []);
         // Crystals in the starter room
         addCrystals(objectsGroup, gltfLoader, 9, 11, 0, -0.7);
         // Bone pile in the passage
         addBonePile(objectsGroup, gltfLoader, 1, 27);
         // Bone pile in the starter room area
         addBonePile(objectsGroup, gltfLoader, 11, 12);
+
+        // Shop against the east wall of the big room, centre row
+        // col 30 is the last floor cell before the east wall (col 31); offsetX pushes it flush
+        addShop(objectsGroup, gltfLoader, 30, 11, -Math.PI / 2, -0.2, 0);
 
         // Portal to Level 2
         // Positioned at col 13, row 13 against the East wall.
@@ -217,6 +288,28 @@ function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offsetX = 0, 
                 child.receiveShadow = false;
                 child.userData.isPortal = true;
                 child.userData.targetLevel = targetLevel;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+            }
+        });
+
+        scene.add(model);
+    });
+}
+
+function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
+    _shopGridCells.add(`${row},${col}`); // block player movement through this cell
+    loader.load('/items/shop.glb', (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(1.0);
+        model.position.set(col * CELL + offsetX, 0.6, row * CELL + offsetZ);
+        model.rotation.y = rotY;
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.userData.isShop = true;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
             }
@@ -304,50 +397,204 @@ function openPortcullis(p) {
 }
 
 function openChestModal(chestObj) {
+    _activeSentLabelId = 'chest-sent-label';
     const overlay = document.getElementById('chest-overlay');
     overlay.classList.remove('chest-hidden');
+    document.getElementById('chest-sent-label').textContent = '';
 
     const slots = document.querySelectorAll('.chest-slot');
     const contents = chestObj.userData.contents || [];
 
-    const firstMember = party.find(m => !m.isEmpty);
+    import('./equipment.js').then(equip => {
+        _bindChestSlots(equip, slots, contents);
+    });
+}
 
+function openMerchantModal() {
+    _merchantBasket = []; // fresh basket each visit
+    document.getElementById('merchant-overlay').classList.remove('merchant-hidden');
+    _renderMerchantShop();
+    _renderMerchantBasket();
+    _updateMerchantTotals();
+}
+
+function _renderMerchantShop() {
+    const grid = document.getElementById('merchant-grid');
+    grid.innerHTML = '';
+
+    _merchantAvailable
+        .filter(name => !_merchantBasket.includes(name))
+        .forEach(name => {
+            const itemDef = getItemDef(name);
+            if (!itemDef) return;
+
+            const slot = document.createElement('div');
+            slot.className = 'merch-slot';
+
+            const img = document.createElement('img');
+            img.src = itemDef.icon;
+            img.title = name;
+            slot.appendChild(img);
+
+            const price = document.createElement('div');
+            price.className = 'merch-price';
+            price.textContent = `${MERCHANT_PRICES[name] ?? '?'}g`;
+            slot.appendChild(price);
+
+            slot.addEventListener('click', () => {
+                _merchantBasket.push(name);
+                _renderMerchantShop();
+                _renderMerchantBasket();
+                _updateMerchantTotals();
+            });
+
+            grid.appendChild(slot);
+        });
+}
+
+function _renderMerchantBasket() {
+    const grid = document.getElementById('merchant-basket-grid');
+    grid.innerHTML = '';
+
+    _merchantBasket.forEach((name, idx) => {
+        const itemDef = getItemDef(name);
+        if (!itemDef) return;
+
+        const slot = document.createElement('div');
+        slot.className = 'merch-slot';
+
+        const img = document.createElement('img');
+        img.src = itemDef.icon;
+        img.title = name;
+        slot.appendChild(img);
+
+        const price = document.createElement('div');
+        price.className = 'merch-price';
+        price.textContent = `${MERCHANT_PRICES[name] ?? '?'}g`;
+        slot.appendChild(price);
+
+        // Click basket item → return it to the shop
+        slot.addEventListener('click', () => {
+            _merchantBasket.splice(idx, 1);
+            _renderMerchantShop();
+            _renderMerchantBasket();
+            _updateMerchantTotals();
+        });
+
+        grid.appendChild(slot);
+    });
+}
+
+function _updateMerchantTotals() {
+    const total = _merchantBasket.reduce((sum, name) => sum + (MERCHANT_PRICES[name] ?? 0), 0);
+    const partyGold = 0; // TODO: wire up party gold when implemented
+
+    document.getElementById('merchant-total-val').textContent = total;
+    document.getElementById('merchant-gold-val').textContent = partyGold;
+
+    const buyBtn = document.getElementById('merchant-buy-btn');
+    buyBtn.disabled = _merchantBasket.length === 0 || partyGold < total;
+}
+
+function _bindChestSlots(equip, slots, contents) {
     slots.forEach((slot, i) => {
         slot.innerHTML = '';
         slot.classList.remove('occupied');
-        slot.onclick = null; // Clear previous handlers
-
-        if (!firstMember) return;
+        slot.onclick = null;
+        slot.oncontextmenu = null;
 
         const itemName = contents[i];
-        if (itemName) {
-            const itemDef = getItemDef(itemName);
-            if (!itemDef) return;
+        if (!itemName) return;
 
-            slot.classList.add('occupied');
-            const img = document.createElement('img');
-            img.src = itemDef.icon;
-            img.title = itemDef.name;
-            slot.appendChild(img);
+        const itemDef = getItemDef(itemName);
+        if (!itemDef) return;
 
-            slot.onclick = () => {
-                import('./equipment.js').then(m => {
-                    const success = m.addItemToInventory(firstMember.id, itemDef.name);
-                    if (success) {
-                        showMessage(`${firstMember.name} picks up ${itemDef.name}.`);
-                        // Remove from chest data
-                        contents[i] = null;
-                        // Update UI — chest stays open
-                        slot.innerHTML = '';
-                        slot.classList.remove('occupied');
-                        slot.onclick = null;
-                    } else {
-                        showMessage("Inventory is full!");
-                    }
-                });
-            };
-        }
+        slot.classList.add('occupied');
+        const img = document.createElement('img');
+        img.src = itemDef.icon;
+        img.title = itemDef.name;
+        slot.appendChild(img);
+
+        // Left-click → send to first available party member
+        slot.onclick = () => {
+            const defaultIdx = party.findIndex(m => !m.isEmpty);
+            if (defaultIdx !== -1) _sendChestItem(equip, slots, contents, i, itemDef, defaultIdx);
+        };
+
+        // Right-click → pick recipient
+        slot.oncontextmenu = (e) => {
+            e.preventDefault();
+            _showChestCtxMenu(e.clientX, e.clientY, equip, slots, contents, i, itemDef);
+        };
+
+        // Hover tooltip
+        equip.attachTooltipListeners(slot, () => contents[i] ? { name: contents[i] } : null);
     });
+}
+
+function _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx) {
+    const target = party[targetIdx];
+    const success = equip.addItemToInventory(targetIdx, itemDef.name);
+    if (success) {
+        document.getElementById(_activeSentLabelId).textContent = `Sent to ${target.name}`;
+        contents[slotIdx] = null;
+        const slot = slots[slotIdx];
+        slot.innerHTML = '';
+        slot.classList.remove('occupied');
+        slot.onclick = null;
+        slot.oncontextmenu = null;
+        equip.hideTooltip();
+    } else {
+        showMessage(`${target.name}'s inventory is full!`);
+    }
+}
+
+function _showChestCtxMenu(x, y, equip, slots, contents, slotIdx, itemDef) {
+    const menu = document.getElementById('chest-ctx-menu');
+    const list = document.getElementById('chest-ctx-list');
+    list.innerHTML = '';
+
+    party.filter(m => !m.isEmpty).forEach(target => {
+        const targetIdx = party.indexOf(target);
+        const row = document.createElement('div');
+        row.className = 'inv-ctx-give-item';
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 26;
+        canvas.height = 26;
+        drawPortrait(canvas, target);
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = target.name;
+
+        row.appendChild(canvas);
+        row.appendChild(nameSpan);
+        row.addEventListener('click', () => {
+            _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx);
+            _hideChestCtxMenu();
+        });
+        list.appendChild(row);
+    });
+
+    menu.classList.remove('chest-ctx-hidden');
+    _chestCtxOpen = true;
+
+    // Position near cursor, flip if near viewport edges
+    const mw = menu.offsetWidth || 160;
+    const mh = menu.offsetHeight || 100;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    let lx = x + 6;
+    let ly = y + 4;
+    if (lx + mw > vw - 8) lx = x - mw - 6;
+    if (ly + mh > vh - 8) ly = y - mh - 4;
+    menu.style.left = lx + 'px';
+    menu.style.top = ly + 'px';
+}
+
+function _hideChestCtxMenu() {
+    document.getElementById('chest-ctx-menu').classList.add('chest-ctx-hidden');
+    _chestCtxOpen = false;
 }
 
 function addBonePile(scene, loader, col, row) {

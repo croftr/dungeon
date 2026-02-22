@@ -63,6 +63,7 @@ export const RECRUITS = [
         skills: [
             { name: 'Arcane Lantern', description: 'Conjures a sphere of magical light that illuminates the dungeon as brightly as a torch for 60 seconds. Cooldown: 60s.', icon: '/skills/arcane-lantern.png' },
             { name: 'Runic Scholar', description: 'Channels arcane power into the next spell cast, doubling its damage after all other modifiers are applied.', icon: '/skills/runic-scholar.png' },
+            { name: 'Mana Tap', description: 'Taps into a hidden vein of arcane energy, instantly replenishing all of Merlin\'s mana points. Cooldown: 120s.', icon: '/skills/mana-tap.png' },
         ],
         image: '/human_wizard_head.png',
         leftHand: 'Staff', rightHand: '—', startingSkill: 'Runic Scholar',

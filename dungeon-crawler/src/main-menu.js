@@ -22,7 +22,7 @@ export function initMainMenu() {
 
 /** Returns true if any game overlay (equipment, tactics, chest…) is visible. */
 function _anyOverlayOpen() {
-  return ['equip-overlay', 'tactics-overlay', 'chest-overlay'].some(id => {
+  return ['equip-overlay', 'tactics-overlay', 'chest-overlay', 'merchant-overlay'].some(id => {
     const el = document.getElementById(id);
     return el && window.getComputedStyle(el).display !== 'none';
   });

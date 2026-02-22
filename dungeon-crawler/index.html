@@ -478,6 +478,7 @@
           <img src="/chest_icon.png" id="chest-header-icon" alt="Chest">
           <span id="chest-title">Chest</span>
         </div>
+        <span id="chest-sent-label"></span>
         <button id="chest-close" aria-label="Close">&times;</button>
       </div>
       <div id="chest-body">
@@ -511,6 +512,39 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Merchant modal -->
+  <div id="merchant-overlay" class="merchant-hidden">
+    <div id="merchant-modal">
+      <div id="merchant-header">
+        <span id="merchant-title">Merchant</span>
+        <button id="merchant-close" aria-label="Close">&times;</button>
+      </div>
+      <div id="merchant-body">
+        <!-- Left: items for sale -->
+        <div id="merchant-shop-panel">
+          <div class="merchant-panel-label">For Sale</div>
+          <div id="merchant-grid"></div>
+        </div>
+        <!-- Right: basket -->
+        <div id="merchant-basket-panel">
+          <div id="merchant-basket-header">
+            <span id="merchant-total-label">Total: <span id="merchant-total-val">0</span>g</span>
+            <span id="merchant-gold-label">Party Gold: <span id="merchant-gold-val">0</span>g</span>
+          </div>
+          <div class="merchant-panel-label">Selected</div>
+          <div id="merchant-basket-grid"></div>
+          <button id="merchant-buy-btn" disabled>Buy Items</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right-click context menu for chest items -->
+  <div id="chest-ctx-menu" class="chest-ctx-hidden">
+    <div class="inv-ctx-give-label">Send to</div>
+    <div id="chest-ctx-list"></div>
   </div>
 
   <!-- Right-click context menu for inventory items -->
