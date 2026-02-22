@@ -788,8 +788,88 @@ body {
 #equip-body {
   display: grid;
   grid-template-columns: 1fr 220px 1fr;
+  grid-template-rows: auto 1fr;
   overflow: hidden;
   flex: 1;
+}
+
+#equip-party-bar {
+  grid-column: 1 / span 3;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 2px solid #3a2e18;
+}
+
+.equip-party-member {
+  width: 44px;
+  height: 44px;
+  border: 2px solid #4a3a20;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  background: #1a1510;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  position: relative;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.equip-party-member:hover {
+  transform: translateY(-2px);
+  border-color: #8a7040;
+}
+
+.equip-party-member.active {
+  border-color: #c8a84a;
+  box-shadow: 0 0 15px rgba(200, 168, 74, 0.4), 0 4px 10px rgba(0, 0, 0, 0.5);
+  transform: scale(1.1);
+}
+
+.equip-party-member.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 4px;
+  background: #c8a84a;
+  border-radius: 2px 2px 0 0;
+}
+
+.equip-party-member img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.equip-party-member.empty {
+  opacity: 0.2;
+  cursor: default;
+  border-style: dashed;
+}
+
+.equip-party-member.transfer-target {
+  border-color: #40c040;
+  background: rgba(64, 192, 64, 0.1);
+  animation: target-pulse 1s infinite;
+}
+
+@keyframes target-pulse {
+  0% {
+    box-shadow: 0 0 5px rgba(64, 192, 64, 0.5);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(64, 192, 64, 0.8);
+  }
+
+  100% {
+    box-shadow: 0 0 5px rgba(64, 192, 64, 0.5);
+  }
 }
 
 .equip-section-title {
@@ -1962,6 +2042,15 @@ body {
 .bl--stun .bl-badge {
   color: #c090ff;
   text-shadow: 0 0 4px rgba(192, 144, 255, 0.4);
+}
+
+.bl--poison {
+  color: #a0ff80;
+}
+
+.bl--poison .bl-badge {
+  color: #40ff40;
+  text-shadow: 0 0 4px rgba(64, 255, 64, 0.4);
 }
 
 .bl-badge {

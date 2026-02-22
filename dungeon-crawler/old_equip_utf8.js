@@ -1,4 +1,4 @@
-import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, drawPortrait } from './party.js';
+﻿import { party, refreshPartyCards, lastAttackTimes, setHp, setMp } from './party.js';
 import { getItemDef } from './items.js';
 import { ACTIONS } from './items.js';
 import { playAction } from './actions.js';
@@ -11,9 +11,9 @@ import { playCritSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { skillsState } from './skills-state.js';
 
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 //  CONSTANTS
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const SLOT_KEYS = [
   'head', 'cloak', 'neck', 'chest',
   'leftHand', 'rightHand',
@@ -22,7 +22,7 @@ const SLOT_KEYS = [
   'legs', 'feet', 'ammo', 'skill',
 ];
 
-const INVENTORY_SIZE = 20; // 4 cols × 5 rows
+const INVENTORY_SIZE = 20; // 4 cols ├ù 5 rows
 
 // Human-readable slot labels for the detail panel
 const SLOT_LABELS = {
@@ -43,14 +43,14 @@ const SLOT_LABELS = {
   skill: 'Skill',
 };
 
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 //  STATE
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 let activeCharIndex = null;
 
-// ─────────────────────────────────────────────
-//  DATA SETUP  — extends party member objects
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+//  DATA SETUP  ΓÇö extends party member objects
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 export function extendPartyData() {
   party.forEach((m) => {
     if (m.isEmpty) return;
@@ -61,7 +61,7 @@ export function extendPartyData() {
     m.equipment = Object.fromEntries(SLOT_KEYS.map((k) => [k, null]));
     // Every character starts with a Shawl on their head
     m.equipment.head = { name: 'Shawl', slot: 'head' };
-    // Seed left/right hand from party card data (skip '—' placeholder)
+    // Seed left/right hand from party card data (skip 'ΓÇö' placeholder)
     // For bothHands items, fill both slots with the same item object reference
 
     // Update legacy starting items to new names if needed
@@ -72,7 +72,7 @@ export function extendPartyData() {
     if (m.rightHand === 'Bow') m.rightHand = 'Short Bow';
     if (m.rightHand === 'Staff') m.rightHand = 'Oak Staff';
 
-    if (m.leftHand && m.leftHand !== '—') {
+    if (m.leftHand && m.leftHand !== 'ΓÇö') {
       const def = getItemDef(m.leftHand);
       const slot = def?.slot ?? 'leftHand';
       if (slot === 'bothHands') {
@@ -86,7 +86,7 @@ export function extendPartyData() {
         m.equipment.leftHand = { name: m.leftHand, slot: 'leftHand' };
       }
     }
-    if (m.rightHand && m.rightHand !== '—') {
+    if (m.rightHand && m.rightHand !== 'ΓÇö') {
       const def = getItemDef(m.rightHand);
       const slot = def?.slot ?? 'rightHand';
       // Only seed rightHand if not already filled by a bothHands item
@@ -121,9 +121,9 @@ export function extendPartyData() {
   });
 }
 
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 //  RENDER
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 export function renderItemIcon(item, containerEl) {
   if (!item) {
     containerEl.innerHTML = '';
@@ -146,7 +146,7 @@ function renderModal(memberIndex) {
   // Header name
   document.getElementById('equip-char-name').textContent = m.name;
 
-  // ── Paperdoll slots ──
+  // ΓöÇΓöÇ Paperdoll slots ΓöÇΓöÇ
   // For bothHands items the same object sits in both leftHand and rightHand.
   // We show the name in full on the primary (leftHand) slot and faded on rightHand.
   SLOT_KEYS.forEach((key) => {
@@ -160,41 +160,22 @@ function renderModal(memberIndex) {
     renderItemIcon(item, pdItemEl);
   });
 
-  // ── Inventory cells ──
+  // ΓöÇΓöÇ Inventory cells ΓöÇΓöÇ
   const cells = document.querySelectorAll('.inv-cell');
   cells.forEach((cell, i) => {
     const item = m.inventory[i];
     cell.classList.toggle('occupied', item !== null);
     renderItemIcon(item, cell);
-
-    // Set up dragging if occupied
-    if (item) {
-      cell.setAttribute('draggable', 'true');
-      cell.ondragstart = (e) => {
-        e.dataTransfer.setData('application/json', JSON.stringify({
-          fromChar: memberIndex,
-          invIndex: i
-        }));
-        // Optional: show ghost image or styling
-        cell.style.opacity = '0.4';
-      };
-      cell.ondragend = () => {
-        cell.style.opacity = '1';
-      };
-    } else {
-      cell.removeAttribute('draggable');
-      cell.ondragstart = null;
-    }
   });
 
-  // ── Character stats ──
+  // ΓöÇΓöÇ Character stats ΓöÇΓöÇ
   const stats = m.stats ?? {};
   ['strength', 'dexterity', 'vitality', 'intelligence', 'resilience'].forEach((key) => {
     const el = document.getElementById(`stat-${key}`);
-    if (el) el.textContent = stats[key] ?? '—';
+    if (el) el.textContent = stats[key] ?? 'ΓÇö';
   });
 
-  // ── Total Defence ──
+  // ΓöÇΓöÇ Total Defence ΓöÇΓöÇ
   let totalDef = 0;
   // Use a Set to avoid double-counting bothHands items which are in both slots
   const countedItems = new Set();
@@ -210,7 +191,7 @@ function renderModal(memberIndex) {
   const defEl = document.getElementById('stat-total-defence');
   if (defEl) defEl.textContent = totalDef;
 
-  // ── Stat bars (HP/MP/SP) ──
+  // ΓöÇΓöÇ Stat bars (HP/MP/SP) ΓöÇΓöÇ
   const pctHelper = (val, max) => Math.max(0, Math.min(100, (val / max) * 100)).toFixed(1) + '%';
 
   const hpFill = document.getElementById('equip-bar-hp');
@@ -227,7 +208,7 @@ function renderModal(memberIndex) {
   if (mpVal) mpVal.textContent = `${m.mp}/${m.mpMax}`;
   if (spVal) spVal.textContent = `${m.sp ?? 100}/${m.spMax ?? 100}`;
 
-  // ── Skills ──
+  // ΓöÇΓöÇ Skills ΓöÇΓöÇ
   const skillsEl = document.getElementById('char-skills');
   if (skillsEl) {
     skillsEl.innerHTML = '';
@@ -244,7 +225,7 @@ function renderModal(memberIndex) {
         const isEquipped = m.equipment?.skill?.name === skill.name;
         if (isEquipped) card.classList.add('skill-card--equipped');
         card.innerHTML = `<span class="skill-name">${skill.name}</span><span class="skill-desc">${skill.description}</span>`;
-        // Click to equip — clicking the already-equipped skill unequips it
+        // Click to equip ΓÇö clicking the already-equipped skill unequips it
         card.addEventListener('click', () => {
           m.equipment.skill = isEquipped ? null : { name: skill.name, slot: 'skill', icon: skill.icon ?? null };
           renderModal(activeCharIndex);
@@ -254,87 +235,11 @@ function renderModal(memberIndex) {
       });
     }
   }
-
-  updatePartyBar(memberIndex);
 }
 
-function updatePartyBar(activeIndex) {
-  const bar = document.getElementById('equip-party-bar');
-  if (!bar) return;
-  bar.innerHTML = '';
-
-  party.forEach((m, i) => {
-    const memEl = document.createElement('div');
-    memEl.className = 'equip-party-member';
-    if (m.isEmpty) memEl.classList.add('empty');
-    if (i === activeIndex) memEl.classList.add('active');
-    memEl.title = m.isEmpty ? 'Empty Slot' : m.name;
-
-    if (!m.isEmpty) {
-      const canvas = document.createElement('canvas');
-      canvas.width = 64;
-      canvas.height = 64;
-      drawPortrait(canvas, m);
-      memEl.appendChild(canvas);
-
-      // Switch character on click
-      memEl.onclick = () => {
-        if (i !== activeIndex) openModal(i);
-      };
-
-      // Drag and Drop targets (for transferring items)
-      memEl.addEventListener('dragover', (e) => {
-        if (i === activeIndex) return; // Can't drop on yourself
-        e.preventDefault();
-        memEl.classList.add('transfer-target');
-      });
-      memEl.addEventListener('dragleave', () => {
-        memEl.classList.remove('transfer-target');
-      });
-      memEl.addEventListener('drop', (e) => {
-        e.preventDefault();
-        memEl.classList.remove('transfer-target');
-        const data = JSON.parse(e.dataTransfer.getData('application/json'));
-        if (data.fromChar === i) return; // safety
-        transferItem(data.fromChar, i, data.invIndex);
-      });
-    }
-
-    bar.appendChild(memEl);
-  });
-}
-
-/**
- * Moves an item from one character's inventory to another's.
- */
-function transferItem(fromIdx, toIdx, invIndex) {
-  const from = party[fromIdx];
-  const to = party[toIdx];
-  if (!from || !to || to.isEmpty) return;
-
-  const item = from.inventory[invIndex];
-  if (!item) return;
-
-  const freePos = to.inventory.indexOf(null);
-  if (freePos === -1) {
-    showMessage(`${to.name}'s inventory is full!`);
-    return;
-  }
-
-  // Move the item
-  from.inventory[invIndex] = null;
-  to.inventory[freePos] = item;
-
-  showMessage(`${from.name} gives ${item.name} to ${to.name}.`);
-
-  // Refresh the current view
-  renderModal(activeCharIndex);
-  refreshPartyCards();
-}
-
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 //  ITEM TOOLTIP
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const TOOLTIP_OFFSET_X = 14;
 const TOOLTIP_OFFSET_Y = 14;
 
@@ -395,18 +300,18 @@ function populateTooltip(item) {
       ? 'Attack: ' + def.attackType.charAt(0).toUpperCase() + def.attackType.slice(1)
       : '';
   descEl.textContent =
-    def?.description ?? '—';
+    def?.description ?? 'ΓÇö';
 
   if (isAmmo) {
-    document.getElementById('item-detail-ammo-mod').textContent = '×' + (def?.damageModifier ?? 1.0);
+    document.getElementById('item-detail-ammo-mod').textContent = '├ù' + (def?.damageModifier ?? 1.0);
     document.getElementById('item-detail-ammo-type').textContent = (def?.damageType ?? 'normal').toUpperCase();
   } else {
     document.getElementById('item-detail-damage').textContent =
-      def?.baseDamage != null ? def.baseDamage : '—';
+      def?.baseDamage != null ? def.baseDamage : 'ΓÇö';
     document.getElementById('item-detail-value').textContent =
-      def != null ? def.value + ' gp' : '—';
+      def != null ? def.value + ' gp' : 'ΓÇö';
     document.getElementById('item-detail-weight').textContent =
-      def != null ? def.weight + ' kg' : '—';
+      def != null ? def.weight + ' kg' : 'ΓÇö';
   }
 }
 
@@ -444,134 +349,9 @@ function attachTooltipListeners(el, getItem) {
   el.addEventListener('mouseleave', () => hideTooltip());
 }
 
-// ─────────────────────────────────────────────
-//  CLICK HANDLERS
-// ─────────────────────────────────────────────
-
-/**
- * Handle Shift + Click for quick transfer to the next party member.
- */
-function onInventoryCellClick(e) {
-  if (activeCharIndex === null) return;
-  const invIndex = Number(e.currentTarget.dataset.index);
-  const m = party[activeCharIndex];
-  const item = m.inventory[invIndex];
-  if (!item) return;
-
-  // Shift + Click = Quick Giving to next member
-  if (e.shiftKey) {
-    let nextIdx = (activeCharIndex + 1) % 4;
-    let attempts = 0;
-    while (party[nextIdx].isEmpty && attempts < 4) {
-      nextIdx = (nextIdx + 1) % 4;
-      attempts++;
-    }
-    if (nextIdx !== activeCharIndex) {
-      transferItem(activeCharIndex, nextIdx, invIndex);
-    }
-    return;
-  }
-
-  // Regular Click = Equip
-  m.inventory[invIndex] = null;
-
-  if (item.slot === 'bothHands') {
-    const displaced = [m.equipment.leftHand, m.equipment.rightHand]
-      .filter((d) => d !== null)
-      .filter((d, idx, arr) => arr.indexOf(d) === idx)
-      .filter((d) => d.slot !== 'spell');
-
-    m.equipment.leftHand = item;
-    m.equipment.rightHand = item;
-
-    displaced.forEach((d) => {
-      if (!d) return;
-      const fi = m.inventory.indexOf(null);
-      if (fi !== -1) m.inventory[fi] = d;
-    });
-  } else if (item.slot === 'enable-spell') {
-    const displaced = [m.equipment.leftHand, m.equipment.rightHand]
-      .filter((d) => d !== null)
-      .filter((d, idx, arr) => arr.indexOf(d) === idx)
-      .filter((d) => d.slot !== 'spell');
-
-    m.equipment.leftHand = item;
-    m.equipment.rightHand = { name: 'Fireball', slot: 'spell' };
-
-    displaced.forEach((d) => {
-      if (!d) return;
-      const fi = m.inventory.indexOf(null);
-      if (fi !== -1) m.inventory[fi] = d;
-    });
-  } else {
-    let currentlyWorn = m.equipment[item.slot];
-
-    if (currentlyWorn?.slot === 'enable-spell') {
-      if (item.slot === 'leftHand' && m.equipment.rightHand?.slot === 'spell') m.equipment.rightHand = null;
-      if (item.slot === 'rightHand' && m.equipment.leftHand?.slot === 'spell') m.equipment.leftHand = null;
-    } else if (currentlyWorn?.slot === 'spell') {
-      const otherSlot = item.slot === 'leftHand' ? 'rightHand' : 'leftHand';
-      const otherItem = m.equipment[otherSlot];
-      if (otherItem?.slot === 'enable-spell') {
-        const fi = m.inventory.indexOf(null);
-        if (fi !== -1) m.inventory[fi] = otherItem;
-        m.equipment[otherSlot] = null;
-      }
-      currentlyWorn = null;
-    }
-
-    m.equipment[item.slot] = item;
-    if (currentlyWorn && currentlyWorn.slot !== 'spell') {
-      m.inventory[invIndex] = currentlyWorn;
-    }
-  }
-
-  renderModal(activeCharIndex);
-  refreshPartyCards();
-}
-
-// Clicking a body slot with an item → move it to first free inventory cell
-// For bothHands items, both hand slots are cleared with one inventory entry.
-function onPaperdollSlotClick(e) {
-  if (activeCharIndex === null) return;
-  const key = e.currentTarget.dataset.slot;
-  const m = party[activeCharIndex];
-  const item = m.equipment[key];
-  if (!item) return; // empty slot — nothing to do
-  if (item.slot === 'spell') return; // Cannot manually unequip spell
-
-  // Skills are learned abilities, not carried items — just clear the slot
-  if (key === 'skill') {
-    m.equipment.skill = null;
-    renderModal(activeCharIndex);
-    refreshPartyCards();
-    return;
-  }
-
-  const freeIndex = m.inventory.indexOf(null);
-  if (freeIndex === -1) {
-    e.currentTarget.style.borderColor = '#c04040';
-    setTimeout(() => { e.currentTarget.style.borderColor = ''; }, 400);
-    return;
-  }
-
-  // Store a single inventory copy with the canonical slot
-  m.inventory[freeIndex] = { name: item.name, slot: item.slot };
-  m.equipment[key] = null;
-  // If it was a bothHands item, clear the mirrored slot too
-  if (item.slot === 'bothHands') {
-    m.equipment.leftHand = null;
-    m.equipment.rightHand = null;
-  } else if (item.slot === 'enable-spell') {
-    if (key === 'leftHand' && m.equipment.rightHand?.slot === 'spell') m.equipment.rightHand = null;
-    if (key === 'rightHand' && m.equipment.leftHand?.slot === 'spell') m.equipment.leftHand = null;
-  }
-  renderModal(activeCharIndex);
-}
-
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 //  OPEN / CLOSE
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function openModal(memberIndex) {
   activeCharIndex = memberIndex;
   hideTooltip();
@@ -587,9 +367,9 @@ function closeModal() {
   refreshPartyCards();
 }
 
-// ─────────────────────────────────────────────
-//  USE HAND  — triggered from party panel
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+//  USE HAND  ΓÇö triggered from party panel
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 /**
  * Called when a player clicks a hand slot on the party panel during dungeon view.
  * Looks up the item in that slot, plays the action animation, and applies
@@ -597,7 +377,7 @@ function closeModal() {
  *
  * Damage formula:  baseDamage + hero.stats.strength - monster.defence
  *
- * @param {number} memberIndex  — 0-3
+ * @param {number} memberIndex  ΓÇö 0-3
  * @param {'left'|'right'} hand
  */
 function _showDamagePopup(slotEl, damage, isCrit) {
@@ -616,7 +396,7 @@ function useHand(memberIndex, hand) {
   const item = m.equipment?.[slotKey];
   const def = item ? getItemDef(item.name) : null;
 
-  // Empty hand → punch; items with no attackType (e.g. Shield) → no action
+  // Empty hand ΓåÆ punch; items with no attackType (e.g. Shield) ΓåÆ no action
   const attackType = item ? (def?.attackType ?? null) : ACTIONS.PUNCH;
   if (!attackType) return;
 
@@ -641,9 +421,9 @@ function useHand(memberIndex, hand) {
   const isRanged = attackType === ACTIONS.SHOOT || attackType === ACTIONS.FIREBALL;
 
   // Back-row members can only melee if their front partner is dead (stepped up).
-  // canMelee() centralises this logic — see combat-rules.js.
+  // canMelee() centralises this logic ΓÇö see combat-rules.js.
   if (!isRanged && !canMelee(party, memberIndex)) {
-    showMessage(`${m.name} is in the back row — only ranged attacks can reach the enemy!`);
+    showMessage(`${m.name} is in the back row ΓÇö only ranged attacks can reach the enemy!`);
     return;
   }
 
@@ -699,8 +479,6 @@ function useHand(memberIndex, hand) {
     finalDamage: result.damage,
     critMultiplier: result.formula?.critMultiplier ?? 1,
     stunned: result.stunned ?? false,
-    poisoned: result.poisoned ?? false,
-    sundered: result.sundered ?? false,
     ammoModifier: result.formula?.ammoModifier ?? null,
   });
 
@@ -717,9 +495,9 @@ function useHand(memberIndex, hand) {
   if (result.crit) {
     playCritSound(attackType);
     if (result.killed) {
-      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${m.name} obliterates the ${target.name}!`, 3000);
+      showMessage(`<span style="color:#ff8800">ΓÜí CRITICAL!</span> ${m.name} obliterates the ${target.name}!`, 3000);
     } else {
-      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${m.name} &nbsp;<b>${result.damage}</b> damage`, 2500);
+      showMessage(`<span style="color:#ff8800">ΓÜí CRITICAL!</span> ${m.name} &nbsp;<b>${result.damage}</b> damage`, 2500);
     }
   } else {
     if (result.killed) {
@@ -730,11 +508,11 @@ function useHand(memberIndex, hand) {
   }
 }
 
-// ─────────────────────────────────────────────
-//  USE SKILL  — dispatcher + per-skill implementations
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+//  USE SKILL  ΓÇö dispatcher + per-skill implementations
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
-// ── Cooldown timestamps (performance.now epoch when the skill becomes ready) ──
+// ΓöÇΓöÇ Cooldown timestamps (performance.now epoch when the skill becomes ready) ΓöÇΓöÇ
 const HUNTERS_EYE_COOLDOWN_MS = 60_000;
 const SANCTUARY_COOLDOWN_MS = 120_000;
 const SANCTUARY_DURATION_MS = 60_000;
@@ -756,7 +534,7 @@ const SUNDER_ARMOR_DURATION_MS = 30_000;
 let _sunderArmorCooldownEnd = 0;
 let _sunderArmorExpireTimer = null;
 
-// ── Dispatcher ────────────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Dispatcher ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function useSkill(memberIndex) {
   const m = party[memberIndex];
   if (!m || m.isDead) return;
@@ -778,7 +556,7 @@ function useSkill(memberIndex) {
   showMessage(`${m.name} uses ${skill.name}! (Skill logic not yet implemented)`);
 }
 
-// ── Hunter's Eye (Elrond) ──────────────────────────────────────────────────
+// ΓöÇΓöÇ Hunter's Eye (Elrond) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function _useHuntersEye(member, memberIndex) {
   // Always allow manual deactivation
   if (getHuntersEyeTargetId() !== null) {
@@ -790,35 +568,35 @@ function _useHuntersEye(member, memberIndex) {
   const now = performance.now();
   if (now < _huntersEyeCooldownEnd) {
     const remaining = Math.ceil((_huntersEyeCooldownEnd - now) / 1000);
-    showMessage(`<span style="color:#f0b040">Hunter's Eye</span> — ready in ${remaining}s`, 2000);
+    showMessage(`<span style="color:#f0b040">Hunter's Eye</span> ΓÇö ready in ${remaining}s`, 2000);
     return;
   }
 
   const target = getInRangeMonster();
   if (!target) {
-    showMessage(`<span style="color:#f0b040">Hunter's Eye</span> — no enemy in range. Engage a monster first!`, 2500);
+    showMessage(`<span style="color:#f0b040">Hunter's Eye</span> ΓÇö no enemy in range. Engage a monster first!`, 2500);
     return;
   }
 
   _huntersEyeCooldownEnd = now + HUNTERS_EYE_COOLDOWN_MS;
   setHuntersEyeTarget(target.id);
-  showMessage(`<span style="color:#f0b040">Hunter's Eye</span> — ${member.name} reads the ${target.name}!`, 2500);
+  showMessage(`<span style="color:#f0b040">Hunter's Eye</span> ΓÇö ${member.name} reads the ${target.name}!`, 2500);
   addLogEntry({ type: 'skill', actor: member.name, skillName: "Hunter's Eye" });
   _startSkillCooldownUI(memberIndex, _huntersEyeCooldownEnd);
 }
 
-// ── Entangle (Elara) ──────────────────────────────────────────────────────
+// ΓöÇΓöÇ Entangle (Elara) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function _useEntangle(member, memberIndex) {
   const now = performance.now();
   if (now < _entangleCooldownEnd) {
     const remaining = Math.ceil((_entangleCooldownEnd - now) / 1000);
-    showMessage(`<span style="color:#80ff80">Entangle</span> — ready in ${remaining}s`, 2000);
+    showMessage(`<span style="color:#80ff80">Entangle</span> ΓÇö ready in ${remaining}s`, 2000);
     return;
   }
 
   const target = getInRangeMonster();
   if (!target) {
-    showMessage(`<span style="color:#80ff80">Entangle</span> — no enemy in range. Engage a monster first!`, 2500);
+    showMessage(`<span style="color:#80ff80">Entangle</span> ΓÇö no enemy in range. Engage a monster first!`, 2500);
     return;
   }
 
@@ -828,34 +606,34 @@ function _useEntangle(member, memberIndex) {
   _entangleCooldownEnd = now + ENTANGLE_COOLDOWN_MS;
 
   showMessage(
-    `<span style="color:#80ff80">✦ Entangle</span> — ${member.name} roots the ${target.name}! Attack speed halved for 30s.`,
+    `<span style="color:#80ff80">Γ£ª Entangle</span> ΓÇö ${member.name} roots the ${target.name}! Attack speed halved for 30s.`,
     3000
   );
-  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Entangle', target: target.name });
+  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Entangle' });
 
   if (_entangleExpireTimer) clearTimeout(_entangleExpireTimer);
   _entangleExpireTimer = setTimeout(() => {
     skillsState.entangle.active = false;
     skillsState.entangle.targetId = null;
-    showMessage(`<span style="color:#80ff80">Entangle</span> fades — the roots wither away.`, 2500);
+    showMessage(`<span style="color:#80ff80">Entangle</span> fades ΓÇö the roots wither away.`, 2500);
     _entangleExpireTimer = null;
   }, ENTANGLE_DURATION_MS);
 
   _startSkillCooldownUI(memberIndex, _entangleCooldownEnd);
 }
 
-// ── Sunder Armor (Thorek) ──────────────────────────────────────────────────
+// ΓöÇΓöÇ Sunder Armor (Thorek) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function _useSunderArmor(member, memberIndex) {
   const now = performance.now();
   if (now < _sunderArmorCooldownEnd) {
     const remaining = Math.ceil((_sunderArmorCooldownEnd - now) / 1000);
-    showMessage(`<span style="color:#ff8080">Sunder Armor</span> — ready in ${remaining}s`, 2000);
+    showMessage(`<span style="color:#ff8080">Sunder Armor</span> ΓÇö ready in ${remaining}s`, 2000);
     return;
   }
 
   const target = getInRangeMonster();
   if (!target) {
-    showMessage(`<span style="color:#ff8080">Sunder Armor</span> — no enemy in range. Engage a monster first!`, 2500);
+    showMessage(`<span style="color:#ff8080">Sunder Armor</span> ΓÇö no enemy in range. Engage a monster first!`, 2500);
     return;
   }
 
@@ -865,28 +643,28 @@ function _useSunderArmor(member, memberIndex) {
   _sunderArmorCooldownEnd = now + SUNDER_ARMOR_COOLDOWN_MS;
 
   showMessage(
-    `<span style="color:#ff8080">✦ Sunder Armor</span> — ${member.name} crushes the ${target.name}! Defence halved for 30s.`,
+    `<span style="color:#ff8080">Γ£ª Sunder Armor</span> ΓÇö ${member.name} crushes the ${target.name}! Defence halved for 30s.`,
     3000
   );
-  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Sunder Armor', target: target.name });
+  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Sunder Armor' });
 
   if (_sunderArmorExpireTimer) clearTimeout(_sunderArmorExpireTimer);
   _sunderArmorExpireTimer = setTimeout(() => {
     skillsState.sunderArmor.active = false;
     skillsState.sunderArmor.targetId = null;
-    showMessage(`<span style="color:#ff8080">Sunder Armor</span> fades — the armor naturally mends.`, 2500);
+    showMessage(`<span style="color:#ff8080">Sunder Armor</span> fades ΓÇö the armor naturally mends.`, 2500);
     _sunderArmorExpireTimer = null;
   }, SUNDER_ARMOR_DURATION_MS);
 
   _startSkillCooldownUI(memberIndex, _sunderArmorCooldownEnd);
 }
 
-// ── Sanctuary (Alaric) ────────────────────────────────────────────────────
+// ΓöÇΓöÇ Sanctuary (Alaric) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function _useSanctuary(member, memberIndex) {
   const now = performance.now();
   if (now < _sanctuaryCooldownEnd) {
     const remaining = Math.ceil((_sanctuaryCooldownEnd - now) / 1000);
-    showMessage(`<span style="color:#f0d080">Sanctuary</span> — ready in ${remaining}s`, 2000);
+    showMessage(`<span style="color:#f0d080">Sanctuary</span> ΓÇö ready in ${remaining}s`, 2000);
     return;
   }
 
@@ -899,7 +677,7 @@ function _useSanctuary(member, memberIndex) {
   document.getElementById('party-panel')?.classList.add('sanctuary-active');
 
   showMessage(
-    `<span style="color:#f0d080">✦ Sanctuary</span> — ${member.name} shields the party! Damage −10% for 60s.`,
+    `<span style="color:#f0d080">Γ£ª Sanctuary</span> ΓÇö ${member.name} shields the party! Damage ΓêÆ10% for 60s.`,
     3000
   );
   addLogEntry({ type: 'skill', actor: member.name, skillName: 'Sanctuary' });
@@ -909,19 +687,19 @@ function _useSanctuary(member, memberIndex) {
   _sanctuaryExpireTimer = setTimeout(() => {
     skillsState.sanctuary.active = false;
     document.getElementById('party-panel')?.classList.remove('sanctuary-active');
-    showMessage(`<span style="color:#f0d080">Sanctuary</span> fades — the shield dissipates.`, 2500);
+    showMessage(`<span style="color:#f0d080">Sanctuary</span> fades ΓÇö the shield dissipates.`, 2500);
     _sanctuaryExpireTimer = null;
   }, SANCTUARY_DURATION_MS);
 
   _startSkillCooldownUI(memberIndex, _sanctuaryCooldownEnd);
 }
 
-// ── Holy Radiance (Alaric) ────────────────────────────────────────────────
+// ΓöÇΓöÇ Holy Radiance (Alaric) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function _useHolyRadiance(member, memberIndex) {
   const now = performance.now();
   if (now < _holyRadianceCooldownEnd) {
     const remaining = Math.ceil((_holyRadianceCooldownEnd - now) / 1000);
-    showMessage(`<span style="color:#f8f8a0">Holy Radiance</span> — ready in ${remaining}s`, 2000);
+    showMessage(`<span style="color:#f8f8a0">Holy Radiance</span> ΓÇö ready in ${remaining}s`, 2000);
     return;
   }
 
@@ -937,18 +715,18 @@ function _useHolyRadiance(member, memberIndex) {
 
   if (healed > 0) {
     showMessage(
-      `<span style="color:#f8f8a0">✦ Holy Radiance</span> — ${member.name} calls down divine light! Each member heals ${HOLY_RADIANCE_HEAL} HP.`,
+      `<span style="color:#f8f8a0">Γ£ª Holy Radiance</span> ΓÇö ${member.name} calls down divine light! Each member heals ${HOLY_RADIANCE_HEAL} HP.`,
       3000
     );
     addLogEntry({ type: 'skill', actor: member.name, skillName: 'Holy Radiance' });
   } else {
-    showMessage(`<span style="color:#f8f8a0">Holy Radiance</span> — the party is already at full health.`, 2000);
+    showMessage(`<span style="color:#f8f8a0">Holy Radiance</span> ΓÇö the party is already at full health.`, 2000);
   }
 
   _startSkillCooldownUI(memberIndex, _holyRadianceCooldownEnd);
 }
 
-// ── Arcane Lantern (Merlin) ───────────────────────────────────────────────
+// ΓöÇΓöÇ Arcane Lantern (Merlin) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const ARCANE_LANTERN_COOLDOWN_MS = 60_000;
 const ARCANE_LANTERN_DURATION_MS = 60_000;
 let _arcaneLanternCooldownEnd = 0;
@@ -958,7 +736,7 @@ function _useArcaneLantern(member, memberIndex) {
   const now = performance.now();
   if (now < _arcaneLanternCooldownEnd) {
     const remaining = Math.ceil((_arcaneLanternCooldownEnd - now) / 1000);
-    showMessage(`<span style="color:#a0d8ff">Arcane Lantern</span> — ready in ${remaining}s`, 2000);
+    showMessage(`<span style="color:#a0d8ff">Arcane Lantern</span> ΓÇö ready in ${remaining}s`, 2000);
     return;
   }
 
@@ -967,7 +745,7 @@ function _useArcaneLantern(member, memberIndex) {
   _arcaneLanternCooldownEnd = now + ARCANE_LANTERN_COOLDOWN_MS;
 
   showMessage(
-    `<span style="color:#a0d8ff">✦ Arcane Lantern</span> — ${member.name} conjures magical light for 60s.`,
+    `<span style="color:#a0d8ff">Γ£ª Arcane Lantern</span> ΓÇö ${member.name} conjures magical light for 60s.`,
     3000
   );
   addLogEntry({ type: 'skill', actor: member.name, skillName: 'Arcane Lantern' });
@@ -975,20 +753,20 @@ function _useArcaneLantern(member, memberIndex) {
   if (_arcaneLanternExpireTimer) clearTimeout(_arcaneLanternExpireTimer);
   _arcaneLanternExpireTimer = setTimeout(() => {
     skillsState.arcaneLight.active = false;
-    showMessage(`<span style="color:#a0d8ff">Arcane Lantern</span> fades — darkness returns.`, 2500);
+    showMessage(`<span style="color:#a0d8ff">Arcane Lantern</span> fades ΓÇö darkness returns.`, 2500);
     _arcaneLanternExpireTimer = null;
   }, ARCANE_LANTERN_DURATION_MS);
 
   _startSkillCooldownUI(memberIndex, _arcaneLanternCooldownEnd);
 }
 
-// ── Runic Scholar (Merlin) ────────────────────────────────────────────────
+// ΓöÇΓöÇ Runic Scholar (Merlin) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function _useRunicScholar(member, memberIndex) {
   // Toggle off if already primed (lets the player cancel the buff)
   if (member.runicScholarActive) {
     member.runicScholarActive = false;
     refreshPartyCards();
-    showMessage(`<span style="color:#c080ff">Runic Scholar</span> — ${member.name} releases the charge.`, 2000);
+    showMessage(`<span style="color:#c080ff">Runic Scholar</span> ΓÇö ${member.name} releases the charge.`, 2000);
     return;
   }
 
@@ -996,13 +774,13 @@ function _useRunicScholar(member, memberIndex) {
   refreshPartyCards(); // immediately lights up the skill slot glow
 
   showMessage(
-    `<span style="color:#c080ff">✦ Runic Scholar</span> — ${member.name} channels the runes! Next spell deals ×2 damage.`,
+    `<span style="color:#c080ff">Γ£ª Runic Scholar</span> ΓÇö ${member.name} channels the runes! Next spell deals ├ù2 damage.`,
     3000
   );
   addLogEntry({ type: 'skill', actor: member.name, skillName: 'Runic Scholar' });
 }
 
-// ── Generic cooldown badge ────────────────────────────────────────────────
+// ΓöÇΓöÇ Generic cooldown badge ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 /**
  * Shows a countdown badge on the skill slot of the given party member.
  * @param {number} memberIndex - Party slot index (0-3)
@@ -1043,9 +821,125 @@ function _startSkillCooldownUI(memberIndex, expiresAt) {
   slotEl._cdTimer = setInterval(tick, 500);
 }
 
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+//  CLICK HANDLERS
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+// Clicking a body slot with an item ΓåÆ move it to first free inventory cell
+// For bothHands items, both hand slots are cleared with one inventory entry.
+function onPaperdollSlotClick(e) {
+  if (activeCharIndex === null) return;
+  const key = e.currentTarget.dataset.slot;
+  const m = party[activeCharIndex];
+  const item = m.equipment[key];
+  if (!item) return; // empty slot ΓÇö nothing to do
+  if (item.slot === 'spell') return; // Cannot manually unequip spell
+
+  // Skills are learned abilities, not carried items ΓÇö just clear the slot
+  if (key === 'skill') {
+    m.equipment.skill = null;
+    renderModal(activeCharIndex);
+    refreshPartyCards();
+    return;
+  }
+
+  const freeIndex = m.inventory.indexOf(null);
+  if (freeIndex === -1) {
+    e.currentTarget.style.borderColor = '#c04040';
+    setTimeout(() => { e.currentTarget.style.borderColor = ''; }, 400);
+    return;
+  }
+
+  // Store a single inventory copy with the canonical slot
+  m.inventory[freeIndex] = { name: item.name, slot: item.slot };
+  m.equipment[key] = null;
+  // If it was a bothHands item, clear the mirrored slot too
+  if (item.slot === 'bothHands') {
+    m.equipment.leftHand = null;
+    m.equipment.rightHand = null;
+  } else if (item.slot === 'enable-spell') {
+    if (key === 'leftHand' && m.equipment.rightHand?.slot === 'spell') m.equipment.rightHand = null;
+    if (key === 'rightHand' && m.equipment.leftHand?.slot === 'spell') m.equipment.leftHand = null;
+  }
+  renderModal(activeCharIndex);
+}
+
+// Left-click an occupied inventory cell ΓåÆ equip the item back to its home slot.
+// For bothHands items, fills both hand slots; any displaced single-hand items
+// are returned to inventory (first displaced item gets the freed cell, second
+// goes to the next free cell).
+function onInventoryCellClick(e) {
+  if (activeCharIndex === null) return;
+  const invIndex = Number(e.currentTarget.dataset.index);
+  const m = party[activeCharIndex];
+  const item = m.inventory[invIndex];
+  if (!item) return; // empty cell
+
+  // Clear this inventory cell first
+  m.inventory[invIndex] = null;
+
+  if (item.slot === 'bothHands') {
+    const displaced = [m.equipment.leftHand, m.equipment.rightHand]
+      .filter((d) => d !== null && d !== m.equipment.leftHand || d === m.equipment.rightHand)
+      // deduplicate ΓÇö bothHands items share the same reference
+      .filter((d, idx, arr) => arr.indexOf(d) === idx)
+      .filter((d) => d.slot !== 'spell');
+
+    // Clear and equip both slots
+    m.equipment.leftHand = item;
+    m.equipment.rightHand = item;
+
+    // Return any displaced items to inventory
+    displaced.forEach((d) => {
+      if (!d) return;
+      const fi = m.inventory.indexOf(null);
+      if (fi !== -1) m.inventory[fi] = d;
+    });
+  } else if (item.slot === 'enable-spell') {
+    const displaced = [m.equipment.leftHand, m.equipment.rightHand]
+      .filter((d) => d !== null)
+      .filter((d, idx, arr) => arr.indexOf(d) === idx)
+      .filter((d) => d.slot !== 'spell');
+
+    m.equipment.leftHand = item;
+    m.equipment.rightHand = { name: 'Fireball', slot: 'spell' };
+
+    displaced.forEach((d) => {
+      if (!d) return;
+      const fi = m.inventory.indexOf(null);
+      if (fi !== -1) m.inventory[fi] = d;
+    });
+  } else {
+    let currentlyWorn = m.equipment[item.slot];
+
+    // Check if we are displacing an enable-spell item
+    if (currentlyWorn?.slot === 'enable-spell') {
+      if (item.slot === 'leftHand' && m.equipment.rightHand?.slot === 'spell') m.equipment.rightHand = null;
+      if (item.slot === 'rightHand' && m.equipment.leftHand?.slot === 'spell') m.equipment.leftHand = null;
+    } else if (currentlyWorn?.slot === 'spell') {
+      const otherSlot = item.slot === 'leftHand' ? 'rightHand' : 'leftHand';
+      const otherItem = m.equipment[otherSlot];
+      if (otherItem?.slot === 'enable-spell') {
+        // Send the staff to inventory since it lost its spell component
+        const fi = m.inventory.indexOf(null);
+        if (fi !== -1) m.inventory[fi] = otherItem;
+        m.equipment[otherSlot] = null;
+      }
+      currentlyWorn = null; // Spell disappears
+    }
+
+    m.equipment[item.slot] = item;
+    if (currentlyWorn && currentlyWorn.slot !== 'spell') {
+      m.inventory[invIndex] = currentlyWorn;
+    }
+  }
+
+  renderModal(activeCharIndex);
+}
+
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 //  DOM WIRING
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function buildInventoryGrid() {
   const grid = document.getElementById('inventory-grid');
   grid.innerHTML = '';
@@ -1054,7 +948,7 @@ function buildInventoryGrid() {
     cell.className = 'inv-cell';
     cell.dataset.index = i;
     cell.addEventListener('click', onInventoryCellClick);
-    // Hover tooltip — reads live item each time in case it changed
+    // Hover tooltip ΓÇö reads live item each time in case it changed
     attachTooltipListeners(cell, () => {
       if (activeCharIndex === null) return null;
       return party[activeCharIndex].inventory[i] ?? null;
@@ -1116,7 +1010,7 @@ function attachCardListeners() {
       });
     }
 
-    // Clicking the left/right hand slots uses the item — does NOT open modal
+    // Clicking the left/right hand slots uses the item ΓÇö does NOT open modal
     const lhSlot = document.getElementById(`slot-lh-${i}`);
     const rhSlot = document.getElementById(`slot-rh-${i}`);
 
@@ -1190,9 +1084,9 @@ export function addItemToInventory(charIndex, itemName) {
   return true;
 }
 
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 //  PUBLIC INIT
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 export function initEquipment() {
   extendPartyData();
   buildInventoryGrid();

@@ -18,7 +18,7 @@ export const lastAttackTimes = {};
 // ─────────────────────────────────────────────
 //  PORTRAIT RENDERER
 // ─────────────────────────────────────────────
-function drawPortrait(canvas, member) {
+export function drawPortrait(canvas, member) {
   const W = canvas.width;
   const H = canvas.height;
   const ctx = canvas.getContext('2d');

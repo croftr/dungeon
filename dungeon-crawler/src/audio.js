@@ -118,6 +118,27 @@ export async function playHealSound() {
   }
 }
 
+export async function playPortalSound() {
+  const buffer = await getBuffer('/sounds/actions/portal.mp3');
+  if (!buffer) return;
+
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.8;
+
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playPortalSound failed:', err);
+  }
+}
+
 /**
  * Synthesizes a dry, clattering bone sound.
  */

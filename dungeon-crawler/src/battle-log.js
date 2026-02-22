@@ -79,7 +79,9 @@ function _prependRow(entry) {
   else if (entry.type === 'skill') typeClass = 'bl--skill';
   else if (entry.blocked) typeClass = 'bl--block';
   else if (entry.stunned) typeClass = 'bl--stun';
+  else if (entry.poisoned) typeClass = 'bl--poison';
   else if (entry.crit) typeClass = 'bl--crit';
+  else if (entry.sundered) typeClass = 'bl--sunder'; // Added this line for sundered status
   else if (!entry.hit) typeClass = 'bl--miss';
 
   row.className = 'bl-row ' + typeClass;
@@ -107,8 +109,9 @@ function _buildRowHtml(e) {
       `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.target}</b> has been slain!</span>`;
   }
   if (e.type === 'skill') {
+    const targetText = e.target ? ` on <b>${e.target}</b>` : '';
     return `<span class="bl-badge">✦</span>` +
-      `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.actor}</b> uses ${e.skillName}!</span>`;
+      `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.actor}</b> uses ${e.skillName}${targetText}!</span>`;
   }
 
   const badge = e.blocked ? '🛡' : (e.crit ? '⚡' : e.hit ? '●' : '○');
@@ -149,12 +152,15 @@ function _formula(e) {
     const raw = e.statBonus + e.weaponBase - e.mitigation;
     const crit = e.crit ? ` ×${e.critMultiplier}` : '';
     const stunText = e.stunned ? ' (Stunned!)' : '';
-    return `(${stat}${e.statBonus}+base${e.weaponBase}${ammoLine}−${mit}${e.mitigation}=${raw}${crit})${stunText}`;
+    const poisonText = e.poisoned ? ' (Poisoned!)' : '';
+    const sunderText = e.sundered ? ' (Sundered!)' : '';
+    return `(${stat}${e.statBonus}+base${e.weaponBase}${ammoLine}−${mit}${e.mitigation}=${raw}${crit})${stunText}${poisonText}${sunderText}`;
   }
 
   // monster attack
   const raw = e.statBonus + e.baseBonus - e.mitigation;
   const crit = e.crit ? ` ×${e.critMultiplier}` : '';
   const stunText = e.stunned ? ' (Stunned!)' : '';
-  return `(STR${e.statBonus}+${e.baseBonus}−mit${e.mitigation}=${raw}${crit})${stunText}`;
+  const poisonText = e.poisoned ? ' (Poisoned!)' : '';
+  return `(STR${e.statBonus}+${e.baseBonus}−mit${e.mitigation}=${raw}${crit})${stunText}${poisonText}`;
 }

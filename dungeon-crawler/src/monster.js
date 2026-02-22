@@ -430,15 +430,17 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   }
 
   // Poison Logic
+  let poisoned = false;
   if (ammoDef && ammoDef.damageType === 'poison' && result.hit && !result.killed) {
     m.poisonUntil = performance.now() + 30000;
     m.poisonTimer = 1.9; // Fast-forward first tick to feel impactful (0.1s later)
     showMessage(`${m.name} is poisoned!`);
     if (m.statsLabel?.visible) _updateStatsPanel(m);
     setTimeout(() => { if (m.statsLabel?.visible) _updateStatsPanel(m); }, 30000);
+    poisoned = true;
   }
 
-  return { ...result, crit: isCrit, hitChance, formula, monsterName: m.name, stunned };
+  return { ...result, crit: isCrit, hitChance, formula, monsterName: m.name, stunned, poisoned, sundered: isSundered };
 }
 
 export function triggerMonsterAttack(monsterId) {

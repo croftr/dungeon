@@ -6,7 +6,7 @@ import { tweenGroup, isInFrontOfPlayer, player } from './player.js';
 import { showMessage } from './minimap.js';
 import { getItemDef } from './items.js';
 import { party, resurrectAll } from './party.js';
-import { playHealSound, playBoneSound } from './audio.js';
+import { playHealSound, playBoneSound, playPortalSound } from './audio.js';
 
 export const objects = [];
 
@@ -108,6 +108,7 @@ export function initObjects(scene, camera) {
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 1 && distCol <= 1) {
                     showMessage("You step into the swirling blue portal...");
+                    playPortalSound();
                     if (window.loadLevel) window.loadLevel(obj.userData.targetLevel);
                 } else {
                     showMessage("Step closer to the portal to enter.");
