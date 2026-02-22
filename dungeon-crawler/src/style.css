@@ -1403,6 +1403,39 @@ body {
   animation: fireball-fly 0.5s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
 }
 
+/* ── SHIELD BASH ── shield rises from below, connects, then drops away ── */
+@keyframes shield-bash {
+  0% {
+    transform: translateY(140%) scale(0.55);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 0.85;
+  }
+
+  45% {
+    transform: translateY(-10%) scale(0.75);
+    opacity: 0.9;
+  }
+
+  65% {
+    transform: translateY(-18%) scale(0.72) rotate(-2deg);
+    opacity: 0.85;
+  }
+
+  100% {
+    transform: translateY(-30%) scale(0.5);
+    opacity: 0;
+    filter: blur(3px);
+  }
+}
+
+.anim-shield-bash svg {
+  animation: shield-bash 0.55s cubic-bezier(0.2, 0.85, 0.3, 1) forwards;
+  filter: drop-shadow(0 0 8px rgba(240, 190, 40, 0.5));
+}
+
 /* ─────────────────────────────────────────────────────────────────────────────
    ITEM TOOLTIP
    Fixed floating panel positioned near the cursor by JS.
@@ -1962,7 +1995,8 @@ body {
   padding: 15px;
 }
 
-.chest-slot, .merchant-slot {
+.chest-slot,
+.merchant-slot {
   aspect-ratio: 1;
   background: rgba(0, 0, 0, 0.5);
   border: 1px solid #2a2010;
@@ -1981,17 +2015,20 @@ body {
   position: relative;
 }
 
-.chest-slot:hover, .merchant-slot:hover {
+.chest-slot:hover,
+.merchant-slot:hover {
   border-color: #a08050;
   background: rgba(60, 40, 10, 0.45);
 }
 
-.chest-slot.occupied, .merchant-slot.occupied {
+.chest-slot.occupied,
+.merchant-slot.occupied {
   border-color: #6a5030;
   color: #e8c87a;
 }
 
-.chest-slot img, .merchant-slot img {
+.chest-slot img,
+.merchant-slot img {
   width: 85%;
   height: 85%;
   object-fit: contain;

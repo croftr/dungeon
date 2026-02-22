@@ -171,6 +171,66 @@ const ACTION_SVG = {
   // Fireball now uses 3D particles instead of a 2D SVG overlay.
   [ACTIONS.FIREBALL]: null,
 
+  // Shield slam — a broad round shield punches straight forward, impact rings and debris
+  [ACTIONS.SHIELD_BASH]: `
+    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"
+         fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <defs>
+        <filter id="glowShield" x="-25%" y="-25%" width="150%" height="150%">
+          <feGaussianBlur stdDeviation="3.5" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
+        <radialGradient id="shieldFace" cx="42%" cy="35%" r="58%">
+          <stop offset="0%"  stop-color="#d0c090" stop-opacity="0.95"/>
+          <stop offset="45%" stop-color="#8a7040" stop-opacity="0.90"/>
+          <stop offset="100%" stop-color="#3a2a10" stop-opacity="0.85"/>
+        </radialGradient>
+        <radialGradient id="impactRing" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"  stop-color="#fff" stop-opacity="0.9"/>
+          <stop offset="50%" stop-color="#f0c040" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#e09020" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <g filter="url(#glowShield)">
+        <!-- Motion blur streak behind the shield -->
+        <ellipse cx="60" cy="66" rx="28" ry="34" fill="rgba(80,60,20,0.18)" />
+        <ellipse cx="60" cy="70" rx="22" ry="28" fill="rgba(80,60,20,0.18)" />
+
+        <!-- Shield body — slightly angled to imply a forward lunge -->
+        <ellipse cx="60" cy="58" rx="30" ry="36"
+                 fill="url(#shieldFace)" stroke="#c8a030" stroke-width="3.5"/>
+        <!-- Shield rim highlight -->
+        <ellipse cx="60" cy="58" rx="30" ry="36"
+                 fill="none" stroke="#ffe080" stroke-width="1" opacity="0.45"/>
+        <!-- Central boss (iron knob) -->
+        <circle cx="60" cy="58" r="9" fill="#5a4018" stroke="#c8a030" stroke-width="2.5"/>
+        <circle cx="57" cy="55" r="3" fill="rgba(255,240,180,0.5)" stroke="none"/>
+        <!-- Quadrant dividers -->
+        <line x1="60" y1="24" x2="60" y2="92" stroke="#b08028" stroke-width="1.5" opacity="0.6"/>
+        <line x1="31" y1="58" x2="89" y2="58" stroke="#b08028" stroke-width="1.5" opacity="0.6"/>
+
+        <!-- Impact flash at boss centre -->
+        <circle cx="60" cy="58" r="38" fill="url(#impactRing)" opacity="0.7"/>
+
+        <!-- Shockwave rings expanding outward -->
+        <ellipse cx="60" cy="58" rx="34" ry="40" stroke="#f0c040" stroke-width="2.5" opacity="0.75"/>
+        <ellipse cx="60" cy="58" rx="44" ry="52" stroke="#d09030" stroke-width="1.5" opacity="0.45"/>
+        <ellipse cx="60" cy="58" rx="55" ry="64" stroke="#c07020" stroke-width="1"   opacity="0.2"/>
+
+        <!-- Flying debris sparks -->
+        <line x1="60" y1="18" x2="62" y2="4"  stroke-width="2.5" stroke="#fff"    opacity="0.9"/>
+        <line x1="92" y1="28" x2="106" y2="16" stroke-width="2"   stroke="#ffe080" opacity="0.85"/>
+        <line x1="98" y1="62" x2="114" y2="66" stroke-width="2"   stroke="#ffe080" opacity="0.8"/>
+        <line x1="86" y1="90" x2="98"  y2="104" stroke-width="1.5" stroke="#f0b040" opacity="0.65"/>
+        <line x1="28" y1="90" x2="16"  y2="104" stroke-width="1.5" stroke="#f0b040" opacity="0.65"/>
+        <line x1="22" y1="58" x2="6"   y2="56"  stroke-width="2"   stroke="#ffe080" opacity="0.8"/>
+        <!-- Spark dots -->
+        <circle cx="108" cy="42" r="2.5" fill="#fff" opacity="0.8"/>
+        <circle cx="112" cy="78" r="1.8" fill="#ffe080" opacity="0.7"/>
+        <circle cx="10"  cy="38" r="2"   fill="#fff" opacity="0.7"/>
+      </g>
+    </svg>`,
+
 };
 
 /**
@@ -184,7 +244,7 @@ export function playAction(attackType, hand = 'left') {
   // Play the matching sound simultaneously
   playActionSound(attackType);
 
-  const visualType = attackType === ACTIONS.SHIELD_BASH ? ACTIONS.BASH : attackType;
+  const visualType = attackType;
 
   // Remove any existing animation that hasn't finished yet
   const existing = document.getElementById('action-anim');

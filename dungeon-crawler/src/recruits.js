@@ -112,12 +112,14 @@ export function initRecruits(scene, camera) {
 
     const alphaTex = new THREE.CanvasTexture(alphaCanvas);
 
-    // PlaneGeometry for wall frescoes (width: 1.5, height: 1.5)
-    const frameGeo = new THREE.PlaneGeometry(1.5, 1.5);
+    // PlaneGeometry for wall frescoes
+    const frameGeo = new THREE.PlaneGeometry(0.8, 0.8);
 
     // Draw them as embedded wall frescoes
     RECRUITS.forEach(r => {
         const map = loader.load(r.image);
+        map.magFilter = THREE.NearestFilter;
+        map.minFilter = THREE.NearestMipmapLinearFilter;
         // We use transparent: true and our alphaMap so edges fade into the procedural wall
         const picMat = new THREE.MeshLambertMaterial({
             map,
