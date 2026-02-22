@@ -195,7 +195,15 @@ function renderModal(memberIndex) {
       skills.forEach((skill) => {
         const card = document.createElement('div');
         card.className = 'skill-card';
+        const isEquipped = m.equipment?.skill?.name === skill.name;
+        if (isEquipped) card.classList.add('skill-card--equipped');
         card.innerHTML = `<span class="skill-name">${skill.name}</span><span class="skill-desc">${skill.description}</span>`;
+        // Click to equip — clicking the already-equipped skill unequips it
+        card.addEventListener('click', () => {
+          m.equipment.skill = isEquipped ? null : { name: skill.name, slot: 'skill' };
+          renderModal(activeCharIndex);
+          refreshPartyCards();
+        });
         skillsEl.appendChild(card);
       });
     }
@@ -472,6 +480,14 @@ function onPaperdollSlotClick(e) {
   const item = m.equipment[key];
   if (!item) return; // empty slot — nothing to do
   if (item.slot === 'spell') return; // Cannot manually unequip spell
+
+  // Skills are learned abilities, not carried items — just clear the slot
+  if (key === 'skill') {
+    m.equipment.skill = null;
+    renderModal(activeCharIndex);
+    refreshPartyCards();
+    return;
+  }
 
   const freeIndex = m.inventory.indexOf(null);
   if (freeIndex === -1) {

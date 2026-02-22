@@ -176,11 +176,14 @@ export function initMonsters(scene) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function updateMonsters(dt, playerCamera, scene) {
+  const currentLevel = window.currentLevel || 1;
   monsters.forEach((m) => {
-    if (!m.alive) {
+    if (!m.alive || currentLevel !== 1) {
       if (m.hpLabel) m.hpLabel.visible = false;
+      if (m.mesh) m.mesh.visible = false;
       return;
     }
+    if (m.mesh) m.mesh.visible = true;
 
     if (m.mixer) m.mixer.update(dt);
 

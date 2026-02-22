@@ -10,39 +10,57 @@ export const CELL_START = 2;
 export const CELL_EXIT = 3;
 export const CELL_PORTCULLIS = 4;
 
-export const dungeonMap = [
+export const level1Map = [
   // cols:  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 |15 16-30(room interior) 31
-  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], // 0
-  [1,1,1,1,1,1,1,0,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], // 1
-  [1,1,1,1,1,1,1,0,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], // 2
-  [1,1,1,1,1,1,1,0,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], // 3 (top wall of test room)
-  [1,1,1,1,1,1,1,0,1,1,1,1,1,1,1, 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // 4
-  [1,1,1,1,1,1,1,0,1,1,1,1,1,1,1, 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // 5
-  [1,1,1,1,1,1,1,0,1,1,1,1,1,1,1, 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // 6
-  [1,1,1,1,1,1,1,4,1,1,1,1,1,1,1, 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // 7 (portcullis)
-  [1,1,1,1,1,1,1,0,1,1,1,1,1,1,1, 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // 8
-  [1,0,0,0,1,0,0,0,1,0,0,0,0,0,1, 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // 9
-  [1,0,1,0,1,0,1,0,1,0,0,0,0,0,1, 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // 10
-  [1,0,1,0,0,0,1,0,1,0,2,1,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // 11 ← START; col14+15 open = entrance to test room
-  [1,0,1,1,1,0,1,0,1,0,0,0,0,0,1, 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // 12
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1, 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // 13
-  [1,1,1,0,1,1,1,0,1,1,1,1,1,1,1, 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // 14
-  [1,0,0,0,0,0,0,0,1,0,0,0,0,0,1, 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // 15
-  [1,0,1,1,1,1,1,0,1,0,1,1,1,0,1, 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // 16
-  [1,0,1,0,0,0,1,0,1,0,1,0,0,0,1, 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // 17
-  [1,0,1,0,1,0,1,0,1,0,1,0,1,1,1, 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], // 18
-  [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], // 19 (bottom wall of test room)
-  [1,1,1,1,1,1,1,1,1,0,1,1,1,0,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], // 20
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], // 21
-  [1,3,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], // 22
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 0
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 1
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 2
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 3 (top wall of test room)
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], // 4
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], // 5
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], // 6
+  [1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], // 7 (portcullis)
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], // 8
+  [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], // 9
+  [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], // 10
+  [1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], // 11 ← START; col14+15 open = entrance to test room
+  [1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], // 12
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], // 13
+  [1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], // 14
+  [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], // 15
+  [1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], // 16
+  [1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], // 17
+  [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], // 18
+  [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 19 (bottom wall of test room)
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 20
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 21
+  [1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 22
 ];
 
-export const ROWS = dungeonMap.length;
-export const COLS = dungeonMap[0].length;
+export const level2Map = [
+  [1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 2, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1],
+];
+
+export let dungeonMap = level1Map;
+export let ROWS = dungeonMap.length;
+export let COLS = dungeonMap[0].length;
+
+export function changeMapArray(newMapArray) {
+  dungeonMap = newMapArray;
+  ROWS = dungeonMap.length;
+  COLS = dungeonMap[0].length;
+}
 
 // World-space constants
 export const CELL = 2;    // units per grid cell
 export const WALL_H = 2;    // wall height
+
 
 
 // ─────────────────────────────────────────────
@@ -214,12 +232,57 @@ export function cellToWorld(row, col) {
   return { x: col * CELL, y: WALL_H * 0.4, z: row * CELL };
 }
 
+let currentMapMeshes = [];
+
 /**
  * Instantiates all wall/floor/ceiling meshes from dungeonMap.
  * Returns the exit PointLight (so lighting.js can manage it).
  */
 export function buildLevel(scene) {
   let exitLight = null;
+
+  // Clear previous level meshes if they exist
+  currentMapMeshes.forEach(mesh => scene.remove(mesh));
+  currentMapMeshes = [];
+
+  // 1. Count instances needed
+  let wallCount = 0;
+  let floorCount = 0;
+  let ceilCount = 0;
+  let exitFloorCount = 0;
+
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const cell = dungeonMap[row][col];
+      if (cell === CELL_WALL) {
+        wallCount++;
+      } else {
+        if (cell === CELL_EXIT) exitFloorCount++;
+        else floorCount++;
+        ceilCount++;
+      }
+    }
+  }
+
+  // 2. Create Instanced Meshes
+  const wallIM = new THREE.InstancedMesh(wallGeo, wallMat, wallCount);
+  wallIM.castShadow = true;
+  wallIM.receiveShadow = true;
+
+  const floorIM = new THREE.InstancedMesh(tileGeo, floorMat, floorCount);
+  floorIM.receiveShadow = true;
+
+  const ceilIM = new THREE.InstancedMesh(tileGeo, ceilMat, ceilCount);
+
+  let exitFloorIM = null;
+  if (exitFloorCount > 0) {
+    exitFloorIM = new THREE.InstancedMesh(tileGeo, exitMat, exitFloorCount);
+    exitFloorIM.receiveShadow = true;
+  }
+
+  // 3. Set matrices
+  const dummy = new THREE.Object3D();
+  let wId = 0, fId = 0, cId = 0, eId = 0;
 
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
@@ -228,33 +291,49 @@ export function buildLevel(scene) {
       const wz = row * CELL;
 
       if (cell === CELL_WALL) {
-        const mesh = new THREE.Mesh(wallGeo, wallMat);
-        mesh.position.set(wx, WALL_H / 2, wz);
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        scene.add(mesh);
+        dummy.position.set(wx, WALL_H / 2, wz);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        wallIM.setMatrixAt(wId++, dummy.matrix);
       } else {
-        // Floor (Portcullis also has floor)
-        const floor = new THREE.Mesh(tileGeo, cell === CELL_EXIT ? exitMat : floorMat);
-        floor.rotation.x = -Math.PI / 2;
-        floor.position.set(wx, 0, wz);
-        floor.receiveShadow = true;
-        scene.add(floor);
+        // Floor
+        dummy.position.set(wx, 0, wz);
+        dummy.rotation.set(-Math.PI / 2, 0, 0);
+        dummy.updateMatrix();
+        if (cell === CELL_EXIT) {
+          exitFloorIM.setMatrixAt(eId++, dummy.matrix);
+        } else {
+          floorIM.setMatrixAt(fId++, dummy.matrix);
+        }
 
         // Ceiling
-        const ceil = new THREE.Mesh(tileGeo, ceilMat);
-        ceil.rotation.x = Math.PI / 2;
-        ceil.position.set(wx, WALL_H, wz);
-        scene.add(ceil);
+        dummy.position.set(wx, WALL_H, wz);
+        dummy.rotation.set(Math.PI / 2, 0, 0);
+        dummy.updateMatrix();
+        ceilIM.setMatrixAt(cId++, dummy.matrix);
 
         // Exit glow light
         if (cell === CELL_EXIT) {
           exitLight = new THREE.PointLight(0x44ff44, 1.5, 5, 2);
           exitLight.position.set(wx, 1, wz);
           scene.add(exitLight);
+          currentMapMeshes.push(exitLight);
         }
       }
     }
+  }
+
+  wallIM.instanceMatrix.needsUpdate = true;
+  floorIM.instanceMatrix.needsUpdate = true;
+  ceilIM.instanceMatrix.needsUpdate = true;
+  if (exitFloorIM) exitFloorIM.instanceMatrix.needsUpdate = true;
+
+  scene.add(wallIM); currentMapMeshes.push(wallIM);
+  scene.add(floorIM); currentMapMeshes.push(floorIM);
+  scene.add(ceilIM); currentMapMeshes.push(ceilIM);
+  if (exitFloorIM) {
+    scene.add(exitFloorIM);
+    currentMapMeshes.push(exitFloorIM);
   }
 
   return exitLight;

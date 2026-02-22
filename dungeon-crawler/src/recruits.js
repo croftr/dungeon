@@ -205,8 +205,9 @@ export function initRecruits(scene, camera) {
 }
 
 export function updateRecruitsMeshState() {
+    const currentLevel = window.currentLevel || 1;
     RECRUITS.forEach(r => {
-        if (r.isRecruited) {
+        if (r.isRecruited || currentLevel !== 1) {
             r.mesh.visible = false;
         } else {
             r.mesh.visible = true;

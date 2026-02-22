@@ -1,16 +1,16 @@
 import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import { buildLevel, findCell, CELL_START } from './map.js';
-import { initPlayer, initInput, setCallbacks, tweenGroup } from './player.js';
+import { buildLevel, findCell, CELL_START, changeMapArray, level1Map, level2Map, cellToWorld } from './map.js';
+import { initPlayer, initInput, setCallbacks, tweenGroup, player } from './player.js';
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
 import { initParty } from './party.js';
 import { initEquipment } from './equipment.js';
 import { initMonsters, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
-import { initRecruits } from './recruits.js';
-import { initObjects } from './objects.js';
+import { initRecruits, updateRecruitsMeshState } from './recruits.js';
+import { initObjects, clearObjects, spawnObjectsForLevel } from './objects.js';
 import { startMusic, updateAudio } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initMainMenu } from './main-menu.js';
@@ -18,8 +18,10 @@ import { initMainMenu } from './main-menu.js';
 import './style.css';
 
 // ─────────────────────────────────────────────
-//  RENDERER
+//  RENDERER & GLOBALS
 // ─────────────────────────────────────────────
+window.currentLevel = 1;
+
 const canvas = document.getElementById('renderer-canvas');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -134,5 +136,69 @@ function handleFirstInteraction() {
 window.addEventListener('click', handleFirstInteraction);
 window.addEventListener('keydown', handleFirstInteraction);
 
+// ─────────────────────────────────────────────
+//  LEVEL LOADING
+// ─────────────────────────────────────────────
+window.loadLevel = function (levelNum) {
+  window.currentLevel = levelNum;
+
+  // 1. Swap Map Array
+  changeMapArray(levelNum === 1 ? level1Map : level2Map);
+
+  // 2. Rebuild map meshes for walls/floors
+  buildLevel(scene);
+
+  // 3. Clear and respawn level objects
+  clearObjects(scene);
+  spawnObjectsForLevel();
+  updateRecruitsMeshState();
+
+  // 4. Move player to start of new map
+  const start = findCell(CELL_START);
+  player.gridRow = start.row;
+  player.gridCol = start.col;
+  const w = cellToWorld(start.row, start.col);
+  camera.position.set(w.x, w.y, w.z);
+
+  // 5. Update Minimap bounds
+  drawMinimap();
+  updateStatus();
+};
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+window.addEventListener('mousemove', (e) => {
+  // Only apply 3D world raycasting if interacting with the canvas directly
+  if (e.target !== canvas) {
+    document.body.classList.remove('cursor-interact');
+    return;
+  }
+
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(scene.children, true);
+
+  let isHoveringInteractable = false;
+  for (let hit of intersects) {
+    const ud = hit.object.userData;
+    if (ud && (ud.isButton || ud.isChest || ud.isCrystal || ud.isBonePile || ud.isRecruit)) {
+      if (hit.object.visible) {
+        isHoveringInteractable = true;
+        break;
+      }
+    }
+  }
+
+  if (isHoveringInteractable) {
+    document.body.classList.add('cursor-interact');
+  } else {
+    document.body.classList.remove('cursor-interact');
+  }
+});
+
 console.log('%c Grid Dungeon Crawler ', 'background:#333;color:#e8c87a;font-size:14px;padding:4px 8px;');
 console.log('Map: 0=floor 1=wall 2=start 3=exit | Controls: W/S=move  Q/E=turn  A/D=strafe  Arrows=move+turn');
+
