@@ -134,7 +134,7 @@ export function spawnObjectsForLevel() {
 
     if (level === 1) {
         // Chest in the starter room
-        addChest(objectsGroup, gltfLoader, 11, 13, 0, 0.7, ['Leather Boots', 'Steel Arrows', 'Poison Arrows']);
+        addChest(objectsGroup, gltfLoader, 11, 13, 0, 0.7, ['Leather Boots', 'Steel Arrows', 'Poison Arrows', 'Torch']);
         // New Chest at the end of the long passage
         addChest(objectsGroup, gltfLoader, 7, 1, 0, -0.7, []);
         // Crystals in the starter room

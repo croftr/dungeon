@@ -49,7 +49,7 @@ export const RECRUITS = [
             { name: 'Sunder Armor', description: 'Crushes the targeted monster, halving its defence stats for 30s. Only usable in combat. Cooldown: 60s.', icon: '/skills/sunder-armor.png' },
         ],
         image: '/dwarf_barbarian_head.png',
-        leftHand: 'Axe', rightHand: 'Torch', startingSkill: 'Sunder Armor',
+        leftHand: 'Axe', rightHand: 'Wooden Shield', startingSkill: 'Sunder Armor',
         gridCol: 12, gridRow: 8, facing: 'front', // North wall
         isRecruited: false
     },
