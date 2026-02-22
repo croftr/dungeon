@@ -6,7 +6,7 @@ import { tweenGroup, isInFrontOfPlayer, player } from './player.js';
 import { showMessage } from './minimap.js';
 import { getItemDef } from './items.js';
 import { resurrectAll } from './party.js';
-import { playHealSound } from './audio.js';
+import { playHealSound, playBoneSound } from './audio.js';
 
 export const objects = [];
 
@@ -21,6 +21,12 @@ export function initObjects(scene, camera) {
 
     // Crystals in the starter room: Row 11, Col 9 (against the West wall)
     addCrystals(scene, gltfLoader, 9, 11, 0, -0.7);
+
+    // Bone pile in the passage: Row 27, Col 1
+    addBonePile(scene, gltfLoader, 1, 27);
+
+    // Bone pile in the starter room area: Row 12, Col 11
+    addBonePile(scene, gltfLoader, 11, 12);
 
     // Portcullis: Row 7, Col 7.
     const portcullis = {
@@ -124,6 +130,21 @@ export function initObjects(scene, camera) {
                     }
                 } else {
                     showMessage("Stand on the crystals to feel their power.");
+                }
+                break;
+            } else if (obj.userData.isBonePile) {
+                // Check if player is near the bone pile
+                if (isInFrontOfPlayer(obj.userData.gridRow, obj.userData.gridCol, 1)) {
+                    playBoneSound();
+                    const messages = [
+                        "A pile of bleached human bones. It seems this adventurer didn't make it far.",
+                        "These bones are old and brittle. A rusted dagger lies nearby, long ago surrendered.",
+                        "You find a tattered leather pouch among the ribs, but it's empty.",
+                        "The skull has a clean indentation. Something powerful struck this poor soul."
+                    ];
+                    showMessage(messages[Math.floor(Math.random() * messages.length)]);
+                } else {
+                    showMessage("A grim pile of bones lies just out of reach.");
                 }
                 break;
             }
@@ -251,5 +272,26 @@ function openChestModal() {
                 });
             };
         }
+    });
+}
+
+function addBonePile(scene, loader, col, row) {
+    loader.load('/items/Meshy_AI_Bone_pile_0221211647_texture.glb', (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(0.4);
+        model.position.set(col * CELL, 0.05, row * CELL);
+        model.rotation.y = Math.random() * Math.PI * 2;
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.userData.isBonePile = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+            }
+        });
+
+        scene.add(model);
     });
 }

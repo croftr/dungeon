@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import { buildLevel, findCell, CELL_START } from './map.js';
 import { initPlayer, initInput, setCallbacks, tweenGroup } from './player.js';
@@ -11,6 +12,8 @@ import { initMonsters, updateMonsters, triggerMonsterAttack, monsters, isMonster
 import { initRecruits } from './recruits.js';
 import { initObjects } from './objects.js';
 import { startMusic, updateAudio } from './audio.js';
+import { initBattleLog } from './battle-log.js';
+import { initMainMenu } from './main-menu.js';
 
 import './style.css';
 
@@ -23,6 +26,11 @@ renderer.setPixelRatio(window.devicePixelRatio);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
+// CSS2D renderer — renders HTML labels (monster HP bars) anchored in 3D space
+const css2dRenderer = new CSS2DRenderer();
+css2dRenderer.domElement.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;';
+document.body.appendChild(css2dRenderer.domElement);
+
 // ─────────────────────────────────────────────
 //  SCENE  &  CAMERA
 // ─────────────────────────────────────────────
@@ -34,6 +42,7 @@ const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 100);
 
 function onResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
+  css2dRenderer.setSize(window.innerWidth, window.innerHeight);
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
 }
@@ -80,6 +89,8 @@ drawMinimap();
 updateStatus();
 initParty();
 initEquipment();
+initBattleLog();
+initMainMenu();
 initRecruits(scene, camera);
 initObjects(scene, camera);
 
@@ -100,10 +111,11 @@ function animate(now) {
 
   tweenGroup.update(now);
   updateLighting(lights, camera, dt);
-  updateMonsters(dt, camera);
+  updateMonsters(dt, camera, scene);
   updateParticles(dt);
   updateAudio(dt);
   renderer.render(scene, camera);
+  css2dRenderer.render(scene, camera);
 }
 
 animate(performance.now());

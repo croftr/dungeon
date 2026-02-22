@@ -8,6 +8,7 @@ import { dropMember } from './recruits.js';
 import { isInFrontOfPlayer } from './player.js';
 import { canMelee } from './combat-rules.js';
 import { playCritSound } from './audio.js';
+import { addLogEntry } from './battle-log.js';
 
 // ─────────────────────────────────────────────
 //  CONSTANTS
@@ -329,6 +330,14 @@ function closeModal() {
  * @param {number} memberIndex  — 0-3
  * @param {'left'|'right'} hand
  */
+function _showDamagePopup(slotEl, damage, isCrit) {
+  const popup = document.createElement('span');
+  popup.className = 'damage-popup' + (isCrit ? ' damage-popup--crit' : '');
+  popup.textContent = `-${damage}`;
+  slotEl.appendChild(popup);
+  setTimeout(() => popup.remove(), 900);
+}
+
 function useHand(memberIndex, hand) {
   const m = party[memberIndex];
   if (!m) return;
@@ -391,23 +400,45 @@ function useHand(memberIndex, hand) {
   // Pass character object + weapon def; hit chance and damage are resolved in combat-rules.js
   const result = attackMonster(target.id, m, def, attackType);
 
+  addLogEntry({
+    time: Date.now(),
+    actor: 'player',
+    attacker: m.name,
+    target: result.monsterName || target.name,
+    attackType,
+    hitChance: result.hitChance ?? 0,
+    hit: result.hit,
+    crit: result.crit,
+    weaponBase: result.formula?.weaponBase ?? 0,
+    statBonus: result.formula?.statBonus ?? 0,
+    mitigation: result.formula?.mitigation ?? 0,
+    preCritDamage: result.formula?.preCritDamage ?? 0,
+    finalDamage: result.damage,
+    critMultiplier: result.formula?.critMultiplier ?? 1,
+  });
+
   if (!result.hit) {
-    showMessage(`${m.name} swings at the ${target.name} — and misses!`);
+    showMessage(`${m.name} misses!`);
     return;
   }
+
+  // Damage number floats up from the clicked weapon slot
+  const slotId = `slot-${hand === 'left' ? 'lh' : 'rh'}-${memberIndex}`;
+  const slotEl = document.getElementById(slotId);
+  if (slotEl) _showDamagePopup(slotEl, result.damage, result.crit);
 
   if (result.crit) {
     playCritSound(attackType);
     if (result.killed) {
       showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${m.name} obliterates the ${target.name}!`, 3000);
     } else {
-      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${m.name} strikes the ${target.name} for <b>${result.damage}</b> damage! &nbsp;(${result.monsterHp} / ${target.hpMax} HP)`, 3000);
+      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${m.name} &nbsp;<b>${result.damage}</b> damage`, 2500);
     }
   } else {
     if (result.killed) {
       showMessage(`${m.name} slays the ${target.name}!`);
     } else {
-      showMessage(`${m.name} hits ${target.name} for <b>${result.damage}</b> damage! &nbsp;(${result.monsterHp} / ${target.hpMax} HP)`);
+      showMessage(`${m.name} &nbsp;<b>${result.damage}</b> damage`);
     }
   }
 }
@@ -600,8 +631,14 @@ function attachCardListeners() {
     const card = document.getElementById(`member-${i}`);
     if (!card) return;
 
-    // Clicking the card opens the equipment modal
-    card.addEventListener('click', () => openModal(i));
+    // Clicking the portrait opens the equipment modal
+    const portrait = card.querySelector('.portrait');
+    if (portrait) {
+      portrait.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openModal(i);
+      });
+    }
 
     // Clicking the left/right hand slots uses the item — does NOT open modal
     const lhSlot = document.getElementById(`slot-lh-${i}`);

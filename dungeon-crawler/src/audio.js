@@ -132,6 +132,46 @@ export async function playHealSound() {
   }
 }
 
+/**
+ * Synthesizes a dry, clattering bone sound.
+ */
+export async function playBoneSound() {
+  try {
+    const ctx = getCtx();
+    const now = ctx.currentTime;
+
+    // Series of quick, short white-noise-like bursts with filtered pitch
+    for (let i = 0; i < 5; i++) {
+      const startTime = now + (i * 0.05);
+      const duration = 0.03 + Math.random() * 0.04;
+
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(100 + Math.random() * 400, startTime);
+
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(800 + Math.random() * 1200, startTime);
+      filter.Q.value = 5;
+
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.1, startTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    }
+  } catch (err) {
+    console.warn('[audio] playBoneSound failed:', err);
+  }
+}
+
 let currentMusicIndex = 0;
 const MUSIC_TRACKS = ['/sounds/back1.mp3', '/sounds/back2.mp3'];
 const BATTLE_TRACK = '/sounds/backing/battle.mp3';

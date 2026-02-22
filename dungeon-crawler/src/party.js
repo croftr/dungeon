@@ -1,5 +1,6 @@
 import { getItemDef } from './items.js';
 import { renderItemIcon } from './equipment.js';
+import { addLogEntry } from './battle-log.js';
 
 // ─────────────────────────────────────────────
 //  PARTY DATA  — 4 members
@@ -576,6 +577,7 @@ export function setHp(index, value) {
 
   if (m.hp === 0 && !m.isDead) {
     m.isDead = true;
+    addLogEntry({ type: 'death', target: m.name, time: Date.now() });
     const canvas = document.getElementById(`portrait-${m.id}`);
     if (canvas) drawPortrait(canvas, m);
     const deathAudio = new Audio('sounds/actions/death.mp3');
@@ -611,6 +613,18 @@ export function flashPortraitCrit(index) {
   void portrait.offsetWidth;   // force reflow to restart animation
   portrait.classList.add('portrait--crit');
   setTimeout(() => portrait.classList.remove('portrait--crit'), 800);
+}
+
+/** Float a red damage number above the member's portrait when they are hit. */
+export function showMemberDamage(memberIndex, damage, isCrit) {
+  const memberTop = document.querySelector(`#member-${memberIndex} .member-top`);
+  if (!memberTop) return;
+  const popup = document.createElement('span');
+  popup.className = 'damage-popup damage-popup--incoming' +
+    (isCrit ? ' damage-popup--crit' : '');
+  popup.textContent = `-${damage}`;
+  memberTop.appendChild(popup);
+  setTimeout(() => popup.remove(), 900);
 }
 
 export function setMp(index, value) {
