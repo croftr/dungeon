@@ -14,6 +14,8 @@
 //    weight      {number}  — encumbrance (future use)
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { SPELLS } from './spells.js';
+
 export const ACTIONS = Object.freeze({
   SWIPE: 'swipe',
   BASH: 'bash',
@@ -21,6 +23,7 @@ export const ACTIONS = Object.freeze({
   PUNCH: 'punch',
   FIREBALL: 'fireball',
   SHIELD_BASH: 'shield-bash',
+  REGENERATE: 'regenerate',
 });
 
 export const ITEMS = [
@@ -403,18 +406,6 @@ export const ITEMS = [
     weight: 1.5,
   },
   {
-    name: 'Fireball',
-    slot: 'spell',
-    attackType: ACTIONS.FIREBALL,
-    baseDamage: 12,
-    delay: 4,
-    mpCost: 10,
-    icon: '/icons/fireball.svg',
-    description: 'A blazing orb of magical fire. Cast to roast your enemies.',
-    value: 0,
-    weight: 0,
-  },
-  {
     name: 'Spellbook',
     slot: 'spell',
     attackType: null,
@@ -544,7 +535,8 @@ export const ITEMS = [
 //  LOOKUP HELPER
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Returns the item definition for a given name, or null if not found. */
 export function getItemDef(name) {
-  return ITEMS.find((item) => item.name === name) ?? null;
+  return ITEMS.find((item) => item.name === name)
+    ?? SPELLS.find((spell) => spell.name === name)
+    ?? null;
 }

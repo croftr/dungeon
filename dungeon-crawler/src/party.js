@@ -676,7 +676,28 @@ export function resurrectAll() {
 let mpRegenTimer = 0;
 let spRegenAccum = 0;
 
+let regenerationDuration = 0;
+let regenerationTick = 0;
+
+export function applyRegeneration() {
+  regenerationDuration = 30; // 30 seconds
+  regenerationTick = 0;
+}
+
 export function updateParty(dt) {
+  if (regenerationDuration > 0) {
+    regenerationDuration -= dt;
+    regenerationTick += dt;
+    if (regenerationTick >= 2.0) {
+      regenerationTick -= 2.0;
+      party.forEach((m) => {
+        if (!m.isEmpty && !m.isDead && m.hp < m.hpMax) {
+          setHp(m.id, Math.min(m.hp + 1, m.hpMax));
+        }
+      });
+    }
+  }
+
   // SP regenerates both in and out of combat, just at different rates:
   //   in combat:     +1 SP every 2 seconds
   //   out of combat: +5 SP every 2 seconds

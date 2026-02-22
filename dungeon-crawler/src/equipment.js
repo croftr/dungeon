@@ -1,5 +1,6 @@
-import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait } from './party.js';
+import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyRegeneration } from './party.js';
 import { getItemDef } from './items.js';
+import { SPELLS } from './spells.js';
 import { ACTIONS } from './items.js';
 import { playAction } from './actions.js';
 import { attackMonster, monsters, getInRangeMonster, setHuntersEyeTarget, getHuntersEyeTargetId } from './monster.js';
@@ -509,8 +510,8 @@ function _equipItem(memberIndex, invIndex) {
     }
 
     m.equipment.leftHand = item;
-    // Default fallback spell if not explicitly putting a spellbook here
-    m.equipment.rightHand = { name: 'Fireball', slot: 'spell' };
+    // We no longer automatically afford Fireball. The off-hand remains free for a Spellbook.
+    m.equipment.rightHand = null;
 
     if (displaced.some(d => d.name === 'Spellbook')) m.selectedSpell = null;
 
@@ -820,8 +821,8 @@ function _openSpellSelectionModal(charIndex, itemKey) {
 
   overlay.classList.remove('spell-sel-hidden');
 
-  // Hardcoded to only show Fireball for now + some empty slots
-  const availableSpells = ['Fireball'];
+  // Show all defined spells + some empty slots
+  const availableSpells = SPELLS.map(s => s.name);
   const m = party[charIndex];
 
   grid.innerHTML = '';
@@ -919,10 +920,11 @@ function useHand(memberIndex, hand) {
   if (m.isDead) return;
 
   const isRanged = attackType === ACTIONS.SHOOT || attackType === ACTIONS.FIREBALL;
+  const isBuff = attackType === ACTIONS.REGENERATE;
 
   // Back-row members can only melee if their front partner is dead (stepped up).
   // canMelee() centralises this logic — see combat-rules.js.
-  if (!isRanged && !canMelee(party, memberIndex)) {
+  if (!isRanged && !isBuff && !canMelee(party, memberIndex)) {
     showMessage(`${m.name} is in the back row — only ranged attacks can reach the enemy!`);
     return;
   }
@@ -930,7 +932,7 @@ function useHand(memberIndex, hand) {
   const maxRange = isRanged ? 3 : 1;
 
   // Find the first alive monster that is in range and directly in front
-  const target = monsters.find(
+  const target = isBuff ? null : monsters.find(
     t => t.alive && isInFrontOfPlayer(t.gridRow, t.gridCol, maxRange)
   );
 
@@ -962,6 +964,25 @@ function useHand(memberIndex, hand) {
 
   // Play the visual + audio animation regardless of whether a target exists
   playAction(attackType, hand);
+
+  if (isBuff) {
+    if (attackType === ACTIONS.REGENERATE) {
+      applyRegeneration();
+      showMessage(`${m.name} casts Regeneration!`);
+      addLogEntry({
+        time: Date.now(),
+        actor: 'player',
+        attacker: m.name,
+        target: 'party',
+        attackType,
+        hitChance: 100,
+        hit: true,
+        crit: false,
+        finalDamage: 0
+      });
+    }
+    return;
+  }
 
   if (!target) {
     return;
