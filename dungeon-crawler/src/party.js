@@ -322,15 +322,19 @@ function refreshMember(m) {
 
   // Use m.equipment as the authoritative source when it exists (after the equipment
   // modal has initialised it), otherwise fall back to the initial hand-assignment strings.
-  const lhName = m.equipment
+  let lhName = m.equipment
     ? (m.equipment.leftHand?.name ?? null)
     : (m.leftHand && m.leftHand !== '—' ? m.leftHand : null);
-  const rhName = m.equipment
+  let rhName = m.equipment
     ? (m.equipment.rightHand?.name ?? null)
     : (m.rightHand && m.rightHand !== '—' ? m.rightHand : null);
   const skName = m.equipment
     ? (m.equipment.skill?.name ?? null)
     : null;
+
+  // If the left or right hand holds a Spellbook, visually pretend it's the selected spell for the HUD
+  if (lhName === 'Spellbook' && m.selectedSpell) lhName = m.selectedSpell;
+  if (rhName === 'Spellbook' && m.selectedSpell) rhName = m.selectedSpell;
 
   let lhDef = null;
   let rhDef = null;
@@ -636,6 +640,13 @@ export function setMp(index, value) {
   refreshMember(m);
 }
 
+export function setSp(index, value) {
+  const m = party[index];
+  if (!m) return;
+  m.sp = Math.max(0, Math.min(m.spMax ?? 100, value));
+  refreshMember(m);
+}
+
 export function setEquip(index, hand, itemName) {
   const m = party[index];
   if (!m) return;
@@ -663,15 +674,31 @@ export function resurrectAll() {
 }
 
 let mpRegenTimer = 0;
+let spRegenAccum = 0;
 
 export function updateParty(dt) {
+  // SP regenerates both in and out of combat, just at different rates:
+  //   in combat:     +1 SP every 2 seconds
+  //   out of combat: +5 SP every 2 seconds
+  spRegenAccum += dt;
+  if (spRegenAccum >= 2.0) {
+    spRegenAccum -= 2.0;
+    const spGain = isInCombat() ? 1 : 5;
+    party.forEach((m) => {
+      if (!m.isEmpty && !m.isDead && m.sp < (m.spMax ?? 100)) {
+        setSp(m.id, Math.min(m.sp + spGain, m.spMax ?? 100));
+      }
+    });
+  }
+
+  // MP only regenerates out of combat — 1 MP per second
   if (isInCombat()) {
     mpRegenTimer = 0;
     return;
   }
 
   mpRegenTimer += dt;
-  if (mpRegenTimer >= 1.0) { // 1 MP per second
+  if (mpRegenTimer >= 1.0) {
     mpRegenTimer -= 1.0;
     party.forEach((m) => {
       if (!m.isEmpty && !m.isDead && m.mp < m.mpMax) {

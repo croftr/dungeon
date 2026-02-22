@@ -968,6 +968,101 @@ body {
   text-align: right;
 }
 
+#save-confirm {
+  margin-top: 15px;
+  color: #80ff80;
+  font-weight: bold;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* ── SPELL SELECTION MODAL ── */
+#spell-selection-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spell-sel-hidden {
+  display: none !important;
+}
+
+#spell-selection-modal {
+  background: #14100c;
+  border: 2px solid #6a5030;
+  padding: 15px;
+  min-width: 250px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.9);
+}
+
+#spell-sel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #c8a84a;
+  border-bottom: 1px solid #3a2a10;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+#spell-sel-close {
+  background: transparent;
+  color: #c04040;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+#spell-sel-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.spell-sel-slot {
+  width: 48px;
+  height: 48px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #3a2a10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.spell-sel-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.spell-sel-slot:hover {
+  border-color: #c8a84a;
+  background: rgba(200, 168, 74, 0.2);
+}
+
+.spell-sel-slot.empty {
+  color: #5a4a2a;
+  font-size: 10px;
+  text-align: center;
+  cursor: not-allowed;
+}
+
+.spell-sel-slot.empty:hover {
+  border-color: #3a2a10;
+  background: rgba(0, 0, 0, 0.5);
+}
+
 /* ── Skills panel ── */
 .equip-section-title--skills {
   margin-top: 4px;

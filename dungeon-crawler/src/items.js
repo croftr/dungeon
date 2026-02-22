@@ -415,6 +415,18 @@ export const ITEMS = [
     weight: 0,
   },
   {
+    name: 'Spellbook',
+    slot: 'spell',
+    attackType: null,
+    baseDamage: null,
+    delay: 4,
+    icon: '/icons/spellbook.png',
+    description: 'An ancient tome. Once equipped, Right-Click it in the paperdoll to select your active spell.',
+    value: 120,
+    weight: 1.0,
+    isSpellBook: true // identifies it for the UI
+  },
+  {
     name: 'Axe',
     slot: 'rightHand',
     attackType: ACTIONS.SWIPE,

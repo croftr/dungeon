@@ -1,4 +1,4 @@
-import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, drawPortrait } from './party.js';
+import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait } from './party.js';
 import { getItemDef } from './items.js';
 import { ACTIONS } from './items.js';
 import { playAction } from './actions.js';
@@ -80,11 +80,8 @@ export function extendPartyData() {
         const item = { name: m.leftHand, slot: 'bothHands' };
         m.equipment.leftHand = item;
         m.equipment.rightHand = item;
-      } else if (slot === 'enable-spell') {
-        m.equipment.leftHand = { name: m.leftHand, slot: 'enable-spell' };
-        m.equipment.rightHand = { name: 'Fireball', slot: 'spell' };
       } else {
-        m.equipment.leftHand = { name: m.leftHand, slot: 'leftHand' };
+        m.equipment.leftHand = { name: m.leftHand, slot: slot };
       }
     }
     if (m.rightHand && m.rightHand !== '—') {
@@ -97,15 +94,8 @@ export function extendPartyData() {
           m.equipment.leftHand = item;
           m.equipment.rightHand = item;
         }
-      } else if (slot === 'enable-spell') {
-        if (!m.equipment.rightHand && !m.equipment.leftHand) {
-          m.equipment.rightHand = { name: m.rightHand, slot: 'enable-spell' };
-          m.equipment.leftHand = { name: 'Fireball', slot: 'spell' };
-        }
       } else {
-        if (m.equipment.rightHand?.slot !== 'spell') {
-          m.equipment.rightHand = { name: m.rightHand, slot: 'rightHand' };
-        }
+        m.equipment.rightHand = { name: m.rightHand, slot: slot };
       }
     }
     if (m.startingSkill) {
@@ -115,6 +105,10 @@ export function extendPartyData() {
 
     if (m.ammo) {
       m.equipment.ammo = { name: m.ammo, slot: 'ammo' };
+    }
+
+    if (m.equipment.leftHand?.name === 'Spellbook' || m.equipment.rightHand?.name === 'Spellbook') {
+      m.selectedSpell = 'Fireball';
     }
 
     // 20-slot inventory, all empty
@@ -475,51 +469,141 @@ function _equipItem(memberIndex, invIndex) {
     const displaced = [m.equipment.leftHand, m.equipment.rightHand]
       .filter((d) => d !== null)
       .filter((d, idx, arr) => arr.indexOf(d) === idx)
-      .filter((d) => d.slot !== 'spell');
+      .filter((d) => d.slot !== 'spell' || d.name === 'Spellbook');
+
+    const freeSlots = m.inventory.filter(i => i === null).length;
+    if (displaced.length > freeSlots) {
+      const cell = document.querySelector(`.inv-cell[data-index="${invIndex}"]`);
+      if (cell) {
+        cell.style.borderColor = '#c04040';
+        setTimeout(() => { cell.style.borderColor = ''; }, 400);
+      }
+      m.inventory[invIndex] = item;
+      return;
+    }
 
     m.equipment.leftHand = item;
     m.equipment.rightHand = item;
 
+    if (displaced.some(d => d.name === 'Spellbook')) m.selectedSpell = null;
+
     displaced.forEach((d) => {
-      if (!d) return;
       const fi = m.inventory.indexOf(null);
-      if (fi !== -1) m.inventory[fi] = d;
+      if (fi !== -1) m.inventory[fi] = { name: d.name, slot: d.slot };
     });
   } else if (item.slot === 'enable-spell') {
     const displaced = [m.equipment.leftHand, m.equipment.rightHand]
       .filter((d) => d !== null)
       .filter((d, idx, arr) => arr.indexOf(d) === idx)
-      .filter((d) => d.slot !== 'spell');
+      .filter((d) => d.slot !== 'spell' || d.name === 'Spellbook');
+
+    const freeSlots = m.inventory.filter(i => i === null).length;
+    if (displaced.length > freeSlots) {
+      const cell = document.querySelector(`.inv-cell[data-index="${invIndex}"]`);
+      if (cell) {
+        cell.style.borderColor = '#c04040';
+        setTimeout(() => { cell.style.borderColor = ''; }, 400);
+      }
+      m.inventory[invIndex] = item;
+      return;
+    }
 
     m.equipment.leftHand = item;
+    // Default fallback spell if not explicitly putting a spellbook here
     m.equipment.rightHand = { name: 'Fireball', slot: 'spell' };
 
+    if (displaced.some(d => d.name === 'Spellbook')) m.selectedSpell = null;
+
     displaced.forEach((d) => {
-      if (!d) return;
       const fi = m.inventory.indexOf(null);
-      if (fi !== -1) m.inventory[fi] = d;
+      if (fi !== -1) m.inventory[fi] = { name: d.name, slot: d.slot };
+    });
+  } else if (item.slot === 'spell') {
+    let targetSlot = null;
+    if (m.equipment.leftHand?.slot === 'enable-spell') targetSlot = 'rightHand';
+    else if (m.equipment.rightHand?.slot === 'enable-spell') targetSlot = 'leftHand';
+
+    if (!targetSlot) {
+      const cell = document.querySelector(`.inv-cell[data-index="${invIndex}"]`);
+      if (cell) {
+        cell.style.borderColor = '#c04040';
+        setTimeout(() => { cell.style.borderColor = ''; }, 400);
+      }
+      m.inventory[invIndex] = item;
+      return;
+    }
+
+    let currentlyWorn = m.equipment[targetSlot];
+    const displaced = [];
+    if (currentlyWorn && currentlyWorn.name === 'Spellbook') displaced.push(currentlyWorn);
+    else if (currentlyWorn && currentlyWorn.slot !== 'spell') displaced.push(currentlyWorn);
+
+    const freeSlots = m.inventory.filter(i => i === null).length;
+    if (displaced.length > freeSlots) {
+      const cell = document.querySelector(`.inv-cell[data-index="${invIndex}"]`);
+      if (cell) {
+        cell.style.borderColor = '#c04040';
+        setTimeout(() => { cell.style.borderColor = ''; }, 400);
+      }
+      m.inventory[invIndex] = item;
+      return;
+    }
+
+    m.equipment[targetSlot] = item;
+
+    if (displaced.some(d => d.name === 'Spellbook')) m.selectedSpell = null;
+
+    displaced.forEach((d) => {
+      const fi = m.inventory.indexOf(null);
+      if (fi !== -1) m.inventory[fi] = { name: d.name, slot: d.slot };
     });
   } else {
+    const displaced = [];
     let currentlyWorn = m.equipment[item.slot];
+    let otherSlotCleared = null;
 
     if (currentlyWorn?.slot === 'enable-spell') {
-      if (item.slot === 'leftHand' && m.equipment.rightHand?.slot === 'spell') m.equipment.rightHand = null;
-      if (item.slot === 'rightHand' && m.equipment.leftHand?.slot === 'spell') m.equipment.leftHand = null;
-    } else if (currentlyWorn?.slot === 'spell') {
-      const otherSlot = item.slot === 'leftHand' ? 'rightHand' : 'leftHand';
-      const otherItem = m.equipment[otherSlot];
-      if (otherItem?.slot === 'enable-spell') {
-        const fi = m.inventory.indexOf(null);
-        if (fi !== -1) m.inventory[fi] = otherItem;
-        m.equipment[otherSlot] = null;
+      const spellHand = item.slot === 'leftHand' ? 'rightHand' : 'leftHand';
+      const pairedSpell = m.equipment[spellHand];
+      if (pairedSpell?.slot === 'spell') {
+        if (pairedSpell.name === 'Spellbook') displaced.push(pairedSpell);
+        otherSlotCleared = spellHand;
       }
+    } else if (currentlyWorn?.slot === 'spell') {
+      const wandHand = item.slot === 'leftHand' ? 'rightHand' : 'leftHand';
+      const pairedWand = m.equipment[wandHand];
+      if (pairedWand?.slot === 'enable-spell') {
+        displaced.push(pairedWand);
+        otherSlotCleared = wandHand;
+      }
+      if (currentlyWorn.name === 'Spellbook') displaced.push(currentlyWorn);
       currentlyWorn = null;
     }
 
-    m.equipment[item.slot] = item;
-    if (currentlyWorn && currentlyWorn.slot !== 'spell') {
-      m.inventory[invIndex] = currentlyWorn;
+    if (currentlyWorn && (currentlyWorn.slot !== 'spell' || currentlyWorn.name === 'Spellbook')) {
+      displaced.push(currentlyWorn);
     }
+
+    const freeSlots = m.inventory.filter(i => i === null).length;
+    if (displaced.length > freeSlots) {
+      const cell = document.querySelector(`.inv-cell[data-index="${invIndex}"]`);
+      if (cell) {
+        cell.style.borderColor = '#c04040';
+        setTimeout(() => { cell.style.borderColor = ''; }, 400);
+      }
+      m.inventory[invIndex] = item;
+      return;
+    }
+
+    if (otherSlotCleared) m.equipment[otherSlotCleared] = null;
+    m.equipment[item.slot] = item;
+
+    if (displaced.some(d => d.name === 'Spellbook')) m.selectedSpell = null;
+
+    displaced.forEach((d) => {
+      const fi = m.inventory.indexOf(null);
+      if (fi !== -1) m.inventory[fi] = { name: d.name, slot: d.slot };
+    });
   }
 
   renderModal(memberIndex);
@@ -647,7 +731,8 @@ function onPaperdollSlotClick(e) {
   const m = party[activeCharIndex];
   const item = m.equipment[key];
   if (!item) return; // empty slot — nothing to do
-  if (item.slot === 'spell') return; // Cannot manually unequip spell
+
+  if (item.slot === 'spell' && item.name !== 'Spellbook') return; // Cannot manually unequip other spells
 
   // Skills are learned abilities, not carried items — just clear the slot
   if (key === 'skill') {
@@ -657,25 +742,54 @@ function onPaperdollSlotClick(e) {
     return;
   }
 
-  const freeIndex = m.inventory.indexOf(null);
-  if (freeIndex === -1) {
+  const displaced = [item];
+  let otherSlotCleared = null;
+
+  if (item.slot === 'bothHands') {
+    otherSlotCleared = key === 'leftHand' ? 'rightHand' : 'leftHand';
+  } else if (item.slot === 'enable-spell') {
+    const spellSlot = key === 'leftHand' ? 'rightHand' : 'leftHand';
+    const carriedSpell = m.equipment[spellSlot];
+    if (carriedSpell?.slot === 'spell') {
+      if (carriedSpell.name === 'Spellbook') displaced.push(carriedSpell);
+      otherSlotCleared = spellSlot;
+    }
+  }
+
+  const freeSlots = m.inventory.filter(i => i === null).length;
+  if (displaced.length > freeSlots) {
     e.currentTarget.style.borderColor = '#c04040';
     setTimeout(() => { e.currentTarget.style.borderColor = ''; }, 400);
     return;
   }
 
-  // Store a single inventory copy with the canonical slot
-  m.inventory[freeIndex] = { name: item.name, slot: item.slot };
+  if (otherSlotCleared) m.equipment[otherSlotCleared] = null;
   m.equipment[key] = null;
-  // If it was a bothHands item, clear the mirrored slot too
-  if (item.slot === 'bothHands') {
-    m.equipment.leftHand = null;
-    m.equipment.rightHand = null;
-  } else if (item.slot === 'enable-spell') {
-    if (key === 'leftHand' && m.equipment.rightHand?.slot === 'spell') m.equipment.rightHand = null;
-    if (key === 'rightHand' && m.equipment.leftHand?.slot === 'spell') m.equipment.leftHand = null;
+
+  if (displaced.some(d => d.name === 'Spellbook')) {
+    m.selectedSpell = null;
   }
+
+  displaced.forEach(d => {
+    const fi = m.inventory.indexOf(null);
+    if (fi !== -1) m.inventory[fi] = { name: d.name, slot: d.slot };
+  });
+
   renderModal(activeCharIndex);
+}
+
+function onPaperdollSlotContextMenu(e) {
+  if (activeCharIndex === null) return;
+  const key = e.currentTarget.dataset.slot;
+  const m = party[activeCharIndex];
+  const item = m.equipment[key];
+  if (!item) return;
+
+  if (item.name === 'Spellbook') {
+    e.preventDefault();
+    hideTooltip();
+    _openSpellSelectionModal(activeCharIndex, key);
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -691,10 +805,62 @@ function openModal(memberIndex) {
 function closeModal() {
   hideTooltip();
   document.getElementById('equip-overlay').classList.add('equip-hidden');
+  document.getElementById('spell-selection-overlay').classList.add('spell-sel-hidden');
   activeCharIndex = null;
   // Sync party card HUD to reflect any equipment changes (weapons, torch, etc.)
   refreshPartyCards();
 }
+
+// ─────────────────────────────────────────────
+//  SPELL SELECTION MODAL
+// ─────────────────────────────────────────────
+function _openSpellSelectionModal(charIndex, itemKey) {
+  const overlay = document.getElementById('spell-selection-overlay');
+  const grid = document.getElementById('spell-sel-grid');
+
+  overlay.classList.remove('spell-sel-hidden');
+
+  // Hardcoded to only show Fireball for now + some empty slots
+  const availableSpells = ['Fireball'];
+  const m = party[charIndex];
+
+  grid.innerHTML = '';
+
+  // Spells
+  availableSpells.forEach(spellName => {
+    const def = getItemDef(spellName);
+    const div = document.createElement('div');
+    div.className = 'spell-sel-slot';
+    div.innerHTML = `<img src="${def.icon}" />`;
+    div.title = def.name;
+    div.onclick = () => {
+      m.selectedSpell = spellName;
+      overlay.classList.add('spell-sel-hidden');
+      renderModal(charIndex);
+      refreshPartyCards();
+    };
+    grid.appendChild(div);
+  });
+
+  // Empty slots
+  for (let i = 0; i < 6; i++) {
+    const div = document.createElement('div');
+    div.className = 'spell-sel-slot empty';
+    div.innerHTML = 'Empty';
+    grid.appendChild(div);
+  }
+}
+
+document.getElementById('spell-sel-close').addEventListener('click', () => {
+  document.getElementById('spell-selection-overlay').classList.add('spell-sel-hidden');
+});
+
+// Click outside spell selector -> close
+document.getElementById('spell-selection-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'spell-selection-overlay') {
+    e.target.classList.add('spell-sel-hidden');
+  }
+});
 
 // ─────────────────────────────────────────────
 //  USE HAND  — triggered from party panel
@@ -722,7 +888,12 @@ function useHand(memberIndex, hand) {
   if (!m) return;
 
   const slotKey = hand === 'left' ? 'leftHand' : 'rightHand';
-  const item = m.equipment?.[slotKey];
+  let item = m.equipment?.[slotKey];
+
+  if (item && item.name === 'Spellbook' && m.selectedSpell) {
+    item = { name: m.selectedSpell, slot: 'spell' };
+  }
+
   const def = item ? getItemDef(item.name) : null;
 
   // Empty hand → punch; items with no attackType (e.g. Shield) → no action
@@ -769,7 +940,8 @@ function useHand(memberIndex, hand) {
 
   // Apply mana cost if applicable
   const mpCost = def?.mpCost ?? 0;
-  if (mpCost > 0) {
+  const isSpell = mpCost > 0; // spells / fireballs cost mana, not stamina
+  if (isSpell) {
     if (m.mp < mpCost) {
       showMessage(`${m.name} does not have enough mana!`);
       return;
@@ -777,7 +949,15 @@ function useHand(memberIndex, hand) {
     setMp(m.id, m.mp - mpCost);
   }
 
+  // Physical attacks cost 5 SP; spells and skills do not
+  const SP_COST = 5;
+  if (!isSpell && m.sp < SP_COST) {
+    showMessage(`${m.name} is too exhausted to attack!`);
+    return;
+  }
+
   lastAttackTimes[timeKey] = now;
+  if (!isSpell) setSp(m.id, m.sp - SP_COST);
   refreshPartyCards();
 
   // Play the visual + audio animation regardless of whether a target exists
@@ -1243,6 +1423,7 @@ function attachPaperdollListeners() {
   SLOT_KEYS.forEach((key) => {
     const el = document.getElementById(`pd-${key}`);
     el.addEventListener('click', onPaperdollSlotClick);
+    el.addEventListener('contextmenu', onPaperdollSlotContextMenu);
     // Hover tooltip for equipped items
     attachTooltipListeners(el, () => {
       if (activeCharIndex === null) return null;

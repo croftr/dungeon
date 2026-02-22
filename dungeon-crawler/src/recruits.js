@@ -67,7 +67,7 @@ export const RECRUITS = [
             { name: 'Mana Tap', description: 'Taps into a hidden vein of arcane energy, instantly replenishing all of Merlin\'s mana points. Cooldown: 120s.', icon: '/skills/mana-tap.png' },
         ],
         image: '/human_wizard_head.png',
-        leftHand: 'Staff', rightHand: '—', startingSkill: 'Runic Scholar',
+        leftHand: 'Spellbook', rightHand: 'Oak Staff', startingSkill: 'Runic Scholar',
         gridCol: 13, gridRow: 8, facing: 'front', // North wall
         isRecruited: false
     },
