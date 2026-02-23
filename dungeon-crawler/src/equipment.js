@@ -1180,13 +1180,13 @@ function useHand(memberIndex, hand) {
     if (result.killed) {
       showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${target.name} OBLITERATED!`, 3000);
     } else {
-      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> &nbsp;<b>${result.damage}</b> <img src="/icons/damage.png" style="height:14px; vertical-align:middle; margin-bottom:2px;">`, 2500);
+      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> &nbsp;<b>${result.damage}</b>`, 2500);
     }
   } else {
     if (result.killed) {
       showMessage(`${target.name} SLAIN!`);
     } else {
-      showMessage(`<b>${result.damage}</b> <img src="/icons/damage.png" style="height:14px; vertical-align:middle; margin-bottom:2px;">`);
+      showMessage(`<b>${result.damage}</b>`);
     }
   }
 }

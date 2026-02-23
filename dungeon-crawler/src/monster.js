@@ -369,13 +369,20 @@ export function showMonsterDamage(monsterId, damage, isCrit) {
   const m = monsters.find(x => x.id === monsterId);
   if (!m || !m.mesh) return;
 
-  const div = document.createElement('div');
-  div.className = 'monster-damage-popup' + (isCrit ? ' damage-popup--crit' : '');
-  div.textContent = damage;
+  // We use a wrapper div because CSS2DObject takes control of the element's transform.
+  // If we animate 'transform' on the same element, they fight and the world-position 
+  // following breaks. By animating only the inner div, we keep the follow-logic.
+  const wrapper = document.createElement('div');
+  wrapper.className = 'monster-damage-wrapper';
 
-  const label = new CSS2DObject(div);
-  // Place it significantly above the health bar (1.8) to avoid overlap
-  label.position.set(0, 2.2, 0);
+  const inner = document.createElement('div');
+  inner.className = 'monster-damage-popup' + (isCrit ? ' damage-popup--crit' : '');
+  inner.textContent = damage;
+  wrapper.appendChild(inner);
+
+  const label = new CSS2DObject(wrapper);
+  // Place it significantly above the health bar (1.8) and stats (2.6)
+  label.position.set(0, 2.8, 0);
   m.mesh.add(label);
 
   setTimeout(() => {
