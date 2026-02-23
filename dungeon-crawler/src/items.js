@@ -501,6 +501,7 @@ export const ITEMS = [
   {
     name: 'Battle Cry',
     slot: 'skill',
+    type: 'debuff',
     icon: '/icons/skill_generic.svg',
     description: 'A terrifying shout that demoralizes enemies.',
     value: 0,
@@ -509,6 +510,7 @@ export const ITEMS = [
   {
     name: 'Focus',
     slot: 'skill',
+    type: 'buff',
     icon: '/icons/skill_generic.svg',
     description: 'Concentrate for increased critical hit chance.',
     value: 0,
@@ -517,6 +519,7 @@ export const ITEMS = [
   {
     name: 'Holy Shield',
     slot: 'skill',
+    type: 'buff',
     blockChance: 20,
     attackType: ACTIONS.BASH,
     baseDamage: 2,
@@ -529,6 +532,7 @@ export const ITEMS = [
   {
     name: 'Rage',
     slot: 'skill',
+    type: 'buff',
     icon: '/icons/skill_generic.svg',
     description: 'Unleash inner fury for increased damage.',
     value: 0,
@@ -537,6 +541,7 @@ export const ITEMS = [
   {
     name: 'Magic Arrow',
     slot: 'skill',
+    type: 'direct-damage',
     icon: '/icons/skill_generic.svg',
     description: 'A bolt of pure magical force.',
     value: 0,

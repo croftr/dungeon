@@ -15,8 +15,8 @@ export const RECRUITS = [
         hp: 42, hpMax: 42, mp: 40, mpMax: 40, sp: 100, spMax: 100,
         stats: { strength: 5, dexterity: 10, vitality: 5, intelligence: 7, resilience: 5 },
         skills: [
-            { name: 'Entangle', description: 'Halves the attack speed of the monster currently being fought for 30s. Only usable in combat. Cooldown: 60s.', icon: '/skills/entangle.png' },
-            { name: "Hunter's Eye", description: "Reveal full stats of the engaged monster — HP, STR, DEX, VIT, INT, RES and Defence. Only usable in combat.", icon: '/skills/hunters-eye.png' },
+            { name: 'Entangle', type: 'debuff', description: 'Halves the attack speed of the monster currently being fought for 30s. Only usable in combat. Cooldown: 60s.', icon: '/skills/entangle.png' },
+            { name: "Hunter's Eye", type: 'debuff', description: "Reveal full stats of the engaged monster — HP, STR, DEX, VIT, INT, RES and Defence. Only usable in combat.", icon: '/skills/hunters-eye.png' },
         ],
         image: '/elf_ranger_head.png',
         leftHand: 'Short Bow', rightHand: 'Short Bow', ammo: 'Wooden Arrows', startingSkill: "Hunter's Eye",
@@ -31,8 +31,8 @@ export const RECRUITS = [
         hp: 60, hpMax: 60, mp: 60, mpMax: 60, sp: 100, spMax: 100,
         stats: { strength: 7, dexterity: 5, vitality: 9, intelligence: 6, resilience: 9 },
         skills: [
-            { name: 'Sanctuary', description: 'Surrounds the party in divine light, reducing all damage received by 10% for 60 seconds. Cooldown: 120s.', icon: '/skills/sancturary.png' },
-            { name: 'Holy Radiance', description: 'Calls down a pulse of holy energy, restoring 10 HP to every living party member. Cooldown: 120s.', icon: '/skills/holy-radiance.png' },
+            { name: 'Sanctuary', type: 'buff', description: 'Surrounds the party in divine light, reducing all damage received by 10% for 60 seconds. Cooldown: 120s.', icon: '/skills/sancturary.png' },
+            { name: 'Holy Radiance', type: 'healing', description: 'Calls down a pulse of holy energy, restoring 10 HP to every living party member. Cooldown: 120s.', icon: '/skills/holy-radiance.png' },
         ],
         image: '/human_paladin_head.png',
         leftHand: 'Sword', rightHand: 'Shield', startingSkill: 'Sanctuary',
@@ -47,7 +47,7 @@ export const RECRUITS = [
         hp: 70, hpMax: 70, mp: 20, mpMax: 20, sp: 100, spMax: 100,
         stats: { strength: 8, dexterity: 6, vitality: 8, intelligence: 4, resilience: 7 },
         skills: [
-            { name: 'Sunder Armor', description: 'Crushes the targeted monster, halving its defence stats for 30s. Only usable in combat. Cooldown: 60s.', icon: '/skills/sunder-armor.png' },
+            { name: 'Sunder Armor', type: 'debuff', description: 'Crushes the targeted monster, halving its defence stats for 30s. Only usable in combat. Cooldown: 60s.', icon: '/skills/sunder-armor.png' },
         ],
         image: '/dwarf_barbarian_head.png',
         leftHand: 'Axe', rightHand: 'Wooden Shield', startingSkill: 'Sunder Armor',
@@ -62,9 +62,9 @@ export const RECRUITS = [
         hp: 30, hpMax: 30, mp: 50, mpMax: 50, sp: 100, spMax: 100,
         stats: { strength: 3, dexterity: 5, vitality: 4, intelligence: 10, resilience: 5 },
         skills: [
-            { name: 'Arcane Lantern', description: 'Conjures a sphere of magical light that illuminates the dungeon as brightly as a torch for 60 seconds. Cooldown: 60s.', icon: '/skills/arcane-lantern.png' },
-            { name: 'Runic Scholar', description: 'Channels arcane power into the next spell cast, doubling its damage after all other modifiers are applied.', icon: '/skills/runic-scholar.png' },
-            { name: 'Mana Tap', description: 'Taps into a hidden vein of arcane energy, instantly replenishing all of Merlin\'s mana points. Cooldown: 120s.', icon: '/skills/mana-tap.png' },
+            { name: 'Arcane Lantern', type: 'buff', description: 'Conjures a sphere of magical light that illuminates the dungeon as brightly as a torch for 60 seconds. Cooldown: 60s.', icon: '/skills/arcane-lantern.png' },
+            { name: 'Runic Scholar', type: 'buff', description: 'Channels arcane power into the next spell cast, doubling its damage after all other modifiers are applied.', icon: '/skills/runic-scholar.png' },
+            { name: 'Mana Tap', type: 'healing', description: 'Taps into a hidden vein of arcane energy, instantly replenishing all of Merlin\'s mana points. Cooldown: 120s.', icon: '/skills/mana-tap.png' },
         ],
         image: '/human_wizard_head.png',
         leftHand: 'Spellbook', rightHand: 'Oak Staff', startingSkill: 'Runic Scholar',
@@ -79,7 +79,7 @@ export const RECRUITS = [
         hp: 67, hpMax: 67, mp: 25, mpMax: 25, sp: 100, spMax: 100,
         stats: { strength: 9, dexterity: 7, vitality: 7, intelligence: 4, resilience: 7 },
         skills: [
-            { name: 'Berserk', description: 'Enters a state of roaring fury, boosting all damage dealt by 20% (after other calculations) for 30s. Cooldown: 60s.', icon: '/skills/berserk.png' }
+            { name: 'Berserk', type: 'buff', description: 'Enters a state of roaring fury, boosting all damage dealt by 20% (after other calculations) for 30s. Cooldown: 60s.', icon: '/skills/berserk.png' }
         ],
         image: '/human_barbarian_head.png',
         leftHand: 'Greataxe', rightHand: '—', startingSkill: 'Berserk',

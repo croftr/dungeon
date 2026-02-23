@@ -422,15 +422,15 @@ function populateTooltip(item) {
   if (hasScaling) {
     const { str = 0, dex = 0 } = def.statWeights;
     const scalingEl = document.getElementById('item-detail-scaling');
-    const barEl    = document.getElementById('item-detail-scaling-bar');
+    const barEl = document.getElementById('item-detail-scaling-bar');
 
     // Text label — coloured to match the dominant stat
     if (dex === 0) {
-      scalingEl.textContent  = 'Strength';
-      scalingEl.style.color  = '#e07030'; // orange
+      scalingEl.textContent = 'Strength';
+      scalingEl.style.color = '#e07030'; // orange
     } else if (str === 0) {
-      scalingEl.textContent  = 'Dexterity';
-      scalingEl.style.color  = '#30b8c0'; // teal
+      scalingEl.textContent = 'Dexterity';
+      scalingEl.style.color = '#30b8c0'; // teal
     } else {
       const sPct = Math.round(str * 100);
       const dPct = Math.round(dex * 100);
@@ -1282,9 +1282,6 @@ function _useSanctuary(member, memberIndex) {
   skillsState.sanctuary.expiresAt = now + SANCTUARY_DURATION_MS;
   _sanctuaryCooldownEnd = now + SANCTUARY_COOLDOWN_MS;
 
-  // Golden glow on the party panel while the shield holds
-  document.getElementById('party-panel')?.classList.add('sanctuary-active');
-
   showMessage(
     `<span style="color:#f0d080">✦ Sanctuary</span> — ${member.name} shields the party! Damage −10% for 60s.`,
     3000
@@ -1295,7 +1292,6 @@ function _useSanctuary(member, memberIndex) {
   if (_sanctuaryExpireTimer) clearTimeout(_sanctuaryExpireTimer);
   _sanctuaryExpireTimer = setTimeout(() => {
     skillsState.sanctuary.active = false;
-    document.getElementById('party-panel')?.classList.remove('sanctuary-active');
     showMessage(`<span style="color:#f0d080">Sanctuary</span> fades — the shield dissipates.`, 2500);
     _sanctuaryExpireTimer = null;
   }, SANCTUARY_DURATION_MS);

@@ -2,6 +2,8 @@ import { getItemDef } from './items.js';
 import { renderItemIcon } from './equipment.js';
 import { addLogEntry } from './battle-log.js';
 import { isInCombat } from './audio.js';
+import { skillsState } from './skills-state.js';
+import { SPELLS } from './spells.js';
 
 // ─────────────────────────────────────────────
 //  PARTY DATA  — 4 members
@@ -715,16 +717,68 @@ export function updateParty(dt) {
   // MP only regenerates out of combat — 1 MP per second
   if (isInCombat()) {
     mpRegenTimer = 0;
-    return;
+  } else {
+    mpRegenTimer += dt;
+    if (mpRegenTimer >= 1.0) {
+      mpRegenTimer -= 1.0;
+      party.forEach((m) => {
+        if (!m.isEmpty && !m.isDead && m.mp < m.mpMax) {
+          setMp(m.id, m.mp + 1);
+        }
+      });
+    }
   }
 
-  mpRegenTimer += dt;
-  if (mpRegenTimer >= 1.0) {
-    mpRegenTimer -= 1.0;
-    party.forEach((m) => {
-      if (!m.isEmpty && !m.isDead && m.mp < m.mpMax) {
-        setMp(m.id, m.mp + 1);
+  updateStatusBanners();
+}
+function getActiveEffectsForMember(m) {
+  const active = [];
+  if (regenerationDuration > 0) active.push('Regeneration');
+  if (skillsState.sanctuary.active) active.push('Sanctuary');
+  if (skillsState.arcaneLight.active) active.push('Arcane Lantern');
+  if (skillsState.berserk.active && skillsState.berserk.actorName === m.name) active.push('Berserk');
+  if (m.runicScholarActive) active.push('Runic Scholar');
+  return active;
+}
+
+function getSkillOrSpellDef(name) {
+  const spellDef = SPELLS.find(s => s.name === name);
+  if (spellDef) return spellDef;
+
+  for (const p of party) {
+    if (p.isEmpty) continue;
+    const skillDef = p.skills?.find(s => s.name === name);
+    if (skillDef) return skillDef;
+  }
+
+  return getItemDef(name);
+}
+
+function updateStatusBanners() {
+  party.forEach(m => {
+    if (m.isEmpty) return;
+    const banner = document.getElementById(`status-banner-${m.id}`);
+    if (!banner) return;
+
+    if (m.isDead) {
+      banner.innerHTML = '';
+      return;
+    }
+
+    let html = '';
+    const activeNames = getActiveEffectsForMember(m);
+
+    activeNames.forEach(name => {
+      const def = getSkillOrSpellDef(name);
+      // Display effects that are either buffs or debuffs
+      if (def && (def.type === 'buff' || def.type === 'debuff')) {
+        html += `<img src="${def.icon}" class="buff-icon" title="${def.name}" />`;
       }
     });
-  }
+
+    // Check if changed to avoid unnecessary DOM updates
+    if (banner.innerHTML !== html) {
+      banner.innerHTML = html;
+    }
+  });
 }

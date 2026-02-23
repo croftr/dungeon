@@ -1,6 +1,7 @@
 export const SPELLS = [
     {
         name: 'Fireball',
+        type: 'direct-damage',
         slot: 'spell',
         attackType: 'fireball',
         baseDamage: 12,
@@ -13,6 +14,7 @@ export const SPELLS = [
     },
     {
         name: 'Regeneration',
+        type: 'buff',
         slot: 'spell',
         attackType: 'regenerate',
         baseDamage: 0,
