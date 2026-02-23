@@ -53,11 +53,47 @@ let _ctxInvIndex = null;   // inventory slot most recently right-clicked
 // ─────────────────────────────────────────────
 //  DATA SETUP  — extends party member objects
 // ─────────────────────────────────────────────
+
+export function updateEffectiveStats(m) {
+  if (!m.baseStats) {
+    if (!m.stats) return; // safeguard
+    m.baseStats = { ...m.stats };
+  }
+  const newStats = { ...m.baseStats };
+  const countedItems = new Set();
+
+  Object.values(m.equipment || {}).forEach(item => {
+    if (item && !countedItems.has(item)) {
+      countedItems.add(item);
+      const def = getItemDef(item.name);
+      if (def?.statChange) {
+        const match = def.statChange.match(/([+-]?\d+)\s+([a-zA-Z]+)/);
+        if (match) {
+          const val = parseInt(match[1], 10);
+          const statName = match[2].toLowerCase();
+          if (newStats[statName] !== undefined) {
+            newStats[statName] += val;
+          }
+        }
+      }
+    }
+  });
+  m.stats = newStats;
+}
+
 export function extendPartyData() {
   party.forEach((m) => {
     if (m.isEmpty) return;
     if (m.isDead === undefined) m.isDead = false;
-    if (m.equipment) return; // Already initialized
+
+    if (!m.baseStats && m.stats) {
+      m.baseStats = { ...m.stats };
+    }
+
+    if (m.equipment) {
+      updateEffectiveStats(m);
+      return; // Already initialized
+    }
 
     // All slots empty by default
     m.equipment = Object.fromEntries(SLOT_KEYS.map((k) => [k, null]));
@@ -114,6 +150,7 @@ export function extendPartyData() {
 
     // 20-slot inventory, all empty
     m.inventory = Array(INVENTORY_SIZE).fill(null);
+    updateEffectiveStats(m);
   });
 }
 
@@ -379,6 +416,7 @@ function populateTooltip(item) {
   const hasDefence = !isAmmo && def?.defence != null && def.defence > 0;
   const hasBlock = !isAmmo && def?.blockChance != null && def.blockChance > 0;
   const hasScaling = !isAmmo && def?.statWeights != null && def?.attackType != null;
+  const hasStatChange = def?.statChange != null;
 
   // Hide/show rows based on item type and available stats
   document.getElementById('detail-row-damage').style.display = isAmmo ? 'none' : 'flex';
@@ -388,6 +426,7 @@ function populateTooltip(item) {
   document.getElementById('detail-row-block').style.display = hasBlock ? 'flex' : 'none';
   document.getElementById('detail-row-value').style.display = isAmmo ? 'none' : 'flex';
   document.getElementById('detail-row-weight').style.display = isAmmo ? 'none' : 'flex';
+  document.getElementById('detail-row-statchange').style.display = hasStatChange ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-mod').style.display = isAmmo ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-type').style.display = isAmmo ? 'flex' : 'none';
 
@@ -416,6 +455,9 @@ function populateTooltip(item) {
       def != null ? def.value + ' gp' : '—';
     document.getElementById('item-detail-weight').textContent =
       def != null ? def.weight + ' kg' : '—';
+    if (hasStatChange) {
+      document.getElementById('item-detail-statchange').textContent = def.statChange;
+    }
   }
 
   // Stat-scaling display — shows which stats drive physical damage
@@ -645,6 +687,7 @@ function _equipItem(memberIndex, invIndex) {
     });
   }
 
+  updateEffectiveStats(m);
   renderModal(memberIndex);
   refreshPartyCards();
 }
@@ -814,6 +857,7 @@ function onPaperdollSlotClick(e) {
     if (fi !== -1) m.inventory[fi] = { name: d.name, slot: d.slot };
   });
 
+  updateEffectiveStats(m);
   renderModal(activeCharIndex);
 }
 
@@ -1178,16 +1222,15 @@ function useHand(memberIndex, hand) {
   if (result.crit) {
     playCritSound(attackType);
     if (result.killed) {
-      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${target.name} OBLITERATED!`, 3000);
+      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${m.name} obliterates the ${target.name}!`, 3000);
     } else {
-      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> &nbsp;<b>${result.damage}</b>`, 2500);
+      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span>`, 1500);
     }
   } else {
     if (result.killed) {
-      showMessage(`${target.name} SLAIN!`);
-    } else {
-      showMessage(`<b>${result.damage}</b>`);
+      showMessage(`${m.name} slays the ${target.name}!`);
     }
+    // Normal hit damage is shown by the red CSS2DObject popup above the monster — no toast needed
   }
 }
 

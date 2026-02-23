@@ -191,44 +191,18 @@ export const ITEMS = [
     weight: 2.0,
   },
 
-  // ── Rings ─────────────────────────────────────────────────────────────────
-  {
-    name: 'Gold Ring',
-    slot: 'ring1',
-    attackType: null,
-    baseDamage: null,
-    description: 'A plain gold ring. Valuable, but otherwise unremarkable.',
-    value: 30,
-    weight: 0.05,
-  },
+  // ── Rings ─────────────────────────────────────────────────────────────────  
   {
     name: 'Ring of Vigour',
     slot: 'ring1',
     attackType: null,
     baseDamage: null,
+    icon: '/icons/ring_of_vigour.png',
     description: 'A carved bone ring that pulses with vitality. Bolsters the wearer\'s constitution.',
     value: 120,
     weight: 0.05,
+    statChange: "+1 Vitality"
   },
-  {
-    name: 'Signet Ring',
-    slot: 'ring2',
-    attackType: null,
-    baseDamage: null,
-    description: 'A heavy signet ring bearing a forgotten noble crest.',
-    value: 45,
-    weight: 0.05,
-  },
-  {
-    name: 'Ring of Swiftness',
-    slot: 'ring2',
-    attackType: null,
-    baseDamage: null,
-    description: 'A thin silver band engraved with speed runes. The wearer moves with uncanny quickness.',
-    value: 140,
-    weight: 0.05,
-  },
-
   // ── Legs ──────────────────────────────────────────────────────────────────
   {
     name: 'Cloth Trousers',

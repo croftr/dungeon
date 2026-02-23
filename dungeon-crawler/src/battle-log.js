@@ -106,8 +106,11 @@ const TYPE_ABBR = {
 
 function _buildRowHtml(e) {
   if (e.type === 'death') {
+    const killText = e.killer
+      ? `<b>${e.killer}</b> slays <b>${e.target}</b>!`
+      : `<b>${e.target}</b> has been slain!`;
     return `<span class="bl-badge">💀</span>` +
-      `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.target}</b> has been slain!</span>`;
+      `<span class="bl-who" style="max-width: none; flex: 1;">${killText}</span>`;
   }
   if (e.type === 'skill') {
     const targetText = e.target ? ` on <b>${e.target}</b>` : '';

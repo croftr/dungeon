@@ -71,4 +71,11 @@ export const MONSTER_DEFS = {
     stats: { strength: 18, dexterity: 6, vitality: 15, intelligence: 12, resilience: 12 },
   },
 
+  treeman: {
+    name: 'Treeman',
+    hp: 250,
+    defence: 32,
+    stats: { strength: 40, dexterity: 18, vitality: 35, intelligence: 26, resilience: 32 },
+  },
+
 };

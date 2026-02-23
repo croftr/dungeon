@@ -209,7 +209,7 @@ export function spawnObjectsForLevel() {
         ]);
         // New Chest at the end of the long passage
         addChest(objectsGroup, gltfLoader, 7, 1, 0, -0.7, [
-            'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Dagger', 'Axe'
+            'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Dagger', 'Axe', 'Ring of Vigour'
         ]);
         // Crystals in the starter room
         addCrystals(objectsGroup, gltfLoader, 9, 11, 0, -0.7);
@@ -265,8 +265,11 @@ export function spawnObjectsForLevel() {
         objectsGroup.add(buttonContainer);
 
     } else if (level === 2) {
-        // Only a portal back to Level 1
-        addPortal(objectsGroup, gltfLoader, 3, 3, 1);
+        // Portal back to Level 1.
+        // col=5, row=1 — first floor row below the north wall (row 0).
+        // rotY=0 keeps the model's default south-facing orientation so it opens toward the room.
+        // offsetZ=-0.85 nudges it flush against the north wall face.
+        addPortal(objectsGroup, gltfLoader, 5, 1, 1, 0, 0, -0.85);
     }
 }
 

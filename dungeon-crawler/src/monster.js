@@ -54,7 +54,7 @@ export function getInRangeMonster() {
 //  Only instance-specific data lives here: map position, assets, game state.
 // ─────────────────────────────────────────────────────────────────────────────
 
-function inst(def, id, gridRow, gridCol, glbIdle, glbAttack, attackSound, scale = 0.45, offsetX = 0, offsetZ = 0) {
+function inst(def, id, gridRow, gridCol, glbIdle, glbAttack, attackSound, scale = 0.45, offsetX = 0, offsetZ = 0, level = 1, patrol = null) {
   return {
     id, type: 'glb',
     ...def,
@@ -63,6 +63,8 @@ function inst(def, id, gridRow, gridCol, glbIdle, glbAttack, attackSound, scale 
     offsetX, offsetZ,
     alive: true, mesh: null, mixer: null, actions: {},
     glbIdle, glbAttack, attackSound, scale,
+    level,
+    patrol,
   };
 }
 
@@ -110,6 +112,15 @@ export const monsters = [
     '/monsters/meshy-AI-iceMan/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/meshy-AI-iceMan/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
     '/monsters/meshy-AI-iceMan/iceman-attack.mp3', 0.6),
+
+  // ── Level 2 ─────────────────────────────────────────────────────────────
+  // One Treeman patrols the chamber. Patrol bounds match the level-2 map
+  // interior: rows 1–5, cols 1–6.
+  inst(D.treeman, 8, 5, 5,
+    '/monsters/treeman/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/treeman/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/treeman/attack-sound.mp3', 0.90, 0, 0, 2,
+    { bounds: { minRow: 1, maxRow: 5, minCol: 1, maxCol: 6 }, speed: 1.2, waitTime: 2.5 }),
 ];
 
 export function isMonsterAt(row, col) {
@@ -293,13 +304,105 @@ export function initMonsters(scene) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+//  PATROL  — random-wander AI for roaming monsters
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Moves a patrolling monster toward a random target cell within its patrol
+ * bounds.  Called every frame from updateMonsters when the player is out of
+ * attack range.
+ *
+ * Patrol state is stored on the monster object as `m._ps`:
+ *   { moving: bool, targetRow, targetCol, waitTimer }
+ */
+function _updatePatrol(m, dt) {
+  if (!m.mesh || !m.patrol) return;
+
+  // Lazy-initialise patrol state; stagger start times so multiple patrol
+  // monsters don't all move in lock-step.
+  if (!m._ps) {
+    m._ps = {
+      moving: false,
+      targetRow: m.gridRow,
+      targetCol: m.gridCol,
+      waitTimer: Math.random() * 3.0,   // staggered first move
+    };
+  }
+
+  const ps = m._ps;
+  const b = m.patrol.bounds;
+  const spd = (m.patrol.speed ?? 1.2) * CELL;  // world-units / second
+
+  if (!ps.moving) {
+    // ── waiting at current cell ──────────────────────────────────────────
+    ps.waitTimer -= dt;
+    if (ps.waitTimer > 0) return;
+
+    // Pick one random adjacent cell (N / S / E / W) that lies inside the
+    // patrol bounds.  Moving one cell at a time keeps gridRow/gridCol
+    // anchored to real cell centres — the mid-move approximation that caused
+    // the half-grid combat gap is avoided entirely.
+    const dirs = [
+      { dr: -1, dc: 0 },
+      { dr: 1, dc: 0 },
+      { dr: 0, dc: -1 },
+      { dr: 0, dc: 1 },
+    ];
+    // Fisher-Yates shuffle for unbiased direction selection
+    for (let i = dirs.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [dirs[i], dirs[j]] = [dirs[j], dirs[i]];
+    }
+    let chosen = false;
+    for (const d of dirs) {
+      const nr = m.gridRow + d.dr;
+      const nc = m.gridCol + d.dc;
+      if (nr >= b.minRow && nr <= b.maxRow && nc >= b.minCol && nc <= b.maxCol) {
+        ps.targetRow = nr;
+        ps.targetCol = nc;
+        ps.moving = true;
+        chosen = true;
+        break;
+      }
+    }
+    if (!chosen) ps.waitTimer = 1.0; // hemmed in — retry shortly
+    return;
+  }
+
+  // ── moving toward the adjacent target cell ───────────────────────────────
+  const targetX = ps.targetCol * CELL + (m.offsetX ?? 0);
+  const targetZ = ps.targetRow * CELL + (m.offsetZ ?? 0);
+  const dx = targetX - m.mesh.position.x;
+  const dz = targetZ - m.mesh.position.z;
+  const dist = Math.sqrt(dx * dx + dz * dz);
+
+  if (dist < 0.05) {
+    // Snap to exact cell centre and commit the new grid position.
+    // gridRow/gridCol are ONLY updated here (on arrival), never mid-step,
+    // so inRange checks always reference a true cell centre.
+    m.mesh.position.x = targetX;
+    m.mesh.position.z = targetZ;
+    m.gridRow = ps.targetRow;
+    m.gridCol = ps.targetCol;
+    ps.moving = false;
+    ps.waitTimer = (m.patrol.waitTime ?? 2.5) + Math.random() * 2.0;
+  } else {
+    const step = Math.min(spd * dt, dist);
+    m.mesh.position.x += (dx / dist) * step;
+    m.mesh.position.z += (dz / dist) * step;
+    // Face the direction of travel (lookAt convention matches lookAtPlayer)
+    m.mesh.lookAt(targetX, m.mesh.position.y, targetZ);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 //  ANIMATION  (called every frame from main.js)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function updateMonsters(dt, playerCamera, scene) {
   const currentLevel = window.currentLevel || 1;
   monsters.forEach((m) => {
-    if (!m.alive || currentLevel !== 1) {
+    if (!m.alive || currentLevel !== (m.level ?? 1)) {
       if (m.hpLabel) m.hpLabel.visible = false;
       if (m.statsLabel) m.statsLabel.visible = false;
       if (_huntersEyeTargetId === m.id) _huntersEyeTargetId = null;
@@ -321,22 +424,30 @@ export function updateMonsters(dt, playerCamera, scene) {
 
     if (m.mixer) m.mixer.update(dt);
 
-    if (m.mesh && playerCamera && m.lookAtPlayer) {
+    // Proximity check — used for HP bar, Hunter's Eye, patrol, and attack logic
+    const distRow = Math.abs(m.gridRow - player.gridRow);
+    const distCol = Math.abs(m.gridCol - player.gridCol);
+    const inRange = distRow <= 1 && distCol <= 1;
+
+    // Non-patrol monsters always face the player; patrol monsters only turn
+    // to face the player once they are adjacent (otherwise patrol handles rotation).
+    if (m.mesh && playerCamera && m.lookAtPlayer && (!m.patrol || inRange)) {
       m.lookAtPlayer(playerCamera.position);
     }
 
     // HP bar is only visible when the party is engaged in melee range with
     // this monster — same adjacency check used for proximity attacks.
-    const distRow = Math.abs(m.gridRow - player.gridRow);
-    const distCol = Math.abs(m.gridCol - player.gridCol);
-    const inRange = distRow <= 1 && distCol <= 1;
-
     if (m.hpLabel) m.hpLabel.visible = inRange;
 
     // Auto-deactivate Hunter's Eye if the player disengages from this monster
     if (_huntersEyeTargetId === m.id && !inRange) {
       _huntersEyeTargetId = null;
       if (m.statsLabel) m.statsLabel.visible = false;
+    }
+
+    // Patrol movement — only runs when the player is out of attack range
+    if (m.patrol && !inRange) {
+      _updatePatrol(m, dt);
     }
 
     // Proximity attack logic: if player is adjacent, attack them periodically
@@ -390,7 +501,7 @@ export function showMonsterDamage(monsterId, damage, isCrit) {
   }, 850);
 }
 
-export function hitMonster(monsterId, finalDamage, attackType, isCrit = false) {
+export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, killer = null) {
   const m = monsters.find((x) => x.id === monsterId && x.alive);
   if (!m) return { hit: false, damage: 0, killed: false, monsterHp: 0 };
 
@@ -414,7 +525,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false) {
   if (m.hp === 0) {
     m.alive = false;
     if (m.hpBarFill) m.hpBarFill.parentElement.style.display = 'none';
-    addLogEntry({ type: 'death', target: m.name, time: Date.now() });
+    addLogEntry({ type: 'death', target: m.name, killer, time: Date.now() });
     _playDeathAnimation(m);
   } else {
     _playHitAnimation(m, attackType);
@@ -498,7 +609,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     ammoModifier: ammoDef?.damageModifier ?? null,
   };
 
-  const result = hitMonster(monsterId, damage, attackType, isCrit);
+  const result = hitMonster(monsterId, damage, attackType, isCrit, character.name);
 
   let stunned = false;
   if (attackType === 'shield-bash' && result.hit && !result.killed) {
