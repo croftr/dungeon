@@ -464,7 +464,7 @@ export const ITEMS = [
   },
   {
     name: 'Longbow',
-    slot: 'bothHands',
+    slot: 'leftHand',
     attackType: ACTIONS.SHOOT,
     baseDamage: 20,
     delay: 4,
