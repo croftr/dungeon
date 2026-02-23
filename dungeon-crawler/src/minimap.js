@@ -16,7 +16,7 @@ let MM_CELL  = 14;
 
 export function initMinimap() {
   const canvas = document.getElementById('minimap');
-  MM_CELL = Math.floor(130 / Math.max(ROWS, COLS));
+  MM_CELL = Math.floor(200 / Math.max(ROWS, COLS));
   canvas.width  = COLS * MM_CELL;
   canvas.height = ROWS * MM_CELL;
   mmCtx = canvas.getContext('2d');

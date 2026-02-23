@@ -180,7 +180,13 @@ export async function playBoneSound() {
 }
 
 let currentMusicIndex = 0;
-const MUSIC_TRACKS = ['/sounds/back1.mp3', '/sounds/back2.mp3'];
+// Ambient playlists keyed by level number. Level 1 rotates two tracks;
+// level 2+ have their own dedicated track(s).
+const MUSIC_TRACKS_BY_LEVEL = {
+  1: ['/sounds/back1.mp3', '/sounds/back2.mp3'],
+  2: ['/sounds/level2-music.mp3'],
+};
+let _ambientLevel = 1;
 const BATTLE_TRACK = '/sounds/backing/battle.mp3';
 
 let musicSource = null;
@@ -199,10 +205,77 @@ export async function startMusic() {
 }
 
 /**
+ * Switch the ambient music pool to match the given level.
+ * Immediately interrupts the current ambient track and starts the new one.
+ * Has no effect if combat music is playing (that will resolve naturally).
+ * @param {number} level
+ */
+export function setAmbientLevel(level) {
+  _ambientLevel = level;
+  _zoneTrack = null;          // clear any room override when changing levels
+  currentMusicIndex = 0;
+  if (!isCombatMusicPlaying) {
+    _musicGen++;
+    _stopCurrent();
+    _playNextTrack();
+  }
+}
+
+/**
+ * Override the ambient track with a specific URL for a room/zone.
+ * Pass null to leave the zone and revert to the level's normal ambient pool.
+ * @param {string|null} url
+ */
+let _zoneTrack = null;
+export function setZoneMusic(url) {
+  if (_zoneTrack === url) return;   // no change
+  _zoneTrack = url;
+  if (!isCombatMusicPlaying) {
+    _musicGen++;
+    _stopCurrent();
+    _playNextTrack();
+  }
+}
+
+/**
  * Call this when a combat event occurs (hit or attack).
  */
 export function setInCombat() {
   combatTimer = 15.0; // Stay in combat music for 15s after last event
+}
+
+const SKILL_SOUND_MAP = {
+  'berserk': { url: '/sounds/actions/skills/berserk.mp3', offset: 0.0 },
+  'cure': { url: '/sounds/actions/skills/cure.mp3', offset: 0.0 },
+  'holy': { url: '/sounds/actions/skills/holy.mp3', offset: 0.0 },
+  'hunters-eye': { url: '/sounds/actions/skills/hunters-eye.mp3', offset: 0.0 },
+  'magic': { url: '/sounds/actions/skills/magic.mp3', offset: 0.0 },
+  'render': { url: '/sounds/actions/skills/render.mp3', offset: 0.0 },
+  'heal': { url: '/sounds/actions/life-crystal.mp3', offset: 0.0 },
+};
+
+/**
+ * Play a skill or spell sound by its short name.
+ * @param {string} name — key from SKILL_SOUND_MAP, e.g. 'holy', 'berserk', 'magic'
+ * @param {number} [volume=0.7]
+ */
+export async function playSkillSound(name, volume = 0.7) {
+  const def = SKILL_SOUND_MAP[name];
+  if (!def) return;
+  const buffer = await getBuffer(def.url);
+  if (!buffer) return;
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = volume;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0, def.offset);
+  } catch (err) {
+    console.warn('[audio] playSkillSound failed:', err);
+  }
 }
 
 export async function playShopkeeperSound() {
@@ -265,8 +338,14 @@ function _switchToNormalMusic() {
 
 function _playNextTrack() {
   if (isCombatMusicPlaying) return;
+  // Zone music takes priority over the level ambient pool
+  if (_zoneTrack) {
+    _playTrack(_zoneTrack, true, _musicGen);
+    return;
+  }
+  const tracks = MUSIC_TRACKS_BY_LEVEL[_ambientLevel] ?? MUSIC_TRACKS_BY_LEVEL[1];
   const gen = _musicGen;
-  const url = MUSIC_TRACKS[currentMusicIndex];
+  const url = tracks[currentMusicIndex % tracks.length];
   _playTrack(url, false, gen);
 }
 
@@ -295,7 +374,8 @@ async function _playTrack(url, loop, gen) {
     // Only advance to the next ambient track if we are still the active generation
     if (gen !== _musicGen) return;
     if (!isCombatMusicPlaying && !loop) {
-      currentMusicIndex = (currentMusicIndex + 1) % MUSIC_TRACKS.length;
+      const tracks = MUSIC_TRACKS_BY_LEVEL[_ambientLevel] ?? MUSIC_TRACKS_BY_LEVEL[1];
+      currentMusicIndex = (currentMusicIndex + 1) % tracks.length;
       _playNextTrack();
     }
   };

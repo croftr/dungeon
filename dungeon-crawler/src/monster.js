@@ -228,6 +228,14 @@ export function initMonsters(scene) {
         if (child.isMesh) {
           child.castShadow = true;
           child.receiveShadow = true;
+
+          // Fix pixelation on monster textures
+          if (child.material && child.material.map) {
+            child.material.map.magFilter = THREE.LinearFilter;
+            child.material.map.minFilter = THREE.LinearMipmapLinearFilter;
+            child.material.map.anisotropy = 16;
+          }
+
           if (child.material) {
             child.material.transparent = false;
             child.material.depthWrite = true;
@@ -525,7 +533,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
   if (m.hp === 0) {
     m.alive = false;
     if (m.hpBarFill) m.hpBarFill.parentElement.style.display = 'none';
-    addLogEntry({ type: 'death', target: m.name, killer, time: Date.now() });
+    addLogEntry({ type: 'death', target: m.name, killer, damage, time: Date.now() });
     _playDeathAnimation(m);
   } else {
     _playHitAnimation(m, attackType);

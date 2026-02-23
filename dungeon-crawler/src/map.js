@@ -138,6 +138,7 @@ function makeBrickTexture() {
   }
 
   const tex = new THREE.CanvasTexture(c);
+  tex.anisotropy = 16;
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
   tex.repeat.set(1, 1); // 1 tile = 3 cols × 4 rows of bricks per face
   return tex;
@@ -183,6 +184,7 @@ function makeFloorTexture() {
   }
 
   const tex = new THREE.CanvasTexture(c);
+  tex.anisotropy = 16;
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
   tex.repeat.set(1, 1);
   return tex;

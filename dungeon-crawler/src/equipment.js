@@ -8,9 +8,51 @@ import { showMessage } from './minimap.js';
 import { dropMember } from './recruits.js';
 import { isInFrontOfPlayer } from './player.js';
 import { canMelee } from './combat-rules.js';
-import { playCritSound } from './audio.js';
+import { playCritSound, playSkillSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { skillsState } from './skills-state.js';
+import {
+  triggerSanctuaryEffect,
+  triggerHolyRadianceEffect,
+  triggerHuntersEyeEffect,
+  triggerEntangleEffect,
+  triggerSunderArmorEffect,
+  triggerBerserkEffect,
+  triggerArcaneLanternEffect,
+  triggerRunicScholarEffect,
+  triggerManaTapEffect,
+  triggerFireballEffect,
+  triggerRegenerationEffect,
+  triggerCurePoisonEffect,
+  triggerDefaultSpellEffect,
+  triggerDefaultSkillEffect,
+} from './quarks-intro.js';
+
+// Maps spell attackType → VFX + sound. Add new entries here as spells grow.
+function _dispatchSpellVFX(attackType) {
+  switch (attackType) {
+    case 'fireball':
+      triggerFireballEffect();
+      // fireball audio already handled by playActionSound inside playAction
+      break;
+    case 'regenerate':
+      playSkillSound('cure');
+      triggerRegenerationEffect();
+      break;
+    case 'cure-poison':
+      playSkillSound('cure');
+      triggerCurePoisonEffect();
+      break;
+    case 'heal':
+      playSkillSound('heal');
+      triggerHolyRadianceEffect();
+      break;
+    default:
+      playSkillSound('magic');
+      triggerDefaultSpellEffect();
+      break;
+  }
+}
 
 // ─────────────────────────────────────────────
 //  CONSTANTS
@@ -1016,17 +1058,48 @@ function _executePartyMemberSpell(caster, casterIndex, hand, spellDef, target) {
   setMp(caster.id, caster.mp - spellDef.mpCost);
 
   // Record cooldown so the slot greys out normally
-  const timeKey = `${casterIndex}-${hand}`;
-  lastAttackTimes[timeKey] = performance.now();
+  if (hand === 'skill') {
+    if (spellDef.name === 'Heal') {
+      const cd = spellDef.cooldown ?? 15000;
+      const ends = performance.now() + cd;
+      _healSkillCooldownEnds[casterIndex] = ends;
+      _startSkillCooldownUI(casterIndex, ends);
+    }
+  } else {
+    const timeKey = `${casterIndex}-${hand}`;
+    lastAttackTimes[timeKey] = performance.now();
+  }
   refreshPartyCards();
 
   // Play the spell animation
   playAction(spellDef.attackType, hand);
+  _dispatchSpellVFX(spellDef.attackType);
 
   if (spellDef.attackType === ACTIONS.CURE_POISON) {
     _executeCurePoison(caster, target);
+  } else if (spellDef.attackType === ACTIONS.HEAL) {
+    _executeHeal(caster, target);
   }
-  // Future party-member spells: add else-if branches here
+}
+
+function _executeHeal(caster, target) {
+  const amount = caster.stats?.intelligence ?? 5;
+  const oldHp = target.hp;
+  setHp(target.id, target.hp + amount);
+  const actualHeal = target.hp - oldHp;
+
+  showMessage(`${caster.name} casts <b>Heal</b> on ${target.name} — restored ${actualHeal} HP!`, 2500);
+
+  addLogEntry({
+    time: Date.now(),
+    type: 'skill',
+    actor: caster.name,
+    skillName: 'Heal',
+    target: target.name,
+    finalDamage: -actualHeal // healing is negative damage in logs usually or just descriptive
+  });
+
+  refreshPartyCards();
 }
 
 function _executeCurePoison(caster, target) {
@@ -1163,6 +1236,7 @@ function useHand(memberIndex, hand) {
 
   // Play the visual + audio animation regardless of whether a target exists
   playAction(attackType, hand);
+  if (isSpell || isBuff) _dispatchSpellVFX(attackType);
 
   if (isBuff) {
     if (attackType === ACTIONS.REGENERATE) {
@@ -1222,13 +1296,13 @@ function useHand(memberIndex, hand) {
   if (result.crit) {
     playCritSound(attackType);
     if (result.killed) {
-      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${m.name} obliterates the ${target.name}!`, 3000);
+      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${m.name} obliterates the ${target.name} for ${result.damage} dmg!`, 3000);
     } else {
-      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span>`, 1500);
+      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${m.name} inflicts a critical hit for ${result.damage} dmg!`, 1500);
     }
   } else {
     if (result.killed) {
-      showMessage(`${m.name} slays the ${target.name}!`);
+      showMessage(`${m.name} slays the ${target.name} for ${result.damage} dmg!`);
     }
     // Normal hit damage is shown by the red CSS2DObject popup above the monster — no toast needed
   }
@@ -1280,7 +1354,10 @@ function useSkill(memberIndex) {
   if (skill.name === 'Entangle') { _useEntangle(m, memberIndex); return; }
   if (skill.name === 'Sunder Armor') { _useSunderArmor(m, memberIndex); return; }
   if (skill.name === 'Berserk') { _useBerserk(m, memberIndex); return; }
+  if (skill.name === 'Heal') { _useHealSkill(m, memberIndex); return; }
 
+  playSkillSound('magic');
+  triggerDefaultSkillEffect();
   showMessage(`${m.name} uses ${skill.name}! (Skill logic not yet implemented)`);
 }
 
@@ -1308,6 +1385,8 @@ function _useHuntersEye(member, memberIndex) {
 
   _huntersEyeCooldownEnd = now + HUNTERS_EYE_COOLDOWN_MS;
   setHuntersEyeTarget(target.id);
+  playSkillSound('hunters-eye');
+  triggerHuntersEyeEffect();
   showMessage(`<span style="color:#f0b040">Hunter's Eye</span> — ${member.name} reads the ${target.name}!`, 2500);
   addLogEntry({ type: 'skill', actor: member.name, skillName: "Hunter's Eye" });
   _startSkillCooldownUI(memberIndex, _huntersEyeCooldownEnd);
@@ -1333,6 +1412,8 @@ function _useEntangle(member, memberIndex) {
   skillsState.entangle.expiresAt = now + ENTANGLE_DURATION_MS;
   _entangleCooldownEnd = now + ENTANGLE_COOLDOWN_MS;
 
+  playSkillSound('magic');
+  triggerEntangleEffect();
   showMessage(
     `<span style="color:#80ff80">✦ Entangle</span> — ${member.name} roots the ${target.name}! Attack speed halved for 30s.`,
     3000
@@ -1370,6 +1451,8 @@ function _useSunderArmor(member, memberIndex) {
   skillsState.sunderArmor.expiresAt = now + SUNDER_ARMOR_DURATION_MS;
   _sunderArmorCooldownEnd = now + SUNDER_ARMOR_COOLDOWN_MS;
 
+  playSkillSound('render');
+  triggerSunderArmorEffect();
   showMessage(
     `<span style="color:#ff8080">✦ Sunder Armor</span> — ${member.name} crushes the ${target.name}! Defence halved for 30s.`,
     3000
@@ -1406,6 +1489,8 @@ function _useBerserk(member, memberIndex) {
   skillsState.berserk.expiresAt = now + BERSERK_DURATION_MS;
   _berserkCooldownEnd = now + BERSERK_COOLDOWN_MS;
 
+  playSkillSound('berserk');
+  triggerBerserkEffect();
   showMessage(
     `<span style="color:#ff5050">✦ Berserk</span> — ${member.name} roars in fury! Damage +20% for 30s.`,
     3000
@@ -1437,6 +1522,8 @@ function _useSanctuary(member, memberIndex) {
   skillsState.sanctuary.expiresAt = now + SANCTUARY_DURATION_MS;
   _sanctuaryCooldownEnd = now + SANCTUARY_COOLDOWN_MS;
 
+  playSkillSound('holy');
+  triggerSanctuaryEffect();
   showMessage(
     `<span style="color:#f0d080">✦ Sanctuary</span> — ${member.name} shields the party! Damage −10% for 60s.`,
     3000
@@ -1474,6 +1561,8 @@ function _useHolyRadiance(member, memberIndex) {
   });
 
   if (healed > 0) {
+    playSkillSound('holy');
+    triggerHolyRadianceEffect();
     showMessage(
       `<span style="color:#f8f8a0">✦ Holy Radiance</span> — ${member.name} calls down divine light! Each member heals ${HOLY_RADIANCE_HEAL} HP.`,
       3000
@@ -1504,6 +1593,8 @@ function _useArcaneLantern(member, memberIndex) {
   skillsState.arcaneLight.expiresAt = now + ARCANE_LANTERN_DURATION_MS;
   _arcaneLanternCooldownEnd = now + ARCANE_LANTERN_COOLDOWN_MS;
 
+  playSkillSound('magic');
+  triggerArcaneLanternEffect();
   showMessage(
     `<span style="color:#a0d8ff">✦ Arcane Lantern</span> — ${member.name} conjures magical light for 60s.`,
     3000
@@ -1533,6 +1624,8 @@ function _useRunicScholar(member, memberIndex) {
   member.runicScholarActive = true;
   refreshPartyCards(); // immediately lights up the skill slot glow
 
+  playSkillSound('magic');
+  triggerRunicScholarEffect();
   showMessage(
     `<span style="color:#c080ff">✦ Runic Scholar</span> — ${member.name} channels the runes! Next spell deals ×2 damage.`,
     3000
@@ -1560,6 +1653,8 @@ function _useManaTap(member, memberIndex) {
   _manaTapCooldownEnd = now + MANA_TAP_COOLDOWN_MS;
   setMp(member.id, member.mpMax);
 
+  playSkillSound('magic');
+  triggerManaTapEffect();
   showMessage(
     `<span style="color:#40c0ff">✦ Mana Tap</span> — ${member.name} draws on hidden reserves! Mana fully restored.`,
     3000
@@ -1567,6 +1662,36 @@ function _useManaTap(member, memberIndex) {
   addLogEntry({ type: 'skill', actor: member.name, skillName: 'Mana Tap' });
   _startSkillCooldownUI(memberIndex, _manaTapCooldownEnd);
 }
+
+// ── Heal (Korg / Skills) ──────────────────────────────────────────────────
+const HEAL_SKILL_COOLDOWN_MS = 15_000;
+let _healSkillCooldownEnds = [0, 0, 0, 0]; // per-member cooldown for Heal skill if shared
+
+function _useHealSkill(member, memberIndex) {
+  const now = performance.now();
+  if (now < _healSkillCooldownEnds[memberIndex]) {
+    const remaining = Math.ceil((_healSkillCooldownEnds[memberIndex] - now) / 1000);
+    showMessage(`<span style="color:#ff80c0">Heal</span> — ready in ${remaining}s`, 2000);
+    return;
+  }
+
+  // Skills that require a target picker
+  // We don't deduct MP/cooldown here; we do it in _executePartyMemberSpell
+  // but for skills we need to manually handle the "hand" as 'skill'
+  _openPartyTargetPicker(member, memberIndex, 'skill', {
+    name: 'Heal',
+    attackType: ACTIONS.HEAL,
+    mpCost: 12, // MP cost for the skill version too? 
+    cooldown: HEAL_SKILL_COOLDOWN_MS
+  });
+}
+
+/**
+ * Special override for skills that used the target picker.
+ * Normally _executePartyMemberSpell handles spells.
+ * We need to ensure it also sets our custom skill cooldown if it was a 'skill' use.
+ */
+// I will need to update _executePartyMemberSpell to handle the cooldown if it came from a skill slot.
 
 // ── Generic cooldown badge ────────────────────────────────────────────────
 /**

@@ -79,7 +79,8 @@ export const RECRUITS = [
         hp: 67, hpMax: 67, mp: 25, mpMax: 25, sp: 100, spMax: 100,
         stats: { strength: 9, dexterity: 7, vitality: 7, intelligence: 4, resilience: 7 },
         skills: [
-            { name: 'Berserk', type: 'buff', description: 'Enters a state of roaring fury, boosting all damage dealt by 20% (after other calculations) for 30s. Cooldown: 60s.', icon: '/skills/berserk.png' }
+            { name: 'Berserk', type: 'buff', description: 'Enters a state of roaring fury, boosting all damage dealt by 20% (after other calculations) for 30s. Cooldown: 60s.', icon: '/skills/berserk.png' },
+            { name: 'Heal', type: 'healing', attackType: 'heal', description: 'A wave of restorative energy that mends wounds. Restores HP equal to the casters Intelligence to one party member.', icon: '/skills/heal.png' }
         ],
         image: '/human_barbarian_head.png',
         leftHand: 'Greataxe', rightHand: '—', startingSkill: 'Berserk',
@@ -118,8 +119,9 @@ export function initRecruits(scene, camera) {
     // Draw them as embedded wall frescoes
     RECRUITS.forEach(r => {
         const map = loader.load(r.image);
-        map.magFilter = THREE.NearestFilter;
-        map.minFilter = THREE.NearestMipmapLinearFilter;
+        map.magFilter = THREE.LinearFilter;
+        map.minFilter = THREE.LinearMipmapLinearFilter;
+        map.anisotropy = 16;
         // We use transparent: true and our alphaMap so edges fade into the procedural wall
         const picMat = new THREE.MeshLambertMaterial({
             map,

@@ -25,6 +25,7 @@ export const ACTIONS = Object.freeze({
   SHIELD_BASH: 'shield-bash',
   REGENERATE: 'regenerate',
   CURE_POISON: 'cure-poison',
+  HEAL: 'heal',
 });
 
 export const ITEMS = [
@@ -367,7 +368,7 @@ export const ITEMS = [
     name: 'Sword',
     slot: 'rightHand',
     attackType: ACTIONS.SWIPE,
-    baseDamage: 15,
+    baseDamage: 10,
     delay: 2,
     statWeights: { str: 0.5, dex: 0.5 }, // versatile balanced blade
     icon: '/icons/sword.png',
@@ -379,7 +380,7 @@ export const ITEMS = [
     name: 'Oak Staff',
     slot: 'enable-spell',
     attackType: ACTIONS.BASH,
-    baseDamage: 10,
+    baseDamage: 5,
     delay: 4,
     statWeights: { str: 0.8, dex: 0.2 }, // bludgeoning reach weapon — mostly strength
     icon: '/icons/oak_staff.png',

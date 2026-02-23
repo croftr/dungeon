@@ -294,6 +294,20 @@ function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offsetX = 0, 
                 child.userData.targetLevel = targetLevel;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
+
+                // Fix pixelation by ensuring smooth filtering and max texture resolution across all material maps
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
             }
         });
 
@@ -316,6 +330,20 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
                 child.userData.isShop = true;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
+
+                // Fix pixelation by ensuring smooth filtering and max texture resolution
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
             }
         });
 
@@ -338,6 +366,19 @@ function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = []) {
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = contents; // Link contents to the chest object
+
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
             }
         });
 
@@ -371,6 +412,17 @@ function addCrystals(scene, loader, col, row, rotY, offsetX = 0) {
                     // Give them a nice cyan mystical glow
                     child.material.emissive = new THREE.Color(0x00ffff);
                     child.material.emissiveIntensity = 0.5;
+
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
                 }
             }
         });
@@ -615,6 +667,19 @@ function addBonePile(scene, loader, col, row) {
                 child.userData.isBonePile = true;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
+
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
             }
         });
 

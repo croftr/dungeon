@@ -50,4 +50,18 @@ export const SPELLS = [
         value: 0,
         weight: 0,
     },
+    {
+        name: 'Heal',
+        type: 'healing',
+        target: 'party-member',
+        slot: 'spell',
+        attackType: 'heal',
+        baseDamage: 0,
+        delay: 5,
+        mpCost: 12,
+        icon: '/icons/heal.png', // Placeholder icon
+        description: 'A wave of restorative energy that mends wounds. Restores HP equal to the casters Intelligence to one party member.',
+        value: 0,
+        weight: 0,
+    },
 ];

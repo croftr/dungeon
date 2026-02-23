@@ -106,8 +106,9 @@ const TYPE_ABBR = {
 
 function _buildRowHtml(e) {
   if (e.type === 'death') {
+    const dmgText = e.damage != null ? ` for <b>${e.damage}</b> dmg` : '';
     const killText = e.killer
-      ? `<b>${e.killer}</b> slays <b>${e.target}</b>!`
+      ? `<b>${e.killer}</b> slays <b>${e.target}</b>${dmgText}!`
       : `<b>${e.target}</b> has been slain!`;
     return `<span class="bl-badge">💀</span>` +
       `<span class="bl-who" style="max-width: none; flex: 1;">${killText}</span>`;

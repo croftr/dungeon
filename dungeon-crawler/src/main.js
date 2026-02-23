@@ -11,9 +11,10 @@ import { initEquipment } from './equipment.js';
 import { initMonsters, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt } from './objects.js';
-import { startMusic, updateAudio } from './audio.js';
+import { startMusic, updateAudio, setAmbientLevel, setZoneMusic } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initMainMenu } from './main-menu.js';
+import { initQuarks, updateQuarks } from './quarks-intro.js';
 
 import './style.css';
 
@@ -72,6 +73,12 @@ setCallbacks({
   moved() {
     drawMinimap();
     updateStatus();
+    // East room (merchant/large room) zone: cols 16-23, rows 7-15, level 1 only
+    if (window.currentLevel === 1) {
+      const inEastRoom = player.gridCol >= 16 && player.gridCol <= 23
+        && player.gridRow >= 7 && player.gridRow <= 15;
+      setZoneMusic(inEastRoom ? '/sounds/level2-music.mp3' : null);
+    }
   },
   reached() {
     showMessage('YOU ESCAPED!<br><small style="font-size:14px;color:#aaa">The dungeon is conquered.</small>');
@@ -82,6 +89,11 @@ setCallbacks({
 });
 
 initInput(camera);
+
+// ─────────────────────────────────────────────
+//  QUARKS PARTICLE EFFECTS
+// ─────────────────────────────────────────────
+initQuarks(scene, camera);
 
 // ─────────────────────────────────────────────
 //  MINIMAP, HUD & PARTY  (initial draw)
@@ -115,6 +127,7 @@ function animate(now) {
   updateLighting(lights, camera, dt);
   updateMonsters(dt, camera, scene);
   updateParticles(dt);
+  updateQuarks(dt);
   updateAudio(dt);
   updateParty(dt);
   renderer.render(scene, camera);
@@ -142,6 +155,9 @@ window.addEventListener('keydown', handleFirstInteraction);
 // ─────────────────────────────────────────────
 window.loadLevel = function (levelNum) {
   window.currentLevel = levelNum;
+
+  // Switch ambient music to match the new level
+  setAmbientLevel(levelNum);
 
   // 1. Swap Map Array
   changeMapArray(levelNum === 1 ? level1Map : level2Map);
