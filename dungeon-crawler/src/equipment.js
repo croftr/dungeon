@@ -627,7 +627,7 @@ export function attachTooltipListeners(el, getItem) {
  */
 function _equipItem(memberIndex, invIndex) {
   const m = party[memberIndex];
-  const item = m.inventory[invIndex];
+  let item = m.inventory[invIndex];
   if (!item) return;
 
   m.inventory[invIndex] = null;

@@ -5,7 +5,7 @@ import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, isInFrontOfPlayer, player } from './player.js';
 import { showMessage } from './minimap.js';
 import { getItemDef } from './items.js';
-import { party, drawPortrait, resurrectAll } from './party.js';
+import { party, drawPortrait, resurrectAll, partyGold, removeGold } from './party.js';
 import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound } from './audio.js';
 
 export const objects = [];
@@ -204,6 +204,15 @@ export function initObjects(scene, camera) {
             e.stopPropagation();
             document.getElementById('merchant-overlay').classList.add('merchant-hidden');
             _hideChestCtxMenu();
+        };
+    }
+
+    // Merchant buy button
+    const merchantBuyBtn = document.getElementById('merchant-buy-btn');
+    if (merchantBuyBtn) {
+        merchantBuyBtn.onclick = (e) => {
+            e.stopPropagation();
+            _buyItems();
         };
     }
 
@@ -657,13 +666,64 @@ function _renderMerchantBasket() {
 
 function _updateMerchantTotals() {
     const total = _merchantBasket.reduce((sum, name) => sum + (MERCHANT_PRICES[name] ?? 0), 0);
-    const partyGold = 0; // TODO: wire up party gold when implemented
 
     document.getElementById('merchant-total-val').textContent = total;
     document.getElementById('merchant-gold-val').textContent = partyGold;
 
     const buyBtn = document.getElementById('merchant-buy-btn');
     buyBtn.disabled = _merchantBasket.length === 0 || partyGold < total;
+}
+
+function _buyItems() {
+    const total = _merchantBasket.reduce((sum, name) => sum + (MERCHANT_PRICES[name] ?? 0), 0);
+    if (partyGold < total) return;
+
+    import('./equipment.js').then(equip => {
+        const boughtItems = [];
+        const failedItems = [];
+
+        // Try to add each item to inventory
+        for (const itemName of _merchantBasket) {
+             let added = false;
+             // Try to find a slot in any party member's inventory
+             for (let i = 0; i < 4; i++) {
+                 if (party[i].isEmpty) continue;
+                 if (equip.addItemToInventory(i, itemName)) {
+                     added = true;
+                     boughtItems.push(itemName);
+                     break;
+                 }
+             }
+             if (!added) {
+                 failedItems.push(itemName);
+             }
+        }
+
+        // Calculate cost of successfully bought items
+        const spent = boughtItems.reduce((sum, name) => sum + (MERCHANT_PRICES[name] ?? 0), 0);
+
+        if (spent > 0) {
+             removeGold(spent);
+             showMessage(`Bought ${boughtItems.length} items for ${spent} gold.`);
+        }
+
+        if (failedItems.length > 0) {
+            showMessage(`Could not carry ${failedItems.length} items (inventory full).`);
+        }
+
+        // Remove bought items from available stock
+        for (const item of boughtItems) {
+            const stockIdx = _merchantAvailable.indexOf(item);
+            if (stockIdx > -1) _merchantAvailable.splice(stockIdx, 1);
+        }
+
+        // Basket should now only contain failed items
+        _merchantBasket = failedItems;
+
+        _renderMerchantShop();
+        _renderMerchantBasket();
+        _updateMerchantTotals();
+    });
 }
 
 function _bindChestSlots(equip, slots, contents) {
