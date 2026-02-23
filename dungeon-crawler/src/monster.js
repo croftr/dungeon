@@ -68,7 +68,6 @@ function inst(def, id, gridRow, gridCol, glbIdle, glbAttack, attackSound, scale 
 
 // Monsters spread through the western dungeon. The big east room is merchant territory.
 // Treekin lurks north of the portcullis — players must open it to face him.
-// The two Albino Goblins share one grid square, nudged apart visually so they stand hip-to-hip.
 export const monsters = [
   // North dead-end passage (behind the portcullis — opens when the wall button is pressed)
   inst(D.treekin, 0, 3, 7,
@@ -82,13 +81,8 @@ export const monsters = [
     '/monsters/meshy-AI-goblin/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
     '/monsters/meshy-AI-goblin/goblin-attack.wav'),
 
-  // Southern section — albino goblin pair, one each on col 5 and col 6
+  // Southern section
   inst(D.albino_goblin, 2, 15, 5,
-    '/monsters/meshy-AI-abbino-goblin/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
-    '/monsters/meshy-AI-abbino-goblin/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/meshy-AI-abbino-goblin/albino-goblin-attack.mp3'),
-
-  inst(D.albino_goblin, 6, 15, 6,
     '/monsters/meshy-AI-abbino-goblin/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
     '/monsters/meshy-AI-abbino-goblin/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
     '/monsters/meshy-AI-abbino-goblin/albino-goblin-attack.mp3'),
@@ -371,13 +365,33 @@ export function updateMonsters(dt, playerCamera, scene) {
 //  HIT / DAMAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function hitMonster(monsterId, finalDamage, attackType) {
+export function showMonsterDamage(monsterId, damage, isCrit) {
+  const m = monsters.find(x => x.id === monsterId);
+  if (!m || !m.mesh) return;
+
+  const div = document.createElement('div');
+  div.className = 'monster-damage-popup' + (isCrit ? ' damage-popup--crit' : '');
+  div.textContent = damage;
+
+  const label = new CSS2DObject(div);
+  // Place it significantly above the health bar (1.8) to avoid overlap
+  label.position.set(0, 2.2, 0);
+  m.mesh.add(label);
+
+  setTimeout(() => {
+    if (m.mesh) m.mesh.remove(label);
+  }, 850);
+}
+
+export function hitMonster(monsterId, finalDamage, attackType, isCrit = false) {
   const m = monsters.find((x) => x.id === monsterId && x.alive);
   if (!m) return { hit: false, damage: 0, killed: false, monsterHp: 0 };
 
   // finalDamage is pre-calculated by attackMonster via combat-rules.js
   const damage = Math.max(1, finalDamage);
   m.hp = Math.max(0, m.hp - damage);
+
+  showMonsterDamage(monsterId, damage, isCrit);
 
   // Update the HP bar above the monster's head
   if (m.hpBarFill) {
@@ -477,7 +491,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     ammoModifier: ammoDef?.damageModifier ?? null,
   };
 
-  const result = hitMonster(monsterId, damage, attackType);
+  const result = hitMonster(monsterId, damage, attackType, isCrit);
 
   let stunned = false;
   if (attackType === 'shield-bash' && result.hit && !result.killed) {
@@ -576,7 +590,6 @@ function _applyMonsterDamage(monster) {
       setTimeout(() => popup.remove(), 900);
     }
 
-    showMessage(`<b>${target.name}</b> blocks the ${monster.name}'s attack!`);
     return;
   }
 
@@ -646,7 +659,7 @@ function _applyMonsterDamage(monster) {
 
   // Only announce a kill — routine damage is shown on the portrait popup
   if (target.isDead) {
-    showMessage(`${monster.name} strikes <b>${target.name}</b> — they have fallen!`, 3500);
+    showMessage(`<b>${target.name}</b> HAS FALLEN!`, 3500);
   }
 }
 

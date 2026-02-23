@@ -2017,33 +2017,79 @@ body {
 
 .damage-popup {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 12px;
-  font-weight: bold;
-  color: #ff5555;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
   pointer-events: none;
-  white-space: nowrap;
+  width: 42px;
+  height: 42px;
+  background-image: url('/icons/damage.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: bold;
+  font-size: 13px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
   animation: damage-float 0.9s ease-out forwards;
   z-index: 20;
 }
 
 .damage-popup--crit {
-  color: #ffaa00;
-  font-size: 14px;
+  width: 54px;
+  height: 54px;
+  font-size: 16px;
+  color: #ffdd00;
+  filter: drop-shadow(0 0 4px rgba(255, 100, 0, 0.6));
+}
+
+.monster-damage-popup {
+  position: absolute;
+  pointer-events: none;
+  width: 90px;
+  height: 90px;
+  background-image: url('/icons/damage.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: bold;
+  font-size: 22px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+  animation: monster-damage-float 0.8s ease-out forwards;
+  z-index: 100;
+}
+
+@keyframes monster-damage-float {
+  0% {
+    transform: translate(-50%, 0) scale(0.4);
+    opacity: 0;
+  }
+
+  20% {
+    transform: translate(-50%, -20px) scale(1.4);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-50%, -60px) scale(1.0);
+    opacity: 0;
+  }
 }
 
 /* Incoming damage (monster → party member) — centred over the 56 px portrait */
 .damage-popup--incoming {
   left: 28px;
-  /* 56px portrait ÷ 2 */
+  top: 28px;
+  transform: translate(-50%, -50%);
   font-size: 13px;
 }
 
 .damage-popup--incoming.damage-popup--crit {
-  font-size: 15px;
+  font-size: 16px;
 }
 
 /* ── Game Over overlay ───────────────────────────────────────────────────── */

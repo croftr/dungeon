@@ -631,7 +631,7 @@ export function showMemberDamage(memberIndex, damage, isCrit) {
   const popup = document.createElement('span');
   popup.className = 'damage-popup damage-popup--incoming' +
     (isCrit ? ' damage-popup--crit' : '');
-  popup.textContent = `-${damage}`;
+  popup.textContent = damage;
   memberTop.appendChild(popup);
   setTimeout(() => popup.remove(), 900);
 }

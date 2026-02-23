@@ -919,8 +919,8 @@ function _closePartyTargetPicker() {
 
 function _openPartyTargetPicker(caster, casterIndex, hand, spellDef) {
   const overlay = document.getElementById('party-target-overlay');
-  const grid    = document.getElementById('party-target-grid');
-  const title   = document.getElementById('party-target-title');
+  const grid = document.getElementById('party-target-grid');
+  const title = document.getElementById('party-target-title');
 
   title.textContent = `${spellDef.name} — Choose Target`;
   grid.innerHTML = '';
@@ -934,7 +934,7 @@ function _openPartyTargetPicker(caster, casterIndex, hand, spellDef) {
 
     // Mini portrait canvas
     const canvas = document.createElement('canvas');
-    canvas.width  = 40;
+    canvas.width = 40;
     canvas.height = 40;
     canvas.className = 'party-target-portrait';
     drawPortrait(canvas, m);
@@ -1171,27 +1171,22 @@ function useHand(memberIndex, hand) {
   });
 
   if (!result.hit) {
-    showMessage(`${m.name} misses!`);
     return;
   }
 
-  // Damage number floats up from the clicked weapon slot
-  const slotId = `slot-${hand === 'left' ? 'lh' : 'rh'}-${memberIndex}`;
-  const slotEl = document.getElementById(slotId);
-  if (slotEl) _showDamagePopup(slotEl, result.damage, result.crit);
 
   if (result.crit) {
     playCritSound(attackType);
     if (result.killed) {
-      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${m.name} obliterates the ${target.name}!`, 3000);
+      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${target.name} OBLITERATED!`, 3000);
     } else {
-      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${m.name} &nbsp;<b>${result.damage}</b> damage`, 2500);
+      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> &nbsp;<b>${result.damage}</b> <img src="/icons/damage.png" style="height:14px; vertical-align:middle; margin-bottom:2px;">`, 2500);
     }
   } else {
     if (result.killed) {
-      showMessage(`${m.name} slays the ${target.name}!`);
+      showMessage(`${target.name} SLAIN!`);
     } else {
-      showMessage(`${m.name} &nbsp;<b>${result.damage}</b> damage`);
+      showMessage(`<b>${result.damage}</b> <img src="/icons/damage.png" style="height:14px; vertical-align:middle; margin-bottom:2px;">`);
     }
   }
 }
