@@ -30,6 +30,14 @@ export const ACTIONS = Object.freeze({
 
 export const ITEMS = [
 
+  {
+    name: 'Life Essence',
+    value: 10,
+    description: 'A glowing orb of pure life energy.',
+    slot: 'loot',
+    weight: 0.1,
+  },
+
   // ── Head ──────────────────────────────────────────────────────────────────
   {
     name: 'Shawl',
