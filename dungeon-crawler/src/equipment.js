@@ -766,7 +766,53 @@ function _equipItem(memberIndex, invIndex) {
 }
 
 function _learnSpell(memberIndex, invIndex) {
-  // Empty for now as requested
+  const m = party[memberIndex];
+  const item = m.inventory[invIndex];
+  if (!item) return;
+
+  const def = getItemDef(item.name);
+  if (!def || def.type !== 'spellbook' || !def.spellName) return;
+
+  // Check INT requirement against effective stats
+  const currentInt = m.stats?.intelligence ?? 0;
+  if (currentInt < def.requiredInt) {
+    showMessage(
+      `${m.name} lacks the arcane intellect to decipher this scroll. ` +
+      `(Requires ${def.requiredInt} Intelligence — current: ${currentInt})`
+    );
+    return;
+  }
+
+  // Check if the spell is already known
+  m.spells = m.spells || [];
+  if (m.spells.some(s => s.name === def.spellName)) {
+    showMessage(`${m.name} already knows ${def.spellName}!`);
+    return;
+  }
+
+  // Find the spell definition
+  const spellDef = SPELLS.find(s => s.name === def.spellName);
+  if (!spellDef) return;
+
+  // Grant the spell
+  m.spells.push({ name: spellDef.name, type: spellDef.type, description: spellDef.description, icon: spellDef.icon });
+
+  // If no spell is selected yet and they have a Spellbook equipped, auto-select this one
+  if (!m.selectedSpell) {
+    const hasSpellbook =
+      m.equipment?.leftHand?.name === 'Spellbook' ||
+      m.equipment?.rightHand?.name === 'Spellbook';
+    if (hasSpellbook) m.selectedSpell = spellDef.name;
+  }
+
+  // Consume the scroll
+  m.inventory[invIndex] = null;
+
+  playSkillSound('magic');
+  showMessage(`${m.name} learns ${def.spellName}!`);
+
+  renderModal(memberIndex);
+  refreshPartyCards();
 }
 
 /**
@@ -997,21 +1043,30 @@ function _openSpellSelectionModal(charIndex, itemKey) {
 
   overlay.classList.remove('spell-sel-hidden');
 
-  // Show all defined spells + some empty slots
-  const availableSpells = SPELLS.map(s => s.name);
   const m = party[charIndex];
+  const learnedSpells = m.spells || [];
 
   grid.innerHTML = '';
 
-  // Spells
-  availableSpells.forEach(spellName => {
-    const def = getItemDef(spellName);
+  if (learnedSpells.length === 0) {
+    const msg = document.createElement('div');
+    msg.style.cssText = 'color:#7a6a50; font-size:12px; padding:20px; text-align:center; grid-column:1/-1;';
+    msg.textContent = 'No spells learned. Study spell scrolls to learn spells.';
+    grid.appendChild(msg);
+    return;
+  }
+
+  // Show only spells this character has learned
+  learnedSpells.forEach(spell => {
+    const spellDef = SPELLS.find(s => s.name === spell.name);
+    if (!spellDef) return;
+    const isSelected = m.selectedSpell === spell.name;
     const div = document.createElement('div');
-    div.className = 'spell-sel-slot';
-    div.innerHTML = `<img src="${def.icon}" />`;
-    div.title = def.name;
+    div.className = 'spell-sel-slot' + (isSelected ? ' spell-sel-slot--active' : '');
+    div.innerHTML = `<img src="${spellDef.icon}" />`;
+    div.title = spellDef.name;
     div.onclick = () => {
-      m.selectedSpell = spellName;
+      m.selectedSpell = spell.name;
       overlay.classList.add('spell-sel-hidden');
       renderModal(charIndex);
       refreshPartyCards();
@@ -1019,8 +1074,9 @@ function _openSpellSelectionModal(charIndex, itemKey) {
     grid.appendChild(div);
   });
 
-  // Empty slots
-  for (let i = 0; i < 6; i++) {
+  // Pad with empty slots so the grid always shows at least a couple of empties
+  const totalSlots = Math.max(learnedSpells.length + 2, 6);
+  for (let i = learnedSpells.length; i < totalSlots; i++) {
     const div = document.createElement('div');
     div.className = 'spell-sel-slot empty';
     div.innerHTML = 'Empty';

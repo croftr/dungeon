@@ -63,6 +63,18 @@ export function initObjects(scene, camera) {
     spawnObjectsForLevel(gltfLoader);
 
     window.addEventListener('click', (e) => {
+        // If any modal overlay is currently visible, let the DOM handle it — don't raycast.
+        const cabinetOverlay = document.getElementById('cabinet-overlay');
+        const chestOverlay = document.getElementById('chest-overlay');
+        const equipOverlay = document.getElementById('equip-overlay');
+        const merchantOverlay = document.getElementById('merchant-overlay');
+        if (
+            (cabinetOverlay && !cabinetOverlay.classList.contains('chest-hidden')) ||
+            (chestOverlay && !chestOverlay.classList.contains('chest-hidden')) ||
+            (equipOverlay && !equipOverlay.classList.contains('equip-hidden')) ||
+            (merchantOverlay && !merchantOverlay.classList.contains('merchant-hidden'))
+        ) return;
+
         // Raycast
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
@@ -177,7 +189,8 @@ export function initObjects(scene, camera) {
     // Modal Close Logic
     const closeBtn = document.getElementById('chest-close');
     if (closeBtn) {
-        closeBtn.onclick = () => {
+        closeBtn.onclick = (e) => {
+            e.stopPropagation();
             document.getElementById('chest-overlay').classList.add('chest-hidden');
             _hideChestCtxMenu();
             import('./equipment.js').then(m => m.hideTooltip());
@@ -187,7 +200,8 @@ export function initObjects(scene, camera) {
     // Merchant modal close
     const merchantCloseBtn = document.getElementById('merchant-close');
     if (merchantCloseBtn) {
-        merchantCloseBtn.onclick = () => {
+        merchantCloseBtn.onclick = (e) => {
+            e.stopPropagation();
             document.getElementById('merchant-overlay').classList.add('merchant-hidden');
             _hideChestCtxMenu();
         };
@@ -196,11 +210,31 @@ export function initObjects(scene, camera) {
     // Cabinet modal close
     const cabinetCloseBtn = document.getElementById('cabinet-close');
     if (cabinetCloseBtn) {
-        cabinetCloseBtn.onclick = () => {
+        cabinetCloseBtn.onclick = (e) => {
+            e.stopPropagation();
             document.getElementById('cabinet-overlay').classList.add('chest-hidden');
             _hideChestCtxMenu();
             import('./equipment.js').then(m => m.hideTooltip());
         };
+    }
+
+    // Stop ALL clicks inside the cabinet overlay from reaching the window listener
+    // (so clicking items inside doesn't trigger world raycasting either)
+    const cabinetOverlay = document.getElementById('cabinet-overlay');
+    if (cabinetOverlay) {
+        cabinetOverlay.addEventListener('click', (e) => e.stopPropagation());
+    }
+
+    // Ditto for chest overlay
+    const chestOverlayEl = document.getElementById('chest-overlay');
+    if (chestOverlayEl) {
+        chestOverlayEl.addEventListener('click', (e) => e.stopPropagation());
+    }
+
+    // Ditto for merchant overlay
+    const merchantOverlayEl = document.getElementById('merchant-overlay');
+    if (merchantOverlayEl) {
+        merchantOverlayEl.addEventListener('click', (e) => e.stopPropagation());
     }
 
     // Dismiss chest context menu on outside click
@@ -272,9 +306,12 @@ export function spawnObjectsForLevel() {
         // Bone pile in the starter room area
         addBonePile(objectsGroup, gltfLoader, 11, 12);
 
-        // Spell Cabinet in the starter room for testing
+        // Spell Cabinet in the starter room
         addSpellCabinet(objectsGroup, gltfLoader, 12, 13, Math.PI, 0.6, [
-            'Fireball Spellbook'
+            'Scroll of Fireball',
+            'Scroll of Heal',
+            'Scroll of Regeneration',
+            'Scroll of Cure Poison',
         ]);
 
         // Shop against the east wall of the 8×8 room, centre row

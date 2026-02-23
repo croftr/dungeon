@@ -527,16 +527,6 @@ export const ITEMS = [
     weight: 0,
   },
   {
-    name: 'Fireball Spellbook',
-    type: 'spellbook',
-    spellName: 'Fireball',
-    requiredInt: 10,
-    icon: '/icons/fireball-spellbook.png',
-    description: 'An ancient tome bound in flame-etched leather. Requires 10 Intelligence to decypher.',
-    value: 200,
-    weight: 1.0,
-  },
-  {
     name: 'Heal Spellbook',
     type: 'spellbook',
     spellName: 'Heal',
@@ -565,6 +555,49 @@ export const ITEMS = [
     description: 'A small pamphlet detailed with botanical sketches. Requires 6 Intelligence to decypher.',
     value: 100,
     weight: 0.3,
+  },
+
+  // ── Spell Cabinet Scrolls (starter room) ──────────────────────────────────
+  // All four require 10 Intelligence to learn. Consumed on use.
+  {
+    name: 'Scroll of Fireball',
+    type: 'spellbook',
+    spellName: 'Fireball',
+    requiredInt: 10,
+    icon: '/icons/scroll_fireball.png',
+    description: 'Ancient parchment inscribed with blazing runes. Study it to learn Fireball. Requires 10 Intelligence.',
+    value: 200,
+    weight: 0.2,
+  },
+  {
+    name: 'Scroll of Heal',
+    type: 'spellbook',
+    spellName: 'Heal',
+    requiredInt: 10,
+    icon: '/icons/scroll_heal.png',
+    description: 'A roll of white vellum filled with restorative prayers. Study it to learn Heal. Requires 10 Intelligence.',
+    value: 180,
+    weight: 0.2,
+  },
+  {
+    name: 'Scroll of Regeneration',
+    type: 'spellbook',
+    spellName: 'Regeneration',
+    requiredInt: 10,
+    icon: '/icons/scroll_regeneration.png',
+    description: 'A scroll smelling of damp earth and fresh moss. Study it to learn Regeneration. Requires 10 Intelligence.',
+    value: 220,
+    weight: 0.2,
+  },
+  {
+    name: 'Scroll of Cure Poison',
+    type: 'spellbook',
+    spellName: 'Cure Poison',
+    requiredInt: 10,
+    icon: '/icons/scroll_cure_poison.png',
+    description: 'A scroll bearing botanical sketches and purifying incantations. Study it to learn Cure Poison. Requires 10 Intelligence.',
+    value: 160,
+    weight: 0.2,
   },
 ];
 

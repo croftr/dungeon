@@ -203,7 +203,7 @@ body {
 
 /* Victory / message overlay */
 #message {
-  position: absolute;
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -214,6 +214,7 @@ body {
   display: none;
   text-align: center;
   pointer-events: none;
+  z-index: 2000;
 }
 
 /* ═══════════════════════════════════════════
@@ -1146,6 +1147,12 @@ body {
 .spell-sel-slot:hover {
   border-color: #c8a84a;
   background: rgba(200, 168, 74, 0.2);
+}
+
+.spell-sel-slot--active {
+  border-color: #c8a84a;
+  background: rgba(200, 168, 74, 0.18);
+  box-shadow: 0 0 8px rgba(200, 168, 74, 0.5), inset 0 0 4px rgba(200, 168, 74, 0.2);
 }
 
 .spell-sel-slot.empty {
@@ -2305,7 +2312,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 1050;
   backdrop-filter: blur(2px);
 }
 
