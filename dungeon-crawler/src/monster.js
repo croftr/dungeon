@@ -5,7 +5,8 @@ import { createHitSpark } from './particles.js';
 import { CELL } from './map.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
-import { party, setHp, flashPortraitHit, showMemberDamage, refreshPartyCards } from './party.js';
+import { party, setHp, flashPortraitHit, showMemberDamage, refreshPartyCards, applyStatusEffect } from './party.js';
+import { STATUS_EFFECT_DEFS } from './status-effects.js';
 import { showMessage } from './minimap.js';
 import {
   playerHitChance, monsterHitChance,
@@ -141,9 +142,31 @@ function _updateStatsPanel(m) {
   const isStunned = m.stunUntil && performance.now() < m.stunUntil;
   const isPoisoned = m.poisonUntil && performance.now() < m.poisonUntil;
 
+  // On-hit effects section — shows what debuffs this monster type can inflict
+  let onHitHtml = '';
+  if (m.onHitEffects?.length) {
+    onHitHtml += `<div class="hep-divider"></div><div class="hep-section-label">On-Hit Effects</div><div class="hep-debuffs">`;
+    m.onHitEffects.forEach(effect => {
+      const def = STATUS_EFFECT_DEFS[effect.effectId];
+      const name = def?.name ?? effect.effectId;
+      const chance = Math.round(effect.chance * 100);
+      const desc = def?.tickDamage != null
+        ? `${def.tickDamage} HP / ${def.tickInterval}s · ${def.duration}s`
+        : '';
+      const descPart = desc ? ` <span class="hep-effect-desc">(${desc})</span>` : '';
+      onHitHtml += `<div class="hep-debuff hep-on-hit" style="color:#c0ff80">`
+        + `<span class="hep-effect-name">${name}</span>`
+        + `<span class="hep-effect-chance">${chance}%</span>`
+        + descPart
+        + `</div>`;
+    });
+    onHitHtml += `</div>`;
+  }
+
+  // Active debuffs currently applied to this monster from player skills
   let debuffsHtml = '';
   if (isSundered || isEntangled || isStunned || isPoisoned) {
-    debuffsHtml += `<div class="hep-divider"></div><div class="hep-debuffs">`;
+    debuffsHtml += `<div class="hep-divider"></div><div class="hep-section-label">Active Effects</div><div class="hep-debuffs">`;
     if (isSundered) {
       debuffsHtml += `<div class="hep-debuff" style="color:#ff8080">Sunder Armor (DEF/RES ½)</div>`;
     }
@@ -171,6 +194,7 @@ function _updateStatsPanel(m) {
     `<span class="hep-stat">RES <b>${displayRes}</b></span>` +
     `<span class="hep-stat">DEF <b>${displayDef}</b></span>` +
     `</div>` +
+    onHitHtml +
     debuffsHtml;
 }
 
@@ -600,6 +624,25 @@ function _applyMonsterDamage(monster) {
     finalDamage: damage,
     critMultiplier: isCrit ? CRIT_MULTIPLIER : 1,
   });
+
+  // Apply on-hit status effects defined on this monster type
+  if (!target.isDead) {
+    (monster.onHitEffects ?? []).forEach(effect => {
+      if (Math.random() < effect.chance) {
+        applyStatusEffect(target.id, effect.effectId);
+        const def = STATUS_EFFECT_DEFS[effect.effectId];
+        addLogEntry({
+          time: Date.now(),
+          type: 'status-effect',
+          actor: 'monster',
+          attacker: monster.name,
+          target: target.name,
+          effectId: effect.effectId,
+          effectName: def?.name ?? effect.effectId,
+        });
+      }
+    });
+  }
 
   // Only announce a kill — routine damage is shown on the portrait popup
   if (target.isDead) {

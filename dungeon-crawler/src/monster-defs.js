@@ -10,6 +10,11 @@
 //    vitality  — reserved for future HP-scaling / regen mechanics
 //    intelligence — reserved for future magic-attack mechanics
 //    resilience — magic resistance (flat reduction from fireball / spell damage)
+//
+//  onHitEffects (optional):
+//    Array of status effects this monster can inflict on a successful hit.
+//    Each entry: { effectId: <key from STATUS_EFFECT_DEFS>, chance: 0–1 }
+//    Effects are defined in status-effects.js.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const MONSTER_DEFS = {
@@ -26,6 +31,9 @@ export const MONSTER_DEFS = {
     hp: 120,
     defence: 8,
     stats: { strength: 14, dexterity: 18, vitality: 10, intelligence: 5, resilience: 6 },
+    onHitEffects: [
+      { effectId: 'poison', chance: 0.9 },
+    ],
   },
 
   orc: {

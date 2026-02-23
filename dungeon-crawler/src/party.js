@@ -4,6 +4,7 @@ import { addLogEntry } from './battle-log.js';
 import { isInCombat } from './audio.js';
 import { skillsState } from './skills-state.js';
 import { SPELLS } from './spells.js';
+import { STATUS_EFFECT_DEFS } from './status-effects.js';
 
 // ─────────────────────────────────────────────
 //  PARTY DATA  — 4 members
@@ -681,6 +682,33 @@ let spRegenAccum = 0;
 let regenerationDuration = 0;
 let regenerationTick = 0;
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  STATUS EFFECT APPLICATION
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Apply (or refresh) a status effect on a party member.
+ * effectId must match a key in STATUS_EFFECT_DEFS.
+ * If the effect is already active its duration is refreshed rather than stacked.
+ */
+export function applyStatusEffect(memberId, effectId) {
+  const m = party.find(p => p.id === memberId);
+  if (!m || m.isEmpty || m.isDead) return;
+
+  const def = STATUS_EFFECT_DEFS[effectId];
+  if (!def) return;
+
+  if (!m.activeDebuffs) m.activeDebuffs = [];
+
+  const existing = m.activeDebuffs.find(d => d.effectId === effectId);
+  if (existing) {
+    // Refresh duration without resetting the tick accumulator
+    existing.expiresAt = performance.now() + def.duration * 1000;
+  } else {
+    m.activeDebuffs.push({ effectId, expiresAt: performance.now() + def.duration * 1000, tickAccum: 0 });
+  }
+}
+
 export function applyRegeneration() {
   regenerationDuration = 30; // 30 seconds
   regenerationTick = 0;
@@ -729,6 +757,24 @@ export function updateParty(dt) {
     }
   }
 
+  // Process active debuffs (e.g. poison tick damage)
+  const now = performance.now();
+  party.forEach(m => {
+    if (m.isEmpty || m.isDead || !m.activeDebuffs?.length) return;
+    // Expire finished debuffs
+    m.activeDebuffs = m.activeDebuffs.filter(d => now < d.expiresAt);
+    // Tick damage
+    m.activeDebuffs.forEach(d => {
+      const def = STATUS_EFFECT_DEFS[d.effectId];
+      if (!def?.tickDamage) return;
+      d.tickAccum += dt;
+      if (d.tickAccum >= def.tickInterval) {
+        d.tickAccum -= def.tickInterval;
+        setHp(m.id, m.hp - def.tickDamage);
+      }
+    });
+  });
+
   updateStatusBanners();
 }
 function getActiveEffectsForMember(m) {
@@ -738,10 +784,22 @@ function getActiveEffectsForMember(m) {
   if (skillsState.arcaneLight.active) active.push('Arcane Lantern');
   if (skillsState.berserk.active && skillsState.berserk.actorName === m.name) active.push('Berserk');
   if (m.runicScholarActive) active.push('Runic Scholar');
+  // Active debuffs from monster on-hit effects
+  const now = performance.now();
+  m.activeDebuffs?.forEach(d => {
+    if (now < d.expiresAt) {
+      const def = STATUS_EFFECT_DEFS[d.effectId];
+      if (def) active.push(def.name);
+    }
+  });
   return active;
 }
 
 function getSkillOrSpellDef(name) {
+  // Check status effect debuffs (e.g. Poison from monster attacks)
+  const effectDef = Object.values(STATUS_EFFECT_DEFS).find(d => d.name === name);
+  if (effectDef) return effectDef;
+
   const spellDef = SPELLS.find(s => s.name === name);
   if (spellDef) return spellDef;
 
@@ -762,23 +820,32 @@ function updateStatusBanners() {
 
     if (m.isDead) {
       banner.innerHTML = '';
+      banner._prevKeys = '';
       return;
     }
 
-    let html = '';
     const activeNames = getActiveEffectsForMember(m);
-
+    const defs = [];
     activeNames.forEach(name => {
       const def = getSkillOrSpellDef(name);
-      // Display effects that are either buffs or debuffs
       if (def && (def.type === 'buff' || def.type === 'debuff')) {
-        html += `<img src="${def.icon}" class="buff-icon" title="${def.name}" />`;
+        defs.push(def);
       }
     });
 
-    // Check if changed to avoid unnecessary DOM updates
-    if (banner.innerHTML !== html) {
-      banner.innerHTML = html;
-    }
+    // Build a key string so we only rebuild the DOM when the set of effects changes
+    const key = defs.map(d => d.name || d.id).join('|');
+    if (banner._prevKeys === key) return;
+    banner._prevKeys = key;
+
+    banner.innerHTML = '';
+    defs.forEach(def => {
+      const img = document.createElement('img');
+      img.src = def.icon;
+      img.className = 'buff-icon';
+      img.alt = def.name;
+      img.title = def.name;
+      banner.appendChild(img);
+    });
   });
 }

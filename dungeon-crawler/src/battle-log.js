@@ -77,11 +77,12 @@ function _prependRow(entry) {
   let typeClass = 'bl--hit';
   if (entry.type === 'death') typeClass = 'bl--death';
   else if (entry.type === 'skill') typeClass = 'bl--skill';
+  else if (entry.type === 'status-effect') typeClass = 'bl--poison';
   else if (entry.blocked) typeClass = 'bl--block';
   else if (entry.stunned) typeClass = 'bl--stun';
   else if (entry.poisoned) typeClass = 'bl--poison';
   else if (entry.crit) typeClass = 'bl--crit';
-  else if (entry.sundered) typeClass = 'bl--sunder'; // Added this line for sundered status
+  else if (entry.sundered) typeClass = 'bl--sunder';
   else if (!entry.hit) typeClass = 'bl--miss';
 
   row.className = 'bl-row ' + typeClass;
@@ -112,6 +113,10 @@ function _buildRowHtml(e) {
     const targetText = e.target ? ` on <b>${e.target}</b>` : '';
     return `<span class="bl-badge">✦</span>` +
       `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.actor}</b> uses ${e.skillName}${targetText}!</span>`;
+  }
+  if (e.type === 'status-effect') {
+    return `<span class="bl-badge">☠</span>` +
+      `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.target}</b> is afflicted with <b>${e.effectName}</b> by ${e.attacker}!</span>`;
   }
 
   const badge = e.blocked ? '🛡' : (e.crit ? '⚡' : e.hit ? '●' : '○');

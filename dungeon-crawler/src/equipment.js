@@ -454,7 +454,7 @@ function populateTooltip(item) {
   }
 }
 
-function showTooltip(item, mouseX, mouseY) {
+export function showTooltip(item, mouseX, mouseY) {
   if (!item) { hideTooltip(); return; }
   populateTooltip(item);
   const panel = document.getElementById('item-detail-panel');
@@ -901,6 +901,116 @@ document.getElementById('spell-selection-overlay').addEventListener('click', (e)
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  PARTY MEMBER TARGET PICKER
+//  Shown when a spell with target: 'party-member' is activated.
+//  Renders a small portrait + name button for each living party member, then
+//  dispatches execution once the player clicks one (or cancel to abort).
+// ─────────────────────────────────────────────────────────────────────────────
+
+document.getElementById('party-target-close').addEventListener('click', _closePartyTargetPicker);
+document.getElementById('party-target-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'party-target-overlay') _closePartyTargetPicker();
+});
+
+function _closePartyTargetPicker() {
+  document.getElementById('party-target-overlay').classList.add('party-target-hidden');
+}
+
+function _openPartyTargetPicker(caster, casterIndex, hand, spellDef) {
+  const overlay = document.getElementById('party-target-overlay');
+  const grid    = document.getElementById('party-target-grid');
+  const title   = document.getElementById('party-target-title');
+
+  title.textContent = `${spellDef.name} — Choose Target`;
+  grid.innerHTML = '';
+
+  party.forEach(m => {
+    if (m.isEmpty) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'party-target-btn' + (m.isDead ? ' party-target-btn--dead' : '');
+    btn.disabled = m.isDead;
+
+    // Mini portrait canvas
+    const canvas = document.createElement('canvas');
+    canvas.width  = 40;
+    canvas.height = 40;
+    canvas.className = 'party-target-portrait';
+    drawPortrait(canvas, m);
+
+    // Poisoned indicator
+    const isPoisoned = m.activeDebuffs?.some(
+      d => d.effectId === 'poison' && performance.now() < d.expiresAt
+    );
+
+    const label = document.createElement('span');
+    label.className = 'party-target-name';
+    label.innerHTML = m.name + (isPoisoned ? ' <span class="party-target-poisoned">☠ Poisoned</span>' : '');
+
+    btn.appendChild(canvas);
+    btn.appendChild(label);
+
+    btn.addEventListener('click', () => {
+      _closePartyTargetPicker();
+      _executePartyMemberSpell(caster, casterIndex, hand, spellDef, m);
+    });
+
+    grid.appendChild(btn);
+  });
+
+  overlay.classList.remove('party-target-hidden');
+}
+
+/** Dispatcher for party-member targeted spells — routes to the correct handler. */
+function _executePartyMemberSpell(caster, casterIndex, hand, spellDef, target) {
+  // MP check (deducted here, after the player has confirmed their target choice)
+  if (caster.mp < spellDef.mpCost) {
+    showMessage(`${caster.name} does not have enough mana!`);
+    return;
+  }
+  setMp(caster.id, caster.mp - spellDef.mpCost);
+
+  // Record cooldown so the slot greys out normally
+  const timeKey = `${casterIndex}-${hand}`;
+  lastAttackTimes[timeKey] = performance.now();
+  refreshPartyCards();
+
+  // Play the spell animation
+  playAction(spellDef.attackType, hand);
+
+  if (spellDef.attackType === ACTIONS.CURE_POISON) {
+    _executeCurePoison(caster, target);
+  }
+  // Future party-member spells: add else-if branches here
+}
+
+function _executeCurePoison(caster, target) {
+  const hadPoison = target.activeDebuffs?.some(
+    d => d.effectId === 'poison' && performance.now() < d.expiresAt
+  );
+
+  // Strip all poison stacks from the target
+  if (target.activeDebuffs) {
+    target.activeDebuffs = target.activeDebuffs.filter(d => d.effectId !== 'poison');
+  }
+
+  const msg = hadPoison
+    ? `${caster.name} casts <b>Cure Poison</b> on ${target.name} — venom purged!`
+    : `${caster.name} casts <b>Cure Poison</b> on ${target.name}.`;
+  showMessage(msg, 2500);
+
+  addLogEntry({
+    time: Date.now(),
+    type: 'skill',
+    actor: caster.name,
+    skillName: 'Cure Poison',
+    target: target.name,
+  });
+
+  refreshPartyCards();
+}
+
 // ─────────────────────────────────────────────
 //  USE HAND  — triggered from party panel
 // ─────────────────────────────────────────────
@@ -956,6 +1066,13 @@ function useHand(memberIndex, hand) {
 
   // Dead members cannot act.
   if (m.isDead) return;
+
+  // Spells that target a single party member need a target picker before executing.
+  // We intercept here — after cooldown/dead checks — but before the monster-targeting path.
+  if (def?.target === 'party-member') {
+    _openPartyTargetPicker(m, memberIndex, hand, def);
+    return;
+  }
 
   const isRanged = attackType === ACTIONS.SHOOT || attackType === ACTIONS.FIREBALL;
   const isBuff = attackType === ACTIONS.REGENERATE;
@@ -1553,6 +1670,7 @@ function attachCardListeners() {
         useSkill(i);
       });
     }
+
   });
 }
 
