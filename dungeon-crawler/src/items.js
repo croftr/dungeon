@@ -192,7 +192,10 @@ export const ITEMS = [
     weight: 2.0,
   },
 
-  // ── Rings ─────────────────────────────────────────────────────────────────  
+  // ── Rings ─────────────────────────────────────────────────────────────────
+  // Rings use statBonuses (a plain object mapping stat key → delta) for clean,
+  // data-driven stat application.  The legacy statChange string is kept for the
+  // item tooltip display only.
   {
     name: 'Ring of Vigour',
     slot: 'ring1',
@@ -202,18 +205,20 @@ export const ITEMS = [
     description: 'A carved bone ring that pulses with vitality. Bolsters the wearer\'s constitution.',
     value: 120,
     weight: 0.05,
-    statChange: "+1 Vitality"
+    statChange: '+1 Vitality',
+    statBonuses: { vitality: 1 },
   },
   {
     name: 'Ring of Wisdom',
-    slot: 'ring1',
+    slot: 'ring2',
     attackType: null,
     baseDamage: null,
     icon: '/icons/ring_of_wisdom.png',
-    description: 'A finely crafted silver ring set with a pulsing sapphire. Bolsters the wearer\'s intelligence.',
+    description: 'A finely crafted silver ring set with a pulsing sapphire. Sharpens the wearer\'s intelligence.',
     value: 120,
     weight: 0.05,
-    statChange: "+1 Intelligence"
+    statChange: '+1 Intelligence',
+    statBonuses: { intelligence: 1 },
   },
   // ── Legs ──────────────────────────────────────────────────────────────────
   {

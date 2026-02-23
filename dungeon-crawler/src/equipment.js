@@ -108,7 +108,19 @@ export function updateEffectiveStats(m) {
     if (item && !countedItems.has(item)) {
       countedItems.add(item);
       const def = getItemDef(item.name);
-      if (def?.statChange) {
+      if (!def) return;
+
+      // Preferred: structured statBonuses object  { vitality: 1, intelligence: 2, … }
+      // This is the general-purpose data-driven approach — add a statBonuses entry to
+      // any item definition and it will be applied automatically when equipped.
+      if (def.statBonuses) {
+        Object.entries(def.statBonuses).forEach(([stat, delta]) => {
+          if (newStats[stat] !== undefined) {
+            newStats[stat] += delta;
+          }
+        });
+      } else if (def.statChange) {
+        // Legacy fallback: parse a human-readable string like "+1 Vitality"
         const match = def.statChange.match(/([+-]?\d+)\s+([a-zA-Z]+)/);
         if (match) {
           const val = parseInt(match[1], 10);
@@ -713,6 +725,15 @@ function _equipItem(memberIndex, invIndex) {
       if (fi !== -1) m.inventory[fi] = { name: d.name, slot: d.slot };
     });
   } else {
+    // ── Smart ring-slot assignment ──────────────────────────────────────────
+    // If the item targets a ring slot but that slot is already occupied and the
+    // other ring slot is empty, automatically redirect to the free slot instead.
+    // This lets the player fill both ring slots without needing to know slot names.
+    const RING_PAIRS = { ring1: 'ring2', ring2: 'ring1' };
+    if (item.slot in RING_PAIRS && m.equipment[item.slot] !== null && m.equipment[RING_PAIRS[item.slot]] === null) {
+      item = { ...item, slot: RING_PAIRS[item.slot] };
+    }
+
     const displaced = [];
     let currentlyWorn = m.equipment[item.slot];
     let otherSlotCleared = null;
@@ -761,6 +782,7 @@ function _equipItem(memberIndex, invIndex) {
     });
   }
 
+  updateEffectiveStats(m);
   renderModal(memberIndex);
   refreshPartyCards();
 }

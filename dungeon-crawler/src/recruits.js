@@ -12,7 +12,7 @@ export const RECRUITS = [
         name: 'Elrond',
         job: 'Ranger',
         race: 'Elf',
-        hp: 42, hpMax: 42, mp: 40, mpMax: 40, sp: 100, spMax: 100,
+        hp: 42, hpMax: 42, mp: 10, mpMax: 10, sp: 100, spMax: 100,
         stats: { strength: 5, dexterity: 10, vitality: 5, intelligence: 7, resilience: 5 },
         skills: [
             { name: 'Entangle', type: 'debuff', description: 'Halves the attack speed of the monster currently being fought for 30s. Only usable in combat. Cooldown: 60s.', icon: '/skills/entangle.png' },
@@ -28,8 +28,8 @@ export const RECRUITS = [
         name: 'Alaric',
         job: 'Paladin',
         race: 'Human',
-        hp: 60, hpMax: 60, mp: 60, mpMax: 60, sp: 100, spMax: 100,
-        stats: { strength: 7, dexterity: 5, vitality: 9, intelligence: 6, resilience: 9 },
+        hp: 70, hpMax: 60, mp: 20, mpMax: 20, sp: 100, spMax: 100,
+        stats: { strength: 7, dexterity: 5, vitality: 9, intelligence: 6, resilience: 10 },
         skills: [
             { name: 'Sanctuary', type: 'buff', description: 'Surrounds the party in divine light, reducing all damage received by 10% for 60 seconds. Cooldown: 120s.', icon: '/skills/sancturary.png' },
             { name: 'Holy Radiance', type: 'healing', description: 'Calls down a pulse of holy energy, restoring 10 HP to every living party member. Cooldown: 120s.', icon: '/skills/holy-radiance.png' },
@@ -44,8 +44,8 @@ export const RECRUITS = [
         name: 'Thorek',
         job: 'Warrior',
         race: 'Dwarf',
-        hp: 70, hpMax: 70, mp: 20, mpMax: 20, sp: 100, spMax: 100,
-        stats: { strength: 8, dexterity: 6, vitality: 8, intelligence: 4, resilience: 7 },
+        hp: 70, hpMax: 70, mp: 10, mpMax: 10, sp: 100, spMax: 100,
+        stats: { strength: 8, dexterity: 6, vitality: 8, intelligence: 4, resilience: 10 },
         skills: [
             { name: 'Sunder Armor', type: 'debuff', description: 'Crushes the targeted monster, halving its defence stats for 30s. Only usable in combat. Cooldown: 60s.', icon: '/skills/sunder-armor.png' },
         ],
@@ -76,7 +76,7 @@ export const RECRUITS = [
         name: 'Korg',
         job: 'Barbarian',
         race: 'Human',
-        hp: 67, hpMax: 67, mp: 25, mpMax: 25, sp: 100, spMax: 100,
+        hp: 67, hpMax: 67, mp: 10, mpMax: 10, sp: 100, spMax: 100,
         stats: { strength: 9, dexterity: 7, vitality: 7, intelligence: 4, resilience: 7 },
         skills: [
             { name: 'Berserk', type: 'buff', description: 'Enters a state of roaring fury, boosting all damage dealt by 20% (after other calculations) for 30s. Cooldown: 60s.', icon: '/skills/berserk.png' },
