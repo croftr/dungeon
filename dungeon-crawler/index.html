@@ -518,6 +518,33 @@
     </div>
   </div>
 
+  <!-- ── SPELL CABINET MODAL ── -->
+  <div id="cabinet-overlay" class="chest-hidden">
+    <div id="cabinet-modal">
+      <div id="cabinet-header" class="chest-header-style">
+        <div id="cabinet-title-wrap">
+          <img src="/icons/spellbook.png" id="cabinet-header-icon" alt="Spell Cabinet">
+          <span id="cabinet-title">Spell Cabinet</span>
+        </div>
+        <span id="cabinet-sent-label"></span>
+        <button id="cabinet-close" aria-label="Close">&times;</button>
+      </div>
+      <div id="cabinet-body">
+        <div id="cabinet-grid">
+          <!-- 8 slots (4×2) -->
+          <div class="chest-slot cabinet-slot" data-index="0"></div>
+          <div class="chest-slot cabinet-slot" data-index="1"></div>
+          <div class="chest-slot cabinet-slot" data-index="2"></div>
+          <div class="chest-slot cabinet-slot" data-index="3"></div>
+          <div class="chest-slot cabinet-slot" data-index="4"></div>
+          <div class="chest-slot cabinet-slot" data-index="5"></div>
+          <div class="chest-slot cabinet-slot" data-index="6"></div>
+          <div class="chest-slot cabinet-slot" data-index="7"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Merchant modal -->
   <div id="merchant-overlay" class="merchant-hidden">
     <div id="merchant-modal">
@@ -554,6 +581,7 @@
   <!-- Right-click context menu for inventory items -->
   <div id="inv-context-menu" class="inv-ctx-hidden">
     <div class="inv-ctx-item inv-ctx-equip" id="inv-ctx-equip">⚔ Equip</div>
+    <div class="inv-ctx-item inv-ctx-learn" id="inv-ctx-learn" style="display: none;">📜 Learn</div>
     <div class="inv-ctx-divider"></div>
     <div class="inv-ctx-give-label" id="inv-ctx-give-label">Give to</div>
     <div id="inv-ctx-give-list"></div>

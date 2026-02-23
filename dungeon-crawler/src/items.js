@@ -204,6 +204,17 @@ export const ITEMS = [
     weight: 0.05,
     statChange: "+1 Vitality"
   },
+  {
+    name: 'Ring of Wisdom',
+    slot: 'ring1',
+    attackType: null,
+    baseDamage: null,
+    icon: '/icons/ring_of_wisdom.png',
+    description: 'A finely crafted silver ring set with a pulsing sapphire. Bolsters the wearer\'s intelligence.',
+    value: 120,
+    weight: 0.05,
+    statChange: "+1 Intelligence"
+  },
   // ── Legs ──────────────────────────────────────────────────────────────────
   {
     name: 'Cloth Trousers',
@@ -426,6 +437,7 @@ export const ITEMS = [
   },
 
   // ── Both Hands ────────────────────────────────────────────────────────────
+
   {
     name: 'Greatsword',
     slot: 'bothHands',
@@ -515,13 +527,44 @@ export const ITEMS = [
     weight: 0,
   },
   {
-    name: 'Magic Arrow',
-    slot: 'skill',
-    type: 'direct-damage',
-    icon: '/icons/skill_generic.svg',
-    description: 'A bolt of pure magical force.',
-    value: 0,
-    weight: 0,
+    name: 'Fireball Spellbook',
+    type: 'spellbook',
+    spellName: 'Fireball',
+    requiredInt: 10,
+    icon: '/icons/fireball-spellbook.png',
+    description: 'An ancient tome bound in flame-etched leather. Requires 10 Intelligence to decypher.',
+    value: 200,
+    weight: 1.0,
+  },
+  {
+    name: 'Heal Spellbook',
+    type: 'spellbook',
+    spellName: 'Heal',
+    requiredInt: 8,
+    icon: '/icons/heal.png',
+    description: 'A vellum scroll containing restorative prayers. Requires 8 Intelligence to decypher.',
+    value: 150,
+    weight: 0.5,
+  },
+  {
+    name: 'Regeneration Spellbook',
+    type: 'spellbook',
+    spellName: 'Regeneration',
+    requiredInt: 12,
+    icon: '/icons/regeneration.png',
+    description: 'A thick book smelling of damp earth and moss. Requires 12 Intelligence to decypher.',
+    value: 250,
+    weight: 1.2,
+  },
+  {
+    name: 'Cure Poison Spellbook',
+    type: 'spellbook',
+    spellName: 'Cure Poison',
+    requiredInt: 6,
+    icon: '/icons/cure-poison.png',
+    description: 'A small pamphlet detailed with botanical sketches. Requires 6 Intelligence to decypher.',
+    value: 100,
+    weight: 0.3,
   },
 ];
 

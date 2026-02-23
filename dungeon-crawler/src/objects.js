@@ -162,6 +162,14 @@ export function initObjects(scene, camera) {
                     showMessage("The merchant watches you from behind the counter.");
                 }
                 break;
+            } else if (obj.userData.isSpellCabinet) {
+                const isOnSameSquare = (player.gridRow === obj.userData.gridRow && player.gridCol === obj.userData.gridCol);
+                if (isOnSameSquare) {
+                    openSpellCabinetModal(obj);
+                } else {
+                    showMessage("Stand on the cabinet to open it.");
+                }
+                break;
             }
         }
     });
@@ -185,6 +193,16 @@ export function initObjects(scene, camera) {
         };
     }
 
+    // Cabinet modal close
+    const cabinetCloseBtn = document.getElementById('cabinet-close');
+    if (cabinetCloseBtn) {
+        cabinetCloseBtn.onclick = () => {
+            document.getElementById('cabinet-overlay').classList.add('chest-hidden');
+            _hideChestCtxMenu();
+            import('./equipment.js').then(m => m.hideTooltip());
+        };
+    }
+
     // Dismiss chest context menu on outside click
     document.addEventListener('mousedown', (e) => {
         if (!_chestCtxOpen) return;
@@ -192,6 +210,42 @@ export function initObjects(scene, camera) {
         if (!menu.contains(e.target)) _hideChestCtxMenu();
     });
 }
+
+export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = []) {
+    loader.load('/items/Meshy_AI_Treasure_Chest_0221184131_texture.glb', (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(0.3);
+        model.position.set(col * CELL, 0.23, row * CELL + offsetZ);
+        model.rotation.y = rotY;
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.userData.isChest = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+                child.userData.contents = contents; // Link contents to the chest object
+
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
+            }
+        });
+
+        scene.add(model);
+    });
+}
+
 
 export function spawnObjectsForLevel() {
     const gltfLoader = new GLTFLoader();
@@ -209,7 +263,7 @@ export function spawnObjectsForLevel() {
         ]);
         // New Chest at the end of the long passage
         addChest(objectsGroup, gltfLoader, 7, 1, 0, -0.7, [
-            'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Dagger', 'Axe', 'Ring of Vigour', 'Mace'
+            'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Dagger', 'Axe', 'Ring of Vigour', 'Mace', 'Ring of Wisdom'
         ]);
         // Crystals in the starter room
         addCrystals(objectsGroup, gltfLoader, 9, 11, 0, -0.7);
@@ -217,6 +271,11 @@ export function spawnObjectsForLevel() {
         addBonePile(objectsGroup, gltfLoader, 1, 27);
         // Bone pile in the starter room area
         addBonePile(objectsGroup, gltfLoader, 11, 12);
+
+        // Spell Cabinet in the starter room for testing
+        addSpellCabinet(objectsGroup, gltfLoader, 12, 13, Math.PI, 0.6, [
+            'Fireball Spellbook'
+        ]);
 
         // Shop against the east wall of the 8×8 room, centre row
         // col 23 is the last floor cell before the east wall (col 24); offsetX pushes it flush
@@ -351,21 +410,25 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
     });
 }
 
-function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = []) {
-    loader.load('/items/Meshy_AI_Treasure_Chest_0221184131_texture.glb', (gltf) => {
+
+
+
+
+function addSpellCabinet(scene, loader, col, row, rotY, offsetZ = 0, contents = []) {
+    loader.load('/items/spell-cabinet.glb', (gltf) => {
         const model = gltf.scene;
-        model.scale.setScalar(0.3);
-        model.position.set(col * CELL, 0.23, row * CELL + offsetZ);
+        model.scale.setScalar(0.7);
+        model.position.set(col * CELL, 0.65, row * CELL + offsetZ);
         model.rotation.y = rotY;
 
         model.traverse((child) => {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
-                child.userData.isChest = true;
+                child.userData.isSpellCabinet = true;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
-                child.userData.contents = contents; // Link contents to the chest object
+                child.userData.contents = contents;
 
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];
@@ -460,6 +523,20 @@ function openChestModal(chestObj) {
 
     const slots = document.querySelectorAll('.chest-slot');
     const contents = chestObj.userData.contents || [];
+
+    import('./equipment.js').then(equip => {
+        _bindChestSlots(equip, slots, contents);
+    });
+}
+
+function openSpellCabinetModal(cabinetObj) {
+    _activeSentLabelId = 'cabinet-sent-label';
+    const overlay = document.getElementById('cabinet-overlay');
+    overlay.classList.remove('chest-hidden');
+    document.getElementById('cabinet-sent-label').textContent = '';
+
+    const slots = document.querySelectorAll('.cabinet-slot');
+    const contents = cabinetObj.userData.contents || [];
 
     import('./equipment.js').then(equip => {
         _bindChestSlots(equip, slots, contents);

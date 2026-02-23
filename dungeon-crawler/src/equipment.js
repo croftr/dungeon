@@ -186,8 +186,26 @@ export function extendPartyData() {
       m.equipment.ammo = { name: m.ammo, slot: 'ammo' };
     }
 
+    m.spells = m.spells || [];
+    // Move any items from 'skills' that are actually in 'SPELLS' into the 'spells' array
+    if (m.skills) {
+      for (let i = m.skills.length - 1; i >= 0; i--) {
+        const s = m.skills[i];
+        if (SPELLS.some(sp => sp.name === s.name)) {
+          m.spells.push(m.skills.splice(i, 1)[0]);
+        }
+      }
+    }
+
     if (m.equipment.leftHand?.name === 'Spellbook' || m.equipment.rightHand?.name === 'Spellbook') {
-      m.selectedSpell = 'Fireball';
+      // Merlin (and others) must now learn Fireball before it appears as default
+      if (m.spells.some(s => s.name === 'Fireball')) {
+        m.selectedSpell = 'Fireball';
+      } else if (m.spells.length > 0) {
+        m.selectedSpell = m.spells[0].name;
+      } else {
+        m.selectedSpell = null;
+      }
     }
 
     // 20-slot inventory, all empty
@@ -307,6 +325,7 @@ function renderModal(memberIndex) {
   if (skillsEl) {
     skillsEl.innerHTML = '';
     const skills = m.skills ?? [];
+
     if (skills.length === 0) {
       const empty = document.createElement('p');
       empty.className = 'skill-empty';
@@ -322,13 +341,17 @@ function renderModal(memberIndex) {
         // Click to equip — clicking the already-equipped skill unequips it
         card.addEventListener('click', () => {
           m.equipment.skill = isEquipped ? null : { name: skill.name, slot: 'skill', icon: skill.icon ?? null };
-          renderModal(activeCharIndex);
+          renderModal(memberIndex);
           refreshPartyCards();
         });
         skillsEl.appendChild(card);
       });
     }
   }
+
+  // Remove the spells container if it exists (from previous turn)
+  const spellsContainer = document.getElementById('char-spells-container');
+  if (spellsContainer) spellsContainer.remove();
 
   updatePartyBar(memberIndex);
 }
@@ -455,13 +478,14 @@ function populateTooltip(item) {
   const def = getItemDef(item.name);
 
   const isAmmo = (def?.slot === 'ammo');
+  const isSpellbook = (def?.type === 'spellbook');
   const hasDefence = !isAmmo && def?.defence != null && def.defence > 0;
   const hasBlock = !isAmmo && def?.blockChance != null && def.blockChance > 0;
   const hasScaling = !isAmmo && def?.statWeights != null && def?.attackType != null;
-  const hasStatChange = def?.statChange != null;
+  const hasStatChange = def?.statChange != null || (isSpellbook && def?.requiredInt);
 
   // Hide/show rows based on item type and available stats
-  document.getElementById('detail-row-damage').style.display = isAmmo ? 'none' : 'flex';
+  document.getElementById('detail-row-damage').style.display = (isAmmo || isSpellbook) ? 'none' : 'flex';
   document.getElementById('detail-row-scaling').style.display = hasScaling ? 'flex' : 'none';
   document.getElementById('detail-row-scaling-bar').style.display = hasScaling ? 'block' : 'none';
   document.getElementById('detail-row-defence').style.display = hasDefence ? 'flex' : 'none';
@@ -472,14 +496,18 @@ function populateTooltip(item) {
   document.getElementById('detail-row-ammo-mod').style.display = isAmmo ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-type').style.display = isAmmo ? 'flex' : 'none';
 
-  slotEl.textContent =
-    'Slot: ' + (SLOT_LABELS[def?.slot ?? item.slot] ?? item.slot);
-  actionEl.textContent =
-    def?.attackType
-      ? 'Attack: ' + def.attackType.charAt(0).toUpperCase() + def.attackType.slice(1)
-      : '';
-  descEl.textContent =
-    def?.description ?? '—';
+  const slotLabelEl = document.getElementById('detail-row-statchange').querySelector('span:first-child');
+  slotLabelEl.textContent = isSpellbook ? 'Requires' : 'Stat Change';
+
+  slotEl.textContent = isSpellbook ? 'Type: Spellbook' : ('Slot: ' + (SLOT_LABELS[def?.slot ?? item.slot] ?? item.slot));
+
+  if (isSpellbook) {
+    actionEl.textContent = 'Learns: ' + (def.spellName || 'None');
+  } else {
+    actionEl.textContent = def?.attackType ? 'Attack: ' + def.attackType.charAt(0).toUpperCase() + def.attackType.slice(1) : '';
+  }
+
+  descEl.textContent = def?.description ?? '—';
 
   if (isAmmo) {
     document.getElementById('item-detail-ammo-mod').textContent = '×' + (def?.damageModifier ?? 1.0);
@@ -497,8 +525,12 @@ function populateTooltip(item) {
       def != null ? def.value + ' gp' : '—';
     document.getElementById('item-detail-weight').textContent =
       def != null ? def.weight + ' kg' : '—';
-    if (hasStatChange) {
+    if (isSpellbook) {
+      document.getElementById('item-detail-statchange').textContent = def.requiredInt + ' Intelligence';
+      document.getElementById('item-detail-statchange').style.color = '#ff8080';
+    } else if (hasStatChange) {
       document.getElementById('item-detail-statchange').textContent = def.statChange;
+      document.getElementById('item-detail-statchange').style.color = '#60c060';
     }
   }
 
@@ -729,9 +761,12 @@ function _equipItem(memberIndex, invIndex) {
     });
   }
 
-  updateEffectiveStats(m);
   renderModal(memberIndex);
   refreshPartyCards();
+}
+
+function _learnSpell(memberIndex, invIndex) {
+  // Empty for now as requested
 }
 
 /**
@@ -787,10 +822,27 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
   const giveLabel = document.getElementById('inv-ctx-give-label');
 
   // ── Equip button ──
-  document.getElementById('inv-ctx-equip').onclick = () => {
-    _equipItem(activeCharIndex, _ctxInvIndex);
-    _hideContextMenu();
-  };
+  const equipBtn = document.getElementById('inv-ctx-equip');
+  const learnBtn = document.getElementById('inv-ctx-learn');
+  const m = party[activeCharIndex];
+  const item = m.inventory[invIndex];
+  const def = item ? getItemDef(item.name) : null;
+
+  if (def?.type === 'spellbook') {
+    equipBtn.style.display = 'none';
+    learnBtn.style.display = 'block';
+    learnBtn.onclick = () => {
+      _learnSpell(activeCharIndex, _ctxInvIndex);
+      _hideContextMenu();
+    };
+  } else {
+    equipBtn.style.display = 'block';
+    learnBtn.style.display = 'none';
+    equipBtn.onclick = () => {
+      _equipItem(activeCharIndex, _ctxInvIndex);
+      _hideContextMenu();
+    };
+  }
 
   // ── Give-to list ──
   giveList.innerHTML = '';
