@@ -13,7 +13,7 @@ export const RECRUITS = [
         job: 'Ranger',
         race: 'Elf',
         hp: 42, hpMax: 42, mp: 40, mpMax: 40, sp: 100, spMax: 100,
-        stats: { strength: 6, dexterity: 9, vitality: 5, intelligence: 7, resilience: 5 },
+        stats: { strength: 5, dexterity: 10, vitality: 5, intelligence: 7, resilience: 5 },
         skills: [
             { name: 'Entangle', description: 'Halves the attack speed of the monster currently being fought for 30s. Only usable in combat. Cooldown: 60s.', icon: '/skills/entangle.png' },
             { name: "Hunter's Eye", description: "Reveal full stats of the engaged monster — HP, STR, DEX, VIT, INT, RES and Defence. Only usable in combat.", icon: '/skills/hunters-eye.png' },

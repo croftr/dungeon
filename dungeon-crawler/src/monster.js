@@ -425,9 +425,26 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     damage = Math.round(damage * 1.2);
   }
 
+  // Compute the weighted stat bonus and label for the battle log
+  let formulaStatBonus;
+  let statLabel;
+  if (isMagic) {
+    formulaStatBonus = character.stats?.intelligence ?? 10;
+    statLabel = 'INT';
+  } else {
+    const strW = weaponDef?.statWeights?.str ?? 1.0;
+    const dexW = weaponDef?.statWeights?.dex ?? 0.0;
+    formulaStatBonus = Math.floor(
+      (character.stats?.strength ?? 10) * strW +
+      (character.stats?.dexterity ?? 10) * dexW
+    );
+    statLabel = strW === 0 ? 'DEX' : dexW === 0 ? 'STR' : 'STR+DEX';
+  }
+
   const formula = {
     weaponBase: weaponDef?.baseDamage ?? 0,
-    statBonus: isMagic ? (character.stats?.intelligence ?? 10) : (character.stats?.strength ?? 10),
+    statBonus: formulaStatBonus,
+    statLabel,
     mitigation: isMagic ? effectiveResilience : effectiveDefence,
     preCritDamage,
     critMultiplier: isCrit ? CRIT_MULTIPLIER : 1,

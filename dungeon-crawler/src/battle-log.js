@@ -146,7 +146,7 @@ function _formula(e) {
   }
 
   if (e.actor === 'player') {
-    const stat = e.attackType === 'fireball' ? 'INT' : 'STR';
+    const stat = e.attackType === 'fireball' ? 'INT' : (e.statLabel ?? 'STR');
     const mit = e.attackType === 'fireball' ? 'RES' : 'DEF';
     const ammoLine = e.ammoModifier && e.ammoModifier !== 1 ? ` ×${e.ammoModifier}ammo` : '';
     const raw = e.statBonus + e.weaponBase - e.mitigation;

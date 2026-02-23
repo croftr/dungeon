@@ -1613,6 +1613,17 @@ body {
   color: #c8a84a;
 }
 
+/* Stat-scaling bar (STR / DEX split under the Scales With row) */
+#detail-row-scaling-bar {
+  margin: -2px 0 1px 0;
+}
+
+#item-detail-scaling-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: #3a2a10;
+}
+
 /* ─────────────────────────────────────────────────────────────────────────────
    INVENTORY CONTEXT MENU
    Right-click popup on inventory items — equip or give to another character.

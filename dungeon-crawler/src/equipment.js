@@ -378,9 +378,12 @@ function populateTooltip(item) {
   const isAmmo = (def?.slot === 'ammo');
   const hasDefence = !isAmmo && def?.defence != null && def.defence > 0;
   const hasBlock = !isAmmo && def?.blockChance != null && def.blockChance > 0;
+  const hasScaling = !isAmmo && def?.statWeights != null && def?.attackType != null;
 
   // Hide/show rows based on item type and available stats
   document.getElementById('detail-row-damage').style.display = isAmmo ? 'none' : 'flex';
+  document.getElementById('detail-row-scaling').style.display = hasScaling ? 'flex' : 'none';
+  document.getElementById('detail-row-scaling-bar').style.display = hasScaling ? 'block' : 'none';
   document.getElementById('detail-row-defence').style.display = hasDefence ? 'flex' : 'none';
   document.getElementById('detail-row-block').style.display = hasBlock ? 'flex' : 'none';
   document.getElementById('detail-row-value').style.display = isAmmo ? 'none' : 'flex';
@@ -413,6 +416,41 @@ function populateTooltip(item) {
       def != null ? def.value + ' gp' : '—';
     document.getElementById('item-detail-weight').textContent =
       def != null ? def.weight + ' kg' : '—';
+  }
+
+  // Stat-scaling display — shows which stats drive physical damage
+  if (hasScaling) {
+    const { str = 0, dex = 0 } = def.statWeights;
+    const scalingEl = document.getElementById('item-detail-scaling');
+    const barEl    = document.getElementById('item-detail-scaling-bar');
+
+    // Text label — coloured to match the dominant stat
+    if (dex === 0) {
+      scalingEl.textContent  = 'Strength';
+      scalingEl.style.color  = '#e07030'; // orange
+    } else if (str === 0) {
+      scalingEl.textContent  = 'Dexterity';
+      scalingEl.style.color  = '#30b8c0'; // teal
+    } else {
+      const sPct = Math.round(str * 100);
+      const dPct = Math.round(dex * 100);
+      scalingEl.innerHTML =
+        `<span style="color:#e07030">STR ${sPct}%</span>` +
+        ` <span style="color:#7a6a50">·</span> ` +
+        `<span style="color:#30b8c0">DEX ${dPct}%</span>`;
+      scalingEl.style.color = ''; // reset so child spans control colour
+    }
+
+    // Gradient bar: orange = STR portion, teal = DEX portion
+    const pct = Math.round(str * 100);
+    if (dex === 0) {
+      barEl.style.background = 'linear-gradient(90deg, #b04818, #e07030)';
+    } else if (str === 0) {
+      barEl.style.background = 'linear-gradient(90deg, #1890a0, #30b8c0)';
+    } else {
+      barEl.style.background =
+        `linear-gradient(90deg, #e07030 0%, #e07030 ${pct}%, #30b8c0 ${pct}%, #30b8c0 100%)`;
+    }
   }
 }
 
@@ -1004,6 +1042,7 @@ function useHand(memberIndex, hand) {
     crit: result.crit,
     weaponBase: result.formula?.weaponBase ?? 0,
     statBonus: result.formula?.statBonus ?? 0,
+    statLabel: result.formula?.statLabel ?? 'STR',
     mitigation: result.formula?.mitigation ?? 0,
     preCritDamage: result.formula?.preCritDamage ?? 0,
     finalDamage: result.damage,

@@ -294,6 +294,7 @@ export const ITEMS = [
     attackType: ACTIONS.BASH,
     baseDamage: 5,
     delay: 2,
+    statWeights: { str: 1.0, dex: 0.0 }, // crude bludgeon — raw force only
     icon: '/icons/torch.png',
     description: 'A burning torch. Lights the way and can be thrust into an enemy\'s face.',
     value: 1,
@@ -305,6 +306,7 @@ export const ITEMS = [
     slot: 'leftHand',
     attackType: ACTIONS.SHIELD_BASH,
     baseDamage: 2,
+    statWeights: { str: 1.0, dex: 0.0 }, // brute-force shove — pure strength
     icon: '/icons/bronze_shield.png',
     description: 'A round iron-banded shield. Passively deflects incoming blows.',
     defence: 2,
@@ -317,6 +319,7 @@ export const ITEMS = [
     slot: 'leftHand',
     attackType: ACTIONS.SHIELD_BASH,
     baseDamage: 2,
+    statWeights: { str: 1.0, dex: 0.0 }, // brute-force shove — pure strength
     icon: '/icons/wooden_shield.png',
     description: 'A basic shield made of reinforced wood. Offers light protection.',
     defence: 1,
@@ -327,8 +330,9 @@ export const ITEMS = [
     name: 'Short Bow',
     slot: 'bothHands',
     attackType: ACTIONS.SHOOT,
-    baseDamage: 10,
+    baseDamage: 15,
     delay: 4,
+    statWeights: { str: 0.2, dex: 0.8 }, // precision aiming — mostly dexterity
     icon: '/icons/short_bow.png',
     description: 'A recurve hunting bow requiring both hands to draw. Loose to strike enemies at range.',
     value: 40,
@@ -376,6 +380,7 @@ export const ITEMS = [
     attackType: ACTIONS.SWIPE,
     baseDamage: 10,
     delay: 2,
+    statWeights: { str: 0.0, dex: 1.0 }, // pure finesse — speed and precision
     icon: '/icons/dagger.png',
     description: 'A short, double-edged blade. Quick and easy to slip past armour.',
     value: 20,
@@ -387,8 +392,9 @@ export const ITEMS = [
     name: 'Sword',
     slot: 'rightHand',
     attackType: ACTIONS.SWIPE,
-    baseDamage: 10,
+    baseDamage: 15,
     delay: 2,
+    statWeights: { str: 0.5, dex: 0.5 }, // versatile balanced blade
     icon: '/icons/sword.png',
     description: 'A straight iron sword. The classic weapon of choice for adventurers.',
     value: 65,
@@ -400,6 +406,7 @@ export const ITEMS = [
     attackType: ACTIONS.BASH,
     baseDamage: 10,
     delay: 4,
+    statWeights: { str: 0.8, dex: 0.2 }, // bludgeoning reach weapon — mostly strength
     icon: '/icons/oak_staff.png',
     description: 'A gnarled wooden staff. Requires one hand, but enables a spell in the offhand.',
     value: 18,
@@ -423,6 +430,7 @@ export const ITEMS = [
     attackType: ACTIONS.SWIPE,
     baseDamage: 10,
     delay: 2,
+    statWeights: { str: 0.8, dex: 0.2 }, // heavy chopping — mostly strength
     icon: '/icons/axe.png',
     description: 'A heavy war axe. Slower than a sword but hits with devastating force.',
     value: 50,
@@ -434,6 +442,7 @@ export const ITEMS = [
     attackType: ACTIONS.BASH,
     baseDamage: 15,
     delay: 2,
+    statWeights: { str: 1.0, dex: 0.0 }, // pure brute force — strength only
     icon: '/icons/mace.png',
     description: 'An iron mace with a flanged head. Excellent against armoured foes.',
     value: 45,
@@ -447,6 +456,7 @@ export const ITEMS = [
     attackType: ACTIONS.SWIPE,
     baseDamage: 30,
     delay: 4,
+    statWeights: { str: 0.7, dex: 0.3 }, // power + technique to control the massive blade
     icon: '/icons/greatsword.png',
     description: 'A massive two-handed blade that cleaves through enemies in a single arc.',
     value: 150,
@@ -458,6 +468,7 @@ export const ITEMS = [
     attackType: ACTIONS.SWIPE,
     baseDamage: 20,
     delay: 4,
+    statWeights: { str: 1.0, dex: 0.0 }, // pure cleaving force — no finesse needed
     icon: '/icons/greataxe.png',
     description: 'A massive two-handed axe that cleaves through enemies in a single arc.',
     value: 150,
@@ -469,6 +480,7 @@ export const ITEMS = [
     attackType: ACTIONS.BASH,
     baseDamage: 25,
     delay: 4,
+    statWeights: { str: 1.0, dex: 0.0 }, // crushing weight — pure strength
     icon: '/icons/war_hammer.png',
     description: 'A two-handed war hammer. Slow to swing but crushes stone and bone alike.',
     value: 130,
@@ -478,8 +490,9 @@ export const ITEMS = [
     name: 'Longbow',
     slot: 'bothHands',
     attackType: ACTIONS.SHOOT,
-    baseDamage: 15,
+    baseDamage: 20,
     delay: 4,
+    statWeights: { str: 0.3, dex: 0.7 }, // heavier draw weight needs some strength, mostly dex
     icon: '/icons/longbow.png',
     description: 'A tall yew longbow requiring both hands. Tremendous range and power.',
     value: 75,
@@ -507,6 +520,7 @@ export const ITEMS = [
     blockChance: 20,
     attackType: ACTIONS.BASH,
     baseDamage: 2,
+    statWeights: { str: 1.0, dex: 0.0 }, // divine force — pure strength
     icon: '/icons/skill_generic.svg',
     description: 'Divine protection against physical attacks.',
     value: 0,

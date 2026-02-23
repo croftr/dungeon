@@ -82,7 +82,15 @@ export function monsterHitChance(monster, character) {
  * @returns {number}          Final damage (minimum 1)
  */
 export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef = null) {
-  let raw = (weaponDef?.baseDamage ?? 0) + (character.stats?.strength ?? 10);
+  // Stat weights on the weapon determine how much STR vs DEX contributes to damage.
+  // Defaults to pure STR (bare-hand punch or any weapon without the field).
+  const strW = weaponDef?.statWeights?.str ?? 1.0;
+  const dexW = weaponDef?.statWeights?.dex ?? 0.0;
+  const statBonus = Math.floor(
+    (character.stats?.strength ?? 10) * strW +
+    (character.stats?.dexterity ?? 10) * dexW
+  );
+  let raw = (weaponDef?.baseDamage ?? 0) + statBonus;
   if (ammoDef && ammoDef.damageModifier) {
     raw = Math.round(raw * ammoDef.damageModifier);
   }

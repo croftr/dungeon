@@ -16,28 +16,28 @@ export const MONSTER_DEFS = {
 
   goblin: {
     name: 'Goblin',
-    hp: 80,
+    hp: 100,
     defence: 8,
     stats: { strength: 12, dexterity: 15, vitality: 8, intelligence: 5, resilience: 5 },
   },
 
   albino_goblin: {
     name: 'Albino Goblin',
-    hp: 90,
+    hp: 120,
     defence: 8,
     stats: { strength: 14, dexterity: 18, vitality: 10, intelligence: 5, resilience: 6 },
   },
 
   orc: {
     name: 'Orc',
-    hp: 150,
+    hp: 200,
     defence: 12,
     stats: { strength: 20, dexterity: 8, vitality: 15, intelligence: 6, resilience: 12 },
   },
 
   ghoul: {
     name: 'Ghoul',
-    hp: 110,
+    hp: 180,
     defence: 7,
     stats: { strength: 16, dexterity: 12, vitality: 10, intelligence: 4, resilience: 6 },
   },
@@ -51,7 +51,7 @@ export const MONSTER_DEFS = {
 
   iceman: {
     name: 'IceMan',
-    hp: 120,
+    hp: 200,
     defence: 12,
     stats: { strength: 15, dexterity: 8, vitality: 12, intelligence: 10, resilience: 10 },
   },
