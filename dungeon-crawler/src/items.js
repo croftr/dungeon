@@ -304,7 +304,7 @@ export const ITEMS = [
   },
   {
     name: 'Short Bow',
-    slot: 'bothHands',
+    slot: 'leftHand',
     attackType: ACTIONS.SHOOT,
     baseDamage: 15,
     delay: 4,
@@ -352,7 +352,7 @@ export const ITEMS = [
   },
   {
     name: 'Dagger',
-    slot: 'leftHand',
+    slot: 'rightHand',
     attackType: ACTIONS.SWIPE,
     baseDamage: 10,
     delay: 2,

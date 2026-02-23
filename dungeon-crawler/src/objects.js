@@ -204,12 +204,12 @@ export function spawnObjectsForLevel() {
             'Leather Boots', 'Steel Arrows', 'Poison Arrows', 'Torch',
             'Leather Cap', 'Iron Helm', 'Padded Vest', 'Leather Belt',
             'Adventurer\'s Belt', 'Chain Shirt', 'Plate Cuirass',
-            'Iron Gauntlets', 'Chainmail Leggings', 'Iron-Shod Boots', 'Mace',
+            'Iron Gauntlets', 'Chainmail Leggings', 'Iron-Shod Boots',
             'Greatsword', 'War Hammer', 'Longbow'
         ]);
         // New Chest at the end of the long passage
         addChest(objectsGroup, gltfLoader, 7, 1, 0, -0.7, [
-            'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Dagger', 'Axe', 'Ring of Vigour'
+            'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Dagger', 'Axe', 'Ring of Vigour', 'Mace'
         ]);
         // Crystals in the starter room
         addCrystals(objectsGroup, gltfLoader, 9, 11, 0, -0.7);
