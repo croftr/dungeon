@@ -17,6 +17,13 @@
 //    Effects are defined in status-effects.js.
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  DROP TABLE FORMAT
+//  drops: Array of { item: <itemName>, chance: 0–1 }
+//  Each entry is rolled independently when the monster is killed.
+//  Drops that succeed are placed in the monster's corpse inventory.
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const MONSTER_DEFS = {
 
   goblin: {
@@ -24,6 +31,10 @@ export const MONSTER_DEFS = {
     hp: 100,
     defence: 8,
     stats: { strength: 12, dexterity: 15, vitality: 8, intelligence: 5, resilience: 5 },
+    drops: [
+      { item: 'Life Essence', chance: 0.50 },
+      { item: 'Poison Vial', chance: 0.40 },
+    ],
   },
 
   albino_goblin: {
@@ -34,6 +45,10 @@ export const MONSTER_DEFS = {
     onHitEffects: [
       { effectId: 'poison', chance: 0.9 },
     ],
+    drops: [
+      { item: 'Life Essence', chance: 0.50 },
+      { item: 'Poison Vial', chance: 0.40 },
+    ],
   },
 
   orc: {
@@ -41,6 +56,9 @@ export const MONSTER_DEFS = {
     hp: 200,
     defence: 12,
     stats: { strength: 20, dexterity: 8, vitality: 15, intelligence: 6, resilience: 12 },
+    drops: [
+      { item: 'Life Essence', chance: 0.50 },
+    ],
   },
 
   ghoul: {
@@ -48,6 +66,10 @@ export const MONSTER_DEFS = {
     hp: 180,
     defence: 7,
     stats: { strength: 16, dexterity: 12, vitality: 10, intelligence: 4, resilience: 6 },
+    drops: [
+      { item: 'Life Essence', chance: 0.50 },
+      { item: 'Poison Vial', chance: 0.40 },
+    ],
   },
 
   zombie: {
@@ -55,6 +77,9 @@ export const MONSTER_DEFS = {
     hp: 100,
     defence: 5,
     stats: { strength: 14, dexterity: 4, vitality: 10, intelligence: 2, resilience: 8 },
+    drops: [
+      { item: 'Life Essence', chance: 0.50 },
+    ],
   },
 
   iceman: {
@@ -62,6 +87,9 @@ export const MONSTER_DEFS = {
     hp: 200,
     defence: 12,
     stats: { strength: 15, dexterity: 8, vitality: 12, intelligence: 10, resilience: 10 },
+    drops: [
+      { item: 'Life Essence', chance: 0.50 },
+    ],
   },
 
   treekin: {
@@ -69,6 +97,10 @@ export const MONSTER_DEFS = {
     hp: 150,
     defence: 15,
     stats: { strength: 18, dexterity: 6, vitality: 15, intelligence: 12, resilience: 12 },
+    drops: [
+      { item: 'Life Essence', chance: 0.50 },
+      { item: 'Life Berry', chance: 0.70 },
+    ],
   },
 
   treeman: {
@@ -76,6 +108,10 @@ export const MONSTER_DEFS = {
     hp: 250,
     defence: 32,
     stats: { strength: 40, dexterity: 18, vitality: 35, intelligence: 26, resilience: 32 },
+    drops: [
+      { item: 'Life Essence', chance: 0.50 },
+      { item: 'Life Berry', chance: 0.70 },
+    ],
   },
 
 };

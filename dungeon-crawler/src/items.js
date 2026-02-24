@@ -30,12 +30,33 @@ export const ACTIONS = Object.freeze({
 
 export const ITEMS = [
 
+  // ── Loot / Crafting Ingredients ──────────────────────────────────────────
   {
     name: 'Life Essence',
-    value: 10,
-    description: 'A glowing orb of pure life energy.',
     slot: 'loot',
+    icon: '/icons/life_essence.png',
+    description: 'A glowing orb of pure life energy. Prized by alchemists for crafting.',
+    value: 10,
     weight: 0.1,
+    sellable: true,
+  },
+  {
+    name: 'Poison Vial',
+    slot: 'loot',
+    icon: '/icons/poison_vial.png',
+    description: 'A small vial of concentrated poison harvested from slain creatures.',
+    value: 10,
+    weight: 0.2,
+    sellable: true,
+  },
+  {
+    name: 'Life Berry',
+    slot: 'loot',
+    icon: '/icons/life_berry.svg',
+    description: 'A magical berry that pulses with natural life energy. Rare and valuable.',
+    value: 10,
+    weight: 0.1,
+    sellable: true,
   },
 
   // ── Head ──────────────────────────────────────────────────────────────────

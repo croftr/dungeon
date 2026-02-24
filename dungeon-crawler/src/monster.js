@@ -533,8 +533,20 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
 
   if (m.hp === 0) {
     m.alive = false;
+
+    // ── Drop table roll ─────────────────────────────────────────────────────
+    // Roll each entry in the monster's drops table independently.
+    const droppedItems = [];
+    if (m.drops && m.drops.length > 0) {
+      for (const drop of m.drops) {
+        if (Math.random() < drop.chance) {
+          droppedItems.push(drop.item);
+        }
+      }
+    }
+
     import('./objects.js').then(obj => {
-      obj.spawnCorpse(m.gridCol, m.gridRow);
+      obj.spawnCorpse(m.gridCol, m.gridRow, droppedItems);
     });
     if (m.hpBarFill) m.hpBarFill.parentElement.style.display = 'none';
     addLogEntry({ type: 'death', target: m.name, killer, damage, time: Date.now() });

@@ -35,17 +35,19 @@ export function isShopAt(r, c) {
 //  MERCHANT STOCK & PRICES
 // ─────────────────────────────────────────────
 const MERCHANT_STOCK = [
-    'Sword', 'Dagger', 'Mace', 'Longbow', 'Fireball',
-    'Bronze Shield', 'Iron Helm', 'Chain Shirt', 'Iron Gauntlets',
-    'Leather Boots', 'Travelling Cloak', 'Amulet of Warding',
-    'Gold Ring', 'Torch', 'Steel Arrows',
+    'Leather Boots', 'Steel Arrows', 'Poison Arrows', 'Torch',
+    'Leather Cap', 'Iron Helm', 'Padded Vest', 'Leather Belt',
+    "Adventurer's Belt", 'Chain Shirt', 'Plate Cuirass',
+    'Iron Gauntlets', 'Chainmail Leggings', 'Iron-Shod Boots',
+    'Greatsword', 'War Hammer', 'Longbow',
 ];
 
 const MERCHANT_PRICES = {
-    'Sword': 120, 'Dagger': 60, 'Mace': 90, 'Longbow': 150, 'Fireball': 200,
-    'Bronze Shield': 80, 'Iron Helm': 70, 'Chain Shirt': 100, 'Iron Gauntlets': 65,
-    'Leather Boots': 45, 'Travelling Cloak': 55, 'Amulet of Warding': 180,
-    'Gold Ring': 110, 'Torch': 20, 'Steel Arrows': 35,
+    'Leather Boots': 30, 'Steel Arrows': 35, 'Poison Arrows': 45, 'Torch': 20,
+    'Leather Cap': 25, 'Iron Helm': 70, 'Padded Vest': 30, 'Leather Belt': 10,
+    "Adventurer's Belt": 50, 'Chain Shirt': 130, 'Plate Cuirass': 350,
+    'Iron Gauntlets': 70, 'Chainmail Leggings': 100, 'Iron-Shod Boots': 50,
+    'Greatsword': 220, 'War Hammer': 190, 'Longbow': 150,
 };
 
 // Items still available for sale (items bought are removed permanently)
@@ -754,27 +756,27 @@ function _buyItems() {
 
         // Try to add each item to inventory
         for (const itemName of _merchantBasket) {
-             let added = false;
-             // Try to find a slot in any party member's inventory
-             for (let i = 0; i < 4; i++) {
-                 if (party[i].isEmpty) continue;
-                 if (equip.addItemToInventory(i, itemName)) {
-                     added = true;
-                     boughtItems.push(itemName);
-                     break;
-                 }
-             }
-             if (!added) {
-                 failedItems.push(itemName);
-             }
+            let added = false;
+            // Try to find a slot in any party member's inventory
+            for (let i = 0; i < 4; i++) {
+                if (party[i].isEmpty) continue;
+                if (equip.addItemToInventory(i, itemName)) {
+                    added = true;
+                    boughtItems.push(itemName);
+                    break;
+                }
+            }
+            if (!added) {
+                failedItems.push(itemName);
+            }
         }
 
         // Calculate cost of successfully bought items
         const spent = boughtItems.reduce((sum, name) => sum + (MERCHANT_PRICES[name] ?? 0), 0);
 
         if (spent > 0) {
-             removeGold(spent);
-             showMessage(`Bought ${boughtItems.length} items for ${spent} gold.`);
+            removeGold(spent);
+            showMessage(`Bought ${boughtItems.length} items for ${spent} gold.`);
         }
 
         if (failedItems.length > 0) {
@@ -932,8 +934,8 @@ function addBonePile(scene, loader, col, row, contents = []) {
     });
 }
 
-export function spawnCorpse(col, row) {
-    // Create corpse with 25 empty inventory slots
+export function spawnCorpse(col, row, droppedItems = []) {
+    // Create corpse with 25 inventory slots — fill first slots with any dropped items
     const corpseContents = [
         null, null, null, null, null,
         null, null, null, null, null,
@@ -941,6 +943,14 @@ export function spawnCorpse(col, row) {
         null, null, null, null, null,
         null, null, null, null, null
     ];
+
+    // Place dropped items into the first available slots
+    let slotIdx = 0;
+    for (const itemName of droppedItems) {
+        if (slotIdx >= corpseContents.length) break;
+        corpseContents[slotIdx] = itemName;
+        slotIdx++;
+    }
 
     const gltfLoader = new GLTFLoader();
     gltfLoader.load('/items/Meshy_AI_Bone_pile_0221211647_texture.glb', (gltf) => {

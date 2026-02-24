@@ -1,4 +1,4 @@
-import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyRegeneration } from './party.js';
+import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyRegeneration, addGold } from './party.js';
 import { getItemDef } from './items.js';
 import { SPELLS } from './spells.js';
 import { ACTIONS } from './items.js';
@@ -896,9 +896,30 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
   const item = m.inventory[invIndex];
   const def = item ? getItemDef(item.name) : null;
 
-  if (def?.type === 'spellbook') {
+  // ── Sell button (loot items only) ──
+  let sellBtn = document.getElementById('inv-ctx-sell');
+  if (def?.slot === 'loot') {
+    equipBtn.style.display = 'none';
+    learnBtn.style.display = 'none';
+    if (sellBtn) {
+      sellBtn.style.display = 'block';
+      sellBtn.onclick = () => {
+        const sellItem = party[activeCharIndex]?.inventory[_ctxInvIndex];
+        if (sellItem) {
+          const sellDef = getItemDef(sellItem.name);
+          const goldValue = sellDef?.value ?? 0;
+          party[activeCharIndex].inventory[_ctxInvIndex] = null;
+          addGold(goldValue);
+          showMessage(`Sold ${sellItem.name} for ${goldValue} gold.`);
+          renderModal(activeCharIndex);
+        }
+        _hideContextMenu();
+      };
+    }
+  } else if (def?.type === 'spellbook') {
     equipBtn.style.display = 'none';
     learnBtn.style.display = 'block';
+    if (sellBtn) sellBtn.style.display = 'none';
     learnBtn.onclick = () => {
       _learnSpell(activeCharIndex, _ctxInvIndex);
       _hideContextMenu();
@@ -906,6 +927,7 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
   } else {
     equipBtn.style.display = 'block';
     learnBtn.style.display = 'none';
+    if (sellBtn) sellBtn.style.display = 'none';
     equipBtn.onclick = () => {
       _equipItem(activeCharIndex, _ctxInvIndex);
       _hideContextMenu();
