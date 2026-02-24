@@ -329,9 +329,9 @@ function refreshMember(m) {
   const hpVal = document.getElementById(`val-hp-${i}`);
   const mpVal = document.getElementById(`val-mp-${i}`);
   const spVal = document.getElementById(`val-sp-${i}`);
-  if (hpVal) hpVal.textContent = `${m.hp}/${m.hpMax}`;
-  if (mpVal) mpVal.textContent = `${m.mp}/${m.mpMax}`;
-  if (spVal) spVal.textContent = `${m.sp ?? 100}/${m.spMax ?? 100}`;
+  if (hpVal) hpVal.textContent = `${Math.ceil(m.hp)}/${m.hpMax}`;
+  if (mpVal) mpVal.textContent = `${Math.ceil(m.mp)}/${m.mpMax}`;
+  if (spVal) spVal.textContent = `${Math.ceil(m.sp ?? 100)}/${m.spMax ?? 100}`;
 
   const lhEl = document.getElementById(`item-lh-${i}`);
   const rhEl = document.getElementById(`item-rh-${i}`);
@@ -698,9 +698,6 @@ export function resurrectAll() {
 let mpRegenTimer = 0;
 let spRegenAccum = 0;
 
-let regenerationDuration = 0;
-let regenerationTick = 0;
-
 // ─────────────────────────────────────────────────────────────────────────────
 //  STATUS EFFECT APPLICATION
 // ─────────────────────────────────────────────────────────────────────────────
@@ -709,9 +706,12 @@ let regenerationTick = 0;
  * Apply (or refresh) a status effect on a party member.
  * effectId must match a key in STATUS_EFFECT_DEFS.
  * If the effect is already active its duration is refreshed rather than stacked.
+ * @param {number} memberId
+ * @param {string} effectId
+ * @param {number} [customTickValue=null] - Optional override for tick damage/heal
  */
-export function applyStatusEffect(memberId, effectId) {
-  const m = party.find(p => p.id === memberId);
+export function applyStatusEffect(memberId, effectId, customTickValue = null) {
+  const m = party.find(p => p.id == memberId);
   if (!m || m.isEmpty || m.isDead) return;
 
   const def = STATUS_EFFECT_DEFS[effectId];
@@ -723,29 +723,27 @@ export function applyStatusEffect(memberId, effectId) {
   if (existing) {
     // Refresh duration without resetting the tick accumulator
     existing.expiresAt = performance.now() + def.duration * 1000;
+    if (customTickValue !== null) existing.customTickValue = customTickValue;
   } else {
-    m.activeDebuffs.push({ effectId, expiresAt: performance.now() + def.duration * 1000, tickAccum: 0 });
+    m.activeDebuffs.push({
+      effectId,
+      expiresAt: performance.now() + def.duration * 1000,
+      tickAccum: 0,
+      customTickValue
+    });
   }
+
+  // Refresh UI immediately
+  refreshMember(m);
+  updateStatusBanners();
 }
 
 export function applyRegeneration() {
-  regenerationDuration = 30; // 30 seconds
-  regenerationTick = 0;
+  // Legacy global function — now redirected to applyStatusEffect if needed
+  // but we mostly call applyStatusEffect(id, 'regeneration', value) now
 }
 
 export function updateParty(dt) {
-  if (regenerationDuration > 0) {
-    regenerationDuration -= dt;
-    regenerationTick += dt;
-    if (regenerationTick >= 2.0) {
-      regenerationTick -= 2.0;
-      party.forEach((m) => {
-        if (!m.isEmpty && !m.isDead && m.hp < m.hpMax) {
-          setHp(m.id, Math.min(m.hp + 1, m.hpMax));
-        }
-      });
-    }
-  }
 
   // SP regenerates both in and out of combat, just at different rates:
   //   in combat:     +1 SP every 2 seconds
@@ -785,11 +783,15 @@ export function updateParty(dt) {
     // Tick damage
     m.activeDebuffs.forEach(d => {
       const def = STATUS_EFFECT_DEFS[d.effectId];
-      if (!def?.tickDamage) return;
+      if (!def?.tickInterval) return;
+
       d.tickAccum += dt;
       if (d.tickAccum >= def.tickInterval) {
         d.tickAccum -= def.tickInterval;
-        setHp(m.id, m.hp - def.tickDamage);
+        const amount = (d.customTickValue !== undefined && d.customTickValue !== null)
+          ? d.customTickValue
+          : (def.tickDamage || 0);
+        setHp(m.id, m.hp - amount);
       }
     });
   });
@@ -798,7 +800,6 @@ export function updateParty(dt) {
 }
 function getActiveEffectsForMember(m) {
   const active = [];
-  if (regenerationDuration > 0) active.push('Regeneration');
   if (skillsState.sanctuary.active) active.push('Sanctuary');
   if (skillsState.arcaneLight.active) active.push('Arcane Lantern');
   if (skillsState.berserk.active && skillsState.berserk.actorName === m.name) active.push('Berserk');

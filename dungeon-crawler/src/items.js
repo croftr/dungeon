@@ -401,9 +401,9 @@ export const ITEMS = [
     name: 'Dagger',
     slot: 'rightHand',
     attackType: ACTIONS.SWIPE,
-    baseDamage: 10,
+    baseDamage: 5,
     delay: 2,
-    statWeights: { str: 0.0, dex: 1.0 }, // pure finesse — speed and precision
+    statWeights: { str: 0.2, dex: 0.8 }, // pure finesse — speed and precision
     icon: '/icons/dagger.png',
     description: 'A short, double-edged blade. Quick and easy to slip past armour.',
     value: 20,

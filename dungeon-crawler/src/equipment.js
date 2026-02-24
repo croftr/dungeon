@@ -1,4 +1,4 @@
-import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyRegeneration, addGold } from './party.js';
+import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold } from './party.js';
 import { getItemDef } from './items.js';
 import { SPELLS } from './spells.js';
 import { ACTIONS } from './items.js';
@@ -1443,7 +1443,32 @@ function _executePartyMemberSpell(caster, casterIndex, hand, spellDef, target) {
     _executeCurePoison(caster, target);
   } else if (spellDef.attackType === ACTIONS.HEAL) {
     _executeHeal(caster, target);
+  } else if (spellDef.attackType === ACTIONS.REGENERATE) {
+    _executeRegenerate(caster, target);
   }
+}
+
+function _executeRegenerate(caster, target) {
+  // Regeneration amount is caster intelligence / 10 (as requested by user)
+  // HP is usually integer based, so we'll allow decimals if setHp handles them, 
+  // but better to floor or keep it consistent. 
+  // User said "casters intelligence/10 HP every 2 seconds"
+  const amount = (caster.stats?.intelligence || 10) / 10;
+
+  // applyStatusEffect is in party.js and exported
+  applyStatusEffect(target.id, 'regeneration', -amount); // negative for healing
+
+  showMessage(`${caster.name} casts <b>Regeneration</b> on ${target.name}!`, 2500);
+
+  addLogEntry({
+    time: Date.now(),
+    type: 'skill',
+    actor: caster.name,
+    skillName: 'Regeneration',
+    target: target.name,
+  });
+
+  refreshPartyCards();
 }
 
 function _executeHeal(caster, target) {
@@ -1603,21 +1628,9 @@ function useHand(memberIndex, hand) {
   if (isSpell || isBuff) _dispatchSpellVFX(attackType);
 
   if (isBuff) {
-    if (attackType === ACTIONS.REGENERATE) {
-      applyRegeneration();
-      showMessage(`${m.name} casts Regeneration!`);
-      addLogEntry({
-        time: Date.now(),
-        actor: 'player',
-        attacker: m.name,
-        target: 'party',
-        attackType,
-        hitChance: 100,
-        hit: true,
-        crit: false,
-        finalDamage: 0
-      });
-    }
+    // Legacy global buffs handled here. 
+    // Regeneration is now targeted, but if we add other untargeted buffs
+    // they could go here. For now, we'll just return.
     return;
   }
 

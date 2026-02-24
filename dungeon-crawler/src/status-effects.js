@@ -33,4 +33,15 @@ export const STATUS_EFFECT_DEFS = {
     tickDamage: 1,
   },
 
+  /** Regeneration — restores HP every 2 seconds for 30 seconds. Tick heal is set by caster. */
+  regeneration: {
+    id: 'regeneration',
+    name: 'Regeneration',
+    type: 'buff',
+    icon: '/icons/regeneration.png',
+    duration: 30,
+    tickInterval: 2,
+    tickDamage: -1, // default, usually overwritten by caster's INT/10
+  },
+
 };
