@@ -45,7 +45,7 @@ export const RECRUITS = [
         name: 'Thorek',
         job: 'Warrior',
         race: 'Dwarf',
-        hp: 70, hpMax: 70, mp: 10, mpMax: 10, sp: 100, spMax: 100,
+        hp: 80, hpMax: 70, mp: 10, mpMax: 10, sp: 100, spMax: 100,
         stats: { strength: 8, dexterity: 6, vitality: 8, intelligence: 4, resilience: 10 },
         skills: [
             { name: 'Sunder Armor', type: 'debuff', description: 'Crushes the targeted monster, halving its defence stats for 30s. Only usable in combat. Cooldown: 60s.', icon: '/skills/sunder-armor.png' },
@@ -94,8 +94,8 @@ export const RECRUITS = [
         name: 'Baldur',
         job: 'Ranger',
         race: 'Dwarf',
-        hp: 67, hpMax: 67, mp: 10, mpMax: 10, sp: 100, spMax: 100,
-        stats: { strength: 9, dexterity: 7, vitality: 7, intelligence: 4, resilience: 7 },
+        hp: 60, hpMax: 67, mp: 10, mpMax: 10, sp: 100, spMax: 100,
+        stats: { strength: 7, dexterity: 7, vitality: 6, intelligence: 4, resilience: 7 },
         skills: [
             { name: 'True Shot', type: 'buff', description: 'Becomes hyper-focused, ensuring every ranged attack finds its mark for 20 seconds. Cooldown: 60s.', icon: '/skills/true-shot.png' },
         ],
@@ -109,7 +109,7 @@ export const RECRUITS = [
         name: 'Lumni',
         job: 'War Dancer',
         race: 'High Elf',
-        hp: 55, hpMax: 55, mp: 30, mpMax: 30, sp: 100, spMax: 100,
+        hp: 65, hpMax: 55, mp: 30, mpMax: 30, sp: 100, spMax: 100,
         stats: { strength: 6, dexterity: 10, vitality: 6, intelligence: 7, resilience: 6 },
         skills: [
             { name: 'Whirlwind', type: 'buff', description: 'Becomes a blur of motion, doubling attack speed and preventing stamina drain for 30s. Cooldown: 60s.', icon: '/skills/whirlwind.png' },
