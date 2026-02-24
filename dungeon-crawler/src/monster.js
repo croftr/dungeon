@@ -15,7 +15,7 @@ import {
   CRIT_CHANCE, CRIT_MULTIPLIER,
   MONSTER_BASE_ATTACK, RESILIENCE_DAMAGE_FACTOR,
 } from './combat-rules.js';
-import { setInCombat, playCritSound } from './audio.js';
+import { setInCombat, playCritSound, playActionSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { getItemDef } from './items.js';
 import { spawnDroppedItem } from './objects.js';
@@ -535,6 +535,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
 
   if (m.hp === 0) {
     m.alive = false;
+    playActionSound('death');
 
     // ── Drop table roll ─────────────────────────────────────────────────────
     // Roll each entry in the monster's drops table independently.
