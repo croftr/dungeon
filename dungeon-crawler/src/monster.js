@@ -316,6 +316,14 @@ export function initMonsters(scene) {
 //  PATROL  — random-wander AI for roaming monsters
 // ─────────────────────────────────────────────────────────────────────────────
 
+/** Shared directions array to avoid per-frame allocations during patrol AI */
+const PATROL_DIRECTIONS = [
+  { dr: -1, dc: 0 },
+  { dr: 1, dc: 0 },
+  { dr: 0, dc: -1 },
+  { dr: 0, dc: 1 },
+];
+
 /**
  * Moves a patrolling monster toward a random target cell within its patrol
  * bounds.  Called every frame from updateMonsters when the player is out of
@@ -351,19 +359,13 @@ function _updatePatrol(m, dt) {
     // patrol bounds.  Moving one cell at a time keeps gridRow/gridCol
     // anchored to real cell centres — the mid-move approximation that caused
     // the half-grid combat gap is avoided entirely.
-    const dirs = [
-      { dr: -1, dc: 0 },
-      { dr: 1, dc: 0 },
-      { dr: 0, dc: -1 },
-      { dr: 0, dc: 1 },
-    ];
     // Fisher-Yates shuffle for unbiased direction selection
-    for (let i = dirs.length - 1; i > 0; i--) {
+    for (let i = PATROL_DIRECTIONS.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [dirs[i], dirs[j]] = [dirs[j], dirs[i]];
+      [PATROL_DIRECTIONS[i], PATROL_DIRECTIONS[j]] = [PATROL_DIRECTIONS[j], PATROL_DIRECTIONS[i]];
     }
     let chosen = false;
-    for (const d of dirs) {
+    for (const d of PATROL_DIRECTIONS) {
       const nr = m.gridRow + d.dr;
       const nc = m.gridCol + d.dc;
       if (nr >= b.minRow && nr <= b.maxRow && nc >= b.minCol && nc <= b.maxCol) {
