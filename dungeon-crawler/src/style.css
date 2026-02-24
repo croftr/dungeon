@@ -1763,7 +1763,8 @@ body {
   background: rgba(200, 168, 74, 0.18);
 }
 
-.inv-ctx-equip {
+.inv-ctx-equip,
+.inv-ctx-use {
   font-weight: 600;
   letter-spacing: 0.02em;
 }

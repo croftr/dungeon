@@ -15,6 +15,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { SPELLS } from './spells.js';
+import POTIONS from './potions.json';
 
 export const ACTIONS = Object.freeze({
   SWIPE: 'swipe',
@@ -29,6 +30,7 @@ export const ACTIONS = Object.freeze({
 });
 
 export const ITEMS = [
+  ...POTIONS,
 
   // ── Loot / Crafting Ingredients ──────────────────────────────────────────
   {

@@ -847,6 +847,43 @@ function _learnSpell(memberIndex, invIndex) {
   refreshPartyCards();
 }
 
+function _usePotion(memberIndex, invIndex) {
+  const m = party[memberIndex];
+  const item = m.inventory[invIndex];
+  if (!item) return;
+
+  const def = getItemDef(item.name);
+  if (!def || def.type !== 'potion' || !def.effect) return;
+
+  const { type, value } = def.effect;
+
+  if (type === 'heal') {
+    const healAmount = value || 0;
+    const oldHp = m.hp;
+    const newHp = Math.min(m.maxHp, m.hp + healAmount);
+    setHp(m.id, newHp);
+    showMessage(`${m.name} drinks ${item.name} and restores ${newHp - oldHp} HP.`);
+    playSkillSound('heal');
+  } else if (type === 'cure-poison') {
+    // Clear poison debuffs
+    const hadPoison = (m.activeDebuffs || []).some(d => d.effectId === 'poison');
+    m.activeDebuffs = (m.activeDebuffs || []).filter(d => d.effectId !== 'poison');
+
+    if (hadPoison) {
+      showMessage(`${m.name} drinks ${item.name} and is cured of poison.`);
+    } else {
+      showMessage(`${m.name} drinks ${item.name}.`);
+    }
+    playSkillSound('cure');
+  }
+
+  // Consume the potion
+  m.inventory[invIndex] = null;
+
+  renderModal(memberIndex);
+  refreshPartyCards();
+}
+
 /**
  * Left-click: equip immediately.
  * Shift+click: quick-give to the next party member.
@@ -885,6 +922,12 @@ function onInventoryCellClick(e) {
     return;
   }
 
+  const def = getItemDef(item.name);
+  if (def?.type === 'potion') {
+    _usePotion(activeCharIndex, invIndex);
+    return;
+  }
+
   _equipItem(activeCharIndex, invIndex);
 }
 
@@ -912,6 +955,7 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
   const giveLabel = document.getElementById('inv-ctx-give-label');
 
   // ── Equip button ──
+  const useBtn = document.getElementById('inv-ctx-use');
   const equipBtn = document.getElementById('inv-ctx-equip');
   const learnBtn = document.getElementById('inv-ctx-learn');
   const m = party[activeCharIndex];
@@ -921,9 +965,38 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
   // ── Sell button (loot items only) ──
   const sellBtn = document.getElementById('inv-ctx-sell');
   const alchemyBtn = document.getElementById('inv-ctx-alchemy'); // We need to add this to the HTML
-  if (def?.slot === 'loot') {
-    equipBtn.style.display = 'none';
-    learnBtn.style.display = 'none';
+
+  // Reset all buttons
+  if (useBtn) useBtn.style.display = 'none';
+  equipBtn.style.display = 'none';
+  learnBtn.style.display = 'none';
+  if (sellBtn) sellBtn.style.display = 'none';
+
+  if (def?.type === 'potion') {
+    if (useBtn) {
+      useBtn.style.display = 'block';
+      useBtn.onclick = () => {
+        _usePotion(activeCharIndex, _ctxInvIndex);
+        _hideContextMenu();
+      };
+    }
+    // Potions are also sellable
+    if (sellBtn) {
+      sellBtn.style.display = 'block';
+      sellBtn.onclick = () => {
+        const sellItem = party[activeCharIndex]?.inventory[_ctxInvIndex];
+        if (sellItem) {
+          const sellDef = getItemDef(sellItem.name);
+          const goldValue = sellDef?.value ?? 0;
+          party[activeCharIndex].inventory[_ctxInvIndex] = null;
+          addGold(goldValue);
+          showMessage(`Sold ${sellItem.name} for ${goldValue} gold.`);
+          renderModal(activeCharIndex);
+        }
+        _hideContextMenu();
+      };
+    }
+  } else if (def?.slot === 'loot') {
     if (sellBtn) {
       sellBtn.style.display = 'block';
       sellBtn.onclick = () => {
@@ -940,17 +1013,13 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
       };
     }
   } else if (def?.type === 'spellbook') {
-    equipBtn.style.display = 'none';
     learnBtn.style.display = 'block';
-    if (sellBtn) sellBtn.style.display = 'none';
     learnBtn.onclick = () => {
       _learnSpell(activeCharIndex, _ctxInvIndex);
       _hideContextMenu();
     };
   } else {
     equipBtn.style.display = 'block';
-    learnBtn.style.display = 'none';
-    if (sellBtn) sellBtn.style.display = 'none';
     equipBtn.onclick = () => {
       _equipItem(activeCharIndex, _ctxInvIndex);
       _hideContextMenu();

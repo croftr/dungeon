@@ -1,0 +1,19 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4dff4d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#006600;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Bottle Shape -->
+  <path d="M22 18 L42 18 L46 26 Q50 34 50 44 Q50 54 40 58 L24 58 Q14 54 14 44 Q14 34 18 26 Z" fill="url(#greenGrad)" stroke="#3a2a1a" stroke-width="2"/>
+  <!-- Highlights -->
+  <path d="M22 28 Q18 34 18 44" fill="none" stroke="white" stroke-width="2" stroke-opacity="0.3" stroke-linecap="round"/>
+  <!-- Cork -->
+  <rect x="26" y="6" width="12" height="12" rx="2" fill="#8b5a2b" stroke="#3a2a1a" stroke-width="1.5"/>
+  <!-- Rim -->
+  <rect x="24" y="16" width="16" height="4" rx="1" fill="#c8a84a" stroke="#3a2a1a" stroke-width="1"/>
+  <!-- Symbol (Horizontal line for 'Cure' or something distinctive) -->
+  <!-- Since the user wants this to heal HP, I'll put a heart or plus -->
+  <path d="M28 38 L36 38 M32 34 L32 42" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-opacity="0.8"/>
+</svg>

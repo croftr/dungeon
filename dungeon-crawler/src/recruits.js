@@ -36,7 +36,7 @@ export const RECRUITS = [
         ],
         image: '/human_paladin_head.png',
         leftHand: 'Sword', rightHand: 'Shield', startingSkill: 'Sanctuary',
-        startingInventory: ['Life Berry', 'Poison Vial', 'Life Essence', 'Life Essence'],
+        startingInventory: ['Cure Poison Potion', 'Healing Potion', 'Life Berry', 'Poison Vial', 'Life Essence', 'Life Essence'],
         gridCol: 10, gridRow: 8, facing: 'front', // North wall
         isRecruited: false
     },

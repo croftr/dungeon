@@ -319,6 +319,15 @@ export function initObjects(scene, camera) {
         };
     }
 
+    // Transmute button
+    const transmuteBtn = document.getElementById('alchemy-transmute-btn');
+    if (transmuteBtn) {
+        transmuteBtn.onclick = (e) => {
+            e.stopPropagation();
+            _transmute();
+        };
+    }
+
     // Stop ALL clicks inside the cabinet overlay from reaching the window listener
     // (so clicking items inside doesn't trigger world raycasting either)
     const cabinetOverlay = document.getElementById('cabinet-overlay');
@@ -1169,6 +1178,52 @@ function _showChestCtxMenu(x, y, equip, slots, contents, slotIdx, itemDef) {
     if (ly + mh > vh - 8) ly = y - mh - 4;
     menu.style.left = lx + 'px';
     menu.style.top = ly + 'px';
+}
+
+// ── Recipes: [ [ingredients...], resultName ] ────────────────────────────────
+const ALCHEMY_RECIPES = [
+    { ingredients: ['Life Essence', 'Life Berry'],  result: 'Healing Potion' },
+    { ingredients: ['Life Essence', 'Poison Vial'], result: 'Cure Poison Potion' },
+];
+
+function _transmute() {
+    // Gather ingredients (slots 0-7)
+    const ingredients = _alchemyContents.slice(0, 8).filter(Boolean);
+
+    if (ingredients.length === 0) {
+        showMessage('Add ingredients before transmuting.');
+        return;
+    }
+
+    // Try each recipe
+    let matchedResult = null;
+    for (const recipe of ALCHEMY_RECIPES) {
+        const pool = [...ingredients];
+        let matched = true;
+        for (const needed of recipe.ingredients) {
+            const idx = pool.indexOf(needed);
+            if (idx === -1) { matched = false; break; }
+            pool.splice(idx, 1);
+        }
+        if (matched) {
+            matchedResult = recipe.result;
+            break;
+        }
+    }
+
+    // Consume all ingredients regardless of outcome
+    for (let i = 0; i < 8; i++) _alchemyContents[i] = null;
+
+    if (matchedResult) {
+        _alchemyContents[8] = matchedResult;
+        showMessage(`Transmutation successful! You created a ${matchedResult}.`);
+        playAlchemySound();
+    } else {
+        _alchemyContents[8] = null;
+        showMessage('The transmutation failed — ingredients lost.');
+    }
+
+    _renderAlchemySlots();
 }
 
 export function openAlchemyModal() {

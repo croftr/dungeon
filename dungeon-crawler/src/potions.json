@@ -1,0 +1,25 @@
+[
+    {
+        "name": "Cure Poison Potion",
+        "icon": "/icons/cure_poison_potion.svg",
+        "description": "A bitter-tasting brew that restores 20 hit points.",
+        "type": "potion",
+        "effect": {
+            "type": "heal",
+            "value": 20
+        },
+        "value": 25,
+        "weight": 0.3
+    },
+    {
+        "name": "Healing Potion",
+        "icon": "/icons/healing_potion.svg",
+        "description": "A soothing elixir that neutralizes toxins and cures poison.",
+        "type": "potion",
+        "effect": {
+            "type": "cure-poison"
+        },
+        "value": 30,
+        "weight": 0.3
+    }
+]
