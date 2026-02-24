@@ -16,6 +16,23 @@ export const party = [
   { id: 3, isEmpty: true },
 ];
 
+export let partyGold = 50000;
+
+export function addGold(amount) {
+  partyGold += amount;
+  updateGoldDisplay();
+}
+
+export function removeGold(amount) {
+  partyGold = Math.max(0, partyGold - amount);
+  updateGoldDisplay();
+}
+
+function updateGoldDisplay() {
+  const el = document.getElementById('tactics-gold');
+  if (el) el.textContent = `Gold: ${partyGold}`;
+}
+
 export const lastAttackTimes = {};
 
 // ─────────────────────────────────────────────
@@ -444,6 +461,7 @@ function buildTacticsOverlay() {
     <div id="tactics-modal">
       <div id="tactics-header">
         <span>Party Tactics</span>
+        <span id="tactics-gold" style="margin-left:auto; font-size:1.1em; color:#ffd700; text-shadow:1px 1px 0 #000;">Gold: ${partyGold}</span>
         <button id="tactics-close" aria-label="Close">&times;</button>
       </div>
       <div id="tactics-body">
@@ -551,6 +569,7 @@ export function initParty() {
   });
 
   buildTacticsOverlay();
+  updateGoldDisplay();
 
   // P key opens/closes the tactics modal
   document.addEventListener('keydown', (e) => {
