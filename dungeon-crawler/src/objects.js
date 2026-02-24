@@ -182,6 +182,28 @@ export function initObjects(scene, camera) {
                     showMessage("Stand on the cabinet to open it.");
                 }
                 break;
+            } else if (obj.userData.isDroppedItem) {
+                const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
+                const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
+                if (distRow <= 1 && distCol <= 1) {
+                    import('./equipment.js').then(equip => {
+                        let added = false;
+                        for (let i = 0; i < 4; i++) {
+                            if (equip.addItemToInventory(i, obj.userData.itemName)) {
+                                added = true;
+                                showMessage(`Picked up ${obj.userData.itemName}.`);
+                                obj.parent.remove(obj);
+                                break;
+                            }
+                        }
+                        if (!added) {
+                            showMessage("Inventory is full!");
+                        }
+                    });
+                } else {
+                    showMessage("Move closer to pick it up.");
+                }
+                break;
             }
         }
     });
@@ -859,4 +881,36 @@ function addBonePile(scene, loader, col, row) {
 
         scene.add(model);
     });
+}
+
+export function spawnDroppedItem(col, row, itemName) {
+    const geometry = new THREE.SphereGeometry(0.15, 8, 8);
+    const material = new THREE.MeshLambertMaterial({
+        color: 0xffff00,
+        emissive: 0xff8800,
+        emissiveIntensity: 0.8
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(col * CELL, 0.5, row * CELL);
+
+    mesh.userData.isDroppedItem = true;
+    mesh.userData.itemName = itemName;
+    mesh.userData.gridCol = col;
+    mesh.userData.gridRow = row;
+
+    // Optional: add a light
+    const light = new THREE.PointLight(0xffaa00, 1, 3);
+    light.position.set(0, 0.2, 0);
+    mesh.add(light);
+
+    // Animation
+    const originY = mesh.position.y;
+    new Tween(mesh.position, tweenGroup)
+        .to({ y: originY + 0.2 }, 1000)
+        .easing(Easing.Quadratic.InOut)
+        .yoyo(true)
+        .repeat(Infinity)
+        .start();
+
+    objectsGroup.add(mesh);
 }

@@ -18,6 +18,7 @@ import {
 import { setInCombat, playCritSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { getItemDef } from './items.js';
+import { spawnDroppedItem } from './objects.js';
 import { MONSTER_DEFS as D } from './monster-defs.js';
 import { skillsState } from './skills-state.js';
 
@@ -532,6 +533,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
 
   if (m.hp === 0) {
     m.alive = false;
+    spawnDroppedItem(m.gridCol, m.gridRow, 'Life Essence');
     if (m.hpBarFill) m.hpBarFill.parentElement.style.display = 'none';
     addLogEntry({ type: 'death', target: m.name, killer, damage, time: Date.now() });
     _playDeathAnimation(m);
