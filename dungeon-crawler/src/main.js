@@ -10,7 +10,7 @@ import { initParty, updateParty } from './party.js';
 import { initEquipment } from './equipment.js';
 import { initMonsters, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState } from './recruits.js';
-import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt } from './objects.js';
+import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, updateObjects } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initMainMenu } from './main-menu.js';
@@ -124,6 +124,7 @@ function animate(now) {
   lastTime = now;
 
   tweenGroup.update(now);
+  updateObjects(dt);
   updateLighting(lights, camera, dt);
   updateMonsters(dt, camera, scene);
   updateParticles(dt);

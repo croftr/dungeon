@@ -10,6 +10,11 @@ import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound } fr
 
 export const objects = [];
 
+const _mixers = [];
+export function updateObjects(dt) {
+    for (const mixer of _mixers) mixer.update(dt);
+}
+
 // ─────────────────────────────────────────────
 //  CHEST / MERCHANT SHARED STATE
 // ─────────────────────────────────────────────
@@ -66,11 +71,13 @@ export function initObjects(scene, camera) {
         // If any modal overlay is currently visible, let the DOM handle it — don't raycast.
         const cabinetOverlay = document.getElementById('cabinet-overlay');
         const chestOverlay = document.getElementById('chest-overlay');
+        const corpseOverlay = document.getElementById('corpse-overlay');
         const equipOverlay = document.getElementById('equip-overlay');
         const merchantOverlay = document.getElementById('merchant-overlay');
         if (
             (cabinetOverlay && !cabinetOverlay.classList.contains('chest-hidden')) ||
             (chestOverlay && !chestOverlay.classList.contains('chest-hidden')) ||
+            (corpseOverlay && !corpseOverlay.classList.contains('chest-hidden')) ||
             (equipOverlay && !equipOverlay.classList.contains('equip-hidden')) ||
             (merchantOverlay && !merchantOverlay.classList.contains('merchant-hidden'))
         ) return;
@@ -140,18 +147,12 @@ export function initObjects(scene, camera) {
                 }
                 break;
             } else if (obj.userData.isBonePile) {
-                // Check if player is near the bone pile
+                // Check if player is in front of the bone pile (within 1 square)
                 if (isInFrontOfPlayer(obj.userData.gridRow, obj.userData.gridCol, 1)) {
                     playBoneSound();
-                    const messages = [
-                        "A pile of bleached human bones. It seems this adventurer didn't make it far.",
-                        "These bones are old and brittle. A rusted dagger lies nearby, long ago surrendered.",
-                        "You find a tattered leather pouch among the ribs, but it's empty.",
-                        "The skull has a clean indentation. Something powerful struck this poor soul."
-                    ];
-                    showMessage(messages[Math.floor(Math.random() * messages.length)]);
+                    openCorpseModal(obj);
                 } else {
-                    showMessage("A grim pile of bones lies just out of reach.");
+                    showMessage("The corpse lies just out of reach.");
                 }
             } else if (obj.userData.isPortal) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
@@ -249,6 +250,17 @@ export function initObjects(scene, camera) {
         };
     }
 
+    // Corpse modal close
+    const corpseCloseBtn = document.getElementById('corpse-close');
+    if (corpseCloseBtn) {
+        corpseCloseBtn.onclick = (e) => {
+            e.stopPropagation();
+            document.getElementById('corpse-overlay').classList.add('chest-hidden');
+            _hideChestCtxMenu();
+            import('./equipment.js').then(m => m.hideTooltip());
+        };
+    }
+
     // Stop ALL clicks inside the cabinet overlay from reaching the window listener
     // (so clicking items inside doesn't trigger world raycasting either)
     const cabinetOverlay = document.getElementById('cabinet-overlay');
@@ -260,6 +272,12 @@ export function initObjects(scene, camera) {
     const chestOverlayEl = document.getElementById('chest-overlay');
     if (chestOverlayEl) {
         chestOverlayEl.addEventListener('click', (e) => e.stopPropagation());
+    }
+
+    // Ditto for corpse overlay
+    const corpseOverlayEl = document.getElementById('corpse-overlay');
+    if (corpseOverlayEl) {
+        corpseOverlayEl.addEventListener('click', (e) => e.stopPropagation());
     }
 
     // Ditto for merchant overlay
@@ -276,8 +294,8 @@ export function initObjects(scene, camera) {
     });
 }
 
-export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = []) {
-    loader.load('/items/Meshy_AI_Treasure_Chest_0221184131_texture.glb', (gltf) => {
+export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = [], modelPath = '/items/Meshy_AI_Treasure_Chest_0221184131_texture.glb', interactive = true) {
+    loader.load(modelPath, (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.3);
         model.position.set(col * CELL, 0.23, row * CELL + offsetZ);
@@ -287,10 +305,12 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
-                child.userData.isChest = true;
-                child.userData.gridRow = row;
-                child.userData.gridCol = col;
-                child.userData.contents = contents; // Link contents to the chest object
+                if (interactive) {
+                    child.userData.isChest = true;
+                    child.userData.gridRow = row;
+                    child.userData.gridCol = col;
+                    child.userData.contents = contents;
+                }
 
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];
@@ -334,8 +354,14 @@ export function spawnObjectsForLevel() {
         addCrystals(objectsGroup, gltfLoader, 9, 11, 0, -0.7);
         // Bone pile in the passage
         addBonePile(objectsGroup, gltfLoader, 1, 27);
-        // Bone pile in the starter room area
-        addBonePile(objectsGroup, gltfLoader, 11, 12);
+        // Corpse in the starter room area (with empty slots for inventory)
+        addBonePile(objectsGroup, gltfLoader, 11, 12, [
+            null, null, null, null, null,
+            null, null, null, null, null,
+            null, null, null, null, null,
+            null, null, null, null, null,
+            null, null, null, null, null
+        ]);
 
         // Spell Cabinet in the starter room
         addSpellCabinet(objectsGroup, gltfLoader, 12, 13, Math.PI, 0.6, [
@@ -348,6 +374,9 @@ export function spawnObjectsForLevel() {
         // Shop against the east wall of the 8×8 room, centre row
         // col 23 is the last floor cell before the east wall (col 24); offsetX pushes it flush
         addShop(objectsGroup, gltfLoader, 23, 11, -Math.PI / 2, -0.2, 0);
+
+        // Decorative chest beside the merchant (same cell, nudged south, non-interactive)
+        addChest(objectsGroup, gltfLoader, 23, 11, -Math.PI / 2, 0.7, [], '/items/chest1.glb', false);
 
         // Portal to Level 2
         // Positioned at col 13, row 13 against the East wall.
@@ -444,10 +473,10 @@ function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offsetX = 0, 
 
 function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
     _shopGridCells.add(`${row},${col}`); // block player movement through this cell
-    loader.load('/items/shop.glb', (gltf) => {
+    loader.load('/npcs/merchant1/merchant-idle.glb', (gltf) => {
         const model = gltf.scene;
-        model.scale.setScalar(1.0);
-        model.position.set(col * CELL + offsetX, 0.6, row * CELL + offsetZ);
+        model.scale.setScalar(0.5);
+        model.position.set(col * CELL + offsetX, 0, row * CELL + offsetZ);
         model.rotation.y = rotY;
 
         model.traverse((child) => {
@@ -458,7 +487,6 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
 
-                // Fix pixelation by ensuring smooth filtering and max texture resolution
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];
                     mats.forEach(mat => {
@@ -473,6 +501,12 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
                 }
             }
         });
+
+        if (gltf.animations && gltf.animations.length > 0) {
+            const mixer = new THREE.AnimationMixer(model);
+            mixer.clipAction(gltf.animations[0]).play();
+            _mixers.push(mixer);
+        }
 
         scene.add(model);
     });
@@ -605,6 +639,20 @@ function openSpellCabinetModal(cabinetObj) {
 
     const slots = document.querySelectorAll('.cabinet-slot');
     const contents = cabinetObj.userData.contents || [];
+
+    import('./equipment.js').then(equip => {
+        _bindChestSlots(equip, slots, contents);
+    });
+}
+
+function openCorpseModal(corpseObj) {
+    _activeSentLabelId = 'corpse-sent-label';
+    const overlay = document.getElementById('corpse-overlay');
+    overlay.classList.remove('chest-hidden');
+    document.getElementById('corpse-sent-label').textContent = '';
+
+    const slots = document.querySelectorAll('.corpse-slot');
+    const contents = corpseObj.userData.contents || [];
 
     import('./equipment.js').then(equip => {
         _bindChestSlots(equip, slots, contents);
@@ -849,7 +897,7 @@ function _hideChestCtxMenu() {
     _chestCtxOpen = false;
 }
 
-function addBonePile(scene, loader, col, row) {
+function addBonePile(scene, loader, col, row, contents = []) {
     loader.load('/items/Meshy_AI_Bone_pile_0221211647_texture.glb', (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.4);
@@ -863,6 +911,7 @@ function addBonePile(scene, loader, col, row) {
                 child.userData.isBonePile = true;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
+                child.userData.contents = contents;
 
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];
@@ -880,6 +929,51 @@ function addBonePile(scene, loader, col, row) {
         });
 
         scene.add(model);
+    });
+}
+
+export function spawnCorpse(col, row) {
+    // Create corpse with 25 empty inventory slots
+    const corpseContents = [
+        null, null, null, null, null,
+        null, null, null, null, null,
+        null, null, null, null, null,
+        null, null, null, null, null,
+        null, null, null, null, null
+    ];
+
+    const gltfLoader = new GLTFLoader();
+    gltfLoader.load('/items/Meshy_AI_Bone_pile_0221211647_texture.glb', (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(0.4);
+        model.position.set(col * CELL, 0.05, row * CELL);
+        model.rotation.y = Math.random() * Math.PI * 2;
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.userData.isBonePile = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+                child.userData.contents = corpseContents;
+
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
+            }
+        });
+
+        objectsGroup.add(model);
     });
 }
 

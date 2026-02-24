@@ -533,7 +533,9 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
 
   if (m.hp === 0) {
     m.alive = false;
-    spawnDroppedItem(m.gridCol, m.gridRow, 'Life Essence');
+    import('./objects.js').then(obj => {
+      obj.spawnCorpse(m.gridCol, m.gridRow);
+    });
     if (m.hpBarFill) m.hpBarFill.parentElement.style.display = 'none';
     addLogEntry({ type: 'death', target: m.name, killer, damage, time: Date.now() });
     _playDeathAnimation(m);
