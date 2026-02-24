@@ -18,8 +18,8 @@ import {
 } from 'three.quarks';
 
 let batchRenderer = null;
-let sceneRef     = null;
-let cameraRef    = null;
+let sceneRef = null;
+let cameraRef = null;
 
 // ─── Shared glow texture ───────────────────────────────────────────────────
 function createGlowTexture() {
@@ -27,10 +27,10 @@ function createGlowTexture() {
     canvas.width = 64; canvas.height = 64;
     const ctx = canvas.getContext('2d');
     const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-    g.addColorStop(0,    'rgba(255,255,255,1)');
-    g.addColorStop(0.2,  'rgba(255,255,255,0.8)');
-    g.addColorStop(0.6,  'rgba(255,255,255,0.3)');
-    g.addColorStop(1,    'rgba(255,255,255,0)');
+    g.addColorStop(0, 'rgba(255,255,255,1)');
+    g.addColorStop(0.2, 'rgba(255,255,255,0.8)');
+    g.addColorStop(0.6, 'rgba(255,255,255,0.3)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, 64, 64);
     return new THREE.CanvasTexture(canvas);
@@ -65,7 +65,7 @@ function _mat(texture) {
 }
 
 // ─── Shared bezier curves ──────────────────────────────────────────────────
-const FADE_OUT  = new PiecewiseBezier([[new Bezier(1, 0.7, 0.3, 0), 0]]);
+const FADE_OUT = new PiecewiseBezier([[new Bezier(1, 0.7, 0.3, 0), 0]]);
 const GROW_FADE = new PiecewiseBezier([[new Bezier(0.2, 0.8, 0.6, 0), 0]]);
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -502,9 +502,9 @@ export function triggerFireballEffect() {
     // Core fire stream — tight narrow cone aimed forward
     const core = new ParticleSystem({
         duration: 0.7, looping: false,
-        startLife:  new IntervalValue(0.3, 0.8),
+        startLife: new IntervalValue(0.3, 0.8),
         startSpeed: new IntervalValue(5.0, 14.0),
-        startSize:  new IntervalValue(0.08, 0.30),
+        startSize: new IntervalValue(0.08, 0.30),
         startColor: new ConstantColor(new Vector4(1, 1, 0.5, 1)),
         worldSpace: true, maxParticle: 160,
         emissionOverTime: new ConstantValue(0),
@@ -524,9 +524,9 @@ export function triggerFireballEffect() {
     // Wide fire bloom at impact zone — spawned further forward
     const bloom = new ParticleSystem({
         duration: 0.6, looping: false,
-        startLife:  new IntervalValue(0.2, 0.6),
+        startLife: new IntervalValue(0.2, 0.6),
         startSpeed: new IntervalValue(2.0, 7.0),
-        startSize:  new IntervalValue(0.06, 0.22),
+        startSize: new IntervalValue(0.06, 0.22),
         startColor: new ConstantColor(new Vector4(1, 0.5, 0.1, 1)),
         worldSpace: true, maxParticle: 100,
         emissionOverTime: new ConstantValue(0),
@@ -552,9 +552,9 @@ export function triggerRegenerationEffect() {
     // Expanding ring at body level
     const ring = new ParticleSystem({
         duration: 1.5, looping: false,
-        startLife:  new IntervalValue(0.6, 1.5),
+        startLife: new IntervalValue(0.6, 1.5),
         startSpeed: new IntervalValue(0.8, 3.0),
-        startSize:  new IntervalValue(0.05, 0.18),
+        startSize: new IntervalValue(0.05, 0.18),
         startColor: new ConstantColor(new Vector4(0.4, 1.0, 0.5, 1)),
         worldSpace: true, maxParticle: 120,
         emissionOverTime: new ConstantValue(0),
@@ -573,9 +573,9 @@ export function triggerRegenerationEffect() {
     // Gentle rising leaf-like motes
     const motes = new ParticleSystem({
         duration: 2.0, looping: false,
-        startLife:  new IntervalValue(1.0, 2.5),
+        startLife: new IntervalValue(1.0, 2.5),
         startSpeed: new IntervalValue(0.2, 0.8),
-        startSize:  new IntervalValue(0.03, 0.10),
+        startSize: new IntervalValue(0.03, 0.10),
         startColor: new ConstantColor(new Vector4(0.3, 0.9, 0.4, 1)),
         worldSpace: true, maxParticle: 60,
         emissionOverTime: new ConstantValue(0),
@@ -601,9 +601,9 @@ export function triggerCurePoisonEffect() {
     // Toxic green burst — the poison being drawn out
     const toxin = new ParticleSystem({
         duration: 0.8, looping: false,
-        startLife:  new IntervalValue(0.3, 0.8),
+        startLife: new IntervalValue(0.3, 0.8),
         startSpeed: new IntervalValue(1.5, 5.0),
-        startSize:  new IntervalValue(0.04, 0.16),
+        startSize: new IntervalValue(0.04, 0.16),
         startColor: new ConstantColor(new Vector4(0.3, 0.9, 0.2, 1)),
         worldSpace: true, maxParticle: 80,
         emissionOverTime: new ConstantValue(0),
@@ -622,9 +622,9 @@ export function triggerCurePoisonEffect() {
     // Cleansing violet overwrite — the purifying magic replacing the venom
     const cleanse = new ParticleSystem({
         duration: 1.2, looping: false,
-        startLife:  new IntervalValue(0.5, 1.2),
+        startLife: new IntervalValue(0.5, 1.2),
         startSpeed: new IntervalValue(0.5, 2.5),
-        startSize:  new IntervalValue(0.05, 0.20),
+        startSize: new IntervalValue(0.05, 0.20),
         startColor: new ConstantColor(new Vector4(0.7, 0.3, 1.0, 1)),
         worldSpace: true, maxParticle: 90,
         emissionOverTime: new ConstantValue(0),
@@ -648,9 +648,9 @@ export function triggerDefaultSpellEffect() {
 
     const flash = new ParticleSystem({
         duration: 0.6, looping: false,
-        startLife:  new IntervalValue(0.2, 0.6),
+        startLife: new IntervalValue(0.2, 0.6),
         startSpeed: new IntervalValue(1.5, 5.0),
-        startSize:  new IntervalValue(0.03, 0.14),
+        startSize: new IntervalValue(0.03, 0.14),
         startColor: new ConstantColor(new Vector4(0.8, 0.9, 1.0, 1)),
         worldSpace: true, maxParticle: 80,
         emissionOverTime: new ConstantValue(0),
@@ -674,9 +674,9 @@ export function triggerDefaultSkillEffect() {
 
     const flash = new ParticleSystem({
         duration: 0.5, looping: false,
-        startLife:  new IntervalValue(0.2, 0.5),
+        startLife: new IntervalValue(0.2, 0.5),
         startSpeed: new IntervalValue(1.0, 4.0),
-        startSize:  new IntervalValue(0.03, 0.12),
+        startSize: new IntervalValue(0.03, 0.12),
         startColor: new ConstantColor(new Vector4(1.0, 0.9, 0.6, 1)),
         worldSpace: true, maxParticle: 60,
         emissionOverTime: new ConstantValue(0),
@@ -694,12 +694,72 @@ export function triggerDefaultSkillEffect() {
 //  PUBLIC INIT / UPDATE
 // ─────────────────────────────────────────────
 export function initQuarks(scene, camera) {
-    sceneRef    = scene;
-    cameraRef   = camera;
+    sceneRef = scene;
+    cameraRef = camera;
     batchRenderer = new BatchedParticleRenderer();
     scene.add(batchRenderer);
 }
 
 export function updateQuarks(dt) {
     if (batchRenderer) batchRenderer.update(dt);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  WHIRLWIND — Lumni (War Dancer)
+//  A swirling vortex of white/blue air particles
+// ══════════════════════════════════════════════════════════════════════════
+export function triggerWhirlwindEffect() {
+    if (!batchRenderer || !sceneRef || !cameraRef) return;
+    const tex = createGlowTexture();
+    const pos = _frontPos(1.2);
+
+    const vortex = new ParticleSystem({
+        duration: 0.8, looping: false,
+        startLife: new IntervalValue(0.4, 0.8),
+        startSpeed: new IntervalValue(2.0, 4.0),
+        startSize: new IntervalValue(0.05, 0.15),
+        startColor: new ConstantColor(new Vector4(0.8, 0.9, 1.0, 1)),
+        worldSpace: true, maxParticle: 100,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(80), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new CircleEmitter({ radius: 0.2, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex), startTileIndex: new ConstantValue(0),
+        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    vortex.addBehavior(new ColorOverLife(new ColorRange(
+        new Vector4(1.0, 1.0, 1.0, 1),
+        new Vector4(0.5, 0.7, 1.0, 0),
+    )));
+    vortex.addBehavior(new SizeOverLife(GROW_FADE));
+    _spawn(vortex, pos, 1.5);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  TRUE SHOT — Baldur (Ranger)
+//  A sharp golden flash/pulse symbolizing focus
+// ══════════════════════════════════════════════════════════════════════════
+export function triggerTrueShotEffect() {
+    if (!batchRenderer || !sceneRef || !cameraRef) return;
+    const tex = createGlowTexture();
+    const pos = _frontPos(1.0);
+
+    const pulse = new ParticleSystem({
+        duration: 0.5, looping: false,
+        startLife: new IntervalValue(0.3, 0.6),
+        startSpeed: new IntervalValue(4.0, 8.0),
+        startSize: new IntervalValue(0.04, 0.12),
+        startColor: new ConstantColor(new Vector4(1.0, 0.9, 0.2, 1)),
+        worldSpace: true, maxParticle: 60,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(50), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.05, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex), startTileIndex: new ConstantValue(0),
+        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    pulse.addBehavior(new ColorOverLife(new ColorRange(
+        new Vector4(1.0, 1.0, 0.5, 1),
+        new Vector4(1.0, 0.5, 0.0, 0),
+    )));
+    pulse.addBehavior(new SizeOverLife(FADE_OUT));
+    _spawn(pulse, pos, 1.0);
 }

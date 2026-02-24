@@ -37,4 +37,18 @@ export const skillsState = {
     actorName: null, // to restrict the buff to just the user
     expiresAt: 0,
   },
+
+  /** Whirlwind — doubles attack speed for 30s */
+  whirlwind: {
+    active: false,
+    actorName: null,
+    expiresAt: 0,
+  },
+
+  /** True Shot — guaranteed hit for ranged attacks for 20s */
+  trueShot: {
+    active: false,
+    actorName: null,
+    expiresAt: 0,
+  },
 };

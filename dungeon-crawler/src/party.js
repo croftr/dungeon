@@ -801,8 +801,13 @@ export function updateParty(dt) {
 function getActiveEffectsForMember(m) {
   const active = [];
   if (skillsState.sanctuary.active) active.push('Sanctuary');
-  if (skillsState.arcaneLight.active) active.push('Arcane Lantern');
+  if (skillsState.arcaneLight.active) {
+    const hasMiners = m.skills?.some(s => s.name === 'Miners Light');
+    active.push(hasMiners ? 'Miners Light' : 'Arcane Lantern');
+  }
   if (skillsState.berserk.active && skillsState.berserk.actorName === m.name) active.push('Berserk');
+  if (skillsState.whirlwind.active && skillsState.whirlwind.actorName === m.name) active.push('Whirlwind');
+  if (skillsState.trueShot.active && skillsState.trueShot.actorName === m.name) active.push('True Shot');
   if (m.runicScholarActive) active.push('Runic Scholar');
   // Active debuffs from monster on-hit effects
   const now = performance.now();

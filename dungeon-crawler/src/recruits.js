@@ -49,6 +49,7 @@ export const RECRUITS = [
         stats: { strength: 8, dexterity: 6, vitality: 8, intelligence: 4, resilience: 10 },
         skills: [
             { name: 'Sunder Armor', type: 'debuff', description: 'Crushes the targeted monster, halving its defence stats for 30s. Only usable in combat. Cooldown: 60s.', icon: '/skills/sunder-armor.png' },
+            { name: 'Miners Light', type: 'buff', description: 'Ignites a specialized lantern, illuminating the dungeon brightly for 60 seconds. Cooldown: 60s.', icon: '/skills/arcane-lantern.png' },
         ],
         image: '/dwarf_barbarian_head.png',
         leftHand: 'Axe', rightHand: 'Wooden Shield', startingSkill: 'Sunder Armor',
@@ -96,10 +97,10 @@ export const RECRUITS = [
         hp: 67, hpMax: 67, mp: 10, mpMax: 10, sp: 100, spMax: 100,
         stats: { strength: 9, dexterity: 7, vitality: 7, intelligence: 4, resilience: 7 },
         skills: [
-            { name: 'Berserk', type: 'buff', description: 'Enters a state of roaring fury, boosting all damage dealt by 20% (after other calculations) for 30s. Cooldown: 60s.', icon: '/skills/berserk.png' },
+            { name: 'True Shot', type: 'buff', description: 'Becomes hyper-focused, ensuring every ranged attack finds its mark for 20 seconds. Cooldown: 60s.', icon: '/skills/true-shot.png' },
         ],
         image: '/heros/dwarf-ranger.png',
-        leftHand: 'Crossbow', rightHand: '—', startingSkill: 'Sunder Armor',
+        leftHand: 'Crossbow', rightHand: 'Dagger', startingSkill: 'True Shot',
         gridCol: 14, gridRow: 9, facing: 'left', // East wall of main hall
         isRecruited: false
     },
@@ -111,10 +112,10 @@ export const RECRUITS = [
         hp: 55, hpMax: 55, mp: 30, mpMax: 30, sp: 100, spMax: 100,
         stats: { strength: 6, dexterity: 10, vitality: 6, intelligence: 7, resilience: 6 },
         skills: [
-            { name: 'Berserk', type: 'buff', description: 'Enters a state of roaring fury, boosting all damage dealt by 20% (after other calculations) for 30s. Cooldown: 60s.', icon: '/skills/berserk.png' },
+            { name: 'Whirlwind', type: 'buff', description: 'Becomes a blur of motion, doubling attack speed and preventing stamina drain for 30s. Cooldown: 60s.', icon: '/skills/whirlwind.png' },
         ],
         image: '/heros/high-elf.png',
-        leftHand: 'Main Gauche', rightHand: 'Dagger', startingSkill: 'Berserk',
+        leftHand: 'Main Gauche', rightHand: 'Dagger', startingSkill: 'Whirlwind',
         gridCol: 8, gridRow: 9, facing: 'right', // West wall of main hall
         isRecruited: false
     }

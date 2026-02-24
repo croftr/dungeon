@@ -25,6 +25,8 @@ import {
   triggerFireballEffect,
   triggerRegenerationEffect,
   triggerCurePoisonEffect,
+  triggerWhirlwindEffect,
+  triggerTrueShotEffect,
   triggerDefaultSpellEffect,
   triggerDefaultSkillEffect,
 } from './quarks-intro.js';
@@ -1557,7 +1559,13 @@ function useHand(memberIndex, hand) {
 
   // Cooldown validation
   const isBothHands = def?.slot === 'bothHands';
-  const delaySec = def?.delay ?? 2;
+  let delaySec = def?.delay ?? 2;
+
+  // Whirlwind buff: double attack speed (half delay)
+  const ww = skillsState.whirlwind;
+  if (ww.active && ww.actorName === m.name && performance.now() < ww.expiresAt) {
+    delaySec /= 2;
+  }
 
   // Check cooldown timer
   // A 'bothHands' weapon is driven by the left or right hand click but acts as 
@@ -1613,14 +1621,19 @@ function useHand(memberIndex, hand) {
   }
 
   // Physical attacks cost 5 SP; spells and skills do not
-  const SP_COST = 5;
-  if (!isSpell && m.sp < SP_COST) {
+  // Whirlwind buff: also prevents SP drain
+  let spCost = 5;
+  if (ww.active && ww.actorName === m.name && performance.now() < ww.expiresAt) {
+    spCost = 0;
+  }
+
+  if (!isSpell && spCost > 0 && m.sp < spCost) {
     showMessage(`${m.name} is too exhausted to attack!`);
     return;
   }
 
   lastAttackTimes[timeKey] = now;
-  if (!isSpell) setSp(m.id, m.sp - SP_COST);
+  if (!isSpell && spCost > 0) setSp(m.id, m.sp - spCost);
   refreshPartyCards();
 
   // Play the visual + audio animation regardless of whether a target exists
@@ -1726,11 +1739,14 @@ function useSkill(memberIndex) {
   if (skill.name === 'Sanctuary') { _useSanctuary(m, memberIndex); return; }
   if (skill.name === 'Holy Radiance') { _useHolyRadiance(m, memberIndex); return; }
   if (skill.name === 'Arcane Lantern') { _useArcaneLantern(m, memberIndex); return; }
+  if (skill.name === 'Miners Light') { _useMinersLight(m, memberIndex); return; }
   if (skill.name === 'Runic Scholar') { _useRunicScholar(m, memberIndex); return; }
   if (skill.name === 'Mana Tap') { _useManaTap(m, memberIndex); return; }
   if (skill.name === 'Entangle') { _useEntangle(m, memberIndex); return; }
   if (skill.name === 'Sunder Armor') { _useSunderArmor(m, memberIndex); return; }
   if (skill.name === 'Berserk') { _useBerserk(m, memberIndex); return; }
+  if (skill.name === 'Whirlwind') { _useWhirlwind(m, memberIndex); return; }
+  if (skill.name === 'True Shot') { _useTrueShot(m, memberIndex); return; }
   if (skill.name === 'Heal') { _useHealSkill(m, memberIndex); return; }
 
   playSkillSound('magic');
@@ -1986,6 +2002,118 @@ function _useArcaneLantern(member, memberIndex) {
   }, ARCANE_LANTERN_DURATION_MS);
 
   _startSkillCooldownUI(memberIndex, _arcaneLanternCooldownEnd);
+}
+
+// ── Miner's Light (Thorek) ────────────────────────────────────────────────
+let _minersLightCooldownEnd = 0;
+let _minersLightExpireTimer = null;
+
+function _useMinersLight(member, memberIndex) {
+  const now = performance.now();
+  if (now < _minersLightCooldownEnd) {
+    const remaining = Math.ceil((_minersLightCooldownEnd - now) / 1000);
+    showMessage(`<span style="color:#d8d8ff">Miners Light</span> — ready in ${remaining}s`, 2000);
+    return;
+  }
+
+  // Same duration and effect as Arcane Lantern
+  skillsState.arcaneLight.active = true;
+  skillsState.arcaneLight.expiresAt = now + ARCANE_LANTERN_DURATION_MS;
+  _minersLightCooldownEnd = now + ARCANE_LANTERN_COOLDOWN_MS;
+
+  playSkillSound('magic');
+  triggerArcaneLanternEffect();
+  showMessage(
+    `<span style="color:#d8d8ff">✦ Miners Light</span> — ${member.name} ignites a lantern for 60s.`,
+    3000
+  );
+  addLogEntry({ type: 'skill', actor: member.name, skillName: "Miners Light" });
+
+  if (_minersLightExpireTimer) clearTimeout(_minersLightExpireTimer);
+  _minersLightExpireTimer = setTimeout(() => {
+    // Both skills share the same global light state
+    skillsState.arcaneLight.active = false;
+    showMessage(`<span style="color:#d8d8ff">Miners Light</span> fades — darkness returns.`, 2500);
+    _minersLightExpireTimer = null;
+  }, ARCANE_LANTERN_DURATION_MS);
+
+  _startSkillCooldownUI(memberIndex, _minersLightCooldownEnd);
+}
+
+// ── Whirlwind (Lumni) ─────────────────────────────────────────────────────
+const WHIRLWIND_COOLDOWN_MS = 60_000;
+const WHIRLWIND_DURATION_MS = 30_000;
+let _whirlwindCooldownEnds = [0, 0, 0, 0];
+let _whirlwindExpireTimers = [null, null, null, null];
+
+function _useWhirlwind(member, memberIndex) {
+  const now = performance.now();
+  if (now < _whirlwindCooldownEnds[memberIndex]) {
+    const remaining = Math.ceil((_whirlwindCooldownEnds[memberIndex] - now) / 1000);
+    showMessage(`<span style="color:#a0f0ff">Whirlwind</span> — ready in ${remaining}s`, 2000);
+    return;
+  }
+
+  skillsState.whirlwind.active = true;
+  skillsState.whirlwind.actorName = member.name;
+  skillsState.whirlwind.expiresAt = now + WHIRLWIND_DURATION_MS;
+  _whirlwindCooldownEnds[memberIndex] = now + WHIRLWIND_COOLDOWN_MS;
+
+  playSkillSound('berserk');
+  triggerWhirlwindEffect();
+  showMessage(
+    `<span style="color:#a0f0ff">✦ Whirlwind</span> — ${member.name} becomes a blur! Attack speed doubled for 30s.`,
+    3000
+  );
+  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Whirlwind' });
+
+  if (_whirlwindExpireTimers[memberIndex]) clearTimeout(_whirlwindExpireTimers[memberIndex]);
+  _whirlwindExpireTimers[memberIndex] = setTimeout(() => {
+    skillsState.whirlwind.active = false;
+    skillsState.whirlwind.actorName = null;
+    showMessage(`<span style="color:#a0f0ff">Whirlwind</span> fades — movement returns to normal.`, 2500);
+    _whirlwindExpireTimers[memberIndex] = null;
+  }, WHIRLWIND_DURATION_MS);
+
+  _startSkillCooldownUI(memberIndex, _whirlwindCooldownEnds[memberIndex]);
+}
+
+// ── True Shot (Baldur) ──────────────────────────────────────────────────
+const TRUE_SHOT_COOLDOWN_MS = 60_000;
+const TRUE_SHOT_DURATION_MS = 20_000;
+let _trueShotCooldownEnds = [0, 0, 0, 0];
+let _trueShotExpireTimers = [null, null, null, null];
+
+function _useTrueShot(member, memberIndex) {
+  const now = performance.now();
+  if (now < _trueShotCooldownEnds[memberIndex]) {
+    const remaining = Math.ceil((_trueShotCooldownEnds[memberIndex] - now) / 1000);
+    showMessage(`<span style="color:#ffe080">True Shot</span> — ready in ${remaining}s`, 2000);
+    return;
+  }
+
+  skillsState.trueShot.active = true;
+  skillsState.trueShot.actorName = member.name;
+  skillsState.trueShot.expiresAt = now + TRUE_SHOT_DURATION_MS;
+  _trueShotCooldownEnds[memberIndex] = now + TRUE_SHOT_COOLDOWN_MS;
+
+  playSkillSound('magic');
+  triggerTrueShotEffect();
+  showMessage(
+    `<span style="color:#ffe080">✦ True Shot</span> — ${member.name} focuses! Ranged attacks will not miss for 20s.`,
+    3000
+  );
+  addLogEntry({ type: 'skill', actor: member.name, skillName: 'True Shot' });
+
+  if (_trueShotExpireTimers[memberIndex]) clearTimeout(_trueShotExpireTimers[memberIndex]);
+  _trueShotExpireTimers[memberIndex] = setTimeout(() => {
+    skillsState.trueShot.active = false;
+    skillsState.trueShot.actorName = null;
+    showMessage(`<span style="color:#ffe080">True Shot</span> fades — focus returns to normal.`, 2500);
+    _trueShotExpireTimers[memberIndex] = null;
+  }, TRUE_SHOT_DURATION_MS);
+
+  _startSkillCooldownUI(memberIndex, _trueShotCooldownEnds[memberIndex]);
 }
 
 // ── Runic Scholar (Merlin) ────────────────────────────────────────────────

@@ -564,7 +564,14 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   const m = monsters.find((x) => x.id === monsterId && x.alive);
   if (!m) return { hit: false, damage: 0, killed: false, monsterHp: 0, crit: false, hitChance: 0, formula: null, monsterName: '' };
 
-  const hitChance = playerHitChance(character, m);
+  let hitChance = playerHitChance(character, m);
+
+  // True Shot: Never miss with ranged attacks
+  const ts = skillsState.trueShot;
+  const isRanged = attackType === 'shoot' || attackType === 'throw'; // assuming throw might also be ranged
+  if (ts?.active && ts.actorName === character.name && isRanged) {
+    hitChance = 1.0;
+  }
 
   // DEX-based hit chance — higher DEX advantage means more reliable hits
   if (Math.random() >= hitChance) {
