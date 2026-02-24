@@ -503,8 +503,8 @@ export function showMonsterDamage(monsterId, damage, isCrit) {
   wrapper.appendChild(inner);
 
   const label = new CSS2DObject(wrapper);
-  // Place it significantly above the health bar (1.8) and stats (2.6)
-  label.position.set(0, 2.8, 0);
+  // Place it near mid-body (HP bar is 1.8) so it can float up through the model
+  label.position.set(0, 1.5, 0);
   m.mesh.add(label);
 
   setTimeout(() => {
