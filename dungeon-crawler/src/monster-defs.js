@@ -106,8 +106,8 @@ export const MONSTER_DEFS = {
   treeman: {
     name: 'Treeman',
     hp: 250,
-    defence: 32,
-    stats: { strength: 40, dexterity: 18, vitality: 35, intelligence: 26, resilience: 32 },
+    defence: 20,
+    stats: { strength: 30, dexterity: 18, vitality: 25, intelligence: 26, resilience: 20 },
     drops: [
       { item: 'Life Essence', chance: 0.50 },
       { item: 'Life Berry', chance: 0.70 },
