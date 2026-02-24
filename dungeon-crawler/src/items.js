@@ -362,6 +362,18 @@ export const ITEMS = [
     weight: 1.2,
   },
   {
+    name: 'Crossbow',
+    slot: 'leftHand',
+    attackType: ACTIONS.SHOOT,
+    baseDamage: 20,
+    delay: 6,
+    statWeights: { str: 0.5, dex: 0.5 },
+    icon: '/icons/wooden-crossbow.png',
+    description: 'A mechanical bow that fires powerful bolts. Slower but harder hitting than a regular bow.',
+    value: 80,
+    weight: 3.5,
+  },
+  {
     name: 'Wooden Arrows',
     slot: 'ammo',
     attackType: null,
@@ -408,6 +420,18 @@ export const ITEMS = [
     description: 'A short, double-edged blade. Quick and easy to slip past armour.',
     value: 20,
     weight: 0.4,
+  },
+  {
+    name: 'Main Gauche',
+    slot: 'leftHand',
+    attackType: ACTIONS.SWIPE,
+    baseDamage: 5,
+    delay: 2,
+    statWeights: { str: 0.2, dex: 0.8 },
+    icon: '/icons/dagger.png',
+    description: 'A parrying dagger designed for the off-hand. Enables dual-wielding.',
+    value: 30,
+    weight: 0.5,
   },
 
   // ── Right Hand ────────────────────────────────────────────────────────────

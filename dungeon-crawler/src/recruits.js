@@ -87,6 +87,36 @@ export const RECRUITS = [
         leftHand: 'Greataxe', rightHand: '—', startingSkill: 'Berserk',
         gridCol: 11, gridRow: 8, facing: 'front', // North wall
         isRecruited: false
+    },
+    {
+        id: 'recruit_6',
+        name: 'Baldur',
+        job: 'Ranger',
+        race: 'Dwarf',
+        hp: 67, hpMax: 67, mp: 10, mpMax: 10, sp: 100, spMax: 100,
+        stats: { strength: 9, dexterity: 7, vitality: 7, intelligence: 4, resilience: 7 },
+        skills: [
+            { name: 'Berserk', type: 'buff', description: 'Enters a state of roaring fury, boosting all damage dealt by 20% (after other calculations) for 30s. Cooldown: 60s.', icon: '/skills/berserk.png' },
+        ],
+        image: '/heros/dwarf-ranger.png',
+        leftHand: 'Crossbow', rightHand: '—', startingSkill: 'Sunder Armor',
+        gridCol: 14, gridRow: 9, facing: 'left', // East wall of main hall
+        isRecruited: false
+    },
+    {
+        id: 'recruit_7',
+        name: 'Lumni',
+        job: 'War Dancer',
+        race: 'High Elf',
+        hp: 55, hpMax: 55, mp: 30, mpMax: 30, sp: 100, spMax: 100,
+        stats: { strength: 6, dexterity: 10, vitality: 6, intelligence: 7, resilience: 6 },
+        skills: [
+            { name: 'Berserk', type: 'buff', description: 'Enters a state of roaring fury, boosting all damage dealt by 20% (after other calculations) for 30s. Cooldown: 60s.', icon: '/skills/berserk.png' },
+        ],
+        image: '/heros/high-elf.png',
+        leftHand: 'Main Gauche', rightHand: 'Dagger', startingSkill: 'Berserk',
+        gridCol: 8, gridRow: 9, facing: 'right', // West wall of main hall
+        isRecruited: false
     }
 ];
 
