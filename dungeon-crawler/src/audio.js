@@ -252,7 +252,15 @@ const SKILL_SOUND_MAP = {
   'magic': { url: '/sounds/actions/skills/magic.mp3', offset: 0.0 },
   'render': { url: '/sounds/actions/skills/render.mp3', offset: 0.0 },
   'heal': { url: '/sounds/actions/life-crystal.mp3', offset: 0.0 },
+  'alchemy': { url: '/sounds/actions/alchemy-bubbles.mp3', offset: 0.0 },
 };
+
+/**
+ * Play the alchemy bubbling sound.
+ */
+export async function playAlchemySound() {
+  playSkillSound('alchemy', 0.8);
+}
 
 /**
  * Play a skill or spell sound by its short name.

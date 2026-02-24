@@ -589,6 +589,58 @@
     </div>
   </div>
 
+  <!-- ── ALCHEMY WORKSHOP MODAL ── -->
+  <div id="alchemy-overlay" class="chest-hidden">
+    <div id="alchemy-modal">
+      <div id="alchemy-header" class="chest-header-style">
+        <div id="alchemy-title-wrap">
+          <img src="/icons/poison_vial.png" id="alchemy-header-icon" alt="Alchemy">
+          <span id="alchemy-title">Alchemy Workshop</span>
+        </div>
+        <button id="alchemy-close" aria-label="Close">&times;</button>
+      </div>
+      <div id="alchemy-body">
+        <div id="alchemy-container">
+          <!-- Left: Ingredients (8 slots) -->
+          <div id="alchemy-ingredients">
+            <h4 class="alchemy-section-title">Ingredients</h4>
+            <div id="alchemy-ingredient-grid">
+              <div class="chest-slot alchemy-slot" data-index="0"></div>
+              <div class="chest-slot alchemy-slot" data-index="1"></div>
+              <div class="chest-slot alchemy-slot" data-index="2"></div>
+              <div class="chest-slot alchemy-slot" data-index="3"></div>
+              <div class="chest-slot alchemy-slot" data-index="4"></div>
+              <div class="chest-slot alchemy-slot" data-index="5"></div>
+              <div class="chest-slot alchemy-slot" data-index="6"></div>
+              <div class="chest-slot alchemy-slot" data-index="7"></div>
+            </div>
+          </div>
+
+          <!-- Middle: Transmute Button -->
+          <div id="alchemy-controls">
+            <button id="alchemy-transmute-btn">TRANSMUTE</button>
+            <div id="alchemy-arrow">→</div>
+          </div>
+
+          <!-- Right: Result Area -->
+          <div id="alchemy-result">
+            <h4 class="alchemy-section-title">Result</h4>
+            <div id="alchemy-result-slot" class="chest-slot alchemy-slot" data-index="8"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alchemy item picker (shown when clicking empty slot) -->
+    <div id="alchemy-picker" class="picker-hidden">
+      <div id="alchemy-picker-header">
+        <span>Select Ingredient</span>
+        <button id="alchemy-picker-close" aria-label="Close">&times;</button>
+      </div>
+      <div id="alchemy-picker-grid"></div>
+    </div>
+  </div>
+
   <!-- Merchant modal -->
   <div id="merchant-overlay" class="merchant-hidden">
     <div id="merchant-modal">
@@ -596,6 +648,12 @@
         <span id="merchant-title">Merchant</span>
         <button id="merchant-close" aria-label="Close">&times;</button>
       </div>
+      <!-- Tab bar -->
+      <div id="merchant-tabs">
+        <button id="merchant-tab-buy" class="merchant-tab merchant-tab-active">Buy</button>
+        <button id="merchant-tab-sell" class="merchant-tab">Sell</button>
+      </div>
+      <!-- Buy body -->
       <div id="merchant-body">
         <!-- Left: items for sale -->
         <div id="merchant-shop-panel">
@@ -611,6 +669,24 @@
           <div class="merchant-panel-label">Selected</div>
           <div id="merchant-basket-grid"></div>
           <button id="merchant-buy-btn" disabled>Buy Items</button>
+        </div>
+      </div>
+      <!-- Sell body -->
+      <div id="merchant-sell-body" style="display:none;">
+        <!-- Left: party inventory -->
+        <div id="merchant-party-panel">
+          <div class="merchant-panel-label">Party Items</div>
+          <div id="merchant-party-grid"></div>
+        </div>
+        <!-- Right: sell basket -->
+        <div id="merchant-sell-basket-panel">
+          <div id="merchant-sell-header">
+            <span id="merchant-sell-total-label">Earn: <span id="merchant-sell-total-val">0</span>g</span>
+            <span id="merchant-sell-gold-label">Party Gold: <span id="merchant-sell-gold-val">0</span>g</span>
+          </div>
+          <div class="merchant-panel-label">To Sell</div>
+          <div id="merchant-sell-basket-grid"></div>
+          <button id="merchant-sell-btn" disabled>Sell Items</button>
         </div>
       </div>
     </div>
@@ -630,6 +706,7 @@
     <div class="inv-ctx-item inv-ctx-equip" id="inv-ctx-equip">⚔ Equip</div>
     <div class="inv-ctx-item inv-ctx-learn" id="inv-ctx-learn" style="display: none;">📜 Learn</div>
     <div class="inv-ctx-item inv-ctx-sell" id="inv-ctx-sell" style="display: none;">💰 Sell</div>
+    <div class="inv-ctx-item inv-ctx-alchemy" id="inv-ctx-alchemy" style="display: none;">🧪 Put in Alchemy</div>
     <div class="inv-ctx-divider"></div>
     <div class="inv-ctx-give-label" id="inv-ctx-give-label">Give to</div>
     <div id="inv-ctx-give-list"></div>
@@ -666,7 +743,8 @@
     <div id="item-detail-action"></div>
     <div id="item-detail-desc"></div>
     <div id="item-detail-stats">
-      <div class="detail-stat-row" id="detail-row-damage"><span>Damage</span><span id="item-detail-damage"></span></div>
+      <div class="detail-stat-row" id="detail-row-damage"><span>Damage</span><span id="item-detail-damage"></span>
+      </div>
       <div class="detail-stat-row" id="detail-row-scaling"><span>Scales with</span><span
           id="item-detail-scaling"></span></div>
       <div id="detail-row-scaling-bar">
@@ -676,8 +754,10 @@
       </div>
       <div class="detail-stat-row" id="detail-row-block"><span>Block Chance</span><span id="item-detail-block"></span>
       </div>
-      <div class="detail-stat-row" id="detail-row-value"><span>Value</span><span id="item-detail-value"></span></div>
-      <div class="detail-stat-row" id="detail-row-weight"><span>Weight</span><span id="item-detail-weight"></span></div>
+      <div class="detail-stat-row" id="detail-row-value"><span>Value</span><span id="item-detail-value"></span>
+      </div>
+      <div class="detail-stat-row" id="detail-row-weight"><span>Weight</span><span id="item-detail-weight"></span>
+      </div>
       <div class="detail-stat-row" id="detail-row-statchange"><span>Stat Change</span><span id="item-detail-statchange"
           style="color: #60c060;"></span></div>
       <div class="detail-stat-row" id="detail-row-ammo-mod"><span>Multiplier</span><span

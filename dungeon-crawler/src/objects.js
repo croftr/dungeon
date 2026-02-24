@@ -5,8 +5,8 @@ import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, isInFrontOfPlayer, player } from './player.js';
 import { showMessage } from './minimap.js';
 import { getItemDef } from './items.js';
-import { party, drawPortrait, resurrectAll, partyGold, removeGold } from './party.js';
-import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound } from './audio.js';
+import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold } from './party.js';
+import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound } from './audio.js';
 
 export const objects = [];
 
@@ -54,6 +54,14 @@ const MERCHANT_PRICES = {
 let _merchantAvailable = [...MERCHANT_STOCK];
 // Items the player has added to the basket this session (cleared on close without buying)
 let _merchantBasket = [];
+// Items the player has selected to sell { charIndex, invIndex, name }
+let _merchantSellBasket = [];
+// Current merchant tab
+let _merchantMode = 'buy';
+
+const ALCHEMY_SLOTS = 9; // 8 ingredients + 1 result
+const _alchemyContents = Array(ALCHEMY_SLOTS).fill(null);
+let _alchemyModalOpen = false;
 
 let objectsGroup = new THREE.Group();
 
@@ -76,12 +84,14 @@ export function initObjects(scene, camera) {
         const corpseOverlay = document.getElementById('corpse-overlay');
         const equipOverlay = document.getElementById('equip-overlay');
         const merchantOverlay = document.getElementById('merchant-overlay');
+        const alchemyOverlay = document.getElementById('alchemy-overlay');
         if (
             (cabinetOverlay && !cabinetOverlay.classList.contains('chest-hidden')) ||
             (chestOverlay && !chestOverlay.classList.contains('chest-hidden')) ||
             (corpseOverlay && !corpseOverlay.classList.contains('chest-hidden')) ||
             (equipOverlay && !equipOverlay.classList.contains('equip-hidden')) ||
-            (merchantOverlay && !merchantOverlay.classList.contains('merchant-hidden'))
+            (merchantOverlay && !merchantOverlay.classList.contains('merchant-hidden')) ||
+            (alchemyOverlay && !alchemyOverlay.classList.contains('chest-hidden'))
         ) return;
 
         // Raycast
@@ -185,6 +195,15 @@ export function initObjects(scene, camera) {
                     showMessage("Stand on the cabinet to open it.");
                 }
                 break;
+            } else if (obj.userData.isAlchemyWorkshop) {
+                const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
+                const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
+                if (distRow <= 1 && distCol <= 1) {
+                    openAlchemyModal();
+                } else {
+                    showMessage("You can't reach the workshop from here.");
+                }
+                break;
             } else if (obj.userData.isDroppedItem) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
@@ -241,6 +260,21 @@ export function initObjects(scene, camera) {
         };
     }
 
+    // Merchant sell button
+    const merchantSellBtn = document.getElementById('merchant-sell-btn');
+    if (merchantSellBtn) {
+        merchantSellBtn.onclick = (e) => {
+            e.stopPropagation();
+            _sellItems();
+        };
+    }
+
+    // Merchant tab buttons
+    const tabBuy = document.getElementById('merchant-tab-buy');
+    const tabSell = document.getElementById('merchant-tab-sell');
+    if (tabBuy) tabBuy.onclick = (e) => { e.stopPropagation(); _switchMerchantTab('buy'); };
+    if (tabSell) tabSell.onclick = (e) => { e.stopPropagation(); _switchMerchantTab('sell'); };
+
     // Cabinet modal close
     const cabinetCloseBtn = document.getElementById('cabinet-close');
     if (cabinetCloseBtn) {
@@ -260,6 +294,28 @@ export function initObjects(scene, camera) {
             document.getElementById('corpse-overlay').classList.add('chest-hidden');
             _hideChestCtxMenu();
             import('./equipment.js').then(m => m.hideTooltip());
+        };
+    }
+
+    // Alchemy modal close
+    const alchemyCloseBtn = document.getElementById('alchemy-close');
+    if (alchemyCloseBtn) {
+        alchemyCloseBtn.onclick = (e) => {
+            e.stopPropagation();
+            document.getElementById('alchemy-overlay').classList.add('chest-hidden');
+            _alchemyModalOpen = false;
+            _hideAlchemyItemPicker();
+            _hideChestCtxMenu();
+            import('./equipment.js').then(m => m.hideTooltip());
+        };
+    }
+
+    // Alchemy picker close
+    const alchemyPickerCloseBtn = document.getElementById('alchemy-picker-close');
+    if (alchemyPickerCloseBtn) {
+        alchemyPickerCloseBtn.onclick = (e) => {
+            e.stopPropagation();
+            _hideAlchemyItemPicker();
         };
     }
 
@@ -286,6 +342,12 @@ export function initObjects(scene, camera) {
     const merchantOverlayEl = document.getElementById('merchant-overlay');
     if (merchantOverlayEl) {
         merchantOverlayEl.addEventListener('click', (e) => e.stopPropagation());
+    }
+
+    // Ditto for alchemy overlay
+    const alchemyOverlayEl = document.getElementById('alchemy-overlay');
+    if (alchemyOverlayEl) {
+        alchemyOverlayEl.addEventListener('click', (e) => e.stopPropagation());
     }
 
     // Dismiss chest context menu on outside click
@@ -384,6 +446,9 @@ export function spawnObjectsForLevel() {
         // Positioned at col 13, row 13 against the East wall.
         // It's on an East wall, so rotate it Math.PI / 2 radians to face West (inward to the room).
         addPortal(objectsGroup, gltfLoader, 13, 13, 2, Math.PI / 2, 0.85, 0);
+
+        // Alchemy Workshop in the big east room against the south wall
+        addAlchemyWorkshop(objectsGroup, gltfLoader, 19, 14, 0, 0, 0.85);
 
         // Portcullis: Row 7, Col 7.
         const portcullis = {
@@ -598,6 +663,53 @@ function addCrystals(scene, loader, col, row, rotY, offsetX = 0) {
     });
 }
 
+function addAlchemyWorkshop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, interactive = true) {
+    loader.load('/items/Alchemy_Workshop.glb', (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(0.7);
+        model.position.set(col * CELL + offsetX, 0.5, row * CELL + offsetZ);
+        model.rotation.y = rotY;
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                if (interactive) {
+                    child.userData.isAlchemyWorkshop = true;
+                    child.userData.gridRow = row;
+                    child.userData.gridCol = col;
+                }
+
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
+            }
+        });
+
+        if (gltf.animations && gltf.animations.length > 0) {
+            const mixer = new THREE.AnimationMixer(model);
+            mixer.clipAction(gltf.animations[0]).play();
+            _mixers.push(mixer);
+        }
+
+        scene.add(model);
+
+        // Add a subtle alchemical glow
+        const light = new THREE.PointLight(0x44ff44, 3, 4);
+        light.position.set(col * CELL + offsetX, 1.2, row * CELL + offsetZ);
+        scene.add(light);
+    });
+}
+
 function openPortcullis(p) {
     if (p.isOpen) return;
     p.isOpen = true;
@@ -662,11 +774,40 @@ function openCorpseModal(corpseObj) {
 }
 
 function openMerchantModal() {
-    _merchantBasket = []; // fresh basket each visit
+    _merchantBasket = [];
+    _merchantSellBasket = [];
+    _merchantMode = 'buy';
     document.getElementById('merchant-overlay').classList.remove('merchant-hidden');
+    _switchMerchantTab('buy');
     _renderMerchantShop();
     _renderMerchantBasket();
     _updateMerchantTotals();
+}
+
+function _switchMerchantTab(mode) {
+    _merchantMode = mode;
+    const buyBody = document.getElementById('merchant-body');
+    const sellBody = document.getElementById('merchant-sell-body');
+    const tabBuy = document.getElementById('merchant-tab-buy');
+    const tabSell = document.getElementById('merchant-tab-sell');
+
+    if (mode === 'buy') {
+        buyBody.style.display = 'flex';
+        sellBody.style.display = 'none';
+        tabBuy.classList.add('merchant-tab-active');
+        tabSell.classList.remove('merchant-tab-active');
+        _renderMerchantShop();
+        _renderMerchantBasket();
+        _updateMerchantTotals();
+    } else {
+        buyBody.style.display = 'none';
+        sellBody.style.display = 'flex';
+        tabBuy.classList.remove('merchant-tab-active');
+        tabSell.classList.add('merchant-tab-active');
+        _renderMerchantPartyItems();
+        _renderMerchantSellBasket();
+        _updateMerchantSellTotals();
+    }
 }
 
 function _renderMerchantShop() {
@@ -798,6 +939,139 @@ function _buyItems() {
     });
 }
 
+// ── Sell-side helpers ────────────────────────────────────────────────────
+
+function _getMerchantSellPrice(name) {
+    const def = getItemDef(name);
+    if (!def) return 0;
+    // Offer 50% of merchant buy price if stocked; otherwise use item base value
+    if (MERCHANT_PRICES[name] != null) return Math.floor(MERCHANT_PRICES[name] * 0.5);
+    return def.value ?? 0;
+}
+
+function _renderMerchantPartyItems() {
+    const grid = document.getElementById('merchant-party-grid');
+    grid.innerHTML = '';
+
+    const CHARACTER_LABELS = ['A', 'B', 'C', 'D'];
+
+    for (let ci = 0; ci < 4; ci++) {
+        const member = party[ci];
+        if (!member || member.isEmpty) continue;
+
+        member.inventory.forEach((item, invIdx) => {
+            if (!item) return;
+            // Skip if already in the sell basket
+            if (_merchantSellBasket.some(e => e.charIndex === ci && e.invIndex === invIdx)) return;
+
+            const def = getItemDef(item.name);
+            if (!def) return;
+
+            const sellPrice = _getMerchantSellPrice(item.name);
+
+            const slot = document.createElement('div');
+            slot.className = 'merch-slot';
+
+            const tag = document.createElement('div');
+            tag.className = 'merch-char-tag';
+            tag.textContent = CHARACTER_LABELS[ci];
+            slot.appendChild(tag);
+
+            const img = document.createElement('img');
+            img.src = def.icon;
+            img.title = item.name;
+            slot.appendChild(img);
+
+            const price = document.createElement('div');
+            price.className = 'merch-price';
+            price.textContent = `${sellPrice}g`;
+            slot.appendChild(price);
+
+            slot.addEventListener('click', () => {
+                _merchantSellBasket.push({ charIndex: ci, invIndex: invIdx, name: item.name });
+                _renderMerchantPartyItems();
+                _renderMerchantSellBasket();
+                _updateMerchantSellTotals();
+            });
+
+            grid.appendChild(slot);
+        });
+    }
+}
+
+function _renderMerchantSellBasket() {
+    const grid = document.getElementById('merchant-sell-basket-grid');
+    grid.innerHTML = '';
+
+    _merchantSellBasket.forEach((entry, idx) => {
+        const def = getItemDef(entry.name);
+        if (!def) return;
+
+        const sellPrice = _getMerchantSellPrice(entry.name);
+
+        const slot = document.createElement('div');
+        slot.className = 'merch-slot';
+
+        const img = document.createElement('img');
+        img.src = def.icon;
+        img.title = entry.name;
+        slot.appendChild(img);
+
+        const price = document.createElement('div');
+        price.className = 'merch-price';
+        price.textContent = `${sellPrice}g`;
+        slot.appendChild(price);
+
+        // Click → return item to party panel
+        slot.addEventListener('click', () => {
+            _merchantSellBasket.splice(idx, 1);
+            _renderMerchantPartyItems();
+            _renderMerchantSellBasket();
+            _updateMerchantSellTotals();
+        });
+
+        grid.appendChild(slot);
+    });
+}
+
+function _updateMerchantSellTotals() {
+    const total = _merchantSellBasket.reduce((sum, e) => sum + _getMerchantSellPrice(e.name), 0);
+
+    document.getElementById('merchant-sell-total-val').textContent = total;
+    document.getElementById('merchant-sell-gold-val').textContent = partyGold;
+
+    const sellBtn = document.getElementById('merchant-sell-btn');
+    sellBtn.disabled = _merchantSellBasket.length === 0;
+}
+
+function _sellItems() {
+    if (_merchantSellBasket.length === 0) return;
+
+    const total = _merchantSellBasket.reduce((sum, e) => sum + _getMerchantSellPrice(e.name), 0);
+    const soldNames = _merchantSellBasket.map(e => e.name);
+
+    // Remove items from inventory (process in reverse index order per character to avoid index shifting)
+    const byChar = {};
+    for (const entry of _merchantSellBasket) {
+        if (!byChar[entry.charIndex]) byChar[entry.charIndex] = [];
+        byChar[entry.charIndex].push(entry.invIndex);
+    }
+    for (const ci of Object.keys(byChar)) {
+        const indices = byChar[ci].sort((a, b) => b - a); // descending so splicing doesn't shift
+        for (const idx of indices) {
+            party[ci].inventory[idx] = null;
+        }
+    }
+
+    addGold(total);
+    showMessage(`Sold ${soldNames.length} item${soldNames.length > 1 ? 's' : ''} for ${total} gold.`);
+
+    _merchantSellBasket = [];
+    _renderMerchantPartyItems();
+    _renderMerchantSellBasket();
+    _updateMerchantSellTotals();
+}
+
 function _bindChestSlots(equip, slots, contents) {
     slots.forEach((slot, i) => {
         slot.innerHTML = '';
@@ -838,7 +1112,10 @@ function _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx) {
     const target = party[targetIdx];
     const success = equip.addItemToInventory(targetIdx, itemDef.name);
     if (success) {
-        document.getElementById(_activeSentLabelId).textContent = `Sent to ${target.name}`;
+        if (_activeSentLabelId) {
+            const label = document.getElementById(_activeSentLabelId);
+            if (label) label.textContent = `Sent to ${target.name}`;
+        }
         contents[slotIdx] = null;
         const slot = slots[slotIdx];
         slot.innerHTML = '';
@@ -892,6 +1169,236 @@ function _showChestCtxMenu(x, y, equip, slots, contents, slotIdx, itemDef) {
     if (ly + mh > vh - 8) ly = y - mh - 4;
     menu.style.left = lx + 'px';
     menu.style.top = ly + 'px';
+}
+
+export function openAlchemyModal() {
+    _alchemyModalOpen = true;
+    playAlchemySound();
+    _activeSentLabelId = null;
+    const overlay = document.getElementById('alchemy-overlay');
+    overlay.classList.remove('chest-hidden');
+
+    _renderAlchemySlots();
+}
+
+/**
+ * Renders the current _alchemyContents into the alchemy modal slots.
+ */
+function _renderAlchemySlots() {
+    const slots = document.querySelectorAll('.alchemy-slot');
+    import('./equipment.js').then(equip => {
+        slots.forEach((slot, i) => {
+            slot.innerHTML = '';
+            slot.classList.remove('occupied');
+            slot.onclick = null;
+            slot.oncontextmenu = null;
+
+            const itemName = _alchemyContents[i];
+            if (!itemName) {
+                // Empty slot hint
+                if (i < 8) { // Only for ingredient slots, not result
+                    slot.onclick = (e) => _showAlchemyItemPicker(e.clientX, e.clientY, i);
+                    equip.attachTooltipListeners(slot, () => ({ name: "Empty Ingredient Slot", description: "Click to select an ingredient from your party's inventory." }));
+                }
+                return;
+            }
+
+            const itemDef = getItemDef(itemName);
+            if (!itemDef) return;
+
+            slot.classList.add('occupied');
+            const img = document.createElement('img');
+            img.src = itemDef.icon;
+            img.title = itemDef.name;
+            slot.appendChild(img);
+
+            // Left-click → send to first available party member (remove from academy)
+            slot.onclick = () => {
+                const defaultIdx = party.findIndex(m => !m.isEmpty);
+                if (defaultIdx !== -1) {
+                    const success = equip.addItemToInventory(defaultIdx, itemName);
+                    if (success) {
+                        _alchemyContents[i] = null;
+                        _renderAlchemySlots();
+                        equip.hideTooltip();
+                    } else {
+                        showMessage(`${party[defaultIdx].name}'s inventory is full!`);
+                    }
+                }
+            };
+
+            // Right-click → pick recipient
+            slot.oncontextmenu = (e) => {
+                e.preventDefault();
+                _showAlchemyCtxMenu(e.clientX, e.clientY, equip, i, itemDef);
+            };
+
+            // Hover tooltip
+            equip.attachTooltipListeners(slot, () => _alchemyContents[i] ? { name: _alchemyContents[i] } : null);
+        });
+    });
+}
+
+/**
+ * Shows a context menu to pick which party member takes the item from alchemy.
+ */
+function _showAlchemyCtxMenu(x, y, equip, slotIdx, itemDef) {
+    const menu = document.getElementById('chest-ctx-menu');
+    const list = document.getElementById('chest-ctx-list');
+    list.innerHTML = '';
+
+    party.filter(m => !m.isEmpty).forEach(target => {
+        const targetIdx = party.indexOf(target);
+        const row = document.createElement('div');
+        row.className = 'inv-ctx-give-item';
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 26;
+        canvas.height = 26;
+        drawPortrait(canvas, target);
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = target.name;
+
+        row.appendChild(canvas);
+        row.appendChild(nameSpan);
+        row.addEventListener('click', () => {
+            const success = equip.addItemToInventory(targetIdx, itemDef.name);
+            if (success) {
+                _alchemyContents[slotIdx] = null;
+                _renderAlchemySlots();
+                equip.hideTooltip();
+            } else {
+                showMessage(`${target.name}'s inventory is full!`);
+            }
+            _hideChestCtxMenu();
+        });
+        list.appendChild(row);
+    });
+
+    menu.classList.remove('chest-ctx-hidden');
+    _chestCtxOpen = true;
+
+    // Position near cursor
+    const mw = menu.offsetWidth || 160;
+    const mh = menu.offsetHeight || 100;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    let lx = x + 6;
+    let ly = y + 4;
+    if (lx + mw > vw - 8) lx = x - mw - 6;
+    if (ly + mh > vh - 8) ly = y - mh - 4;
+    menu.style.left = lx + 'px';
+    menu.style.top = ly + 'px';
+}
+
+/**
+ * Shows a picker with all unequipped loot items from the party's collective inventory.
+ */
+function _showAlchemyItemPicker(x, y, slotIdx) {
+    const picker = document.getElementById('alchemy-picker');
+    const grid = document.getElementById('alchemy-picker-grid');
+    grid.innerHTML = '';
+
+    let hasLoot = false;
+
+    import('./equipment.js').then(equip => {
+        party.forEach((member, memberIdx) => {
+            if (member.isEmpty) return;
+
+            member.inventory.forEach((item, invIdx) => {
+                if (!item) return;
+                const itemName = item.name; // inventory stores { name, slot } objects
+                const def = getItemDef(itemName);
+                if (def?.slot !== 'loot') return;
+
+                hasLoot = true;
+                const slot = document.createElement('div');
+                slot.className = 'picker-slot';
+
+                const img = document.createElement('img');
+                img.src = def.icon;
+                img.title = `${def.name} (${member.name})`;
+                slot.appendChild(img);
+
+                // Mini portrait of owner
+                const owner = document.createElement('div');
+                owner.className = 'picker-slot-owner';
+                const canvas = document.createElement('canvas');
+                canvas.width = 14;
+                canvas.height = 14;
+                drawPortrait(canvas, member);
+                owner.appendChild(canvas);
+                slot.appendChild(owner);
+
+                slot.onclick = () => {
+                    // Move item: store string name in alchemy, clear inventory slot
+                    _alchemyContents[slotIdx] = itemName;
+                    member.inventory[invIdx] = null;
+                    _renderAlchemySlots();
+                    _hideAlchemyItemPicker();
+                    equip.hideTooltip();
+                };
+
+                equip.attachTooltipListeners(slot, () => ({ name: def.name, description: `Held by ${member.name}. Click to add to workshop.` }));
+                grid.appendChild(slot);
+            });
+        });
+
+        if (!hasLoot) {
+            const msg = document.createElement('div');
+            msg.className = 'picker-empty-msg';
+            msg.textContent = "No ingredients found in party inventory.";
+            grid.appendChild(msg);
+        }
+
+        picker.classList.remove('picker-hidden');
+
+        // Position near clicked slot
+        const pw = picker.offsetWidth || 280;
+        const ph = picker.offsetHeight || 200;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        // Prefer showing it above the clicked point
+        let lx = x - (pw / 2);
+        let ly = y - ph - 10;
+
+        if (lx < 10) lx = 10;
+        if (lx + pw > vw - 10) lx = vw - pw - 10;
+        if (ly < 10) ly = y + 20; // Flip below if no space above
+        if (ly + ph > vh - 10) ly = vh - ph - 10;
+
+        picker.style.left = lx + 'px';
+        picker.style.top = ly + 'px';
+    });
+}
+
+function _hideAlchemyItemPicker() {
+    const picker = document.getElementById('alchemy-picker');
+    if (picker) picker.classList.add('picker-hidden');
+}
+
+/**
+ * Returns true if the alchemy modal is currently visible.
+ */
+export function isAlchemyModalOpen() {
+    return _alchemyModalOpen;
+}
+
+/**
+ * Tries to add an item to the first available ingredient slot (0-7).
+ */
+export function addItemToAlchemy(itemName) {
+    for (let i = 0; i < 8; i++) {
+        if (_alchemyContents[i] === null) {
+            _alchemyContents[i] = itemName;
+            if (_alchemyModalOpen) _renderAlchemySlots();
+            return true;
+        }
+    }
+    showMessage("The alchemy workshop ingredient slots are full!");
+    return false;
 }
 
 function _hideChestCtxMenu() {

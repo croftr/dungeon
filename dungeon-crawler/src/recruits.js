@@ -36,6 +36,7 @@ export const RECRUITS = [
         ],
         image: '/human_paladin_head.png',
         leftHand: 'Sword', rightHand: 'Shield', startingSkill: 'Sanctuary',
+        startingInventory: ['Life Berry', 'Poison Vial', 'Life Essence', 'Life Essence'],
         gridCol: 10, gridRow: 8, facing: 'front', // North wall
         isRecruited: false
     },
@@ -347,6 +348,7 @@ function recruitCharacter(r) {
         irisColor: '#2a6a3a',
         // also need these for logic
         inventory: null,
+        startingInventory: r.startingInventory ? [...r.startingInventory] : null,
         equipment: null
     };
 

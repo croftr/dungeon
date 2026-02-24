@@ -7,6 +7,7 @@ import { attackMonster, monsters, getInRangeMonster, setHuntersEyeTarget, getHun
 import { showMessage } from './minimap.js';
 import { dropMember } from './recruits.js';
 import { isInFrontOfPlayer } from './player.js';
+import { isAlchemyModalOpen, addItemToAlchemy } from './objects.js';
 import { canMelee } from './combat-rules.js';
 import { playCritSound, playSkillSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
@@ -221,8 +222,16 @@ export function extendPartyData() {
       }
     }
 
-    // 20-slot inventory, all empty
+    // 20-slot inventory, all empty (or with starting items)
     m.inventory = Array(INVENTORY_SIZE).fill(null);
+    if (m.startingInventory) {
+      const itemsToSeed = [...m.startingInventory];
+      // Clear it before seeding so we don't re-seed if equipment modal is opened/closed
+      delete m.startingInventory;
+      itemsToSeed.forEach((itemName) => {
+        addItemToInventory(party.indexOf(m), itemName);
+      });
+    }
     updateEffectiveStats(m);
   });
 }
@@ -850,6 +859,18 @@ function onInventoryCellClick(e) {
   const item = m.inventory[invIndex];
   if (!item) return;
 
+  // If the Alchemy Workshop is open, clicking a loot item sends it there immediately.
+  if (isAlchemyModalOpen()) {
+    const def = getItemDef(item.name);
+    if (def?.slot === 'loot') {
+      if (addItemToAlchemy(item.name)) {
+        m.inventory[invIndex] = null;
+        renderModal(activeCharIndex);
+      }
+      return;
+    }
+  }
+
   // Shift + Click = Quick Giving to next member (original shortcut kept)
   if (e.shiftKey) {
     let nextIdx = (activeCharIndex + 1) % 4;
@@ -898,7 +919,8 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
   const def = item ? getItemDef(item.name) : null;
 
   // ── Sell button (loot items only) ──
-  let sellBtn = document.getElementById('inv-ctx-sell');
+  const sellBtn = document.getElementById('inv-ctx-sell');
+  const alchemyBtn = document.getElementById('inv-ctx-alchemy'); // We need to add this to the HTML
   if (def?.slot === 'loot') {
     equipBtn.style.display = 'none';
     learnBtn.style.display = 'none';
@@ -933,6 +955,26 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
       _equipItem(activeCharIndex, _ctxInvIndex);
       _hideContextMenu();
     };
+  }
+
+  // ── Alchemy Workshop button ──
+  if (alchemyBtn) {
+    if (isAlchemyModalOpen() && def?.slot === 'loot') {
+      alchemyBtn.style.display = 'block';
+      alchemyBtn.onclick = () => {
+        const m = party[activeCharIndex];
+        const item = m.inventory[_ctxInvIndex];
+        if (item) {
+          if (addItemToAlchemy(item.name)) {
+            m.inventory[_ctxInvIndex] = null;
+            renderModal(activeCharIndex);
+          }
+        }
+        _hideContextMenu();
+      };
+    } else {
+      alchemyBtn.style.display = 'none';
+    }
   }
 
   // ── Give-to list ──
