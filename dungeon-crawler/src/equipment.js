@@ -91,6 +91,7 @@ const SLOT_LABELS = {
 // ─────────────────────────────────────────────
 let activeCharIndex = null;
 let _ctxInvIndex = null;   // inventory slot most recently right-clicked
+let _skillSwMenuCtx = null; // { memberIndex, mode: 'skill'|'spell' } when skill-switch menu is open
 
 // ─────────────────────────────────────────────
 //  DATA SETUP  — extends party member objects
@@ -987,6 +988,83 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
 function _hideContextMenu() {
   document.getElementById('inv-context-menu').classList.add('inv-ctx-hidden');
   _ctxInvIndex = null;
+}
+
+// ─────────────────────────────────────────────
+//  SKILL / SPELL SWITCH MENU
+// ─────────────────────────────────────────────
+
+function _showSkillSwitchMenu(x, y, memberIndex, mode) {
+  const m = party[memberIndex];
+  if (!m || m.isEmpty) return;
+
+  const items = mode === 'skill' ? (m.skills || []) : (m.spells || []);
+  if (!items.length) return;
+
+  _skillSwMenuCtx = { memberIndex, mode };
+
+  const menu = document.getElementById('skill-switch-menu');
+  menu.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.className = 'skill-sw-header';
+  header.textContent = mode === 'skill' ? 'Switch Skill' : 'Switch Spell';
+  menu.appendChild(header);
+
+  const currentName = mode === 'skill'
+    ? m.equipment?.skill?.name
+    : m.selectedSpell;
+
+  items.forEach(item => {
+    const isActive = item.name === currentName;
+    const row = document.createElement('div');
+    row.className = 'skill-sw-item' + (isActive ? ' skill-sw-active' : '');
+
+    if (item.icon) {
+      const img = document.createElement('img');
+      img.src = item.icon;
+      img.alt = item.name;
+      row.appendChild(img);
+    }
+
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = item.name;
+    row.appendChild(nameSpan);
+
+    if (isActive) {
+      const check = document.createElement('span');
+      check.className = 'skill-sw-check';
+      check.textContent = '✓';
+      row.appendChild(check);
+    }
+
+    row.addEventListener('click', () => {
+      if (mode === 'skill') {
+        m.equipment.skill = { name: item.name, slot: 'skill', icon: item.icon };
+      } else {
+        m.selectedSpell = item.name;
+      }
+      refreshPartyCards();
+      _hideSkillSwitchMenu();
+    });
+
+    menu.appendChild(row);
+  });
+
+  // Show then position (needs to be visible to measure size)
+  menu.classList.remove('skill-sw-hidden');
+  const menuRect = menu.getBoundingClientRect();
+  let left = x;
+  let top = y;
+  if (left + menuRect.width > window.innerWidth) left = window.innerWidth - menuRect.width - 8;
+  if (top + menuRect.height > window.innerHeight) top = window.innerHeight - menuRect.height - 8;
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
+}
+
+function _hideSkillSwitchMenu() {
+  document.getElementById('skill-switch-menu').classList.add('skill-sw-hidden');
+  _skillSwMenuCtx = null;
 }
 
 // Clicking a body slot with an item → move it to first free inventory cell
@@ -1970,11 +2048,29 @@ function attachCardListeners() {
         e.stopPropagation(); // prevent card click / modal open
         useHand(i, 'left');
       });
+      lhSlot.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const m = party[i];
+        if (!m || m.isEmpty) return;
+        if (m.equipment?.leftHand?.name === 'Spellbook' && m.spells?.length) {
+          _showSkillSwitchMenu(e.clientX, e.clientY, i, 'spell');
+        }
+      });
     }
     if (rhSlot) {
       rhSlot.addEventListener('click', (e) => {
         e.stopPropagation();
         useHand(i, 'right');
+      });
+      rhSlot.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const m = party[i];
+        if (!m || m.isEmpty) return;
+        if (m.equipment?.rightHand?.name === 'Spellbook' && m.spells?.length) {
+          _showSkillSwitchMenu(e.clientX, e.clientY, i, 'spell');
+        }
       });
     }
 
@@ -1983,6 +2079,15 @@ function attachCardListeners() {
       skSlot.addEventListener('click', (e) => {
         e.stopPropagation();
         useSkill(i);
+      });
+      skSlot.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const m = party[i];
+        if (!m || m.isEmpty) return;
+        if (m.skills?.length) {
+          _showSkillSwitchMenu(e.clientX, e.clientY, i, 'skill');
+        }
       });
     }
 
@@ -2003,6 +2108,11 @@ function attachOverlayListeners() {
   // Escape key — close context menu first, then modal
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
+      if (_skillSwMenuCtx !== null) {
+        e.stopPropagation();
+        _hideSkillSwitchMenu();
+        return;
+      }
       if (_ctxInvIndex !== null) {
         e.stopPropagation();
         _hideContextMenu();
@@ -2027,10 +2137,14 @@ function attachOverlayListeners() {
     }
   });
 
-  // Click outside the context menu → dismiss it
+  // Click outside context menus → dismiss them
   document.addEventListener('mousedown', (e) => {
-    const menu = document.getElementById('inv-context-menu');
-    if (!menu.classList.contains('inv-ctx-hidden') && !menu.contains(e.target)) {
+    const skillMenu = document.getElementById('skill-switch-menu');
+    if (!skillMenu.classList.contains('skill-sw-hidden') && !skillMenu.contains(e.target)) {
+      _hideSkillSwitchMenu();
+    }
+    const invMenu = document.getElementById('inv-context-menu');
+    if (!invMenu.classList.contains('inv-ctx-hidden') && !invMenu.contains(e.target)) {
       _hideContextMenu();
     }
   });

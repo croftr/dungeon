@@ -1811,6 +1811,73 @@ body {
   font-style: italic;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   SKILL / SPELL SWITCH MENU
+   Right-click popup on party panel skill/spell slots — switch active skill or spell.
+───────────────────────────────────────────────────────────────────────────── */
+#skill-switch-menu {
+  position: fixed;
+  min-width: 170px;
+  background: rgba(8, 6, 3, 0.97);
+  border: 1px solid #7a5a28;
+  border-radius: 5px;
+  padding: 4px 0;
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 220, 120, 0.07);
+  z-index: 1200;
+  user-select: none;
+}
+
+#skill-switch-menu.skill-sw-hidden {
+  display: none;
+}
+
+.skill-sw-header {
+  font-size: 0.68rem;
+  color: #806840;
+  padding: 4px 14px 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.skill-sw-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  cursor: pointer;
+  color: #c8a87a;
+  font-size: 0.84rem;
+  white-space: nowrap;
+  transition: background 0.1s ease;
+}
+
+.skill-sw-item:hover {
+  background: rgba(200, 168, 74, 0.18);
+  color: #e8d89a;
+}
+
+.skill-sw-item.skill-sw-active {
+  color: #ffe08a;
+  font-weight: 600;
+}
+
+.skill-sw-item img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
+  image-rendering: pixelated;
+}
+
+.skill-sw-check {
+  margin-left: auto;
+  color: #80d080;
+  font-size: 0.9rem;
+  padding-left: 6px;
+}
+
 /* ── Dead party member card ─────────────────────────────────────────────── */
 .member-card--dead {
   border-color: #5a1010 !important;
