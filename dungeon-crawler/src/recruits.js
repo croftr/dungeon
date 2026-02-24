@@ -11,7 +11,7 @@ export const RECRUITS = [
         id: 'recruit_1',
         name: 'Elrond',
         job: 'Ranger',
-        race: 'Elf',
+        race: 'Wood Elf',
         hp: 42, hpMax: 42, mp: 10, mpMax: 10, sp: 100, spMax: 100,
         stats: { strength: 5, dexterity: 10, vitality: 5, intelligence: 7, resilience: 5 },
         skills: [

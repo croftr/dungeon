@@ -641,6 +641,29 @@
     </div>
   </div>
 
+  <!-- ── ANVIL MODAL ── -->
+  <div id="anvil-overlay" class="chest-hidden">
+    <div id="anvil-modal">
+      <div id="anvil-header" class="chest-header-style">
+        <div id="anvil-title-wrap">
+          <img src="/icons/anvil.svg" id="anvil-header-icon" alt="Anvil">
+          <span id="anvil-title">Blacksmith's Anvil</span>
+        </div>
+        <span id="anvil-sent-label"></span>
+        <button id="anvil-close" aria-label="Close">&times;</button>
+      </div>
+      <div id="anvil-body">
+        <div id="anvil-grid">
+          <!-- 4 slots (2x2) for a smaller modal -->
+          <div class="chest-slot anvil-slot" data-index="0"></div>
+          <div class="chest-slot anvil-slot" data-index="1"></div>
+          <div class="chest-slot anvil-slot" data-index="2"></div>
+          <div class="chest-slot anvil-slot" data-index="3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Merchant modal -->
   <div id="merchant-overlay" class="merchant-hidden">
     <div id="merchant-modal">

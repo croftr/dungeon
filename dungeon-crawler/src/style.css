@@ -2499,6 +2499,86 @@ body {
   flex-shrink: 0;
 }
 
+/* ── Anvil modal ── */
+#anvil-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  backdrop-filter: blur(2px);
+}
+
+#anvil-modal {
+  width: 200px;
+  /* Small modal as requested */
+  background: rgba(12, 10, 8, 0.98);
+  border: 1px solid #5a4a30;
+  border-radius: 6px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 220, 120, 0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: monospace;
+}
+
+#anvil-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #3a2e18;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+#anvil-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#anvil-header-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+#anvil-title {
+  font-size: 11px;
+  color: #c8a84a;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+#anvil-sent-label {
+  flex: 1;
+  text-align: right;
+  font-size: 10px;
+  color: #8a7040;
+  font-style: italic;
+  padding-right: 8px;
+}
+
+#anvil-close {
+  background: none;
+  border: 1px solid #4a3a20;
+  color: #888;
+  font-size: 16px;
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+#anvil-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 15px;
+}
+
 #corpse-title-wrap {
   display: flex;
   align-items: center;

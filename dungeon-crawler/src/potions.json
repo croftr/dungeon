@@ -2,11 +2,10 @@
     {
         "name": "Cure Poison Potion",
         "icon": "/icons/cure_poison_potion.svg",
-        "description": "A bitter-tasting brew that restores 20 hit points.",
+        "description": "A bitter-tasting brew that neutralizes toxins and cures poison.",
         "type": "potion",
         "effect": {
-            "type": "heal",
-            "value": 20
+            "type": "cure-poison"
         },
         "value": 25,
         "weight": 0.3
@@ -14,12 +13,37 @@
     {
         "name": "Healing Potion",
         "icon": "/icons/healing_potion.svg",
-        "description": "A soothing elixir that neutralizes toxins and cures poison.",
+        "description": "A soothing elixir that restores 20 hit points.",
         "type": "potion",
         "effect": {
-            "type": "cure-poison"
+            "type": "heal",
+            "value": 20
         },
         "value": 30,
         "weight": 0.3
+    },
+    {
+        "name": "Mana Potion",
+        "icon": "/icons/mana_potion.svg",
+        "description": "A crystalline blue liquid that restores 30 mana points.",
+        "type": "potion",
+        "effect": {
+            "type": "restore-mp",
+            "value": 30
+        },
+        "value": 40,
+        "weight": 0.3
+    },
+    {
+        "name": "Stamina Potion",
+        "icon": "/icons/stamina_potion.svg",
+        "description": "A bubbling orange brew that restores 40 stamina points.",
+        "type": "potion",
+        "effect": {
+            "type": "restore-sp",
+            "value": 40
+        },
+        "value": 20,
+        "weight": 0.4
     }
 ]

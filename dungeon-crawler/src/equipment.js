@@ -856,26 +856,49 @@ function _usePotion(memberIndex, invIndex) {
   if (!def || def.type !== 'potion' || !def.effect) return;
 
   const { type, value } = def.effect;
+  let msg = '';
+  let sound = 'heal';
 
-  if (type === 'heal') {
-    const healAmount = value || 0;
-    const oldHp = m.hp;
-    const newHp = Math.min(m.maxHp, m.hp + healAmount);
-    setHp(m.id, newHp);
-    showMessage(`${m.name} drinks ${item.name} and restores ${newHp - oldHp} HP.`);
-    playSkillSound('heal');
-  } else if (type === 'cure-poison') {
-    // Clear poison debuffs
-    const hadPoison = (m.activeDebuffs || []).some(d => d.effectId === 'poison');
-    m.activeDebuffs = (m.activeDebuffs || []).filter(d => d.effectId !== 'poison');
-
-    if (hadPoison) {
-      showMessage(`${m.name} drinks ${item.name} and is cured of poison.`);
-    } else {
-      showMessage(`${m.name} drinks ${item.name}.`);
+  switch (type) {
+    case 'heal':
+    case 'restore-hp': {
+      const oldHp = m.hp;
+      const newHp = Math.min(m.hpMax, m.hp + (value || 0));
+      setHp(m.id, newHp);
+      msg = `restores ${newHp - oldHp} HP`;
+      sound = 'heal';
+      break;
     }
-    playSkillSound('cure');
+    case 'restore-mp': {
+      const oldMp = m.mp;
+      const newMp = Math.min(m.mpMax, m.mp + (value || 0));
+      setMp(m.id, newMp);
+      msg = `restores ${newMp - oldMp} MP`;
+      sound = 'magic';
+      break;
+    }
+    case 'restore-sp': {
+      const oldSp = m.sp;
+      const newSp = Math.min(m.spMax ?? 100, m.sp + (value || 0));
+      setSp(m.id, newSp);
+      msg = `restores ${newSp - oldSp} SP`;
+      sound = 'magic';
+      break;
+    }
+    case 'cure-poison': {
+      const hadPoison = (m.activeDebuffs || []).some(d => d.effectId === 'poison');
+      m.activeDebuffs = (m.activeDebuffs || []).filter(d => d.effectId !== 'poison');
+      msg = hadPoison ? `is cured of poison` : 'feels refreshed';
+      sound = 'cure';
+      break;
+    }
+    default:
+      console.warn(`Unknown potion effect type: ${type}`);
+      return;
   }
+
+  showMessage(`${m.name} drinks ${item.name} and ${msg}.`);
+  if (sound) playSkillSound(sound);
 
   // Consume the potion
   m.inventory[invIndex] = null;

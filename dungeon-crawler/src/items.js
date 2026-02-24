@@ -38,9 +38,9 @@ export const ITEMS = [
     slot: 'loot',
     icon: '/icons/life_essence.png',
     description: 'A glowing orb of pure life energy. Prized by alchemists for crafting.',
-    value: 10,
+    value: 0,
     weight: 0.1,
-    sellable: true,
+    sellable: false,
   },
   {
     name: 'Poison Vial',

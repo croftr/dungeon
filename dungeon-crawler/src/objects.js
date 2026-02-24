@@ -6,7 +6,7 @@ import { tweenGroup, isInFrontOfPlayer, player } from './player.js';
 import { showMessage } from './minimap.js';
 import { getItemDef } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold } from './party.js';
-import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound } from './audio.js';
+import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAnvilSound } from './audio.js';
 
 export const objects = [];
 
@@ -226,6 +226,15 @@ export function initObjects(scene, camera) {
                     showMessage("Move closer to pick it up.");
                 }
                 break;
+            } else if (obj.userData.isAnvil) {
+                const isOnSameSquare = (player.gridRow === obj.userData.gridRow && player.gridCol === obj.userData.gridCol);
+                if (isOnSameSquare) {
+                    playAnvilSound();
+                    openAnvilModal(obj);
+                } else {
+                    showMessage("Stand by the anvil to use it.");
+                }
+                break;
             }
         }
     });
@@ -248,6 +257,18 @@ export function initObjects(scene, camera) {
             e.stopPropagation();
             document.getElementById('merchant-overlay').classList.add('merchant-hidden');
             _hideChestCtxMenu();
+            import('./equipment.js').then(m => m.hideTooltip());
+        };
+    }
+
+    // Anvil modal close
+    const anvilCloseBtn = document.getElementById('anvil-close');
+    if (anvilCloseBtn) {
+        anvilCloseBtn.onclick = (e) => {
+            e.stopPropagation();
+            document.getElementById('anvil-overlay').classList.add('chest-hidden');
+            _hideChestCtxMenu();
+            import('./equipment.js').then(m => m.hideTooltip());
         };
     }
 
@@ -359,6 +380,12 @@ export function initObjects(scene, camera) {
         alchemyOverlayEl.addEventListener('click', (e) => e.stopPropagation());
     }
 
+    // Ditto for anvil overlay
+    const anvilOverlayEl = document.getElementById('anvil-overlay');
+    if (anvilOverlayEl) {
+        anvilOverlayEl.addEventListener('click', (e) => e.stopPropagation());
+    }
+
     // Dismiss chest context menu on outside click
     document.addEventListener('mousedown', (e) => {
         if (!_chestCtxOpen) return;
@@ -458,6 +485,9 @@ export function spawnObjectsForLevel() {
 
         // Alchemy Workshop in the big east room against the south wall
         addAlchemyWorkshop(objectsGroup, gltfLoader, 19, 14, 0, 0, 0.85);
+
+        // Anvil in the big east room against the north wall
+        addAnvil(objectsGroup, gltfLoader, 19, 7, 0, 0, -0.85, ['Life Essence', 'Life Essence']);
 
         // Portcullis: Row 7, Col 7.
         const portcullis = {
@@ -719,6 +749,41 @@ function addAlchemyWorkshop(scene, loader, col, row, rotY = 0, offsetX = 0, offs
     });
 }
 
+function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, contents = []) {
+    loader.load('/items/anvil.glb', (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(0.7);
+        model.position.set(col * CELL + offsetX, 0.5, row * CELL + offsetZ);
+        model.rotation.y = rotY;
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.userData.isAnvil = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+                child.userData.contents = contents;
+
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
+            }
+        });
+
+        scene.add(model);
+    });
+}
+
 function openPortcullis(p) {
     if (p.isOpen) return;
     p.isOpen = true;
@@ -762,6 +827,20 @@ function openSpellCabinetModal(cabinetObj) {
 
     const slots = document.querySelectorAll('.cabinet-slot');
     const contents = cabinetObj.userData.contents || [];
+
+    import('./equipment.js').then(equip => {
+        _bindChestSlots(equip, slots, contents);
+    });
+}
+
+function openAnvilModal(anvilObj) {
+    _activeSentLabelId = 'anvil-sent-label';
+    const overlay = document.getElementById('anvil-overlay');
+    overlay.classList.remove('chest-hidden');
+    document.getElementById('anvil-sent-label').textContent = '';
+
+    const slots = document.querySelectorAll('.anvil-slot');
+    const contents = anvilObj.userData.contents || [];
 
     import('./equipment.js').then(equip => {
         _bindChestSlots(equip, slots, contents);
@@ -1182,7 +1261,7 @@ function _showChestCtxMenu(x, y, equip, slots, contents, slotIdx, itemDef) {
 
 // ── Recipes: [ [ingredients...], resultName ] ────────────────────────────────
 const ALCHEMY_RECIPES = [
-    { ingredients: ['Life Essence', 'Life Berry'],  result: 'Healing Potion' },
+    { ingredients: ['Life Essence', 'Life Berry'], result: 'Healing Potion' },
     { ingredients: ['Life Essence', 'Poison Vial'], result: 'Cure Poison Potion' },
 ];
 
