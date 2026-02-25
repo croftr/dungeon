@@ -20,6 +20,7 @@ const SOUND_MAP = {
   punch: { url: '/sounds/actions/bash.mp3', offset: 0.05 },
   fireball: { url: '/sounds/actions/fireball.mp3', offset: 0.0 },
   'shield-bash': { url: '/sounds/actions/bash.mp3', offset: 0.05 },
+  death: { url: '/sounds/actions/death.mp3', offset: 0.0 },
 };
 
 const bufferCache = new Map();
