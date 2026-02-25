@@ -20,7 +20,7 @@ const SOUND_MAP = {
   punch: { url: '/sounds/actions/bash.mp3', offset: 0.05 },
   fireball: { url: '/sounds/actions/fireball.mp3', offset: 0.0 },
   'shield-bash': { url: '/sounds/actions/bash.mp3', offset: 0.05 },
-  death: { url: '/sounds/actions/death.mp3', offset: 0.0 },
+  death: { url: '/sounds/actions/monster-killed-1.mp3 ', offset: 0.0 },
 };
 
 const bufferCache = new Map();
@@ -241,8 +241,12 @@ export function setZoneMusic(url) {
 /**
  * Call this when a combat event occurs (hit or attack).
  */
-export function setInCombat() {
-  combatTimer = 15.0; // Stay in combat music for 15s after last event
+export function setInCombat(duration = 5.0) {
+  combatTimer = Math.max(combatTimer, duration);
+}
+
+export function clearCombat() {
+  combatTimer = 0;
 }
 
 const SKILL_SOUND_MAP = {

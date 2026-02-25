@@ -15,7 +15,7 @@ import {
   CRIT_CHANCE, CRIT_MULTIPLIER,
   MONSTER_BASE_ATTACK, RESILIENCE_DAMAGE_FACTOR,
 } from './combat-rules.js';
-import { setInCombat, playCritSound, playActionSound } from './audio.js';
+import { setInCombat, clearCombat, playCritSound, playActionSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { getItemDef } from './items.js';
 import { spawnDroppedItem } from './objects.js';
@@ -463,6 +463,8 @@ export function updateMonsters(dt, playerCamera, scene) {
 
     // Proximity attack logic: if player is adjacent, attack them periodically
     if (inRange) {
+      setInCombat();
+
       if (m.stunUntil && performance.now() < m.stunUntil) {
         // Monster is stunned; cooldown timer doesn't tick down yet
       } else {
@@ -535,6 +537,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
 
   if (m.hp === 0) {
     m.alive = false;
+    if (!getInRangeMonster()) clearCombat();
     playActionSound('death');
 
     // ── Drop table roll ─────────────────────────────────────────────────────
