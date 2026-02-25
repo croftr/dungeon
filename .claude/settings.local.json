@@ -4,7 +4,20 @@
       "Bash(node --version:*)",
       "Bash(npm:*)",
       "Bash(dir:*)",
-      "Bash(cmd /c:*)"
+      "Bash(cmd /c:*)",
+      "mcp__Context7__resolve-library-id",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(node -e:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(where npm:*)",
+      "Bash(where:*)",
+      "Bash(curl:*)",
+      "Bash(ls:*)",
+      "Bash(npx vite build)",
+      "Bash(node:*)",
+      "Bash(grep:*)"
     ]
   }
 }
