@@ -1,7 +1,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 //  COMBAT RULES  — single source of truth for all combat tuning and formation logic.
-//  Edit this file to iterate on combat balance and rules.
+//  Edit data/combat-rules.json to iterate on combat balance.
 // ─────────────────────────────────────────────────────────────────────────────
+
+import RULES from './data/combat-rules.json';
 
 // ── Utility ───────────────────────────────────────────────────────────────────
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
@@ -9,38 +11,46 @@ function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 // ── Hit chance constants ──────────────────────────────────────────────────────
 
 /** Base probability (0–1) that a player's attack hits a monster. */
-export const BASE_PLAYER_HIT_CHANCE = 0.80;
+export const BASE_PLAYER_HIT_CHANCE = RULES.basePlayerHitChance;
 
 /** Base probability (0–1) that a monster's attack hits a party member. */
-export const BASE_MONSTER_HIT_CHANCE = 0.45;
+export const BASE_MONSTER_HIT_CHANCE = RULES.baseMonsterHitChance;
 
 /** Hit chance shift per point of DEX advantage/disadvantage (both directions). */
-export const DEX_HIT_MODIFIER = 0.015;
+export const DEX_HIT_MODIFIER = RULES.dexHitModifier;
 
 /** Floor applied to all hit chance results — no attacker can drop below this. */
-export const MIN_HIT_CHANCE = 0.15;
+export const MIN_HIT_CHANCE = RULES.minHitChance;
 
 /** Ceiling applied to all hit chance results — no attacker can exceed this. */
-export const MAX_HIT_CHANCE = 0.97;
+export const MAX_HIT_CHANCE = RULES.maxHitChance;
 
 // ── Critical hit constants ────────────────────────────────────────────────────
 
 /** Probability (0–1) that a confirmed hit (either direction) becomes a critical hit. */
-export const CRIT_CHANCE = 0.05;
+export const CRIT_CHANCE = RULES.critChance;
 
 /** Damage multiplier applied when a critical hit occurs. */
-export const CRIT_MULTIPLIER = 3;
+export const CRIT_MULTIPLIER = RULES.critMultiplier;
 
 // ── Monster attack damage constants ──────────────────────────────────────────
 
 /** Flat bonus added to a monster's STR when calculating attack damage. */
-export const MONSTER_BASE_ATTACK = 4;
+export const MONSTER_BASE_ATTACK = RULES.monsterBaseAttack;
 
 /**
  * Fraction of a character's RES stat subtracted from incoming monster damage.
  * e.g. RES 18 × 0.5 = 9 points of damage reduction.
  */
-export const RESILIENCE_DAMAGE_FACTOR = 0.5;
+export const RESILIENCE_DAMAGE_FACTOR = RULES.resilienceDamageFactor;
+
+// ── Shield bash stun constants ──────────────────────────────────────────────
+
+/** Probability (0–1) that a shield bash stuns the monster. */
+export const SHIELD_BASH_STUN_CHANCE = RULES.shieldBashStunChance;
+
+/** Duration in ms that a shield bash stun lasts. */
+export const SHIELD_BASH_STUN_DURATION_MS = RULES.shieldBashStunDurationMs;
 
 // ── Hit chance functions ──────────────────────────────────────────────────────
 
@@ -140,10 +150,7 @@ export function calcMonsterDamage(monster, character, characterDefence = 0) {
 //
 //  BACKUP_PAIRS maps backSlot → frontSlot it covers.
 
-export const BACKUP_PAIRS = {
-  2: 0,   // slot 2 steps up when slot 0 is dead
-  3: 1,   // slot 3 steps up when slot 1 is dead
-};
+export const BACKUP_PAIRS = RULES.backupPairs;
 
 // ── Formation queries ─────────────────────────────────────────────────────────
 

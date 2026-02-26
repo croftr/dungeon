@@ -7,6 +7,7 @@ import { showMessage } from './minimap.js';
 import { getItemDef } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold } from './party.js';
 import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAnvilSound } from './audio.js';
+import MERCHANT_DATA from './data/merchant.json';
 
 export const objects = [];
 
@@ -34,23 +35,8 @@ export function isShopAt(r, c) {
 // ─────────────────────────────────────────────
 //  MERCHANT STOCK & PRICES
 // ─────────────────────────────────────────────
-const MERCHANT_STOCK = [
-    'Leather Boots', 'Steel Arrows', 'Poison Arrows', 'Torch',
-    'Leather Cap', 'Iron Helm', 'Padded Vest', 'Leather Belt',
-    "Adventurer's Belt", 'Chain Shirt', 'Plate Cuirass',
-    'Iron Gauntlets', 'Chainmail Leggings', 'Iron-Shod Boots',
-    'Greatsword', 'War Hammer', 'Longbow',
-    'Ring of Strength', 'Ring of Dexterity', 'Ring of Resilience',
-];
-
-const MERCHANT_PRICES = {
-    'Leather Boots': 30, 'Steel Arrows': 35, 'Poison Arrows': 45, 'Torch': 20,
-    'Leather Cap': 25, 'Iron Helm': 70, 'Padded Vest': 30, 'Leather Belt': 10,
-    "Adventurer's Belt": 50, 'Chain Shirt': 130, 'Plate Cuirass': 350,
-    'Iron Gauntlets': 70, 'Chainmail Leggings': 100, 'Iron-Shod Boots': 50,
-    'Greatsword': 220, 'War Hammer': 190, 'Longbow': 150,
-    'Ring of Strength': 120, 'Ring of Dexterity': 120, 'Ring of Resilience': 120,
-};
+const MERCHANT_STOCK = MERCHANT_DATA.stock;
+const MERCHANT_PRICES = MERCHANT_DATA.prices;
 
 // Items still available for sale (items bought are removed permanently)
 let _merchantAvailable = [...MERCHANT_STOCK];

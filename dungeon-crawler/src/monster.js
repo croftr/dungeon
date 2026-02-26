@@ -14,6 +14,7 @@ import {
   pickRandomFrontLineTarget,
   CRIT_CHANCE, CRIT_MULTIPLIER,
   MONSTER_BASE_ATTACK, RESILIENCE_DAMAGE_FACTOR,
+  SHIELD_BASH_STUN_CHANCE, SHIELD_BASH_STUN_DURATION_MS,
 } from './combat-rules.js';
 import { setInCombat, clearCombat, playCritSound, playActionSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
@@ -21,6 +22,7 @@ import { getItemDef } from './items.js';
 import { spawnDroppedItem } from './objects.js';
 import { MONSTER_DEFS as D } from './monster-defs.js';
 import { skillsState } from './skills-state.js';
+import SKILLS_DATA from './data/skills.json';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  HUNTER'S EYE STATE  — tracks which monster is currently being analysed
@@ -141,8 +143,9 @@ function _updateStatsPanel(m) {
   const defVal = m.defence ?? '—';
   const resVal = s.resilience ?? '—';
 
-  const displayDef = isSundered && defVal !== '—' ? `<span style="color:#ff8080">${Math.floor(defVal / 2)}</span>` : defVal;
-  const displayRes = isSundered && resVal !== '—' ? `<span style="color:#ff8080">${Math.floor(resVal / 2)}</span>` : resVal;
+  const sunderMag = SKILLS_DATA['Sunder Armor'].magnitude;
+  const displayDef = isSundered && defVal !== '—' ? `<span style="color:#ff8080">${Math.floor(defVal * sunderMag)}</span>` : defVal;
+  const displayRes = isSundered && resVal !== '—' ? `<span style="color:#ff8080">${Math.floor(resVal * sunderMag)}</span>` : resVal;
 
   const isEntangled = skillsState.entangle?.active && skillsState.entangle?.targetId === m.id;
   const isStunned = m.stunUntil && performance.now() < m.stunUntil;
@@ -473,7 +476,7 @@ export function updateMonsters(dt, playerCamera, scene) {
           triggerMonsterAttack(m.id);
           let nextAttack = 5.0 + (Math.random() * 2.0); // Next attack in 5.0 - 7.0 seconds
           if (skillsState.entangle?.active && skillsState.entangle?.targetId === m.id) {
-            nextAttack *= 2.0;
+            nextAttack *= SKILLS_DATA['Entangle'].magnitude;
           }
           m.attackCooldown = nextAttack;
         }
@@ -587,8 +590,9 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
 
   // Apply Sunder Armor penalty
   const isSundered = skillsState.sunderArmor?.active && skillsState.sunderArmor?.targetId === m.id;
-  const effectiveDefence = isSundered ? Math.floor((m.defence ?? 0) / 2) : (m.defence ?? 0);
-  const effectiveResilience = isSundered ? Math.floor((m.stats?.resilience ?? 0) / 2) : (m.stats?.resilience ?? 0);
+  const sunderMag = SKILLS_DATA['Sunder Armor'].magnitude;
+  const effectiveDefence = isSundered ? Math.floor((m.defence ?? 0) * sunderMag) : (m.defence ?? 0);
+  const effectiveResilience = isSundered ? Math.floor((m.stats?.resilience ?? 0) * sunderMag) : (m.stats?.resilience ?? 0);
 
   const mSunder = {
     ...m,
@@ -607,7 +611,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   // Runic Scholar — doubles final spell damage after ALL other modifiers (including crit)
   const runicActive = isMagic && character.runicScholarActive;
   if (runicActive) {
-    damage = damage * 2;
+    damage = damage * SKILLS_DATA['Runic Scholar'].magnitude;
     character.runicScholarActive = false; // consume the buff
     refreshPartyCards();                  // remove the glow from the skill slot
   }
@@ -615,7 +619,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   // Berserk — applies a x1.2 damage multiplier after everything else
   const berserkActive = skillsState.berserk?.active && skillsState.berserk?.actorName === character.name;
   if (berserkActive) {
-    damage = Math.round(damage * 1.2);
+    damage = Math.round(damage * SKILLS_DATA['Berserk'].magnitude);
   }
 
   // Compute the weighted stat bonus and label for the battle log
@@ -650,12 +654,12 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
 
   let stunned = false;
   if (attackType === 'shield-bash' && result.hit && !result.killed) {
-    if (Math.random() < 0.5) {
+    if (Math.random() < SHIELD_BASH_STUN_CHANCE) {
       stunned = true;
-      m.stunUntil = performance.now() + 5000;
+      m.stunUntil = performance.now() + SHIELD_BASH_STUN_DURATION_MS;
       showMessage(`${m.name} is stunned by the shield bash!`);
       if (m.statsLabel?.visible) _updateStatsPanel(m);
-      setTimeout(() => { if (m.statsLabel?.visible) _updateStatsPanel(m); }, 5000); // refresh UI when it drops
+      setTimeout(() => { if (m.statsLabel?.visible) _updateStatsPanel(m); }, SHIELD_BASH_STUN_DURATION_MS); // refresh UI when it drops
     }
   }
 
@@ -770,7 +774,7 @@ function _applyMonsterDamage(monster) {
   const sanctuaryUp = skillsState.sanctuary.active &&
     performance.now() < skillsState.sanctuary.expiresAt;
   if (sanctuaryUp) {
-    damage = Math.max(1, Math.floor(damage * 0.9));
+    damage = Math.max(1, Math.floor(damage * SKILLS_DATA['Sanctuary'].magnitude));
   }
 
   setHp(target.id, target.hp - damage);

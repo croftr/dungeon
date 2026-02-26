@@ -1,0 +1,14 @@
+{
+    "basePlayerHitChance": 0.80,
+    "baseMonsterHitChance": 0.45,
+    "dexHitModifier": 0.015,
+    "minHitChance": 0.15,
+    "maxHitChance": 0.97,
+    "critChance": 0.05,
+    "critMultiplier": 3,
+    "monsterBaseAttack": 4,
+    "resilienceDamageFactor": 0.5,
+    "shieldBashStunChance": 0.5,
+    "shieldBashStunDurationMs": 5000,
+    "backupPairs": { "2": 0, "3": 1 }
+}

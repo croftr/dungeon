@@ -1,0 +1,130 @@
+{
+    "Hunter's Eye": {
+        "type": "debuff",
+        "icon": "/skills/hunters-eye.png",
+        "description": "Reveal full stats of the engaged monster — HP, STR, DEX, VIT, INT, RES and Defence. Only usable in combat.",
+        "cooldownMs": 60000,
+        "effectType": "reveal",
+        "effectTarget": "monster"
+    },
+    "Sanctuary": {
+        "type": "buff",
+        "icon": "/skills/sancturary.png",
+        "description": "Surrounds the party in divine light, reducing all damage received by 10% for 60 seconds. Cooldown: 120s.",
+        "cooldownMs": 120000,
+        "durationMs": 60000,
+        "effectType": "damageReduction",
+        "effectTarget": "party",
+        "stateKey": "sanctuary",
+        "magnitude": 0.9
+    },
+    "Holy Radiance": {
+        "type": "healing",
+        "icon": "/skills/holy-radiance.png",
+        "description": "Calls down a pulse of holy energy, restoring 10 HP to every living party member. Cooldown: 120s.",
+        "cooldownMs": 120000,
+        "effectType": "partyHeal",
+        "effectTarget": "party",
+        "magnitude": 10
+    },
+    "Entangle": {
+        "type": "debuff",
+        "icon": "/skills/entangle.png",
+        "description": "Halves the attack speed of the monster currently being fought for 30s. Only usable in combat. Cooldown: 60s.",
+        "cooldownMs": 60000,
+        "durationMs": 30000,
+        "effectType": "attackSpeedMultiplier",
+        "effectTarget": "monster",
+        "stateKey": "entangle",
+        "magnitude": 2.0
+    },
+    "Sunder Armor": {
+        "type": "debuff",
+        "icon": "/skills/sunder-armor.png",
+        "description": "Crushes the targeted monster, halving its defence stats for 30s. Only usable in combat. Cooldown: 60s.",
+        "cooldownMs": 60000,
+        "durationMs": 30000,
+        "effectType": "defenceMultiplier",
+        "effectTarget": "monster",
+        "stateKey": "sunderArmor",
+        "magnitude": 0.5
+    },
+    "Arcane Lantern": {
+        "type": "buff",
+        "icon": "/skills/arcane-lantern.png",
+        "description": "Conjures a sphere of magical light that illuminates the dungeon as brightly as a torch for 60 seconds. Cooldown: 60s.",
+        "cooldownMs": 60000,
+        "durationMs": 60000,
+        "effectType": "light",
+        "effectTarget": "party",
+        "stateKey": "arcaneLight"
+    },
+    "Runic Scholar": {
+        "type": "buff",
+        "icon": "/skills/runic-scholar.png",
+        "description": "Channels arcane power into the next spell cast, doubling its damage after all other modifiers are applied.",
+        "cooldownMs": 0,
+        "effectType": "spellDamageMultiplier",
+        "effectTarget": "self",
+        "magnitude": 2.0
+    },
+    "Mana Tap": {
+        "type": "healing",
+        "icon": "/skills/mana-tap.png",
+        "description": "Taps into a hidden vein of arcane energy, instantly replenishing all of Merlin's mana points. Cooldown: 120s.",
+        "cooldownMs": 120000,
+        "effectType": "restoreMp",
+        "effectTarget": "self"
+    },
+    "Berserk": {
+        "type": "buff",
+        "icon": "/skills/berserk.png",
+        "description": "Enters a state of roaring fury, boosting all damage dealt by 20% (after other calculations) for 30s. Cooldown: 60s.",
+        "cooldownMs": 60000,
+        "durationMs": 30000,
+        "effectType": "damageMultiplier",
+        "effectTarget": "self",
+        "stateKey": "berserk",
+        "magnitude": 1.2
+    },
+    "Miners Light": {
+        "type": "buff",
+        "icon": "/skills/arcane-lantern.png",
+        "description": "Ignites a specialized lantern, illuminating the dungeon brightly for 60 seconds. Cooldown: 60s.",
+        "cooldownMs": 60000,
+        "durationMs": 60000,
+        "effectType": "light",
+        "effectTarget": "party",
+        "stateKey": "arcaneLight"
+    },
+    "Whirlwind": {
+        "type": "buff",
+        "icon": "/skills/whirlwind.png",
+        "description": "Becomes a blur of motion, doubling attack speed and preventing stamina drain for 30s. Cooldown: 60s.",
+        "cooldownMs": 60000,
+        "durationMs": 30000,
+        "effectType": "attackSpeedMultiplier",
+        "effectTarget": "self",
+        "stateKey": "whirlwind",
+        "magnitude": 0.5
+    },
+    "True Shot": {
+        "type": "buff",
+        "icon": "/skills/true-shot.png",
+        "description": "Becomes hyper-focused, ensuring every ranged attack finds its mark for 20 seconds. Cooldown: 60s.",
+        "cooldownMs": 60000,
+        "durationMs": 20000,
+        "effectType": "guaranteedHit",
+        "effectTarget": "self",
+        "stateKey": "trueShot"
+    },
+    "Heal": {
+        "type": "healing",
+        "icon": "/skills/heal.png",
+        "description": "A wave of restorative energy that mends wounds. Restores HP equal to the casters Intelligence to one party member.",
+        "cooldownMs": 15000,
+        "effectType": "singleHeal",
+        "effectTarget": "party-member",
+        "attackType": "heal"
+    }
+}

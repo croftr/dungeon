@@ -1,0 +1,23 @@
+{
+
+  "poison": {
+    "id": "poison",
+    "name": "Poison",
+    "type": "debuff",
+    "icon": "/icons/poison.svg",
+    "duration": 30,
+    "tickInterval": 2,
+    "tickDamage": 1
+  },
+
+  "regeneration": {
+    "id": "regeneration",
+    "name": "Regeneration",
+    "type": "buff",
+    "icon": "/icons/regeneration.png",
+    "duration": 30,
+    "tickInterval": 2,
+    "tickDamage": -1
+  }
+
+}

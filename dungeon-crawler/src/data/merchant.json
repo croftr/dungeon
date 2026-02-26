@@ -1,0 +1,32 @@
+{
+    "stock": [
+        "Leather Boots", "Steel Arrows", "Poison Arrows", "Torch",
+        "Leather Cap", "Iron Helm", "Padded Vest", "Leather Belt",
+        "Adventurer's Belt", "Chain Shirt", "Plate Cuirass",
+        "Iron Gauntlets", "Chainmail Leggings", "Iron-Shod Boots",
+        "Greatsword", "War Hammer", "Longbow",
+        "Ring of Strength", "Ring of Dexterity", "Ring of Resilience"
+    ],
+    "prices": {
+        "Leather Boots": 30,
+        "Steel Arrows": 35,
+        "Poison Arrows": 45,
+        "Torch": 20,
+        "Leather Cap": 25,
+        "Iron Helm": 70,
+        "Padded Vest": 30,
+        "Leather Belt": 10,
+        "Adventurer's Belt": 50,
+        "Chain Shirt": 130,
+        "Plate Cuirass": 350,
+        "Iron Gauntlets": 70,
+        "Chainmail Leggings": 100,
+        "Iron-Shod Boots": 50,
+        "Greatsword": 220,
+        "War Hammer": 190,
+        "Longbow": 150,
+        "Ring of Strength": 120,
+        "Ring of Dexterity": 120,
+        "Ring of Resilience": 120
+    }
+}

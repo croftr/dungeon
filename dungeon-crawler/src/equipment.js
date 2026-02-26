@@ -2,6 +2,7 @@ import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPor
 import { getItemDef } from './items.js';
 import { SPELLS } from './spells.js';
 import { ACTIONS } from './items.js';
+import SKILLS_DATA from './data/skills.json';
 import { playAction } from './actions.js';
 import { attackMonster, monsters, getInRangeMonster, setHuntersEyeTarget, getHuntersEyeTargetId } from './monster.js';
 import { showMessage } from './minimap.js';
@@ -1720,25 +1721,25 @@ function useHand(memberIndex, hand) {
 //  USE SKILL  — dispatcher + per-skill implementations
 // ─────────────────────────────────────────────
 
-// ── Cooldown timestamps (performance.now epoch when the skill becomes ready) ──
-const HUNTERS_EYE_COOLDOWN_MS = 60_000;
-const SANCTUARY_COOLDOWN_MS = 120_000;
-const SANCTUARY_DURATION_MS = 60_000;
-const HOLY_RADIANCE_COOLDOWN_MS = 120_000;
-const HOLY_RADIANCE_HEAL = 10;
+// ── Skill cooldown/duration/magnitude values loaded from data/skills.json ──
+const HUNTERS_EYE_COOLDOWN_MS   = SKILLS_DATA["Hunter's Eye"].cooldownMs;
+const SANCTUARY_COOLDOWN_MS     = SKILLS_DATA['Sanctuary'].cooldownMs;
+const SANCTUARY_DURATION_MS     = SKILLS_DATA['Sanctuary'].durationMs;
+const HOLY_RADIANCE_COOLDOWN_MS = SKILLS_DATA['Holy Radiance'].cooldownMs;
+const HOLY_RADIANCE_HEAL        = SKILLS_DATA['Holy Radiance'].magnitude;
+const ENTANGLE_COOLDOWN_MS      = SKILLS_DATA['Entangle'].cooldownMs;
+const ENTANGLE_DURATION_MS      = SKILLS_DATA['Entangle'].durationMs;
+const SUNDER_ARMOR_COOLDOWN_MS  = SKILLS_DATA['Sunder Armor'].cooldownMs;
+const SUNDER_ARMOR_DURATION_MS  = SKILLS_DATA['Sunder Armor'].durationMs;
 
 let _huntersEyeCooldownEnd = 0;
 let _sanctuaryCooldownEnd = 0;
 let _holyRadianceCooldownEnd = 0;
 let _sanctuaryExpireTimer = null;
 
-const ENTANGLE_COOLDOWN_MS = 60_000;
-const ENTANGLE_DURATION_MS = 30_000;
 let _entangleCooldownEnd = 0;
 let _entangleExpireTimer = null;
 
-const SUNDER_ARMOR_COOLDOWN_MS = 60_000;
-const SUNDER_ARMOR_DURATION_MS = 30_000;
 let _sunderArmorCooldownEnd = 0;
 let _sunderArmorExpireTimer = null;
 
@@ -1898,8 +1899,8 @@ function _useSunderArmor(member, memberIndex) {
 }
 
 // ── Berserk (Korg) ─────────────────────────────────────────────────────────
-const BERSERK_COOLDOWN_MS = 60_000;
-const BERSERK_DURATION_MS = 30_000;
+const BERSERK_COOLDOWN_MS = SKILLS_DATA['Berserk'].cooldownMs;
+const BERSERK_DURATION_MS = SKILLS_DATA['Berserk'].durationMs;
 let _berserkCooldownEnd = 0;
 let _berserkExpireTimer = null;
 
@@ -2012,8 +2013,8 @@ function _useHolyRadiance(member, memberIndex) {
 }
 
 // ── Arcane Lantern (Merlin) ───────────────────────────────────────────────
-const ARCANE_LANTERN_COOLDOWN_MS = 60_000;
-const ARCANE_LANTERN_DURATION_MS = 60_000;
+const ARCANE_LANTERN_COOLDOWN_MS = SKILLS_DATA['Arcane Lantern'].cooldownMs;
+const ARCANE_LANTERN_DURATION_MS = SKILLS_DATA['Arcane Lantern'].durationMs;
 let _arcaneLanternCooldownEnd = 0;
 let _arcaneLanternExpireTimer = null;
 
@@ -2090,8 +2091,8 @@ function _useMinersLight(member, memberIndex) {
 }
 
 // ── Whirlwind (Lumni) ─────────────────────────────────────────────────────
-const WHIRLWIND_COOLDOWN_MS = 60_000;
-const WHIRLWIND_DURATION_MS = 30_000;
+const WHIRLWIND_COOLDOWN_MS = SKILLS_DATA['Whirlwind'].cooldownMs;
+const WHIRLWIND_DURATION_MS = SKILLS_DATA['Whirlwind'].durationMs;
 let _whirlwindCooldownEnds = [0, 0, 0, 0];
 let _whirlwindExpireTimers = [null, null, null, null];
 
@@ -2131,8 +2132,8 @@ function _useWhirlwind(member, memberIndex) {
 }
 
 // ── True Shot (Baldur) ──────────────────────────────────────────────────
-const TRUE_SHOT_COOLDOWN_MS = 60_000;
-const TRUE_SHOT_DURATION_MS = 20_000;
+const TRUE_SHOT_COOLDOWN_MS = SKILLS_DATA['True Shot'].cooldownMs;
+const TRUE_SHOT_DURATION_MS = SKILLS_DATA['True Shot'].durationMs;
 let _trueShotCooldownEnds = [0, 0, 0, 0];
 let _trueShotExpireTimers = [null, null, null, null];
 
@@ -2194,7 +2195,7 @@ function _useRunicScholar(member, memberIndex) {
 }
 
 // ── Mana Tap (Merlin) ─────────────────────────────────────────────────────
-const MANA_TAP_COOLDOWN_MS = 120_000;
+const MANA_TAP_COOLDOWN_MS = SKILLS_DATA['Mana Tap'].cooldownMs;
 let _manaTapCooldownEnd = 0;
 
 function _useManaTap(member, memberIndex) {
@@ -2227,7 +2228,7 @@ function _useManaTap(member, memberIndex) {
 }
 
 // ── Heal (Korg / Skills) ──────────────────────────────────────────────────
-const HEAL_SKILL_COOLDOWN_MS = 15_000;
+const HEAL_SKILL_COOLDOWN_MS = SKILLS_DATA['Heal'].cooldownMs;
 let _healSkillCooldownEnds = [0, 0, 0, 0]; // per-member cooldown for Heal skill if shared
 
 function _useHealSkill(member, memberIndex) {

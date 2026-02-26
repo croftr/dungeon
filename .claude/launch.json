@@ -4,7 +4,7 @@
     {
       "name": "dungeon-crawler",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["node_modules/vite/bin/vite.js", "--port", "5174"],
+      "runtimeArgs": ["node_modules/vite/bin/vite.js", "--port", "5174", "--host"],
       "cwd": "C:\\Users\\rob\\projects\\dungeon\\dungeon-crawler",
       "port": 5174
     }
