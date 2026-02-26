@@ -40,6 +40,7 @@ const MERCHANT_STOCK = [
     "Adventurer's Belt", 'Chain Shirt', 'Plate Cuirass',
     'Iron Gauntlets', 'Chainmail Leggings', 'Iron-Shod Boots',
     'Greatsword', 'War Hammer', 'Longbow',
+    'Ring of Strength', 'Ring of Dexterity', 'Ring of Resilience',
 ];
 
 const MERCHANT_PRICES = {
@@ -48,6 +49,7 @@ const MERCHANT_PRICES = {
     "Adventurer's Belt": 50, 'Chain Shirt': 130, 'Plate Cuirass': 350,
     'Iron Gauntlets': 70, 'Chainmail Leggings': 100, 'Iron-Shod Boots': 50,
     'Greatsword': 220, 'War Hammer': 190, 'Longbow': 150,
+    'Ring of Strength': 120, 'Ring of Dexterity': 120, 'Ring of Resilience': 120,
 };
 
 // Items still available for sale (items bought are removed permanently)
