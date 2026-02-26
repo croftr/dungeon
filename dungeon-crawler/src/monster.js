@@ -659,6 +659,11 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     damage = Math.round(damage * SKILLS_DATA['Berserk'].magnitude);
   }
 
+  // Warcry — applies a x1.1 damage multiplier to all party members
+  if (skillsState.warcry?.active) {
+    damage = Math.round(damage * (SKILLS_DATA['Warcry']?.magnitude ?? 1.1));
+  }
+
   // Compute the weighted stat bonus and label for the battle log
   let formulaStatBonus;
   let statLabel;
@@ -684,6 +689,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     critMultiplier: isCrit ? CRIT_MULTIPLIER : 1,
     runicScholar: runicActive,
     berserkMultiplier: berserkActive ? 1.2 : 1.0,
+    warcryMultiplier: skillsState.warcry?.active ? 1.1 : 1.0,
     ammoModifier: ammoDef?.damageModifier ?? null,
   };
 

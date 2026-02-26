@@ -51,4 +51,14 @@ export const skillsState = {
     actorName: null,
     expiresAt: 0,
   },
+  /** Warcry — boosts party damage by 10% */
+  warcry: {
+    active: false,
+    expiresAt: 0,
+  },
+  /** War Dance — boosts party attack speed by 25% */
+  warDance: {
+    active: false,
+    expiresAt: 0,
+  },
 };

@@ -20,6 +20,7 @@ import {
   triggerEntangleEffect,
   triggerSunderArmorEffect,
   triggerBerserkEffect,
+  triggerWarcryEffect,
   triggerArcaneLanternEffect,
   triggerRunicScholarEffect,
   triggerManaTapEffect,
@@ -27,6 +28,7 @@ import {
   triggerRegenerationEffect,
   triggerCurePoisonEffect,
   triggerWhirlwindEffect,
+  triggerWarDanceEffect,
   triggerTrueShotEffect,
   triggerDefaultSpellEffect,
   triggerDefaultSkillEffect,
@@ -1583,7 +1585,13 @@ function useHand(memberIndex, hand) {
   // Whirlwind buff: double attack speed (half delay)
   const ww = skillsState.whirlwind;
   if (ww.active && ww.actorName === m.name && performance.now() < ww.expiresAt) {
-    delaySec /= 2;
+    delaySec *= (SKILLS_DATA['Whirlwind']?.magnitude ?? 0.5);
+  }
+
+  // War Dance buff: boost attack speed for the whole party
+  const wd = skillsState.warDance;
+  if (wd.active && performance.now() < wd.expiresAt) {
+    delaySec *= (SKILLS_DATA['War Dance']?.magnitude ?? 0.75);
   }
 
   // Check cooldown timer
@@ -1640,9 +1648,12 @@ function useHand(memberIndex, hand) {
   }
 
   // Physical attacks cost 5 SP; spells and skills do not
-  // Whirlwind buff: also prevents SP drain
+  // Whirlwind / War Dance buff: also prevents SP drain
   let spCost = 5;
-  if (ww.active && ww.actorName === m.name && performance.now() < ww.expiresAt) {
+  const wwActive = ww.active && ww.actorName === m.name && now < ww.expiresAt;
+  const wdActive = skillsState.warDance.active && now < skillsState.warDance.expiresAt;
+
+  if (wwActive || wdActive) {
     spCost = 0;
   }
 
@@ -1695,6 +1706,7 @@ function useHand(memberIndex, hand) {
     poisoned: result.poisoned ?? false,
     sundered: result.sundered ?? false,
     ammoModifier: result.formula?.ammoModifier ?? null,
+    warcryMultiplier: result.formula?.warcryMultiplier ?? 1.0,
   });
 
   if (!result.hit) {
@@ -1722,15 +1734,15 @@ function useHand(memberIndex, hand) {
 // ─────────────────────────────────────────────
 
 // ── Skill cooldown/duration/magnitude values loaded from data/skills.json ──
-const HUNTERS_EYE_COOLDOWN_MS   = SKILLS_DATA["Hunter's Eye"].cooldownMs;
-const SANCTUARY_COOLDOWN_MS     = SKILLS_DATA['Sanctuary'].cooldownMs;
-const SANCTUARY_DURATION_MS     = SKILLS_DATA['Sanctuary'].durationMs;
+const HUNTERS_EYE_COOLDOWN_MS = SKILLS_DATA["Hunter's Eye"].cooldownMs;
+const SANCTUARY_COOLDOWN_MS = SKILLS_DATA['Sanctuary'].cooldownMs;
+const SANCTUARY_DURATION_MS = SKILLS_DATA['Sanctuary'].durationMs;
 const HOLY_RADIANCE_COOLDOWN_MS = SKILLS_DATA['Holy Radiance'].cooldownMs;
-const HOLY_RADIANCE_HEAL        = SKILLS_DATA['Holy Radiance'].magnitude;
-const ENTANGLE_COOLDOWN_MS      = SKILLS_DATA['Entangle'].cooldownMs;
-const ENTANGLE_DURATION_MS      = SKILLS_DATA['Entangle'].durationMs;
-const SUNDER_ARMOR_COOLDOWN_MS  = SKILLS_DATA['Sunder Armor'].cooldownMs;
-const SUNDER_ARMOR_DURATION_MS  = SKILLS_DATA['Sunder Armor'].durationMs;
+const HOLY_RADIANCE_HEAL = SKILLS_DATA['Holy Radiance'].magnitude;
+const ENTANGLE_COOLDOWN_MS = SKILLS_DATA['Entangle'].cooldownMs;
+const ENTANGLE_DURATION_MS = SKILLS_DATA['Entangle'].durationMs;
+const SUNDER_ARMOR_COOLDOWN_MS = SKILLS_DATA['Sunder Armor'].cooldownMs;
+const SUNDER_ARMOR_DURATION_MS = SKILLS_DATA['Sunder Armor'].durationMs;
 
 let _huntersEyeCooldownEnd = 0;
 let _sanctuaryCooldownEnd = 0;
@@ -1764,7 +1776,9 @@ function useSkill(memberIndex) {
   if (skill.name === 'Entangle') { _useEntangle(m, memberIndex); return; }
   if (skill.name === 'Sunder Armor') { _useSunderArmor(m, memberIndex); return; }
   if (skill.name === 'Berserk') { _useBerserk(m, memberIndex); return; }
+  if (skill.name === 'Warcry') { _useWarcry(m, memberIndex); return; }
   if (skill.name === 'Whirlwind') { _useWhirlwind(m, memberIndex); return; }
+  if (skill.name === 'War Dance') { _useWarDance(m, memberIndex); return; }
   if (skill.name === 'True Shot') { _useTrueShot(m, memberIndex); return; }
   if (skill.name === 'Heal') { _useHealSkill(m, memberIndex); return; }
 
@@ -1939,6 +1953,46 @@ function _useBerserk(member, memberIndex) {
   _startSkillCooldownUI(memberIndex, _berserkCooldownEnd);
 }
 
+// ── Warcry (Korg) ──────────────────────────────────────────────────────────
+const WARCRY_COOLDOWN_MS = SKILLS_DATA['Warcry']?.cooldownMs ?? 60000;
+const WARCRY_DURATION_MS = SKILLS_DATA['Warcry']?.durationMs ?? 30000;
+let _warcryCooldownEnd = 0;
+let _warcryExpireTimer = null;
+
+function _useWarcry(member, memberIndex) {
+  const now = performance.now();
+  if (now < _warcryCooldownEnd) {
+    const remaining = Math.ceil((_warcryCooldownEnd - now) / 1000);
+    showMessage(`<span style="color:#ffcc00">Warcry</span> — ready in ${remaining}s`, 2000);
+    return;
+  }
+
+  const def = getItemDef(member.equipment.skill.name);
+  const delayMs = (def?.delay ?? 60) * 1000;
+  skillsState.warcry.active = true;
+  skillsState.warcry.expiresAt = now + WARCRY_DURATION_MS;
+  _warcryCooldownEnd = now + delayMs;
+  lastAttackTimes[`${memberIndex}-skill`] = now;
+
+  playSkillSound('berserk'); // reuse berserk roar for now
+  triggerWarcryEffect();
+  showMessage(
+    `<span style="color:#ffcc00">✦ Warcry</span> — ${member.name} inspires the party! Damage +10% for 30s.`,
+    3000
+  );
+  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Warcry' });
+
+  if (_warcryExpireTimer) clearTimeout(_warcryExpireTimer);
+  _warcryExpireTimer = setTimeout(() => {
+    skillsState.warcry.active = false;
+    showMessage(`<span style="color:#ffcc00">Warcry</span> fades — the inspiration passes.`, 2500);
+    addLogEntry({ type: 'skill', actor: 'System', skillName: 'Warcry fades' });
+    _warcryExpireTimer = null;
+  }, WARCRY_DURATION_MS);
+
+  _startSkillCooldownUI(memberIndex, _warcryCooldownEnd);
+}
+
 // ── Sanctuary (Alaric) ────────────────────────────────────────────────────
 function _useSanctuary(member, memberIndex) {
   const now = performance.now();
@@ -2088,6 +2142,46 @@ function _useMinersLight(member, memberIndex) {
   }, ARCANE_LANTERN_DURATION_MS);
 
   _startSkillCooldownUI(memberIndex, _minersLightCooldownEnd);
+}
+
+// ── War Dance (Lumni) ───────────────────────────────────────────────────────
+const WAR_DANCE_COOLDOWN_MS = SKILLS_DATA['War Dance']?.cooldownMs ?? 60000;
+const WAR_DANCE_DURATION_MS = SKILLS_DATA['War Dance']?.durationMs ?? 30000;
+let _warDanceCooldownEnd = 0;
+let _warDanceExpireTimer = null;
+
+function _useWarDance(member, memberIndex) {
+  const now = performance.now();
+  if (now < _warDanceCooldownEnd) {
+    const remaining = Math.ceil((_warDanceCooldownEnd - now) / 1000);
+    showMessage(`<span style="color:#ff80c0">War Dance</span> — ready in ${remaining}s`, 2000);
+    return;
+  }
+
+  const def = getItemDef(member.equipment.skill.name);
+  const delayMs = (def?.delay ?? 60) * 1000;
+  skillsState.warDance.active = true;
+  skillsState.warDance.expiresAt = now + WAR_DANCE_DURATION_MS;
+  _warDanceCooldownEnd = now + delayMs;
+  lastAttackTimes[`${memberIndex}-skill`] = now;
+
+  playSkillSound('berserk');
+  triggerWarDanceEffect();
+  showMessage(
+    `<span style="color:#ff80c0">✦ War Dance</span> — ${member.name} inspires the party! Attack Speed up for 30s.`,
+    3000
+  );
+  addLogEntry({ type: 'skill', actor: member.name, skillName: 'War Dance' });
+
+  if (_warDanceExpireTimer) clearTimeout(_warDanceExpireTimer);
+  _warDanceExpireTimer = setTimeout(() => {
+    skillsState.warDance.active = false;
+    showMessage(`<span style="color:#ff80c0">War Dance</span> fades — the rhythm ends.`, 2500);
+    addLogEntry({ type: 'skill', actor: 'System', skillName: 'War Dance fades' });
+    _warDanceExpireTimer = null;
+  }, WAR_DANCE_DURATION_MS);
+
+  _startSkillCooldownUI(memberIndex, _warDanceCooldownEnd);
 }
 
 // ── Whirlwind (Lumni) ─────────────────────────────────────────────────────

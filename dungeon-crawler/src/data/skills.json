@@ -126,5 +126,27 @@
         "effectType": "singleHeal",
         "effectTarget": "party-member",
         "attackType": "heal"
+    },
+    "Warcry": {
+        "type": "buff",
+        "icon": "/skills/warcry.png",
+        "description": "Lets out a thunderous shout that inspires the entire party, boosting all damage dealt by 10% (after other calculations) for 30s. Cooldown: 60s.",
+        "cooldownMs": 60000,
+        "durationMs": 30000,
+        "effectType": "damageMultiplier",
+        "effectTarget": "party",
+        "stateKey": "warcry",
+        "magnitude": 2.1
+    },
+    "War Dance": {
+        "type": "buff",
+        "icon": "/skills/wardance.png",
+        "description": "Inspires the party with a graceful dance, increasing attack speed and preventing stamina drain for 30s. Cooldown: 60s.",
+        "cooldownMs": 60000,
+        "durationMs": 30000,
+        "effectType": "attackSpeedMultiplier",
+        "effectTarget": "party",
+        "stateKey": "warDance",
+        "magnitude": 1.75
     }
 }

@@ -4,6 +4,7 @@ import { addLogEntry } from './battle-log.js';
 import { isInCombat } from './audio.js';
 import { skillsState } from './skills-state.js';
 import { SPELLS } from './spells.js';
+import SKILLS_DATA from './data/skills.json';
 import { STATUS_EFFECT_DEFS } from './status-effects.js';
 
 // ─────────────────────────────────────────────
@@ -383,7 +384,14 @@ function refreshMember(m) {
     lhSlot.classList.toggle('slot-no-action', lhNoAction);
 
     // Check cooldown for left slot
-    const lhDelaySec = (lhDef?.delay ?? 2);
+    let lhDelaySec = (lhDef?.delay ?? 2);
+    if (skillsState.whirlwind.active && skillsState.whirlwind.actorName === m.name) {
+      lhDelaySec *= (SKILLS_DATA['Whirlwind']?.magnitude ?? 0.5);
+    }
+    if (skillsState.warDance.active) {
+      lhDelaySec *= (SKILLS_DATA['War Dance']?.magnitude ?? 0.75);
+    }
+
     const lhCanAttack = (performance.now() - (lastAttackTimes[`${i}-left`] || 0)) >= (lhDelaySec * 1000);
     lhSlot.classList.toggle('slot-cooling-down', !lhCanAttack);
     // Auto-refresh when cooldown expires if it's currently on cooldown
@@ -401,7 +409,14 @@ function refreshMember(m) {
 
     // Check cooldown for right slot
     const rhActualDef = lhBothHands ? lhDef : rhDef;
-    const rhDelaySec = (rhActualDef?.delay ?? 2);
+    let rhDelaySec = (rhActualDef?.delay ?? 2);
+    if (skillsState.whirlwind.active && skillsState.whirlwind.actorName === m.name) {
+      rhDelaySec *= (SKILLS_DATA['Whirlwind']?.magnitude ?? 0.5);
+    }
+    if (skillsState.warDance.active) {
+      rhDelaySec *= (SKILLS_DATA['War Dance']?.magnitude ?? 0.75);
+    }
+
     const rhCanAttack = lhBothHands
       ? (performance.now() - (lastAttackTimes[`${i}-left`] || 0)) >= (rhDelaySec * 1000)
       : (performance.now() - (lastAttackTimes[`${i}-right`] || 0)) >= (rhDelaySec * 1000);
@@ -814,6 +829,8 @@ export function updateParty(dt) {
 function getActiveEffectsForMember(m) {
   const active = [];
   if (skillsState.sanctuary.active) active.push('Sanctuary');
+  if (skillsState.warcry.active) active.push('Warcry');
+  if (skillsState.warDance.active) active.push('War Dance');
   if (skillsState.arcaneLight.active) {
     const hasMiners = m.skills?.some(s => s.name === 'Miners Light');
     active.push(hasMiners ? 'Miners Light' : 'Arcane Lantern');

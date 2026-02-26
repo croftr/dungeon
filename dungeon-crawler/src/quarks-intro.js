@@ -344,6 +344,55 @@ export function triggerBerserkEffect() {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
+//  WARCRY — Korg (Barbarian)
+//  Powerful amber/golden outward shockwave  (party-wide inspiration)
+// ══════════════════════════════════════════════════════════════════════════
+export function triggerWarcryEffect() {
+    if (!batchRenderer || !sceneRef || !cameraRef) return;
+    const tex = createGlowTexture();
+    const pos = cameraRef.position;
+
+    // Outer expanding ring / shockwave
+    const ring = new ParticleSystem({
+        duration: 0.8, looping: false,
+        startLife: new IntervalValue(0.5, 1.0),
+        startSpeed: new IntervalValue(4.0, 10.0),
+        startSize: new IntervalValue(0.1, 0.3),
+        startColor: new ConstantColor(new Vector4(1, 0.8, 0.2, 1)),
+        worldSpace: true, maxParticle: 150,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(100), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new CircleEmitter({ radius: 0.3, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex), startTileIndex: new ConstantValue(0),
+        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    ring.addBehavior(new ColorOverLife(new ColorRange(new Vector4(1, 0.9, 0.5, 1), new Vector4(1, 0.4, 0.0, 0))));
+    ring.addBehavior(new SizeOverLife(GROW_FADE));
+
+    // Orient ring to floor (XZ plane)
+    ring.emitter.rotation.set(-Math.PI / 2, 0, 0);
+    _spawn(ring, new THREE.Vector3().copy(pos).add(new THREE.Vector3(0, -0.5, 0)), 1.5);
+
+    // Central burst
+    const burst = new ParticleSystem({
+        duration: 1.0, looping: false,
+        startLife: new IntervalValue(0.4, 0.8),
+        startSpeed: new IntervalValue(2.0, 6.0),
+        startSize: new IntervalValue(0.05, 0.2),
+        startColor: new ConstantColor(new Vector4(1, 0.6, 0.1, 1)),
+        worldSpace: true, maxParticle: 100,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(80), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.2, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex), startTileIndex: new ConstantValue(0),
+        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    burst.addBehavior(new ColorOverLife(new ColorRange(new Vector4(1, 1, 0.8, 1), new Vector4(0.8, 0.2, 0.0, 0))));
+    burst.addBehavior(new SizeOverLife(FADE_OUT));
+    _spawn(burst, pos, 2.0);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
 //  ARCANE LANTERN — Merlin (Wizard)
 //  Soft blue/cyan sparkles blooming outward  (magical light conjuring)
 // ══════════════════════════════════════════════════════════════════════════
@@ -732,6 +781,54 @@ export function triggerWhirlwindEffect() {
     )));
     vortex.addBehavior(new SizeOverLife(GROW_FADE));
     _spawn(vortex, pos, 1.5);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  WAR DANCE — Lumni (War Dancer)
+//  Elegant swirling rose/gold petals and air  (party-wide inspiration)
+// ══════════════════════════════════════════════════════════════════════════
+export function triggerWarDanceEffect() {
+    if (!batchRenderer || !sceneRef || !cameraRef) return;
+    const tex = createGlowTexture();
+    const pos = cameraRef.position;
+
+    // A more vibrant/multi-color vortex
+    const vortex = new ParticleSystem({
+        duration: 1.0, looping: false,
+        startLife: new IntervalValue(0.5, 1.0),
+        startSpeed: new IntervalValue(3.0, 6.0),
+        startSize: new IntervalValue(0.04, 0.18),
+        startColor: new ConstantColor(new Vector4(1, 0.5, 0.8, 1)), // Rose/Pink
+        worldSpace: true, maxParticle: 120,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(100), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.3, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex), startTileIndex: new ConstantValue(0),
+        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    vortex.addBehavior(new ColorOverLife(new ColorRange(
+        new Vector4(1.0, 0.8, 1.0, 1), // White/Pink
+        new Vector4(0.8, 0.2, 0.5, 0), // Darker Pink
+    )));
+    vortex.addBehavior(new SizeOverLife(GROW_FADE));
+    _spawn(vortex, pos, 2.0);
+
+    // Add some golden sparkles
+    const sparkles = new ParticleSystem({
+        duration: 1.2, looping: false,
+        startLife: new IntervalValue(0.6, 1.2),
+        startSpeed: new IntervalValue(1.0, 3.0),
+        startSize: new IntervalValue(0.02, 0.08),
+        startColor: new ConstantColor(new Vector4(1, 0.9, 0.5, 1)), // Gold
+        worldSpace: true, maxParticle: 60,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(40), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.5, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex), startTileIndex: new ConstantValue(0),
+        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    sparkles.addBehavior(new SizeOverLife(FADE_OUT));
+    _spawn(sparkles, pos, 2.0);
 }
 
 // ══════════════════════════════════════════════════════════════════════════

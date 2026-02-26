@@ -161,10 +161,11 @@ function _formula(e) {
     const raw = e.statBonus + e.weaponBase - e.mitigation;
     const crit = e.crit ? ` ×${e.critMultiplier}` : '';
     const berserkText = (e.berserkMultiplier && e.berserkMultiplier !== 1.0) ? ` (Berserk ×${e.berserkMultiplier})` : '';
+    const warcryText = (e.warcryMultiplier && e.warcryMultiplier !== 1.0) ? ` (Warcry ×${e.warcryMultiplier})` : '';
     const stunText = e.stunned ? ' (Stunned!)' : '';
     const poisonText = e.poisoned ? ' (Poisoned!)' : '';
     const sunderText = e.sundered ? ' (Sundered!)' : '';
-    return `(${stat}${e.statBonus}+base${e.weaponBase}${ammoLine}−${mit}${e.mitigation}=${raw}${crit})${berserkText}${stunText}${poisonText}${sunderText}`;
+    return `(${stat}${e.statBonus}+base${e.weaponBase}${ammoLine}−${mit}${e.mitigation}=${raw}${crit})${berserkText}${warcryText}${stunText}${poisonText}${sunderText}`;
   }
 
   // monster attack
