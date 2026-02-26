@@ -786,7 +786,7 @@ function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, c
     });
 }
 
-function openPortcullis(p) {
+export function openPortcullis(p) {
     if (p.isOpen) return;
     p.isOpen = true;
     showMessage("The portcullis slowly grinds open...");
@@ -807,7 +807,7 @@ function openPortcullis(p) {
         .start();
 }
 
-function openChestModal(chestObj) {
+export function openChestModal(chestObj) {
     _activeSentLabelId = 'chest-sent-label';
     const overlay = document.getElementById('chest-overlay');
     overlay.classList.remove('chest-hidden');
@@ -821,7 +821,7 @@ function openChestModal(chestObj) {
     });
 }
 
-function openSpellCabinetModal(cabinetObj) {
+export function openSpellCabinetModal(cabinetObj) {
     _activeSentLabelId = 'cabinet-sent-label';
     const overlay = document.getElementById('cabinet-overlay');
     overlay.classList.remove('chest-hidden');
@@ -835,7 +835,7 @@ function openSpellCabinetModal(cabinetObj) {
     });
 }
 
-function openAnvilModal(anvilObj) {
+export function openAnvilModal(anvilObj) {
     _activeSentLabelId = 'anvil-sent-label';
     const overlay = document.getElementById('anvil-overlay');
     overlay.classList.remove('chest-hidden');
@@ -849,7 +849,7 @@ function openAnvilModal(anvilObj) {
     });
 }
 
-function openCorpseModal(corpseObj) {
+export function openCorpseModal(corpseObj) {
     _activeSentLabelId = 'corpse-sent-label';
     const overlay = document.getElementById('corpse-overlay');
     overlay.classList.remove('chest-hidden');
@@ -863,7 +863,7 @@ function openCorpseModal(corpseObj) {
     });
 }
 
-function openMerchantModal() {
+export function openMerchantModal() {
     _merchantBasket = [];
     _merchantSellBasket = [];
     _merchantMode = 'buy';
@@ -904,9 +904,46 @@ function _renderMerchantShop() {
     const grid = document.getElementById('merchant-grid');
     grid.innerHTML = '';
 
-    _merchantAvailable
-        .filter(name => !_merchantBasket.includes(name))
-        .forEach(name => {
+    import('./equipment.js').then(equip => {
+        _merchantAvailable
+            .filter(name => !_merchantBasket.includes(name))
+            .forEach(name => {
+                const itemDef = getItemDef(name);
+                if (!itemDef) return;
+
+                const slot = document.createElement('div');
+                slot.className = 'merch-slot';
+
+                const img = document.createElement('img');
+                img.src = itemDef.icon;
+                img.title = name;
+                slot.appendChild(img);
+
+                const price = document.createElement('div');
+                price.className = 'merch-price';
+                price.textContent = `${MERCHANT_PRICES[name] ?? '?'}g`;
+                slot.appendChild(price);
+
+                slot.addEventListener('click', () => {
+                    _merchantBasket.push(name);
+                    _renderMerchantShop();
+                    _renderMerchantBasket();
+                    _updateMerchantTotals();
+                });
+
+                equip.attachTooltipListeners(slot, () => ({ name }));
+
+                grid.appendChild(slot);
+            });
+    });
+}
+
+function _renderMerchantBasket() {
+    const grid = document.getElementById('merchant-basket-grid');
+    grid.innerHTML = '';
+
+    import('./equipment.js').then(equip => {
+        _merchantBasket.forEach((name, idx) => {
             const itemDef = getItemDef(name);
             if (!itemDef) return;
 
@@ -923,47 +960,18 @@ function _renderMerchantShop() {
             price.textContent = `${MERCHANT_PRICES[name] ?? '?'}g`;
             slot.appendChild(price);
 
+            // Click basket item → return it to the shop
             slot.addEventListener('click', () => {
-                _merchantBasket.push(name);
+                _merchantBasket.splice(idx, 1);
                 _renderMerchantShop();
                 _renderMerchantBasket();
                 _updateMerchantTotals();
             });
 
+            equip.attachTooltipListeners(slot, () => ({ name }));
+
             grid.appendChild(slot);
         });
-}
-
-function _renderMerchantBasket() {
-    const grid = document.getElementById('merchant-basket-grid');
-    grid.innerHTML = '';
-
-    _merchantBasket.forEach((name, idx) => {
-        const itemDef = getItemDef(name);
-        if (!itemDef) return;
-
-        const slot = document.createElement('div');
-        slot.className = 'merch-slot';
-
-        const img = document.createElement('img');
-        img.src = itemDef.icon;
-        img.title = name;
-        slot.appendChild(img);
-
-        const price = document.createElement('div');
-        price.className = 'merch-price';
-        price.textContent = `${MERCHANT_PRICES[name] ?? '?'}g`;
-        slot.appendChild(price);
-
-        // Click basket item → return it to the shop
-        slot.addEventListener('click', () => {
-            _merchantBasket.splice(idx, 1);
-            _renderMerchantShop();
-            _renderMerchantBasket();
-            _updateMerchantTotals();
-        });
-
-        grid.appendChild(slot);
     });
 }
 
@@ -1045,31 +1053,71 @@ function _renderMerchantPartyItems() {
 
     const CHARACTER_LABELS = ['A', 'B', 'C', 'D'];
 
-    for (let ci = 0; ci < 4; ci++) {
-        const member = party[ci];
-        if (!member || member.isEmpty) continue;
+    import('./equipment.js').then(equip => {
+        for (let ci = 0; ci < 4; ci++) {
+            const member = party[ci];
+            if (!member || member.isEmpty) continue;
 
-        member.inventory.forEach((item, invIdx) => {
-            if (!item) return;
-            // Skip if already in the sell basket
-            if (_merchantSellBasket.some(e => e.charIndex === ci && e.invIndex === invIdx)) return;
+            member.inventory.forEach((item, invIdx) => {
+                if (!item) return;
+                // Skip if already in the sell basket
+                if (_merchantSellBasket.some(e => e.charIndex === ci && e.invIndex === invIdx)) return;
 
-            const def = getItemDef(item.name);
+                const def = getItemDef(item.name);
+                if (!def) return;
+
+                const sellPrice = _getMerchantSellPrice(item.name);
+
+                const slot = document.createElement('div');
+                slot.className = 'merch-slot';
+
+                const tag = document.createElement('div');
+                tag.className = 'merch-char-tag';
+                tag.textContent = CHARACTER_LABELS[ci];
+                slot.appendChild(tag);
+
+                const img = document.createElement('img');
+                img.src = def.icon;
+                img.title = item.name;
+                slot.appendChild(img);
+
+                const price = document.createElement('div');
+                price.className = 'merch-price';
+                price.textContent = `${sellPrice}g`;
+                slot.appendChild(price);
+
+                slot.addEventListener('click', () => {
+                    _merchantSellBasket.push({ charIndex: ci, invIndex: invIdx, name: item.name });
+                    _renderMerchantPartyItems();
+                    _renderMerchantSellBasket();
+                    _updateMerchantSellTotals();
+                });
+
+                equip.attachTooltipListeners(slot, () => ({ name: item.name }));
+
+                grid.appendChild(slot);
+            });
+        }
+    });
+}
+
+function _renderMerchantSellBasket() {
+    const grid = document.getElementById('merchant-sell-basket-grid');
+    grid.innerHTML = '';
+
+    import('./equipment.js').then(equip => {
+        _merchantSellBasket.forEach((entry, idx) => {
+            const def = getItemDef(entry.name);
             if (!def) return;
 
-            const sellPrice = _getMerchantSellPrice(item.name);
+            const sellPrice = _getMerchantSellPrice(entry.name);
 
             const slot = document.createElement('div');
             slot.className = 'merch-slot';
 
-            const tag = document.createElement('div');
-            tag.className = 'merch-char-tag';
-            tag.textContent = CHARACTER_LABELS[ci];
-            slot.appendChild(tag);
-
             const img = document.createElement('img');
             img.src = def.icon;
-            img.title = item.name;
+            img.title = entry.name;
             slot.appendChild(img);
 
             const price = document.createElement('div');
@@ -1077,50 +1125,18 @@ function _renderMerchantPartyItems() {
             price.textContent = `${sellPrice}g`;
             slot.appendChild(price);
 
+            // Click → return item to party panel
             slot.addEventListener('click', () => {
-                _merchantSellBasket.push({ charIndex: ci, invIndex: invIdx, name: item.name });
+                _merchantSellBasket.splice(idx, 1);
                 _renderMerchantPartyItems();
                 _renderMerchantSellBasket();
                 _updateMerchantSellTotals();
             });
 
+            equip.attachTooltipListeners(slot, () => ({ name: entry.name }));
+
             grid.appendChild(slot);
         });
-    }
-}
-
-function _renderMerchantSellBasket() {
-    const grid = document.getElementById('merchant-sell-basket-grid');
-    grid.innerHTML = '';
-
-    _merchantSellBasket.forEach((entry, idx) => {
-        const def = getItemDef(entry.name);
-        if (!def) return;
-
-        const sellPrice = _getMerchantSellPrice(entry.name);
-
-        const slot = document.createElement('div');
-        slot.className = 'merch-slot';
-
-        const img = document.createElement('img');
-        img.src = def.icon;
-        img.title = entry.name;
-        slot.appendChild(img);
-
-        const price = document.createElement('div');
-        price.className = 'merch-price';
-        price.textContent = `${sellPrice}g`;
-        slot.appendChild(price);
-
-        // Click → return item to party panel
-        slot.addEventListener('click', () => {
-            _merchantSellBasket.splice(idx, 1);
-            _renderMerchantPartyItems();
-            _renderMerchantSellBasket();
-            _updateMerchantSellTotals();
-        });
-
-        grid.appendChild(slot);
     });
 }
 
@@ -1170,30 +1186,30 @@ function _bindChestSlots(equip, slots, contents) {
         slot.oncontextmenu = null;
 
         const itemName = contents[i];
-        if (!itemName) return;
+        if (itemName) {
+            const itemDef = getItemDef(itemName);
+            if (itemDef) {
+                slot.classList.add('occupied');
+                const img = document.createElement('img');
+                img.src = itemDef.icon;
+                img.title = itemDef.name;
+                slot.appendChild(img);
 
-        const itemDef = getItemDef(itemName);
-        if (!itemDef) return;
+                // Left-click → send to first available party member
+                slot.onclick = () => {
+                    const defaultIdx = party.findIndex(m => !m.isEmpty);
+                    if (defaultIdx !== -1) _sendChestItem(equip, slots, contents, i, itemDef, defaultIdx);
+                };
 
-        slot.classList.add('occupied');
-        const img = document.createElement('img');
-        img.src = itemDef.icon;
-        img.title = itemDef.name;
-        slot.appendChild(img);
+                // Right-click → pick recipient
+                slot.oncontextmenu = (e) => {
+                    e.preventDefault();
+                    _showChestCtxMenu(e.clientX, e.clientY, equip, slots, contents, i, itemDef);
+                };
+            }
+        }
 
-        // Left-click → send to first available party member
-        slot.onclick = () => {
-            const defaultIdx = party.findIndex(m => !m.isEmpty);
-            if (defaultIdx !== -1) _sendChestItem(equip, slots, contents, i, itemDef, defaultIdx);
-        };
-
-        // Right-click → pick recipient
-        slot.oncontextmenu = (e) => {
-            e.preventDefault();
-            _showChestCtxMenu(e.clientX, e.clientY, equip, slots, contents, i, itemDef);
-        };
-
-        // Hover tooltip
+        // Hover tooltip — call this for ALL slots to ensure listeners are updated or cleared
         equip.attachTooltipListeners(slot, () => contents[i] ? { name: contents[i] } : null);
     });
 }

@@ -609,11 +609,18 @@ export function hideTooltip() {
 /** Attach hover tooltip listeners to any hoverable item element.
  *  getItem() is called each time to get the current item (may change). */
 export function attachTooltipListeners(el, getItem) {
-  el.addEventListener('mouseenter', (e) => {
+  // Remove any existing listeners first
+  if (el._tooltipCleanup) {
+    el._tooltipCleanup();
+    delete el._tooltipCleanup;
+  }
+
+  const onEnter = (e) => {
     const item = getItem();
     if (item) showTooltip(item, e.clientX, e.clientY);
-  });
-  el.addEventListener('mousemove', (e) => {
+  };
+
+  const onMove = (e) => {
     const item = getItem();
     if (item) {
       // Keep tooltip populated and repositioned as cursor moves
@@ -624,8 +631,20 @@ export function attachTooltipListeners(el, getItem) {
     } else {
       hideTooltip();
     }
-  });
-  el.addEventListener('mouseleave', () => hideTooltip());
+  };
+
+  const onLeave = () => hideTooltip();
+
+  el.addEventListener('mouseenter', onEnter);
+  el.addEventListener('mousemove', onMove);
+  el.addEventListener('mouseleave', onLeave);
+
+  // Store cleanup function
+  el._tooltipCleanup = () => {
+    el.removeEventListener('mouseenter', onEnter);
+    el.removeEventListener('mousemove', onMove);
+    el.removeEventListener('mouseleave', onLeave);
+  };
 }
 
 // ─────────────────────────────────────────────
