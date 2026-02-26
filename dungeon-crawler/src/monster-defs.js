@@ -66,6 +66,9 @@ export const MONSTER_DEFS = {
     hp: 180,
     defence: 7,
     stats: { strength: 16, dexterity: 12, vitality: 10, intelligence: 4, resilience: 6 },
+    onHitEffects: [
+      { effectId: 'poison', chance: 0.5 },
+    ],
     drops: [
       { item: 'Life Essence', chance: 0.50 },
       { item: 'Poison Vial', chance: 0.40 },
