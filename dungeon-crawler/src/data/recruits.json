@@ -4,15 +4,31 @@
         "name": "Elrond",
         "job": "Ranger",
         "race": "Wood Elf",
-        "hp": 42, "hpMax": 42, "mp": 10, "mpMax": 10, "sp": 100, "spMax": 100,
-        "stats": { "strength": 5, "dexterity": 10, "vitality": 5, "intelligence": 7, "resilience": 5 },
-        "skills": ["Entangle", "Hunter's Eye"],
+        "hp": 42,
+        "hpMax": 42,
+        "mp": 10,
+        "mpMax": 10,
+        "sp": 100,
+        "spMax": 100,
+        "stats": {
+            "strength": 5,
+            "dexterity": 10,
+            "vitality": 5,
+            "intelligence": 7,
+            "resilience": 5
+        },
+        "skills": [
+            "Entangle",
+            "Hunter's Eye"
+        ],
         "image": "/elf_ranger_head.png",
         "leftHand": "Short Bow",
         "rightHand": "—",
         "ammo": "Wooden Arrows",
         "startingSkill": "Hunter's Eye",
-        "gridCol": 9, "gridRow": 8, "facing": "front",
+        "gridCol": 9,
+        "gridRow": 8,
+        "facing": "front",
         "isRecruited": false
     },
     {
@@ -20,15 +36,38 @@
         "name": "Alaric",
         "job": "Paladin",
         "race": "Human",
-        "hp": 70, "hpMax": 60, "mp": 20, "mpMax": 20, "sp": 100, "spMax": 100,
-        "stats": { "strength": 7, "dexterity": 5, "vitality": 9, "intelligence": 6, "resilience": 10 },
-        "skills": ["Sanctuary", "Holy Radiance"],
+        "hp": 70,
+        "hpMax": 60,
+        "mp": 20,
+        "mpMax": 20,
+        "sp": 100,
+        "spMax": 100,
+        "stats": {
+            "strength": 7,
+            "dexterity": 5,
+            "vitality": 9,
+            "intelligence": 6,
+            "resilience": 10
+        },
+        "skills": [
+            "Sanctuary",
+            "Holy Radiance"
+        ],
         "image": "/human_paladin_head.png",
         "leftHand": "Sword",
         "rightHand": "Shield",
         "startingSkill": "Sanctuary",
-        "startingInventory": ["Cure Poison Potion", "Healing Potion", "Life Berry", "Poison Vial", "Life Essence", "Life Essence"],
-        "gridCol": 10, "gridRow": 8, "facing": "front",
+        "startingInventory": [
+            "Cure Poison Potion",
+            "Healing Potion",
+            "Life Berry",
+            "Poison Vial",
+            "Life Essence",
+            "Life Essence"
+        ],
+        "gridCol": 10,
+        "gridRow": 8,
+        "facing": "front",
         "isRecruited": false
     },
     {
@@ -36,14 +75,30 @@
         "name": "Thorek",
         "job": "Warrior",
         "race": "Dwarf",
-        "hp": 80, "hpMax": 70, "mp": 10, "mpMax": 10, "sp": 100, "spMax": 100,
-        "stats": { "strength": 8, "dexterity": 6, "vitality": 8, "intelligence": 4, "resilience": 10 },
-        "skills": ["Sunder Armor", "Miners Light"],
+        "hp": 80,
+        "hpMax": 70,
+        "mp": 10,
+        "mpMax": 10,
+        "sp": 100,
+        "spMax": 100,
+        "stats": {
+            "strength": 8,
+            "dexterity": 6,
+            "vitality": 8,
+            "intelligence": 4,
+            "resilience": 10
+        },
+        "skills": [
+            "Sunder Armor",
+            "Miners Light"
+        ],
         "image": "/dwarf_barbarian_head.png",
         "leftHand": "Axe",
         "rightHand": "Wooden Shield",
         "startingSkill": "Sunder Armor",
-        "gridCol": 12, "gridRow": 8, "facing": "front",
+        "gridCol": 12,
+        "gridRow": 8,
+        "facing": "front",
         "isRecruited": false
     },
     {
@@ -51,14 +106,31 @@
         "name": "Merlin",
         "job": "Wizard",
         "race": "Human",
-        "hp": 30, "hpMax": 30, "mp": 50, "mpMax": 50, "sp": 100, "spMax": 100,
-        "stats": { "strength": 3, "dexterity": 5, "vitality": 4, "intelligence": 10, "resilience": 5 },
-        "skills": ["Arcane Lantern", "Runic Scholar", "Mana Tap"],
+        "hp": 30,
+        "hpMax": 30,
+        "mp": 50,
+        "mpMax": 50,
+        "sp": 100,
+        "spMax": 100,
+        "stats": {
+            "strength": 3,
+            "dexterity": 5,
+            "vitality": 4,
+            "intelligence": 10,
+            "resilience": 5
+        },
+        "skills": [
+            "Arcane Lantern",
+            "Runic Scholar",
+            "Mana Tap"
+        ],
         "image": "/human_wizard_head.png",
         "leftHand": "Spellbook",
         "rightHand": "Oak Staff",
         "startingSkill": "Runic Scholar",
-        "gridCol": 13, "gridRow": 8, "facing": "front",
+        "gridCol": 13,
+        "gridRow": 8,
+        "facing": "front",
         "isRecruited": false
     },
     {
@@ -66,14 +138,30 @@
         "name": "Korg",
         "job": "Barbarian",
         "race": "Human",
-        "hp": 67, "hpMax": 67, "mp": 10, "mpMax": 10, "sp": 100, "spMax": 100,
-        "stats": { "strength": 9, "dexterity": 7, "vitality": 7, "intelligence": 4, "resilience": 7 },
-        "skills": ["Berserk", "Heal"],
+        "hp": 67,
+        "hpMax": 67,
+        "mp": 10,
+        "mpMax": 10,
+        "sp": 100,
+        "spMax": 100,
+        "stats": {
+            "strength": 9,
+            "dexterity": 7,
+            "vitality": 7,
+            "intelligence": 4,
+            "resilience": 7
+        },
+        "skills": [
+            "Berserk",
+            "Heal"
+        ],
         "image": "/human_barbarian_head.png",
         "leftHand": "Greataxe",
         "rightHand": "—",
         "startingSkill": "Berserk",
-        "gridCol": 11, "gridRow": 8, "facing": "front",
+        "gridCol": 11,
+        "gridRow": 8,
+        "facing": "front",
         "isRecruited": false
     },
     {
@@ -81,14 +169,29 @@
         "name": "Baldur",
         "job": "Ranger",
         "race": "Dwarf",
-        "hp": 60, "hpMax": 67, "mp": 10, "mpMax": 10, "sp": 100, "spMax": 100,
-        "stats": { "strength": 7, "dexterity": 7, "vitality": 6, "intelligence": 4, "resilience": 7 },
-        "skills": ["True Shot"],
+        "hp": 60,
+        "hpMax": 67,
+        "mp": 10,
+        "mpMax": 10,
+        "sp": 100,
+        "spMax": 100,
+        "stats": {
+            "strength": 7,
+            "dexterity": 7,
+            "vitality": 6,
+            "intelligence": 4,
+            "resilience": 7
+        },
+        "skills": [
+            "True Shot"
+        ],
         "image": "/heros/dwarf-ranger.png",
         "leftHand": "Crossbow",
         "rightHand": "Dagger",
         "startingSkill": "True Shot",
-        "gridCol": 14, "gridRow": 9, "facing": "left",
+        "gridCol": 14,
+        "gridRow": 9,
+        "facing": "left",
         "isRecruited": false
     },
     {
@@ -96,14 +199,29 @@
         "name": "Lumni",
         "job": "War Dancer",
         "race": "High Elf",
-        "hp": 65, "hpMax": 55, "mp": 30, "mpMax": 30, "sp": 100, "spMax": 100,
-        "stats": { "strength": 6, "dexterity": 10, "vitality": 6, "intelligence": 7, "resilience": 6 },
-        "skills": ["Whirlwind"],
+        "hp": 65,
+        "hpMax": 55,
+        "mp": 30,
+        "mpMax": 30,
+        "sp": 100,
+        "spMax": 100,
+        "stats": {
+            "strength": 6,
+            "dexterity": 10,
+            "vitality": 6,
+            "intelligence": 7,
+            "resilience": 6
+        },
+        "skills": [
+            "Whirlwind"
+        ],
         "image": "/heros/high-elf.png",
-        "leftHand": "Main Gauche",
+        "leftHand": "Dagger",
         "rightHand": "Dagger",
         "startingSkill": "Whirlwind",
-        "gridCol": 8, "gridRow": 9, "facing": "right",
+        "gridCol": 8,
+        "gridRow": 9,
+        "facing": "right",
         "isRecruited": false
     }
 ]

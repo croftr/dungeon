@@ -26,7 +26,6 @@
         "weight": 0.1,
         "sellable": true
     },
-
     {
         "name": "Shawl",
         "slot": "head",
@@ -60,7 +59,6 @@
         "value": 40,
         "weight": 2.5
     },
-
     {
         "name": "Travelling Cloak",
         "slot": "cloak",
@@ -81,7 +79,6 @@
         "value": 80,
         "weight": 0.4
     },
-
     {
         "name": "Amulet of Warding",
         "slot": "neck",
@@ -102,7 +99,6 @@
         "value": 75,
         "weight": 0.1
     },
-
     {
         "name": "Padded Vest",
         "slot": "chest",
@@ -136,7 +132,6 @@
         "value": 250,
         "weight": 12.0
     },
-
     {
         "name": "Leather Belt",
         "slot": "belt",
@@ -159,7 +154,6 @@
         "value": 25,
         "weight": 0.5
     },
-
     {
         "name": "Leather Gloves",
         "slot": "hands",
@@ -182,7 +176,6 @@
         "value": 50,
         "weight": 2.0
     },
-
     {
         "name": "Ring of Vigour",
         "slot": "ring1",
@@ -193,7 +186,9 @@
         "value": 120,
         "weight": 0.05,
         "statChange": "+1 Vitality",
-        "statBonuses": { "vitality": 1 }
+        "statBonuses": {
+            "vitality": 1
+        }
     },
     {
         "name": "Ring of Wisdom",
@@ -205,7 +200,9 @@
         "value": 120,
         "weight": 0.05,
         "statChange": "+1 Intelligence",
-        "statBonuses": { "intelligence": 1 }
+        "statBonuses": {
+            "intelligence": 1
+        }
     },
     {
         "name": "Ring of Strength",
@@ -217,7 +214,9 @@
         "value": 120,
         "weight": 0.05,
         "statChange": "+1 Strength",
-        "statBonuses": { "strength": 1 }
+        "statBonuses": {
+            "strength": 1
+        }
     },
     {
         "name": "Ring of Dexterity",
@@ -229,7 +228,9 @@
         "value": 120,
         "weight": 0.05,
         "statChange": "+1 Dexterity",
-        "statBonuses": { "dexterity": 1 }
+        "statBonuses": {
+            "dexterity": 1
+        }
     },
     {
         "name": "Ring of Resilience",
@@ -241,9 +242,10 @@
         "value": 120,
         "weight": 0.05,
         "statChange": "+1 Resilience",
-        "statBonuses": { "resilience": 1 }
+        "statBonuses": {
+            "resilience": 1
+        }
     },
-
     {
         "name": "Cloth Trousers",
         "slot": "legs",
@@ -266,7 +268,6 @@
         "value": 70,
         "weight": 4.0
     },
-
     {
         "name": "Worn Boots",
         "slot": "feet",
@@ -300,14 +301,16 @@
         "value": 15,
         "weight": 1.0
     },
-
     {
         "name": "Torch",
         "slot": "rightHand",
         "attackType": "bash",
         "baseDamage": 5,
         "delay": 2,
-        "statWeights": { "str": 1.0, "dex": 0.0 },
+        "statWeights": {
+            "str": 1.0,
+            "dex": 0.0
+        },
         "icon": "/icons/torch.png",
         "description": "A burning torch. Lights the way and can be thrust into an enemy's face.",
         "value": 1,
@@ -319,7 +322,10 @@
         "slot": "leftHand",
         "attackType": "shield-bash",
         "baseDamage": 2,
-        "statWeights": { "str": 1.0, "dex": 0.0 },
+        "statWeights": {
+            "str": 1.0,
+            "dex": 0.0
+        },
         "icon": "/icons/bronze_shield.png",
         "description": "A round iron-banded shield. Passively deflects incoming blows.",
         "defence": 2,
@@ -332,7 +338,10 @@
         "slot": "leftHand",
         "attackType": "shield-bash",
         "baseDamage": 2,
-        "statWeights": { "str": 1.0, "dex": 0.0 },
+        "statWeights": {
+            "str": 1.0,
+            "dex": 0.0
+        },
         "icon": "/icons/wooden_shield.png",
         "description": "A basic shield made of reinforced wood. Offers light protection.",
         "defence": 1,
@@ -345,7 +354,10 @@
         "attackType": "shoot",
         "baseDamage": 15,
         "delay": 4,
-        "statWeights": { "str": 0.2, "dex": 0.8 },
+        "statWeights": {
+            "str": 0.2,
+            "dex": 0.8
+        },
         "icon": "/icons/short_bow.png",
         "description": "A recurve hunting bow. Loose to strike enemies at range.",
         "value": 40,
@@ -357,7 +369,10 @@
         "attackType": "shoot",
         "baseDamage": 20,
         "delay": 6,
-        "statWeights": { "str": 0.5, "dex": 0.5 },
+        "statWeights": {
+            "str": 0.5,
+            "dex": 0.5
+        },
         "icon": "/icons/wooden-crossbow.png",
         "description": "A mechanical bow that fires powerful bolts. Highly effective at range.",
         "value": 80,
@@ -405,32 +420,25 @@
         "attackType": "swipe",
         "baseDamage": 5,
         "delay": 2,
-        "statWeights": { "str": 0.2, "dex": 0.8 },
+        "statWeights": {
+            "str": 0.2,
+            "dex": 0.8
+        },
         "icon": "/icons/dagger.png",
         "description": "A short, double-edged blade. Quick and easy to slip past armour.",
         "value": 20,
         "weight": 0.4
     },
     {
-        "name": "Main Gauche",
-        "slot": "leftHand",
-        "attackType": "swipe",
-        "baseDamage": 5,
-        "delay": 2,
-        "statWeights": { "str": 0.2, "dex": 0.8 },
-        "icon": "/icons/dagger.png",
-        "description": "A parrying dagger designed for the off-hand. Enables dual-wielding.",
-        "value": 30,
-        "weight": 0.5
-    },
-
-    {
         "name": "Sword",
         "slot": "rightHand",
         "attackType": "swipe",
         "baseDamage": 10,
         "delay": 2,
-        "statWeights": { "str": 0.5, "dex": 0.5 },
+        "statWeights": {
+            "str": 0.5,
+            "dex": 0.5
+        },
         "icon": "/icons/sword.png",
         "description": "A straight iron sword. The classic weapon of choice for adventurers.",
         "value": 65,
@@ -442,7 +450,10 @@
         "attackType": "bash",
         "baseDamage": 5,
         "delay": 4,
-        "statWeights": { "str": 0.8, "dex": 0.2 },
+        "statWeights": {
+            "str": 0.8,
+            "dex": 0.2
+        },
         "icon": "/icons/oak_staff.png",
         "description": "A gnarled wooden staff. Requires one hand, but enables a spell in the offhand.",
         "value": 18,
@@ -466,7 +477,10 @@
         "attackType": "swipe",
         "baseDamage": 10,
         "delay": 2,
-        "statWeights": { "str": 0.8, "dex": 0.2 },
+        "statWeights": {
+            "str": 0.8,
+            "dex": 0.2
+        },
         "icon": "/icons/axe.png",
         "description": "A heavy war axe. Slower than a sword but hits with devastating force.",
         "value": 50,
@@ -478,20 +492,25 @@
         "attackType": "bash",
         "baseDamage": 15,
         "delay": 2,
-        "statWeights": { "str": 1.0, "dex": 0.0 },
+        "statWeights": {
+            "str": 1.0,
+            "dex": 0.0
+        },
         "icon": "/icons/mace.png",
         "description": "An iron mace with a flanged head. Excellent against armoured foes.",
         "value": 45,
         "weight": 2.2
     },
-
     {
         "name": "Greatsword",
         "slot": "bothHands",
         "attackType": "swipe",
         "baseDamage": 30,
         "delay": 4,
-        "statWeights": { "str": 0.7, "dex": 0.3 },
+        "statWeights": {
+            "str": 0.7,
+            "dex": 0.3
+        },
         "icon": "/icons/greatsword.png",
         "description": "A massive two-handed blade that cleaves through enemies in a single arc.",
         "value": 150,
@@ -503,7 +522,10 @@
         "attackType": "swipe",
         "baseDamage": 20,
         "delay": 4,
-        "statWeights": { "str": 1.0, "dex": 0.0 },
+        "statWeights": {
+            "str": 1.0,
+            "dex": 0.0
+        },
         "icon": "/icons/greataxe.png",
         "description": "A massive two-handed axe that cleaves through enemies in a single arc.",
         "value": 150,
@@ -515,7 +537,10 @@
         "attackType": "bash",
         "baseDamage": 25,
         "delay": 4,
-        "statWeights": { "str": 1.0, "dex": 0.0 },
+        "statWeights": {
+            "str": 1.0,
+            "dex": 0.0
+        },
         "icon": "/icons/war_hammer.png",
         "description": "A two-handed war hammer. Slow to swing but crushes stone and bone alike.",
         "value": 130,
@@ -527,7 +552,10 @@
         "attackType": "shoot",
         "baseDamage": 20,
         "delay": 4,
-        "statWeights": { "str": 0.3, "dex": 0.7 },
+        "statWeights": {
+            "str": 0.3,
+            "dex": 0.7
+        },
         "icon": "/icons/longbow.png",
         "description": "A tall yew longbow. Tremendous range and power.",
         "value": 75,
@@ -560,7 +588,10 @@
         "blockChance": 20,
         "attackType": "bash",
         "baseDamage": 2,
-        "statWeights": { "str": 1.0, "dex": 0.0 },
+        "statWeights": {
+            "str": 1.0,
+            "dex": 0.0
+        },
         "icon": "/icons/skill_generic.svg",
         "description": "Divine protection against physical attacks.",
         "delay": 120,
@@ -647,7 +678,6 @@
         "value": 100,
         "weight": 0.3
     },
-
     {
         "name": "Scroll of Fireball",
         "type": "spellbook",
