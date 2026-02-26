@@ -20,28 +20,6 @@
 //    tickDamage  — HP removed per tick (omit if no tick damage)
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const STATUS_EFFECT_DEFS = {
+import statusEffectData from './data/status-effects.json';
 
-  /** Poison — drains 1 HP every 2 seconds for 30 seconds. */
-  poison: {
-    id: 'poison',
-    name: 'Poison',
-    type: 'debuff',
-    icon: '/icons/poison.svg',
-    duration: 30,
-    tickInterval: 2,
-    tickDamage: 1,
-  },
-
-  /** Regeneration — restores HP every 2 seconds for 30 seconds. Tick heal is set by caster. */
-  regeneration: {
-    id: 'regeneration',
-    name: 'Regeneration',
-    type: 'buff',
-    icon: '/icons/regeneration.png',
-    duration: 30,
-    tickInterval: 2,
-    tickDamage: -1, // default, usually overwritten by caster's INT/10
-  },
-
-};
+export const STATUS_EFFECT_DEFS = statusEffectData;
