@@ -420,6 +420,19 @@ function refreshMember(m) {
   if (skSlot) {
     skSlot.classList.toggle('slot-empty', !skName);
     skSlot.classList.toggle('skill-runic-active', !!m.runicScholarActive);
+
+    const skDef = skName ? getSkillOrSpellDef(skName) : null;
+    const skDelaySec = skDef?.delay ?? 0;
+    const skCanUse = (performance.now() - (lastAttackTimes[`${i}-skill`] || 0)) >= (skDelaySec * 1000);
+    skSlot.classList.toggle('slot-cooling-down', !!skName && !skCanUse);
+
+    if (skName && !skCanUse && !m.cooldownTimers['skill']) {
+      const remaining = (skDelaySec * 1000) - (performance.now() - lastAttackTimes[`${i}-skill`]);
+      m.cooldownTimers['skill'] = setTimeout(() => {
+        m.cooldownTimers['skill'] = null;
+        refreshMember(m);
+      }, remaining);
+    }
   }
 }
 

@@ -446,7 +446,7 @@ export function spawnObjectsForLevel() {
             'Leather Cap', 'Iron Helm', 'Padded Vest', 'Leather Belt',
             'Adventurer\'s Belt', 'Chain Shirt', 'Plate Cuirass',
             'Iron Gauntlets', 'Chainmail Leggings', 'Iron-Shod Boots',
-            'Greatsword', 'War Hammer', 'Longbow'
+            'Greatsword', 'War Hammer', 'Longbow', 'Ring of Strength', 'Ring of Dexterity', 'Ring of Resilience', 'Ring of Wisdom', 'Ring of Vigour'
         ]);
         // New Chest at the end of the long passage
         addChest(objectsGroup, gltfLoader, 7, 1, 0, -0.7, [

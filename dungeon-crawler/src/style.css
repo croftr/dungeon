@@ -633,11 +633,22 @@ body {
   cursor: pointer;
 }
 
-/* Slot cooldown */
+/* Slot inactive/cooldown state */
+.slot-inactive,
 .slot-cooling-down {
-  opacity: 0.3 !important;
+  opacity: 0.4 !important;
+  filter: grayscale(100%) brightness(0.7) contrast(0.9);
   pointer-events: none;
-  filter: grayscale(100%);
+  transition: all 0.3s ease;
+}
+
+.slot-inactive::after,
+.slot-cooling-down::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1;
 }
 
 /* Hunter's Eye countdown badge inside the skill slot */

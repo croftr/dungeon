@@ -1424,17 +1424,16 @@ function _executePartyMemberSpell(caster, casterIndex, hand, spellDef, target) {
   setMp(caster.id, caster.mp - spellDef.mpCost);
 
   // Record cooldown so the slot greys out normally
+  const timeKey = (hand === 'skill') ? `${casterIndex}-skill` : `${casterIndex}-${hand}`;
+  lastAttackTimes[timeKey] = performance.now();
+
   if (hand === 'skill') {
-    if (spellDef.name === 'Heal') {
-      const cd = spellDef.cooldown ?? 15000;
-      const ends = performance.now() + cd;
-      _healSkillCooldownEnds[casterIndex] = ends;
-      _startSkillCooldownUI(casterIndex, ends);
-    }
-  } else {
-    const timeKey = `${casterIndex}-${hand}`;
-    lastAttackTimes[timeKey] = performance.now();
+    const cd = (spellDef.delay ?? 15) * 1000;
+    const ends = performance.now() + cd;
+    if (spellDef.name === 'Heal') _healSkillCooldownEnds[casterIndex] = ends;
+    _startSkillCooldownUI(casterIndex, ends);
   }
+
   refreshPartyCards();
 
   // Play the spell animation
@@ -1606,7 +1605,7 @@ function useHand(memberIndex, hand) {
   );
 
   // Set the cooldown timer and force HUD re-render.
-  // If `bothHands` weapon (e.g., Short Bow), set the cooldown for left hand, 
+  // If `bothHands` weapon (e.g., Greatsword), set the cooldown for left hand, 
   // which is correctly polled by both HUD visual slots.
 
   // Apply mana cost if applicable
@@ -1751,6 +1750,13 @@ function useSkill(memberIndex) {
 
   playSkillSound('magic');
   triggerDefaultSkillEffect();
+
+  const def = getItemDef(skill.name);
+  if (def && def.delay) {
+    lastAttackTimes[`${memberIndex}-skill`] = performance.now();
+    _startSkillCooldownUI(memberIndex, performance.now() + (def.delay * 1000));
+  }
+
   showMessage(`${m.name} uses ${skill.name}! (Skill logic not yet implemented)`);
 }
 
@@ -1776,7 +1782,10 @@ function _useHuntersEye(member, memberIndex) {
     return;
   }
 
-  _huntersEyeCooldownEnd = now + HUNTERS_EYE_COOLDOWN_MS;
+  const def = getItemDef(member.equipment.skill.name);
+  const delayMs = (def?.delay ?? 60) * 1000;
+  _huntersEyeCooldownEnd = now + delayMs;
+  lastAttackTimes[`${memberIndex}-skill`] = now;
   setHuntersEyeTarget(target.id);
   playSkillSound('hunters-eye');
   triggerHuntersEyeEffect();
@@ -1800,10 +1809,13 @@ function _useEntangle(member, memberIndex) {
     return;
   }
 
+  const def = getItemDef(member.equipment.skill.name);
+  const delayMs = (def?.delay ?? 60) * 1000;
   skillsState.entangle.active = true;
   skillsState.entangle.targetId = target.id;
   skillsState.entangle.expiresAt = now + ENTANGLE_DURATION_MS;
-  _entangleCooldownEnd = now + ENTANGLE_COOLDOWN_MS;
+  _entangleCooldownEnd = now + delayMs;
+  lastAttackTimes[`${memberIndex}-skill`] = now;
 
   playSkillSound('magic');
   triggerEntangleEffect();
@@ -1839,10 +1851,13 @@ function _useSunderArmor(member, memberIndex) {
     return;
   }
 
+  const def = getItemDef(member.equipment.skill.name);
+  const delayMs = (def?.delay ?? 60) * 1000;
   skillsState.sunderArmor.active = true;
   skillsState.sunderArmor.targetId = target.id;
   skillsState.sunderArmor.expiresAt = now + SUNDER_ARMOR_DURATION_MS;
-  _sunderArmorCooldownEnd = now + SUNDER_ARMOR_COOLDOWN_MS;
+  _sunderArmorCooldownEnd = now + delayMs;
+  lastAttackTimes[`${memberIndex}-skill`] = now;
 
   playSkillSound('render');
   triggerSunderArmorEffect();
@@ -1877,10 +1892,13 @@ function _useBerserk(member, memberIndex) {
     return;
   }
 
+  const def = getItemDef(member.equipment.skill.name);
+  const delayMs = (def?.delay ?? 60) * 1000;
   skillsState.berserk.active = true;
   skillsState.berserk.actorName = member.name;
   skillsState.berserk.expiresAt = now + BERSERK_DURATION_MS;
-  _berserkCooldownEnd = now + BERSERK_COOLDOWN_MS;
+  _berserkCooldownEnd = now + delayMs;
+  lastAttackTimes[`${memberIndex}-skill`] = now;
 
   playSkillSound('berserk');
   triggerBerserkEffect();
@@ -1910,10 +1928,13 @@ function _useSanctuary(member, memberIndex) {
     return;
   }
 
+  const def = getItemDef(member.equipment.skill.name);
+  const delayMs = (def?.delay ?? 120) * 1000;
   // Activate the buff
   skillsState.sanctuary.active = true;
   skillsState.sanctuary.expiresAt = now + SANCTUARY_DURATION_MS;
-  _sanctuaryCooldownEnd = now + SANCTUARY_COOLDOWN_MS;
+  _sanctuaryCooldownEnd = now + delayMs;
+  lastAttackTimes[`${memberIndex}-skill`] = now;
 
   playSkillSound('holy');
   triggerSanctuaryEffect();
@@ -1943,7 +1964,10 @@ function _useHolyRadiance(member, memberIndex) {
     return;
   }
 
-  _holyRadianceCooldownEnd = now + HOLY_RADIANCE_COOLDOWN_MS;
+  const def = getItemDef(member.equipment.skill.name);
+  const delayMs = (def?.delay ?? 120) * 1000;
+  _holyRadianceCooldownEnd = now + delayMs;
+  lastAttackTimes[`${memberIndex}-skill`] = now;
 
   let healed = 0;
   party.forEach((m) => {
@@ -1982,9 +2006,12 @@ function _useArcaneLantern(member, memberIndex) {
     return;
   }
 
+  const def = getItemDef(member.equipment.skill.name);
+  const delayMs = (def?.delay ?? 60) * 1000;
   skillsState.arcaneLight.active = true;
   skillsState.arcaneLight.expiresAt = now + ARCANE_LANTERN_DURATION_MS;
-  _arcaneLanternCooldownEnd = now + ARCANE_LANTERN_COOLDOWN_MS;
+  _arcaneLanternCooldownEnd = now + delayMs;
+  lastAttackTimes[`${memberIndex}-skill`] = now;
 
   playSkillSound('magic');
   triggerArcaneLanternEffect();
@@ -2016,10 +2043,13 @@ function _useMinersLight(member, memberIndex) {
     return;
   }
 
+  const def = getItemDef(member.equipment.skill.name);
+  const delayMs = (def?.delay ?? 60) * 1000;
   // Same duration and effect as Arcane Lantern
   skillsState.arcaneLight.active = true;
   skillsState.arcaneLight.expiresAt = now + ARCANE_LANTERN_DURATION_MS;
-  _minersLightCooldownEnd = now + ARCANE_LANTERN_COOLDOWN_MS;
+  _minersLightCooldownEnd = now + delayMs;
+  lastAttackTimes[`${memberIndex}-skill`] = now;
 
   playSkillSound('magic');
   triggerArcaneLanternEffect();
@@ -2054,10 +2084,13 @@ function _useWhirlwind(member, memberIndex) {
     return;
   }
 
+  const def = getItemDef(member.equipment.skill.name);
+  const delayMs = (def?.delay ?? 60) * 1000;
   skillsState.whirlwind.active = true;
   skillsState.whirlwind.actorName = member.name;
   skillsState.whirlwind.expiresAt = now + WHIRLWIND_DURATION_MS;
-  _whirlwindCooldownEnds[memberIndex] = now + WHIRLWIND_COOLDOWN_MS;
+  _whirlwindCooldownEnds[memberIndex] = now + delayMs;
+  lastAttackTimes[`${memberIndex}-skill`] = now;
 
   playSkillSound('berserk');
   triggerWhirlwindEffect();
@@ -2092,10 +2125,13 @@ function _useTrueShot(member, memberIndex) {
     return;
   }
 
+  const def = getItemDef(member.equipment.skill.name);
+  const delayMs = (def?.delay ?? 60) * 1000;
   skillsState.trueShot.active = true;
   skillsState.trueShot.actorName = member.name;
   skillsState.trueShot.expiresAt = now + TRUE_SHOT_DURATION_MS;
-  _trueShotCooldownEnds[memberIndex] = now + TRUE_SHOT_COOLDOWN_MS;
+  _trueShotCooldownEnds[memberIndex] = now + delayMs;
+  lastAttackTimes[`${memberIndex}-skill`] = now;
 
   playSkillSound('magic');
   triggerTrueShotEffect();
@@ -2155,7 +2191,10 @@ function _useManaTap(member, memberIndex) {
     return;
   }
 
-  _manaTapCooldownEnd = now + MANA_TAP_COOLDOWN_MS;
+  const def = getItemDef(member.equipment.skill.name);
+  const delayMs = (def?.delay ?? 120) * 1000;
+  _manaTapCooldownEnd = now + delayMs;
+  lastAttackTimes[`${memberIndex}-skill`] = now;
   setMp(member.id, member.mpMax);
 
   playSkillSound('magic');
