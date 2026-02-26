@@ -869,9 +869,6 @@ export function openMerchantModal() {
     _merchantMode = 'buy';
     document.getElementById('merchant-overlay').classList.remove('merchant-hidden');
     _switchMerchantTab('buy');
-    _renderMerchantShop();
-    _renderMerchantBasket();
-    _updateMerchantTotals();
 }
 
 function _switchMerchantTab(mode) {
