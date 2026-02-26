@@ -76,54 +76,60 @@ function inst(def, id, gridRow, gridCol, glbIdle, glbAttack, attackSound, scale 
 export const monsters = [
   // North dead-end passage (behind the portcullis — opens when the wall button is pressed)
   inst(D.treekin, 0, 3, 7,
-    '/monsters/meshy-AI-treeKin/Meshy_AI_Animation_Walking_withSkin.glb',
-    '/monsters/meshy-AI-treeKin/Meshy_AI_Animation_mage_soell_cast_withSkin.glb',
-    '/monsters/meshy-AI-treeKin/treeKin-attack.mp3', 0.45),
+    '/monsters/treekin-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/treekin-animation/Meshy_AI_Animation_mage_soell_cast_withSkin.glb',
+    '/monsters/treekin-animation/treeKin-attack.mp3', 0.45),
 
   // Upper maze
   inst(D.goblin, 1, 9, 6,
-    '/monsters/meshy-AI-goblin/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
-    '/monsters/meshy-AI-goblin/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    '/monsters/meshy-AI-goblin/goblin-attack.wav'),
+    '/monsters/goblin-animation/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/goblin-animation/goblin-attack.wav'),
 
   // Southern section
   inst(D.albino_goblin, 2, 15, 5,
-    '/monsters/meshy-AI-abbino-goblin/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
-    '/monsters/meshy-AI-abbino-goblin/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/meshy-AI-abbino-goblin/albino-goblin-attack.mp3'),
+    '/monsters/albino-goblin-aimation/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
+    '/monsters/albino-goblin-aimation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    '/monsters/albino-goblin-aimation/albino-goblin-attack.mp3'),
 
   // Lower maze — zombie lurks in the far lower-right section, well past the row-14 barrier
   inst(D.zombie, 3, 17, 12,
-    '/monsters/meshy-AI-zombie/Meshy_AI_Animation_Walking_withSkin.glb',
-    '/monsters/meshy-AI-zombie/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    '/monsters/meshy-AI-zombie/zombie-attack.mp3'),
+    '/monsters/zombie-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/zombie-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/zombie-animation/zombie-attack.mp3'),
 
   // Lower maze
   inst(D.ghoul, 4, 17, 11,
-    '/monsters/meshy-AI-ghoul/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
-    '/monsters/meshy-AI-ghoul/Meshy_AI_Animation_Basic_Jump_withSkin.glb',
-    '/monsters/meshy-AI-ghoul/ghoul-attack.mp3'),
+    '/monsters/ghoul-aimation/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
+    '/monsters/ghoul-aimation/Meshy_AI_Animation_Basic_Jump_withSkin.glb',
+    '/monsters/ghoul-aimation/ghoul-attack.mp3'),
 
   // Deeper south passage
   inst(D.orc, 7, 19, 8,
-    '/monsters/meshy-AI-orc/Meshy_AI_Animation_Walking_withSkin.glb',
-    '/monsters/meshy-AI-orc/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    '/monsters/meshy-AI-orc/orc-attack.mp3', 0.5),
+    '/monsters/orc-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/orc-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/orc-animation/orc-attack.mp3', 0.5),
 
   // Bottom long corridor
   inst(D.iceman, 5, 21, 5,
-    '/monsters/meshy-AI-iceMan/Meshy_AI_Animation_Walking_withSkin.glb',
-    '/monsters/meshy-AI-iceMan/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    '/monsters/meshy-AI-iceMan/iceman-attack.mp3', 0.6),
+    '/monsters/iceMan-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/iceMan-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/iceMan-animation/iceman-attack.mp3', 0.6),
 
   // ── Level 2 ─────────────────────────────────────────────────────────────
   // One Treeman patrols the chamber. Patrol bounds match the level-2 map
   // interior: rows 1–5, cols 1–6.
   inst(D.treeman, 8, 5, 5,
-    '/monsters/treeman/Meshy_AI_Animation_Walking_withSkin.glb',
-    '/monsters/treeman/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    '/monsters/treeman/attack-sound.mp3', 0.90, 0, 0, 2,
+    '/monsters/treeman-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/treeman-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/treeman-animation/attack-sound.mp3', 0.90, 0, 0, 2,
     { bounds: { minRow: 1, maxRow: 5, minCol: 1, maxCol: 6 }, speed: 1.2, waitTime: 2.5 }),
+
+  // Training dummy in the big east room
+  inst(D.dummy, 10, 11, 20,
+    '/monsters/dummy-annimation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/dummy-annimation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    null, 0.5),
 ];
 
 export function isMonsterAt(row, col) {
@@ -259,10 +265,10 @@ export function initMonsters(scene) {
         const idleAction = m.mixer.clipAction(gltf.animations[0]);
         m.actions.idle = idleAction;
         // Agree Gesture animations run fast — halve the speed so they look natural
-        if (m.glbIdle.includes('Agree_Gesture')) {
-          idleAction.setEffectiveTimeScale(0.5);
+        // Training dummy doesn't loop its idle animation; it's triggered manually on hit
+        if (m.name !== 'Training Dummy') {
+          idleAction.play();
         }
-        idleAction.play();
       }
 
       scene.add(model);
@@ -302,9 +308,9 @@ export function initMonsters(scene) {
           attackAction.setLoop(THREE.LoopOnce, 1);
           attackAction.clampWhenFinished = true;
 
-          // When attack finishes, fade back to idle
+          // When attack finishes, fade back to idle (except for training dummy, which stays on its last frame)
           m.mixer.addEventListener('finished', (e) => {
-            if (e.action === m.actions.attack && m.actions.idle) {
+            if (e.action === m.actions.attack && m.actions.idle && m.name !== 'Training Dummy') {
               m.actions.idle.reset().play();
               m.actions.attack.crossFadeTo(m.actions.idle, 0.25, false);
             }
@@ -561,7 +567,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
     addLogEntry({ type: 'death', target: m.name, killer, damage, time: Date.now() });
     _playDeathAnimation(m);
   } else {
-    _playHitAnimation(m, attackType);
+    _playHitAnimation(m, attackType, killer);
   }
 
   return { hit: true, damage, killed: m.hp === 0, monsterHp: m.hp };
@@ -826,9 +832,19 @@ function _applyMonsterDamage(monster) {
 //  HIT / DEATH TWEENS
 // ─────────────────────────────────────────────────────────────────────────────
 
-function _playHitAnimation(m, attackType) {
+function _playHitAnimation(m, attackType, killer) {
   if (!m.mesh) return;
   const mesh = m.mesh;
+
+  if (m.name === 'Training Dummy') {
+    // Only trigger for recruits (party members)
+    const isRecruit = killer && party.some(p => p.name === killer);
+    if (isRecruit && m.mixer && m.actions.attack) {
+      m.actions.attack.stop(); // Stop anything current
+      m.actions.attack.reset().play();
+    }
+    return; // Skip standard red flash/knockback for dummy
+  }
 
   if (attackType === 'fireball') {
     createHitSpark(mesh.position);

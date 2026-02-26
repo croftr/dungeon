@@ -430,6 +430,21 @@
         "weight": 0.4
     },
     {
+        "name": "Elven Dagger",
+        "slot": "leftHand",
+        "attackType": "swipe",
+        "baseDamage": 6,
+        "delay": 2,
+        "statWeights": {
+            "str": 0.1,
+            "dex": 0.9
+        },
+        "icon": "/icons/elven-dagger.png",
+        "description": "A short, double-edged blade. Quick and easy to slip past armour.",
+        "value": 20,
+        "weight": 0.4
+    },
+    {
         "name": "Sword",
         "slot": "rightHand",
         "attackType": "swipe",

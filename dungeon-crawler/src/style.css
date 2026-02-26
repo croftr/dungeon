@@ -3325,7 +3325,7 @@ body.cursor-interact #renderer-canvas {
 
 .alchemy-slot:hover {
   background: rgba(40, 70, 40, 0.8);
-  border-color: #4da4d;
+  border-color: #4da4d1;
   box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
 }
 
@@ -3345,7 +3345,7 @@ body.cursor-interact #renderer-canvas {
 #alchemy-transmute-btn {
   padding: 12px 24px;
   background: linear-gradient(to bottom, #2d5d2d, #1a3a1a);
-  border: 1px solid #4da4d;
+  border: 1px solid #4da4d1;
   border-radius: 4px;
   color: #aaffaa;
   font-weight: 700;
