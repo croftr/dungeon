@@ -392,14 +392,15 @@ function refreshMember(m) {
       lhDelaySec *= (SKILLS_DATA['War Dance']?.magnitude ?? 0.75);
     }
 
-    const lhCanAttack = (performance.now() - (lastAttackTimes[`${i}-left`] || 0)) >= (lhDelaySec * 1000);
+    const lastUsed = lastAttackTimes[`${i}-left`];
+    const lhCanAttack = lastUsed === undefined || (performance.now() - lastUsed) >= (lhDelaySec * 1000);
     lhSlot.classList.toggle('slot-cooling-down', !lhCanAttack);
     // Auto-refresh when cooldown expires if it's currently on cooldown
     if (!lhCanAttack && !m.cooldownTimers['left']) {
       m.cooldownTimers['left'] = setTimeout(() => {
         m.cooldownTimers['left'] = null;
         refreshMember(m);
-      }, (lhDelaySec * 1000) - (performance.now() - lastAttackTimes[`${i}-left`]));
+      }, (lhDelaySec * 1000) - (performance.now() - lastUsed));
     }
   }
   if (rhSlot) {
@@ -417,15 +418,12 @@ function refreshMember(m) {
       rhDelaySec *= (SKILLS_DATA['War Dance']?.magnitude ?? 0.75);
     }
 
-    const rhCanAttack = lhBothHands
-      ? (performance.now() - (lastAttackTimes[`${i}-left`] || 0)) >= (rhDelaySec * 1000)
-      : (performance.now() - (lastAttackTimes[`${i}-right`] || 0)) >= (rhDelaySec * 1000);
+    const lastUsed = lhBothHands ? lastAttackTimes[`${i}-left`] : lastAttackTimes[`${i}-right`];
+    const rhCanAttack = lastUsed === undefined || (performance.now() - lastUsed) >= (rhDelaySec * 1000);
 
     rhSlot.classList.toggle('slot-cooling-down', !rhCanAttack);
     if (!rhCanAttack && !m.cooldownTimers['right']) {
-      const remaining = lhBothHands
-        ? (rhDelaySec * 1000) - (performance.now() - lastAttackTimes[`${i}-left`])
-        : (rhDelaySec * 1000) - (performance.now() - lastAttackTimes[`${i}-right`]);
+      const remaining = (rhDelaySec * 1000) - (performance.now() - lastUsed);
       m.cooldownTimers['right'] = setTimeout(() => {
         m.cooldownTimers['right'] = null;
         refreshMember(m);
@@ -438,11 +436,12 @@ function refreshMember(m) {
 
     const skDef = skName ? getSkillOrSpellDef(skName) : null;
     const skDelaySec = skDef?.delay ?? 0;
-    const skCanUse = (performance.now() - (lastAttackTimes[`${i}-skill`] || 0)) >= (skDelaySec * 1000);
+    const lastUsed = lastAttackTimes[`${i}-skill`];
+    const skCanUse = lastUsed === undefined || (performance.now() - lastUsed) >= (skDelaySec * 1000);
     skSlot.classList.toggle('slot-cooling-down', !!skName && !skCanUse);
 
     if (skName && !skCanUse && !m.cooldownTimers['skill']) {
-      const remaining = (skDelaySec * 1000) - (performance.now() - lastAttackTimes[`${i}-skill`]);
+      const remaining = (skDelaySec * 1000) - (performance.now() - lastUsed);
       m.cooldownTimers['skill'] = setTimeout(() => {
         m.cooldownTimers['skill'] = null;
         refreshMember(m);

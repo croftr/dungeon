@@ -212,3 +212,32 @@ export function pickRandomFrontLineTarget(party) {
   if (!candidates.length) return null;
   return candidates[Math.floor(Math.random() * candidates.length)];
 }
+
+// ── Skill magnitude resolver ──────────────────────────────────────────────────
+
+/**
+ * Returns the effective magnitude for a skill, evaluated against the caster's
+ * current stats when a magnitudeFormula is defined, otherwise falls back to the
+ * hard-coded magnitude value.
+ *
+ * Supported formula syntax: additive combinations of stat names, e.g.
+ *   "vitality + intelligence"
+ *   "strength + dexterity"
+ */
+export function resolveSkillMagnitude(skillDef, caster) {
+  console.log('resolveSkillMagnitude', skillDef, caster);
+  if (skillDef.magnitudeFormula && caster?.stats) {
+    const s = caster.stats;
+    const res = skillDef.magnitudeFormula
+      .replace(/vitality/g, s.vitality ?? 0)
+      .replace(/intelligence/g, s.intelligence ?? 0)
+      .replace(/strength/g, s.strength ?? 0)
+      .replace(/dexterity/g, s.dexterity ?? 0)
+      .replace(/resilience/g, s.resilience ?? 0)
+      .split('+').map(Number).reduce((a, b) => a + b, 0);
+    console.log('res', res);
+    return res;
+  }
+
+  return skillDef.magnitude ?? 1;
+}

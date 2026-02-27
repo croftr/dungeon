@@ -9,7 +9,7 @@ import { showMessage } from './minimap.js';
 import { dropMember } from './recruits.js';
 import { isInFrontOfPlayer } from './player.js';
 import { isAlchemyModalOpen, addItemToAlchemy } from './objects.js';
-import { canMelee } from './combat-rules.js';
+import { canMelee, resolveSkillMagnitude } from './combat-rules.js';
 import { playCritSound, playSkillSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { skillsState } from './skills-state.js';
@@ -1715,7 +1715,6 @@ function useHand(memberIndex, hand) {
 
 
   if (result.crit) {
-    playCritSound(attackType);
     if (result.killed) {
       showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${m.name} obliterates the ${target.name} for ${result.damage} dmg!`, 3000);
     } else {
@@ -1738,7 +1737,6 @@ const HUNTERS_EYE_COOLDOWN_MS = SKILLS_DATA["Hunter's Eye"].cooldownMs;
 const SANCTUARY_COOLDOWN_MS = SKILLS_DATA['Sanctuary'].cooldownMs;
 const SANCTUARY_DURATION_MS = SKILLS_DATA['Sanctuary'].durationMs;
 const HOLY_RADIANCE_COOLDOWN_MS = SKILLS_DATA['Holy Radiance'].cooldownMs;
-const HOLY_RADIANCE_HEAL = SKILLS_DATA['Holy Radiance'].magnitude;
 const ENTANGLE_COOLDOWN_MS = SKILLS_DATA['Entangle'].cooldownMs;
 const ENTANGLE_DURATION_MS = SKILLS_DATA['Entangle'].durationMs;
 const SUNDER_ARMOR_COOLDOWN_MS = SKILLS_DATA['Sunder Armor'].cooldownMs;
@@ -2004,9 +2002,10 @@ function _useSanctuary(member, memberIndex) {
 
   const def = getItemDef(member.equipment.skill.name);
   const delayMs = (def?.delay ?? 120) * 1000;
-  // Activate the buff
+  // Activate the buff — magnitude resolved from the caster's current stats
   skillsState.sanctuary.active = true;
   skillsState.sanctuary.expiresAt = now + SANCTUARY_DURATION_MS;
+  skillsState.sanctuary.magnitude = resolveSkillMagnitude(SKILLS_DATA['Sanctuary'], member);
   _sanctuaryCooldownEnd = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill`] = now;
 
@@ -2043,10 +2042,11 @@ function _useHolyRadiance(member, memberIndex) {
   _holyRadianceCooldownEnd = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill`] = now;
 
+  const holyRadianceHeal = resolveSkillMagnitude(SKILLS_DATA['Holy Radiance'], member);
   let healed = 0;
   party.forEach((m) => {
     if (!m.isEmpty && !m.isDead && m.hp < m.hpMax) {
-      setHp(m.id, Math.min(m.hp + HOLY_RADIANCE_HEAL, m.hpMax));
+      setHp(m.id, Math.min(m.hp + holyRadianceHeal, m.hpMax));
       healed++;
     }
   });
@@ -2055,7 +2055,7 @@ function _useHolyRadiance(member, memberIndex) {
     playSkillSound('holy');
     triggerHolyRadianceEffect();
     showMessage(
-      `<span style="color:#f8f8a0">✦ Holy Radiance</span> — ${member.name} calls down divine light! Each member heals ${HOLY_RADIANCE_HEAL} HP.`,
+      `<span style="color:#f8f8a0">✦ Holy Radiance</span> — ${member.name} calls down divine light! Each member heals ${holyRadianceHeal} HP.`,
       3000
     );
     addLogEntry({ type: 'skill', actor: member.name, skillName: 'Holy Radiance' });

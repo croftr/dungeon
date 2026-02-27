@@ -21,6 +21,7 @@ const SOUND_MAP = {
   fireball: { url: '/sounds/actions/fireball.mp3', offset: 0.0 },
   'shield-bash': { url: '/sounds/actions/bash.mp3', offset: 0.05 },
   death: { url: '/sounds/actions/monster-killed-1.mp3 ', offset: 0.0 },
+  hit: { url: '/sounds/actions/hit.mp3', offset: 0.0 },
 };
 
 const bufferCache = new Map();
@@ -137,6 +138,27 @@ export async function playPortalSound() {
     source.start(0);
   } catch (err) {
     console.warn('[audio] playPortalSound failed:', err);
+  }
+}
+
+export async function playHitSound() {
+  const buffer = await getBuffer('/sounds/actions/hit.mp3');
+  if (!buffer) return;
+
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.7;
+
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playHitSound failed:', err);
   }
 }
 

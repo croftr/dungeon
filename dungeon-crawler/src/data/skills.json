@@ -21,11 +21,11 @@
     "Holy Radiance": {
         "type": "healing",
         "icon": "/skills/holy-radiance.png",
-        "description": "Calls down a pulse of holy energy, restoring 10 HP to every living party member. Cooldown: 120s.",
+        "description": "Calls down a pulse of holy energy, restoring HP equal to the caster's Vitality + Intelligence to every living party member. Cooldown: 120s.",
         "cooldownMs": 120000,
         "effectType": "partyHeal",
         "effectTarget": "party",
-        "magnitude": 10
+        "magnitudeFormula": "vitality + intelligence"
     },
     "Entangle": {
         "type": "debuff",

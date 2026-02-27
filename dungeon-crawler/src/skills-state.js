@@ -6,10 +6,11 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const skillsState = {
-  /** Sanctuary — reduces all incoming party damage by 10% while active. */
+  /** Sanctuary — reduces all incoming party damage while active. */
   sanctuary: {
     active: false,
-    expiresAt: 0,   // performance.now() value when the buff ends
+    expiresAt: 0,     // performance.now() value when the buff ends
+    magnitude: 1,     // resolved from caster's stats at cast time
   },
 
   /** Arcane Lantern — Merlin's spell illuminates the dungeon like a torch. */

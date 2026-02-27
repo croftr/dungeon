@@ -16,7 +16,7 @@ import {
   MONSTER_BASE_ATTACK, RESILIENCE_DAMAGE_FACTOR,
   SHIELD_BASH_STUN_CHANCE, SHIELD_BASH_STUN_DURATION_MS,
 } from './combat-rules.js';
-import { setInCombat, clearCombat, playCritSound, playActionSound } from './audio.js';
+import { setInCombat, clearCombat, playCritSound, playActionSound, playHitSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { getItemDef } from './items.js';
 import { spawnDroppedItem } from './objects.js';
@@ -557,51 +557,71 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
   const m = monsters.find((x) => x.id === monsterId && x.alive);
   if (!m) return { hit: false, damage: 0, killed: false, monsterHp: 0 };
 
-  // finalDamage is pre-calculated by attackMonster via combat-rules.js
   const damage = Math.max(1, finalDamage);
+  const hpBefore = m.hp;
   m.hp = Math.max(0, m.hp - damage);
+  const hpAfter = m.hp;
+  const killedByThisHit = (hpBefore > 0 && hpAfter === 0);
 
-  showMonsterDamage(monsterId, damage, isCrit);
-
-  // Update the HP bar above the monster's head
-  if (m.hpBarFill) {
-    const pct = m.hpMax > 0 ? (m.hp / m.hpMax) * 100 : 0;
-    m.hpBarFill.style.width = `${pct}%`;
-  }
-
-  if (m.statsLabel?.visible) _updateStatsPanel(m);
-
-  if (m.name !== 'Training Dummy') {
-    setInCombat();
-  }
-
-  if (m.hp === 0) {
+  if (killedByThisHit) {
     m.alive = false;
-    if (!getInRangeMonster()) clearCombat();
-    playActionSound('death');
+  }
 
-    // ── Drop table roll ─────────────────────────────────────────────────────
-    // Roll each entry in the monster's drops table independently.
-    const droppedItems = [];
-    if (m.drops && m.drops.length > 0) {
-      for (const drop of m.drops) {
-        if (Math.random() < drop.chance) {
-          droppedItems.push(drop.item);
-        }
-      }
+  // Sync visual/audio feedback with the action animation
+  const delay = (attackType === 'poison-dot') ? 0 : 250;
+
+  setTimeout(() => {
+    if (!m.mesh) return; // Safeguard if level changed or monster destroyed
+
+    if (attackType !== 'poison-dot') {
+      playHitSound();
     }
 
-    import('./objects.js').then(obj => {
-      obj.spawnCorpse(m.gridCol, m.gridRow, droppedItems);
-    });
-    if (m.hpBarFill) m.hpBarFill.parentElement.style.display = 'none';
-    addLogEntry({ type: 'death', target: m.name, killer, damage, time: Date.now() });
-    _playDeathAnimation(m);
-  } else {
-    _playHitAnimation(m, attackType, killer);
-  }
+    if (isCrit) {
+      playCritSound(attackType);
+    }
 
-  return { hit: true, damage, killed: m.hp === 0, monsterHp: m.hp };
+    showMonsterDamage(monsterId, damage, isCrit);
+
+    // Update the HP bar above the monster's head
+    if (m.hpBarFill) {
+      const pct = m.hpMax > 0 ? (hpAfter / m.hpMax) * 100 : 0;
+      m.hpBarFill.style.width = `${pct}%`;
+    }
+
+    if (m.statsLabel?.visible) _updateStatsPanel(m);
+
+    if (m.name !== 'Training Dummy') {
+      setInCombat();
+    }
+
+    if (killedByThisHit) {
+      if (!getInRangeMonster()) clearCombat();
+      playActionSound('death');
+
+      // ── Drop table roll ─────────────────────────────────────────────────────
+      // Roll each entry in the monster's drops table independently.
+      const droppedItems = [];
+      if (m.drops && m.drops.length > 0) {
+        for (const drop of m.drops) {
+          if (Math.random() < drop.chance) {
+            droppedItems.push(drop.item);
+          }
+        }
+      }
+
+      import('./objects.js').then(obj => {
+        obj.spawnCorpse(m.gridCol, m.gridRow, droppedItems);
+      });
+      if (m.hpBarFill) m.hpBarFill.parentElement.style.display = 'none';
+      addLogEntry({ type: 'death', target: m.name, killer, damage, time: Date.now() });
+      _playDeathAnimation(m);
+    } else {
+      _playHitAnimation(m, attackType, killer);
+    }
+  }, delay);
+
+  return { hit: true, damage, killed: killedByThisHit, monsterHp: m.hp };
 }
 
 export function attackMonster(monsterId, character, weaponDef, attackType, ammoDef = null) {
@@ -817,7 +837,7 @@ function _applyMonsterDamage(monster) {
   const sanctuaryUp = skillsState.sanctuary.active &&
     performance.now() < skillsState.sanctuary.expiresAt;
   if (sanctuaryUp) {
-    damage = Math.max(1, Math.floor(damage * SKILLS_DATA['Sanctuary'].magnitude));
+    damage = Math.max(1, Math.floor(damage * skillsState.sanctuary.magnitude));
   }
 
   setHp(target.id, target.hp - damage);
