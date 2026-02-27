@@ -216,28 +216,70 @@ export function pickRandomFrontLineTarget(party) {
 // ── Skill magnitude resolver ──────────────────────────────────────────────────
 
 /**
- * Returns the effective magnitude for a skill, evaluated against the caster's
- * current stats when a magnitudeFormula is defined, otherwise falls back to the
- * hard-coded magnitude value.
+ * Sums the item skill-power bonuses a caster's equipped items grant for a given skill.
  *
- * Supported formula syntax: additive combinations of stat names, e.g.
- *   "vitality + intelligence"
- *   "strength + dexterity"
+ * Item skillBonuses keys (any combination allowed):
+ *   "all"          — applies to every skill
+ *   "healing"      — applies to skills with type "healing"   (matches skills.json `type`)
+ *   "buff"         — applies to skills with type "buff"
+ *   "debuff"       — applies to skills with type "debuff"
+ *   "<Skill Name>" — applies to one specific skill, e.g. "Sanctuary" or "Holy Radiance"
  */
-export function resolveSkillMagnitude(skillDef, caster) {
-  console.log('resolveSkillMagnitude', skillDef, caster);
+function _itemSkillBonus(skillName, skillDef, caster) {
+  const bonuses = caster?.skillBonuses;
+  if (!bonuses) return 0;
+  let total = 0;
+  total += bonuses['all']          ?? 0;
+  if (skillDef.type) total += bonuses[skillDef.type] ?? 0;
+  if (skillName)     total += bonuses[skillName]     ?? 0;
+  return total;
+}
+
+/**
+ * Returns the effective magnitude for a skill.
+ *
+ * Resolution order:
+ *   1. If the skill has a `magnitudeFormula`, evaluate it against the caster's stats.
+ *   2. Otherwise use the hard-coded `magnitude` value from skills.json.
+ *   3. Apply any item bonus from the caster's equipped gear, using the skill's
+ *      `magnitudeBonusMode` to determine how:
+ *
+ *      "flat"    (default) — bonus added directly:        base + bonus
+ *                            Use for HP values, percentages, absolute amounts.
+ *      "percent"           — bonus is a % change to base: base * (1 + bonus / 100)
+ *                            Use for damage/speed multipliers. e.g. bonus=10 → ×1.10.
+ *                            Use negative values on items to strengthen inverted
+ *                            multipliers (e.g. "Sunder Armor": -10 → 0.5 × 0.9 = 0.45).
+ *
+ * @param {string}  skillName  Key from skills.json, e.g. "Holy Radiance"
+ * @param {object}  skillDef   The skill definition object from skills.json
+ * @param {object}  caster     The party member casting the skill (needs .stats and .skillBonuses)
+ */
+export function resolveSkillMagnitude(skillName, skillDef, caster) {
+  console.log('resolveSkillMagnitude', skillName, skillDef.type, skillDef.magnitudeFormula, caster?.stats);
+
+  let base;
   if (skillDef.magnitudeFormula && caster?.stats) {
     const s = caster.stats;
-    const res = skillDef.magnitudeFormula
-      .replace(/vitality/g, s.vitality ?? 0)
+    base = skillDef.magnitudeFormula
+      .replace(/vitality/g,     s.vitality     ?? 0)
       .replace(/intelligence/g, s.intelligence ?? 0)
-      .replace(/strength/g, s.strength ?? 0)
-      .replace(/dexterity/g, s.dexterity ?? 0)
-      .replace(/resilience/g, s.resilience ?? 0)
+      .replace(/strength/g,     s.strength     ?? 0)
+      .replace(/dexterity/g,    s.dexterity    ?? 0)
+      .replace(/resilience/g,   s.resilience   ?? 0)
       .split('+').map(Number).reduce((a, b) => a + b, 0);
-    console.log('res', res);
-    return res;
+  } else {
+    base = skillDef.magnitude ?? 1;
   }
 
-  return skillDef.magnitude ?? 1;
+  const bonus = _itemSkillBonus(skillName, skillDef, caster);
+  if (bonus === 0) return base;
+
+  const mode = skillDef.magnitudeBonusMode ?? 'flat';
+  const result = mode === 'percent'
+    ? base * (1 + bonus / 100)
+    : base + bonus;
+
+  console.log(`[${skillName}] base=${base} bonus=${bonus} mode=${mode} → ${result}`);
+  return result;
 }

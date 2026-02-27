@@ -16,7 +16,8 @@
         "effectType": "damageReduction",
         "effectTarget": "party",
         "stateKey": "sanctuary",
-        "magnitude": 0.9
+        "magnitude": 10,
+        "magnitudeBonusMode": "flat"
     },
     "Holy Radiance": {
         "type": "healing",
@@ -25,7 +26,8 @@
         "cooldownMs": 120000,
         "effectType": "partyHeal",
         "effectTarget": "party",
-        "magnitudeFormula": "vitality + intelligence"
+        "magnitudeFormula": "vitality + intelligence",
+        "magnitudeBonusMode": "flat"
     },
     "Entangle": {
         "type": "debuff",
@@ -36,7 +38,8 @@
         "effectType": "attackSpeedMultiplier",
         "effectTarget": "monster",
         "stateKey": "entangle",
-        "magnitude": 2.0
+        "magnitude": 2.0,
+        "magnitudeBonusMode": "percent"
     },
     "Sunder Armor": {
         "type": "debuff",
@@ -47,7 +50,8 @@
         "effectType": "defenceMultiplier",
         "effectTarget": "monster",
         "stateKey": "sunderArmor",
-        "magnitude": 0.5
+        "magnitude": 0.5,
+        "magnitudeBonusMode": "percent"
     },
     "Arcane Lantern": {
         "type": "buff",
@@ -66,7 +70,8 @@
         "cooldownMs": 0,
         "effectType": "spellDamageMultiplier",
         "effectTarget": "self",
-        "magnitude": 2.0
+        "magnitude": 2.0,
+        "magnitudeBonusMode": "percent"
     },
     "Mana Tap": {
         "type": "healing",
@@ -85,7 +90,8 @@
         "effectType": "damageMultiplier",
         "effectTarget": "self",
         "stateKey": "berserk",
-        "magnitude": 1.2
+        "magnitude": 1.3,
+        "magnitudeBonusMode": "percent"
     },
     "Miners Light": {
         "type": "buff",
@@ -106,7 +112,8 @@
         "effectType": "attackSpeedMultiplier",
         "effectTarget": "self",
         "stateKey": "whirlwind",
-        "magnitude": 0.5
+        "magnitude": 0.5,
+        "magnitudeBonusMode": "percent"
     },
     "True Shot": {
         "type": "buff",
@@ -125,7 +132,8 @@
         "cooldownMs": 15000,
         "effectType": "singleHeal",
         "effectTarget": "party-member",
-        "attackType": "heal"
+        "attackType": "heal",
+        "magnitudeBonusMode": "flat"
     },
     "Warcry": {
         "type": "buff",
@@ -136,7 +144,8 @@
         "effectType": "damageMultiplier",
         "effectTarget": "party",
         "stateKey": "warcry",
-        "magnitude": 2.1
+        "magnitude": 2.1,
+        "magnitudeBonusMode": "percent"
     },
     "War Dance": {
         "type": "buff",
@@ -147,6 +156,7 @@
         "effectType": "attackSpeedMultiplier",
         "effectTarget": "party",
         "stateKey": "warDance",
-        "magnitude": 1.75
+        "magnitude": 1.75,
+        "magnitudeBonusMode": "percent"
     }
 }

@@ -3,6 +3,9 @@
 //
 //  Imported by equipment.js (writes) and monster.js (reads) to avoid creating
 //  a circular dependency between those two modules.
+//
+//  Every skill that has a magnitude stores it here, resolved from the caster's
+//  stats and equipment at cast time via resolveSkillMagnitude().
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const skillsState = {
@@ -10,7 +13,7 @@ export const skillsState = {
   sanctuary: {
     active: false,
     expiresAt: 0,     // performance.now() value when the buff ends
-    magnitude: 1,     // resolved from caster's stats at cast time
+    magnitude: 1,     // resolved from caster's stats + gear at cast time
   },
 
   /** Arcane Lantern — Merlin's spell illuminates the dungeon like a torch. */
@@ -19,47 +22,56 @@ export const skillsState = {
     expiresAt: 0,
   },
 
-  /** Entangle - Halves attack speed for the targeted monster */
+  /** Entangle — multiplies the targeted monster's attack delay */
   entangle: {
     active: false,
     expiresAt: 0,
     targetId: null,
+    magnitude: 1,     // resolved at cast time
   },
-  /** Sunder Armor — cuts a specific monster's defence by 50% */
+
+  /** Sunder Armor — multiplier applied to a specific monster's defence */
   sunderArmor: {
     active: false,
     targetId: null,
     expiresAt: 0,
+    magnitude: 1,     // resolved at cast time
   },
 
-  /** Berserk — boots Korg's damage by 20% */
+  /** Berserk — damage multiplier for the caster */
   berserk: {
     active: false,
-    actorName: null, // to restrict the buff to just the user
+    actorName: null,  // restricts the buff to just the caster
     expiresAt: 0,
+    magnitude: 1,     // resolved at cast time
   },
 
-  /** Whirlwind — doubles attack speed for 30s */
+  /** Whirlwind — attack-delay multiplier for the caster */
   whirlwind: {
     active: false,
     actorName: null,
     expiresAt: 0,
+    magnitude: 1,     // resolved at cast time
   },
 
-  /** True Shot — guaranteed hit for ranged attacks for 20s */
+  /** True Shot — guaranteed hit for ranged attacks (no magnitude needed) */
   trueShot: {
     active: false,
     actorName: null,
     expiresAt: 0,
   },
-  /** Warcry — boosts party damage by 10% */
+
+  /** Warcry — damage multiplier for the whole party */
   warcry: {
     active: false,
     expiresAt: 0,
+    magnitude: 1,     // resolved at cast time
   },
-  /** War Dance — boosts party attack speed by 25% */
+
+  /** War Dance — attack-delay multiplier for the whole party */
   warDance: {
     active: false,
     expiresAt: 0,
+    magnitude: 1,     // resolved at cast time
   },
 };

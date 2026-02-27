@@ -151,7 +151,7 @@ function _updateStatsPanel(m) {
   const defVal = m.defence ?? '—';
   const resVal = s.resilience ?? '—';
 
-  const sunderMag = SKILLS_DATA['Sunder Armor'].magnitude;
+  const sunderMag = skillsState.sunderArmor.magnitude;
   const displayDef = isSundered && defVal !== '—' ? `<span style="color:#ff8080">${Math.floor(defVal * sunderMag)}</span>` : defVal;
   const displayRes = isSundered && resVal !== '—' ? `<span style="color:#ff8080">${Math.floor(resVal * sunderMag)}</span>` : resVal;
 
@@ -512,7 +512,7 @@ export function updateMonsters(dt, playerCamera, scene) {
           triggerMonsterAttack(m.id);
           let nextAttack = 5.0 + (Math.random() * 2.0); // Next attack in 5.0 - 7.0 seconds
           if (skillsState.entangle?.active && skillsState.entangle?.targetId === m.id) {
-            nextAttack *= SKILLS_DATA['Entangle'].magnitude;
+            nextAttack *= skillsState.entangle.magnitude;
           }
           m.attackCooldown = nextAttack;
         }
@@ -647,7 +647,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
 
   // Apply Sunder Armor penalty
   const isSundered = skillsState.sunderArmor?.active && skillsState.sunderArmor?.targetId === m.id;
-  const sunderMag = SKILLS_DATA['Sunder Armor'].magnitude;
+  const sunderMag = skillsState.sunderArmor.magnitude;
   const effectiveDefence = isSundered ? Math.floor((m.defence ?? 0) * sunderMag) : (m.defence ?? 0);
   const effectiveResilience = isSundered ? Math.floor((m.stats?.resilience ?? 0) * sunderMag) : (m.stats?.resilience ?? 0);
 
@@ -668,7 +668,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   // Runic Scholar — doubles final spell damage after ALL other modifiers (including crit)
   const runicActive = isMagic && character.runicScholarActive;
   if (runicActive) {
-    damage = damage * SKILLS_DATA['Runic Scholar'].magnitude;
+    damage = damage * character.runicScholarMagnitude;
     character.runicScholarActive = false; // consume the buff
     refreshPartyCards();                  // remove the glow from the skill slot
   }
@@ -676,12 +676,12 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   // Berserk — applies a x1.2 damage multiplier after everything else
   const berserkActive = skillsState.berserk?.active && skillsState.berserk?.actorName === character.name;
   if (berserkActive) {
-    damage = Math.round(damage * SKILLS_DATA['Berserk'].magnitude);
+    damage = Math.round(damage * skillsState.berserk.magnitude);
   }
 
   // Warcry — applies a x1.1 damage multiplier to all party members
   if (skillsState.warcry?.active) {
-    damage = Math.round(damage * (SKILLS_DATA['Warcry']?.magnitude ?? 1.1));
+    damage = Math.round(damage * skillsState.warcry.magnitude);
   }
 
   // Compute the weighted stat bonus and label for the battle log
@@ -833,11 +833,13 @@ function _applyMonsterDamage(monster) {
   const isCrit = Math.random() < CRIT_CHANCE;
   let damage = isCrit ? Math.round(preCritDamage * CRIT_MULTIPLIER) : preCritDamage;
 
-  // Sanctuary buff — Alaric's shield reduces all incoming party damage by 10%
+  // Sanctuary buff — reduces all incoming party damage by a percentage.
+  // magnitude is stored as a percentage (e.g. 10 = 10% reduction), capped at 100%.
   const sanctuaryUp = skillsState.sanctuary.active &&
     performance.now() < skillsState.sanctuary.expiresAt;
   if (sanctuaryUp) {
-    damage = Math.max(1, Math.floor(damage * skillsState.sanctuary.magnitude));
+    const reductionMultiplier = 1 - Math.min(skillsState.sanctuary.magnitude, 100) / 100;
+    damage = Math.max(1, Math.floor(damage * reductionMultiplier));
   }
 
   setHp(target.id, target.hp - damage);

@@ -109,6 +109,9 @@ export function updateEffectiveStats(m) {
     m.baseStats = { ...m.stats };
   }
   const newStats = { ...m.baseStats };
+  // skillBonuses accumulates flat additions to formula-resolved skill magnitudes.
+  // Keys: "all" (every skill), or a skill type string e.g. "healing", "buff", "debuff".
+  const newSkillBonuses = {};
   const countedItems = new Set();
 
   Object.values(m.equipment || {}).forEach(item => {
@@ -137,9 +140,19 @@ export function updateEffectiveStats(m) {
           }
         }
       }
+
+      // skillBonuses: flat additions to formula-resolved skill magnitudes.
+      // Add a skillBonuses entry to any item definition to boost skill potency.
+      if (def.skillBonuses) {
+        Object.entries(def.skillBonuses).forEach(([key, delta]) => {
+          newSkillBonuses[key] = (newSkillBonuses[key] ?? 0) + delta;
+        });
+      }
     }
   });
+
   m.stats = newStats;
+  m.skillBonuses = newSkillBonuses;
 }
 
 export function extendPartyData() {
@@ -364,7 +377,9 @@ function renderModal(memberIndex) {
         card.className = 'skill-card';
         const isEquipped = m.equipment?.skill?.name === skill.name;
         if (isEquipped) card.classList.add('skill-card--equipped');
-        card.innerHTML = `<span class="skill-name">${skill.name}</span><span class="skill-desc">${skill.description}</span>`;
+        const potency = _formatSkillPotency(skill.name, m);
+        const potencyHtml = potency ? `<span class="skill-potency">${potency}</span>` : '';
+        card.innerHTML = `<span class="skill-name">${skill.name}</span><span class="skill-desc">${skill.description}</span>${potencyHtml}`;
         // Click to equip — clicking the already-equipped skill unequips it
         card.addEventListener('click', () => {
           m.equipment.skill = isEquipped ? null : { name: skill.name, slot: 'skill', icon: skill.icon ?? null };
@@ -458,6 +473,39 @@ function transferItem(fromIdx, toIdx, invIndex) {
 }
 
 // ─────────────────────────────────────────────
+//  SKILL POTENCY FORMATTER
+// ─────────────────────────────────────────────
+
+/**
+ * Returns a short, human-readable string describing the effective potency of a
+ * skill for a given party member, factoring in their current stats and equipment.
+ * Returns null for skills that have no meaningful magnitude (e.g. utility skills).
+ */
+function _formatSkillPotency(skillName, member) {
+  const skillDef = SKILLS_DATA[skillName];
+  if (!skillDef || (!skillDef.magnitude && !skillDef.magnitudeFormula)) return null;
+  const mag = resolveSkillMagnitude(skillName, skillDef, member);
+  switch (skillDef.effectType) {
+    case 'partyHeal':
+    case 'singleHeal':
+      return `Heals ${Math.round(mag)} HP`;
+    case 'damageReduction':
+      return `Reduces damage by ${Math.min(Math.round(mag), 100)}%`;
+    case 'damageMultiplier':
+      return `+${Math.round((mag - 1) * 100)}% damage`;
+    case 'spellDamageMultiplier':
+      return `×${mag.toFixed(1)} spell damage`;
+    case 'attackSpeedMultiplier':
+      if (skillDef.effectTarget === 'monster') return `Monster attack delay ×${mag.toFixed(1)}`;
+      return `Attack delay ×${mag.toFixed(2)}`;
+    case 'defenceMultiplier':
+      return `-${Math.round((1 - mag) * 100)}% monster defence`;
+    default:
+      return null;
+  }
+}
+
+// ─────────────────────────────────────────────
 //  ITEM TOOLTIP
 // ─────────────────────────────────────────────
 const TOOLTIP_OFFSET_X = 14;
@@ -510,6 +558,7 @@ function populateTooltip(item) {
   const hasBlock = !isAmmo && def?.blockChance != null && def.blockChance > 0;
   const hasScaling = !isAmmo && def?.statWeights != null && def?.attackType != null;
   const hasStatChange = def?.statChange != null || (isSpellbook && def?.requiredInt);
+  const hasSkillBonus = def?.skillBonuses && Object.keys(def.skillBonuses).length > 0;
 
   // Hide/show rows based on item type and available stats
   document.getElementById('detail-row-damage').style.display = (isAmmo || isSpellbook) ? 'none' : 'flex';
@@ -520,6 +569,7 @@ function populateTooltip(item) {
   document.getElementById('detail-row-value').style.display = isAmmo ? 'none' : 'flex';
   document.getElementById('detail-row-weight').style.display = isAmmo ? 'none' : 'flex';
   document.getElementById('detail-row-statchange').style.display = hasStatChange ? 'flex' : 'none';
+  document.getElementById('detail-row-skillbonus').style.display = hasSkillBonus ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-mod').style.display = isAmmo ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-type').style.display = isAmmo ? 'flex' : 'none';
 
@@ -558,6 +608,16 @@ function populateTooltip(item) {
     } else if (hasStatChange) {
       document.getElementById('item-detail-statchange').textContent = def.statChange;
       document.getElementById('item-detail-statchange').style.color = '#60c060';
+    }
+
+    if (hasSkillBonus) {
+      // Format each bonus entry: type keys get a readable label, named skills show as-is
+      const BONUS_LABELS = { all: 'All Skills', healing: 'Healing', buff: 'Buff', debuff: 'Debuff' };
+      const parts = Object.entries(def.skillBonuses).map(([key, val]) => {
+        const label = BONUS_LABELS[key] ?? key;
+        return `${label} +${val}`;
+      });
+      document.getElementById('item-detail-skillbonus').textContent = parts.join(' · ');
     }
   }
 
@@ -1585,13 +1645,13 @@ function useHand(memberIndex, hand) {
   // Whirlwind buff: double attack speed (half delay)
   const ww = skillsState.whirlwind;
   if (ww.active && ww.actorName === m.name && performance.now() < ww.expiresAt) {
-    delaySec *= (SKILLS_DATA['Whirlwind']?.magnitude ?? 0.5);
+    delaySec *= skillsState.whirlwind.magnitude;
   }
 
   // War Dance buff: boost attack speed for the whole party
   const wd = skillsState.warDance;
   if (wd.active && performance.now() < wd.expiresAt) {
-    delaySec *= (SKILLS_DATA['War Dance']?.magnitude ?? 0.75);
+    delaySec *= skillsState.warDance.magnitude;
   }
 
   // Check cooldown timer
@@ -1846,13 +1906,15 @@ function _useEntangle(member, memberIndex) {
   skillsState.entangle.active = true;
   skillsState.entangle.targetId = target.id;
   skillsState.entangle.expiresAt = now + ENTANGLE_DURATION_MS;
+  skillsState.entangle.magnitude = resolveSkillMagnitude('Entangle', SKILLS_DATA['Entangle'], member);
   _entangleCooldownEnd = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill`] = now;
 
   playSkillSound('magic');
   triggerEntangleEffect();
+  const entangleDelayStr = skillsState.entangle.magnitude.toFixed(1);
   showMessage(
-    `<span style="color:#80ff80">✦ Entangle</span> — ${member.name} roots the ${target.name}! Attack speed halved for 30s.`,
+    `<span style="color:#80ff80">✦ Entangle</span> — ${member.name} roots the ${target.name}! Monster attack delay ×${entangleDelayStr} for 30s.`,
     3000
   );
   addLogEntry({ type: 'skill', actor: member.name, skillName: 'Entangle', target: target.name });
@@ -1888,13 +1950,15 @@ function _useSunderArmor(member, memberIndex) {
   skillsState.sunderArmor.active = true;
   skillsState.sunderArmor.targetId = target.id;
   skillsState.sunderArmor.expiresAt = now + SUNDER_ARMOR_DURATION_MS;
+  skillsState.sunderArmor.magnitude = resolveSkillMagnitude('Sunder Armor', SKILLS_DATA['Sunder Armor'], member);
   _sunderArmorCooldownEnd = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill`] = now;
 
   playSkillSound('render');
   triggerSunderArmorEffect();
+  const sunderPct = Math.round((1 - skillsState.sunderArmor.magnitude) * 100);
   showMessage(
-    `<span style="color:#ff8080">✦ Sunder Armor</span> — ${member.name} crushes the ${target.name}! Defence halved for 30s.`,
+    `<span style="color:#ff8080">✦ Sunder Armor</span> — ${member.name} crushes the ${target.name}! Defence reduced by ${sunderPct}% for 30s.`,
     3000
   );
   addLogEntry({ type: 'skill', actor: member.name, skillName: 'Sunder Armor', target: target.name });
@@ -1929,13 +1993,15 @@ function _useBerserk(member, memberIndex) {
   skillsState.berserk.active = true;
   skillsState.berserk.actorName = member.name;
   skillsState.berserk.expiresAt = now + BERSERK_DURATION_MS;
+  skillsState.berserk.magnitude = resolveSkillMagnitude('Berserk', SKILLS_DATA['Berserk'], member);
   _berserkCooldownEnd = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill`] = now;
 
   playSkillSound('berserk');
   triggerBerserkEffect();
+  const berserkPct = Math.round((skillsState.berserk.magnitude - 1) * 100);
   showMessage(
-    `<span style="color:#ff5050">✦ Berserk</span> — ${member.name} roars in fury! Damage +20% for 30s.`,
+    `<span style="color:#ff5050">✦ Berserk</span> — ${member.name} roars in fury! Damage +${berserkPct}% for 30s.`,
     3000
   );
   addLogEntry({ type: 'skill', actor: member.name, skillName: 'Berserk' });
@@ -1969,13 +2035,15 @@ function _useWarcry(member, memberIndex) {
   const delayMs = (def?.delay ?? 60) * 1000;
   skillsState.warcry.active = true;
   skillsState.warcry.expiresAt = now + WARCRY_DURATION_MS;
+  skillsState.warcry.magnitude = resolveSkillMagnitude('Warcry', SKILLS_DATA['Warcry'], member);
   _warcryCooldownEnd = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill`] = now;
 
   playSkillSound('berserk'); // reuse berserk roar for now
   triggerWarcryEffect();
+  const warcryPct = Math.round((skillsState.warcry.magnitude - 1) * 100);
   showMessage(
-    `<span style="color:#ffcc00">✦ Warcry</span> — ${member.name} inspires the party! Damage +10% for 30s.`,
+    `<span style="color:#ffcc00">✦ Warcry</span> — ${member.name} inspires the party! Damage +${warcryPct}% for 30s.`,
     3000
   );
   addLogEntry({ type: 'skill', actor: member.name, skillName: 'Warcry' });
@@ -2005,14 +2073,15 @@ function _useSanctuary(member, memberIndex) {
   // Activate the buff — magnitude resolved from the caster's current stats
   skillsState.sanctuary.active = true;
   skillsState.sanctuary.expiresAt = now + SANCTUARY_DURATION_MS;
-  skillsState.sanctuary.magnitude = resolveSkillMagnitude(SKILLS_DATA['Sanctuary'], member);
+  skillsState.sanctuary.magnitude = resolveSkillMagnitude('Sanctuary', SKILLS_DATA['Sanctuary'], member);
   _sanctuaryCooldownEnd = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill`] = now;
 
   playSkillSound('holy');
   triggerSanctuaryEffect();
+  const sanctuaryReductionPct = Math.min(skillsState.sanctuary.magnitude, 100);
   showMessage(
-    `<span style="color:#f0d080">✦ Sanctuary</span> — ${member.name} shields the party! Damage −10% for 60s.`,
+    `<span style="color:#f0d080">✦ Sanctuary</span> — ${member.name} shields the party! Damage −${sanctuaryReductionPct}% for 60s.`,
     3000
   );
   addLogEntry({ type: 'skill', actor: member.name, skillName: 'Sanctuary' });
@@ -2042,7 +2111,7 @@ function _useHolyRadiance(member, memberIndex) {
   _holyRadianceCooldownEnd = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill`] = now;
 
-  const holyRadianceHeal = resolveSkillMagnitude(SKILLS_DATA['Holy Radiance'], member);
+  const holyRadianceHeal = resolveSkillMagnitude('Holy Radiance', SKILLS_DATA['Holy Radiance'], member);
   let healed = 0;
   party.forEach((m) => {
     if (!m.isEmpty && !m.isDead && m.hp < m.hpMax) {
@@ -2162,13 +2231,15 @@ function _useWarDance(member, memberIndex) {
   const delayMs = (def?.delay ?? 60) * 1000;
   skillsState.warDance.active = true;
   skillsState.warDance.expiresAt = now + WAR_DANCE_DURATION_MS;
+  skillsState.warDance.magnitude = resolveSkillMagnitude('War Dance', SKILLS_DATA['War Dance'], member);
   _warDanceCooldownEnd = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill`] = now;
 
   playSkillSound('berserk');
   triggerWarDanceEffect();
+  const warDanceDelayStr = skillsState.warDance.magnitude.toFixed(2);
   showMessage(
-    `<span style="color:#ff80c0">✦ War Dance</span> — ${member.name} inspires the party! Attack Speed up for 30s.`,
+    `<span style="color:#ff80c0">✦ War Dance</span> — ${member.name} inspires the party! Attack delay ×${warDanceDelayStr} for 30s.`,
     3000
   );
   addLogEntry({ type: 'skill', actor: member.name, skillName: 'War Dance' });
@@ -2203,13 +2274,15 @@ function _useWhirlwind(member, memberIndex) {
   skillsState.whirlwind.active = true;
   skillsState.whirlwind.actorName = member.name;
   skillsState.whirlwind.expiresAt = now + WHIRLWIND_DURATION_MS;
+  skillsState.whirlwind.magnitude = resolveSkillMagnitude('Whirlwind', SKILLS_DATA['Whirlwind'], member);
   _whirlwindCooldownEnds[memberIndex] = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill`] = now;
 
   playSkillSound('berserk');
   triggerWhirlwindEffect();
+  const whirlwindDelayStr = skillsState.whirlwind.magnitude.toFixed(2);
   showMessage(
-    `<span style="color:#a0f0ff">✦ Whirlwind</span> — ${member.name} becomes a blur! Attack speed doubled for 30s.`,
+    `<span style="color:#a0f0ff">✦ Whirlwind</span> — ${member.name} becomes a blur! Attack delay ×${whirlwindDelayStr} for 30s.`,
     3000
   );
   addLogEntry({ type: 'skill', actor: member.name, skillName: 'Whirlwind' });
@@ -2277,12 +2350,13 @@ function _useRunicScholar(member, memberIndex) {
   }
 
   member.runicScholarActive = true;
+  member.runicScholarMagnitude = resolveSkillMagnitude('Runic Scholar', SKILLS_DATA['Runic Scholar'], member);
   refreshPartyCards(); // immediately lights up the skill slot glow
 
   playSkillSound('magic');
   triggerRunicScholarEffect();
   showMessage(
-    `<span style="color:#c080ff">✦ Runic Scholar</span> — ${member.name} channels the runes! Next spell deals ×2 damage.`,
+    `<span style="color:#c080ff">✦ Runic Scholar</span> — ${member.name} channels the runes! Next spell deals ×${member.runicScholarMagnitude.toFixed(1)} damage.`,
     3000
   );
   addLogEntry({ type: 'skill', actor: member.name, skillName: 'Runic Scholar' });

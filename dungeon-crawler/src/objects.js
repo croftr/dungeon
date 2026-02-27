@@ -12,6 +12,8 @@ import MERCHANT_DATA from './data/merchant.json';
 export const objects = [];
 
 const _mixers = [];
+const _intervals = [];
+
 export function updateObjects(dt) {
     for (const mixer of _mixers) mixer.update(dt);
 }
@@ -57,6 +59,11 @@ export function clearObjects(scene) {
     scene.remove(objectsGroup);
     objectsGroup = new THREE.Group();
     scene.add(objectsGroup);
+    // Properly clean up animations and timers
+    _mixers.length = 0;
+    for (const id of _intervals) clearInterval(id);
+    _intervals.length = 0;
+    _shopGridCells.clear();
 }
 
 export function initObjects(scene, camera) {
@@ -479,6 +486,9 @@ export function spawnObjectsForLevel() {
         // Anvil in the big east room against the north wall
         addAnvil(objectsGroup, gltfLoader, 19, 7, 0, 0, -0.85, ['Life Essence', 'Life Essence']);
 
+        // Jester against the north wall of the east room
+        addJester(objectsGroup, gltfLoader, 17, 7, 0, 0, -0.8);
+
         // Portcullis: Row 7, Col 7.
         const portcullis = {
             name: 'Portcullis',
@@ -771,6 +781,70 @@ function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, c
         });
 
         scene.add(model);
+    });
+}
+
+function addJester(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
+    const paths = [
+        '/npcs/jester/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
+        '/npcs/jester/Meshy_AI_Animation_Alert_withSkin.glb'
+    ];
+    const models = [];
+
+    let loadedCount = 0;
+    paths.forEach((path, index) => {
+        loader.load(path, (gltf) => {
+            const model = gltf.scene;
+            model.scale.setScalar(0.7);
+            model.position.set(col * CELL + offsetX, 0, row * CELL + offsetZ);
+            model.rotation.y = rotY;
+            model.visible = (index === 0);
+
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    if (child.material) {
+                        const mats = Array.isArray(child.material) ? child.material : [child.material];
+                        mats.forEach(mat => {
+                            ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                                if (mat[mapName]) {
+                                    mat[mapName].magFilter = THREE.LinearFilter;
+                                    mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                    mat[mapName].anisotropy = 16;
+                                }
+                            });
+                        });
+                    }
+                }
+            });
+
+            if (gltf.animations && gltf.animations.length > 0) {
+                const mixer = new THREE.AnimationMixer(model);
+                mixer.clipAction(gltf.animations[0]).play();
+                _mixers.push(mixer);
+            }
+
+            models[index] = model;
+            scene.add(model);
+
+            loadedCount++;
+            if (loadedCount === paths.length) {
+                // Alternating logic
+                let currentIdx = 0;
+                const intervalId = setInterval(() => {
+                    // Safety check: if models are removed from group, clear interval
+                    if (!models[0].parent) {
+                        clearInterval(intervalId);
+                        return;
+                    }
+                    models[currentIdx].visible = false;
+                    currentIdx = (currentIdx + 1) % models.length;
+                    models[currentIdx].visible = true;
+                }, 6000); // switch every 6 seconds
+                _intervals.push(intervalId);
+            }
+        });
     });
 }
 

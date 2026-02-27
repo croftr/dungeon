@@ -1235,6 +1235,12 @@ body {
   line-height: 1.45;
 }
 
+.skill-potency {
+  font-size: 9px;
+  color: #c0a0f8;
+  line-height: 1.45;
+}
+
 .skill-empty {
   font-size: 9px;
   color: #4a4030;

@@ -149,10 +149,14 @@
         "attackType": null,
         "baseDamage": null,
         "icon": "/icons/adventurers_belt.png",
-        "description": "A wide belt with multiple loops and pouches for quick-draw access.",
+        "description": "A wide belt with multiple loops and pouches for quick-draw access. Boosts the potency of all skills.",
         "defence": 2,
         "value": 25,
-        "weight": 0.5
+        "weight": 0.5,
+        "skillBonuses": {
+            "all": 100,
+            "Sanctuary": 50
+        }
     },
     {
         "name": "Leather Gloves",

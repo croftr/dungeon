@@ -386,10 +386,10 @@ function refreshMember(m) {
     // Check cooldown for left slot
     let lhDelaySec = (lhDef?.delay ?? 2);
     if (skillsState.whirlwind.active && skillsState.whirlwind.actorName === m.name) {
-      lhDelaySec *= (SKILLS_DATA['Whirlwind']?.magnitude ?? 0.5);
+      lhDelaySec *= skillsState.whirlwind.magnitude;
     }
     if (skillsState.warDance.active) {
-      lhDelaySec *= (SKILLS_DATA['War Dance']?.magnitude ?? 0.75);
+      lhDelaySec *= skillsState.warDance.magnitude;
     }
 
     const lastUsed = lastAttackTimes[`${i}-left`];
@@ -412,10 +412,10 @@ function refreshMember(m) {
     const rhActualDef = lhBothHands ? lhDef : rhDef;
     let rhDelaySec = (rhActualDef?.delay ?? 2);
     if (skillsState.whirlwind.active && skillsState.whirlwind.actorName === m.name) {
-      rhDelaySec *= (SKILLS_DATA['Whirlwind']?.magnitude ?? 0.5);
+      rhDelaySec *= skillsState.whirlwind.magnitude;
     }
     if (skillsState.warDance.active) {
-      rhDelaySec *= (SKILLS_DATA['War Dance']?.magnitude ?? 0.75);
+      rhDelaySec *= skillsState.warDance.magnitude;
     }
 
     const lastUsed = lhBothHands ? lastAttackTimes[`${i}-left`] : lastAttackTimes[`${i}-right`];
