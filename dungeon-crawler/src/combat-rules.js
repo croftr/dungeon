@@ -117,7 +117,9 @@ export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef 
  * @returns {number}          Final damage (minimum 1)
  */
 export function calcPlayerMagicDamage(character, weaponDef, monster) {
-  const raw = (weaponDef?.baseDamage ?? 0) + (character.stats?.intelligence ?? 10);
+  const raw = weaponDef?.magnitudeFormula
+    ? resolveSpellMagnitude(weaponDef.name, weaponDef, character)
+    : (weaponDef?.baseDamage ?? 0) + (character.stats?.intelligence ?? 10);
   return Math.max(1, raw - (monster.stats?.resilience ?? 0));
 }
 
@@ -213,26 +215,56 @@ export function pickRandomFrontLineTarget(party) {
   return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
-// ── Skill magnitude resolver ──────────────────────────────────────────────────
+// ── Skill / spell magnitude resolver ─────────────────────────────────────────
 
 /**
- * Sums the item skill-power bonuses a caster's equipped items grant for a given skill.
+ * Sums the item power bonuses a caster's equipped items grant for a given skill or spell.
  *
- * Item skillBonuses keys (any combination allowed):
- *   "all"          — applies to every skill
- *   "healing"      — applies to skills with type "healing"   (matches skills.json `type`)
- *   "buff"         — applies to skills with type "buff"
- *   "debuff"       — applies to skills with type "debuff"
- *   "<Skill Name>" — applies to one specific skill, e.g. "Sanctuary" or "Holy Radiance"
+ * skillBonuses keys (any combination allowed):
+ *   "all"              — applies to every skill and spell
+ *   "healing"          — applies to effects with type "healing"
+ *   "buff"             — applies to effects with type "buff"
+ *   "debuff"           — applies to effects with type "debuff"
+ *   "direct-damage"    — applies to spells with type "direct-damage"
+ *   "<Name>"           — applies to one specific skill/spell, e.g. "Fireball" or "Holy Radiance"
  */
-function _itemSkillBonus(skillName, skillDef, caster) {
+function _itemMagnitudeBonus(name, def, caster) {
   const bonuses = caster?.skillBonuses;
   if (!bonuses) return 0;
   let total = 0;
-  total += bonuses['all']          ?? 0;
-  if (skillDef.type) total += bonuses[skillDef.type] ?? 0;
-  if (skillName)     total += bonuses[skillName]     ?? 0;
+  total += bonuses['all']     ?? 0;
+  if (def.type) total += bonuses[def.type] ?? 0;
+  if (name)     total += bonuses[name]     ?? 0;
   return total;
+}
+
+/**
+ * Evaluates a stat formula string against caster stats and applies an optional scale factor.
+ * Supports additive formulas only, e.g. "vitality + intelligence".
+ * Use `magnitudeScale` in the def for multiplicative adjustments (e.g. 0.1 for /10).
+ */
+function _evalFormula(formula, def, caster) {
+  const s = caster.stats;
+  const base = formula
+    .replace(/vitality/g,     s.vitality     ?? 0)
+    .replace(/intelligence/g, s.intelligence ?? 0)
+    .replace(/strength/g,     s.strength     ?? 0)
+    .replace(/dexterity/g,    s.dexterity    ?? 0)
+    .replace(/resilience/g,   s.resilience   ?? 0)
+    .split('+').map(Number).reduce((a, b) => a + b, 0);
+  return def.magnitudeScale != null ? base * def.magnitudeScale : base;
+}
+
+/**
+ * Applies item bonuses to a base magnitude using the def's magnitudeBonusMode.
+ *
+ *   "flat"    (default) — base + bonus
+ *   "percent"           — base * (1 + bonus / 100)
+ */
+function _applyBonus(base, bonus, mode) {
+  return mode === 'percent'
+    ? base * (1 + bonus / 100)
+    : base + bonus;
 }
 
 /**
@@ -241,15 +273,10 @@ function _itemSkillBonus(skillName, skillDef, caster) {
  * Resolution order:
  *   1. If the skill has a `magnitudeFormula`, evaluate it against the caster's stats.
  *   2. Otherwise use the hard-coded `magnitude` value from skills.json.
- *   3. Apply any item bonus from the caster's equipped gear, using the skill's
- *      `magnitudeBonusMode` to determine how:
+ *   3. Apply any item bonus from the caster's equipped gear via `magnitudeBonusMode`.
  *
  *      "flat"    (default) — bonus added directly:        base + bonus
- *                            Use for HP values, percentages, absolute amounts.
  *      "percent"           — bonus is a % change to base: base * (1 + bonus / 100)
- *                            Use for damage/speed multipliers. e.g. bonus=10 → ×1.10.
- *                            Use negative values on items to strengthen inverted
- *                            multipliers (e.g. "Sunder Armor": -10 → 0.5 × 0.9 = 0.45).
  *
  * @param {string}  skillName  Key from skills.json, e.g. "Holy Radiance"
  * @param {object}  skillDef   The skill definition object from skills.json
@@ -258,28 +285,43 @@ function _itemSkillBonus(skillName, skillDef, caster) {
 export function resolveSkillMagnitude(skillName, skillDef, caster) {
   console.log('resolveSkillMagnitude', skillName, skillDef.type, skillDef.magnitudeFormula, caster?.stats);
 
-  let base;
-  if (skillDef.magnitudeFormula && caster?.stats) {
-    const s = caster.stats;
-    base = skillDef.magnitudeFormula
-      .replace(/vitality/g,     s.vitality     ?? 0)
-      .replace(/intelligence/g, s.intelligence ?? 0)
-      .replace(/strength/g,     s.strength     ?? 0)
-      .replace(/dexterity/g,    s.dexterity    ?? 0)
-      .replace(/resilience/g,   s.resilience   ?? 0)
-      .split('+').map(Number).reduce((a, b) => a + b, 0);
-  } else {
-    base = skillDef.magnitude ?? 1;
-  }
+  const base = (skillDef.magnitudeFormula && caster?.stats)
+    ? _evalFormula(skillDef.magnitudeFormula, skillDef, caster)
+    : (skillDef.magnitude ?? 1);
 
-  const bonus = _itemSkillBonus(skillName, skillDef, caster);
+  const bonus = _itemMagnitudeBonus(skillName, skillDef, caster);
   if (bonus === 0) return base;
 
-  const mode = skillDef.magnitudeBonusMode ?? 'flat';
-  const result = mode === 'percent'
-    ? base * (1 + bonus / 100)
-    : base + bonus;
+  const result = _applyBonus(base, bonus, skillDef.magnitudeBonusMode ?? 'flat');
+  console.log(`[${skillName}] base=${base} bonus=${bonus} mode=${skillDef.magnitudeBonusMode ?? 'flat'} → ${result}`);
+  return result;
+}
 
-  console.log(`[${skillName}] base=${base} bonus=${bonus} mode=${mode} → ${result}`);
+/**
+ * Returns the effective magnitude for a spell.
+ *
+ * Resolution order:
+ *   1. If the spell has a `magnitudeFormula`, evaluate it against the caster's stats.
+ *      Apply `magnitudeScale` from the def if present (e.g. 0.1 scales intelligence → int/10).
+ *   2. Otherwise fall back to `spellDef.baseDamage`.
+ *   3. Apply any item bonus from the caster's equipped gear via `magnitudeBonusMode`.
+ *
+ *      "flat"    (default) — base + bonus
+ *      "percent"           — base * (1 + bonus / 100)
+ *
+ * @param {string}  spellName  e.g. "Fireball"
+ * @param {object}  spellDef   The spell definition object from spells.json
+ * @param {object}  caster     The party member casting the spell (needs .stats and .skillBonuses)
+ */
+export function resolveSpellMagnitude(spellName, spellDef, caster) {
+  const base = (spellDef.magnitudeFormula && caster?.stats)
+    ? _evalFormula(spellDef.magnitudeFormula, spellDef, caster)
+    : (spellDef.baseDamage ?? 0);
+
+  const bonus = _itemMagnitudeBonus(spellName, spellDef, caster);
+  if (bonus === 0) return base;
+
+  const result = _applyBonus(base, bonus, spellDef.magnitudeBonusMode ?? 'flat');
+  console.log(`[${spellName}] base=${base} bonus=${bonus} mode=${spellDef.magnitudeBonusMode ?? 'flat'} → ${result}`);
   return result;
 }

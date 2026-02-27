@@ -35,7 +35,11 @@
         "description": "A worn cloth shawl pulled over the head. Offers little protection but keeps out the chill.",
         "defence": 1,
         "value": 2,
-        "weight": 0.2
+        "weight": 0.2,
+        "skillBonuses": {
+            "Fireball": 100,
+            "Heal": 100
+        }
     },
     {
         "name": "Leather Cap",

@@ -98,7 +98,8 @@ export const monsters = [
   inst(D.zombie, 3, 17, 12,
     '/monsters/zombie-animation/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/zombie-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    '/monsters/zombie-animation/zombie-attack.mp3'),
+    '/monsters/zombie-animation/zombie-attack.mp3', 0.45, 0, 0, 1, null,
+    '/monsters/zombie-animation/Meshy_AI_Animation_Dead_withSkin.glb'),
 
   // Lower maze
   inst(D.ghoul, 4, 17, 11,
@@ -132,6 +133,13 @@ export const monsters = [
     '/monsters/dummy-annimation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/dummy-annimation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     null, 0.5),
+
+  // Test zombie in the big east room near entrance
+  inst(D.zombie, 21, 11, 18,
+    '/monsters/zombie-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/zombie-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/zombie-animation/zombie-attack.mp3', 0.45, 0, 0, 1, null,
+    '/monsters/zombie-animation/Meshy_AI_Animation_Dead_withSkin.glb'),
 ];
 
 export function isMonsterAt(row, col) {

@@ -9,7 +9,7 @@ import { showMessage } from './minimap.js';
 import { dropMember } from './recruits.js';
 import { isInFrontOfPlayer } from './player.js';
 import { isAlchemyModalOpen, addItemToAlchemy } from './objects.js';
-import { canMelee, resolveSkillMagnitude } from './combat-rules.js';
+import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude } from './combat-rules.js';
 import { playCritSound, playSkillSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { skillsState } from './skills-state.js';
@@ -1525,20 +1525,15 @@ function _executePartyMemberSpell(caster, casterIndex, hand, spellDef, target) {
   if (spellDef.attackType === ACTIONS.CURE_POISON) {
     _executeCurePoison(caster, target);
   } else if (spellDef.attackType === ACTIONS.HEAL) {
-    _executeHeal(caster, target);
+    _executeHeal(caster, spellDef, target);
   } else if (spellDef.attackType === ACTIONS.REGENERATE) {
-    _executeRegenerate(caster, target);
+    _executeRegenerate(caster, spellDef, target);
   }
 }
 
-function _executeRegenerate(caster, target) {
-  // Regeneration amount is caster intelligence / 10 (as requested by user)
-  // HP is usually integer based, so we'll allow decimals if setHp handles them, 
-  // but better to floor or keep it consistent. 
-  // User said "casters intelligence/10 HP every 2 seconds"
-  const amount = (caster.stats?.intelligence || 10) / 10;
+function _executeRegenerate(caster, spellDef, target) {
+  const amount = resolveSpellMagnitude('Regeneration', spellDef, caster);
 
-  // applyStatusEffect is in party.js and exported
   applyStatusEffect(target.id, 'regeneration', -amount); // negative for healing
 
   showMessage(`${caster.name} casts <b>Regeneration</b> on ${target.name}!`, 2500);
@@ -1554,8 +1549,8 @@ function _executeRegenerate(caster, target) {
   refreshPartyCards();
 }
 
-function _executeHeal(caster, target) {
-  const amount = caster.stats?.intelligence ?? 5;
+function _executeHeal(caster, spellDef, target) {
+  const amount = Math.floor(resolveSpellMagnitude('Heal', spellDef, caster));
   const oldHp = target.hp;
   setHp(target.id, target.hp + amount);
   const actualHeal = target.hp - oldHp;
