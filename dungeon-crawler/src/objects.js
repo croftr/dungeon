@@ -6,7 +6,7 @@ import { tweenGroup, isInFrontOfPlayer, player } from './player.js';
 import { showMessage } from './minimap.js';
 import { getItemDef } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold } from './party.js';
-import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAnvilSound } from './audio.js';
+import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAnvilSound, playKeyLockSound, playGateOpeningSound } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
 
 export const objects = [];
@@ -58,10 +58,12 @@ export function clearObjects(scene) {
     scene.remove(objectsGroup);
     objectsGroup = new THREE.Group();
     scene.add(objectsGroup);
-    // Properly clean up animations and timers
+
+    // Clear mixers and intervals to prevent memory leaks and performance lag
     _mixers.length = 0;
-    for (const id of _intervals) clearInterval(id);
-    _intervals.length = 0;
+    while (_intervals.length > 0) {
+        clearInterval(_intervals.pop());
+    }
     _shopGridCells.clear();
 }
 
@@ -230,19 +232,61 @@ export function initObjects(scene, camera) {
                 }
                 break;
             } else if (obj.userData.isKeyhole) {
-                if (isInFrontOfPlayer(obj.userData.gridRow, obj.userData.gridCol, 1)) {
+                const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
+                const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
+                if (distRow <= 3 && distCol <= 3) {
                     const p = objects.find(o => o.name === 'Portcullis' && o.gridRow === obj.userData.targetRow && o.gridCol === obj.userData.targetCol);
                     if (p) {
                         if (!p.isOpen) {
-                            showMessage("You turn the key. The portcullis grinds open.");
-                            playPortalSound(); // metallic grind would be better but let's use this
-                            openPortcullis(p);
+                            let keyFound = false;
+                            for (let i = 0; i < party.length; i++) {
+                                if (party[i] && !party[i].isEmpty && party[i].inventory) {
+                                    const invIndex = party[i].inventory.findIndex(item => item && item.name === 'Bronze Key');
+                                    if (invIndex !== -1) {
+                                        keyFound = true;
+                                        party[i].inventory[invIndex] = null;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (keyFound) {
+                                showMessage("You use the Bronze Key. The portcullis grinds open.");
+                                playKeyLockSound();
+                                setTimeout(() => {
+                                    openPortcullis(p, true);
+                                }, 400);
+                                import('./party.js').then(pt => pt.refreshPartyCards && pt.refreshPartyCards());
+                            } else {
+                                showMessage("The portcullis is locked. It needs a key.");
+                            }
                         } else {
                             showMessage("The portcullis is already open.");
                         }
                     }
                 } else {
                     showMessage("You can't reach the keyhole from here.");
+                }
+                break;
+            } else if (obj.userData.isJester) {
+                const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
+                const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
+                if (distRow <= 2 && distCol <= 2) {
+                    const audio = new Audio('/npcs/jester/jester-welcome.mp3');
+                    audio.volume = 0.7;
+                    audio.play().catch(e => console.error("Audio play failed:", e));
+                    showMessage("The Jester greets you with a cackle!");
+
+                    // Play animation if available
+                    let actObj = obj;
+                    while (actObj && !actObj.userData.action) {
+                        actObj = actObj.parent;
+                    }
+                    if (actObj && actObj.userData.action) {
+                        actObj.userData.action.reset().play();
+                    }
+                } else {
+                    showMessage("The Jester beckons you from afar.");
                 }
                 break;
             }
@@ -501,8 +545,6 @@ export function spawnObjectsForLevel() {
         // Anvil in the big east room against the north wall
         addAnvil(objectsGroup, gltfLoader, 19, 7, 0, 0, -0.85, ['Life Essence', 'Life Essence']);
 
-        // Jester against the north wall of the east room
-        addJester(objectsGroup, gltfLoader, 17, 7, 0, 0, -0.8);
 
         // Portcullis: Row 7, Col 7.
         addPortcullis(objectsGroup, gltfLoader, 7, 7);
@@ -532,7 +574,8 @@ export function spawnObjectsForLevel() {
         // It's at the end of the long south passage now.
         // row=12, col=5
         // Math.PI faces North.
-        addPortal(objectsGroup, gltfLoader, 5, 12, 3, Math.PI, 0, 0.85);
+        // Jester at the end of the long south passage
+        addJester(objectsGroup, gltfLoader, 5, 12, Math.PI, 0, 0.85);
 
         // Locked Portcullis at the entrance of the passage (moved 2 squares back for vestibule)
         addPortcullis(objectsGroup, gltfLoader, 5, 8);
@@ -854,78 +897,57 @@ function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, c
 }
 
 function addJester(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
-    const paths = [
-        '/npcs/jester/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
-        '/npcs/jester/Meshy_AI_Animation_Alert_withSkin.glb'
-    ];
-    const models = [];
+    const path = '/npcs/jester/Meshy_AI_Animation_Agree_Gesture_withSkin.glb';
+    loader.load(path, (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(0.7);
+        model.position.set(col * CELL + offsetX, 0, row * CELL + offsetZ);
+        model.rotation.y = rotY;
 
-    let loadedCount = 0;
-    paths.forEach((path, index) => {
-        loader.load(path, (gltf) => {
-            const model = gltf.scene;
-            model.scale.setScalar(0.7);
-            model.position.set(col * CELL + offsetX, 0, row * CELL + offsetZ);
-            model.rotation.y = rotY;
-            model.visible = (index === 0);
-
-            model.traverse((child) => {
-                if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                    if (child.material) {
-                        const mats = Array.isArray(child.material) ? child.material : [child.material];
-                        mats.forEach(mat => {
-                            ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
-                                if (mat[mapName]) {
-                                    mat[mapName].magFilter = THREE.LinearFilter;
-                                    mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
-                                    mat[mapName].anisotropy = 16;
-                                }
-                            });
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.userData.isJester = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
                         });
-                    }
+                    });
                 }
-            });
-
-            if (gltf.animations && gltf.animations.length > 0) {
-                const mixer = new THREE.AnimationMixer(model);
-                mixer.clipAction(gltf.animations[0]).play();
-                _mixers.push(mixer);
-            }
-
-            models[index] = model;
-            scene.add(model);
-
-            loadedCount++;
-            if (loadedCount === paths.length) {
-                // Alternating logic
-                let currentIdx = 0;
-                const intervalId = setInterval(() => {
-                    // Safety check: if models are removed from group, clear interval
-                    if (!models[0].parent) {
-                        clearInterval(intervalId);
-                        return;
-                    }
-                    models[currentIdx].visible = false;
-                    currentIdx = (currentIdx + 1) % models.length;
-                    models[currentIdx].visible = true;
-                }, 6000); // switch every 6 seconds
-                _intervals.push(intervalId);
             }
         });
+
+        if (gltf.animations && gltf.animations.length > 0) {
+            const mixer = new THREE.AnimationMixer(model);
+            const action = mixer.clipAction(gltf.animations[0]);
+            action.setLoop(THREE.LoopOnce);
+            action.clampWhenFinished = true;
+
+            // Store reference so we can trigger it on click
+            model.userData.mixer = mixer;
+            model.userData.action = action;
+            _mixers.push(mixer);
+        }
+
+        scene.add(model);
     });
 }
 
-export function openPortcullis(p) {
+export function openPortcullis(p, skipMessage = false) {
     if (p.isOpen) return;
     p.isOpen = true;
-    showMessage("The portcullis slowly grinds open...");
+    if (!skipMessage) showMessage("The portcullis slowly grinds open...");
 
-    // Play a heavy grinding sound if available (simulated)
-    const grindAudio = new Audio('/sounds/actions/bash.mp3'); // or a better sound if found
-    grindAudio.volume = 0.5;
-    grindAudio.play().catch(e => { });
+    playGateOpeningSound();
 
     // Animate mesh up
     new Tween(p.mesh.position, tweenGroup)

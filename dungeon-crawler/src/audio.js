@@ -141,6 +141,48 @@ export async function playPortalSound() {
   }
 }
 
+export async function playKeyLockSound() {
+  const buffer = await getBuffer('/sounds/actions/key-lock.mp3');
+  if (!buffer) return;
+
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.8;
+
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playKeyLockSound failed:', err);
+  }
+}
+
+export async function playGateOpeningSound() {
+  const buffer = await getBuffer('/sounds/actions/gate-opening.mp3');
+  if (!buffer) return;
+
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.8;
+
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playGateOpeningSound failed:', err);
+  }
+}
+
 export async function playHitSound() {
   const buffer = await getBuffer('/sounds/actions/hit.mp3');
   if (!buffer) return;

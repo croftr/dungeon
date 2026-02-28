@@ -27,6 +27,15 @@
         "sellable": true
     },
     {
+        "name": "Bronze Key",
+        "slot": "loot",
+        "icon": "/icons/bronze_key.png",
+        "description": "A heavy, tarnished bronze key. Looks like it fits a large lock.",
+        "value": 0,
+        "weight": 0.5,
+        "sellable": false
+    },
+    {
         "name": "Shawl",
         "slot": "head",
         "attackType": null,

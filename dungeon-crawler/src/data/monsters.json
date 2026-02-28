@@ -161,7 +161,7 @@
   },
   "treeman": {
     "name": "Treeman",
-    "hp": 250,
+    "hp": 1,
     "defence": 20,
     "stats": {
       "strength": 30,
