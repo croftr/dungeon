@@ -1699,6 +1699,84 @@ body {
   border-radius: 50%;
 }
 
+/* ── Choosable skill cards (level-up mode) ── */
+.skill-card--choosable {
+  cursor: pointer;
+  border-color: #6a5a30;
+  opacity: 1;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+
+.skill-card--choosable:hover {
+  border-color: #c8a84a;
+  box-shadow: 0 0 8px rgba(200, 168, 74, 0.4);
+  transform: scale(1.08);
+}
+
+.skill-card--chosen {
+  border-color: #c8a84a !important;
+  box-shadow: 0 0 12px rgba(200, 168, 74, 0.6) !important;
+  background: rgba(200, 168, 74, 0.12);
+}
+
+/* ── Confirm footer ── */
+#char-dev-footer {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 16px;
+  background: linear-gradient(0deg, #1a1408, #14100c);
+  border-top: 2px solid #3a2a10;
+  flex-shrink: 0;
+}
+
+#char-dev-confirm {
+  background: linear-gradient(180deg, #5a4010, #3a2808);
+  border: 1px solid #c8a84a;
+  color: #e8d090;
+  font-family: monospace;
+  font-size: 14px;
+  letter-spacing: 1px;
+  padding: 8px 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+#char-dev-confirm:hover:not(:disabled) {
+  background: linear-gradient(180deg, #7a5818, #5a3a10);
+  box-shadow: 0 0 14px rgba(200, 168, 74, 0.4);
+}
+
+#char-dev-confirm:disabled {
+  opacity: 0.4;
+  cursor: default;
+  border-color: #4a3a20;
+  color: #6a5a30;
+}
+
+/* ── Stat buttons hidden in view mode ── */
+#cd-char-stats:not(.level-up-mode) .stat-btn {
+  display: none;
+}
+
+#cd-char-stats:not(.level-up-mode) .stat-controls {
+  justify-content: flex-end;
+}
+
+/* ── Level Up! button pulse in inventory header ── */
+#equip-char-dev.level-up-pending {
+  background: rgba(200, 168, 74, 0.2);
+  border-color: #c8a84a;
+  color: #e8d090;
+  animation: levelup-btn-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes levelup-btn-pulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(200, 168, 74, 0.3); }
+  50%       { box-shadow: 0 0 14px rgba(200, 168, 74, 0.7); }
+}
+
 #cd-detail-panel {
   padding: 12px;
   display: flex;
