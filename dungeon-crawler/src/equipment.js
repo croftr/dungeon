@@ -116,6 +116,9 @@ const SLOT_LABELS = {
 //  STATE
 // ─────────────────────────────────────────────
 let activeCharIndex = null;
+let activeCharDevIndex = null;
+let _equipSkillTab = 'action';
+let _cdSkillTab = 'action';
 let _ctxInvIndex = null;   // inventory slot most recently right-clicked
 let _skillSwMenuCtx = null; // { memberIndex, mode: 'skill'|'spell' } when skill-switch menu is open
 
@@ -411,13 +414,18 @@ function renderModal(memberIndex) {
     skillsEl.innerHTML = '';
     const skills = m.skills ?? [];
 
-    if (skills.length === 0) {
+    const filteredSkills = skills.filter((skill) => {
+      const def = getItemDef(skill.name) || (typeof SKILLS_DATA !== 'undefined' ? SKILLS_DATA[skill.name] : null);
+      return _equipSkillTab === 'passive' ? (def?.isPassive === true) : (def?.isPassive !== true);
+    });
+
+    if (filteredSkills.length === 0) {
       const empty = document.createElement('p');
       empty.className = 'skill-empty';
-      empty.textContent = 'No skills learned.';
+      empty.textContent = `No ${_equipSkillTab} skills learned.`;
       skillsEl.appendChild(empty);
     } else {
-      skills.forEach((skill) => {
+      filteredSkills.forEach((skill) => {
         const card = document.createElement('div');
         card.className = 'skill-card';
         const isEquipped = m.equipment?.skill?.name === skill.name;
@@ -1456,6 +1464,76 @@ function closeModal() {
   activeCharIndex = null;
   // Sync party card HUD to reflect any equipment changes (weapons, torch, etc.)
   refreshPartyCards();
+}
+
+// ─────────────────────────────────────────────
+//  CHARACTER DEVELOPMENT MODAL
+// ─────────────────────────────────────────────
+export function openCharDevModal(memberIndex) {
+  activeCharDevIndex = memberIndex;
+  hideTooltip();
+  document.getElementById('char-dev-overlay').classList.remove('char-dev-hidden');
+  renderCharDevModal(memberIndex);
+}
+
+export function closeCharDevModal() {
+  hideTooltip();
+  document.getElementById('char-dev-overlay').classList.add('char-dev-hidden');
+  activeCharDevIndex = null;
+  refreshPartyCards();
+}
+
+function renderCharDevModal(memberIndex) {
+  const m = party[memberIndex];
+  if (!m || m.isEmpty) return;
+
+  const nameEl = document.getElementById('char-dev-char-name');
+  if (nameEl) nameEl.textContent = m.name;
+
+  // Render Stats
+  const stats = m.baseStats ?? m.stats ?? {};
+  ['strength', 'dexterity', 'vitality', 'intelligence', 'resilience'].forEach(key => {
+    const valEl = document.getElementById(`cd-stat-${key}`);
+    if (valEl) valEl.textContent = stats[key] ?? 10;
+  });
+
+  // Render Skills
+  const cdSkillsEl = document.getElementById('cd-char-skills');
+  if (cdSkillsEl) {
+    cdSkillsEl.innerHTML = '';
+    const skills = m.skills ?? [];
+
+    const filteredSkills = skills.filter(skill => {
+      const def = getItemDef(skill.name) || (typeof SKILLS_DATA !== 'undefined' ? SKILLS_DATA[skill.name] : null);
+      return _cdSkillTab === 'passive' ? (def?.isPassive === true) : (def?.isPassive !== true);
+    });
+
+    if (filteredSkills.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'skill-empty';
+      empty.textContent = `No ${_cdSkillTab} skills learned.`;
+      cdSkillsEl.appendChild(empty);
+    } else {
+      filteredSkills.forEach(skill => {
+        const card = document.createElement('div');
+        card.className = 'skill-card';
+        renderItemIcon({ icon: skill.icon }, card);
+        card.addEventListener('click', () => {
+          document.getElementById('cd-detail-name').textContent = skill.name;
+          const def = getItemDef(skill.name) || (typeof SKILLS_DATA !== 'undefined' ? SKILLS_DATA[skill.name] : null);
+          document.getElementById('cd-detail-action').textContent = (def?.isPassive ? 'Passive' : 'Action') + ' Skill';
+          document.getElementById('cd-detail-desc').textContent = def?.description || '';
+
+          const pot = _formatSkillPotency(skill.name, m);
+          document.getElementById('cd-detail-potency').innerHTML = pot ? (Array.isArray(pot) ? pot.join('<br>') : pot) : '';
+
+          document.querySelectorAll('#cd-char-skills .skill-card').forEach(c => c.classList.remove('skill-card--equipped'));
+          card.classList.add('skill-card--equipped');
+        });
+        cdSkillsEl.appendChild(card);
+      });
+    }
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -2764,11 +2842,15 @@ function attachOverlayListeners() {
         e.stopPropagation();
         closeModal();
       }
+      if (activeCharDevIndex !== null) {
+        e.stopPropagation();
+        closeCharDevModal();
+      }
     }
 
-    // C key — open character inventory for the first available member
-    if (e.key === 'c' || e.key === 'C') {
-      if (activeCharIndex !== null) return; // already open
+    // I key — open character inventory
+    if (e.key === 'i' || e.key === 'I') {
+      if (activeCharIndex !== null || activeCharDevIndex !== null) return; // already open
       const overlayOpen = ['tactics-overlay', 'chest-overlay', 'merchant-overlay', 'main-menu-overlay'].some(id => {
         const el = document.getElementById(id);
         return el && window.getComputedStyle(el).display !== 'none';
@@ -2776,6 +2858,18 @@ function attachOverlayListeners() {
       if (overlayOpen) return;
       const firstIndex = party.findIndex(m => !m.isEmpty && !m.isDead);
       if (firstIndex !== -1) openModal(firstIndex);
+    }
+
+    // C key — open character development
+    if (e.key === 'c' || e.key === 'C') {
+      if (activeCharIndex !== null || activeCharDevIndex !== null) return; // already open
+      const overlayOpen = ['tactics-overlay', 'chest-overlay', 'merchant-overlay', 'main-menu-overlay'].some(id => {
+        const el = document.getElementById(id);
+        return el && window.getComputedStyle(el).display !== 'none';
+      });
+      if (overlayOpen) return;
+      const firstIndex = party.findIndex(m => !m.isEmpty && !m.isDead);
+      if (firstIndex !== -1) openCharDevModal(firstIndex);
     }
   });
 
@@ -2829,4 +2923,56 @@ export function initEquipment() {
   attachBarTooltipListeners();
   attachCardListeners();
   attachOverlayListeners();
+  attachCharDevListeners();
+}
+
+function attachCharDevListeners() {
+  // Equip Skill Tabs
+  document.querySelectorAll('#equip-skill-tabs .skill-tab-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      document.querySelectorAll('#equip-skill-tabs .skill-tab-btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      _equipSkillTab = e.target.dataset.tab;
+      if (activeCharIndex !== null) renderModal(activeCharIndex);
+    });
+  });
+
+  // Char Dev Close
+  const closeBtn = document.getElementById('char-dev-close');
+  if (closeBtn) closeBtn.addEventListener('click', closeCharDevModal);
+
+  // Char Dev Skill Tabs
+  document.querySelectorAll('#cd-skill-tabs .skill-tab-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      document.querySelectorAll('#cd-skill-tabs .skill-tab-btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      _cdSkillTab = e.target.dataset.tab;
+      if (activeCharDevIndex !== null) renderCharDevModal(activeCharDevIndex);
+      // Clear detail
+      document.getElementById('cd-detail-name').textContent = 'Select a skill';
+      document.getElementById('cd-detail-action').textContent = '';
+      document.getElementById('cd-detail-desc').textContent = '';
+      document.getElementById('cd-detail-potency').textContent = '';
+    });
+  });
+
+  // Stat Adjustments
+  document.querySelectorAll('#cd-char-stats .stat-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      if (activeCharDevIndex === null) return;
+      const statName = e.target.dataset.stat;
+      const delta = parseInt(e.target.dataset.delta, 10);
+      const m = party[activeCharDevIndex];
+      if (!m || m.isEmpty) return;
+
+      m.baseStats[statName] = (m.baseStats[statName] ?? 10) + delta;
+
+      // Re-evaluate equipment stats & derived stats immediately
+      updateEffectiveStats(m);
+
+      // Update UI
+      renderCharDevModal(activeCharDevIndex);
+      refreshPartyCards();
+    });
+  });
 }

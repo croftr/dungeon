@@ -259,6 +259,10 @@
           </div>
 
           <h4 class="equip-section-title equip-section-title--skills">Skills</h4>
+          <div class="skill-tabs" id="equip-skill-tabs">
+            <button class="skill-tab-btn active" data-tab="action" id="equip-tab-action">Action</button>
+            <button class="skill-tab-btn" data-tab="passive" id="equip-tab-passive">Passive</button>
+          </div>
           <div id="char-skills">
             <!-- skill cards injected by equipment.js -->
           </div>
@@ -488,6 +492,101 @@
       </div><!-- /#equip-body -->
     </div><!-- /#equip-modal -->
   </div><!-- /#equip-overlay -->
+
+  <!-- ── CHARACTER DEVELOPMENT MODAL ── -->
+  <div id="char-dev-overlay" class="char-dev-hidden">
+    <div id="char-dev-modal">
+      <div id="char-dev-header">
+        <div id="char-dev-title-wrap">
+          <span id="char-dev-char-name"></span> <span style="margin-left:8px; color:#888;">(Development)</span>
+        </div>
+        <button id="char-dev-close" aria-label="Close">&times;</button>
+      </div>
+
+      <div id="char-dev-body">
+
+        <!-- Stats -->
+        <section id="char-dev-stats-section">
+          <h4 class="equip-section-title">Attributes</h4>
+          <div id="cd-char-stats">
+            <div class="stat-row">
+              <span class="stat-name">Strength</span>
+              <div class="stat-controls">
+                <button class="stat-btn" data-stat="strength" data-delta="-1">-</button>
+                <span class="stat-value" id="cd-stat-strength"></span>
+                <button class="stat-btn" data-stat="strength" data-delta="1">+</button>
+              </div>
+            </div>
+            <div class="stat-row">
+              <span class="stat-name">Dexterity</span>
+              <div class="stat-controls">
+                <button class="stat-btn" data-stat="dexterity" data-delta="-1">-</button>
+                <span class="stat-value" id="cd-stat-dexterity"></span>
+                <button class="stat-btn" data-stat="dexterity" data-delta="1">+</button>
+              </div>
+            </div>
+            <div class="stat-row">
+              <span class="stat-name">Vitality</span>
+              <div class="stat-controls">
+                <button class="stat-btn" data-stat="vitality" data-delta="-1">-</button>
+                <span class="stat-value" id="cd-stat-vitality"></span>
+                <button class="stat-btn" data-stat="vitality" data-delta="1">+</button>
+              </div>
+            </div>
+            <div class="stat-row">
+              <span class="stat-name">Intelligence</span>
+              <div class="stat-controls">
+                <button class="stat-btn" data-stat="intelligence" data-delta="-1">-</button>
+                <span class="stat-value" id="cd-stat-intelligence"></span>
+                <button class="stat-btn" data-stat="intelligence" data-delta="1">+</button>
+              </div>
+            </div>
+            <div class="stat-row">
+              <span class="stat-name">Resilience</span>
+              <div class="stat-controls">
+                <button class="stat-btn" data-stat="resilience" data-delta="-1">-</button>
+                <span class="stat-value" id="cd-stat-resilience"></span>
+                <button class="stat-btn" data-stat="resilience" data-delta="1">+</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Skills -->
+        <section id="char-dev-skills-section">
+          <h4 class="equip-section-title equip-section-title--skills">Learned Skills</h4>
+          <div class="skill-tabs" id="cd-skill-tabs">
+            <button class="skill-tab-btn active" data-tab="action" id="cd-tab-action">Action</button>
+            <button class="skill-tab-btn" data-tab="passive" id="cd-tab-passive">Passive</button>
+          </div>
+          <div id="cd-char-skills">
+            <!-- skill cards injected here -->
+          </div>
+          <div id="cd-future-skills">
+            <h4 class="equip-section-title equip-section-title--skills">Available to Learn</h4>
+            <div id="cd-available-skills">
+              <div class="skill-card empty-skill-card"></div>
+              <div class="skill-card empty-skill-card"></div>
+              <div class="skill-card empty-skill-card"></div>
+              <div class="skill-card empty-skill-card"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Details -->
+        <section id="char-dev-detail-section">
+          <h4 class="equip-section-title">Selected Skill Detail</h4>
+          <div id="cd-detail-panel">
+            <div id="cd-detail-name">Select a skill</div>
+            <div id="cd-detail-action" style="color: #a08050; font-size: 11px; margin-bottom: 5px;"></div>
+            <div id="cd-detail-desc" style="font-size: 12px; line-height: 1.4; color: #d0c0a0;"></div>
+            <div id="cd-detail-potency" style="color: #c0a0f8; font-weight: bold; margin-top: 10px;"></div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
 
   <!-- ── CHEST MODAL ── -->
   <div id="chest-overlay" class="chest-hidden">
