@@ -781,6 +781,26 @@ export function applyRegeneration() {
 //  up automatically.
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Returns a combined statusResistances map for a member, merging:
+ *   1. Item-based resistances (from m.statusResistances, built by updateEffectiveStats)
+ *   2. Resistances from active buff effects (e.g. resist-poison spell)
+ * Values are additive and capped at 0.9 (90%) per effect.
+ */
+export function getEffectiveStatusResistances(member) {
+  const combined = { ...(member.statusResistances ?? {}) };
+  const now = performance.now();
+  (member.activeDebuffs ?? []).forEach(d => {
+    if (now >= d.expiresAt) return;
+    const def = STATUS_EFFECT_DEFS[d.effectId];
+    if (!def?.statusResistances) return;
+    for (const [effectId, resistance] of Object.entries(def.statusResistances)) {
+      combined[effectId] = Math.min(0.9, (combined[effectId] ?? 0) + resistance);
+    }
+  });
+  return combined;
+}
+
 /** Returns a copy of member.stats with all active statModifiers applied. */
 export function getEffectiveStats(member) {
   const base = { ...(member.stats ?? {}) };

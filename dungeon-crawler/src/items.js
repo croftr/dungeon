@@ -23,6 +23,7 @@ export const ACTIONS = Object.freeze({
   SHIELD_BASH: 'shield-bash',
   REGENERATE: 'regenerate',
   CURE_POISON: 'cure-poison',
+  RESIST_POISON: 'resist-poison',
   HEAL: 'heal',
 });
 

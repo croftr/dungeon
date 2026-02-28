@@ -46,6 +46,7 @@ function _dispatchSpellVFX(attackType) {
       triggerRegenerationEffect();
       break;
     case 'cure-poison':
+    case 'resist-poison':
       playSkillSound('cure');
       triggerCurePoisonEffect();
       break;
@@ -131,6 +132,7 @@ export function updateEffectiveStats(m) {
   // skillBonuses accumulates flat additions to formula-resolved skill magnitudes.
   // Keys: "all" (every skill), or a skill type string e.g. "healing", "buff", "debuff".
   const newSkillBonuses = {};
+  const newStatusResistances = {};
   const countedItems = new Set();
 
   Object.values(m.equipment || {}).forEach(item => {
@@ -167,11 +169,21 @@ export function updateEffectiveStats(m) {
           newSkillBonuses[key] = (newSkillBonuses[key] ?? 0) + delta;
         });
       }
+
+      // statusResistances: reduce the chance of specific on-hit effects landing.
+      // Values are additive across items, capped at 0.9 (90%) per effect.
+      // e.g. { "poison": 0.5 } halves the chance that poison takes hold.
+      if (def.statusResistances) {
+        Object.entries(def.statusResistances).forEach(([effectId, resistance]) => {
+          newStatusResistances[effectId] = Math.min(0.9, (newStatusResistances[effectId] ?? 0) + resistance);
+        });
+      }
     }
   });
 
   m.stats = newStats;
   m.skillBonuses = newSkillBonuses;
+  m.statusResistances = newStatusResistances;
 
   // Recalculate hpMax/mpMax/spMax from the (now equipment-boosted) stats
   const derived = calcDerivedMaxStats(newStats);
@@ -1568,6 +1580,50 @@ function _openPartyTargetPicker(caster, casterIndex, hand, spellDef) {
   overlay.classList.remove('party-target-hidden');
 }
 
+/** Dispatcher for party-wide spells — no target picker, applies to all living members. */
+function _executePartySpell(caster, casterIndex, hand, spellDef) {
+  if (caster.mp < spellDef.mpCost) {
+    showMessage(`${caster.name} does not have enough mana!`);
+    return;
+  }
+  setMp(caster.id, caster.mp - spellDef.mpCost);
+
+  const timeKey = (hand === 'skill') ? `${casterIndex}-skill` : `${casterIndex}-${hand}`;
+  lastAttackTimes[timeKey] = performance.now();
+
+  if (hand === 'skill') {
+    const cd = (spellDef.delay ?? 15) * 1000;
+    _startSkillCooldownUI(casterIndex, performance.now() + cd);
+  }
+
+  refreshPartyCards();
+  playAction(spellDef.attackType, hand);
+  _dispatchSpellVFX(spellDef.attackType);
+
+  if (spellDef.attackType === ACTIONS.RESIST_POISON) {
+    _executeResistPoison(caster, spellDef);
+  }
+}
+
+function _executeResistPoison(caster) {
+  const targets = party.filter(m => !m.isEmpty && !m.isDead);
+  targets.forEach(m => applyStatusEffect(m.id, 'resist-poison'));
+
+  showMessage(`${caster.name} casts <b>Resist Poison</b> — the party is protected!`, 2500);
+
+  targets.forEach(m => {
+    addLogEntry({
+      time: Date.now(),
+      type: 'skill',
+      actor: caster.name,
+      skillName: 'Resist Poison',
+      target: m.name,
+    });
+  });
+
+  refreshPartyCards();
+}
+
 /** Dispatcher for party-member targeted spells — routes to the correct handler. */
 function _executePartyMemberSpell(caster, casterIndex, hand, spellDef, target) {
   // MP check (deducted here, after the player has confirmed their target choice)
@@ -1746,6 +1802,12 @@ function useHand(memberIndex, hand) {
   // We intercept here — after cooldown/dead checks — but before the monster-targeting path.
   if (def?.target === 'party-member') {
     _openPartyTargetPicker(m, memberIndex, hand, def);
+    return;
+  }
+
+  // Spells that target the whole party execute immediately without a target picker.
+  if (def?.target === 'party') {
+    _executePartySpell(m, memberIndex, hand, def);
     return;
   }
 

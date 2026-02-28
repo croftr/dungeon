@@ -44,6 +44,21 @@ export const MONSTER_BASE_ATTACK = RULES.monsterBaseAttack;
  */
 export const RESILIENCE_DAMAGE_FACTOR = RULES.resilienceDamageFactor;
 
+// ── On-hit status effect constants ───────────────────────────────────────────
+
+/**
+ * Controls how quickly resilience reduces on-hit effect chance.
+ * A character with this many resilience points halves the raw chance.
+ * Formula: rawChance × (BASE / (BASE + resilience))
+ */
+export const ON_HIT_EFFECT_BASE = RULES.onHitEffectBase;
+
+/**
+ * Floor for on-hit effect chance after all reductions — ensures effects always
+ * have at least a small chance of landing even with very high resilience.
+ */
+export const ON_HIT_EFFECT_MIN_CHANCE = RULES.onHitEffectMinChance;
+
 // ── Shield bash stun constants ──────────────────────────────────────────────
 
 /** Probability (0–1) that a shield bash stuns the monster. */
@@ -151,6 +166,31 @@ export function calcMonsterDamage(monster, character, characterDefence = 0) {
     ((character.stats?.resilience ?? 0) + (character.stats?.vitality ?? 0)) * RESILIENCE_DAMAGE_FACTOR / 2
   );
   return Math.max(1, raw - mitigation - characterDefence);
+}
+
+// ── On-hit effect chance ──────────────────────────────────────────────────────
+
+/**
+ * Effective probability (0–1) that an on-hit status effect lands on a character.
+ *
+ * Two independent reductions are applied multiplicatively:
+ *   1. Resilience — higher resilience → lower chance, with diminishing returns.
+ *      The BASE constant represents the resilience value that halves the raw chance.
+ *   2. Item resistances — each item granting resistance to this effect reduces
+ *      the remaining chance further (additive per item, capped at 90% total).
+ *
+ * A minimum floor (ON_HIT_EFFECT_MIN_CHANCE) ensures it is never impossible.
+ *
+ * @param {number} rawChance           The effect's base chance from data (0–1)
+ * @param {number} resilience          Target's current resilience stat
+ * @param {object|null} statusResistances  Map of effectId → total resistance (0–1) from gear
+ * @param {string} effectId            The effect being checked, e.g. "poison"
+ * @returns {number}                   Clamped effective chance (0–1)
+ */
+export function calcOnHitChance(rawChance, resilience, statusResistances, effectId) {
+  const resMultiplier = ON_HIT_EFFECT_BASE / (ON_HIT_EFFECT_BASE + resilience);
+  const itemResistance = Math.min(0.9, statusResistances?.[effectId] ?? 0);
+  return Math.max(ON_HIT_EFFECT_MIN_CHANCE, rawChance * resMultiplier * (1 - itemResistance));
 }
 
 // ── Formation layout ─────────────────────────────────────────────────────────

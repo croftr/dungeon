@@ -35,5 +35,16 @@
     "icon": "/icons/frozen.svg",
     "color": "#00ffff",
     "duration": 20
+  },
+  "resist-poison": {
+    "id": "resist-poison",
+    "name": "Resist Poison",
+    "type": "buff",
+    "icon": "/icons/cure-poison.png",
+    "color": "#80ff80",
+    "duration": 60,
+    "statusResistances": {
+      "poison": 0.5
+    }
   }
 }

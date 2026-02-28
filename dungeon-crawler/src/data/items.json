@@ -173,7 +173,10 @@
         "defence": 2,
         "value": 25,
         "weight": 0.5,
-        "skillBonuses": {}
+        "skillBonuses": {},
+        "statusResistances": {
+            "poison": 0.25
+        }
     },
     {
         "name": "Leather Gloves",
@@ -743,6 +746,16 @@
         "weight": 0.3
     },
     {
+        "name": "Resist Poison Spellbook",
+        "type": "spellbook",
+        "spellName": "Resist Poison",
+        "requiredInt": 6,
+        "icon": "/icons/resist-poison-scroll.png",
+        "description": "A small pamphlet detailed with botanical sketches. Reduces poison damage. Requires 6 Intelligence to decypher.",
+        "value": 100,
+        "weight": 0.3
+    },
+    {
         "name": "Scroll of Fireball",
         "type": "spellbook",
         "spellName": "Fireball",
@@ -779,6 +792,16 @@
         "requiredInt": 10,
         "icon": "/icons/scroll_cure_poison.png",
         "description": "A scroll bearing botanical sketches and purifying incantations. Study it to learn Cure Poison. Requires 10 Intelligence.",
+        "value": 160,
+        "weight": 0.2
+    },
+    {
+        "name": "Scroll of Resist Poison",
+        "type": "spellbook",
+        "spellName": "Resist Poison",
+        "requiredInt": 10,
+        "icon": "/icons/resist-poison-scroll.png",
+        "description": "Ancient parchment bearer of purifying incantations. Study it to learn Resist Poison. Requires 10 Intelligence.",
         "value": 160,
         "weight": 0.2
     }

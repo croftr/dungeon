@@ -5,12 +5,13 @@ import { createHitSpark } from './particles.js';
 import { CELL } from './map.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
-import { party, setHp, flashPortraitHit, showMemberDamage, refreshPartyCards, applyStatusEffect, getEffectiveStats, getDefenceModifier, describeEffect } from './party.js';
+import { party, setHp, flashPortraitHit, showMemberDamage, refreshPartyCards, applyStatusEffect, getEffectiveStats, getEffectiveStatusResistances, getDefenceModifier, describeEffect } from './party.js';
 import { STATUS_EFFECT_DEFS } from './status-effects.js';
 import { showMessage } from './minimap.js';
 import {
   playerHitChance, monsterHitChance,
   calcPlayerPhysicalDamage, calcPlayerMagicDamage, calcMonsterDamage,
+  calcOnHitChance,
   pickRandomFrontLineTarget,
   CRIT_CHANCE, CRIT_MULTIPLIER,
   MONSTER_BASE_ATTACK, RESILIENCE_DAMAGE_FACTOR,
@@ -836,7 +837,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
       ...(ammoDef?.onHitEffects ?? []),
     ];
     allOnHit.forEach(effect => {
-      if (Math.random() < effect.chance) {
+      if (Math.random() < calcOnHitChance(effect.chance, m.stats?.resilience ?? 0, null, effect.effectId)) {
         applyMonsterStatusEffect(monsterId, effect.effectId);
         const def = STATUS_EFFECT_DEFS[effect.effectId];
         showMessage(`${m.name} is afflicted with <b>${def?.name ?? effect.effectId}</b>!`);
@@ -978,7 +979,13 @@ function _applyMonsterDamage(monster) {
   // Apply on-hit status effects defined on this monster type
   if (!target.isDead) {
     (monster.onHitEffects ?? []).forEach(effect => {
-      if (Math.random() < effect.chance) {
+      const effectiveChance = calcOnHitChance(
+        effect.chance,
+        target.stats?.resilience ?? 0,
+        getEffectiveStatusResistances(target),
+        effect.effectId,
+      );
+      if (Math.random() < effectiveChance) {
         applyStatusEffect(target.id, effect.effectId);
         const def = STATUS_EFFECT_DEFS[effect.effectId];
         showMessage(`<b>${target.name}</b> is afflicted with <b>${def?.name ?? effect.effectId}</b>!`, 2500);

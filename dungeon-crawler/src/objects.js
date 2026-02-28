@@ -525,6 +525,7 @@ export function spawnObjectsForLevel() {
             'Scroll of Heal',
             'Scroll of Regeneration',
             'Scroll of Cure Poison',
+            'Scroll of Resist Poison',
         ]);
 
         // Shop against the east wall of the 8×8 room, centre row

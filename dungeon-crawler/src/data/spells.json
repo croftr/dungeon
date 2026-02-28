@@ -47,6 +47,20 @@
         "weight": 0
     },
     {
+        "name": "Resist Poison",
+        "type": "buff",
+        "target": "party",
+        "slot": "spell",
+        "attackType": "resist-poison",
+        "baseDamage": 0,
+        "delay": 4,
+        "mpCost": 8,
+        "icon": "/icons/resist-poison.png",
+        "description": "A warding incantation that halves the chance of the entire party being afflicted by poison for 60 seconds.",
+        "value": 0,
+        "weight": 0
+    },
+    {
         "name": "Heal",
         "type": "healing",
         "target": "party-member",
