@@ -77,7 +77,7 @@ function _prependRow(entry) {
   let typeClass = 'bl--hit';
   if (entry.type === 'death') typeClass = 'bl--death';
   else if (entry.type === 'skill') typeClass = 'bl--skill';
-  else if (entry.type === 'status-effect') typeClass = 'bl--poison';
+  else if (entry.type === 'status-effect') typeClass = 'bl--status-effect';
   else if (entry.blocked) typeClass = 'bl--block';
   else if (entry.stunned) typeClass = 'bl--stun';
   else if (entry.poisoned) typeClass = 'bl--poison';
@@ -86,6 +86,7 @@ function _prependRow(entry) {
   else if (!entry.hit) typeClass = 'bl--miss';
 
   row.className = 'bl-row ' + typeClass;
+  if (entry.effectColor) row.style.borderLeftColor = entry.effectColor;
   row.innerHTML = _buildRowHtml(entry);
   container.prepend(row);
 

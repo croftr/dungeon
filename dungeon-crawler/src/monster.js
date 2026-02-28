@@ -5,7 +5,7 @@ import { createHitSpark } from './particles.js';
 import { CELL } from './map.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
-import { party, setHp, flashPortraitHit, showMemberDamage, refreshPartyCards, applyStatusEffect } from './party.js';
+import { party, setHp, flashPortraitHit, showMemberDamage, refreshPartyCards, applyStatusEffect, getEffectiveStats, getDefenceModifier, describeEffect } from './party.js';
 import { STATUS_EFFECT_DEFS } from './status-effects.js';
 import { showMessage } from './minimap.js';
 import {
@@ -111,7 +111,9 @@ export const monsters = [
   inst(D.orc, 7, 19, 8,
     '/monsters/orc-animation/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/orc-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    '/monsters/orc-animation/orc-attack.mp3', 0.5),
+    '/monsters/orc-animation/orc-attack.mp3', 0.5, 0, 0, 1, null,
+    '/monsters/orc-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/orc-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 
   // Bottom long corridor
   inst(D.iceman, 5, 21, 5,
@@ -176,11 +178,10 @@ function _updateStatsPanel(m) {
       const def = STATUS_EFFECT_DEFS[effect.effectId];
       const name = def?.name ?? effect.effectId;
       const chance = Math.round(effect.chance * 100);
-      const desc = def?.tickDamage != null
-        ? `${def.tickDamage} HP / ${def.tickInterval}s · ${def.duration}s`
-        : '';
+      const desc = def ? describeEffect(def) : '';
+      const effectColor = def?.color ?? '#c0ff80';
       const descPart = desc ? ` <span class="hep-effect-desc">(${desc})</span>` : '';
-      onHitHtml += `<div class="hep-debuff hep-on-hit" style="color:#c0ff80">`
+      onHitHtml += `<div class="hep-debuff hep-on-hit" style="color:${effectColor}">`
         + `<span class="hep-effect-name">${name}</span>`
         + `<span class="hep-effect-chance">${chance}%</span>`
         + descPart
@@ -658,7 +659,10 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   const m = monsters.find((x) => x.id === monsterId && x.alive);
   if (!m) return { hit: false, damage: 0, killed: false, monsterHp: 0, crit: false, hitChance: 0, formula: null, monsterName: '' };
 
-  let hitChance = playerHitChance(character, m);
+  // Apply status effect stat modifiers to the attacker's stats for this attack
+  const effChar = { ...character, stats: getEffectiveStats(character) };
+
+  let hitChance = playerHitChance(effChar, m);
 
   // True Shot: Never miss with ranged attacks
   const ts = skillsState.trueShot;
@@ -688,8 +692,8 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   };
 
   const preCritDamage = isMagic
-    ? calcPlayerMagicDamage(character, weaponDef, mSunder)
-    : calcPlayerPhysicalDamage(character, weaponDef, mSunder, ammoDef);
+    ? calcPlayerMagicDamage(effChar, weaponDef, mSunder)
+    : calcPlayerPhysicalDamage(effChar, weaponDef, mSunder, ammoDef);
 
   // 5% chance to critically hit — triples the calculated damage
   const isCrit = Math.random() < CRIT_CHANCE;
@@ -714,18 +718,18 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     damage = Math.round(damage * skillsState.warcry.magnitude);
   }
 
-  // Compute the weighted stat bonus and label for the battle log
+  // Compute the weighted stat bonus and label for the battle log (uses effective stats)
   let formulaStatBonus;
   let statLabel;
   if (isMagic) {
-    formulaStatBonus = character.stats?.intelligence ?? 10;
+    formulaStatBonus = effChar.stats?.intelligence ?? 10;
     statLabel = 'INT';
   } else {
     const strW = weaponDef?.statWeights?.str ?? 1.0;
     const dexW = weaponDef?.statWeights?.dex ?? 0.0;
     formulaStatBonus = Math.floor(
-      (character.stats?.strength ?? 10) * strW +
-      (character.stats?.dexterity ?? 10) * dexW
+      (effChar.stats?.strength ?? 10) * strW +
+      (effChar.stats?.dexterity ?? 10) * dexW
     );
     statLabel = strW === 0 ? 'DEX' : dexW === 0 ? 'STR' : 'STR+DEX';
   }
@@ -798,8 +802,11 @@ function _applyMonsterDamage(monster) {
   const target = pickRandomFrontLineTarget(party);
   if (!target) return;   // entire party wiped
 
+  // Apply status effect stat modifiers to the target for this damage calculation
+  const effTarget = { ...target, stats: getEffectiveStats(target) };
+
   // DEX-based hit chance — nimble characters are harder for slow monsters to land on
-  const hitChance = monsterHitChance(monster, target);
+  const hitChance = monsterHitChance(monster, effTarget);
   if (Math.random() >= hitChance) {
     addLogEntry({
       time: Date.now(), actor: 'monster',
@@ -845,7 +852,7 @@ function _applyMonsterDamage(monster) {
     return;
   }
 
-  // Calculate character's total physical defence from equipped armour
+  // Calculate character's total physical defence from equipped armour + status effect modifiers
   let charDefence = 0;
   const _counted = new Set();
   Object.values(target.equipment ?? {}).forEach(item => {
@@ -855,9 +862,10 @@ function _applyMonsterDamage(monster) {
       if (itemDef?.defence) charDefence += itemDef.defence;
     }
   });
+  charDefence = Math.max(0, charDefence + getDefenceModifier(target));
 
-  const preCritDamage = calcMonsterDamage(monster, target, charDefence);
-  const resMitigation = Math.floor((target.stats?.resilience ?? 0) * RESILIENCE_DAMAGE_FACTOR);
+  const preCritDamage = calcMonsterDamage(monster, effTarget, charDefence);
+  const resMitigation = Math.floor((effTarget.stats?.resilience ?? 0) * RESILIENCE_DAMAGE_FACTOR);
 
   // 5% chance to critically hit — triples the calculated damage
   const isCrit = Math.random() < CRIT_CHANCE;
@@ -898,6 +906,7 @@ function _applyMonsterDamage(monster) {
       if (Math.random() < effect.chance) {
         applyStatusEffect(target.id, effect.effectId);
         const def = STATUS_EFFECT_DEFS[effect.effectId];
+        showMessage(`<b>${target.name}</b> is afflicted with <b>${def?.name ?? effect.effectId}</b>!`, 2500);
         addLogEntry({
           time: Date.now(),
           type: 'status-effect',
@@ -906,6 +915,7 @@ function _applyMonsterDamage(monster) {
           target: target.name,
           effectId: effect.effectId,
           effectName: def?.name ?? effect.effectId,
+          effectColor: def?.color ?? null,
         });
       }
     });

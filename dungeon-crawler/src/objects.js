@@ -109,7 +109,7 @@ export function initObjects(scene, camera) {
                         .chain(new Tween(obj.position).to({ x: 0.04 }, 100).easing(Easing.Quadratic.In))
                         .start();
                     // Hardcoded portcullis open
-                    const p = objects.find(o => o.name === 'Portcullis');
+                    const p = objects.find(o => o.name === 'Portcullis' && o.gridRow === 7 && o.gridCol === 7);
                     if (p) openPortcullis(p);
                 } else {
                     showMessage("You can't reach that from here.");
@@ -228,6 +228,22 @@ export function initObjects(scene, camera) {
                     openAnvilModal(obj);
                 } else {
                     showMessage("Stand by the anvil to use it.");
+                }
+                break;
+            } else if (obj.userData.isKeyhole) {
+                if (isInFrontOfPlayer(obj.userData.gridRow, obj.userData.gridCol, 1)) {
+                    const p = objects.find(o => o.name === 'Portcullis' && o.gridRow === obj.userData.targetRow && o.gridCol === obj.userData.targetCol);
+                    if (p) {
+                        if (!p.isOpen) {
+                            showMessage("You turn the key. The portcullis grinds open.");
+                            playPortalSound(); // metallic grind would be better but let's use this
+                            openPortcullis(p);
+                        } else {
+                            showMessage("The portcullis is already open.");
+                        }
+                    }
+                } else {
+                    showMessage("You can't reach the keyhole from here.");
                 }
                 break;
             }
@@ -490,24 +506,7 @@ export function spawnObjectsForLevel() {
         addJester(objectsGroup, gltfLoader, 17, 7, 0, 0, -0.8);
 
         // Portcullis: Row 7, Col 7.
-        const portcullis = {
-            name: 'Portcullis',
-            path: '/items/Meshy_AI_Iron_Portcullis_0221184348_texture.glb',
-            gridRow: 7,
-            gridCol: 7,
-            x: 7 * CELL,
-            z: 7 * CELL,
-            scale: 0.8,
-            isOpen: false
-        };
-        gltfLoader.load(portcullis.path, (gltf) => {
-            const model = gltf.scene;
-            model.scale.set(1.15, 0.9, 1.15); // scaled to fit the corridor
-            model.position.set(portcullis.x, 1.1, portcullis.z);
-            objectsGroup.add(model);
-            portcullis.mesh = model;
-        });
-        objects.push(portcullis);
+        addPortcullis(objectsGroup, gltfLoader, 7, 7);
 
         // Button for portcullis
         const buttonContainer = new THREE.Group();
@@ -528,11 +527,82 @@ export function spawnObjectsForLevel() {
 
     } else if (level === 2) {
         // Portal back to Level 1.
-        // col=5, row=1 — first floor row below the north wall (row 0).
-        // rotY=0 keeps the model's default south-facing orientation so it opens toward the room.
-        // offsetZ=-0.85 nudges it flush against the north wall face.
         addPortal(objectsGroup, gltfLoader, 5, 1, 1, 0, 0, -0.85);
+
+        // Opposite side of the room (South wall).
+        // It's at the end of the long south passage now.
+        // row=12, col=5
+        // Math.PI faces North.
+        addPortal(objectsGroup, gltfLoader, 5, 12, 3, Math.PI, 0, 0.85);
+
+        // Locked Portcullis at the entrance of the passage (moved 2 squares back for vestibule)
+        addPortcullis(objectsGroup, gltfLoader, 5, 8);
+
+        // Keyhole next to the portcullis on the West wall (moved 1.0 grid squares back for accessibility)
+        addKeyhole(objectsGroup, gltfLoader, 5, 8, Math.PI / 2, -0.85, -2.0);
+    } else if (level === 3) {
+        // Portal back to Level 2.
+        // Start position in level 3 is [5, 1], against the West wall (col 0)
+        // Math.PI/2 faces East (into the room)
+        addPortal(objectsGroup, gltfLoader, 1, 5, 2, Math.PI / 2, -0.85, 0);
     }
+}
+
+function addPortcullis(scene, loader, col, row) {
+    const portcullis = {
+        name: 'Portcullis',
+        path: '/items/Meshy_AI_Iron_Portcullis_0221184348_texture.glb',
+        gridRow: row,
+        gridCol: col,
+        x: col * CELL,
+        z: row * CELL,
+        isOpen: false
+    };
+    loader.load(portcullis.path, (gltf) => {
+        const model = gltf.scene;
+        model.scale.set(1.15, 0.9, 1.15);
+        model.position.set(portcullis.x, 1.1, portcullis.z);
+        scene.add(model);
+        portcullis.mesh = model;
+    });
+    objects.push(portcullis);
+}
+
+function addKeyhole(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, targetRow = null, targetCol = null) {
+    loader.load('/items/keyhole.glb', (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(0.2); // half the previous size (0.4)
+        model.position.set(col * CELL + offsetX, 0.95, row * CELL + offsetZ);
+        model.rotation.y = rotY;
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.userData.isKeyhole = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+                // Which portcullis does it open? If not specified, open the one on its own cell
+                child.userData.targetRow = targetRow !== null ? targetRow : row;
+                child.userData.targetCol = targetCol !== null ? targetCol : col;
+
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
+            }
+        });
+
+        scene.add(model);
+    });
 }
 
 function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offsetX = 0, offsetZ = 0) {

@@ -391,6 +391,7 @@ function refreshMember(m) {
     if (skillsState.warDance.active) {
       lhDelaySec *= skillsState.warDance.magnitude;
     }
+    lhDelaySec *= getAttackSpeedMultiplier(m);
 
     const lastUsed = lastAttackTimes[`${i}-left`];
     const lhCanAttack = lastUsed === undefined || (performance.now() - lastUsed) >= (lhDelaySec * 1000);
@@ -417,6 +418,7 @@ function refreshMember(m) {
     if (skillsState.warDance.active) {
       rhDelaySec *= skillsState.warDance.magnitude;
     }
+    rhDelaySec *= getAttackSpeedMultiplier(m);
 
     const lastUsed = lhBothHands ? lastAttackTimes[`${i}-left`] : lastAttackTimes[`${i}-right`];
     const rhCanAttack = lastUsed === undefined || (performance.now() - lastUsed) >= (rhDelaySec * 1000);
@@ -770,6 +772,88 @@ export function applyRegeneration() {
   // but we mostly call applyStatusEffect(id, 'regeneration', value) now
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  STATUS EFFECT QUERY HELPERS
+//  These allow combat code to read effective stats / modifiers without
+//  hardcoding individual effect IDs.  Adding a new effect to the JSON with
+//  any of the supported properties (statModifiers, attackSpeedMultiplier,
+//  defenceModifier, preventsSpRegen, preventsMpRegen, etc.) will be picked
+//  up automatically.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Returns a copy of member.stats with all active statModifiers applied. */
+export function getEffectiveStats(member) {
+  const base = { ...(member.stats ?? {}) };
+  const now = performance.now();
+  (member.activeDebuffs ?? []).forEach(d => {
+    if (now >= d.expiresAt) return;
+    const def = STATUS_EFFECT_DEFS[d.effectId];
+    const mods = def?.statModifiers;
+    if (!mods) return;
+    for (const [stat, val] of Object.entries(mods)) {
+      if (base[stat] !== undefined) base[stat] = Math.max(0, base[stat] + val);
+    }
+  });
+  return base;
+}
+
+/** Returns the combined attack speed multiplier from active debuffs (>1 = slower). */
+export function getAttackSpeedMultiplier(member) {
+  let mult = 1.0;
+  const now = performance.now();
+  (member.activeDebuffs ?? []).forEach(d => {
+    if (now >= d.expiresAt) return;
+    const def = STATUS_EFFECT_DEFS[d.effectId];
+    if (def?.attackSpeedMultiplier) mult *= def.attackSpeedMultiplier;
+  });
+  return mult;
+}
+
+/** Returns true if any active effect has the given boolean flag (e.g. 'preventsSpRegen'). */
+export function hasEffectFlag(member, flagName) {
+  const now = performance.now();
+  return (member.activeDebuffs ?? []).some(d => {
+    if (now >= d.expiresAt) return false;
+    return !!STATUS_EFFECT_DEFS[d.effectId]?.[flagName];
+  });
+}
+
+/** Returns the sum of defenceModifier values from all active effects. */
+export function getDefenceModifier(member) {
+  let mod = 0;
+  const now = performance.now();
+  (member.activeDebuffs ?? []).forEach(d => {
+    if (now >= d.expiresAt) return;
+    const def = STATUS_EFFECT_DEFS[d.effectId];
+    if (def?.defenceModifier) mod += def.defenceModifier;
+  });
+  return mod;
+}
+
+/** Builds a human-readable description string from an effect definition's properties. */
+export function describeEffect(def) {
+  const parts = [];
+  if (def.tickDamage > 0) parts.push(`${def.tickDamage} HP / ${def.tickInterval}s`);
+  if (def.tickDamage < 0) parts.push(`+${Math.abs(def.tickDamage)} HP / ${def.tickInterval}s`);
+  if (def.tickManaDrain) parts.push(`-${def.tickManaDrain} MP / ${def.tickInterval}s`);
+  if (def.tickSpDrain) parts.push(`-${def.tickSpDrain} SP / ${def.tickInterval}s`);
+  if (def.preventsSpRegen) parts.push('No SP Regen');
+  if (def.preventsMpRegen) parts.push('No MP Regen');
+  if (def.statModifiers) {
+    const STAT_ABBR = { strength: 'STR', dexterity: 'DEX', vitality: 'VIT', intelligence: 'INT', resilience: 'RES' };
+    for (const [stat, val] of Object.entries(def.statModifiers)) {
+      const label = STAT_ABBR[stat] ?? stat.toUpperCase();
+      parts.push(`${label} ${val > 0 ? '+' : ''}${val}`);
+    }
+  }
+  if (def.attackSpeedMultiplier && def.attackSpeedMultiplier !== 1) {
+    parts.push(`Atk Spd x${def.attackSpeedMultiplier}`);
+  }
+  if (def.defenceModifier) parts.push(`DEF ${def.defenceModifier > 0 ? '+' : ''}${def.defenceModifier}`);
+  parts.push(`${def.duration}s`);
+  return parts.join(' \u00b7 ');
+}
+
 export function updateParty(dt) {
 
   // SP regenerates both in and out of combat, just at different rates:
@@ -781,7 +865,9 @@ export function updateParty(dt) {
     const spGain = isInCombat() ? 1 : 5;
     party.forEach((m) => {
       if (!m.isEmpty && !m.isDead && m.sp < (m.spMax ?? 100)) {
-        setSp(m.id, Math.min(m.sp + spGain, m.spMax ?? 100));
+        if (!hasEffectFlag(m, 'preventsSpRegen')) {
+          setSp(m.id, Math.min(m.sp + spGain, m.spMax ?? 100));
+        }
       }
     });
   }
@@ -795,19 +881,21 @@ export function updateParty(dt) {
       mpRegenTimer -= 1.0;
       party.forEach((m) => {
         if (!m.isEmpty && !m.isDead && m.mp < m.mpMax) {
-          setMp(m.id, m.mp + 1);
+          if (!hasEffectFlag(m, 'preventsMpRegen')) {
+            setMp(m.id, m.mp + 1);
+          }
         }
       });
     }
   }
 
-  // Process active debuffs (e.g. poison tick damage)
+  // ── Process all active status effects each frame ────────────────────────
   const now = performance.now();
   party.forEach(m => {
     if (m.isEmpty || m.isDead || !m.activeDebuffs?.length) return;
-    // Expire finished debuffs
+    // Expire finished effects
     m.activeDebuffs = m.activeDebuffs.filter(d => now < d.expiresAt);
-    // Tick damage
+    // Tick-based effects
     m.activeDebuffs.forEach(d => {
       const def = STATUS_EFFECT_DEFS[d.effectId];
       if (!def?.tickInterval) return;
@@ -815,10 +903,15 @@ export function updateParty(dt) {
       d.tickAccum += dt;
       if (d.tickAccum >= def.tickInterval) {
         d.tickAccum -= def.tickInterval;
-        const amount = (d.customTickValue !== undefined && d.customTickValue !== null)
+        // HP damage / heal
+        const hpAmount = (d.customTickValue !== undefined && d.customTickValue !== null)
           ? d.customTickValue
           : (def.tickDamage || 0);
-        setHp(m.id, m.hp - amount);
+        if (hpAmount !== 0) setHp(m.id, m.hp - hpAmount);
+        // MP drain
+        if (def.tickManaDrain) setMp(m.id, m.mp - def.tickManaDrain);
+        // SP drain
+        if (def.tickSpDrain) setSp(m.id, m.sp - def.tickSpDrain);
       }
     });
   });

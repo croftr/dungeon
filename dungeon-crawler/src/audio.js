@@ -208,6 +208,7 @@ let currentMusicIndex = 0;
 const MUSIC_TRACKS_BY_LEVEL = {
   1: ['/sounds/back1.mp3', '/sounds/back2.mp3'],
   2: ['/sounds/level2-music.mp3'],
+  3: ['/sounds/level2-music.mp3'],
 };
 let _ambientLevel = 1;
 const BATTLE_TRACK = '/sounds/backing/battle.mp3';

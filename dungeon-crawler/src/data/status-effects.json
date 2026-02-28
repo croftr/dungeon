@@ -1,23 +1,31 @@
 {
-
   "poison": {
     "id": "poison",
     "name": "Poison",
     "type": "debuff",
     "icon": "/icons/poison.svg",
+    "color": "#50ff50",
     "duration": 30,
     "tickInterval": 2,
     "tickDamage": 1
   },
-
   "regeneration": {
     "id": "regeneration",
     "name": "Regeneration",
     "type": "buff",
     "icon": "/icons/regeneration.png",
+    "color": "#80ff80",
     "duration": 30,
     "tickInterval": 2,
     "tickDamage": -1
+  },
+  "rot": {
+    "id": "rot",
+    "name": "Rot",
+    "type": "debuff",
+    "icon": "/icons/rot.svg",
+    "color": "#c8b060",
+    "duration": 30,
+    "preventsSpRegen": true
   }
-
 }

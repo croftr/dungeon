@@ -10,6 +10,21 @@
 
 <body>
 
+  <!-- ── INTRO / SPLASH OVERLAY ── -->
+  <div id="intro-overlay">
+    <div id="splash-screen">
+      <h1 id="splash-title">DUNGEON CRAWLER</h1>
+      <button id="start-adventure-btn">Start Adventure</button>
+    </div>
+    <div id="video-container" class="hidden">
+      <video id="intro-video" preload="auto">
+        <source src="/videos/Dungeon_Crawl_Intro_Video_Generation.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+      <button id="skip-intro-btn">Skip Intro</button>
+    </div>
+  </div>
+
   <canvas id="renderer-canvas"></canvas>
 
   <div id="hud">

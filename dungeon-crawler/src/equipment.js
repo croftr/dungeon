@@ -1,4 +1,4 @@
-import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold } from './party.js';
+import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getAttackSpeedMultiplier } from './party.js';
 import { getItemDef } from './items.js';
 import { SPELLS } from './spells.js';
 import { ACTIONS } from './items.js';
@@ -1648,6 +1648,9 @@ function useHand(memberIndex, hand) {
   if (wd.active && performance.now() < wd.expiresAt) {
     delaySec *= skillsState.warDance.magnitude;
   }
+
+  // Status effect attack speed penalty (e.g. Slow debuff)
+  delaySec *= getAttackSpeedMultiplier(m);
 
   // Check cooldown timer
   // A 'bothHands' weapon is driven by the left or right hand click but acts as 

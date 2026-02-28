@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import { buildLevel, findCell, CELL_START, changeMapArray, level1Map, level2Map, cellToWorld } from './map.js';
+import { buildLevel, findCell, CELL_START, changeMapArray, level1Map, level2Map, level3Map, cellToWorld } from './map.js';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player } from './player.js';
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles } from './particles.js';
@@ -141,6 +141,46 @@ animate(performance.now());
 //  DEV INFO
 // ─────────────────────────────────────────────
 // ─────────────────────────────────────────────
+//  INTRO VIDEO & SPLASH
+// ─────────────────────────────────────────────
+const introOverlay = document.getElementById('intro-overlay');
+const splashScreen = document.getElementById('splash-screen');
+const videoContainer = document.getElementById('video-container');
+const introVideo = document.getElementById('intro-video');
+const startBtn = document.getElementById('start-adventure-btn');
+const skipBtn = document.getElementById('skip-intro-btn');
+
+function finishIntro() {
+  if (!introOverlay) return;
+  introVideo.pause();
+  introOverlay.style.opacity = '0';
+  introOverlay.style.transition = 'opacity 1s ease';
+  setTimeout(() => {
+    introOverlay.remove();
+  }, 1000);
+}
+
+if (startBtn) {
+  startBtn.addEventListener('click', () => {
+    splashScreen.classList.add('hidden');
+    videoContainer.classList.remove('hidden');
+    introVideo.play().catch(e => {
+      console.warn("Video play failed:", e);
+      finishIntro();
+    });
+    // Trigger music/audio context via the same click
+    handleFirstInteraction();
+  });
+}
+
+if (introVideo) {
+  introVideo.addEventListener('ended', finishIntro);
+}
+if (skipBtn) {
+  skipBtn.addEventListener('click', finishIntro);
+}
+
+// ─────────────────────────────────────────────
 //  MUSIC
 // ─────────────────────────────────────────────
 function handleFirstInteraction() {
@@ -161,7 +201,8 @@ window.loadLevel = function (levelNum) {
   setAmbientLevel(levelNum);
 
   // 1. Swap Map Array
-  changeMapArray(levelNum === 1 ? level1Map : level2Map);
+  const maps = [null, level1Map, level2Map, level3Map];
+  changeMapArray(maps[levelNum] || level1Map);
 
   // 2. Rebuild map meshes for walls/floors
   buildLevel(scene);
