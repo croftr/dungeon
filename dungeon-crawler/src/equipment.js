@@ -63,6 +63,25 @@ function _dispatchSpellVFX(attackType) {
 // ─────────────────────────────────────────────
 //  CONSTANTS
 // ─────────────────────────────────────────────
+
+// Derived max stat formulas — single source of truth
+// HP scales with vitality, MP with intelligence, SP with resilience.
+const HP_PER_VIT = 8;
+const MP_PER_INT = 5;
+const SP_PER_RES = 10;
+
+/**
+ * Calculate hpMax, mpMax, spMax from a stats object.
+ * Items that boost vitality/intelligence/resilience automatically cascade here.
+ */
+export function calcDerivedMaxStats(stats) {
+  return {
+    hpMax: (stats.vitality ?? 0) * HP_PER_VIT,
+    mpMax: (stats.intelligence ?? 0) * MP_PER_INT,
+    spMax: (stats.resilience ?? 0) * SP_PER_RES,
+  };
+}
+
 const SLOT_KEYS = [
   'head', 'cloak', 'neck', 'chest',
   'leftHand', 'rightHand',
@@ -153,6 +172,20 @@ export function updateEffectiveStats(m) {
 
   m.stats = newStats;
   m.skillBonuses = newSkillBonuses;
+
+  // Recalculate hpMax/mpMax/spMax from the (now equipment-boosted) stats
+  const derived = calcDerivedMaxStats(newStats);
+  m.hpMax = derived.hpMax;
+  m.mpMax = derived.mpMax;
+  m.spMax = derived.spMax;
+
+  // Initialise current values on first equip; otherwise clamp to new maxes
+  if (m.hp === undefined) m.hp = m.hpMax;
+  if (m.mp === undefined) m.mp = m.mpMax;
+  if (m.sp === undefined) m.sp = m.spMax;
+  m.hp = Math.min(m.hp, m.hpMax);
+  m.mp = Math.min(m.mp, m.mpMax);
+  m.sp = Math.min(m.sp, m.spMax);
 }
 
 export function extendPartyData() {

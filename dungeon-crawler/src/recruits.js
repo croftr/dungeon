@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { party } from './party.js';
-import { extendPartyData } from './equipment.js';
+import { extendPartyData, calcDerivedMaxStats } from './equipment.js';
 import { CELL, WALL_H, findCell } from './map.js';
 import { isInFrontOfPlayer } from './player.js';
 import { getItemDef } from './items.js';
@@ -164,6 +164,8 @@ function openRecruitModal(recruitId) {
     const freeSlot = party.find(m => m.isEmpty);
     const canRecruit = !!freeSlot;
 
+    const { hpMax, mpMax, spMax } = calcDerivedMaxStats(r.stats);
+
     const lhDef = r.leftHand && r.leftHand !== '—' ? getItemDef(r.leftHand) : null;
     const rhDef = r.rightHand && r.rightHand !== '—' ? getItemDef(r.rightHand) : null;
     const ammoDef = r.ammo && r.ammo !== '—' ? getItemDef(r.ammo) : null;
@@ -184,7 +186,7 @@ function openRecruitModal(recruitId) {
         <div>
             <h2 style="margin:0 0 5px 0; color:#fff">${r.name}</h2>
             <p style="margin:0; font-size:12px;"><strong>${r.race} ${r.job}</strong></p>
-            <p style="margin:4px 0 0 0; font-size:11px; color:#e8c87a;">HP: ${r.hp}/${r.hpMax} &nbsp;&nbsp; MP: ${r.mp}/${r.mpMax}</p>
+            <p style="margin:4px 0 0 0; font-size:11px; color:#e8c87a;">HP: ${hpMax}/${hpMax} &nbsp;&nbsp; MP: ${mpMax}/${mpMax} &nbsp;&nbsp; SP: ${spMax}/${spMax}</p>
         </div>
     </div>
     
@@ -263,15 +265,12 @@ function recruitCharacter(r) {
 
     r.isRecruited = true;
 
-    // Clone data into the party slot
-    // Give them a generated portrait or just fallback
+    // Clone data into the party slot.
+    // hp/mp/sp and their maxes are derived from stats by extendPartyData → updateEffectiveStats below.
     party[freeIndex] = {
         id: freeIndex,
         isEmpty: false,
         name: r.name,
-        hp: r.hp, hpMax: r.hpMax,
-        mp: r.mp, mpMax: r.mpMax,
-        sp: r.sp, spMax: r.spMax,
         stats: { ...r.stats },
         skills: JSON.parse(JSON.stringify(r.skills)),
         leftHand: r.leftHand,
