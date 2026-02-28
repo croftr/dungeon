@@ -17,6 +17,7 @@
             "intelligence": 7,
             "resilience": 5
         },
+        "startingInventory": [],
         "skills": [
             "Entangle",
             "Hunter's Eye"
@@ -63,7 +64,8 @@
             "Life Berry",
             "Poison Vial",
             "Life Essence",
-            "Life Essence"
+            "Life Essence",
+            "Sun Pendant"
         ],
         "gridCol": 10,
         "gridRow": 8,
@@ -123,6 +125,9 @@
             "Arcane Lantern",
             "Runic Scholar",
             "Mana Tap"
+        ],
+        "startingInventory": [
+            "Rune Pendant"
         ],
         "image": "/human_wizard_head.png",
         "leftHand": "Spellbook",
@@ -215,6 +220,10 @@
         "skills": [
             "Whirlwind",
             "War Dance"
+        ],
+        "startingInventory": [
+            "Poison Dagger",
+            "Elven Dagger"
         ],
         "image": "/heros/high-elf.png",
         "leftHand": "Dagger",

@@ -84,24 +84,34 @@
         "weight": 0.4
     },
     {
-        "name": "Amulet of Warding",
+        "name": "Rune Pendant",
         "slot": "neck",
         "attackType": null,
         "baseDamage": null,
-        "description": "A silver amulet engraved with protective runes.",
+        "icon": "/icons/rune_pendant.png",
+        "description": "A silver amulet engraved with runes.",
         "defence": 1,
-        "value": 60,
-        "weight": 0.1
+        "value": 260,
+        "weight": 0.1,
+        "skillBonuses": {
+            "Fireball": 100,
+            "Heal": 100
+        }
     },
     {
-        "name": "Pendant of Focus",
+        "name": "Sun Pendant",
         "slot": "neck",
         "attackType": null,
         "baseDamage": null,
+        "icon": "/icons/sun_pendant.png",
         "description": "A crystal pendant that sharpens the mind and aids concentration.",
         "defence": 1,
-        "value": 75,
-        "weight": 0.1
+        "value": 275,
+        "weight": 0.1,
+        "skillBonuses": {
+            "all": 100,
+            "Sanctuary": 50
+        }
     },
     {
         "name": "Padded Vest",
@@ -157,10 +167,7 @@
         "defence": 2,
         "value": 25,
         "weight": 0.5,
-        "skillBonuses": {
-            "all": 100,
-            "Sanctuary": 50
-        }
+        "skillBonuses": {}
     },
     {
         "name": "Leather Gloves",
@@ -449,6 +456,22 @@
         },
         "icon": "/icons/elven-dagger.png",
         "description": "A short, double-edged blade. Quick and easy to slip past armour.",
+        "value": 20,
+        "weight": 0.4
+    },
+    {
+        "name": "Poison Dagger",
+        "slot": "rightHand",
+        "attackType": "swipe",
+        "baseDamage": 5,
+        "damageType": "poison",
+        "delay": 2,
+        "statWeights": {
+            "str": 0.1,
+            "dex": 0.9
+        },
+        "icon": "/icons/poison-dagger.png",
+        "description": "A short, double-edged blade coated in poison.",
         "value": 20,
         "weight": 0.4
     },

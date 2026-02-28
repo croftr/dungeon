@@ -57,7 +57,7 @@ export function getInRangeMonster() {
 //  Only instance-specific data lives here: map position, assets, game state.
 // ─────────────────────────────────────────────────────────────────────────────
 
-function inst(def, id, gridRow, gridCol, glbIdle, glbAttack, attackSound, scale = 0.45, offsetX = 0, offsetZ = 0, level = 1, patrol = null, glbDeath = null) {
+function inst(def, id, gridRow, gridCol, glbIdle, glbAttack, attackSound, scale = 0.45, offsetX = 0, offsetZ = 0, level = 1, patrol = null, glbDeath = null, glbHit = null) {
   return {
     id, type: 'glb',
     ...def,
@@ -65,7 +65,7 @@ function inst(def, id, gridRow, gridCol, glbIdle, glbAttack, attackSound, scale 
     gridRow, gridCol,
     offsetX, offsetZ,
     alive: true, mesh: null, mixer: null, actions: {},
-    glbIdle, glbAttack, glbDeath, attackSound, scale,
+    glbIdle, glbAttack, glbDeath, glbHit, attackSound, scale,
     level,
     patrol,
   };
@@ -82,10 +82,9 @@ export const monsters = [
 
   // Upper maze
   inst(D.goblin, 1, 9, 6,
-    '/monsters/goblin-animation/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
-    '/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    '/monsters/goblin-animation/goblin-attack.wav', 0.45, 0, 0, 1, null,
-    '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Dead_withSkin.glb'),
+    '/monsters/goblin/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
+    '/monsters/goblin/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/goblin/goblin-attack.wav', 0.45, 0, 0, 1, null),
 
   // Southern section
   inst(D.albino_goblin, 2, 15, 5,
@@ -96,10 +95,11 @@ export const monsters = [
 
   // Lower maze — zombie lurks in the far lower-right section, well past the row-14 barrier
   inst(D.zombie, 3, 17, 12,
-    '/monsters/zombie-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/zombie-animation/Meshy_AI_Animation_Idle_3_withSkin.glb',
     '/monsters/zombie-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
     '/monsters/zombie-animation/zombie-attack.mp3', 0.45, 0, 0, 1, null,
-    '/monsters/zombie-animation/Meshy_AI_Animation_Dead_withSkin.glb'),
+    '/monsters/zombie-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/zombie-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 
   // Lower maze
   inst(D.ghoul, 4, 17, 11,
@@ -136,10 +136,11 @@ export const monsters = [
 
   // Test zombie in the big east room near entrance
   inst(D.zombie, 21, 11, 18,
-    '/monsters/zombie-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/zombie-animation/Meshy_AI_Animation_Idle_3_withSkin.glb',
     '/monsters/zombie-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
     '/monsters/zombie-animation/zombie-attack.mp3', 0.45, 0, 0, 1, null,
-    '/monsters/zombie-animation/Meshy_AI_Animation_Dead_withSkin.glb'),
+    '/monsters/zombie-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/zombie-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 ];
 
 export function isMonsterAt(row, col) {
@@ -337,6 +338,27 @@ export function initMonsters(scene) {
             m.actions.death = deathAction;
             deathAction.setLoop(THREE.LoopOnce, 1);
             deathAction.clampWhenFinished = true;
+          }
+        });
+      }
+
+      // Load the hit animation GLB if provided
+      if (m.glbHit) {
+        gltfLoader.load(m.glbHit, (hitGltf) => {
+          if (hitGltf.animations && hitGltf.animations.length > 0) {
+            const hitClip = hitGltf.animations[0];
+            const hitAction = m.mixer.clipAction(hitClip);
+            m.actions.hit = hitAction;
+            hitAction.setLoop(THREE.LoopOnce, 1);
+            hitAction.clampWhenFinished = true;
+
+            // When hit animation finishes, fade back to idle
+            m.mixer.addEventListener('finished', (e) => {
+              if (e.action === m.actions.hit && m.actions.idle) {
+                m.actions.idle.reset().play();
+                m.actions.hit.crossFadeTo(m.actions.idle, 0.2, false);
+              }
+            });
           }
         });
       }
@@ -915,6 +937,18 @@ function _playHitAnimation(m, attackType, killer) {
 
   if (attackType === 'fireball') {
     createHitSpark(mesh.position);
+  }
+
+  // Standard hit flash and knockback logic below...
+
+  if (m.mixer && m.actions.hit) {
+    // If there is an idle animation, crossfade from it to hit
+    if (m.actions.idle) {
+      m.actions.hit.reset().play();
+      m.actions.idle.crossFadeTo(m.actions.hit, 0.1, true);
+    } else {
+      m.actions.hit.reset().play();
+    }
   }
 
   // Flash red on emissive channel
