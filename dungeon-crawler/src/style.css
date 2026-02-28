@@ -848,11 +848,18 @@ body {
 #equip-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 10px;
   padding: 10px 14px;
   border-bottom: 1px solid #3a2e18;
   background: rgba(0, 0, 0, 0.4);
   flex-shrink: 0;
+}
+
+#equip-char-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
 }
 
 #equip-char-name {
@@ -860,6 +867,30 @@ body {
   color: #c8a84a;
   letter-spacing: 2px;
   text-transform: uppercase;
+}
+
+#equip-char-level {
+  font-size: 11px;
+  color: #7a6a44;
+  letter-spacing: 1px;
+}
+
+#equip-char-dev {
+  background: rgba(200, 168, 74, 0.1);
+  border: 1px solid #6a5030;
+  color: #c8a84a;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 12px;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+#equip-char-dev:hover {
+  background: rgba(200, 168, 74, 0.25);
+  border-color: #c8a84a;
 }
 
 #equip-close {

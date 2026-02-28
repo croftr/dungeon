@@ -347,8 +347,17 @@ export function renderItemIcon(item, containerEl) {
 function renderModal(memberIndex) {
   const m = party[memberIndex];
 
-  // Header name
+  // Header name + level/XP
   document.getElementById('equip-char-name').textContent = m.name;
+  const levelEl = document.getElementById('equip-char-level');
+  if (levelEl) {
+    const nextXP = getNextLevelXP(m);
+    if (nextXP !== null) {
+      levelEl.textContent = `Lv.${m.level ?? 0}  ·  ${m.xp ?? 0} / ${nextXP} XP`;
+    } else {
+      levelEl.textContent = `Lv.${m.level ?? 0}  ·  MAX`;
+    }
+  }
 
   // ── Paperdoll slots ──
   // For bothHands items the same object sits in both leftHand and rightHand.
@@ -2998,6 +3007,15 @@ function attachOverlayListeners() {
     }
   });
 }
+
+// Development button — close inventory and open char-dev for same member
+document.getElementById('equip-char-dev').addEventListener('click', () => {
+  if (activeCharIndex !== null) {
+    const idx = activeCharIndex;
+    closeModal();
+    openCharDevModal(idx);
+  }
+});
 
 // Drop button
 document.getElementById('equip-drop').addEventListener('click', () => {
