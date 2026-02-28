@@ -377,9 +377,20 @@ function renderModal(memberIndex) {
         card.className = 'skill-card';
         const isEquipped = m.equipment?.skill?.name === skill.name;
         if (isEquipped) card.classList.add('skill-card--equipped');
-        const potency = _formatSkillPotency(skill.name, m);
-        const potencyHtml = potency ? `<span class="skill-potency">${potency}</span>` : '';
-        card.innerHTML = `<span class="skill-name">${skill.name}</span><span class="skill-desc">${skill.description}</span>${potencyHtml}`;
+
+        // Render skill icon
+        renderItemIcon({ icon: skill.icon }, card);
+
+        // Tooltip
+        attachTooltipListeners(card, () => {
+          const potency = _formatSkillPotency(skill.name, m);
+          return {
+            ...skill,
+            isSkill: true,
+            potency: potency
+          };
+        });
+
         // Click to equip — clicking the already-equipped skill unequips it
         card.addEventListener('click', () => {
           m.equipment.skill = isEquipped ? null : { name: skill.name, slot: 'skill', icon: skill.icon ?? null };
@@ -531,26 +542,93 @@ function positionTooltip(mouseX, mouseY) {
   panel.style.top = y + 'px';
 }
 
-function populateTooltip(item) {
-  const isCustom = !!item.isCustom;
+function populateTooltip(obj) {
+  if (!obj) return;
+  const isSkill = !!obj.isSkill;
+  const isCustom = !!obj.isCustom;
   const nameEl = document.getElementById('item-detail-name');
   const slotEl = document.getElementById('item-detail-slot');
   const actionEl = document.getElementById('item-detail-action');
   const descEl = document.getElementById('item-detail-desc');
   const statsEl = document.getElementById('item-detail-stats');
 
-  nameEl.textContent = item.name;
+  nameEl.textContent = obj.name;
+
+  if (isSkill) {
+    slotEl.textContent = 'Skill type: ' + (obj.type || 'Generic');
+    actionEl.textContent = obj.cooldownMs ? `Cooldown: ${obj.cooldownMs / 1000}s` : '';
+    descEl.textContent = obj.description;
+    statsEl.style.display = obj.potency ? 'flex' : 'none';
+
+    // Clear and show potency if applicable
+    if (obj.potency) {
+      statsEl.innerHTML = `
+                <div class="detail-stat-row">
+                    <span>Current Power</span>
+                    <span style="color:#c0a0f8">${obj.potency}</span>
+                </div>
+            `;
+    }
+    return;
+  }
+
+  // Reset statsEl for items (since skills might have changed its innerHTML)
+  statsEl.innerHTML = `
+        <div class="detail-stat-row" id="detail-row-damage">
+            <span>Attack Power</span>
+            <span id="item-detail-damage">—</span>
+        </div>
+        <div class="detail-stat-row" id="detail-row-defence">
+            <span>Defence</span>
+            <span id="item-detail-defence">—</span>
+        </div>
+        <div class="detail-stat-row" id="detail-row-block">
+            <span>Block Chance</span>
+            <span id="item-detail-block">—</span>
+        </div>
+        <div class="detail-stat-row" id="detail-row-scaling">
+            <span>Scales with</span>
+            <span id="item-detail-scaling">—</span>
+        </div>
+        <div id="detail-row-scaling-bar">
+            <div id="item-detail-scaling-bar"></div>
+        </div>
+        <div class="detail-stat-row" id="detail-row-statchange">
+            <span>Stat Change</span>
+            <span id="item-detail-statchange">—</span>
+        </div>
+        <div class="detail-stat-row" id="detail-row-skillbonus">
+            <span style="font-size:8px">Skill Bonuses</span>
+            <span id="item-detail-skillbonus" style="font-size:8px; text-align:right">—</span>
+        </div>
+        <div class="detail-stat-row" id="detail-row-ammo-mod">
+            <span>Dmg Multiplier</span>
+            <span id="item-detail-ammo-mod">—</span>
+        </div>
+        <div class="detail-stat-row" id="detail-row-ammo-type">
+            <span>Damage Type</span>
+            <span id="item-detail-ammo-type">—</span>
+        </div>
+        <div class="detail-stat-row" id="detail-row-weight">
+            <span>Weight</span>
+            <span id="item-detail-weight">—</span>
+        </div>
+        <div class="detail-stat-row" id="detail-row-value">
+            <span>Market Value</span>
+            <span id="item-detail-value">—</span>
+        </div>
+    `;
 
   if (isCustom) {
     slotEl.textContent = '';
     actionEl.textContent = '';
-    descEl.textContent = item.description;
+    descEl.textContent = obj.description;
     statsEl.style.display = 'none';
     return;
   }
 
   statsEl.style.display = 'flex';
-  const def = getItemDef(item.name);
+  const def = getItemDef(obj.name);
 
   const isAmmo = (def?.slot === 'ammo');
   const isSpellbook = (def?.type === 'spellbook');
@@ -576,7 +654,7 @@ function populateTooltip(item) {
   const slotLabelEl = document.getElementById('detail-row-statchange').querySelector('span:first-child');
   slotLabelEl.textContent = isSpellbook ? 'Requires' : 'Stat Change';
 
-  slotEl.textContent = isSpellbook ? 'Type: Spellbook' : ('Slot: ' + (SLOT_LABELS[def?.slot ?? item.slot] ?? item.slot));
+  slotEl.textContent = isSpellbook ? 'Type: Spellbook' : ('Slot: ' + (SLOT_LABELS[def?.slot ?? obj.slot] ?? obj.slot));
 
   if (isSpellbook) {
     actionEl.textContent = 'Learns: ' + (def.spellName || 'None');
