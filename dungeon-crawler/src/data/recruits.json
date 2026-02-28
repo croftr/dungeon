@@ -14,7 +14,9 @@
         "startingInventory": [],
         "skills": [
             "Entangle",
-            "Hunter's Eye"
+            "Hunter's Eye",
+            "Bow Master",
+            "Bow Master"
         ],
         "image": "/elf_ranger_head.png",
         "leftHand": "Short Bow",
@@ -40,7 +42,9 @@
         },
         "skills": [
             "Sanctuary",
-            "Holy Radiance"
+            "Holy Radiance",
+            "Mace Master",
+            "Mace Master"
         ],
         "image": "/human_paladin_head.png",
         "leftHand": "Sword",
@@ -74,7 +78,9 @@
         },
         "skills": [
             "Sunder Armor",
-            "Miners Light"
+            "Miners Light",
+            "Axe Master",
+            "Axe Master"
         ],
         "image": "/dwarf_barbarian_head.png",
         "leftHand": "Axe",
@@ -100,7 +106,9 @@
         "skills": [
             "Arcane Lantern",
             "Runic Scholar",
-            "Mana Tap"
+            "Mana Tap",
+            "Staff Master",
+            "Staff Master"
         ],
         "startingInventory": [
             "Rune Pendant"
@@ -128,7 +136,9 @@
         },
         "skills": [
             "Berserk",
-            "Warcry"
+            "Warcry",
+            "Two-Handed Master",
+            "Two-Handed Master"
         ],
         "image": "/human_barbarian_head.png",
         "leftHand": "Greataxe",
@@ -152,7 +162,9 @@
             "resilience": 7
         },
         "skills": [
-            "True Shot"
+            "True Shot",
+            "Crossbow Master",
+            "Crossbow Master"
         ],
         "image": "/heros/dwarf-ranger.png",
         "leftHand": "Crossbow",
@@ -177,7 +189,9 @@
         },
         "skills": [
             "Whirlwind",
-            "War Dance"
+            "War Dance",
+            "Dagger Master",
+            "Dagger Master"
         ],
         "startingInventory": [
             "Poison Dagger",

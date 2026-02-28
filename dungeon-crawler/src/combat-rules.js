@@ -4,6 +4,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import RULES from './data/combat-rules.json';
+import SKILLS_DATA from './data/skills.json';
 
 // ── Utility ───────────────────────────────────────────────────────────────────
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
@@ -121,7 +122,19 @@ export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef 
     (character.stats?.vitality ?? 10) * vitW +
     (character.stats?.resilience ?? 10) * resW
   );
-  let raw = (weaponDef?.baseDamage ?? 0) + statBonus;
+  let passiveBonus = 0;
+  if (character.skills) {
+    character.skills.forEach(skillName => {
+      const skillDef = SKILLS_DATA[skillName];
+      if (skillDef?.isPassive && skillDef.effectType === 'weaponDamageBonus') {
+        if (weaponDef && weaponDef.weaponType === skillDef.weaponType) {
+          passiveBonus += skillDef.magnitude || 0;
+        }
+      }
+    });
+  }
+
+  let raw = (weaponDef?.baseDamage ?? 0) + statBonus + passiveBonus;
   if (ammoDef && ammoDef.damageModifier) {
     raw = Math.round(raw * ammoDef.damageModifier);
   }

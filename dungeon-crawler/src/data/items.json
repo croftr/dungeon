@@ -329,6 +329,7 @@
         "name": "Torch",
         "slot": "rightHand",
         "attackType": "bash",
+        "weaponType": "mace",
         "baseDamage": 5,
         "delay": 2,
         "statWeights": {
@@ -345,6 +346,7 @@
         "blockChance": 20,
         "slot": "leftHand",
         "attackType": "shield-bash",
+        "weaponType": "shield",
         "baseDamage": 2,
         "statWeights": {
             "str": 1.0,
@@ -361,6 +363,7 @@
         "blockChance": 10,
         "slot": "leftHand",
         "attackType": "shield-bash",
+        "weaponType": "shield",
         "baseDamage": 2,
         "statWeights": {
             "str": 1.0,
@@ -376,6 +379,7 @@
         "name": "Short Bow",
         "slot": "leftHand",
         "attackType": "shoot",
+        "weaponType": "bow",
         "baseDamage": 15,
         "delay": 4,
         "statWeights": {
@@ -391,6 +395,7 @@
         "name": "Crossbow",
         "slot": "leftHand",
         "attackType": "shoot",
+        "weaponType": "crossbow",
         "baseDamage": 20,
         "delay": 6,
         "statWeights": {
@@ -448,6 +453,7 @@
         "name": "Dagger",
         "slot": "rightHand",
         "attackType": "swipe",
+        "weaponType": "dagger",
         "baseDamage": 5,
         "delay": 2,
         "statWeights": {
@@ -463,6 +469,7 @@
         "name": "Elven Dagger",
         "slot": "leftHand",
         "attackType": "swipe",
+        "weaponType": "dagger",
         "baseDamage": 6,
         "delay": 2,
         "statWeights": {
@@ -478,6 +485,7 @@
         "name": "Poison Dagger",
         "slot": "rightHand",
         "attackType": "swipe",
+        "weaponType": "dagger",
         "baseDamage": 5,
         "damageType": "poison",
         "onHitEffects": [
@@ -500,6 +508,7 @@
         "name": "Sword",
         "slot": "rightHand",
         "attackType": "swipe",
+        "weaponType": "sword",
         "baseDamage": 10,
         "delay": 2,
         "statWeights": {
@@ -515,6 +524,7 @@
         "name": "Oak Staff",
         "slot": "enable-spell",
         "attackType": "bash",
+        "weaponType": "staff",
         "baseDamage": 5,
         "delay": 4,
         "statWeights": {
@@ -542,6 +552,7 @@
         "name": "Axe",
         "slot": "rightHand",
         "attackType": "swipe",
+        "weaponType": "axe",
         "baseDamage": 10,
         "delay": 2,
         "statWeights": {
@@ -557,6 +568,7 @@
         "name": "Mace",
         "slot": "rightHand",
         "attackType": "bash",
+        "weaponType": "mace",
         "baseDamage": 15,
         "delay": 2,
         "statWeights": {
@@ -572,6 +584,7 @@
         "name": "Greatsword",
         "slot": "bothHands",
         "attackType": "swipe",
+        "weaponType": "twoHanded",
         "baseDamage": 30,
         "delay": 4,
         "statWeights": {
@@ -587,6 +600,7 @@
         "name": "Greataxe",
         "slot": "bothHands",
         "attackType": "swipe",
+        "weaponType": "twoHanded",
         "baseDamage": 20,
         "delay": 4,
         "statWeights": {
@@ -602,6 +616,7 @@
         "name": "War Hammer",
         "slot": "bothHands",
         "attackType": "bash",
+        "weaponType": "twoHanded",
         "baseDamage": 25,
         "delay": 4,
         "statWeights": {
@@ -617,6 +632,7 @@
         "name": "Longbow",
         "slot": "leftHand",
         "attackType": "shoot",
+        "weaponType": "bow",
         "baseDamage": 20,
         "delay": 4,
         "statWeights": {
