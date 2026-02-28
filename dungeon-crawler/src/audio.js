@@ -356,6 +356,23 @@ export async function playSkillSound(name, volume = 0.7) {
   }
 }
 
+export async function playLevelUpSound() {
+  const buffer = await getBuffer('/sounds/actions/skills/holy.mp3');
+  if (!buffer) return;
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.9;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playLevelUpSound failed:', err);
+  }
+}
+
 export async function playShopkeeperSound() {
   const buffer = await getBuffer('/sounds/actions/shopkeeper.mp3');
   if (!buffer) return;

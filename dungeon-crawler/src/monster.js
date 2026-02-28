@@ -24,6 +24,7 @@ import { spawnDroppedItem } from './objects.js';
 import { MONSTER_DEFS as D } from './monster-defs.js';
 import { skillsState } from './skills-state.js';
 import SKILLS_DATA from './data/skills.json';
+import { awardXP } from './leveling.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  HUNTER'S EYE STATE  — tracks which monster is currently being analysed
@@ -162,6 +163,14 @@ export const monsters = [
     '/monsters/ogre/ogre.mp3', 0.7, 0, 0, 1, null,
     '/monsters/ogre/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/ogre/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+
+  // Goblin guard in the vertical passage leading to the Northwest room
+  inst(D.goblin, 23, 8, 1,
+    '/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/goblin-animation/goblin-attack.wav', 0.45, 0, 0, 1, null,
+    '/monsters/goblin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 ];
 
 export function isMonsterAt(row, col) {
@@ -712,6 +721,10 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       });
       if (m.hpBarFill) m.hpBarFill.parentElement.style.display = 'none';
       addLogEntry({ type: 'death', target: m.name, killer, damage, time: Date.now() });
+
+      // ── Award XP to living party members ──────────────────────────────────
+      if (m.xp > 0) awardXP(m.xp);
+
       _playDeathAnimation(m);
     } else {
       _playHitAnimation(m, attackType, killer);

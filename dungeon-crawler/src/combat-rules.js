@@ -124,8 +124,10 @@ export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef 
   );
   let passiveBonus = 0;
   if (character.skills) {
-    character.skills.forEach(skillName => {
-      const skillDef = SKILLS_DATA[skillName];
+    character.skills.forEach(skill => {
+      // Skills are objects with a .name property
+      const name = typeof skill === 'string' ? skill : skill.name;
+      const skillDef = SKILLS_DATA[name];
       if (skillDef?.isPassive && skillDef.effectType === 'weaponDamageBonus') {
         if (weaponDef && weaponDef.weaponType === skillDef.weaponType) {
           passiveBonus += skillDef.magnitude || 0;

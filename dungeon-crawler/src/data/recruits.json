@@ -12,7 +12,7 @@
             "resilience": 5
         },
         "startingInventory": [],
-        "skills": [
+        "skillProgression": [
             "Entangle",
             "Hunter's Eye",
             "Bow Master",
@@ -22,7 +22,6 @@
         "leftHand": "Short Bow",
         "rightHand": "—",
         "ammo": "Wooden Arrows",
-        "startingSkill": "Hunter's Eye",
         "gridCol": 9,
         "gridRow": 8,
         "facing": "front",
@@ -40,7 +39,7 @@
             "intelligence": 6,
             "resilience": 10
         },
-        "skills": [
+        "skillProgression": [
             "Sanctuary",
             "Holy Radiance",
             "Mace Master",
@@ -49,7 +48,6 @@
         "image": "/human_paladin_head.png",
         "leftHand": "Sword",
         "rightHand": "Shield",
-        "startingSkill": "Sanctuary",
         "startingInventory": [
             "Cure Poison Potion",
             "Healing Potion",
@@ -76,7 +74,7 @@
             "intelligence": 4,
             "resilience": 10
         },
-        "skills": [
+        "skillProgression": [
             "Sunder Armor",
             "Miners Light",
             "Axe Master",
@@ -85,7 +83,6 @@
         "image": "/dwarf_barbarian_head.png",
         "leftHand": "Axe",
         "rightHand": "Wooden Shield",
-        "startingSkill": "Sunder Armor",
         "gridCol": 12,
         "gridRow": 8,
         "facing": "front",
@@ -103,7 +100,7 @@
             "intelligence": 10,
             "resilience": 5
         },
-        "skills": [
+        "skillProgression": [
             "Arcane Lantern",
             "Runic Scholar",
             "Mana Tap",
@@ -116,7 +113,6 @@
         "image": "/human_wizard_head.png",
         "leftHand": "Spellbook",
         "rightHand": "Oak Staff",
-        "startingSkill": "Runic Scholar",
         "gridCol": 13,
         "gridRow": 8,
         "facing": "front",
@@ -134,7 +130,7 @@
             "intelligence": 4,
             "resilience": 7
         },
-        "skills": [
+        "skillProgression": [
             "Berserk",
             "Warcry",
             "Two-Handed Master",
@@ -143,7 +139,6 @@
         "image": "/human_barbarian_head.png",
         "leftHand": "Greataxe",
         "rightHand": "—",
-        "startingSkill": "Berserk",
         "gridCol": 11,
         "gridRow": 8,
         "facing": "front",
@@ -161,7 +156,7 @@
             "intelligence": 4,
             "resilience": 7
         },
-        "skills": [
+        "skillProgression": [
             "True Shot",
             "Crossbow Master",
             "Crossbow Master"
@@ -169,7 +164,6 @@
         "image": "/heros/dwarf-ranger.png",
         "leftHand": "Crossbow",
         "rightHand": "Dagger",
-        "startingSkill": "True Shot",
         "gridCol": 14,
         "gridRow": 9,
         "facing": "left",
@@ -187,7 +181,7 @@
             "intelligence": 7,
             "resilience": 6
         },
-        "skills": [
+        "skillProgression": [
             "Whirlwind",
             "War Dance",
             "Dagger Master",
@@ -200,7 +194,6 @@
         "image": "/heros/high-elf.png",
         "leftHand": "Dagger",
         "rightHand": "Dagger",
-        "startingSkill": "Whirlwind",
         "gridCol": 8,
         "gridRow": 9,
         "facing": "right",

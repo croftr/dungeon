@@ -25,6 +25,18 @@
     </div>
   </div>
 
+  <!-- ── OGRE ENCOUNTER VIDEO OVERLAY ── -->
+  <div id="ogre-video-overlay" class="hidden"
+    style="position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 1.5s ease;">
+    <video id="ogre-video" preload="auto"
+      style="max-width: 100%; max-height: 100%; box-shadow: 0 0 100px rgba(0, 0, 0, 1);">
+      <source src="/videos/Ogre_Guards_Treasure_Chest_Video.mp4" type="video/mp4">
+    </video>
+    <button id="skip-ogre-btn"
+      style="position: absolute; bottom: 40px; right: 40px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(232, 200, 122, 0.3); color: #aaa; padding: 10px 24px; font-family: monospace; font-size: 12px; cursor: pointer; border-radius: 4px;">Skip
+      Video</button>
+  </div>
+
   <canvas id="renderer-canvas"></canvas>
 
   <div id="hud">
@@ -497,17 +509,33 @@
   <div id="char-dev-overlay" class="char-dev-hidden">
     <div id="char-dev-modal">
       <div id="char-dev-header">
+        <button id="char-dev-prev" aria-label="Previous member">&#8249;</button>
         <div id="char-dev-title-wrap">
           <span id="char-dev-char-name"></span> <span style="margin-left:8px; color:#888;">(Development)</span>
         </div>
+        <button id="char-dev-next" aria-label="Next member">&#8250;</button>
         <button id="char-dev-close" aria-label="Close">&times;</button>
       </div>
 
       <div id="char-dev-body">
 
+        <!-- Level & XP -->
+        <section id="char-dev-level-section">
+          <div id="cd-level-row">
+            <span id="cd-level-label">Level 0</span>
+            <span id="cd-xp-label">0 / 100 XP</span>
+          </div>
+          <div id="cd-xp-bar-bg">
+            <div id="cd-xp-bar-fill"></div>
+          </div>
+        </section>
+
         <!-- Stats -->
         <section id="char-dev-stats-section">
-          <h4 class="equip-section-title">Attributes</h4>
+          <div id="cd-stat-points-row">
+            <h4 class="equip-section-title">Attributes</h4>
+            <span id="cd-stat-points-remaining"></span>
+          </div>
           <div id="cd-char-stats">
             <div class="stat-row">
               <span class="stat-name">Strength</span>
@@ -563,12 +591,9 @@
             <!-- skill cards injected here -->
           </div>
           <div id="cd-future-skills">
-            <h4 class="equip-section-title equip-section-title--skills">Available to Learn</h4>
+            <h4 class="equip-section-title equip-section-title--skills">Skill Progression</h4>
             <div id="cd-available-skills">
-              <div class="skill-card empty-skill-card"></div>
-              <div class="skill-card empty-skill-card"></div>
-              <div class="skill-card empty-skill-card"></div>
-              <div class="skill-card empty-skill-card"></div>
+              <!-- progression cards injected here -->
             </div>
           </div>
         </section>

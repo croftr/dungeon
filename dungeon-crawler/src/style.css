@@ -1467,6 +1467,33 @@ body {
   font-weight: bold;
   letter-spacing: 2px;
   text-transform: uppercase;
+  flex: 1;
+  text-align: center;
+}
+
+#char-dev-prev,
+#char-dev-next {
+  background: none;
+  border: 1px solid #4a3a20;
+  color: #c8a84a;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 10px;
+  border-radius: 3px;
+  transition: background 0.15s, color 0.15s;
+}
+
+#char-dev-prev:hover,
+#char-dev-next:hover {
+  background: rgba(200,168,74,0.15);
+  color: #e8d090;
+}
+
+#char-dev-prev:disabled,
+#char-dev-next:disabled {
+  opacity: 0.3;
+  cursor: default;
 }
 
 #char-dev-close {
@@ -1476,6 +1503,7 @@ body {
   font-size: 24px;
   line-height: 1;
   cursor: pointer;
+  margin-left: 12px;
 }
 
 #char-dev-close:hover {
@@ -1531,6 +1559,113 @@ body {
   background: #4a3a20;
   border-color: #c8a84a;
   color: #fff;
+}
+
+/* ── Level & XP Bar ── */
+#char-dev-level-section {
+  padding: 10px 16px 8px;
+  border-bottom: 1px solid #2a2010;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+#cd-level-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+#cd-level-label {
+  font-size: 13px;
+  color: #c8a84a;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+#cd-xp-label {
+  font-size: 11px;
+  color: #8a7850;
+}
+
+#cd-xp-bar-bg {
+  width: 100%;
+  height: 8px;
+  background: #1a1408;
+  border: 1px solid #3a2a10;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+#cd-xp-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #8a6020, #c8a84a);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+/* ── Stat Points Remaining ── */
+#cd-stat-points-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px 0;
+}
+
+#cd-stat-points-remaining {
+  font-size: 11px;
+  color: #80ff80;
+  font-weight: bold;
+}
+
+#cd-stat-points-remaining:empty {
+  display: none;
+}
+
+/* ── Stat Button States ── */
+.stat-btn[disabled] {
+  opacity: 0.25;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Skill Progression Cards ── */
+.skill-card--locked {
+  opacity: 0.35;
+  filter: grayscale(0.8);
+}
+
+.skill-card--learned {
+  border-color: #80ff80;
+  box-shadow: 0 0 6px rgba(128, 255, 128, 0.2);
+}
+
+.skill-card--new {
+  border-color: #c8a84a;
+  box-shadow: 0 0 10px rgba(200, 168, 74, 0.5);
+  animation: skill-new-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skill-new-pulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(200, 168, 74, 0.3); }
+  50% { box-shadow: 0 0 16px rgba(200, 168, 74, 0.7); }
+}
+
+.skill-card .skill-level-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #2a2010;
+  border: 1px solid #4a3a20;
+  color: #8a7850;
+  font-size: 9px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
 }
 
 #cd-detail-panel {

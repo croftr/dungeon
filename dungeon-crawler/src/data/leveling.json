@@ -1,0 +1,10 @@
+{
+  "xpThresholds": [
+    100,
+    300,
+    600,
+    1000
+  ],
+  "statPointsPerLevel": 3,
+  "maxLevel": 4
+}

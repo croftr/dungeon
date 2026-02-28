@@ -69,6 +69,8 @@ initParticles(scene, camera);
 const start = findCell(CELL_START);
 initPlayer(start.row, start.col, camera);
 
+let hasSeenOgreVideo = false;
+
 setCallbacks({
   moved() {
     drawMinimap();
@@ -77,7 +79,21 @@ setCallbacks({
     if (window.currentLevel === 1) {
       const inEastRoom = player.gridCol >= 16 && player.gridCol <= 23
         && player.gridRow >= 7 && player.gridRow <= 15;
-      setZoneMusic(inEastRoom ? '/sounds/level2-music.mp3' : null);
+      const inOgreRoom = player.gridCol >= 1 && player.gridCol <= 6
+        && player.gridRow >= 1 && player.gridRow <= 9;
+
+      if (inEastRoom) {
+        setZoneMusic('/sounds/level2-music.mp3');
+      } else if (inOgreRoom && hasSeenOgreVideo) {
+        setZoneMusic('/sounds/backing/ogre-room.mp3');
+      } else {
+        setZoneMusic(null);
+      }
+
+      if (!hasSeenOgreVideo && player.gridRow === 6 && player.gridCol === 1) {
+        hasSeenOgreVideo = true;
+        playOgreVideo();
+      }
     }
   },
   reached() {
@@ -152,12 +168,12 @@ const skipBtn = document.getElementById('skip-intro-btn');
 
 function finishIntro() {
   if (!introOverlay) return;
-  introVideo.pause();
+  introOverlay.style.transition = 'opacity 1.5s ease';
   introOverlay.style.opacity = '0';
-  introOverlay.style.transition = 'opacity 1s ease';
   setTimeout(() => {
+    introVideo.pause();
     introOverlay.remove();
-  }, 1000);
+  }, 1500);
 }
 
 if (startBtn) {
@@ -179,6 +195,43 @@ if (introVideo) {
 if (skipBtn) {
   skipBtn.addEventListener('click', finishIntro);
 }
+
+// ─────────────────────────────────────────────
+//  OGRE VIDEO OVERLAY
+// ─────────────────────────────────────────────
+const ogreOverlay = document.getElementById('ogre-video-overlay');
+const ogreVideo = document.getElementById('ogre-video');
+const skipOgreBtn = document.getElementById('skip-ogre-btn');
+
+function playOgreVideo() {
+  if (!ogreOverlay || !ogreVideo) return;
+  ogreOverlay.classList.remove('hidden');
+
+  // Give the browser a moment to process the display change before animating opacity
+  setTimeout(() => {
+    ogreOverlay.style.opacity = '1';
+    ogreVideo.play().catch(e => {
+      console.warn("Ogre video play failed:", e);
+      finishOgreVideo();
+    });
+  }, 50);
+}
+
+function finishOgreVideo() {
+  if (!ogreOverlay) return;
+  ogreOverlay.style.opacity = '0';
+
+  // Start the Ogre Room music as the video fades out
+  setZoneMusic('/sounds/backing/ogre-room.mp3');
+
+  setTimeout(() => {
+    ogreVideo.pause();
+    ogreOverlay.remove();
+  }, 1500);
+}
+
+if (skipOgreBtn) skipOgreBtn.addEventListener('click', finishOgreVideo);
+if (ogreVideo) ogreVideo.addEventListener('ended', finishOgreVideo);
 
 // ─────────────────────────────────────────────
 //  MUSIC

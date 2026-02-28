@@ -13,6 +13,7 @@ import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude } from './combat
 import { playCritSound, playSkillSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { skillsState } from './skills-state.js';
+import { onCharDevClosed, getNextLevelXP } from './leveling.js';
 import {
   triggerSanctuaryEffect,
   triggerHolyRadianceEffect,
@@ -132,6 +133,14 @@ export function updateEffectiveStats(m) {
     m.baseStats = { ...m.stats };
   }
   const newStats = { ...m.baseStats };
+
+  // Apply level-up stat bonuses before equipment
+  if (m.statBonuses) {
+    for (const [stat, bonus] of Object.entries(m.statBonuses)) {
+      if (newStats[stat] !== undefined) newStats[stat] += bonus;
+    }
+  }
+
   // skillBonuses accumulates flat additions to formula-resolved skill magnitudes.
   // Keys: "all" (every skill), or a skill type string e.g. "healing", "buff", "debuff".
   const newSkillBonuses = {};
@@ -212,6 +221,13 @@ export function extendPartyData() {
       m.baseStats = { ...m.stats };
     }
 
+    // Initialize leveling fields if missing
+    if (m.level === undefined) m.level = 0;
+    if (m.xp === undefined) m.xp = 0;
+    if (m.unspentStatPoints === undefined) m.unspentStatPoints = 0;
+    if (!m.statBonuses) m.statBonuses = { strength: 0, dexterity: 0, vitality: 0, intelligence: 0, resilience: 0 };
+    if (!m.skillProgression) m.skillProgression = [];
+
     if (m.equipment) {
       updateEffectiveStats(m);
       return; // Already initialized
@@ -257,9 +273,16 @@ export function extendPartyData() {
         m.equipment.rightHand = { name: m.rightHand, slot: slot };
       }
     }
-    if (m.startingSkill) {
-      const skillDef = (m.skills ?? []).find((s) => s.name === m.startingSkill);
-      m.equipment.skill = { name: m.startingSkill, slot: 'skill', icon: skillDef?.icon ?? null };
+
+    // Auto-equip first learned skill if available (no startingSkill at level 0)
+    if (m.skills && m.skills.length > 0) {
+      const firstActive = m.skills.find(s => {
+        const def = SKILLS_DATA[s.name];
+        return def && !def.isPassive;
+      });
+      if (firstActive) {
+        m.equipment.skill = { name: firstActive.name, slot: 'skill', icon: firstActive.icon ?? null };
+      }
     }
 
     if (m.ammo) {
@@ -1479,8 +1502,18 @@ export function openCharDevModal(memberIndex) {
 export function closeCharDevModal() {
   hideTooltip();
   document.getElementById('char-dev-overlay').classList.add('char-dev-hidden');
+  const closingIndex = activeCharDevIndex;
   activeCharDevIndex = null;
   refreshPartyCards();
+
+  // Clear the newly-learned highlight
+  if (closingIndex !== null) {
+    const m = party[closingIndex];
+    if (m && !m.isEmpty) delete m.newlyLearnedSkill;
+  }
+
+  // Continue processing any queued level-ups
+  onCharDevClosed();
 }
 
 function renderCharDevModal(memberIndex) {
@@ -1490,21 +1523,62 @@ function renderCharDevModal(memberIndex) {
   const nameEl = document.getElementById('char-dev-char-name');
   if (nameEl) nameEl.textContent = m.name;
 
-  // Render Stats
-  const stats = m.baseStats ?? m.stats ?? {};
+  // ── Prev/Next button state — disable if only one party member ──
+  const nonEmpty = party.filter(p => !p.isEmpty).length;
+  const prevBtn = document.getElementById('char-dev-prev');
+  const nextBtn = document.getElementById('char-dev-next');
+  if (prevBtn) prevBtn.disabled = nonEmpty <= 1;
+  if (nextBtn) nextBtn.disabled = nonEmpty <= 1;
+
+  // ── Level & XP bar ──
+  const levelLabel = document.getElementById('cd-level-label');
+  const xpLabel = document.getElementById('cd-xp-label');
+  const xpFill = document.getElementById('cd-xp-bar-fill');
+  if (levelLabel) levelLabel.textContent = `Level ${m.level ?? 0}`;
+  const nextXP = getNextLevelXP(m);
+  if (xpLabel && xpFill) {
+    if (nextXP !== null) {
+      xpLabel.textContent = `${m.xp ?? 0} / ${nextXP} XP`;
+      xpFill.style.width = `${Math.min(100, ((m.xp ?? 0) / nextXP) * 100)}%`;
+    } else {
+      xpLabel.textContent = `${m.xp ?? 0} XP (MAX)`;
+      xpFill.style.width = '100%';
+    }
+  }
+
+  // ── Stat points remaining ──
+  const pointsEl = document.getElementById('cd-stat-points-remaining');
+  if (pointsEl) {
+    const pts = m.unspentStatPoints ?? 0;
+    pointsEl.textContent = pts > 0 ? `${pts} point${pts > 1 ? 's' : ''} to spend` : '';
+  }
+
+  // ── Render Stats with button states ──
+  const base = m.baseStats ?? m.stats ?? {};
+  const bonuses = m.statBonuses ?? {};
   ['strength', 'dexterity', 'vitality', 'intelligence', 'resilience'].forEach(key => {
     const valEl = document.getElementById(`cd-stat-${key}`);
-    if (valEl) valEl.textContent = stats[key] ?? 10;
+    const totalVal = (base[key] ?? 0) + (bonuses[key] ?? 0);
+    if (valEl) valEl.textContent = totalVal;
+
+    // Enable/disable +/- buttons
+    const row = valEl?.closest('.stat-row');
+    if (row) {
+      const minusBtn = row.querySelector('[data-delta="-1"]');
+      const plusBtn = row.querySelector('[data-delta="1"]');
+      if (minusBtn) minusBtn.disabled = (bonuses[key] ?? 0) <= 0;
+      if (plusBtn) plusBtn.disabled = (m.unspentStatPoints ?? 0) <= 0;
+    }
   });
 
-  // Render Skills
+  // ── Render Learned Skills ──
   const cdSkillsEl = document.getElementById('cd-char-skills');
   if (cdSkillsEl) {
     cdSkillsEl.innerHTML = '';
     const skills = m.skills ?? [];
 
     const filteredSkills = skills.filter(skill => {
-      const def = getItemDef(skill.name) || (typeof SKILLS_DATA !== 'undefined' ? SKILLS_DATA[skill.name] : null);
+      const def = getItemDef(skill.name) || SKILLS_DATA[skill.name];
       return _cdSkillTab === 'passive' ? (def?.isPassive === true) : (def?.isPassive !== true);
     });
 
@@ -1517,23 +1591,62 @@ function renderCharDevModal(memberIndex) {
       filteredSkills.forEach(skill => {
         const card = document.createElement('div');
         card.className = 'skill-card';
+        if (m.newlyLearnedSkill === skill.name) card.classList.add('skill-card--new');
         renderItemIcon({ icon: skill.icon }, card);
-        card.addEventListener('click', () => {
-          document.getElementById('cd-detail-name').textContent = skill.name;
-          const def = getItemDef(skill.name) || (typeof SKILLS_DATA !== 'undefined' ? SKILLS_DATA[skill.name] : null);
-          document.getElementById('cd-detail-action').textContent = (def?.isPassive ? 'Passive' : 'Action') + ' Skill';
-          document.getElementById('cd-detail-desc').textContent = def?.description || '';
-
-          const pot = _formatSkillPotency(skill.name, m);
-          document.getElementById('cd-detail-potency').innerHTML = pot ? (Array.isArray(pot) ? pot.join('<br>') : pot) : '';
-
-          document.querySelectorAll('#cd-char-skills .skill-card').forEach(c => c.classList.remove('skill-card--equipped'));
-          card.classList.add('skill-card--equipped');
-        });
+        card.addEventListener('click', () => _showSkillDetail(skill, m));
         cdSkillsEl.appendChild(card);
       });
     }
   }
+
+  // ── Render Skill Progression ──
+  const availEl = document.getElementById('cd-available-skills');
+  if (availEl) {
+    availEl.innerHTML = '';
+    const progression = m.skillProgression ?? [];
+    const learnedNames = new Set((m.skills ?? []).map(s => s.name));
+
+    progression.forEach((skill, idx) => {
+      const card = document.createElement('div');
+      card.className = 'skill-card';
+      card.style.position = 'relative';
+
+      const isLearned = learnedNames.has(skill.name);
+      const isNew = m.newlyLearnedSkill === skill.name;
+
+      if (isNew) {
+        card.classList.add('skill-card--new');
+      } else if (isLearned) {
+        card.classList.add('skill-card--learned');
+      } else {
+        card.classList.add('skill-card--locked');
+      }
+
+      renderItemIcon({ icon: skill.icon }, card);
+
+      // Level badge
+      const badge = document.createElement('span');
+      badge.className = 'skill-level-badge';
+      badge.textContent = idx + 1;
+      card.appendChild(badge);
+
+      card.addEventListener('click', () => _showSkillDetail(skill, m));
+      availEl.appendChild(card);
+    });
+  }
+}
+
+function _showSkillDetail(skill, m) {
+  document.getElementById('cd-detail-name').textContent = skill.name;
+  const def = getItemDef(skill.name) || SKILLS_DATA[skill.name];
+  document.getElementById('cd-detail-action').textContent = (def?.isPassive ? 'Passive' : 'Action') + ' Skill';
+  document.getElementById('cd-detail-desc').textContent = def?.description || '';
+
+  const pot = _formatSkillPotency(skill.name, m);
+  document.getElementById('cd-detail-potency').innerHTML = pot ? (Array.isArray(pot) ? pot.join('<br>') : pot) : '';
+
+  document.querySelectorAll('#cd-char-skills .skill-card, #cd-available-skills .skill-card').forEach(c => c.classList.remove('skill-card--equipped'));
+  // Find and highlight the clicked card (event delegation would be cleaner but this works)
 }
 
 // ─────────────────────────────────────────────
@@ -2941,6 +3054,25 @@ function attachCharDevListeners() {
   const closeBtn = document.getElementById('char-dev-close');
   if (closeBtn) closeBtn.addEventListener('click', closeCharDevModal);
 
+  // Char Dev Prev / Next — cycle through non-empty party members
+  function navigateCharDev(direction) {
+    if (activeCharDevIndex === null) return;
+    const total = party.length;
+    let idx = activeCharDevIndex;
+    for (let i = 0; i < total - 1; i++) {
+      idx = (idx + direction + total) % total;
+      if (!party[idx].isEmpty) {
+        openCharDevModal(idx);
+        return;
+      }
+    }
+  }
+
+  const prevBtn = document.getElementById('char-dev-prev');
+  const nextBtn = document.getElementById('char-dev-next');
+  if (prevBtn) prevBtn.addEventListener('click', () => navigateCharDev(-1));
+  if (nextBtn) nextBtn.addEventListener('click', () => navigateCharDev(1));
+
   // Char Dev Skill Tabs
   document.querySelectorAll('#cd-skill-tabs .skill-tab-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -2956,7 +3088,7 @@ function attachCharDevListeners() {
     });
   });
 
-  // Stat Adjustments
+  // Stat Adjustments — uses unspentStatPoints and statBonuses
   document.querySelectorAll('#cd-char-stats .stat-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       if (activeCharDevIndex === null) return;
@@ -2965,7 +3097,19 @@ function attachCharDevListeners() {
       const m = party[activeCharDevIndex];
       if (!m || m.isEmpty) return;
 
-      m.baseStats[statName] = (m.baseStats[statName] ?? 10) + delta;
+      if (!m.statBonuses) m.statBonuses = { strength: 0, dexterity: 0, vitality: 0, intelligence: 0, resilience: 0 };
+
+      if (delta > 0) {
+        // Adding a point — requires unspent points
+        if ((m.unspentStatPoints ?? 0) <= 0) return;
+        m.statBonuses[statName] = (m.statBonuses[statName] ?? 0) + 1;
+        m.unspentStatPoints--;
+      } else {
+        // Removing a point — can only undo level-up allocations
+        if ((m.statBonuses[statName] ?? 0) <= 0) return;
+        m.statBonuses[statName]--;
+        m.unspentStatPoints = (m.unspentStatPoints ?? 0) + 1;
+      }
 
       // Re-evaluate equipment stats & derived stats immediately
       updateEffectiveStats(m);

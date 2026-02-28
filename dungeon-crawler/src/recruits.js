@@ -7,24 +7,26 @@ import { getItemDef } from './items.js';
 import RECRUITS_DATA from './data/recruits.json';
 import SKILLS_DATA from './data/skills.json';
 
-// Hydrate skill name strings into full skill objects using skills.json definitions
+// Hydrate skill progression strings into full skill objects using skills.json definitions
+function hydrateSkillName(skillName) {
+    const def = SKILLS_DATA[skillName];
+    if (!def) {
+        console.warn(`Skill "${skillName}" not found in skills.json`);
+        return { name: skillName };
+    }
+    return {
+        name: skillName,
+        type: def.type,
+        delay: (def.cooldownMs || 0) / 1000,
+        description: def.description,
+        icon: def.icon,
+        ...(def.attackType ? { attackType: def.attackType } : {}),
+    };
+}
+
 export const RECRUITS = RECRUITS_DATA.map(r => ({
     ...r,
-    skills: r.skills.map(skillName => {
-        const def = SKILLS_DATA[skillName];
-        if (!def) {
-            console.warn(`Skill "${skillName}" not found in skills.json`);
-            return { name: skillName };
-        }
-        return {
-            name: skillName,
-            type: def.type,
-            delay: (def.cooldownMs || 0) / 1000,
-            description: def.description,
-            icon: def.icon,
-            ...(def.attackType ? { attackType: def.attackType } : {}),
-        };
-    }),
+    skillProgression: (r.skillProgression || []).map(hydrateSkillName),
 }));
 
 let uiContainer = null;
@@ -208,12 +210,13 @@ function openRecruitModal(recruitId) {
     </div>
 
     <div style="border-top:1px solid #4a3a20; padding-top:10px; margin-top:10px; font-size:11px;">
-      <h3 style="margin:0 0 8px; color:#c8a84a; font-size:11px; text-transform:uppercase; letter-spacing:1px;">Known Skills</h3>
+      <h3 style="margin:0 0 8px; color:#c8a84a; font-size:11px; text-transform:uppercase; letter-spacing:1px;">Skill Progression</h3>
       <div style="display:flex; flex-direction:column; gap:6px;">
-        ${r.skills.map(s => `
+        ${r.skillProgression.map((s, i) => `
             <div style="background:rgba(0,0,0,0.3); border:1px solid #3a2e14; padding:6px 8px; border-radius:3px;">
+                <div style="color:#8a7850; font-size:9px; margin-bottom:2px;">Level ${i + 1}</div>
                 <div style="color:#c8a84a; font-weight:bold; margin-bottom:2px;">${s.name}</div>
-                <div style="color:#7a6a50; font-size:9px; line-height:1.4;">${s.description}</div>
+                <div style="color:#7a6a50; font-size:9px; line-height:1.4;">${s.description || ''}</div>
             </div>
         `).join('')}
       </div>
@@ -272,17 +275,20 @@ function recruitCharacter(r) {
         isEmpty: false,
         name: r.name,
         stats: { ...r.stats },
-        skills: JSON.parse(JSON.stringify(r.skills)),
+        // Leveling: characters start at level 0 with no skills
+        level: 0,
+        xp: 0,
+        unspentStatPoints: 0,
+        statBonuses: { strength: 0, dexterity: 0, vitality: 0, intelligence: 0, resilience: 0 },
+        skillProgression: JSON.parse(JSON.stringify(r.skillProgression)),
+        skills: [],  // empty — skills are learned by leveling up
         leftHand: r.leftHand,
         rightHand: r.rightHand,
-        startingSkill: r.startingSkill,
         ammo: r.ammo,
-        image: r.image, // Include image in party slot
-        // Add fake portrait palette so it does not crash drawPortrait
+        image: r.image,
         skinLight: '#e8c8a0', skinDark: '#b08050',
         hairColor: '#8a1a1a',
         irisColor: '#2a6a3a',
-        // also need these for logic
         inventory: null,
         startingInventory: r.startingInventory ? [...r.startingInventory] : null,
         equipment: null
