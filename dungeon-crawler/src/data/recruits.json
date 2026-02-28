@@ -11,7 +11,9 @@
             "intelligence": 7,
             "resilience": 5
         },
-        "startingInventory": [],
+        "startingInventory": [
+            "Torch"
+        ],
         "skillProgression": [
             "Entangle",
             "Hunter's Eye",
@@ -51,11 +53,7 @@
         "startingInventory": [
             "Cure Poison Potion",
             "Healing Potion",
-            "Life Berry",
-            "Poison Vial",
-            "Life Essence",
-            "Life Essence",
-            "Sun Pendant"
+            "Life Berry"
         ],
         "gridCol": 10,
         "gridRow": 8,
@@ -108,7 +106,8 @@
             "Staff Master"
         ],
         "startingInventory": [
-            "Rune Pendant"
+            "Scroll of Fireball",
+            "Scroll of Heal"
         ],
         "image": "/human_wizard_head.png",
         "leftHand": "Spellbook",
@@ -187,10 +186,7 @@
             "Dagger Master",
             "Dagger Master"
         ],
-        "startingInventory": [
-            "Poison Dagger",
-            "Elven Dagger"
-        ],
+        "startingInventory": [],
         "image": "/heros/high-elf.png",
         "leftHand": "Dagger",
         "rightHand": "Dagger",
