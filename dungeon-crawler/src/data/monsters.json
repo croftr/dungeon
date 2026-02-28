@@ -167,7 +167,7 @@
   },
   "treeman": {
     "name": "Treeman",
-    "hp": 250,
+    "hp": 1,
     "defence": 9,
     "stats": {
       "strength": 30,
@@ -188,6 +188,28 @@
       {
         "item": "Bronze Key",
         "chance": 1
+      }
+    ]
+  },
+  "ogre": {
+    "name": "Ogre",
+    "hp": 150,
+    "defence": 9,
+    "stats": {
+      "strength": 20,
+      "dexterity": 18,
+      "vitality": 25,
+      "intelligence": 26,
+      "resilience": 20
+    },
+    "drops": [
+      {
+        "item": "Life Essence",
+        "chance": 1
+      },
+      {
+        "item": "Life Berry",
+        "chance": 0.5
       }
     ]
   },

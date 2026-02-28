@@ -448,11 +448,11 @@ export function initObjects(scene, camera) {
     });
 }
 
-export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = [], modelPath = '/items/Meshy_AI_Treasure_Chest_0221184131_texture.glb', interactive = true) {
+export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = [], modelPath = '/items/Meshy_AI_Treasure_Chest_0221184131_texture.glb', interactive = true, offsetX = 0) {
     loader.load(modelPath, (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.3);
-        model.position.set(col * CELL, 0.23, row * CELL + offsetZ);
+        model.position.set(col * CELL + offsetX, 0.23, row * CELL + offsetZ);
         model.rotation.y = rotY;
 
         model.traverse((child) => {
@@ -506,6 +506,10 @@ export function spawnObjectsForLevel() {
         addChest(objectsGroup, gltfLoader, 7, 1, 0, -0.7, [
             'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Dagger', 'Axe', 'Ring of Vigour', 'Mace', 'Ring of Wisdom'
         ]);
+        // Chest in the Northwest room, tucked into the far northeast corner (against Rows 0 & Col 6)
+        addChest(objectsGroup, gltfLoader, 5, 1, Math.PI, -0.65, [
+            "Ring of Dexterity", "Elven Dagger", "Steel Arrows", "Poison Dagger", "Leather Belt", "Adventurer's Belt"
+        ], undefined, true, -0.35);
         // Crystals in the starter room
         addCrystals(objectsGroup, gltfLoader, 9, 11, 0, -0.7);
         // Bone pile in the passage

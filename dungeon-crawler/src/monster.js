@@ -146,13 +146,22 @@ export const monsters = [
     '/monsters/dummy-annimation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     null, 0.5),
 
-  // Iceman in the big east room near entrance (replaced ghoul)
-  inst(D.iceman, 21, 11, 18,
-    '/monsters/iceMan-animation/Meshy_AI_Animation_Walking_withSkin.glb',
-    '/monsters/iceMan-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    '/monsters/iceMan-animation/iceman-attack.mp3', 0.6, 0, 0, 1, null,
-    '/monsters/iceMan-animation/Meshy_AI_Animation_Dead_withSkin.glb',
-    '/monsters/iceMan-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+  // Ogre in the new north-west room — now on patrol
+  inst(D.ogre, 21, 2, 2,
+    '/monsters/ogre/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/ogre/Meshy_AI_Animation_Attack_withSkin.glb',
+    '/monsters/ogre/ogre.mp3', 0.7, 0, 0, 1,
+    { bounds: { minRow: 1, maxRow: 5, minCol: 1, maxCol: 5 }, speed: 1.0, waitTime: 2.0 },
+    '/monsters/ogre/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/ogre/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+
+  // Ogre in the deeper parts of the dungeon (Level 1)
+  inst(D.ogre, 22, 19, 10,
+    '/monsters/ogre/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/ogre/Meshy_AI_Animation_Attack_withSkin.glb',
+    '/monsters/ogre/ogre.mp3', 0.7, 0, 0, 1, null,
+    '/monsters/ogre/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/ogre/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 ];
 
 export function isMonsterAt(row, col) {
