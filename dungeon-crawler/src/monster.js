@@ -82,13 +82,15 @@ export const monsters = [
 
   // Upper maze
   inst(D.goblin, 1, 9, 6,
-    '/monsters/goblin/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
-    '/monsters/goblin/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    '/monsters/goblin/goblin-attack.wav', 0.45, 0, 0, 1, null),
+    '/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/goblin-animation/goblin-attack.wav', 0.45, 0, 0, 1, null,
+    '/monsters/goblin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 
   // Southern section
   inst(D.albino_goblin, 2, 15, 5,
-    '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
+    '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
     '/monsters/albino_goblin-aimation/albino-goblin-attack.mp3', 0.45, 0, 0, 1, null,
     '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Dead_withSkin.glb'),
@@ -103,9 +105,10 @@ export const monsters = [
 
   // Lower maze
   inst(D.ghoul, 4, 17, 11,
-    '/monsters/ghoul-aimation/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
+    '/monsters/ghoul-aimation/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/ghoul-aimation/Meshy_AI_Animation_Basic_Jump_withSkin.glb',
-    '/monsters/ghoul-aimation/ghoul-attack.mp3'),
+    '/monsters/ghoul-aimation/ghoul-attack.mp3', 0.45, 0, 0, 1, null,
+    '/monsters/ghoul-aimation/Meshy_AI_Animation_Dead_withSkin (1).glb'),
 
   // Deeper south passage
   inst(D.orc, 7, 19, 8,
@@ -136,13 +139,11 @@ export const monsters = [
     '/monsters/dummy-annimation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     null, 0.5),
 
-  // Orc in the big east room near entrance (replaced zombie)
-  inst(D.orc, 21, 11, 18,
-    '/monsters/orc-animation/Meshy_AI_Animation_Walking_withSkin.glb',
-    '/monsters/orc-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    '/monsters/orc-animation/orc-attack.mp3', 0.5, 0, 0, 1, null,
-    '/monsters/orc-animation/Meshy_AI_Animation_Dead_withSkin.glb',
-    '/monsters/orc-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+  // Iceman in the big east room near entrance (replaced ghoul)
+  inst(D.iceman, 21, 11, 18,
+    '/monsters/iceMan-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/iceMan-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/iceMan-animation/iceman-attack.mp3', 0.6),
 ];
 
 export function isMonsterAt(row, col) {
