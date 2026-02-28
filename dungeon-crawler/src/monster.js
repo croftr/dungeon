@@ -78,7 +78,9 @@ export const monsters = [
   inst(D.treekin, 0, 3, 7,
     '/monsters/treekin-animation/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/treekin-animation/Meshy_AI_Animation_mage_soell_cast_withSkin.glb',
-    '/monsters/treekin-animation/treeKin-attack.mp3', 0.45),
+    '/monsters/treekin-animation/treeKin-attack.mp3', 0.45, 0, 0, 1, null,
+    '/monsters/treekin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/treekin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 
   // Upper maze
   inst(D.goblin, 1, 9, 6,
@@ -122,7 +124,9 @@ export const monsters = [
   inst(D.iceman, 5, 21, 5,
     '/monsters/iceMan-animation/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/iceMan-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    '/monsters/iceMan-animation/iceman-attack.mp3', 0.6),
+    '/monsters/iceMan-animation/iceman-attack.mp3', 0.6, 0, 0, 1, null,
+    '/monsters/iceMan-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/iceMan-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 
   // ── Level 2 ─────────────────────────────────────────────────────────────
   // One Treeman patrols the chamber. Patrol bounds match the level-2 map
@@ -131,7 +135,9 @@ export const monsters = [
     '/monsters/treeman-animation/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/treeman-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
     '/monsters/treeman-animation/attack-sound.mp3', 0.90, 0, 0, 2,
-    { bounds: { minRow: 1, maxRow: 5, minCol: 1, maxCol: 6 }, speed: 1.2, waitTime: 2.5 }),
+    { bounds: { minRow: 1, maxRow: 5, minCol: 1, maxCol: 6 }, speed: 1.2, waitTime: 2.5 },
+    '/monsters/treeman-animation/Meshy_AI_Animation_Dead_withSkin (1).glb',
+    '/monsters/treeman-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin (1).glb'),
 
   // Training dummy in the big east room
   inst(D.dummy, 10, 11, 20,
@@ -143,7 +149,9 @@ export const monsters = [
   inst(D.iceman, 21, 11, 18,
     '/monsters/iceMan-animation/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/iceMan-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    '/monsters/iceMan-animation/iceman-attack.mp3', 0.6),
+    '/monsters/iceMan-animation/iceman-attack.mp3', 0.6, 0, 0, 1, null,
+    '/monsters/iceMan-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/iceMan-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 ];
 
 export function isMonsterAt(row, col) {

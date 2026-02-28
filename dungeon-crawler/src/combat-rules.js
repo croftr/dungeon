@@ -232,9 +232,9 @@ function _itemMagnitudeBonus(name, def, caster) {
   const bonuses = caster?.skillBonuses;
   if (!bonuses) return 0;
   let total = 0;
-  total += bonuses['all']     ?? 0;
+  total += bonuses['all'] ?? 0;
   if (def.type) total += bonuses[def.type] ?? 0;
-  if (name)     total += bonuses[name]     ?? 0;
+  if (name) total += bonuses[name] ?? 0;
   return total;
 }
 
@@ -246,11 +246,11 @@ function _itemMagnitudeBonus(name, def, caster) {
 function _evalFormula(formula, def, caster) {
   const s = caster.stats;
   const base = formula
-    .replace(/vitality/g,     s.vitality     ?? 0)
+    .replace(/vitality/g, s.vitality ?? 0)
     .replace(/intelligence/g, s.intelligence ?? 0)
-    .replace(/strength/g,     s.strength     ?? 0)
-    .replace(/dexterity/g,    s.dexterity    ?? 0)
-    .replace(/resilience/g,   s.resilience   ?? 0)
+    .replace(/strength/g, s.strength ?? 0)
+    .replace(/dexterity/g, s.dexterity ?? 0)
+    .replace(/resilience/g, s.resilience ?? 0)
     .split('+').map(Number).reduce((a, b) => a + b, 0);
   return def.magnitudeScale != null ? base * def.magnitudeScale : base;
 }
@@ -289,7 +289,8 @@ export function resolveSkillMagnitude(skillName, skillDef, caster) {
     ? _evalFormula(skillDef.magnitudeFormula, skillDef, caster)
     : (skillDef.magnitude ?? 1);
 
-  const bonus = _itemMagnitudeBonus(skillName, skillDef, caster);
+  const isWorn = caster?.equipment && Object.values(caster.equipment).some(item => item?.name === skillName);
+  const bonus = isWorn ? _itemMagnitudeBonus(skillName, skillDef, caster) : 0;
   if (bonus === 0) return base;
 
   const result = _applyBonus(base, bonus, skillDef.magnitudeBonusMode ?? 'flat');
