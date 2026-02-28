@@ -2790,6 +2790,7 @@ body {
 
 #merchant-modal {
   width: 700px;
+  max-height: 85vh;
   background: rgba(10, 7, 4, 0.97);
   border: 1px solid #5a4a30;
   border-radius: 6px;
@@ -2840,7 +2841,9 @@ body {
 #merchant-body {
   display: flex;
   gap: 0;
+  flex: 1;
   min-height: 340px;
+  overflow: hidden;
 }
 
 #merchant-shop-panel {
@@ -2867,12 +2870,45 @@ body {
 }
 
 #merchant-grid,
-#merchant-basket-grid {
+#merchant-basket-grid,
+#merchant-party-grid,
+#merchant-sell-basket-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 6px;
   flex: 1;
   align-content: start;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+#merchant-grid::-webkit-scrollbar,
+#merchant-basket-grid::-webkit-scrollbar,
+#merchant-party-grid::-webkit-scrollbar,
+#merchant-sell-basket-grid::-webkit-scrollbar {
+  width: 4px;
+}
+
+#merchant-grid::-webkit-scrollbar-track,
+#merchant-basket-grid::-webkit-scrollbar-track,
+#merchant-party-grid::-webkit-scrollbar-track,
+#merchant-sell-basket-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#merchant-grid::-webkit-scrollbar-thumb,
+#merchant-basket-grid::-webkit-scrollbar-thumb,
+#merchant-party-grid::-webkit-scrollbar-thumb,
+#merchant-sell-basket-grid::-webkit-scrollbar-thumb {
+  background: #3a2e18;
+  border-radius: 2px;
+}
+
+#merchant-grid::-webkit-scrollbar-thumb:hover,
+#merchant-basket-grid::-webkit-scrollbar-thumb:hover,
+#merchant-party-grid::-webkit-scrollbar-thumb:hover,
+#merchant-sell-basket-grid::-webkit-scrollbar-thumb:hover {
+  background: #5a4a30;
 }
 
 #merchant-basket-header {
@@ -2994,7 +3030,9 @@ body {
 #merchant-sell-body {
   display: flex;
   gap: 0;
+  flex: 1;
   min-height: 340px;
+  overflow: hidden;
 }
 
 #merchant-party-panel {
@@ -3012,14 +3050,7 @@ body {
   padding: 12px;
 }
 
-#merchant-party-grid,
-#merchant-sell-basket-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
-  flex: 1;
-  align-content: start;
-}
+
 
 #merchant-sell-header {
   display: flex;

@@ -136,13 +136,13 @@ export const monsters = [
     '/monsters/dummy-annimation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     null, 0.5),
 
-  // Test zombie in the big east room near entrance
-  inst(D.zombie, 21, 11, 18,
-    '/monsters/zombie-animation/Meshy_AI_Animation_Idle_3_withSkin.glb',
-    '/monsters/zombie-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    '/monsters/zombie-animation/zombie-attack.mp3', 0.45, 0, 0, 1, null,
-    '/monsters/zombie-animation/Meshy_AI_Animation_Dead_withSkin.glb',
-    '/monsters/zombie-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+  // Orc in the big east room near entrance (replaced zombie)
+  inst(D.orc, 21, 11, 18,
+    '/monsters/orc-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/orc-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/orc-animation/orc-attack.mp3', 0.5, 0, 0, 1, null,
+    '/monsters/orc-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/orc-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 ];
 
 export function isMonsterAt(row, col) {
@@ -168,7 +168,6 @@ function _updateStatsPanel(m) {
 
   const isEntangled = skillsState.entangle?.active && skillsState.entangle?.targetId === m.id;
   const isStunned = m.stunUntil && performance.now() < m.stunUntil;
-  const isPoisoned = m.poisonUntil && performance.now() < m.poisonUntil;
 
   // On-hit effects section — shows what debuffs this monster type can inflict
   let onHitHtml = '';
@@ -190,9 +189,12 @@ function _updateStatsPanel(m) {
     onHitHtml += `</div>`;
   }
 
-  // Active debuffs currently applied to this monster from player skills
+  // Active debuffs currently applied to this monster (skills + status effects)
+  const nowMs = performance.now();
+  const hasSkillDebuffs = isSundered || isEntangled || isStunned;
+  const hasStatusDebuffs = m.activeDebuffs?.some(d => nowMs < d.expiresAt);
   let debuffsHtml = '';
-  if (isSundered || isEntangled || isStunned || isPoisoned) {
+  if (hasSkillDebuffs || hasStatusDebuffs) {
     debuffsHtml += `<div class="hep-divider"></div><div class="hep-section-label">Active Effects</div><div class="hep-debuffs">`;
     if (isSundered) {
       debuffsHtml += `<div class="hep-debuff" style="color:#ff8080">Sunder Armor (DEF/RES ½)</div>`;
@@ -203,9 +205,15 @@ function _updateStatsPanel(m) {
     if (isStunned) {
       debuffsHtml += `<div class="hep-debuff" style="color:#ffd040">Stunned (Cannot Act)</div>`;
     }
-    if (isPoisoned) {
-      debuffsHtml += `<div class="hep-debuff" style="color:#50ff50">Poisoned (1 HP / 2s)</div>`;
-    }
+    // Data-driven status effects from activeDebuffs
+    (m.activeDebuffs ?? []).forEach(d => {
+      if (nowMs >= d.expiresAt) return;
+      const def = STATUS_EFFECT_DEFS[d.effectId];
+      if (!def) return;
+      const color = def.color ?? '#c0ff80';
+      const desc = describeEffect(def);
+      debuffsHtml += `<div class="hep-debuff" style="color:${color}">${def.name} (${desc})</div>`;
+    });
     debuffsHtml += `</div>`;
   }
 
@@ -492,15 +500,24 @@ export function updateMonsters(dt, playerCamera, scene) {
       return;
     }
 
-    // Poison Tick Logic
-    if (m.poisonUntil && performance.now() < m.poisonUntil) {
-      m.poisonTimer = (m.poisonTimer || 0) + dt;
-      if (m.poisonTimer >= 2.0) {
-        m.poisonTimer = 0;
-        hitMonster(m.id, 1, 'poison-dot');
-      }
-    } else {
-      m.poisonTimer = 0;
+    // ── Process active status effects (poison ticks, stat debuffs, etc.) ──
+    if (m.activeDebuffs?.length) {
+      const now = performance.now();
+      m.activeDebuffs = m.activeDebuffs.filter(d => now < d.expiresAt);
+      let panelDirty = false;
+      m.activeDebuffs.forEach(d => {
+        const def = STATUS_EFFECT_DEFS[d.effectId];
+        if (!def?.tickInterval) return;
+        d.tickAccum += dt;
+        if (d.tickAccum >= def.tickInterval) {
+          d.tickAccum -= def.tickInterval;
+          const dmg = def.tickDamage || 0;
+          if (dmg > 0) hitMonster(m.id, dmg, 'dot');
+          if (dmg < 0) m.hp = Math.min(m.hpMax, m.hp - dmg); // heal
+          panelDirty = true;
+        }
+      });
+      if (panelDirty && m.statsLabel?.visible) _updateStatsPanel(m);
     }
 
     if (m.mixer) m.mixer.update(dt);
@@ -553,6 +570,36 @@ export function updateMonsters(dt, playerCamera, scene) {
       m.attackCooldown = 0;
     }
   });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  MONSTER STATUS EFFECTS
+//  Mirrors the party member activeDebuffs system so weapons, ammo, and spells
+//  can apply any status effect defined in status-effects.json to monsters.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Apply (or refresh) a status effect on a monster.
+ * effectId must match a key in STATUS_EFFECT_DEFS.
+ */
+export function applyMonsterStatusEffect(monsterId, effectId) {
+  const m = monsters.find(x => x.id === monsterId && x.alive);
+  if (!m) return;
+  const def = STATUS_EFFECT_DEFS[effectId];
+  if (!def) return;
+
+  if (!m.activeDebuffs) m.activeDebuffs = [];
+  const existing = m.activeDebuffs.find(d => d.effectId === effectId);
+  if (existing) {
+    existing.expiresAt = performance.now() + def.duration * 1000;
+  } else {
+    m.activeDebuffs.push({
+      effectId,
+      expiresAt: performance.now() + def.duration * 1000,
+      tickAccum: def.tickInterval ? def.tickInterval * 0.95 : 0, // fast first tick
+    });
+  }
+  if (m.statsLabel?.visible) _updateStatsPanel(m);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -760,18 +807,25 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     }
   }
 
-  // Poison Logic
-  let poisoned = false;
-  if (ammoDef && ammoDef.damageType === 'poison' && result.hit && !result.killed) {
-    m.poisonUntil = performance.now() + 30000;
-    m.poisonTimer = 1.9; // Fast-forward first tick to feel impactful (0.1s later)
-    showMessage(`${m.name} is poisoned!`);
-    if (m.statsLabel?.visible) _updateStatsPanel(m);
-    setTimeout(() => { if (m.statsLabel?.visible) _updateStatsPanel(m); }, 30000);
-    poisoned = true;
+  // Apply on-hit status effects from weapon and ammo (data-driven)
+  const appliedEffects = [];
+  if (result.hit && !result.killed) {
+    const allOnHit = [
+      ...(weaponDef?.onHitEffects ?? []),
+      ...(ammoDef?.onHitEffects ?? []),
+    ];
+    allOnHit.forEach(effect => {
+      if (Math.random() < effect.chance) {
+        applyMonsterStatusEffect(monsterId, effect.effectId);
+        const def = STATUS_EFFECT_DEFS[effect.effectId];
+        showMessage(`${m.name} is afflicted with <b>${def?.name ?? effect.effectId}</b>!`);
+        appliedEffects.push(effect.effectId);
+      }
+    });
   }
+  const poisoned = appliedEffects.includes('poison');
 
-  return { ...result, crit: isCrit, hitChance, formula, monsterName: m.name, stunned, poisoned, sundered: isSundered };
+  return { ...result, crit: isCrit, hitChance, formula, monsterName: m.name, stunned, poisoned, sundered: isSundered, appliedEffects };
 }
 
 export function triggerMonsterAttack(monsterId) {

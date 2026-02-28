@@ -20,29 +20,16 @@
         "Ring of Strength",
         "Ring of Dexterity",
         "Ring of Resilience",
-        "Elven Dagger"
-    ],
-    "prices": {
-        "Leather Boots": 30,
-        "Steel Arrows": 35,
-        "Poison Arrows": 45,
-        "Torch": 20,
-        "Leather Cap": 25,
-        "Iron Helm": 70,
-        "Padded Vest": 30,
-        "Leather Belt": 10,
-        "Adventurer's Belt": 50,
-        "Chain Shirt": 130,
-        "Plate Cuirass": 350,
-        "Iron Gauntlets": 70,
-        "Chainmail Leggings": 100,
-        "Iron-Shod Boots": 50,
-        "Greatsword": 220,
-        "War Hammer": 190,
-        "Longbow": 150,
-        "Ring of Strength": 120,
-        "Ring of Dexterity": 120,
-        "Ring of Resilience": 120,
-        "Elven Dagger": 20
-    }
+        "Elven Dagger",
+        "Sun Pendant",
+        "Rune Pendant",
+        "Poison Dagger",
+        "Poison Vial",
+        "Poison Vial",
+        "Poison Vial",
+        "Life Berry",
+        "Life Berry",
+        "Life Berry",
+        "Life Berry"
+    ]
 }

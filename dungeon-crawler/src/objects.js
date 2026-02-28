@@ -38,7 +38,6 @@ export function isShopAt(r, c) {
 //  MERCHANT STOCK & PRICES
 // ─────────────────────────────────────────────
 const MERCHANT_STOCK = MERCHANT_DATA.stock;
-const MERCHANT_PRICES = MERCHANT_DATA.prices;
 
 // Items still available for sale (items bought are removed permanently)
 let _merchantAvailable = [...MERCHANT_STOCK];
@@ -1050,7 +1049,7 @@ function _renderMerchantShop() {
 
                 const price = document.createElement('div');
                 price.className = 'merch-price';
-                price.textContent = `${MERCHANT_PRICES[name] ?? '?'}g`;
+                price.textContent = `${getItemDef(name)?.value ?? '?'}g`;
                 slot.appendChild(price);
 
                 slot.addEventListener('click', () => {
@@ -1086,7 +1085,7 @@ function _renderMerchantBasket() {
 
             const price = document.createElement('div');
             price.className = 'merch-price';
-            price.textContent = `${MERCHANT_PRICES[name] ?? '?'}g`;
+            price.textContent = `${getItemDef(name)?.value ?? '?'}g`;
             slot.appendChild(price);
 
             // Click basket item → return it to the shop
@@ -1105,7 +1104,7 @@ function _renderMerchantBasket() {
 }
 
 function _updateMerchantTotals() {
-    const total = _merchantBasket.reduce((sum, name) => sum + (MERCHANT_PRICES[name] ?? 0), 0);
+    const total = _merchantBasket.reduce((sum, name) => sum + (getItemDef(name)?.value ?? 0), 0);
 
     document.getElementById('merchant-total-val').textContent = total;
     document.getElementById('merchant-gold-val').textContent = partyGold;
@@ -1115,7 +1114,7 @@ function _updateMerchantTotals() {
 }
 
 function _buyItems() {
-    const total = _merchantBasket.reduce((sum, name) => sum + (MERCHANT_PRICES[name] ?? 0), 0);
+    const total = _merchantBasket.reduce((sum, name) => sum + (getItemDef(name)?.value ?? 0), 0);
     if (partyGold < total) return;
 
     import('./equipment.js').then(equip => {
@@ -1140,7 +1139,7 @@ function _buyItems() {
         }
 
         // Calculate cost of successfully bought items
-        const spent = boughtItems.reduce((sum, name) => sum + (MERCHANT_PRICES[name] ?? 0), 0);
+        const spent = boughtItems.reduce((sum, name) => sum + (getItemDef(name)?.value ?? 0), 0);
 
         if (spent > 0) {
             removeGold(spent);
@@ -1172,7 +1171,7 @@ function _getMerchantSellPrice(name) {
     const def = getItemDef(name);
     if (!def) return 0;
     // Offer 50% of merchant buy price if stocked; otherwise use item base value
-    if (MERCHANT_PRICES[name] != null) return Math.floor(MERCHANT_PRICES[name] * 0.5);
+    if (MERCHANT_STOCK.includes(name)) return Math.floor((def.value ?? 0) * 0.5);
     return def.value ?? 0;
 }
 
