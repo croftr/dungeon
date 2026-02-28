@@ -781,13 +781,25 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     formulaStatBonus = effChar.stats?.intelligence ?? 10;
     statLabel = 'INT';
   } else {
+    const intW = weaponDef?.statWeights?.intelligence ?? 0.0;
+    const vitW = weaponDef?.statWeights?.vitality ?? 0.0;
+    const resW = weaponDef?.statWeights?.resilience ?? 0.0;
     const strW = weaponDef?.statWeights?.str ?? 1.0;
     const dexW = weaponDef?.statWeights?.dex ?? 0.0;
     formulaStatBonus = Math.floor(
       (effChar.stats?.strength ?? 10) * strW +
-      (effChar.stats?.dexterity ?? 10) * dexW
+      (effChar.stats?.dexterity ?? 10) * dexW +
+      (effChar.stats?.intelligence ?? 10) * intW +
+      (effChar.stats?.vitality ?? 10) * vitW +
+      (effChar.stats?.resilience ?? 10) * resW
     );
-    statLabel = strW === 0 ? 'DEX' : dexW === 0 ? 'STR' : 'STR+DEX';
+    const labels = [];
+    if (strW > 0) labels.push('STR');
+    if (dexW > 0) labels.push('DEX');
+    if (intW > 0) labels.push('INT');
+    if (vitW > 0) labels.push('VIT');
+    if (resW > 0) labels.push('RES');
+    statLabel = labels.join('+') || 'NONE';
   }
 
   const formula = {

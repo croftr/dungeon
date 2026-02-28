@@ -582,17 +582,6 @@ function populateTooltip(obj) {
             <span>Defence</span>
             <span id="item-detail-defence">—</span>
         </div>
-        <div class="detail-stat-row" id="detail-row-block">
-            <span>Block Chance</span>
-            <span id="item-detail-block">—</span>
-        </div>
-        <div class="detail-stat-row" id="detail-row-scaling">
-            <span>Scales with</span>
-            <span id="item-detail-scaling">—</span>
-        </div>
-        <div id="detail-row-scaling-bar">
-            <div id="item-detail-scaling-bar"></div>
-        </div>
         <div class="detail-stat-row" id="detail-row-statchange">
             <span>Stat Change</span>
             <span id="item-detail-statchange">—</span>
@@ -640,8 +629,6 @@ function populateTooltip(obj) {
 
   // Hide/show rows based on item type and available stats
   document.getElementById('detail-row-damage').style.display = (isAmmo || isSpellbook) ? 'none' : 'flex';
-  document.getElementById('detail-row-scaling').style.display = hasScaling ? 'flex' : 'none';
-  document.getElementById('detail-row-scaling-bar').style.display = hasScaling ? 'block' : 'none';
   document.getElementById('detail-row-defence').style.display = hasDefence ? 'flex' : 'none';
   document.getElementById('detail-row-block').style.display = hasBlock ? 'flex' : 'none';
   document.getElementById('detail-row-value').style.display = isAmmo ? 'none' : 'flex';
@@ -696,41 +683,6 @@ function populateTooltip(obj) {
         return `${label} +${val}`;
       });
       document.getElementById('item-detail-skillbonus').textContent = parts.join(' · ');
-    }
-  }
-
-  // Stat-scaling display — shows which stats drive physical damage
-  if (hasScaling) {
-    const { str = 0, dex = 0 } = def.statWeights;
-    const scalingEl = document.getElementById('item-detail-scaling');
-    const barEl = document.getElementById('item-detail-scaling-bar');
-
-    // Text label — coloured to match the dominant stat
-    if (dex === 0) {
-      scalingEl.textContent = 'Strength';
-      scalingEl.style.color = '#e07030'; // orange
-    } else if (str === 0) {
-      scalingEl.textContent = 'Dexterity';
-      scalingEl.style.color = '#30b8c0'; // teal
-    } else {
-      const sPct = Math.round(str * 100);
-      const dPct = Math.round(dex * 100);
-      scalingEl.innerHTML =
-        `<span style="color:#e07030">STR ${sPct}%</span>` +
-        ` <span style="color:#7a6a50">·</span> ` +
-        `<span style="color:#30b8c0">DEX ${dPct}%</span>`;
-      scalingEl.style.color = ''; // reset so child spans control colour
-    }
-
-    // Gradient bar: orange = STR portion, teal = DEX portion
-    const pct = Math.round(str * 100);
-    if (dex === 0) {
-      barEl.style.background = 'linear-gradient(90deg, #b04818, #e07030)';
-    } else if (str === 0) {
-      barEl.style.background = 'linear-gradient(90deg, #1890a0, #30b8c0)';
-    } else {
-      barEl.style.background =
-        `linear-gradient(90deg, #e07030 0%, #e07030 ${pct}%, #30b8c0 ${pct}%, #30b8c0 100%)`;
     }
   }
 }
@@ -799,6 +751,10 @@ export function attachTooltipListeners(el, getItem) {
  */
 function _equipItem(memberIndex, invIndex) {
   const m = party[memberIndex];
+  if (m.activeDebuffs?.some(d => d.effectId === 'frozen' && performance.now() < d.expiresAt)) {
+    showMessage(`${m.name} is frozen and cannot change equipment!`);
+    return;
+  }
   let item = m.inventory[invIndex];
   if (!item) return;
 
@@ -1011,6 +967,11 @@ function _learnSpell(memberIndex, invIndex) {
 
 function _usePotion(memberIndex, invIndex) {
   const m = party[memberIndex];
+  if (m.isDead) return;
+  if (m.activeDebuffs?.some(d => d.effectId === 'frozen' && performance.now() < d.expiresAt)) {
+    showMessage(`${m.name} is frozen and cannot use items!`);
+    return;
+  }
   const item = m.inventory[invIndex];
   if (!item) return;
 
@@ -1697,6 +1658,10 @@ function _showDamagePopup(slotEl, damage, isCrit) {
 function useHand(memberIndex, hand) {
   const m = party[memberIndex];
   if (!m) return;
+  if (m.activeDebuffs?.some(d => d.effectId === 'frozen' && performance.now() < d.expiresAt)) {
+    showMessage(`${m.name} is frozen and cannot act!`);
+    return;
+  }
 
   const slotKey = hand === 'left' ? 'leftHand' : 'rightHand';
   let item = m.equipment?.[slotKey];
@@ -1893,6 +1858,10 @@ let _sunderArmorExpireTimer = null;
 function useSkill(memberIndex) {
   const m = party[memberIndex];
   if (!m || m.isDead) return;
+  if (m.activeDebuffs?.some(d => d.effectId === 'frozen' && performance.now() < d.expiresAt)) {
+    showMessage(`${m.name} is frozen and cannot use skills!`);
+    return;
+  }
 
   const skill = m.equipment?.skill;
   if (!skill) {

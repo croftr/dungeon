@@ -2,7 +2,7 @@
   "goblin": {
     "name": "Goblin",
     "hp": 100,
-    "defence": 8,
+    "defence": 5,
     "stats": {
       "strength": 12,
       "dexterity": 15,
@@ -24,7 +24,7 @@
   "albino_goblin": {
     "name": "Albino Goblin",
     "hp": 120,
-    "defence": 8,
+    "defence": 4,
     "stats": {
       "strength": 14,
       "dexterity": 18,
@@ -52,7 +52,7 @@
   "orc": {
     "name": "Orc",
     "hp": 200,
-    "defence": 12,
+    "defence": 6,
     "stats": {
       "strength": 20,
       "dexterity": 8,
@@ -70,7 +70,7 @@
   "ghoul": {
     "name": "Ghoul",
     "hp": 180,
-    "defence": 7,
+    "defence": 3,
     "stats": {
       "strength": 16,
       "dexterity": 12,
@@ -98,7 +98,7 @@
   "zombie": {
     "name": "Zombie",
     "hp": 100,
-    "defence": 5,
+    "defence": 1,
     "stats": {
       "strength": 14,
       "dexterity": 4,
@@ -122,7 +122,7 @@
   "iceman": {
     "name": "IceMan",
     "hp": 200,
-    "defence": 12,
+    "defence": 7,
     "stats": {
       "strength": 15,
       "dexterity": 8,
@@ -130,6 +130,12 @@
       "intelligence": 10,
       "resilience": 10
     },
+    "onHitEffects": [
+      {
+        "effectId": "frozen",
+        "chance": 0.40
+      }
+    ],
     "drops": [
       {
         "item": "Life Essence",
@@ -140,7 +146,7 @@
   "treekin": {
     "name": "TreeKin",
     "hp": 150,
-    "defence": 15,
+    "defence": 9,
     "stats": {
       "strength": 18,
       "dexterity": 6,
@@ -161,8 +167,8 @@
   },
   "treeman": {
     "name": "Treeman",
-    "hp": 1,
-    "defence": 20,
+    "hp": 250,
+    "defence": 9,
     "stats": {
       "strength": 30,
       "dexterity": 18,
@@ -188,7 +194,7 @@
   "dummy": {
     "name": "Training Dummy",
     "hp": 100000,
-    "defence": 10,
+    "defence": 0,
     "stats": {
       "strength": 0,
       "dexterity": 0,

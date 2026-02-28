@@ -84,11 +84,11 @@ export function monsterHitChance(monster, character) {
 
 /**
  * Damage dealt by a physical attack (SWIPE / BASH / PUNCH / SHOOT).
- * Uses character STR and is reduced by the monster's physical defence.
+ * Uses character STR and is reduced by the monster's VIT/RES stat mitigation and flat defence.
  *
  * @param {object} character  Party member (needs stats.strength)
  * @param {object|null} weaponDef  Item definition from items.js (needs baseDamage), or null for bare fists
- * @param {object} monster    Monster (needs defence)
+ * @param {object} monster    Monster (needs defence, stats.vitality, stats.resilience)
  * @returns {number}          Final damage (minimum 1)
  */
 export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef = null) {
@@ -96,47 +96,61 @@ export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef 
   // Defaults to pure STR (bare-hand punch or any weapon without the field).
   const strW = weaponDef?.statWeights?.str ?? 1.0;
   const dexW = weaponDef?.statWeights?.dex ?? 0.0;
+  const intW = weaponDef?.statWeights?.intelligence ?? 0.0;
+  const vitW = weaponDef?.statWeights?.vitality ?? 0.0;
+  const resW = weaponDef?.statWeights?.resilience ?? 0.0;
   const statBonus = Math.floor(
     (character.stats?.strength ?? 10) * strW +
-    (character.stats?.dexterity ?? 10) * dexW
+    (character.stats?.dexterity ?? 10) * dexW +
+    (character.stats?.intelligence ?? 10) * intW +
+    (character.stats?.vitality ?? 10) * vitW +
+    (character.stats?.resilience ?? 10) * resW
   );
   let raw = (weaponDef?.baseDamage ?? 0) + statBonus;
   if (ammoDef && ammoDef.damageModifier) {
     raw = Math.round(raw * ammoDef.damageModifier);
   }
-  return Math.max(1, raw - (monster.defence ?? 0));
+  const statMitigation = Math.floor(
+    ((monster.stats?.resilience ?? 0) + (monster.stats?.vitality ?? 0)) * RESILIENCE_DAMAGE_FACTOR / 2
+  );
+  return Math.max(1, raw - statMitigation - (monster.defence ?? 0));
 }
 
 /**
  * Damage dealt by a magic attack (FIREBALL).
- * Uses character INT instead of STR, and is reduced by the monster's resilience (magic resistance).
+ * Uses character INT instead of STR, and is reduced by the monster's VIT/RES stat mitigation.
  *
  * @param {object} character  Party member (needs stats.intelligence)
  * @param {object|null} weaponDef  Item definition (needs baseDamage)
- * @param {object} monster    Monster (needs stats.resilience)
+ * @param {object} monster    Monster (needs stats.vitality, stats.resilience)
  * @returns {number}          Final damage (minimum 1)
  */
 export function calcPlayerMagicDamage(character, weaponDef, monster) {
   const raw = weaponDef?.magnitudeFormula
     ? resolveSpellMagnitude(weaponDef.name, weaponDef, character)
     : (weaponDef?.baseDamage ?? 0) + (character.stats?.intelligence ?? 10);
-  return Math.max(1, raw - (monster.stats?.resilience ?? 0));
+  const statMitigation = Math.floor(
+    ((monster.stats?.resilience ?? 0) + (monster.stats?.vitality ?? 0)) * RESILIENCE_DAMAGE_FACTOR / 2
+  );
+  return Math.max(1, raw - statMitigation);
 }
 
 /**
  * Damage dealt by a monster's attack on a party member.
- * Scales with monster STR; reduced by the character's RES (resilience stat)
+ * Scales with monster STR; reduced by the character's RES and VIT (50-50 split)
  * and DEF (physical defence from equipped armour).
  *
  * @param {object} monster              Monster (needs stats.strength)
- * @param {object} character            Party member (needs stats.resilience)
+ * @param {object} character            Party member (needs stats.resilience, stats.vitality)
  * @param {number} [characterDefence=0] Total physical defence from equipment
  * @returns {number}                    Final damage (minimum 1)
  */
 export function calcMonsterDamage(monster, character, characterDefence = 0) {
   const raw = (monster.stats?.strength ?? 10) + MONSTER_BASE_ATTACK;
-  const resMitigation = Math.floor((character.stats?.resilience ?? 0) * RESILIENCE_DAMAGE_FACTOR);
-  return Math.max(1, raw - resMitigation - characterDefence);
+  const mitigation = Math.floor(
+    ((character.stats?.resilience ?? 0) + (character.stats?.vitality ?? 0)) * RESILIENCE_DAMAGE_FACTOR / 2
+  );
+  return Math.max(1, raw - mitigation - characterDefence);
 }
 
 // ── Formation layout ─────────────────────────────────────────────────────────

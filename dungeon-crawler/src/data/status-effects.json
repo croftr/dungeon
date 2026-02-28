@@ -27,5 +27,13 @@
     "color": "#c8b060",
     "duration": 30,
     "preventsSpRegen": true
+  },
+  "frozen": {
+    "id": "frozen",
+    "name": "Frozen",
+    "type": "debuff",
+    "icon": "/icons/frozen.svg",
+    "color": "#00ffff",
+    "duration": 20
   }
 }
