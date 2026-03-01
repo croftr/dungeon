@@ -92,8 +92,12 @@ function _renderPanel(panel) {
       </div>
     `).join('');
 
+  const titleEl = panel.querySelector('.bsp-title');
+  if (titleEl) {
+    titleEl.textContent = _monsterName ? `Battle Summary — ${_monsterName}` : 'Battle Summary';
+  }
+
   body.innerHTML = `
-    ${_monsterName ? `<div class="bsp-monster-name">${_monsterName}</div>` : ''}
     <div class="bsp-header-row">
       <span class="bsp-name"></span>
       <span class="bsp-col-label" title="Damage dealt">DMG OUT</span>
@@ -119,7 +123,7 @@ export function initBattleStats() {
   panel.id = 'battle-stats-panel';
   panel.innerHTML = `
     <div class="bsp-titlebar">
-      <span>Battle Summary</span>
+      <span class="bsp-title">Battle Summary</span>
       <button class="bsp-close" title="Close">✕</button>
     </div>
     <div class="bsp-body"></div>

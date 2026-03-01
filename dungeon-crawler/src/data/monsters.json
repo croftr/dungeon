@@ -24,16 +24,22 @@
   },
   "mummy": {
     "name": "Mummy",
-    "hp": 50,
-    "defence": 5,
-    "xp": 60,
+    "hp": 100,
+    "defence": 6,
+    "xp": 100,
     "stats": {
-      "strength": 10,
-      "dexterity": 10,
-      "vitality": 8,
+      "strength": 13,
+      "dexterity": 13,
+      "vitality": 10,
       "intelligence": 5,
-      "resilience": 5
+      "resilience": 6
     },
+    "onHitEffects": [
+      {
+        "effectId": "poison",
+        "chance": 0.3
+      }
+    ],
     "drops": [
       {
         "item": "Life Essence",

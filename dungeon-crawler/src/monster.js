@@ -21,7 +21,7 @@ import { setInCombat, clearCombat, playCritSound, playActionSound, playHitSound,
 import { addLogEntry } from './battle-log.js';
 import { resetBattleStats, recordDamageDealt, recordDamageTaken, showBattleStatsIcon } from './battle-stats.js';
 import { getItemDef } from './items.js';
-import { spawnDroppedItem } from './objects.js';
+import { spawnDroppedItem, isStatueAt } from './objects.js';
 import { MONSTER_DEFS as D } from './monster-defs.js';
 import { skillsState } from './skills-state.js';
 import SKILLS_DATA from './data/skills.json';
@@ -45,21 +45,49 @@ export function setHuntersEyeTarget(id) {
   });
 }
 
-/** Returns the first alive monster within melee range of the player, or null. */
+// Forward-direction unit vectors per facing value (0=N,1=E,2=S,3=W)
+const _FACING_DR = [-1, 0, 1, 0];
+const _FACING_DC = [0, 1, 0, -1];
+
+/**
+ * Returns the alive monster within melee range of the player that is most
+ * aligned with the player's current facing direction.  This ensures that a
+ * monster standing between the player and another monster is targeted first,
+ * preventing attacks from appearing to "pass through" a closer enemy.
+ *
+ * Alignment is measured as the dot-product of (monster − player) with the
+ * facing unit vector: +1 for directly in front, 0 for the sides, −1 behind.
+ * If two monsters share the same score the one earlier in the monsters array
+ * wins (stable, deterministic).
+ */
 export function getInRangeMonster() {
-  return monsters.find((m) => {
+  // Collect all passable-reachable adjacent monsters
+  const candidates = monsters.filter((m) => {
     if (!m.alive) return false;
     const distRow = Math.abs(m.gridRow - player.gridRow);
     const distCol = Math.abs(m.gridCol - player.gridCol);
-    if (distRow <= 1 && distCol <= 1) {
-      if (!isPassable(m.gridRow, m.gridCol) || !isPassable(player.gridRow, player.gridCol)) return false;
-      if (distRow === 1 && distCol === 1) {
-        if (!isPassable(player.gridRow, m.gridCol) && !isPassable(m.gridRow, player.gridCol)) return false;
-      }
-      return true;
+    if (distRow > 1 || distCol > 1) return false;
+    if (!isPassable(m.gridRow, m.gridCol) || !isPassable(player.gridRow, player.gridCol)) return false;
+    if (distRow === 1 && distCol === 1) {
+      if (!isPassable(player.gridRow, m.gridCol) && !isPassable(m.gridRow, player.gridCol)) return false;
     }
-    return false;
-  }) ?? null;
+    return true;
+  });
+
+  if (candidates.length === 0) return null;
+  if (candidates.length === 1) return candidates[0];
+
+  // Pick the candidate most aligned with the player's facing direction
+  const fdr = _FACING_DR[player.facing] ?? 0;
+  const fdc = _FACING_DC[player.facing] ?? 0;
+  let best = candidates[0];
+  let bestScore = (best.gridRow - player.gridRow) * fdr + (best.gridCol - player.gridCol) * fdc;
+  for (let i = 1; i < candidates.length; i++) {
+    const m = candidates[i];
+    const score = (m.gridRow - player.gridRow) * fdr + (m.gridCol - player.gridCol) * fdc;
+    if (score > bestScore) { bestScore = score; best = m; }
+  }
+  return best;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -209,10 +237,83 @@ export const monsters = [
     '/monsters/goblin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/goblin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+
+  // Mummies in the secret room (Level 1, Rows 1-4, Cols 17-20)
+  inst(D.mummy, 101, 2, 18,
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/mummy-annimation/mummy-attack.mp3', 0.6, 0, 0, 1, null,
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Dead_withSkin.glb',
+    null,
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Walking_withSkin.glb'),
+
+  inst(D.mummy, 102, 3, 18,
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/mummy-annimation/mummy-attack.mp3', 0.6, 0, 0, 1, null,
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Dead_withSkin.glb',
+    null,
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Walking_withSkin.glb'),
+
+  inst(D.mummy, 103, 4, 18,
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/mummy-annimation/mummy-attack.mp3', 0.6, 0, 0, 1, null,
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Dead_withSkin.glb',
+    null,
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Walking_withSkin.glb'),
+
+  // Zombies in the new hidden room (Level 1, Rows 17-20, Cols 16-19)
+  inst(D.zombie, 201, 18, 17,
+    '/monsters/zombie-animation/Meshy_AI_Animation_Idle_3_withSkin.glb',
+    '/monsters/zombie-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/zombie-animation/zombie-attack.mp3', 0.45, 0, 0, 1, null,
+    '/monsters/zombie-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/zombie-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+
+  inst(D.zombie, 202, 18, 18,
+    '/monsters/zombie-animation/Meshy_AI_Animation_Idle_3_withSkin.glb',
+    '/monsters/zombie-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/zombie-animation/zombie-attack.mp3', 0.45, 0, 0, 1, null,
+    '/monsters/zombie-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/zombie-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+
+  inst(D.zombie, 203, 19, 18,
+    '/monsters/zombie-animation/Meshy_AI_Animation_Idle_3_withSkin.glb',
+    '/monsters/zombie-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/zombie-animation/zombie-attack.mp3', 0.45, 0, 0, 1, null,
+    '/monsters/zombie-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/zombie-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 ];
+
+/** Triggers the mummies to start chasing the player immediately. */
+export function triggerMummyAmbush() {
+  monsters.forEach(m => {
+    if (m.name === 'Mummy' && m.alive) {
+      m.engaged = true;
+    }
+  });
+}
 
 export function isMonsterAt(row, col) {
   return monsters.some(m => m.alive && m.gridRow === row && m.gridCol === col);
+}
+
+/**
+ * Returns true if any alive monster *other than* excludeId either occupies or
+ * has already reserved (is moving toward) the given cell.  Used internally to
+ * prevent two monsters from double-booking the same destination in the same
+ * frame — isMonsterAt only checks committed gridRow/gridCol and misses monsters
+ * that are mid-step.
+ */
+function _isCellReserved(row, col, excludeId) {
+  return monsters.some(m => {
+    if (!m.alive || m.id === excludeId) return false;
+    if (m.gridRow === row && m.gridCol === col) return true;
+    if (m._cs?.moving && m._cs.targetRow === row && m._cs.targetCol === col) return true;
+    if (m._ps?.moving && m._ps.targetRow === row && m._ps.targetCol === col) return true;
+    return false;
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -527,7 +628,13 @@ function _updatePatrol(m, dt) {
     for (const d of PATROL_DIRECTIONS) {
       const nr = m.gridRow + d.dr;
       const nc = m.gridCol + d.dc;
-      if (nr >= b.minRow && nr <= b.maxRow && nc >= b.minCol && nc <= b.maxCol) {
+      if (
+        nr >= b.minRow && nr <= b.maxRow &&
+        nc >= b.minCol && nc <= b.maxCol &&
+        isPassable(nr, nc) &&
+        !isStatueAt(nr, nc) &&
+        !_isCellReserved(nr, nc, m.id)
+      ) {
         ps.targetRow = nr;
         ps.targetCol = nc;
         ps.moving = true;
@@ -601,7 +708,7 @@ function _updateChase(m, dt) {
       if (d.dr === 0 && d.dc === 0) continue;
       const nr = m.gridRow + d.dr;
       const nc = m.gridCol + d.dc;
-      if (isPassable(nr, nc) && !isMonsterAt(nr, nc)) {
+      if (isPassable(nr, nc) && !isStatueAt(nr, nc) && !_isCellReserved(nr, nc, m.id)) {
         cs.targetRow = nr;
         cs.targetCol = nc;
         cs.moving = true;

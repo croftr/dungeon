@@ -124,10 +124,10 @@
         "race": "Human",
         "stats": {
             "strength": 9,
-            "dexterity": 7,
-            "vitality": 7,
+            "dexterity": 6,
+            "vitality": 6,
             "intelligence": 4,
-            "resilience": 7
+            "resilience": 6
         },
         "skillProgression": [
             "Berserk",

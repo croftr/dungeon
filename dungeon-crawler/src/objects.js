@@ -8,6 +8,7 @@ import { getItemDef } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold } from './party.js';
 import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAnvilSound, playKeyLockSound, playGateOpeningSound } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
+import { triggerMummyAmbush } from './monster.js';
 
 export const objects = [];
 
@@ -17,6 +18,11 @@ const _intervals = [];
 export function updateObjects(dt) {
     for (const mixer of _mixers) mixer.update(dt);
 }
+
+// ─────────────────────────────────────────────
+//  SARCOPHAGUS STATE
+// ─────────────────────────────────────────────
+let _mummyGateOpened = false; // true once the player confirms — prevents re-triggering
 
 // ─────────────────────────────────────────────
 //  CHEST / MERCHANT SHARED STATE
@@ -29,9 +35,14 @@ let _activeSentLabelId = 'chest-sent-label';
 //  SHOP GRID BLOCKING
 // ─────────────────────────────────────────────
 const _shopGridCells = new Set(); // "row,col" keys — treated as impassable
+const _statueGridCells = new Set();
 
 export function isShopAt(r, c) {
     return _shopGridCells.has(`${r},${c}`);
+}
+
+export function isStatueAt(r, c) {
+    return _statueGridCells.has(`${r},${c}`);
 }
 
 // ─────────────────────────────────────────────
@@ -65,6 +76,7 @@ export function clearObjects(scene) {
         clearInterval(_intervals.pop());
     }
     _shopGridCells.clear();
+    _statueGridCells.clear();
 }
 
 export function initObjects(scene, camera) {
@@ -289,21 +301,14 @@ export function initObjects(scene, camera) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 2 && distCol <= 2) {
-                    showMessage("You push a hidden switch on the statue...");
+                    // Gate already open — nothing more to do
+                    if (_mummyGateOpened) break;
 
-                    playGateOpeningSound();
-
-                    if (window.playMummyVideo) {
-                        window.playMummyVideo(() => {
-                            const p = objects.find(o => o.name === 'Portcullis' && o.gridRow === 3 && o.gridCol === 16);
-                            if (p) openPortcullis(p, true);
-                        });
-                    } else {
-                        const p = objects.find(o => o.name === 'Portcullis' && o.gridRow === 3 && o.gridCol === 16);
-                        if (p) openPortcullis(p);
-                    }
+                    // Show the sarcophagus confirmation modal
+                    const overlay = document.getElementById('sarcophagus-overlay');
+                    if (overlay) overlay.classList.remove('chest-hidden');
                 } else {
-                    showMessage("The statue stands silently in the center of the room.");
+                    showMessage("The sarcophagus looms silently across the room.");
                 }
                 break;
             } else if (obj.userData.isJester) {
@@ -350,6 +355,51 @@ export function initObjects(scene, camera) {
             document.getElementById('merchant-overlay').classList.add('merchant-hidden');
             _hideChestCtxMenu();
             import('./equipment.js').then(m => m.hideTooltip());
+        };
+    }
+
+    // Sarcophagus modal
+    const sarcophagusClose = document.getElementById('sarcophagus-close');
+    if (sarcophagusClose) {
+        sarcophagusClose.onclick = (e) => {
+            e.stopPropagation();
+            document.getElementById('sarcophagus-overlay').classList.add('chest-hidden');
+        };
+    }
+
+    const sarcophagusNo = document.getElementById('sarcophagus-no');
+    if (sarcophagusNo) {
+        sarcophagusNo.onclick = (e) => {
+            e.stopPropagation();
+            document.getElementById('sarcophagus-overlay').classList.add('chest-hidden');
+        };
+    }
+
+    const sarcophagusYes = document.getElementById('sarcophagus-yes');
+    if (sarcophagusYes) {
+        sarcophagusYes.onclick = (e) => {
+            e.stopPropagation();
+            document.getElementById('sarcophagus-overlay').classList.add('chest-hidden');
+            _mummyGateOpened = true;
+
+            playGateOpeningSound();
+
+            // Engage mummies immediately so they start moving toward the gate
+            // as it rises. The portcullis cell stays impassable for ~2500 ms,
+            // so they queue up at the gate and flood through the moment it opens.
+            triggerMummyAmbush();
+
+            if (window.playMummyVideo) {
+                window.playMummyVideo(() => {
+                    objects
+                        .filter(o => o.name === 'Portcullis' && o.gridCol === 16 && o.gridRow >= 2 && o.gridRow <= 4)
+                        .forEach(p => openPortcullis(p, true));
+                });
+            } else {
+                objects
+                    .filter(o => o.name === 'Portcullis' && o.gridCol === 16 && o.gridRow >= 2 && o.gridRow <= 4)
+                    .forEach(p => openPortcullis(p));
+            }
         };
     }
 
@@ -525,9 +575,10 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
 }
 
 function addStatue(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
+    _statueGridCells.add(`${row},${col}`);
     loader.load('/items/statue.glb', (gltf) => {
         const model = gltf.scene;
-        model.scale.setScalar(0.6);
+        model.scale.setScalar(0.45);
         model.position.set(col * CELL + offsetX, 0.5, row * CELL + offsetZ);
         model.rotation.y = rotY;
 
@@ -650,8 +701,18 @@ export function spawnObjectsForLevel() {
         // Statue in the center of the new 5x5 room
         addStatue(objectsGroup, gltfLoader, 13, 3);
 
-        // Portcullis on the far side of the 5x5 room
-        addPortcullis(objectsGroup, gltfLoader, 16, 3);
+        // Three-wide portcullis on the far side of the 5x5 room —
+        // rows 2, 3 & 4 all open together so mummies can't be funnelled.
+        addPortcullis(objectsGroup, gltfLoader, 16, 2, Math.PI / 2);
+        addPortcullis(objectsGroup, gltfLoader, 16, 3, Math.PI / 2);
+        addPortcullis(objectsGroup, gltfLoader, 16, 4, Math.PI / 2);
+
+        // Hidden 4x4 room in the Southeast corner (not accessible)
+        // Adding a mysterious "Black Chest" with artifacts.
+        addChest(objectsGroup, gltfLoader, 17, 18, 0, 0, [
+            { name: 'Gold Coins', quantity: 1500 },
+            'Sun Pendant', 'Rune Pendant', 'Shadow Cloak', 'Plate Cuirass', 'Greatsword'
+        ], '/items/chest1.glb', true, 0, 'Forbidden Chest');
 
     } else if (level === 2) {
         // Portal back to Level 1.
@@ -677,7 +738,7 @@ export function spawnObjectsForLevel() {
     }
 }
 
-function addPortcullis(scene, loader, col, row) {
+function addPortcullis(scene, loader, col, row, rotY = 0) {
     const portcullis = {
         name: 'Portcullis',
         path: '/items/Meshy_AI_Iron_Portcullis_0221184348_texture.glb',
@@ -691,6 +752,7 @@ function addPortcullis(scene, loader, col, row) {
         const model = gltf.scene;
         model.scale.set(1.15, 0.9, 1.15);
         model.position.set(portcullis.x, 1.1, portcullis.z);
+        model.rotation.y = rotY;
         scene.add(model);
         portcullis.mesh = model;
     });
