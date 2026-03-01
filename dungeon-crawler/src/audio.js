@@ -22,6 +22,7 @@ const SOUND_MAP = {
   'shield-bash': { url: '/sounds/actions/bash.mp3', offset: 0.05 },
   death: { url: '/sounds/actions/monster-killed-1.mp3 ', offset: 0.0 },
   hit: { url: '/sounds/actions/hit.mp3', offset: 0.0 },
+  'gold-coins': { url: '/sounds/actions/gold-coins.mp3', offset: 0.0 },
 };
 
 const bufferCache = new Map();
@@ -201,6 +202,27 @@ export async function playHitSound() {
     source.start(0);
   } catch (err) {
     console.warn('[audio] playHitSound failed:', err);
+  }
+}
+
+export async function playGoldSound() {
+  const buffer = await getBuffer('/sounds/actions/gold-coins.mp3');
+  if (!buffer) return;
+
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.8;
+
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playGoldSound failed:', err);
   }
 }
 

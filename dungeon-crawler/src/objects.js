@@ -169,20 +169,15 @@ export function initObjects(scene, camera) {
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 1 && distCol <= 1) {
                     const targetLevel = obj.userData.targetLevel;
-                    if (targetLevel === 2 && window.currentLevel === 1) {
-                        showMessage("You step into the swirling blue portal...");
-                        playPortalSound();
-                        if (window.playTreemanVideo) {
-                            window.playTreemanVideo(() => {
-                                if (window.loadLevel) window.loadLevel(targetLevel);
-                            });
-                        } else {
-                            if (window.loadLevel) window.loadLevel(targetLevel);
-                        }
-                    } else {
-                        showMessage("You step into the swirling blue portal...");
-                        playPortalSound();
-                        if (window.loadLevel) window.loadLevel(targetLevel);
+                    const isTreemanTransition = (targetLevel === 2 && window.currentLevel === 1);
+
+                    showMessage("You step into the swirling blue portal...");
+                    playPortalSound();
+
+                    if (window.loadLevel) window.loadLevel(targetLevel);
+
+                    if (isTreemanTransition && window.playTreemanVideo) {
+                        window.playTreemanVideo();
                     }
                 } else {
                     showMessage("Step closer to the portal to enter.");
@@ -288,6 +283,27 @@ export function initObjects(scene, camera) {
                     }
                 } else {
                     showMessage("You can't reach the keyhole from here.");
+                }
+                break;
+            } else if (obj.userData.isStatue) {
+                const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
+                const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
+                if (distRow <= 2 && distCol <= 2) {
+                    showMessage("You push a hidden switch on the statue...");
+
+                    playGateOpeningSound();
+
+                    if (window.playMummyVideo) {
+                        window.playMummyVideo(() => {
+                            const p = objects.find(o => o.name === 'Portcullis' && o.gridRow === 3 && o.gridCol === 16);
+                            if (p) openPortcullis(p, true);
+                        });
+                    } else {
+                        const p = objects.find(o => o.name === 'Portcullis' && o.gridRow === 3 && o.gridCol === 16);
+                        if (p) openPortcullis(p);
+                    }
+                } else {
+                    showMessage("The statue stands silently in the center of the room.");
                 }
                 break;
             } else if (obj.userData.isJester) {
@@ -508,6 +524,41 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
     });
 }
 
+function addStatue(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
+    loader.load('/items/statue.glb', (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(0.6);
+        model.position.set(col * CELL + offsetX, 0.5, row * CELL + offsetZ);
+        model.rotation.y = rotY;
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.userData.isStatue = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
+            }
+        });
+
+        scene.add(model);
+    });
+}
+
+
 
 export function spawnObjectsForLevel() {
     const gltfLoader = new GLTFLoader();
@@ -595,6 +646,12 @@ export function spawnObjectsForLevel() {
 
         buttonContainer.position.set(8 * CELL - 1.0, 1.25, 8 * CELL);
         objectsGroup.add(buttonContainer);
+
+        // Statue in the center of the new 5x5 room
+        addStatue(objectsGroup, gltfLoader, 13, 3);
+
+        // Portcullis on the far side of the 5x5 room
+        addPortcullis(objectsGroup, gltfLoader, 16, 3);
 
     } else if (level === 2) {
         // Portal back to Level 1.
@@ -972,12 +1029,13 @@ function addJester(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) 
     });
 }
 
-export function openPortcullis(p, skipMessage = false) {
+export function openPortcullis(p, skipEverything = false) {
     if (p.isOpen) return;
     p.isOpen = true;
-    if (!skipMessage) showMessage("The portcullis slowly grinds open...");
-
-    playGateOpeningSound();
+    if (!skipEverything) {
+        showMessage("The portcullis slowly grinds open...");
+        playGateOpeningSound();
+    }
 
     // Animate mesh up
     new Tween(p.mesh.position, tweenGroup)

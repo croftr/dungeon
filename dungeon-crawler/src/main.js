@@ -13,6 +13,7 @@ import { initRecruits, updateRecruitsMeshState } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, updateObjects } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic } from './audio.js';
 import { initBattleLog } from './battle-log.js';
+import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
 import { initQuarks, updateQuarks } from './quarks-intro.js';
 
@@ -81,11 +82,15 @@ setCallbacks({
         && player.gridRow >= 7 && player.gridRow <= 15;
       const inOgreRoom = player.gridCol >= 1 && player.gridCol <= 6
         && player.gridRow >= 1 && player.gridRow <= 9;
+      const inMummyRoom = player.gridCol >= 11 && player.gridCol <= 15
+        && player.gridRow >= 1 && player.gridRow <= 5;
 
       if (inEastRoom) {
         setZoneMusic('/sounds/level2-music.mp3');
       } else if (inOgreRoom && hasSeenOgreVideo) {
         setZoneMusic('/sounds/backing/ogre-room.mp3');
+      } else if (inMummyRoom) {
+        setZoneMusic('/sounds/backing/mummy-room.mp3');
       } else {
         setZoneMusic(null);
       }
@@ -120,6 +125,7 @@ updateStatus();
 initParty();
 initEquipment();
 initBattleLog();
+initBattleStats();
 initMainMenu();
 initRecruits(scene, camera);
 initObjects(scene, camera);
@@ -290,6 +296,51 @@ function finishTreemanVideo() {
 
 if (skipTreemanBtn) skipTreemanBtn.addEventListener('click', finishTreemanVideo);
 if (treemanVideo) treemanVideo.addEventListener('ended', finishTreemanVideo);
+
+// ─────────────────────────────────────────────
+//  MUMMY VIDEO OVERLAY
+// ─────────────────────────────────────────────
+const mummyOverlay = document.getElementById('mummy-video-overlay');
+const mummyVideo = document.getElementById('mummy-video');
+const skipMummyBtn = document.getElementById('skip-mummy-btn');
+let _mummyCallback = null;
+
+window.playMummyVideo = function (onComplete) {
+  _mummyCallback = onComplete;
+  if (!mummyOverlay || !mummyVideo) {
+    if (_mummyCallback) _mummyCallback();
+    return;
+  }
+  mummyOverlay.classList.remove('hidden');
+
+  setTimeout(() => {
+    mummyOverlay.style.opacity = '1';
+    mummyVideo.play().catch(e => {
+      console.warn("Mummy video play failed:", e);
+      finishMummyVideo();
+    });
+  }, 50);
+};
+
+function finishMummyVideo() {
+  if (!mummyOverlay) {
+    if (_mummyCallback) _mummyCallback();
+    return;
+  }
+  mummyOverlay.style.opacity = '0';
+
+  setTimeout(() => {
+    mummyVideo.pause();
+    mummyOverlay.classList.add('hidden');
+    if (_mummyCallback) {
+      _mummyCallback();
+      _mummyCallback = null;
+    }
+  }, 1500);
+}
+
+if (skipMummyBtn) skipMummyBtn.addEventListener('click', finishMummyVideo);
+if (mummyVideo) mummyVideo.addEventListener('ended', finishMummyVideo);
 
 // ─────────────────────────────────────────────
 //  MUSIC

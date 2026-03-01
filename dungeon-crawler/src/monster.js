@@ -17,8 +17,9 @@ import {
   MONSTER_BASE_ATTACK, RESILIENCE_DAMAGE_FACTOR,
   SHIELD_BASH_STUN_CHANCE, SHIELD_BASH_STUN_DURATION_MS,
 } from './combat-rules.js';
-import { setInCombat, clearCombat, playCritSound, playActionSound, playHitSound } from './audio.js';
+import { setInCombat, clearCombat, playCritSound, playActionSound, playHitSound, isInCombat } from './audio.js';
 import { addLogEntry } from './battle-log.js';
+import { resetBattleStats, recordDamageDealt, recordDamageTaken, showBattleStatsIcon } from './battle-stats.js';
 import { getItemDef } from './items.js';
 import { spawnDroppedItem } from './objects.js';
 import { MONSTER_DEFS as D } from './monster-defs.js';
@@ -692,7 +693,7 @@ export function updateMonsters(dt, playerCamera, scene) {
         if (d.tickAccum >= def.tickInterval) {
           d.tickAccum -= def.tickInterval;
           const dmg = def.tickDamage || 0;
-          if (dmg > 0) hitMonster(m.id, dmg, 'dot');
+          if (dmg > 0) hitMonster(m.id, dmg, 'dot', false, d.caster ?? null);
           if (dmg < 0) m.hp = Math.min(m.hpMax, m.hp - dmg); // heal
           panelDirty = true;
         }
@@ -805,7 +806,7 @@ export function updateMonsters(dt, playerCamera, scene) {
  * Apply (or refresh) a status effect on a monster.
  * effectId must match a key in STATUS_EFFECT_DEFS.
  */
-export function applyMonsterStatusEffect(monsterId, effectId) {
+export function applyMonsterStatusEffect(monsterId, effectId, caster = null) {
   const m = monsters.find(x => x.id === monsterId && x.alive);
   if (!m) return;
   const def = STATUS_EFFECT_DEFS[effectId];
@@ -815,9 +816,11 @@ export function applyMonsterStatusEffect(monsterId, effectId) {
   const existing = m.activeDebuffs.find(d => d.effectId === effectId);
   if (existing) {
     existing.expiresAt = performance.now() + def.duration * 1000;
+    if (caster) existing.caster = caster; // refresh caster on re-apply
   } else {
     m.activeDebuffs.push({
       effectId,
+      caster,
       expiresAt: performance.now() + def.duration * 1000,
       tickAccum: def.tickInterval ? def.tickInterval * 0.95 : 0, // fast first tick
     });
@@ -858,8 +861,14 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
   const m = monsters.find((x) => x.id === monsterId && x.alive);
   if (!m) return { hit: false, damage: 0, killed: false, monsterHp: 0 };
 
-  // Any hit — including ranged — triggers the monster to chase if it survives
+  // Any hit — including ranged — triggers the monster to chase if it survives.
+  // If this is the first hit on a fresh monster (not already engaged) and we're
+  // not currently mid-combat, this marks the start of a new fight — reset stats.
+  const wasEngaged = m.engaged;
   if (m.name !== 'Training Dummy') m.engaged = true;
+  if (!wasEngaged && !isInCombat() && m.name !== 'Training Dummy') {
+    resetBattleStats();
+  }
 
   const damage = Math.max(1, finalDamage);
   const hpBefore = m.hp;
@@ -869,6 +878,11 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
 
   if (killedByThisHit) {
     m.alive = false;
+  }
+
+  // Track damage dealt for battle summary (Training Dummy excluded)
+  if (killer && m.name !== 'Training Dummy') {
+    recordDamageDealt(killer, damage);
   }
 
   // Sync visual/audio feedback with the action animation
@@ -919,6 +933,9 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       });
       if (m.hpBarFill) m.hpBarFill.parentElement.style.display = 'none';
       addLogEntry({ type: 'death', target: m.name, killer, damage, time: Date.now() });
+
+      // Show battle summary icon now that the fight is over
+      showBattleStatsIcon(m.name);
 
       // ── Award XP to living party members ──────────────────────────────────
       if (m.xp > 0) awardXP(m.xp);
@@ -1058,7 +1075,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     ];
     allOnHit.forEach(effect => {
       if (Math.random() < calcOnHitChance(effect.chance, m.stats?.resilience ?? 0, null, effect.effectId)) {
-        applyMonsterStatusEffect(monsterId, effect.effectId);
+        applyMonsterStatusEffect(monsterId, effect.effectId, character.name);
         const def = STATUS_EFFECT_DEFS[effect.effectId];
         showMessage(`${m.name} is afflicted with <b>${def?.name ?? effect.effectId}</b>!`);
         appliedEffects.push(effect.effectId);
@@ -1182,6 +1199,9 @@ function _applyMonsterDamage(monster) {
   setHp(target.id, target.hp - damage);
   flashPortraitHit(target.id);
   if (isCrit) playCritSound('bash');
+
+  // Track damage taken for battle summary
+  recordDamageTaken(target.name, damage);
 
   // Float the damage number above the character's portrait
   showMemberDamage(target.id, damage, isCrit);

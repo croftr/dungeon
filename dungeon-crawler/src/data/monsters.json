@@ -22,6 +22,29 @@
       }
     ]
   },
+  "mummy": {
+    "name": "Mummy",
+    "hp": 50,
+    "defence": 5,
+    "xp": 60,
+    "stats": {
+      "strength": 10,
+      "dexterity": 10,
+      "vitality": 8,
+      "intelligence": 5,
+      "resilience": 5
+    },
+    "drops": [
+      {
+        "item": "Life Essence",
+        "chance": 0.50
+      },
+      {
+        "item": "Poison Vial",
+        "chance": 0.40
+      }
+    ]
+  },
   "albino_goblin": {
     "name": "Albino Goblin",
     "hp": 120,

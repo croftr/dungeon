@@ -3336,7 +3336,7 @@ body {
 #merchant-party-grid,
 #merchant-sell-basket-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 6px;
   flex: 1;
   align-content: start;
@@ -3385,13 +3385,13 @@ body {
 }
 
 #merchant-total-label {
-  font-size: 11px;
+  font-size: 14px;
   color: #c8a84a;
 }
 
 #merchant-gold-label {
-  font-size: 11px;
-  color: #7a9040;
+  font-size: 14px;
+  color: #ffd700;
 }
 
 #merchant-buy-btn {
@@ -3443,14 +3443,15 @@ body {
 }
 
 .merch-slot img {
-  width: 72%;
-  height: 72%;
+  width: 80%;
+  height: 80%;
   object-fit: contain;
 }
 
 .merch-price {
-  font-size: 7px;
-  color: #c8a840;
+  font-size: 11px;
+  font-weight: bold;
+  color: #ffd700;
   margin-top: 2px;
   line-height: 1;
   font-family: monospace;
@@ -3526,13 +3527,13 @@ body {
 }
 
 #merchant-sell-total-label {
-  font-size: 11px;
+  font-size: 14px;
   color: #c8a84a;
 }
 
 #merchant-sell-gold-label {
-  font-size: 11px;
-  color: #7a9040;
+  font-size: 14px;
+  color: #ffd700;
 }
 
 #merchant-sell-btn {
@@ -4092,4 +4093,170 @@ body.cursor-interact #renderer-canvas {
   color: #668866;
   font-size: 12px;
   font-style: italic;
+}
+
+/* ═══════════════════════════════════════════
+   BATTLE STATS ICON & PANEL
+═══════════════════════════════════════════ */
+#battle-stats-btn {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  width: 32px;
+  height: 32px;
+  background: rgba(10, 7, 4, 0.90);
+  border: 1px solid #5a4a30;
+  border-radius: 5px;
+  color: #c8a84a;
+  font-size: 15px;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 620;
+  transition: border-color 0.15s, color 0.15s, box-shadow 0.15s;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.7);
+}
+
+#battle-stats-btn.bsb--visible {
+  display: flex;
+  animation: bsb-pop 0.25s ease-out;
+}
+
+@keyframes bsb-pop {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+#battle-stats-btn:hover {
+  border-color: #c8a84a;
+  color: #ffe88a;
+  box-shadow: 0 0 12px rgba(200, 168, 74, 0.35);
+}
+
+#battle-stats-panel {
+  position: fixed;
+  top: 54px;
+  left: 14px;
+  min-width: 240px;
+  background: rgba(10, 7, 4, 0.97);
+  border: 1px solid #5a4a30;
+  border-radius: 6px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  z-index: 619;
+  display: none;
+  flex-direction: column;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+  animation: bsp-fadein 0.15s ease-out;
+}
+
+#battle-stats-panel.bsp--visible {
+  display: flex;
+}
+
+@keyframes bsp-fadein {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.bsp-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #3a2e18;
+  background: rgba(0, 0, 0, 0.35);
+  color: #c8a84a;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.bsp-close {
+  background: none;
+  border: 1px solid #4a3a20;
+  color: #888;
+  font-size: 12px;
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.bsp-close:hover {
+  border-color: #8a7040;
+  color: #c8a84a;
+}
+
+.bsp-body {
+  padding: 8px 12px 10px;
+}
+
+.bsp-header-row {
+  display: grid;
+  grid-template-columns: 1fr 64px 64px;
+  gap: 4px;
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(90, 74, 48, 0.5);
+}
+
+.bsp-col-label {
+  color: #8a7a50;
+  font-size: 10px;
+  text-align: right;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bsp-row {
+  display: grid;
+  grid-template-columns: 1fr 64px 64px;
+  gap: 4px;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(50, 40, 25, 0.5);
+}
+
+.bsp-row:last-child {
+  border-bottom: none;
+}
+
+.bsp-name {
+  color: #d4b870;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bsp-dealt {
+  color: #e07050;
+  text-align: right;
+  font-weight: bold;
+}
+
+.bsp-taken {
+  color: #6090c0;
+  text-align: right;
+}
+
+.bsp-monster-name {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #a08060;
+  letter-spacing: 0.05em;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #333;
+  margin-bottom: 4px;
+}
+
+.bsp-empty {
+  color: #664;
+  font-style: italic;
+  text-align: center;
+  padding: 8px 0;
 }

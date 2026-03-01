@@ -1,7 +1,7 @@
 import { getItemDef } from './items.js';
 import { renderItemIcon } from './equipment.js';
 import { addLogEntry } from './battle-log.js';
-import { isInCombat } from './audio.js';
+import { isInCombat, playGoldSound } from './audio.js';
 import { skillsState } from './skills-state.js';
 import { SPELLS } from './spells.js';
 import SKILLS_DATA from './data/skills.json';
@@ -31,7 +31,7 @@ export function removeGold(amount) {
 
 function updateGoldDisplay() {
   const el = document.getElementById('tactics-gold');
-  if (el) el.innerHTML = `<img src="/icons/gold_pile.png" style="width:16px; height:16px; margin-right:4px;">${partyGold}`;
+  if (el) el.innerHTML = `<img src="/icons/gold_pile.png" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}`;
 }
 
 export const lastAttackTimes = {};
@@ -490,7 +490,7 @@ function buildTacticsOverlay() {
     <div id="tactics-modal">
       <div id="tactics-header">
         <span>Party Tactics</span>
-        <span id="tactics-gold" style="margin-left:auto; display:flex; align-items:center; font-size:1.1em; color:#ffd700; text-shadow:1px 1px 0 #000;"><img src="/icons/gold_pile.png" style="width:16px; height:16px; margin-right:4px;">${partyGold}</span>
+        <span id="tactics-gold" style="margin-left:auto; display:flex; align-items:center; font-size:1.1em; color:#ffd700; text-shadow:1px 1px 0 #000;"><img src="/icons/gold_pile.png" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}</span>
         <button id="tactics-close" aria-label="Close">&times;</button>
       </div>
       <div id="tactics-body">
@@ -599,6 +599,17 @@ export function initParty() {
 
   buildTacticsOverlay();
   updateGoldDisplay();
+
+  // Global listener for gold icon clicks
+  document.addEventListener('click', (e) => {
+    const target = e.target;
+    if (target && target.tagName === 'IMG') {
+      const src = target.src || '';
+      if (target.classList.contains('gold-icon-click') || src.includes('gold_pile.png') || src.includes('gold_coins.png')) {
+        playGoldSound();
+      }
+    }
+  });
 
   // P key opens/closes the tactics modal
   document.addEventListener('keydown', (e) => {
