@@ -81,13 +81,15 @@ export function initObjects(scene, camera) {
         const equipOverlay = document.getElementById('equip-overlay');
         const merchantOverlay = document.getElementById('merchant-overlay');
         const alchemyOverlay = document.getElementById('alchemy-overlay');
+        const charDevOverlay = document.getElementById('char-dev-overlay');
         if (
             (cabinetOverlay && !cabinetOverlay.classList.contains('chest-hidden')) ||
             (chestOverlay && !chestOverlay.classList.contains('chest-hidden')) ||
             (corpseOverlay && !corpseOverlay.classList.contains('chest-hidden')) ||
             (equipOverlay && !equipOverlay.classList.contains('equip-hidden')) ||
             (merchantOverlay && !merchantOverlay.classList.contains('merchant-hidden')) ||
-            (alchemyOverlay && !alchemyOverlay.classList.contains('chest-hidden'))
+            (alchemyOverlay && !alchemyOverlay.classList.contains('chest-hidden')) ||
+            (charDevOverlay && !charDevOverlay.classList.contains('char-dev-hidden'))
         ) return;
 
         // Raycast
@@ -520,6 +522,7 @@ export function spawnObjectsForLevel() {
         ], '/items/stash.glb', true, 0, 'Stash');
         // New Chest at the end of the long passage
         addChest(objectsGroup, gltfLoader, 7, 1, 0, -0.7, [
+            { name: 'Gold Coins', quantity: 50 },
             'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Dagger', 'Axe', 'Ring of Vigour', 'Mace', 'Ring of Wisdom'
         ]);
         // Chest in the Northwest room, tucked into the far northeast corner (against Rows 0 & Col 6)

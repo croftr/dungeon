@@ -29,9 +29,25 @@ export function awardXP(totalXP) {
   const share = Math.floor(totalXP / livingMembers.length);
   if (share <= 0) return;
 
+  const allEvents = [];
   for (const m of livingMembers) {
     m.xp = (m.xp ?? 0) + share;
-    checkLevelUp(m);
+    allEvents.push(...checkLevelUp(m));
+  }
+
+  if (allEvents.length > 0) {
+    playLevelUpSound();
+    // Group by member name and take the highest level reached per member
+    const byName = {};
+    for (const ev of allEvents) {
+      if (!byName[ev.name] || ev.level > byName[ev.name]) {
+        byName[ev.name] = ev.level;
+      }
+    }
+    const msg = Object.entries(byName)
+      .map(([name, level]) => `<b>${name}</b> reached <b>Level ${level}</b>!`)
+      .join('  ·  ');
+    showMessage(msg, 4000);
   }
 
   refreshPartyCards();
@@ -42,8 +58,10 @@ export function awardXP(totalXP) {
  * Sets m.pendingLevelUp = true so the inventory screen shows a
  * "Level Up!" button — the player then opens the dev screen to
  * choose a skill and allocate stat points, then confirms.
+ * Returns an array of { name, level } events for each level gained.
  */
 function checkLevelUp(m) {
+  const events = [];
   while (m.level < maxLevel) {
     const threshold = xpThresholds[m.level];
     if (threshold === undefined || m.xp < threshold) break;
@@ -52,14 +70,10 @@ function checkLevelUp(m) {
     m.unspentStatPoints = (m.unspentStatPoints ?? 0) + statPointsPerLevel;
     m.pendingLevelUp = true;
 
-    playLevelUpSound();
-    showMessage(
-      `<b>${m.name}</b> has reached <b>Level ${m.level}</b>!`,
-      3500
-    );
-
+    events.push({ name: m.name, level: m.level });
     addLogEntry({ type: 'levelup', target: m.name, level: m.level, time: Date.now() });
   }
+  return events;
 }
 
 /**

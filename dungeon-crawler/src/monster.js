@@ -12,7 +12,7 @@ import {
   playerHitChance, monsterHitChance,
   calcPlayerPhysicalDamage, calcPlayerMagicDamage, calcMonsterDamage,
   calcOnHitChance,
-  pickRandomFrontLineTarget,
+  pickRandomFrontLineTarget, pickDirectionalTarget,
   CRIT_CHANCE, CRIT_MULTIPLIER,
   MONSTER_BASE_ATTACK, RESILIENCE_DAMAGE_FACTOR,
   SHIELD_BASH_STUN_CHANCE, SHIELD_BASH_STUN_DURATION_MS,
@@ -94,7 +94,7 @@ export const monsters = [
 
   // Upper maze
   inst(D.goblin, 1, 9, 6,
-    '/monsters/goblin-animation/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
+    '/monsters/goblin-animation/goblin-alert.glb',
     '/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
     '/monsters/goblin-animation/goblin-attack.wav', 0.45, 0, 0, 1, null,
     '/monsters/goblin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
@@ -169,7 +169,40 @@ export const monsters = [
 
   // Goblin guard in the vertical passage leading to the Northwest room
   inst(D.goblin, 23, 8, 1,
-    '/monsters/goblin-animation/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
+    '/monsters/goblin-animation/goblin-alert.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/goblin-animation/goblin-attack.wav', 0.45, 0, 0, 1, null,
+    '/monsters/goblin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+
+  // Additional Goblins spread through Level 1 corridors (avoiding big rooms)
+  inst(D.goblin, 24, 14, 3,
+    '/monsters/goblin-animation/goblin-alert.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/goblin-animation/goblin-attack.wav', 0.45, 0, 0, 1, null,
+    '/monsters/goblin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+
+  inst(D.goblin, 25, 16, 7,
+    '/monsters/goblin-animation/goblin-alert.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/goblin-animation/goblin-attack.wav', 0.45, 0, 0, 1, null,
+    '/monsters/goblin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+
+  inst(D.goblin, 26, 18, 3,
+    '/monsters/goblin-animation/goblin-alert.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/goblin-animation/goblin-attack.wav', 0.45, 0, 0, 1, null,
+    '/monsters/goblin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+
+  inst(D.goblin, 27, 20, 9,
+    '/monsters/goblin-animation/goblin-alert.glb',
     '/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
     '/monsters/goblin-animation/goblin-attack.wav', 0.45, 0, 0, 1, null,
     '/monsters/goblin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
@@ -1063,7 +1096,9 @@ export function triggerMonsterAttack(monsterId) {
 }
 
 function _applyMonsterDamage(monster) {
-  const target = pickRandomFrontLineTarget(party);
+  // Target whoever is on the face of the formation the monster is attacking from.
+  // Falls back to any alive member if that face is completely wiped.
+  const target = pickDirectionalTarget(party, monster, player.facing, player.gridRow, player.gridCol);
   if (!target) return;   // entire party wiped
 
   // Apply status effect stat modifiers to the target for this damage calculation

@@ -210,10 +210,16 @@ export function calcOnHitChance(rawChance, resilience, statusResistances, effect
 
 // ── Formation layout ─────────────────────────────────────────────────────────
 //
-//  Party slots are arranged in a 2×2 grid:
+//  Party slots are arranged in a 2×2 grid viewed from behind the party:
 //
-//    [ slot 0 ]  [ slot 1 ]   ← primary front row  (melee + ranged)
-//    [ slot 2 ]  [ slot 3 ]   ← back row            (ranged only by default)
+//    [ slot 0 front-LEFT ]  [ slot 1 front-RIGHT ]   ← primary front row
+//    [ slot 2  back-LEFT ]  [ slot 3  back-RIGHT ]   ← back row
+//
+//  Directional attack coverage:
+//    Front  → slots 0, 1  (or back partner if front is dead)
+//    Back   → slots 2, 3  (or front partner if back is dead)
+//    Left   → slots 0, 2  (or right-column partner if both dead)
+//    Right  → slots 1, 3  (or left-column partner if both dead)
 //
 //  Each back-row slot has a "front partner". If that partner is dead or absent,
 //  the back-row member steps up to the front line — they can be targeted by
@@ -282,6 +288,72 @@ export function pickRandomFrontLineTarget(party) {
   const candidates = getEffectiveFrontLine(party);
   if (!candidates.length) return null;
   return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+// Player facing → forward unit vector in grid space { dr, dc }
+// (row increases South, col increases East)
+const _FWD = [
+  { dr: -1, dc:  0 }, // 0 North
+  { dr:  0, dc:  1 }, // 1 East
+  { dr:  1, dc:  0 }, // 2 South
+  { dr:  0, dc: -1 }, // 3 West
+];
+
+// Right-hand vector (90° CW from forward in top-down grid space)
+const _RIGHT = [
+  { dr:  0, dc:  1 }, // 0 North → right is East
+  { dr:  1, dc:  0 }, // 1 East  → right is South
+  { dr:  0, dc: -1 }, // 2 South → right is West
+  { dr: -1, dc:  0 }, // 3 West  → right is North
+];
+
+/**
+ * Picks a random alive party member from the face of the formation the monster
+ * is attacking from, based on the player's current facing direction.
+ *
+ * Attack-face → candidate slots:
+ *   Front  (monster ahead of party)  → 0, 1
+ *   Back   (monster behind party)    → 2, 3
+ *   Right  (monster on party's right)→ 1, 3
+ *   Left   (monster on party's left) → 0, 2
+ *
+ * Falls back to any alive member if the entire face is wiped.
+ *
+ * @param {Array}  party        The live party array from party.js
+ * @param {object} monster      Attacking monster (needs gridRow, gridCol)
+ * @param {number} facing       player.facing  (0 North / 1 East / 2 South / 3 West)
+ * @param {number} playerRow    player.gridRow
+ * @param {number} playerCol    player.gridCol
+ * @returns {object|null}
+ */
+export function pickDirectionalTarget(party, monster, facing, playerRow, playerCol) {
+  const fwd   = _FWD[facing]   ?? _FWD[0];
+  const right = _RIGHT[facing] ?? _RIGHT[0];
+
+  // Vector from player to monster
+  const dr = monster.gridRow - playerRow;
+  const dc = monster.gridCol - playerCol;
+
+  const dotFwd   = dr * fwd.dr   + dc * fwd.dc;
+  const dotRight = dr * right.dr + dc * right.dc;
+
+  // Which axis dominates?  Tie goes to front/back.
+  let slots;
+  if (Math.abs(dotFwd) >= Math.abs(dotRight)) {
+    slots = dotFwd >= 0 ? [0, 1] : [2, 3]; // front or back
+  } else {
+    slots = dotRight > 0 ? [1, 3] : [0, 2]; // right or left flank
+  }
+
+  const pool = slots.map(i => party[i]).filter(m => m && !m.isEmpty && !m.isDead);
+
+  // Fallback: any surviving member (so combat never silently stalls)
+  if (!pool.length) {
+    const fallback = party.filter(m => m && !m.isEmpty && !m.isDead);
+    return fallback.length ? fallback[Math.floor(Math.random() * fallback.length)] : null;
+  }
+
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 // ── Skill / spell magnitude resolver ─────────────────────────────────────────

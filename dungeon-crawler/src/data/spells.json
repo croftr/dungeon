@@ -68,11 +68,12 @@
         "attackType": "heal",
         "baseDamage": 0,
         "magnitudeFormula": "intelligence",
+        "magnitudeScale": 2.0,
         "magnitudeBonusMode": "flat",
         "delay": 5,
         "mpCost": 12,
         "icon": "/icons/heal.png",
-        "description": "A wave of restorative energy that mends wounds. Restores HP equal to the caster's Intelligence to one party member.",
+        "description": "A wave of restorative energy that mends wounds. Restores HP equal to double the caster's Intelligence to one party member.",
         "value": 0,
         "weight": 0
     }

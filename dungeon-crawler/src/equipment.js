@@ -697,6 +697,10 @@ function populateTooltip(obj) {
             <span style="font-size:8px">Skill Bonuses</span>
             <span id="item-detail-skillbonus" style="font-size:8px; text-align:right">—</span>
         </div>
+        <div class="detail-stat-row" id="detail-row-scaling">
+            <span>Stat Scaling</span>
+            <span id="item-detail-scaling">—</span>
+        </div>
         <div class="detail-stat-row" id="detail-row-ammo-mod">
             <span>Dmg Multiplier</span>
             <span id="item-detail-ammo-mod">—</span>
@@ -742,6 +746,7 @@ function populateTooltip(obj) {
   document.getElementById('detail-row-weight').style.display = isAmmo ? 'none' : 'flex';
   document.getElementById('detail-row-statchange').style.display = hasStatChange ? 'flex' : 'none';
   document.getElementById('detail-row-skillbonus').style.display = hasSkillBonus ? 'flex' : 'none';
+  document.getElementById('detail-row-scaling').style.display = hasScaling ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-mod').style.display = isAmmo ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-type').style.display = isAmmo ? 'flex' : 'none';
 
@@ -790,6 +795,17 @@ function populateTooltip(obj) {
         return `${label} +${val}`;
       });
       document.getElementById('item-detail-skillbonus').textContent = parts.join(' · ');
+    }
+
+    if (hasScaling) {
+      const weights = def.statWeights;
+      const parts = [];
+      if (weights.str > 0) parts.push(`STR ${Math.round(weights.str * 100)}%`);
+      if (weights.dex > 0) parts.push(`DEX ${Math.round(weights.dex * 100)}%`);
+      if (weights.intelligence > 0) parts.push(`INT ${Math.round(weights.intelligence * 100)}%`);
+      if (weights.vitality > 0) parts.push(`VIT ${Math.round(weights.vitality * 100)}%`);
+      if (weights.resilience > 0) parts.push(`RES ${Math.round(weights.resilience * 100)}%`);
+      document.getElementById('item-detail-scaling').textContent = parts.join(' · ');
     }
   }
 }
@@ -1362,7 +1378,13 @@ function _showSkillSwitchMenu(x, y, memberIndex, mode) {
   const m = party[memberIndex];
   if (!m || m.isEmpty) return;
 
-  const items = mode === 'skill' ? (m.skills || []) : (m.spells || []);
+  let items = mode === 'skill' ? (m.skills || []) : (m.spells || []);
+  if (mode === 'skill') {
+    items = items.filter(s => {
+      const def = SKILLS_DATA[s.name];
+      return !def?.isPassive;
+    });
+  }
   if (!items.length) return;
 
   _skillSwMenuCtx = { memberIndex, mode };
@@ -1650,8 +1672,24 @@ function renderCharDevModal(memberIndex) {
     if (futureHeading) futureHeading.textContent = 'Choose a Skill:';
     if (availEl) {
       availEl.innerHTML = '';
-      const learnedNames = new Set((m.skills ?? []).map(s => s.name));
-      const choosable = (m.skillProgression ?? []).filter(s => !learnedNames.has(s.name));
+      // Count how many times each skill name has been learned so duplicate
+      // progression entries (e.g. two "Bow Master" slots) each show as a
+      // separate choosable card, and only become unavailable once that many
+      // copies have been learned.
+      const learnedCounts = {};
+      for (const s of (m.skills ?? [])) {
+        learnedCounts[s.name] = (learnedCounts[s.name] ?? 0) + 1;
+      }
+      // Walk the progression in order; for each entry, skip it only if we've
+      // already "consumed" that many learned copies of the same name.
+      const seen = {};
+      const choosable = [];
+      for (const s of (m.skillProgression ?? [])) {
+        seen[s.name] = (seen[s.name] ?? 0) + 1;
+        if (seen[s.name] > (learnedCounts[s.name] ?? 0)) {
+          choosable.push(s);
+        }
+      }
 
       if (choosable.length === 0) {
         const p = document.createElement('p');

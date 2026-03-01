@@ -128,11 +128,13 @@
     "Heal": {
         "type": "healing",
         "icon": "/skills/heal.png",
-        "description": "A wave of restorative energy that mends wounds. Restores HP equal to the casters Intelligence to one party member.",
+        "description": "A wave of restorative energy that mends wounds. Restores HP equal to double the caster's Intelligence to one party member.",
         "cooldownMs": 15000,
         "effectType": "singleHeal",
         "effectTarget": "party-member",
         "attackType": "heal",
+        "magnitudeFormula": "intelligence",
+        "magnitudeScale": 2.0,
         "magnitudeBonusMode": "flat"
     },
     "Warcry": {
