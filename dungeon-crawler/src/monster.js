@@ -261,14 +261,11 @@ function _updateStatsPanel(m) {
     debuffsHtml;
 }
 
-export function initMonsters(scene) {
-  const gltfLoader = new GLTFLoader();
+const _gltfLoader = new GLTFLoader();
 
-  monsters.forEach((m) => {
-    if (!m.alive) return;
-
+function _loadMonster(m, scene) {
     // Load the idle/walking GLB as the base mesh
-    gltfLoader.load(m.glbIdle, (gltf) => {
+    _gltfLoader.load(m.glbIdle, (gltf) => {
       const model = gltf.scene;
       m.mesh = model;
 
@@ -400,6 +397,22 @@ export function initMonsters(scene) {
         });
       }
     });
+}
+
+export function initMonsters(scene) {
+  const currentLevel = window.currentLevel || 1;
+  monsters.forEach((m) => {
+    if (!m.alive) return;
+    if ((m.level ?? 1) !== currentLevel) return; // defer other levels
+    _loadMonster(m, scene);
+  });
+}
+
+export function loadMonstersForLevel(scene, level) {
+  monsters.forEach((m) => {
+    if (!m.alive || m.mesh) return; // skip dead or already loaded
+    if ((m.level ?? 1) !== level) return;
+    _loadMonster(m, scene);
   });
 }
 
@@ -501,8 +514,11 @@ function _updatePatrol(m, dt) {
 //  ANIMATION  (called every frame from main.js)
 // ─────────────────────────────────────────────────────────────────────────────
 
+const FOG_CULL_SQ = 14 * 14; // slightly beyond fog end (12 units)
+
 export function updateMonsters(dt, playerCamera, scene) {
   const currentLevel = window.currentLevel || 1;
+  const playerPos = playerCamera ? playerCamera.position : null;
   monsters.forEach((m) => {
     if (currentLevel !== (m.level ?? 1)) {
       if (m.hpLabel) m.hpLabel.visible = false;
@@ -514,6 +530,21 @@ export function updateMonsters(dt, playerCamera, scene) {
 
     // If dead and mesh is already gone, skip
     if (!m.alive && !m.mesh) return;
+
+    // Distance cull: skip full update for monsters beyond fog range
+    if (m.mesh && playerPos && m.alive) {
+      const dx = m.mesh.position.x - playerPos.x;
+      const dz = m.mesh.position.z - playerPos.z;
+      if (dx * dx + dz * dz > FOG_CULL_SQ) {
+        if (m.mixer && m.mixer.timeScale !== 0) m.mixer.timeScale = 0;
+        if (m.hpLabel) m.hpLabel.visible = false;
+        if (m.statsLabel) m.statsLabel.visible = false;
+        m.mesh.visible = false;
+        return;
+      }
+      // Resume if returning into range
+      if (m.mixer && m.mixer.timeScale === 0) m.mixer.timeScale = 1;
+    }
 
     if (m.mesh) m.mesh.visible = true;
 

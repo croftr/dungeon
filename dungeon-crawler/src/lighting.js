@@ -28,6 +28,7 @@ export function initLighting(scene) {
 //  PER-FRAME UPDATE  (call from render loop)
 // ─────────────────────────────────────────────
 let flickerTime = 0;
+let _lastLightX = NaN, _lastLightZ = NaN;
 
 export function updateLighting({ torch, fill }, camera, dt) {
   flickerTime += dt * 3.5;
@@ -57,7 +58,12 @@ export function updateLighting({ torch, fill }, camera, dt) {
   torch.intensity = targetIntensity * flicker;
   torch.distance = targetDistance;
 
-  // Both lights track the camera position exactly
-  torch.position.copy(camera.position);
-  fill.position.set(camera.position.x, camera.position.y - 0.3, camera.position.z);
+  // Only move lights when camera has moved (avoids shadow map recalculation on static frames)
+  const cx = camera.position.x, cz = camera.position.z;
+  if (cx !== _lastLightX || cz !== _lastLightZ) {
+    torch.position.copy(camera.position);
+    fill.position.set(cx, camera.position.y - 0.3, cz);
+    _lastLightX = cx;
+    _lastLightZ = cz;
+  }
 }

@@ -8,7 +8,7 @@ import { initParticles, updateParticles } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
 import { initParty, updateParty } from './party.js';
 import { initEquipment } from './equipment.js';
-import { initMonsters, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
+import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, updateObjects } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic } from './audio.js';
@@ -264,6 +264,9 @@ window.loadLevel = function (levelNum) {
   clearObjects(scene);
   spawnObjectsForLevel();
   updateRecruitsMeshState();
+
+  // 4. Load monster models for this level (deferred from init)
+  loadMonstersForLevel(scene, levelNum);
 
   // 4. Move player to start of new map
   const start = findCell(CELL_START);
