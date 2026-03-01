@@ -3,7 +3,7 @@
     "name": "Goblin",
     "hp": 100,
     "defence": 5,
-    "xp": 500,
+    "xp": 100,
     "stats": {
       "strength": 12,
       "dexterity": 15,
@@ -26,7 +26,7 @@
     "name": "Albino Goblin",
     "hp": 120,
     "defence": 4,
-    "xp": 35,
+    "xp": 120,
     "stats": {
       "strength": 14,
       "dexterity": 18,
@@ -55,7 +55,7 @@
     "name": "Orc",
     "hp": 200,
     "defence": 6,
-    "xp": 60,
+    "xp": 160,
     "stats": {
       "strength": 20,
       "dexterity": 8,
@@ -74,7 +74,7 @@
     "name": "Ghoul",
     "hp": 180,
     "defence": 3,
-    "xp": 50,
+    "xp": 150,
     "stats": {
       "strength": 16,
       "dexterity": 12,
@@ -103,7 +103,7 @@
     "name": "Zombie",
     "hp": 100,
     "defence": 1,
-    "xp": 20,
+    "xp": 120,
     "stats": {
       "strength": 14,
       "dexterity": 4,
@@ -128,7 +128,7 @@
     "name": "IceMan",
     "hp": 200,
     "defence": 7,
-    "xp": 65,
+    "xp": 265,
     "stats": {
       "strength": 15,
       "dexterity": 8,
@@ -153,7 +153,7 @@
     "name": "TreeKin",
     "hp": 150,
     "defence": 9,
-    "xp": 45,
+    "xp": 245,
     "stats": {
       "strength": 18,
       "dexterity": 6,
@@ -174,9 +174,9 @@
   },
   "treeman": {
     "name": "Treeman",
-    "hp": 1,
+    "hp": 250,
     "defence": 9,
-    "xp": 200,
+    "xp": 1000,
     "stats": {
       "strength": 30,
       "dexterity": 18,
@@ -203,12 +203,12 @@
     "name": "Ogre",
     "hp": 150,
     "defence": 9,
-    "xp": 55,
+    "xp": 255,
     "stats": {
-      "strength": 20,
+      "strength": 24,
       "dexterity": 18,
       "vitality": 25,
-      "intelligence": 26,
+      "intelligence": 16,
       "resilience": 20
     },
     "drops": [

@@ -166,9 +166,22 @@ export function initObjects(scene, camera) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 1 && distCol <= 1) {
-                    showMessage("You step into the swirling blue portal...");
-                    playPortalSound();
-                    if (window.loadLevel) window.loadLevel(obj.userData.targetLevel);
+                    const targetLevel = obj.userData.targetLevel;
+                    if (targetLevel === 2 && window.currentLevel === 1) {
+                        showMessage("You step into the swirling blue portal...");
+                        playPortalSound();
+                        if (window.playTreemanVideo) {
+                            window.playTreemanVideo(() => {
+                                if (window.loadLevel) window.loadLevel(targetLevel);
+                            });
+                        } else {
+                            if (window.loadLevel) window.loadLevel(targetLevel);
+                        }
+                    } else {
+                        showMessage("You step into the swirling blue portal...");
+                        playPortalSound();
+                        if (window.loadLevel) window.loadLevel(targetLevel);
+                    }
                 } else {
                     showMessage("Step closer to the portal to enter.");
                 }
@@ -204,20 +217,27 @@ export function initObjects(scene, camera) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 1 && distCol <= 1) {
-                    import('./equipment.js').then(equip => {
-                        let added = false;
-                        for (let i = 0; i < 4; i++) {
-                            if (equip.addItemToInventory(i, obj.userData.itemName)) {
-                                added = true;
-                                showMessage(`Picked up ${obj.userData.itemName}.`);
-                                obj.parent.remove(obj);
-                                break;
+                    if (obj.userData.itemName === 'Gold Coins') {
+                        const amount = obj.userData.quantity || 1;
+                        addGold(amount);
+                        showMessage(`Picked up ${amount} Gold Coins.`);
+                        obj.parent.remove(obj);
+                    } else {
+                        import('./equipment.js').then(equip => {
+                            let added = false;
+                            for (let i = 0; i < 4; i++) {
+                                if (equip.addItemToInventory(i, obj.userData.itemName)) {
+                                    added = true;
+                                    showMessage(`Picked up ${obj.userData.itemName}.`);
+                                    obj.parent.remove(obj);
+                                    break;
+                                }
                             }
-                        }
-                        if (!added) {
-                            showMessage("Inventory is full!");
-                        }
-                    });
+                            if (!added) {
+                                showMessage("Inventory is full!");
+                            }
+                        });
+                    }
                 } else {
                     showMessage("Move closer to pick it up.");
                 }
@@ -448,7 +468,7 @@ export function initObjects(scene, camera) {
     });
 }
 
-export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = [], modelPath = '/items/Meshy_AI_Treasure_Chest_0221184131_texture.glb', interactive = true, offsetX = 0) {
+export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = [], modelPath = '/items/Meshy_AI_Treasure_Chest_0221184131_texture.glb', interactive = true, offsetX = 0, title = 'Chest') {
     loader.load(modelPath, (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.3);
@@ -464,6 +484,7 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
                     child.userData.gridRow = row;
                     child.userData.gridCol = col;
                     child.userData.contents = contents;
+                    child.userData.title = title;
                 }
 
                 if (child.material) {
@@ -492,16 +513,11 @@ export function spawnObjectsForLevel() {
     objects.length = 0; // clear logical array
 
     if (level === 1) {
-        // Chest in the starter room
+        // Stash in the starter room
         addChest(objectsGroup, gltfLoader, 11, 13, 0, 0.7, [
-            'Leather Boots', 'Steel Arrows', 'Poison Arrows', 'Torch',
-            'Leather Cap', 'Iron Helm', 'Padded Vest', 'Leather Belt',
-            'Adventurer\'s Belt', 'Chain Shirt', 'Plate Cuirass',
-            'Iron Gauntlets', 'Chainmail Leggings', 'Iron-Shod Boots',
-            'Greatsword', 'War Hammer', 'Longbow',
-            'Ring of Strength', 'Ring of Dexterity', 'Ring of Dexterity', 'Ring of Resilience', 'Ring of Wisdom', 'Ring of Vigour',
-            'Elven Dagger'
-        ]);
+            { name: 'Gold Coins', quantity: 100 },
+            'Torch'
+        ], '/items/stash.glb', true, 0, 'Stash');
         // New Chest at the end of the long passage
         addChest(objectsGroup, gltfLoader, 7, 1, 0, -0.7, [
             'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Dagger', 'Axe', 'Ring of Vigour', 'Mace', 'Ring of Wisdom'
@@ -510,6 +526,12 @@ export function spawnObjectsForLevel() {
         addChest(objectsGroup, gltfLoader, 5, 1, Math.PI, -0.65, [
             "Ring of Dexterity", "Elven Dagger", "Steel Arrows", "Poison Dagger", "Leather Belt", "Adventurer's Belt"
         ], undefined, true, -0.35);
+
+        // 2nd Chest in the Northwest room, next to the other one, containing all rings
+        addChest(objectsGroup, gltfLoader, 5, 1, Math.PI, -0.65, [
+            { name: 'Gold Coins', quantity: 100 },
+            "Ring of Vigour", "Ring of Wisdom", "Ring of Strength", "Ring of Dexterity", "Ring of Resilience"
+        ], undefined, true, 0.35);
         // Crystals in the starter room
         addCrystals(objectsGroup, gltfLoader, 9, 11, 0, -0.7);
         // Bone pile in the passage
@@ -902,7 +924,7 @@ function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, c
 }
 
 function addJester(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
-    const path = '/npcs/jester/Meshy_AI_Animation_Agree_Gesture_withSkin.glb';
+    const path = '/npcs/jester/jester-idle1.glb';
     loader.load(path, (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
@@ -934,8 +956,8 @@ function addJester(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) 
         if (gltf.animations && gltf.animations.length > 0) {
             const mixer = new THREE.AnimationMixer(model);
             const action = mixer.clipAction(gltf.animations[0]);
-            action.setLoop(THREE.LoopOnce);
-            action.clampWhenFinished = true;
+            action.setLoop(THREE.LoopRepeat);
+            action.play();
 
             // Store reference so we can trigger it on click
             model.userData.mixer = mixer;
@@ -970,6 +992,7 @@ export function openChestModal(chestObj) {
     const overlay = document.getElementById('chest-overlay');
     overlay.classList.remove('chest-hidden');
     document.getElementById('chest-sent-label').textContent = '';
+    document.getElementById('chest-title').textContent = chestObj.userData.title || 'Chest';
 
     const slots = document.querySelectorAll('.chest-slot');
     const contents = chestObj.userData.contents || [];
@@ -1071,7 +1094,6 @@ function _renderMerchantShop() {
 
                 const img = document.createElement('img');
                 img.src = itemDef.icon;
-                img.title = name;
                 slot.appendChild(img);
 
                 const price = document.createElement('div');
@@ -1107,7 +1129,6 @@ function _renderMerchantBasket() {
 
             const img = document.createElement('img');
             img.src = itemDef.icon;
-            img.title = name;
             slot.appendChild(img);
 
             const price = document.createElement('div');
@@ -1233,7 +1254,6 @@ function _renderMerchantPartyItems() {
 
                 const img = document.createElement('img');
                 img.src = def.icon;
-                img.title = item.name;
                 slot.appendChild(img);
 
                 const price = document.createElement('div');
@@ -1272,7 +1292,6 @@ function _renderMerchantSellBasket() {
 
             const img = document.createElement('img');
             img.src = def.icon;
-            img.title = entry.name;
             slot.appendChild(img);
 
             const price = document.createElement('div');
@@ -1340,14 +1359,14 @@ function _bindChestSlots(equip, slots, contents) {
         slot.onclick = null;
         slot.oncontextmenu = null;
 
-        const itemName = contents[i];
+        const entry = contents[i];
+        const itemName = typeof entry === 'string' ? entry : entry?.name;
         if (itemName) {
             const itemDef = getItemDef(itemName);
             if (itemDef) {
                 slot.classList.add('occupied');
                 const img = document.createElement('img');
                 img.src = itemDef.icon;
-                img.title = itemDef.name;
                 slot.appendChild(img);
 
                 // Left-click → send to first available party member
@@ -1357,19 +1376,47 @@ function _bindChestSlots(equip, slots, contents) {
                 };
 
                 // Right-click → pick recipient
-                slot.oncontextmenu = (e) => {
-                    e.preventDefault();
-                    _showChestCtxMenu(e.clientX, e.clientY, equip, slots, contents, i, itemDef);
-                };
+                if (itemName !== 'Gold Coins') {
+                    slot.oncontextmenu = (e) => {
+                        e.preventDefault();
+                        _showChestCtxMenu(e.clientX, e.clientY, equip, slots, contents, i, itemDef);
+                    };
+                } else {
+                    slot.oncontextmenu = (e) => { e.preventDefault(); };
+                }
             }
         }
 
         // Hover tooltip — call this for ALL slots to ensure listeners are updated or cleared
-        equip.attachTooltipListeners(slot, () => contents[i] ? { name: contents[i] } : null);
+        equip.attachTooltipListeners(slot, () => {
+            if (!contents[i]) return null;
+            const entry = contents[i];
+            const isObj = typeof entry === 'object';
+            return {
+                name: itemName,
+                quantity: isObj && entry.quantity ? entry.quantity : null
+            };
+        });
     });
 }
 
 function _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx) {
+    const entry = contents[slotIdx];
+    const isGold = (typeof entry === 'string' ? entry : entry?.name) === 'Gold Coins';
+    if (isGold) {
+        const amount = typeof entry === 'object' && entry.quantity ? entry.quantity : 1;
+        addGold(amount);
+        showMessage(`Picked up ${amount} Gold Coins.`);
+        contents[slotIdx] = null;
+        const slot = slots[slotIdx];
+        slot.innerHTML = '';
+        slot.classList.remove('occupied');
+        slot.onclick = null;
+        slot.oncontextmenu = null;
+        equip.hideTooltip();
+        return;
+    }
+
     const target = party[targetIdx];
     const success = equip.addItemToInventory(targetIdx, itemDef.name);
     if (success) {
@@ -1516,7 +1563,6 @@ function _renderAlchemySlots() {
             slot.classList.add('occupied');
             const img = document.createElement('img');
             img.src = itemDef.icon;
-            img.title = itemDef.name;
             slot.appendChild(img);
 
             // Left-click → send to first available party member (remove from academy)
@@ -1625,7 +1671,6 @@ function _showAlchemyItemPicker(x, y, slotIdx) {
 
                 const img = document.createElement('img');
                 img.src = def.icon;
-                img.title = `${def.name} (${member.name})`;
                 slot.appendChild(img);
 
                 // Mini portrait of owner
@@ -1801,7 +1846,61 @@ export function spawnCorpse(col, row, droppedItems = []) {
     });
 }
 
-export function spawnDroppedItem(col, row, itemName) {
+export function spawnDroppedItem(col, row, itemName, quantity = 1) {
+    if (itemName === 'Gold Coins') {
+        const spriteMat = new THREE.SpriteMaterial({ color: 0xffffff });
+        const sprite = new THREE.Sprite(spriteMat);
+
+        const img = new Image();
+        img.src = '/icons/gold_coins.png';
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, 256, 256);
+
+            ctx.font = 'bold 80px Arial';
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 6;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            ctx.strokeText(quantity.toString(), 128, 128);
+            ctx.fillText(quantity.toString(), 128, 128);
+
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.minFilter = THREE.LinearFilter;
+            sprite.material.map = tex;
+            sprite.material.needsUpdate = true;
+        };
+
+        sprite.position.set(col * CELL, 0.5, row * CELL);
+        sprite.scale.set(0.8, 0.8, 0.8);
+
+        sprite.userData.isDroppedItem = true;
+        sprite.userData.itemName = itemName;
+        sprite.userData.quantity = quantity;
+        sprite.userData.gridCol = col;
+        sprite.userData.gridRow = row;
+
+        const light = new THREE.PointLight(0xffaa00, 1, 3);
+        light.position.set(0, 0.2, 0);
+        sprite.add(light);
+
+        const originY = sprite.position.y;
+        new Tween(sprite.position, tweenGroup)
+            .to({ y: originY + 0.2 }, 1000)
+            .easing(Easing.Quadratic.InOut)
+            .yoyo(true)
+            .repeat(Infinity)
+            .start();
+
+        objectsGroup.add(sprite);
+        return;
+    }
+
     const geometry = new THREE.SphereGeometry(0.15, 8, 8);
     const material = new THREE.MeshLambertMaterial({
         color: 0xffff00,

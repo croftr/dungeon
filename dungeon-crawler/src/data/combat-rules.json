@@ -8,9 +8,12 @@
     "critMultiplier": 3,
     "monsterBaseAttack": 4,
     "resilienceDamageFactor": 0.5,
-    "shieldBashStunChance": 0.5,
+    "shieldBashStunChance": 0.1,
     "shieldBashStunDurationMs": 5000,
-    "backupPairs": { "2": 0, "3": 1 },
+    "backupPairs": {
+        "2": 0,
+        "3": 1
+    },
     "onHitEffectBase": 10,
     "onHitEffectMinChance": 0.05
 }

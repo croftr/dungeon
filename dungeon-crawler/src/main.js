@@ -234,6 +234,64 @@ if (skipOgreBtn) skipOgreBtn.addEventListener('click', finishOgreVideo);
 if (ogreVideo) ogreVideo.addEventListener('ended', finishOgreVideo);
 
 // ─────────────────────────────────────────────
+//  TREEMAN VIDEO OVERLAY
+// ─────────────────────────────────────────────
+const treemanOverlay = document.getElementById('treeman-video-overlay');
+const treemanVideo = document.getElementById('treeman-video');
+const skipTreemanBtn = document.getElementById('skip-treeman-btn');
+let _treemanCallback = null;
+
+window.playTreemanVideo = function (onComplete) {
+  _treemanCallback = onComplete;
+  if (!treemanOverlay || !treemanVideo) {
+    if (_treemanCallback) _treemanCallback();
+    return;
+  }
+  treemanOverlay.classList.remove('hidden');
+
+  setTimeout(() => {
+    treemanOverlay.style.opacity = '1';
+    treemanVideo.play().catch(e => {
+      console.warn("Treeman video play failed:", e);
+      finishTreemanVideo();
+    });
+  }, 50);
+};
+
+function finishTreemanVideo() {
+  if (!treemanOverlay) {
+    if (_treemanCallback) _treemanCallback();
+    return;
+  }
+  treemanOverlay.style.opacity = '0';
+
+  // Fade out audio
+  const startVol = treemanVideo.volume;
+  const fadeInterval = setInterval(() => {
+    if (treemanVideo.volume > 0.05) {
+      treemanVideo.volume -= 0.05;
+    } else {
+      treemanVideo.volume = 0;
+      clearInterval(fadeInterval);
+    }
+  }, 50);
+
+  setTimeout(() => {
+    treemanVideo.pause();
+    clearInterval(fadeInterval);
+    treemanVideo.volume = startVol; // Reset for next time
+    treemanOverlay.classList.add('hidden');
+    if (_treemanCallback) {
+      _treemanCallback();
+      _treemanCallback = null;
+    }
+  }, 1500);
+}
+
+if (skipTreemanBtn) skipTreemanBtn.addEventListener('click', finishTreemanVideo);
+if (treemanVideo) treemanVideo.addEventListener('ended', finishTreemanVideo);
+
+// ─────────────────────────────────────────────
 //  MUSIC
 // ─────────────────────────────────────────────
 function handleFirstInteraction() {
@@ -248,6 +306,7 @@ window.addEventListener('keydown', handleFirstInteraction);
 //  LEVEL LOADING
 // ─────────────────────────────────────────────
 window.loadLevel = function (levelNum) {
+  const oldLevel = window.currentLevel;
   window.currentLevel = levelNum;
 
   // Switch ambient music to match the new level

@@ -17,7 +17,7 @@ export const party = [
   { id: 3, isEmpty: true },
 ];
 
-export let partyGold = 50000;
+export let partyGold = 0;
 
 export function addGold(amount) {
   partyGold += amount;
@@ -31,7 +31,7 @@ export function removeGold(amount) {
 
 function updateGoldDisplay() {
   const el = document.getElementById('tactics-gold');
-  if (el) el.textContent = `Gold: ${partyGold}`;
+  if (el) el.innerHTML = `<img src="/icons/gold_pile.png" style="width:16px; height:16px; margin-right:4px;">${partyGold}`;
 }
 
 export const lastAttackTimes = {};
@@ -490,7 +490,7 @@ function buildTacticsOverlay() {
     <div id="tactics-modal">
       <div id="tactics-header">
         <span>Party Tactics</span>
-        <span id="tactics-gold" style="margin-left:auto; font-size:1.1em; color:#ffd700; text-shadow:1px 1px 0 #000;">Gold: ${partyGold}</span>
+        <span id="tactics-gold" style="margin-left:auto; display:flex; align-items:center; font-size:1.1em; color:#ffd700; text-shadow:1px 1px 0 #000;"><img src="/icons/gold_pile.png" style="width:16px; height:16px; margin-right:4px;">${partyGold}</span>
         <button id="tactics-close" aria-label="Close">&times;</button>
       </div>
       <div id="tactics-body">
@@ -536,8 +536,8 @@ function renderTacticsSlots() {
     } else {
       const canvas = document.createElement('canvas');
       canvas.className = 'tactics-portrait';
-      canvas.width = 56;
-      canvas.height = 56;
+      canvas.width = 96;
+      canvas.height = 96;
       cell.appendChild(canvas);
       drawPortrait(canvas, m);
 

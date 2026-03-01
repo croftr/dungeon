@@ -120,8 +120,9 @@ body {
 }
 
 #intro-video {
-  max-width: 100%;
-  max-height: 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   box-shadow: 0 0 100px rgba(0, 0, 0, 1);
 }
 
@@ -357,10 +358,10 @@ body {
 #tactics-modal {
   background: rgba(10, 7, 4, 0.97);
   border: 1px solid #5a4a30;
-  border-radius: 6px;
-  box-shadow: 0 0 50px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 220, 120, 0.07);
+  border-radius: 8px;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 220, 120, 0.07);
   font-family: monospace;
-  min-width: 340px;
+  min-width: 600px;
   overflow: hidden;
 }
 
@@ -368,13 +369,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
-  border-bottom: 1px solid #3a2e18;
+  padding: 18px 24px;
+  border-bottom: 2px solid #3a2e18;
   background: rgba(0, 0, 0, 0.4);
 }
 
 #tactics-header span {
-  font-size: 13px;
+  font-size: 16px;
   color: #c8a84a;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -401,15 +402,15 @@ body {
 }
 
 #tactics-body {
-  padding: 16px 20px 18px;
+  padding: 30px 40px 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 16px;
 }
 
 .tactics-row-label {
-  font-size: 8px;
+  font-size: 10px;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: #c8a84a;
@@ -422,21 +423,21 @@ body {
 
 .tactics-row {
   display: flex;
-  gap: 12px;
+  gap: 24px;
 }
 
 .tactics-slot {
-  width: 120px;
-  min-height: 96px;
+  width: 220px;
+  min-height: 180px;
   background: rgba(0, 0, 0, 0.5);
   border: 1px solid #3a2e14;
-  border-radius: 4px;
+  border-radius: 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 10px 8px;
+  gap: 12px;
+  padding: 24px 20px;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
 }
@@ -460,28 +461,28 @@ body {
 
 .tactics-portrait {
   display: block;
-  width: 56px;
-  height: 56px;
+  width: 96px;
+  height: 96px;
   border: 1px solid #4a3a20;
-  border-radius: 3px;
+  border-radius: 4px;
 }
 
 .tactics-name {
-  font-size: 9px;
+  font-size: 14px;
   color: #c8a84a;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   text-align: center;
 }
 
 .tactics-job {
-  font-size: 8px;
-  color: #6a5838;
+  font-size: 12px;
+  color: #8a7858;
   text-align: center;
 }
 
 .tactics-empty {
-  font-size: 9px;
+  font-size: 11px;
   color: #3a3020;
   font-style: italic;
 }
@@ -489,15 +490,16 @@ body {
 #tactics-swap-rows {
   background: rgba(10, 7, 4, 0.8);
   border: 1px solid #4a3a20;
-  color: #6a5a38;
-  font-size: 8px;
-  letter-spacing: 1px;
+  color: #8a7a58;
+  font-size: 11px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   font-family: monospace;
-  padding: 5px 16px;
-  border-radius: 3px;
+  padding: 10px 24px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
+  transition: all 0.15s;
+  margin: 10px 0;
 }
 
 #tactics-swap-rows:hover {
@@ -506,13 +508,13 @@ body {
 }
 
 .tactics-hint {
-  font-size: 9px;
-  color: #4a4030;
+  font-size: 12px;
+  color: #6a5a48;
   text-align: center;
-  padding-top: 8px;
-  border-top: 1px solid #2a2010;
+  padding-top: 20px;
+  border-top: 1px solid #3a2e18;
   width: 100%;
-  line-height: 1.5;
+  line-height: 1.8;
 }
 
 /* One member card */
@@ -1463,7 +1465,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1010; /* above equip-overlay (1000) — never both open, but stacks correctly */
+  z-index: 1010;
+  /* above equip-overlay (1000) — never both open, but stacks correctly */
 }
 
 #char-dev-modal {
@@ -1513,7 +1516,7 @@ body {
 
 #char-dev-prev:hover,
 #char-dev-next:hover {
-  background: rgba(200,168,74,0.15);
+  background: rgba(200, 168, 74, 0.15);
   color: #e8d090;
 }
 
@@ -1675,8 +1678,15 @@ body {
 }
 
 @keyframes skill-new-pulse {
-  0%, 100% { box-shadow: 0 0 6px rgba(200, 168, 74, 0.3); }
-  50% { box-shadow: 0 0 16px rgba(200, 168, 74, 0.7); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 6px rgba(200, 168, 74, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 16px rgba(200, 168, 74, 0.7);
+  }
 }
 
 .skill-card .skill-level-badge {
@@ -1769,8 +1779,15 @@ body {
 }
 
 @keyframes levelup-btn-pulse {
-  0%, 100% { box-shadow: 0 0 4px rgba(200, 168, 74, 0.3); }
-  50%       { box-shadow: 0 0 14px rgba(200, 168, 74, 0.7); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 4px rgba(200, 168, 74, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 14px rgba(200, 168, 74, 0.7);
+  }
 }
 
 #cd-detail-panel {

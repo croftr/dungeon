@@ -67,7 +67,7 @@ export function getInRangeMonster() {
 //  Only instance-specific data lives here: map position, assets, game state.
 // ─────────────────────────────────────────────────────────────────────────────
 
-function inst(def, id, gridRow, gridCol, glbIdle, glbAttack, attackSound, scale = 0.45, offsetX = 0, offsetZ = 0, level = 1, patrol = null, glbDeath = null, glbHit = null) {
+function inst(def, id, gridRow, gridCol, glbIdle, glbAttack, attackSound, scale = 0.45, offsetX = 0, offsetZ = 0, level = 1, patrol = null, glbDeath = null, glbHit = null, glbWalk = null) {
   return {
     id, type: 'glb',
     ...def,
@@ -75,7 +75,7 @@ function inst(def, id, gridRow, gridCol, glbIdle, glbAttack, attackSound, scale 
     gridRow, gridCol,
     offsetX, offsetZ,
     alive: true, mesh: null, mixer: null, actions: {},
-    glbIdle, glbAttack, glbDeath, glbHit, attackSound, scale,
+    glbIdle, glbAttack, glbDeath, glbHit, glbWalk, attackSound, scale,
     level,
     patrol,
   };
@@ -94,18 +94,21 @@ export const monsters = [
 
   // Upper maze
   inst(D.goblin, 1, 9, 6,
-    '/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
     '/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
     '/monsters/goblin-animation/goblin-attack.wav', 0.45, 0, 0, 1, null,
     '/monsters/goblin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
-    '/monsters/goblin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+    '/monsters/goblin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
 
   // Southern section
   inst(D.albino_goblin, 2, 15, 5,
-    '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
     '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
     '/monsters/albino_goblin-aimation/albino-goblin-attack.mp3', 0.45, 0, 0, 1, null,
-    '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Dead_withSkin.glb'),
+    '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Walking_withSkin.glb'),
 
   // Lower maze — zombie lurks in the far lower-right section, well past the row-14 barrier
   inst(D.zombie, 3, 17, 12,
@@ -145,7 +148,7 @@ export const monsters = [
     '/monsters/treeman-animation/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/treeman-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
     '/monsters/treeman-animation/attack-sound.mp3', 0.90, 0, 0, 2,
-    { bounds: { minRow: 1, maxRow: 5, minCol: 1, maxCol: 6 }, speed: 1.2, waitTime: 2.5 },
+    { bounds: { minRow: 1, maxRow: 5, minCol: 1, maxCol: 6 }, speed: 0.6, waitTime: 2.5 },
     '/monsters/treeman-animation/Meshy_AI_Animation_Dead_withSkin (1).glb',
     '/monsters/treeman-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin (1).glb'),
 
@@ -160,17 +163,18 @@ export const monsters = [
     '/monsters/ogre/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/ogre/Meshy_AI_Animation_Attack_withSkin.glb',
     '/monsters/ogre/ogre.mp3', 0.7, 0, 0, 1,
-    { bounds: { minRow: 1, maxRow: 5, minCol: 1, maxCol: 5 }, speed: 1.0, waitTime: 2.0 },
+    { bounds: { minRow: 1, maxRow: 5, minCol: 1, maxCol: 5 }, speed: 0.5, waitTime: 2.0 },
     '/monsters/ogre/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/ogre/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 
   // Goblin guard in the vertical passage leading to the Northwest room
   inst(D.goblin, 23, 8, 1,
-    '/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
     '/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
     '/monsters/goblin-animation/goblin-attack.wav', 0.45, 0, 0, 1, null,
     '/monsters/goblin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
-    '/monsters/goblin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+    '/monsters/goblin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
 ];
 
 export function isMonsterAt(row, col) {
@@ -264,139 +268,156 @@ function _updateStatsPanel(m) {
 const _gltfLoader = new GLTFLoader();
 
 function _loadMonster(m, scene) {
-    // Load the idle/walking GLB as the base mesh
-    _gltfLoader.load(m.glbIdle, (gltf) => {
-      const model = gltf.scene;
-      m.mesh = model;
+  // Load the idle/walking GLB as the base mesh
+  _gltfLoader.load(m.glbIdle, (gltf) => {
+    const model = gltf.scene;
+    m.mesh = model;
 
-      model.scale.setScalar(m.scale);
+    model.scale.setScalar(m.scale);
 
-      const wx = m.gridCol * CELL + (m.offsetX ?? 0);
-      const wz = m.gridRow * CELL + (m.offsetZ ?? 0);
-      model.position.set(wx, 0.0, wz);
+    const wx = m.gridCol * CELL + (m.offsetX ?? 0);
+    const wz = m.gridRow * CELL + (m.offsetZ ?? 0);
+    model.position.set(wx, 0.0, wz);
 
-      m.lookAtPlayer = (playerPos) => {
-        model.lookAt(playerPos.x, model.position.y, playerPos.z);
-      };
+    m.lookAtPlayer = (playerPos) => {
+      model.lookAt(playerPos.x, model.position.y, playerPos.z);
+    };
 
-      model.traverse((child) => {
-        if (child.isMesh) {
-          child.castShadow = true;
-          child.receiveShadow = true;
+    model.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
 
-          // Fix pixelation on monster textures
-          if (child.material && child.material.map) {
-            child.material.map.magFilter = THREE.LinearFilter;
-            child.material.map.minFilter = THREE.LinearMipmapLinearFilter;
-            child.material.map.anisotropy = 16;
-          }
-
-          if (child.material) {
-            child.material.transparent = false;
-            child.material.depthWrite = true;
-            if (child.material.metalness !== undefined) child.material.metalness = 0.0;
-            if (child.material.roughness !== undefined) child.material.roughness = 1.0;
-
-            if (m.name === 'Goblin' && child.material.color) {
-              child.material.color.setHex(0x55aa55);
-            }
-          }
+        // Fix pixelation on monster textures
+        if (child.material && child.material.map) {
+          child.material.map.magFilter = THREE.LinearFilter;
+          child.material.map.minFilter = THREE.LinearMipmapLinearFilter;
+          child.material.map.anisotropy = 16;
         }
-      });
 
-      m.mixer = new THREE.AnimationMixer(model);
+        if (child.material) {
+          child.material.transparent = false;
+          child.material.depthWrite = true;
+          if (child.material.metalness !== undefined) child.material.metalness = 0.0;
+          if (child.material.roughness !== undefined) child.material.roughness = 1.0;
 
-      if (gltf.animations && gltf.animations.length > 0) {
-        const idleAction = m.mixer.clipAction(gltf.animations[0]);
-        m.actions.idle = idleAction;
-        // Agree Gesture animations run fast — halve the speed so they look natural
-        // Training dummy doesn't loop its idle animation; it's triggered manually on hit
-        if (m.name !== 'Training Dummy') {
-          idleAction.play();
+          if (m.name === 'Goblin' && child.material.color) {
+            child.material.color.setHex(0x55aa55);
+          }
         }
       }
+    });
 
-      scene.add(model);
+    m.mixer = new THREE.AnimationMixer(model);
 
-      // ── HP bar label (CSS2DObject) ──────────────────────────────────────
-      const barWrap = document.createElement('div');
-      barWrap.className = 'monster-hp-bar';
-      const barFill = document.createElement('div');
-      barFill.className = 'monster-hp-fill';
-      barWrap.appendChild(barFill);
-      m.hpBarFill = barFill;
-
-      const hpLabel = new CSS2DObject(barWrap);
-      hpLabel.position.set(0, 1.8, 0);
-      model.add(hpLabel);
-      m.hpLabel = hpLabel;
-
-      // ── Hunter's Eye stats panel (CSS2DObject) ─────────────────────────
-      const statsDiv = document.createElement('div');
-      statsDiv.className = 'monster-stats-panel';
-      _updateStatsPanel({ ...m, statsPanel: statsDiv }); // seed initial HTML
-      m.statsPanel = statsDiv;
-
-      const statsLabel = new CSS2DObject(statsDiv);
-      statsLabel.position.set(0, 2.6, 0); // above the HP bar
-      statsLabel.visible = false;
-      model.add(statsLabel);
-      m.statsLabel = statsLabel;
-
-      // Load the attack animation GLB
-      gltfLoader.load(m.glbAttack, (animGltf) => {
-        if (animGltf.animations && animGltf.animations.length > 0) {
-          const attackClip = animGltf.animations[0];
-          const attackAction = m.mixer.clipAction(attackClip);
-          m.actions.attack = attackAction;
-
-          attackAction.setLoop(THREE.LoopOnce, 1);
-          attackAction.clampWhenFinished = true;
-
-          // When attack finishes, fade back to idle (except for training dummy, which stays on its last frame)
-          m.mixer.addEventListener('finished', (e) => {
-            if (e.action === m.actions.attack && m.actions.idle && m.name !== 'Training Dummy') {
-              m.actions.idle.reset().play();
-              m.actions.attack.crossFadeTo(m.actions.idle, 0.25, false);
-            }
-          });
-        }
-      });
-
-      // Load the death animation GLB if provided
-      if (m.glbDeath) {
-        gltfLoader.load(m.glbDeath, (deathGltf) => {
-          if (deathGltf.animations && deathGltf.animations.length > 0) {
-            const deathClip = deathGltf.animations[0];
-            const deathAction = m.mixer.clipAction(deathClip);
-            m.actions.death = deathAction;
-            deathAction.setLoop(THREE.LoopOnce, 1);
-            deathAction.clampWhenFinished = true;
-          }
-        });
+    if (gltf.animations && gltf.animations.length > 0) {
+      const idleAction = m.mixer.clipAction(gltf.animations[0]);
+      m.actions.idle = idleAction;
+      // Agree Gesture animations run fast — halve the speed so they look natural
+      // Training dummy doesn't loop its idle animation; it's triggered manually on hit
+      if (m.name !== 'Training Dummy') {
+        idleAction.play();
       }
+    }
 
-      // Load the hit animation GLB if provided
-      if (m.glbHit) {
-        gltfLoader.load(m.glbHit, (hitGltf) => {
-          if (hitGltf.animations && hitGltf.animations.length > 0) {
-            const hitClip = hitGltf.animations[0];
-            const hitAction = m.mixer.clipAction(hitClip);
-            m.actions.hit = hitAction;
-            hitAction.setLoop(THREE.LoopOnce, 1);
-            hitAction.clampWhenFinished = true;
+    scene.add(model);
 
-            // When hit animation finishes, fade back to idle
-            m.mixer.addEventListener('finished', (e) => {
-              if (e.action === m.actions.hit && m.actions.idle) {
-                m.actions.idle.reset().play();
-                m.actions.hit.crossFadeTo(m.actions.idle, 0.2, false);
-              }
-            });
+    // ── HP bar label (CSS2DObject) ──────────────────────────────────────
+    const barWrap = document.createElement('div');
+    barWrap.className = 'monster-hp-bar';
+    const barFill = document.createElement('div');
+    barFill.className = 'monster-hp-fill';
+    barWrap.appendChild(barFill);
+    m.hpBarFill = barFill;
+
+    const hpLabel = new CSS2DObject(barWrap);
+    hpLabel.position.set(0, 1.8, 0);
+    model.add(hpLabel);
+    m.hpLabel = hpLabel;
+
+    // ── Hunter's Eye stats panel (CSS2DObject) ─────────────────────────
+    const statsDiv = document.createElement('div');
+    statsDiv.className = 'monster-stats-panel';
+    _updateStatsPanel({ ...m, statsPanel: statsDiv }); // seed initial HTML
+    m.statsPanel = statsDiv;
+
+    const statsLabel = new CSS2DObject(statsDiv);
+    statsLabel.position.set(0, 2.6, 0); // above the HP bar
+    statsLabel.visible = false;
+    model.add(statsLabel);
+    m.statsLabel = statsLabel;
+
+    // Load the attack animation GLB
+    _gltfLoader.load(m.glbAttack, (animGltf) => {
+      if (animGltf.animations && animGltf.animations.length > 0) {
+        const attackClip = animGltf.animations[0];
+        const attackAction = m.mixer.clipAction(attackClip);
+        m.actions.attack = attackAction;
+
+        attackAction.setLoop(THREE.LoopOnce, 1);
+        attackAction.clampWhenFinished = true;
+
+        // When attack finishes, fade back to idle or walk (except for training dummy)
+        m.mixer.addEventListener('finished', (e) => {
+          if (e.action === m.actions.attack && m.actions.idle && m.name !== 'Training Dummy') {
+            const isMoving = (m._cs && m._cs.moving) || (m._ps && m._ps.moving);
+            const toAction = (isMoving && m.actions.walk) ? m.actions.walk : m.actions.idle;
+            toAction.reset().play();
+            m.actions.attack.crossFadeTo(toAction, 0.25, false);
+            m._animState = isMoving ? 'walk' : 'idle';
           }
         });
       }
     });
+
+    // Load the death animation GLB if provided
+    if (m.glbDeath) {
+      _gltfLoader.load(m.glbDeath, (deathGltf) => {
+        if (deathGltf.animations && deathGltf.animations.length > 0) {
+          const deathClip = deathGltf.animations[0];
+          const deathAction = m.mixer.clipAction(deathClip);
+          m.actions.death = deathAction;
+          deathAction.setLoop(THREE.LoopOnce, 1);
+          deathAction.clampWhenFinished = true;
+        }
+      });
+    }
+
+    // Load the hit animation GLB if provided
+    if (m.glbHit) {
+      _gltfLoader.load(m.glbHit, (hitGltf) => {
+        if (hitGltf.animations && hitGltf.animations.length > 0) {
+          const hitClip = hitGltf.animations[0];
+          const hitAction = m.mixer.clipAction(hitClip);
+          m.actions.hit = hitAction;
+          hitAction.setLoop(THREE.LoopOnce, 1);
+          hitAction.clampWhenFinished = true;
+
+          // When hit animation finishes, fade back to idle or walk
+          m.mixer.addEventListener('finished', (e) => {
+            if (e.action === m.actions.hit && m.actions.idle) {
+              const isMoving = (m._cs && m._cs.moving) || (m._ps && m._ps.moving);
+              const toAction = (isMoving && m.actions.walk) ? m.actions.walk : m.actions.idle;
+              toAction.reset().play();
+              m.actions.hit.crossFadeTo(toAction, 0.2, false);
+              m._animState = isMoving ? 'walk' : 'idle';
+            }
+          });
+        }
+      });
+    }
+
+    // Load the walking animation GLB if provided
+    if (m.glbWalk) {
+      _gltfLoader.load(m.glbWalk, (walkGltf) => {
+        if (walkGltf.animations && walkGltf.animations.length > 0) {
+          const walkClip = walkGltf.animations[0];
+          const walkAction = m.mixer.clipAction(walkClip);
+          m.actions.walk = walkAction;
+        }
+      });
+    }
+  });
 }
 
 export function initMonsters(scene) {
@@ -452,7 +473,7 @@ function _updatePatrol(m, dt) {
 
   const ps = m._ps;
   const b = m.patrol.bounds;
-  const spd = (m.patrol.speed ?? 1.2) * CELL;  // world-units / second
+  const spd = (m.patrol.speed ?? 0.6) * CELL;  // world-units / second
 
   if (!ps.moving) {
     // ── waiting at current cell ──────────────────────────────────────────
@@ -506,6 +527,73 @@ function _updatePatrol(m, dt) {
     m.mesh.position.x += (dx / dist) * step;
     m.mesh.position.z += (dz / dist) * step;
     // Face the direction of travel (lookAt convention matches lookAtPlayer)
+    m.mesh.lookAt(targetX, m.mesh.position.y, targetZ);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  CHASE  — pursue the player once combat has been initiated
+// ─────────────────────────────────────────────────────────────────────────────
+
+const CHASE_SPEED = 0.9; // cells per second
+
+/**
+ * Moves an engaged monster one step toward the player's grid position.
+ * Called every frame when the monster is engaged but out of melee range.
+ */
+function _updateChase(m, dt) {
+  if (!m.mesh) return;
+
+  if (!m._cs) {
+    m._cs = { moving: false, targetRow: m.gridRow, targetCol: m.gridCol };
+  }
+
+  const cs = m._cs;
+  const spd = CHASE_SPEED * CELL;
+
+  if (!cs.moving) {
+    const dr = player.gridRow - m.gridRow;
+    const dc = player.gridCol - m.gridCol;
+
+    // Already adjacent — nothing to do (inRange will take over)
+    if (Math.abs(dr) <= 1 && Math.abs(dc) <= 1) return;
+
+    // Try steps toward the player, prioritising the larger gap axis first
+    const primary = Math.abs(dr) >= Math.abs(dc)
+      ? [{ dr: Math.sign(dr), dc: 0 }, { dr: 0, dc: Math.sign(dc) }]
+      : [{ dr: 0, dc: Math.sign(dc) }, { dr: Math.sign(dr), dc: 0 }];
+
+    for (const d of primary) {
+      if (d.dr === 0 && d.dc === 0) continue;
+      const nr = m.gridRow + d.dr;
+      const nc = m.gridCol + d.dc;
+      if (isPassable(nr, nc) && !isMonsterAt(nr, nc)) {
+        cs.targetRow = nr;
+        cs.targetCol = nc;
+        cs.moving = true;
+        break;
+      }
+    }
+    return;
+  }
+
+  // Slide toward the target cell
+  const targetX = cs.targetCol * CELL + (m.offsetX ?? 0);
+  const targetZ = cs.targetRow * CELL + (m.offsetZ ?? 0);
+  const dx = targetX - m.mesh.position.x;
+  const dz = targetZ - m.mesh.position.z;
+  const dist = Math.sqrt(dx * dx + dz * dz);
+
+  if (dist < 0.05) {
+    m.mesh.position.x = targetX;
+    m.mesh.position.z = targetZ;
+    m.gridRow = cs.targetRow;
+    m.gridCol = cs.targetCol;
+    cs.moving = false;
+  } else {
+    const step = Math.min(spd * dt, dist);
+    m.mesh.position.x += (dx / dist) * step;
+    m.mesh.position.z += (dz / dist) * step;
     m.mesh.lookAt(targetX, m.mesh.position.y, targetZ);
   }
 }
@@ -611,13 +699,47 @@ export function updateMonsters(dt, playerCamera, scene) {
       if (m.statsLabel) m.statsLabel.visible = false;
     }
 
-    // Patrol movement — only runs when the player is out of attack range
-    if (m.patrol && !inRange) {
-      _updatePatrol(m, dt);
+    // Movement when player is out of attack range
+    let isMoving = false;
+    if (!inRange) {
+      if (m.engaged && m.name !== 'Training Dummy') {
+        // Combat has started — chase the player
+        _updateChase(m, dt);
+        if (m._cs && m._cs.moving) isMoving = true;
+      } else if (m.patrol) {
+        // Not yet engaged — continue normal patrol
+        _updatePatrol(m, dt);
+        if (m._ps && m._ps.moving) isMoving = true;
+      }
+    }
+
+    // Handle animation transitions between walk and idle
+    if (m.actions.walk && m.actions.idle) {
+      // Only switch if we are NOT playing a priority animation (attack, hit, death)
+      const isAttacking = m.actions.attack && m.actions.attack.isRunning();
+      const isHitting = m.actions.hit && m.actions.hit.isRunning();
+      const isDead = m.actions.death && m.actions.death.isRunning();
+
+      if (!isAttacking && !isHitting && !isDead) {
+        if (isMoving) {
+          if (m._animState !== 'walk') {
+            m.actions.walk.reset().play();
+            m.actions.idle.crossFadeTo(m.actions.walk, 0.3, true);
+            m._animState = 'walk';
+          }
+        } else {
+          if (m._animState !== 'idle') {
+            m.actions.idle.reset().play();
+            m.actions.walk.crossFadeTo(m.actions.idle, 0.3, true);
+            m._animState = 'idle';
+          }
+        }
+      }
     }
 
     // Proximity attack logic: if player is adjacent, attack them periodically
     if (inRange && m.name !== 'Training Dummy') {
+      m.engaged = true;
       setInCombat();
 
       if (m.stunUntil && performance.now() < m.stunUntil) {
@@ -702,6 +824,9 @@ export function showMonsterDamage(monsterId, damage, isCrit) {
 export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, killer = null) {
   const m = monsters.find((x) => x.id === monsterId && x.alive);
   if (!m) return { hit: false, damage: 0, killed: false, monsterHp: 0 };
+
+  // Any hit — including ranged — triggers the monster to chase if it survives
+  if (m.name !== 'Training Dummy') m.engaged = true;
 
   const damage = Math.max(1, finalDamage);
   const hpBefore = m.hp;
@@ -923,7 +1048,8 @@ export function triggerMonsterAttack(monsterId) {
     m.actions.attack.setEffectiveTimeScale(1);
     m.actions.attack.setEffectiveWeight(1);
     m.actions.attack.play();
-    m.actions.idle.crossFadeTo(m.actions.attack, 0.2, true);
+    const fromAction = (m.actions.walk && m._animState === 'walk') ? m.actions.walk : m.actions.idle;
+    fromAction.crossFadeTo(m.actions.attack, 0.2, true);
 
     if (m.attackSound) {
       const audio = new Audio(m.attackSound);
@@ -1096,10 +1222,11 @@ function _playHitAnimation(m, attackType, killer) {
   // Standard hit flash and knockback logic below...
 
   if (m.mixer && m.actions.hit) {
-    // If there is an idle animation, crossfade from it to hit
-    if (m.actions.idle) {
+    // If there are moving/idle animations, crossfade from the current one to hit
+    const currentAction = (m.actions.walk && m._animState === 'walk') ? m.actions.walk : m.actions.idle;
+    if (currentAction) {
       m.actions.hit.reset().play();
-      m.actions.idle.crossFadeTo(m.actions.hit, 0.1, true);
+      currentAction.crossFadeTo(m.actions.hit, 0.1, true);
     } else {
       m.actions.hit.reset().play();
     }
@@ -1138,6 +1265,7 @@ function _playDeathAnimation(m) {
 
   if (m.actions.death) {
     if (m.actions.idle) m.actions.idle.stop();
+    if (m.actions.walk) m.actions.walk.stop();
     if (m.actions.attack) m.actions.attack.stop();
     m.actions.death.reset().play();
 

@@ -340,7 +340,7 @@ export function renderItemIcon(item, containerEl) {
   // on the item object (used by skills such as Hunter's Eye).
   const iconSrc = def?.icon || item.icon || null;
   if (iconSrc) {
-    containerEl.innerHTML = `<img src="${iconSrc}" alt="${item.name}" draggable="false" style="width: 100%; height: 100%; object-fit: contain; pointer-events: none;" />`;
+    containerEl.innerHTML = `<img src="${iconSrc}" draggable="false" style="width: 100%; height: 100%; object-fit: contain; pointer-events: none;" />`;
   } else {
     containerEl.innerHTML = `<span>${item.name}</span>`;
   }
@@ -651,7 +651,11 @@ function populateTooltip(obj) {
   const descEl = document.getElementById('item-detail-desc');
   const statsEl = document.getElementById('item-detail-stats');
 
-  nameEl.textContent = obj.name;
+  if (obj.name === 'Gold Coins' && obj.quantity) {
+    nameEl.textContent = `${obj.quantity} ${obj.name}`;
+  } else {
+    nameEl.textContent = obj.name;
+  }
 
   if (isSkill) {
     slotEl.textContent = 'Skill type: ' + (obj.type || 'Generic');
@@ -680,6 +684,10 @@ function populateTooltip(obj) {
         <div class="detail-stat-row" id="detail-row-defence">
             <span>Defence</span>
             <span id="item-detail-defence">—</span>
+        </div>
+        <div class="detail-stat-row" id="detail-row-block">
+            <span>Block</span>
+            <span id="item-detail-block">—</span>
         </div>
         <div class="detail-stat-row" id="detail-row-statchange">
             <span>Stat Change</span>
@@ -1612,9 +1620,9 @@ function renderCharDevModal(memberIndex) {
     const filteredSkills = pending
       ? skills
       : skills.filter(skill => {
-          const def = getItemDef(skill.name) || SKILLS_DATA[skill.name];
-          return _cdSkillTab === 'passive' ? (def?.isPassive === true) : (def?.isPassive !== true);
-        });
+        const def = getItemDef(skill.name) || SKILLS_DATA[skill.name];
+        return _cdSkillTab === 'passive' ? (def?.isPassive === true) : (def?.isPassive !== true);
+      });
 
     if (filteredSkills.length === 0) {
       const empty = document.createElement('p');

@@ -820,5 +820,14 @@
         "description": "Ancient parchment bearer of purifying incantations. Study it to learn Resist Poison. Requires 10 Intelligence.",
         "value": 160,
         "weight": 0.2
+    },
+    {
+        "name": "Gold Coins",
+        "slot": "loot",
+        "icon": "/icons/gold_coins.png",
+        "description": "A pile of glittering gold coins.",
+        "value": 1,
+        "weight": 0.0,
+        "sellable": false
     }
 ]
