@@ -1497,6 +1497,8 @@ function onPaperdollSlotContextMenu(e) {
 //  OPEN / CLOSE
 // ─────────────────────────────────────────────
 function openModal(memberIndex) {
+  // Close char-dev if it's open — never show both modals simultaneously
+  if (activeCharDevIndex !== null) closeCharDevModal();
   activeCharIndex = memberIndex;
   hideTooltip();
   document.getElementById('equip-overlay').classList.remove('equip-hidden');
@@ -1516,6 +1518,8 @@ function closeModal() {
 //  CHARACTER DEVELOPMENT MODAL
 // ─────────────────────────────────────────────
 export function openCharDevModal(memberIndex) {
+  // Close inventory if it's open — never show both modals simultaneously
+  if (activeCharIndex !== null) closeModal();
   activeCharDevIndex = memberIndex;
   hideTooltip();
   document.getElementById('char-dev-overlay').classList.remove('char-dev-hidden');
@@ -3233,12 +3237,10 @@ function attachCharDevListeners() {
       m.pendingLevelUp = false;
       m.pendingSkillChoice = null;
 
-      // Refresh both modals and party bar
-      renderCharDevModal(activeCharDevIndex);
-      refreshPartyCards();
-
-      // If the inventory modal is open for the same member, update its button
-      if (activeCharIndex === activeCharDevIndex) renderModal(activeCharIndex);
+      // Close the dev screen and refresh the party bar.
+      // The modal must not stay open — it could navigate to another member via
+      // the prev/next buttons, causing confusion.
+      closeCharDevModal();
     });
   }
 }

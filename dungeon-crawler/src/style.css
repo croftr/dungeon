@@ -1466,7 +1466,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 1010; /* above equip-overlay (1000) — never both open, but stacks correctly */
   backdrop-filter: blur(3px);
 }
 

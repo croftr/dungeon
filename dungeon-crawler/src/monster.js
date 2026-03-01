@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
 import { createHitSpark } from './particles.js';
-import { CELL } from './map.js';
+import { CELL, isPassable } from './map.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { party, setHp, flashPortraitHit, showMemberDamage, refreshPartyCards, applyStatusEffect, getEffectiveStats, getEffectiveStatusResistances, getDefenceModifier, describeEffect } from './party.js';
@@ -46,11 +46,19 @@ export function setHuntersEyeTarget(id) {
 
 /** Returns the first alive monster within melee range of the player, or null. */
 export function getInRangeMonster() {
-  return monsters.find(
-    (m) => m.alive &&
-      Math.abs(m.gridRow - player.gridRow) <= 1 &&
-      Math.abs(m.gridCol - player.gridCol) <= 1
-  ) ?? null;
+  return monsters.find((m) => {
+    if (!m.alive) return false;
+    const distRow = Math.abs(m.gridRow - player.gridRow);
+    const distCol = Math.abs(m.gridCol - player.gridCol);
+    if (distRow <= 1 && distCol <= 1) {
+      if (!isPassable(m.gridRow, m.gridCol) || !isPassable(player.gridRow, player.gridCol)) return false;
+      if (distRow === 1 && distCol === 1) {
+        if (!isPassable(player.gridRow, m.gridCol) && !isPassable(m.gridRow, player.gridCol)) return false;
+      }
+      return true;
+    }
+    return false;
+  }) ?? null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -153,14 +161,6 @@ export const monsters = [
     '/monsters/ogre/Meshy_AI_Animation_Attack_withSkin.glb',
     '/monsters/ogre/ogre.mp3', 0.7, 0, 0, 1,
     { bounds: { minRow: 1, maxRow: 5, minCol: 1, maxCol: 5 }, speed: 1.0, waitTime: 2.0 },
-    '/monsters/ogre/Meshy_AI_Animation_Dead_withSkin.glb',
-    '/monsters/ogre/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
-
-  // Ogre in the deeper parts of the dungeon (Level 1)
-  inst(D.ogre, 22, 19, 10,
-    '/monsters/ogre/Meshy_AI_Animation_Idle_withSkin.glb',
-    '/monsters/ogre/Meshy_AI_Animation_Attack_withSkin.glb',
-    '/monsters/ogre/ogre.mp3', 0.7, 0, 0, 1, null,
     '/monsters/ogre/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/ogre/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 
@@ -553,7 +553,18 @@ export function updateMonsters(dt, playerCamera, scene) {
     // Proximity check — used for HP bar, Hunter's Eye, patrol, and attack logic
     const distRow = Math.abs(m.gridRow - player.gridRow);
     const distCol = Math.abs(m.gridCol - player.gridCol);
-    const inRange = distRow <= 1 && distCol <= 1;
+    let inRange = distRow <= 1 && distCol <= 1;
+
+    // Prevent attacking through walls if monster is somehow in a wall or cornered
+    if (inRange) {
+      if (!isPassable(m.gridRow, m.gridCol) || !isPassable(player.gridRow, player.gridCol)) {
+        inRange = false;
+      } else if (distRow === 1 && distCol === 1) {
+        if (!isPassable(player.gridRow, m.gridCol) && !isPassable(m.gridRow, player.gridCol)) {
+          inRange = false;
+        }
+      }
+    }
 
     // Non-patrol monsters always face the player; patrol monsters only turn
     // to face the player once they are adjacent (otherwise patrol handles rotation).
