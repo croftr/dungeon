@@ -249,6 +249,12 @@
         "item": "Life Berry",
         "chance": 0.5
       }
+    ],
+    "onHitEffects": [
+      {
+        "effectId": "fear",
+        "chance": 0.90
+      }
     ]
   },
   "dummy": {

@@ -707,12 +707,6 @@ export function spawnObjectsForLevel() {
         addPortcullis(objectsGroup, gltfLoader, 16, 3, Math.PI / 2);
         addPortcullis(objectsGroup, gltfLoader, 16, 4, Math.PI / 2);
 
-        // Hidden 4x4 room in the Southeast corner (not accessible)
-        // Adding a mysterious "Black Chest" with artifacts.
-        addChest(objectsGroup, gltfLoader, 17, 18, 0, 0, [
-            { name: 'Gold Coins', quantity: 1500 },
-            'Sun Pendant', 'Rune Pendant', 'Shadow Cloak', 'Plate Cuirass', 'Greatsword'
-        ], '/items/chest1.glb', true, 0, 'Forbidden Chest');
 
     } else if (level === 2) {
         // Portal back to Level 1.

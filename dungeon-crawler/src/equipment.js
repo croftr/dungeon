@@ -1,4 +1,4 @@
-import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getAttackSpeedMultiplier } from './party.js';
+import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getAttackSpeedMultiplier, hasEffectFlag } from './party.js';
 import { getItemDef } from './items.js';
 import { SPELLS } from './spells.js';
 import { ACTIONS } from './items.js';
@@ -621,21 +621,30 @@ function _formatSkillPotency(skillName, member) {
 const TOOLTIP_OFFSET_X = 14;
 const TOOLTIP_OFFSET_Y = 14;
 
-function positionTooltip(mouseX, mouseY) {
+function positionTooltip(mouseX, mouseY, preferAbove = false) {
   const panel = document.getElementById('item-detail-panel');
   const pw = panel.offsetWidth || 190;
   const ph = panel.offsetHeight || 120;
   const vw = window.innerWidth;
   const vh = window.innerHeight;
 
-  // Default: place to the right and below cursor
+  // Default: place to the right of cursor
   let x = mouseX + TOOLTIP_OFFSET_X;
-  let y = mouseY + TOOLTIP_OFFSET_Y;
+
+  // Decide vertical position based on preference or screen position
+  let y;
+  if (preferAbove) {
+    y = mouseY - ph - TOOLTIP_OFFSET_Y;
+    // If it would overflow the top, flip down
+    if (y < 8) y = mouseY + TOOLTIP_OFFSET_Y;
+  } else {
+    y = mouseY + TOOLTIP_OFFSET_Y;
+    // If it would overflow the bottom, flip up
+    if (y + ph > vh - 8) y = mouseY - ph - TOOLTIP_OFFSET_Y;
+  }
 
   // Flip left if it would overflow the right edge
   if (x + pw > vw - 8) x = mouseX - pw - TOOLTIP_OFFSET_X;
-  // Flip up if it would overflow the bottom edge
-  if (y + ph > vh - 8) y = mouseY - ph - TOOLTIP_OFFSET_Y;
 
   panel.style.left = x + 'px';
   panel.style.top = y + 'px';
@@ -645,16 +654,30 @@ function populateTooltip(obj) {
   if (!obj) return;
   const isSkill = !!obj.isSkill;
   const isCustom = !!obj.isCustom;
+  const isStatusEffect = !!obj.isStatusEffect;
   const nameEl = document.getElementById('item-detail-name');
   const slotEl = document.getElementById('item-detail-slot');
   const actionEl = document.getElementById('item-detail-action');
   const descEl = document.getElementById('item-detail-desc');
   const statsEl = document.getElementById('item-detail-stats');
 
+  // Reset any inline colour override on slotEl from previous calls
+  slotEl.style.color = '';
+
   if (obj.name === 'Gold Coins' && obj.quantity) {
     nameEl.textContent = `${obj.quantity} ${obj.name}`;
   } else {
     nameEl.textContent = obj.name;
+  }
+
+  if (isStatusEffect) {
+    const isDebuff = obj.type === 'debuff';
+    slotEl.textContent = isDebuff ? 'Debuff' : 'Buff';
+    slotEl.style.color = isDebuff ? '#c06060' : '#60c060';
+    actionEl.textContent = obj.duration ? `Duration: ${obj.duration}s` : '';
+    descEl.textContent = obj.description ?? '';
+    statsEl.style.display = 'none';
+    return;
   }
 
   if (isSkill) {
@@ -810,12 +833,12 @@ function populateTooltip(obj) {
   }
 }
 
-export function showTooltip(item, mouseX, mouseY) {
+export function showTooltip(item, mouseX, mouseY, preferAbove = false) {
   if (!item) { hideTooltip(); return; }
   populateTooltip(item);
   const panel = document.getElementById('item-detail-panel');
   panel.classList.remove('detail-hidden');
-  positionTooltip(mouseX, mouseY);
+  positionTooltip(mouseX, mouseY, preferAbove);
 }
 
 export function hideTooltip() {
@@ -824,7 +847,7 @@ export function hideTooltip() {
 
 /** Attach hover tooltip listeners to any hoverable item element.
  *  getItem() is called each time to get the current item (may change). */
-export function attachTooltipListeners(el, getItem) {
+export function attachTooltipListeners(el, getItem, preferAbove = false) {
   // Remove any existing listeners first
   if (el._tooltipCleanup) {
     el._tooltipCleanup();
@@ -833,7 +856,7 @@ export function attachTooltipListeners(el, getItem) {
 
   const onEnter = (e) => {
     const item = getItem();
-    if (item) showTooltip(item, e.clientX, e.clientY);
+    if (item) showTooltip(item, e.clientX, e.clientY, preferAbove);
   };
 
   const onMove = (e) => {
@@ -843,7 +866,7 @@ export function attachTooltipListeners(el, getItem) {
       populateTooltip(item);
       const panel = document.getElementById('item-detail-panel');
       panel.classList.remove('detail-hidden');
-      positionTooltip(e.clientX, e.clientY);
+      positionTooltip(e.clientX, e.clientY, preferAbove);
     } else {
       hideTooltip();
     }
@@ -874,8 +897,8 @@ export function attachTooltipListeners(el, getItem) {
  */
 function _equipItem(memberIndex, invIndex) {
   const m = party[memberIndex];
-  if (m.activeDebuffs?.some(d => d.effectId === 'frozen' && performance.now() < d.expiresAt)) {
-    showMessage(`${m.name} is frozen and cannot change equipment!`);
+  if (hasEffectFlag(m, 'preventsAction')) {
+    showMessage(`${m.name} cannot change equipment!`);
     return;
   }
   let item = m.inventory[invIndex];
@@ -1091,8 +1114,8 @@ function _learnSpell(memberIndex, invIndex) {
 function _usePotion(memberIndex, invIndex) {
   const m = party[memberIndex];
   if (m.isDead) return;
-  if (m.activeDebuffs?.some(d => d.effectId === 'frozen' && performance.now() < d.expiresAt)) {
-    showMessage(`${m.name} is frozen and cannot use items!`);
+  if (hasEffectFlag(m, 'preventsAction')) {
+    showMessage(`${m.name} cannot use items!`);
     return;
   }
   const item = m.inventory[invIndex];
@@ -2067,8 +2090,8 @@ function _showDamagePopup(slotEl, damage, isCrit) {
 function useHand(memberIndex, hand) {
   const m = party[memberIndex];
   if (!m) return;
-  if (m.activeDebuffs?.some(d => d.effectId === 'frozen' && performance.now() < d.expiresAt)) {
-    showMessage(`${m.name} is frozen and cannot act!`);
+  if (hasEffectFlag(m, 'preventsAction')) {
+    showMessage(`${m.name} cannot act!`);
     return;
   }
 
@@ -2273,8 +2296,8 @@ let _sunderArmorExpireTimer = null;
 function useSkill(memberIndex) {
   const m = party[memberIndex];
   if (!m || m.isDead) return;
-  if (m.activeDebuffs?.some(d => d.effectId === 'frozen' && performance.now() < d.expiresAt)) {
-    showMessage(`${m.name} is frozen and cannot use skills!`);
+  if (hasEffectFlag(m, 'preventsAction')) {
+    showMessage(`${m.name} cannot use skills!`);
     return;
   }
 

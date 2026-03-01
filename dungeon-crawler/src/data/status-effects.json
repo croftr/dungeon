@@ -2,6 +2,7 @@
   "poison": {
     "id": "poison",
     "name": "Poison",
+    "description": "Takes 1 damage every 2 seconds for 30 seconds.",
     "type": "debuff",
     "icon": "/icons/poison.svg",
     "color": "#50ff50",
@@ -12,6 +13,7 @@
   "regeneration": {
     "id": "regeneration",
     "name": "Regeneration",
+    "description": "Restores 1 HP every 2 seconds for 30 seconds.",
     "type": "buff",
     "icon": "/icons/regeneration.png",
     "color": "#80ff80",
@@ -22,6 +24,7 @@
   "rot": {
     "id": "rot",
     "name": "Rot",
+    "description": "Prevents SP regeneration for 30 seconds.",
     "type": "debuff",
     "icon": "/icons/rot.svg",
     "color": "#c8b060",
@@ -31,14 +34,17 @@
   "frozen": {
     "id": "frozen",
     "name": "Frozen",
+    "description": "Frozen solid — cannot act for 20 seconds.",
     "type": "debuff",
     "icon": "/icons/frozen.svg",
     "color": "#00ffff",
-    "duration": 20
+    "duration": 20,
+    "preventsAction": true
   },
   "resist-poison": {
     "id": "resist-poison",
     "name": "Resist Poison",
+    "description": "Reduces chance of being poisoned by 50% for 60 seconds.",
     "type": "buff",
     "icon": "/icons/cure-poison.png",
     "color": "#80ff80",
@@ -46,5 +52,15 @@
     "statusResistances": {
       "poison": 0.5
     }
+  },
+  "fear": {
+    "id": "fear",
+    "name": "Fear",
+    "description": "Frozen with fear — cannot act for 20 seconds.",
+    "type": "debuff",
+    "icon": "/icons/fear.png",
+    "color": "#8000ff",
+    "duration": 20,
+    "preventsAction": true
   }
 }

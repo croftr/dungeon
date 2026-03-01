@@ -1,5 +1,5 @@
 import { getItemDef } from './items.js';
-import { renderItemIcon } from './equipment.js';
+import { renderItemIcon, attachTooltipListeners, hideTooltip } from './equipment.js';
 import { addLogEntry } from './battle-log.js';
 import { isInCombat, playGoldSound } from './audio.js';
 import { skillsState } from './skills-state.js';
@@ -1017,12 +1017,13 @@ function updateStatusBanners() {
     banner._prevKeys = key;
 
     banner.innerHTML = '';
+    hideTooltip();
     defs.forEach(def => {
       const img = document.createElement('img');
       img.src = def.icon;
       img.className = 'buff-icon';
       img.alt = def.name;
-      img.title = def.name;
+      attachTooltipListeners(img, () => ({ ...def, isStatusEffect: true }), true);
       banner.appendChild(img);
     });
   });
