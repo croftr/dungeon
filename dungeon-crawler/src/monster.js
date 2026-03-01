@@ -548,8 +548,6 @@ export function updateMonsters(dt, playerCamera, scene) {
       if (panelDirty && m.statsLabel?.visible) _updateStatsPanel(m);
     }
 
-    if (m.mixer) m.mixer.update(dt);
-
     // Proximity check — used for HP bar, Hunter's Eye, patrol, and attack logic
     const distRow = Math.abs(m.gridRow - player.gridRow);
     const distCol = Math.abs(m.gridCol - player.gridCol);

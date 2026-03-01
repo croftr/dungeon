@@ -155,12 +155,11 @@ body {
 #main-menu-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.72);
+  background: rgba(0, 0, 0, 0.88);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 800;
-  backdrop-filter: blur(3px);
 }
 
 #main-menu-overlay.mm-hidden {
@@ -348,12 +347,11 @@ body {
 #tactics-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.78);
+  background: rgba(0, 0, 0, 0.88);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(2px);
 }
 
 #tactics-modal {
@@ -725,7 +723,7 @@ body {
 .slot-inactive,
 .slot-cooling-down {
   opacity: 0.4 !important;
-  filter: grayscale(100%) brightness(0.7) contrast(0.9);
+  filter: grayscale(80%);
   pointer-events: none;
   transition: all 0.3s ease;
 }
@@ -817,12 +815,11 @@ body {
 #equip-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.78);
+  background: rgba(0, 0, 0, 0.88);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(2px);
 }
 
 .equip-hidden {
@@ -1462,12 +1459,11 @@ body {
 #char-dev-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.92);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1010; /* above equip-overlay (1000) — never both open, but stacks correctly */
-  backdrop-filter: blur(3px);
 }
 
 #char-dev-modal {
@@ -2813,12 +2809,11 @@ body {
 #chest-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.78);
+  background: rgba(0, 0, 0, 0.88);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(2px);
 }
 
 .chest-hidden {
@@ -2935,12 +2930,11 @@ body {
 #cabinet-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.88);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1050;
-  backdrop-filter: blur(2px);
 }
 
 #cabinet-modal {
@@ -3028,12 +3022,11 @@ body {
 #corpse-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.88);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1050;
-  backdrop-filter: blur(2px);
 }
 
 #corpse-modal {
@@ -3062,12 +3055,11 @@ body {
 #anvil-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.88);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1050;
-  backdrop-filter: blur(2px);
 }
 
 #anvil-modal {
@@ -3230,12 +3222,11 @@ body {
 #merchant-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.78);
+  background: rgba(0, 0, 0, 0.88);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(2px);
 }
 
 .merchant-hidden {
@@ -3809,12 +3800,11 @@ body.cursor-interact #renderer-canvas {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 5, 0, 0.65);
+  background: rgba(0, 5, 0, 0.88);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10000;
-  backdrop-filter: blur(4px);
 }
 
 #alchemy-modal {

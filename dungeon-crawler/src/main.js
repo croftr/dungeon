@@ -25,9 +25,9 @@ window.currentLevel = 1;
 
 const canvas = document.getElementById('renderer-canvas');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFShadowMap;
 
 // CSS2D renderer — renders HTML labels (monster HP bars) anchored in 3D space
 const css2dRenderer = new CSS2DRenderer();
@@ -278,7 +278,9 @@ window.loadLevel = function (levelNum) {
 };
 
 const raycaster = new THREE.Raycaster();
+raycaster.far = 6;
 const mouse = new THREE.Vector2();
+let _lastRayTime = 0;
 
 window.addEventListener('mousemove', (e) => {
   // Only apply 3D world raycasting if interacting with the canvas directly
@@ -286,6 +288,10 @@ window.addEventListener('mousemove', (e) => {
     document.body.classList.remove('cursor-interact');
     return;
   }
+
+  const now = performance.now();
+  if (now - _lastRayTime < 66) return;
+  _lastRayTime = now;
 
   mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
