@@ -813,6 +813,12 @@ export function updateMonsters(dt, playerCamera, scene) {
     const distCol = Math.abs(m.gridCol - player.gridCol);
     let inRange = distRow <= 1 && distCol <= 1;
 
+    // Monsters detect characters and start chasing from 2 grid squares away
+    if (!m.engaged && m.name !== 'Training Dummy' && distRow <= 2 && distCol <= 2) {
+      m.engaged = true;
+      setInCombat();
+    }
+
     // Prevent attacking through walls if monster is somehow in a wall or cornered
     if (inRange) {
       if (!isPassable(m.gridRow, m.gridCol) || !isPassable(player.gridRow, player.gridCol)) {
