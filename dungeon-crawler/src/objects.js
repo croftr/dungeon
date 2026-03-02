@@ -5,10 +5,11 @@ import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, isInFrontOfPlayer, player } from './player.js';
 import { showMessage } from './minimap.js';
 import { getItemDef } from './items.js';
-import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold } from './party.js';
+import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refreshPartyCards } from './party.js';
 import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
 import { triggerMummyAmbush } from './monster.js';
+import * as equip from './equipment.js';
 
 export const objects = [];
 
@@ -242,7 +243,7 @@ export function initObjects(scene, camera) {
                         showMessage(`Picked up ${amount} Gold Coins.`);
                         obj.parent.remove(obj);
                     } else {
-                        import('./equipment.js').then(equip => {
+                        {
                             let added = false;
                             for (let i = 0; i < 4; i++) {
                                 if (equip.addItemToInventory(i, obj.userData.itemName)) {
@@ -256,7 +257,7 @@ export function initObjects(scene, camera) {
                             if (!added) {
                                 showMessage("Inventory is full!");
                             }
-                        });
+                        }
                     }
                 } else {
                     showMessage("Move closer to pick it up.");
@@ -296,7 +297,7 @@ export function initObjects(scene, camera) {
                                 setTimeout(() => {
                                     openPortcullis(p, true);
                                 }, 400);
-                                import('./party.js').then(pt => pt.refreshPartyCards && pt.refreshPartyCards());
+                                refreshPartyCards();
                             } else {
                                 showMessage("The portcullis is locked. It needs a key.");
                             }
@@ -354,7 +355,7 @@ export function initObjects(scene, camera) {
             e.stopPropagation();
             document.getElementById('chest-overlay').classList.add('chest-hidden');
             _hideChestCtxMenu();
-            import('./equipment.js').then(m => m.hideTooltip());
+            equip.hideTooltip();
         };
     }
 
@@ -365,7 +366,7 @@ export function initObjects(scene, camera) {
             e.stopPropagation();
             document.getElementById('merchant-overlay').classList.add('merchant-hidden');
             _hideChestCtxMenu();
-            import('./equipment.js').then(m => m.hideTooltip());
+            equip.hideTooltip();
         };
     }
 
@@ -421,7 +422,7 @@ export function initObjects(scene, camera) {
             e.stopPropagation();
             document.getElementById('anvil-overlay').classList.add('chest-hidden');
             _hideChestCtxMenu();
-            import('./equipment.js').then(m => m.hideTooltip());
+            equip.hideTooltip();
         };
     }
 
@@ -456,7 +457,7 @@ export function initObjects(scene, camera) {
             e.stopPropagation();
             document.getElementById('weapon-rack-overlay').classList.add('chest-hidden');
             _hideChestCtxMenu();
-            import('./equipment.js').then(m => m.hideTooltip());
+            equip.hideTooltip();
         };
     }
 
@@ -467,7 +468,7 @@ export function initObjects(scene, camera) {
             e.stopPropagation();
             document.getElementById('cabinet-overlay').classList.add('chest-hidden');
             _hideChestCtxMenu();
-            import('./equipment.js').then(m => m.hideTooltip());
+            equip.hideTooltip();
         };
     }
 
@@ -478,7 +479,7 @@ export function initObjects(scene, camera) {
             e.stopPropagation();
             document.getElementById('corpse-overlay').classList.add('chest-hidden');
             _hideChestCtxMenu();
-            import('./equipment.js').then(m => m.hideTooltip());
+            equip.hideTooltip();
         };
     }
 
@@ -491,7 +492,7 @@ export function initObjects(scene, camera) {
             _alchemyModalOpen = false;
             _hideAlchemyItemPicker();
             _hideChestCtxMenu();
-            import('./equipment.js').then(m => m.hideTooltip());
+            equip.hideTooltip();
         };
     }
 
@@ -685,7 +686,7 @@ export function spawnObjectsForLevel() {
         ]);
 
         // Spell Cabinet at the end of the dead-end passage near the zombie room
-        addSpellCabinet(objectsGroup, gltfLoader, 21, 16, -Math.PI / 2, -0.6, 0, [
+        addSpellCabinet(objectsGroup, gltfLoader, 21, 16, -Math.PI / 2, 0.7, 0, [
             'Resist Poison Spellbook',
             'Scroll of Regeneration',
             'Scroll of Cure Poison',
@@ -1182,9 +1183,9 @@ export function openChestModal(chestObj) {
     const slots = document.querySelectorAll('.chest-slot');
     const contents = chestObj.userData.contents || [];
 
-    import('./equipment.js').then(equip => {
+    {
         _bindChestSlots(equip, slots, contents);
-    });
+    }
 }
 
 export function openWeaponRackModal(rackObj) {
@@ -1197,9 +1198,9 @@ export function openWeaponRackModal(rackObj) {
     const slots = document.querySelectorAll('.weapon-rack-slot');
     const contents = rackObj.userData.contents || [];
 
-    import('./equipment.js').then(equip => {
+    {
         _bindChestSlots(equip, slots, contents);
-    });
+    }
 }
 
 export function openSpellCabinetModal(cabinetObj) {
@@ -1212,9 +1213,9 @@ export function openSpellCabinetModal(cabinetObj) {
     const slots = document.querySelectorAll('.cabinet-slot');
     const contents = cabinetObj.userData.contents || [];
 
-    import('./equipment.js').then(equip => {
+    {
         _bindChestSlots(equip, slots, contents);
-    });
+    }
 }
 
 export function openAnvilModal(anvilObj) {
@@ -1226,9 +1227,9 @@ export function openAnvilModal(anvilObj) {
     const slots = document.querySelectorAll('.anvil-slot');
     const contents = anvilObj.userData.contents || [];
 
-    import('./equipment.js').then(equip => {
+    {
         _bindChestSlots(equip, slots, contents);
-    });
+    }
 }
 
 export function openCorpseModal(corpseObj) {
@@ -1240,9 +1241,9 @@ export function openCorpseModal(corpseObj) {
     const slots = document.querySelectorAll('.corpse-slot');
     const contents = corpseObj.userData.contents || [];
 
-    import('./equipment.js').then(equip => {
+    {
         _bindChestSlots(equip, slots, contents);
-    });
+    }
 }
 
 export function openMerchantModal() {
@@ -1283,7 +1284,7 @@ function _renderMerchantShop() {
     const grid = document.getElementById('merchant-grid');
     grid.innerHTML = '';
 
-    import('./equipment.js').then(equip => {
+    {
         _merchantAvailable
             .filter(name => !_merchantBasket.includes(name))
             .forEach(name => {
@@ -1314,14 +1315,14 @@ function _renderMerchantShop() {
 
                 grid.appendChild(slot);
             });
-    });
+    }
 }
 
 function _renderMerchantBasket() {
     const grid = document.getElementById('merchant-basket-grid');
     grid.innerHTML = '';
 
-    import('./equipment.js').then(equip => {
+    {
         _merchantBasket.forEach((name, idx) => {
             const itemDef = getItemDef(name);
             if (!itemDef) return;
@@ -1351,7 +1352,7 @@ function _renderMerchantBasket() {
 
             grid.appendChild(slot);
         });
-    });
+    }
 }
 
 function _updateMerchantTotals() {
@@ -1368,7 +1369,7 @@ function _buyItems() {
     const total = _merchantBasket.reduce((sum, name) => sum + (getItemDef(name)?.value ?? 0), 0);
     if (partyGold < total) return;
 
-    import('./equipment.js').then(equip => {
+    {
         const boughtItems = [];
         const failedItems = [];
 
@@ -1413,7 +1414,7 @@ function _buyItems() {
         _renderMerchantShop();
         _renderMerchantBasket();
         _updateMerchantTotals();
-    });
+    }
 }
 
 // ── Sell-side helpers ────────────────────────────────────────────────────
@@ -1432,7 +1433,7 @@ function _renderMerchantPartyItems() {
 
     const CHARACTER_LABELS = ['A', 'B', 'C', 'D'];
 
-    import('./equipment.js').then(equip => {
+    {
         for (let ci = 0; ci < 4; ci++) {
             const member = party[ci];
             if (!member || member.isEmpty) continue;
@@ -1477,14 +1478,14 @@ function _renderMerchantPartyItems() {
                 grid.appendChild(slot);
             });
         }
-    });
+    }
 }
 
 function _renderMerchantSellBasket() {
     const grid = document.getElementById('merchant-sell-basket-grid');
     grid.innerHTML = '';
 
-    import('./equipment.js').then(equip => {
+    {
         _merchantSellBasket.forEach((entry, idx) => {
             const def = getItemDef(entry.name);
             if (!def) return;
@@ -1516,7 +1517,7 @@ function _renderMerchantSellBasket() {
 
             grid.appendChild(slot);
         });
-    });
+    }
 }
 
 function _updateMerchantSellTotals() {
@@ -1746,7 +1747,7 @@ export function openAlchemyModal() {
  */
 function _renderAlchemySlots() {
     const slots = document.querySelectorAll('.alchemy-slot');
-    import('./equipment.js').then(equip => {
+    {
         slots.forEach((slot, i) => {
             slot.innerHTML = '';
             slot.classList.remove('occupied');
@@ -1795,7 +1796,7 @@ function _renderAlchemySlots() {
             // Hover tooltip
             equip.attachTooltipListeners(slot, () => _alchemyContents[i] ? { name: _alchemyContents[i] } : null);
         });
-    });
+    }
 }
 
 /**
@@ -1861,7 +1862,7 @@ function _showAlchemyItemPicker(x, y, slotIdx) {
 
     let hasLoot = false;
 
-    import('./equipment.js').then(equip => {
+    {
         party.forEach((member, memberIdx) => {
             if (member.isEmpty) return;
 
@@ -1929,7 +1930,7 @@ function _showAlchemyItemPicker(x, y, slotIdx) {
 
         picker.style.left = lx + 'px';
         picker.style.top = ly + 'px';
-    });
+    }
 }
 
 function _hideAlchemyItemPicker() {

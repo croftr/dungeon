@@ -21,7 +21,7 @@ import { setInCombat, clearCombat, playCritSound, playActionSound, playHitSound,
 import { addLogEntry } from './battle-log.js';
 import { resetBattleStats, recordDamageDealt, recordDamageTaken, showBattleStatsIcon } from './battle-stats.js';
 import { getItemDef } from './items.js';
-import { spawnDroppedItem, isStatueAt } from './objects.js';
+import { spawnDroppedItem, isStatueAt, spawnCorpse } from './objects.js';
 import { MONSTER_DEFS as D } from './monster-defs.js';
 import { skillsState } from './skills-state.js';
 import SKILLS_DATA from './data/skills.json';
@@ -1072,9 +1072,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
         }
       }
 
-      import('./objects.js').then(obj => {
-        obj.spawnCorpse(m.gridCol, m.gridRow, droppedItems);
-      });
+      spawnCorpse(m.gridCol, m.gridRow, droppedItems);
       if (m.hpBarFill) m.hpBarFill.parentElement.style.display = 'none';
       addLogEntry({ type: 'death', target: m.name, killer, damage, time: Date.now() });
 
