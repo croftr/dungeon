@@ -454,7 +454,7 @@ function refreshMember(m) {
   }
 
   // ── Quickslot buttons ──
-  [0, 1].forEach(qsi => {
+  [0].forEach(qsi => {
     const btn = document.getElementById(`qs-${i}-${qsi}`);
     if (!btn) return;
     const item = m.quickslots?.[qsi] ?? null;

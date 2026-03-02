@@ -232,7 +232,7 @@ export function extendPartyData() {
     if (!m.statBonuses) m.statBonuses = { strength: 0, dexterity: 0, vitality: 0, intelligence: 0, resilience: 0 };
     if (!m.skillProgression) m.skillProgression = [];
     if (m.pendingLevelUp === undefined) m.pendingLevelUp = false;
-    if (!m.quickslots) m.quickslots = [null, null];
+    if (!m.quickslots) m.quickslots = [null];
     if (m.pendingSkillChoice === undefined) m.pendingSkillChoice = null;
 
     if (m.equipment) {
@@ -393,7 +393,7 @@ function renderModal(memberIndex) {
   });
 
   // ── Quickslots (paperdoll) ──
-  [0, 1].forEach(qsi => {
+  [0].forEach(qsi => {
     const el = document.getElementById(`pd-quickslot-${qsi}`);
     if (!el) return;
     const item = m.quickslots?.[qsi] ?? null;
@@ -1144,14 +1144,10 @@ function _assignQuickslot(memberIndex, slotIdx, invIndex) {
   if (!m || m.isEmpty) return;
   const item = m.inventory[invIndex];
   if (!item) return;
-  if (!m.quickslots) m.quickslots = [null, null];
-  // If slot already has an item, move it back to inventory first
-  if (m.quickslots[slotIdx]) {
-    const freeInvSlot = m.inventory.findIndex((s, idx) => !s && idx !== invIndex);
-    if (freeInvSlot !== -1) m.inventory[freeInvSlot] = m.quickslots[slotIdx];
-  }
+  if (!m.quickslots) m.quickslots = [null];
+  const displaced = m.quickslots[slotIdx];
   m.quickslots[slotIdx] = item;
-  m.inventory[invIndex] = null;
+  m.inventory[invIndex] = displaced;
   showMessage(`${item.name} assigned to Quick Slot ${slotIdx + 1}.`);
   renderModal(memberIndex);
   refreshPartyCards();
@@ -1169,7 +1165,7 @@ export function useQuickslotPotion(memberIndex, slotIdx) {
     showMessage(`${m.name} cannot use items!`);
     return;
   }
-  if (!m.quickslots) m.quickslots = [null, null];
+  if (!m.quickslots) m.quickslots = [null];
   const item = m.quickslots[slotIdx];
   if (!item) return;
 
@@ -1292,18 +1288,16 @@ function onInventoryCellClick(e) {
     // Left-click moves into the first empty quickslot (like equipping).
     // To drink, use right-click → Drink, a shortcut key, or the party panel button.
     const m2 = party[activeCharIndex];
-    if (!m2.quickslots) m2.quickslots = [null, null];
+    if (!m2.quickslots) m2.quickslots = [null];
     const freeSlot = m2.quickslots.findIndex(s => !s);
-    if (freeSlot !== -1) {
-      playItemSound(item.name, 'potion');
-      m2.quickslots[freeSlot] = item;
-      m2.inventory[invIndex] = null;
-      showMessage(`${item.name} assigned to Quick Slot ${freeSlot + 1}.`);
-      renderModal(activeCharIndex);
-      refreshPartyCards();
-    } else {
-      showMessage(`Quick Slots are full. Right-click to reassign.`);
-    }
+    const targetSlot = freeSlot !== -1 ? freeSlot : 0;
+    playItemSound(item.name, 'potion');
+    const displaced = m2.quickslots[targetSlot];
+    m2.quickslots[targetSlot] = item;
+    m2.inventory[invIndex] = displaced;
+    showMessage(`${item.name} assigned to Quick Slot ${targetSlot + 1}.`);
+    renderModal(activeCharIndex);
+    refreshPartyCards();
     return;
   }
 
@@ -3102,7 +3096,7 @@ function attachPaperdollListeners() {
   });
 
   // Quickslot divs: click to clear the assignment; tooltip shows assigned item
-  [0, 1].forEach(qsi => {
+  [0].forEach(qsi => {
     const el = document.getElementById(`pd-quickslot-${qsi}`);
     if (!el) return;
     el.addEventListener('click', () => {
