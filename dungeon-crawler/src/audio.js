@@ -277,8 +277,8 @@ let currentMusicIndex = 0;
 // level 2+ have their own dedicated track(s).
 const MUSIC_TRACKS_BY_LEVEL = {
   1: ['/sounds/back1.mp3', '/sounds/back2.mp3'],
-  2: ['/sounds/level2-music.mp3'],
-  3: ['/sounds/level2-music.mp3'],
+  2: ['/sounds/backing/level-2.mp3'],
+  3: ['/sounds/backing/level-2.mp3'],
 };
 let _ambientLevel = 1;
 const BATTLE_TRACK = '/sounds/backing/battle.mp3';
@@ -397,6 +397,47 @@ export async function playAlchemySound() {
 }
 
 /**
+ * Synthesizes a dull fizzle/sputter — played when a transmutation attempt
+ * does not match any recipe (ingredients preserved, nothing produced).
+ */
+export async function playAlchemyFailSound() {
+  try {
+    const ctx = getCtx();
+    const now = ctx.currentTime;
+
+    // Short burst of filtered noise that quickly dies out
+    for (let i = 0; i < 3; i++) {
+      const t = now + i * 0.07;
+
+      const bufferSize = ctx.sampleRate * 0.12;
+      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = noiseBuffer.getChannelData(0);
+      for (let j = 0; j < bufferSize; j++) data[j] = Math.random() * 2 - 1;
+
+      const source = ctx.createBufferSource();
+      source.buffer = noiseBuffer;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(300 + i * 80, t);
+      filter.Q.value = 3;
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.18, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+
+      source.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      source.start(t);
+      source.stop(t + 0.13);
+    }
+  } catch (err) {
+    console.warn('[audio] playAlchemyFailSound failed:', err);
+  }
+}
+
+/**
  * Play a skill or spell sound by its short name.
  * @param {string} name — key from SKILL_SOUND_MAP, e.g. 'holy', 'berserk', 'magic'
  * @param {number} [volume=0.7]
@@ -481,7 +522,7 @@ export async function playWeaponRackSound() {
 }
 
 export async function playLevelUpSound() {
-  const buffer = await getBuffer('/sounds/actions/skills/holy.mp3');
+  const buffer = await getBuffer('/sounds/actions/level-up1.mp3');
   if (!buffer) return;
   try {
     const ctx = getCtx();
@@ -494,6 +535,23 @@ export async function playLevelUpSound() {
     source.start(0);
   } catch (err) {
     console.warn('[audio] playLevelUpSound failed:', err);
+  }
+}
+
+export async function playLevelUpConfirmSound() {
+  const buffer = await getBuffer('/sounds/actions/level-up2.mp3');
+  if (!buffer) return;
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.9;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playLevelUpConfirmSound failed:', err);
   }
 }
 

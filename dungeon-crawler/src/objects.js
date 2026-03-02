@@ -6,8 +6,9 @@ import { tweenGroup, isInFrontOfPlayer, player } from './player.js';
 import { showMessage } from './minimap.js';
 import { getItemDef } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refreshPartyCards } from './party.js';
-import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound } from './audio.js';
+import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
+import POTIONS_DATA from './data/potions.json';
 import { triggerMummyAmbush } from './monster.js';
 import * as equip from './equipment.js';
 
@@ -1686,30 +1687,73 @@ function _showChestCtxMenu(x, y, equip, slots, contents, slotIdx, itemDef) {
     menu.style.top = ly + 'px';
 }
 
-// ── Recipes: [ [ingredients...], resultName ] ────────────────────────────────
-const ALCHEMY_RECIPES = [
-    { ingredients: ['Life Essence', 'Life Berry'], result: 'Healing Potion' },
-    { ingredients: ['Life Essence', 'Poison Vial'], result: 'Cure Poison Potion' },
-];
+// ── Alchemy message bar ───────────────────────────────────────────────────────
+// Displays feedback inside the modal rather than using the global showMessage.
+// type: 'success' | 'fail' | 'info'
+let _alchemyMsgTimer = null;
+
+function showAlchemyMessage(text, type = 'info') {
+    const bar  = document.getElementById('alchemy-message-bar');
+    const span = document.getElementById('alchemy-message-text');
+    if (!bar || !span) return;
+
+    if (_alchemyMsgTimer) { clearTimeout(_alchemyMsgTimer); _alchemyMsgTimer = null; }
+
+    span.textContent = text;
+    bar.className = `alchemy-msg-visible alchemy-msg-${type}`;
+
+    _alchemyMsgTimer = setTimeout(() => {
+        bar.className = '';
+        _alchemyMsgTimer = null;
+    }, 4000);
+}
+
+function _clearAlchemyMessage() {
+    if (_alchemyMsgTimer) { clearTimeout(_alchemyMsgTimer); _alchemyMsgTimer = null; }
+    const bar = document.getElementById('alchemy-message-bar');
+    if (bar) bar.className = '';
+}
+
+// ── Recipes: derived at runtime from potions.json entries that have an
+//    "ingredients" field. To add or change a recipe, edit potions.json only.
+//    Ingredient entries: { name: string, quantity: number }
+function _getAlchemyRecipes() {
+    return POTIONS_DATA
+        .filter(p => Array.isArray(p.ingredients) && p.ingredients.length > 0)
+        .map(p => ({ ingredients: p.ingredients, result: p.name }));
+}
 
 function _transmute() {
+    // Block if a potion is already waiting in the result slot
+    if (_alchemyContents[8] !== null) {
+        showAlchemyMessage('Take the potion from the result slot before transmuting again.', 'info');
+        return;
+    }
+
     // Gather ingredients (slots 0-7)
     const ingredients = _alchemyContents.slice(0, 8).filter(Boolean);
 
     if (ingredients.length === 0) {
-        showMessage('Add ingredients before transmuting.');
+        showAlchemyMessage('Add ingredients before transmuting.', 'info');
         return;
     }
 
-    // Try each recipe
+    const recipes = _getAlchemyRecipes();
+
+    // Try each recipe — quantity-aware matching
     let matchedResult = null;
-    for (const recipe of ALCHEMY_RECIPES) {
+    for (const recipe of recipes) {
         const pool = [...ingredients];
         let matched = true;
         for (const needed of recipe.ingredients) {
-            const idx = pool.indexOf(needed);
-            if (idx === -1) { matched = false; break; }
-            pool.splice(idx, 1);
+            let remaining = needed.quantity;
+            while (remaining > 0) {
+                const idx = pool.indexOf(needed.name);
+                if (idx === -1) { matched = false; break; }
+                pool.splice(idx, 1);
+                remaining--;
+            }
+            if (!matched) break;
         }
         if (matched) {
             matchedResult = recipe.result;
@@ -1717,16 +1761,16 @@ function _transmute() {
         }
     }
 
-    // Consume all ingredients regardless of outcome
-    for (let i = 0; i < 8; i++) _alchemyContents[i] = null;
-
     if (matchedResult) {
+        // Consume all ingredients only on success
+        for (let i = 0; i < 8; i++) _alchemyContents[i] = null;
         _alchemyContents[8] = matchedResult;
-        showMessage(`Transmutation successful! You created a ${matchedResult}.`);
+        showAlchemyMessage(`Transmutation successful! You created a ${matchedResult}.`, 'success');
         playAlchemySound();
     } else {
-        _alchemyContents[8] = null;
-        showMessage('The transmutation failed — ingredients lost.');
+        // Ingredients are preserved — nothing is consumed
+        showAlchemyMessage('The ingredients do not react — nothing happens.', 'fail');
+        playAlchemyFailSound();
     }
 
     _renderAlchemySlots();
@@ -1736,6 +1780,7 @@ export function openAlchemyModal() {
     _alchemyModalOpen = true;
     playAlchemySound();
     _activeSentLabelId = null;
+    _clearAlchemyMessage();
     const overlay = document.getElementById('alchemy-overlay');
     overlay.classList.remove('chest-hidden');
 
@@ -1782,7 +1827,7 @@ function _renderAlchemySlots() {
                         _renderAlchemySlots();
                         equip.hideTooltip();
                     } else {
-                        showMessage(`${party[defaultIdx].name}'s inventory is full!`);
+                        showAlchemyMessage(`${party[defaultIdx].name}'s inventory is full!`, 'info');
                     }
                 }
             };
@@ -1793,8 +1838,16 @@ function _renderAlchemySlots() {
                 _showAlchemyCtxMenu(e.clientX, e.clientY, equip, i, itemDef);
             };
 
-            // Hover tooltip
-            equip.attachTooltipListeners(slot, () => _alchemyContents[i] ? { name: _alchemyContents[i] } : null);
+            // Hover tooltip — result slot gets a "take it" hint
+            if (i === 8) {
+                equip.attachTooltipListeners(slot, () => _alchemyContents[8]
+                    ? { name: _alchemyContents[8], description: 'Click to take into your inventory. Right-click to choose who receives it.' }
+                    : null);
+            } else {
+                equip.attachTooltipListeners(slot, () => _alchemyContents[i]
+                    ? { name: _alchemyContents[i], description: 'Click to return to inventory. Right-click to choose who receives it.' }
+                    : null);
+            }
         });
     }
 }
@@ -1829,7 +1882,7 @@ function _showAlchemyCtxMenu(x, y, equip, slotIdx, itemDef) {
                 _renderAlchemySlots();
                 equip.hideTooltip();
             } else {
-                showMessage(`${target.name}'s inventory is full!`);
+                showAlchemyMessage(`${target.name}'s inventory is full!`, 'info');
             }
             _hideChestCtxMenu();
         });
@@ -1956,7 +2009,7 @@ export function addItemToAlchemy(itemName) {
             return true;
         }
     }
-    showMessage("The alchemy workshop ingredient slots are full!");
+    showAlchemyMessage('The ingredient slots are full!', 'info');
     return false;
 }
 

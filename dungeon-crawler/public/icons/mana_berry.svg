@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#66d9ff"/>
+      <stop offset="40%" stop-color="#2a8ee8"/>
+      <stop offset="100%" stop-color="#08327a"/>
+    </radialGradient>
+    <radialGradient id="shine" cx="38%" cy="30%" r="35%">
+      <stop offset="0%" stop-color="#a0f0ff" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#66d9ff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="bloom" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  <!-- Soft ambient glow behind berry -->
+  <ellipse cx="32" cy="38" rx="18" ry="14" fill="#1054c0" opacity="0.22" filter="url(#bloom)"/>
+  <!-- Stem -->
+  <path d="M32 18 Q35 10 40 8 Q38 14 36 18" fill="#2e7a1a" stroke="#1a4a0a" stroke-width="0.8"/>
+  <!-- Leaf -->
+  <ellipse cx="38" cy="11" rx="5" ry="2.5" fill="#3aaa22" stroke="#1a5a10" stroke-width="0.6" transform="rotate(-30 38 11)"/>
+  <!-- Berry body -->
+  <circle cx="32" cy="38" r="18" fill="url(#glow)" filter="url(#bloom)"/>
+  <!-- Berry gloss/shine -->
+  <ellipse cx="27" cy="31" rx="7" ry="5" fill="url(#shine)"/>
+  <!-- Mana energy sparkles -->
+  <circle cx="18" cy="28" r="1.5" fill="#66d9ff" opacity="0.8"/>
+  <circle cx="46" cy="32" r="1.2" fill="#66d9ff" opacity="0.7"/>
+  <circle cx="22" cy="50" r="1.0" fill="#66d9ff" opacity="0.6"/>
+  <circle cx="42" cy="22" r="0.9" fill="#a0f0ff" opacity="0.9"/>
+</svg>

@@ -54,7 +54,14 @@
         "rightHand": "Shield",
         "startingInventory": [
             "Cure Poison Potion",
-            "Healing Potion"
+            "Healing Potion",
+            "Fermented Sugar",
+            "Mana Berry",
+            "Life Berry",
+            "Poison Vial",
+            "Life Essence",
+            "Life Essence",
+            "Life Essence"
         ],
         "gridCol": 10,
         "gridRow": 8,
@@ -191,7 +198,7 @@
         "stats": {
             "strength": 6,
             "dexterity": 100,
-            "vitality": 6,
+            "vitality": 106,
             "intelligence": 7,
             "resilience": 6
         },

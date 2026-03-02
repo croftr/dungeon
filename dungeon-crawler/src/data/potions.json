@@ -7,6 +7,16 @@
         "effect": {
             "type": "cure-poison"
         },
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Poison Vial",
+                "quantity": 1
+            }
+        ],
         "value": 25,
         "weight": 0.3
     },
@@ -15,6 +25,16 @@
         "icon": "/icons/mana_potion.svg",
         "description": "A crystalline blue liquid that restores 30 mana points.",
         "type": "potion",
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Mana Berry",
+                "quantity": 1
+            }
+        ],
         "effect": {
             "type": "restore-mp",
             "value": 30
@@ -31,6 +51,16 @@
             "type": "heal",
             "value": 20
         },
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Life Berry",
+                "quantity": 1
+            }
+        ],
         "value": 30,
         "weight": 0.3
     },
@@ -47,18 +77,6 @@
         "weight": 0.3
     },
     {
-        "name": "Stamina Potion",
-        "icon": "/icons/stamina_potion.svg",
-        "description": "A bubbling orange brew that restores 40 stamina points.",
-        "type": "potion",
-        "effect": {
-            "type": "restore-sp",
-            "value": 40
-        },
-        "value": 20,
-        "weight": 0.4
-    },
-    {
         "name": "Minor Rejuvenate Potion",
         "icon": "/icons/minor_rejuvenate_potion.svg",
         "description": "A glowing yellow elixir that restores 100 stamina points.",
@@ -67,6 +85,16 @@
             "type": "restore-sp",
             "value": 100
         },
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Fermented Sugar",
+                "quantity": 1
+            }
+        ],
         "value": 50,
         "weight": 0.3
     }

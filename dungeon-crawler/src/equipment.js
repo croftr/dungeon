@@ -10,7 +10,7 @@ import { dropMember } from './recruits.js';
 import { isInFrontOfPlayer } from './player.js';
 import { isAlchemyModalOpen, addItemToAlchemy } from './objects.js';
 import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude } from './combat-rules.js';
-import { playCritSound, playSkillSound, playItemSound } from './audio.js';
+import { playCritSound, playSkillSound, playItemSound, playLevelUpConfirmSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { skillsState } from './skills-state.js';
 import { getNextLevelXP, hydrateSkill } from './leveling.js';
@@ -3459,6 +3459,17 @@ function attachCharDevListeners() {
       updateEffectiveStats(m);
       m.pendingLevelUp = false;
       m.pendingSkillChoice = null;
+      playLevelUpConfirmSound();
+
+      const messages = [
+        `${m.name} has grown in power!`,
+        `${m.name} feels a surge of new energy!`,
+        `${m.name} has mastered new techniques!`,
+        `${m.name} becomes even more formidable!`,
+        `${m.name} ascends to new heights!`
+      ];
+      const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+      showMessage(randomMsg);
 
       // Close the dev screen and refresh the party bar.
       // The modal must not stay open — it could navigate to another member via

@@ -27,6 +27,24 @@
         "sellable": true
     },
     {
+        "name": "Mana Berry",
+        "slot": "loot",
+        "icon": "/icons/mana_berry.svg",
+        "description": "A vibrant blue berry infused with arcane essence. Used in many magical concoctions.",
+        "value": 45,
+        "weight": 0.1,
+        "sellable": true
+    },
+    {
+        "name": "Fermented Sugar",
+        "slot": "loot",
+        "icon": "/icons/fermented_sugar.svg",
+        "description": "A sticky, golden substance with a pungent sweet aroma. A volatile alchemical base.",
+        "value": 25,
+        "weight": 0.2,
+        "sellable": true
+    },
+    {
         "name": "Bronze Key",
         "slot": "loot",
         "icon": "/icons/bronze_key.png",

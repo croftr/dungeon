@@ -302,7 +302,7 @@ body {
   display: none;
   text-align: center;
   pointer-events: none;
-  z-index: 2000;
+  z-index: 10003;
 }
 
 /* ═══════════════════════════════════════════
@@ -524,10 +524,9 @@ body {
   border: 1px solid #5a4a30;
   border-radius: 4px;
   padding: 4px;
-  display: grid;
-  grid-template-columns: auto auto;
-  column-gap: 6px;
-  row-gap: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   box-shadow: inset 0 1px 0 rgba(255, 220, 120, 0.08), 0 2px 8px rgba(0, 0, 0, 0.7);
   position: relative;
 }
@@ -537,7 +536,6 @@ body {
   gap: 4px;
   height: 18px;
   pointer-events: none;
-  grid-column: 1 / span 2;
 }
 
 .status-banner .buff-icon {
@@ -557,7 +555,6 @@ body {
   gap: 6px;
   align-items: flex-start;
   position: relative;
-  grid-column: 1;
   /* anchor for incoming damage popups */
 }
 
@@ -588,11 +585,9 @@ body {
 
 /* Bars column */
 .bars {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  justify-content: center;
 }
 
 .bar-row {
@@ -657,13 +652,11 @@ body {
   margin-top: 1px;
 }
 
-/* ── Bottom row: equipment slots ── */
 .member-equip {
   display: flex;
   gap: 4px;
   justify-content: space-between;
   padding: 2px 2px 0;
-  grid-column: 1;
 }
 
 .equip-slot {
@@ -2041,33 +2034,23 @@ body {
   z-index: 1;
 }
 
-/* ── Party panel quick-use slots ── */
-.member-quickslots {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  justify-content: center;
-  align-items: center;
-  padding: 2px 4px;
-  grid-column: 2;
-  grid-row: 2 / span 2;
-}
-
 .quickslot-btn {
-  width: 26px;
-  height: 26px;
+  width: 54px;
+  height: 54px;
   background: rgba(10, 20, 10, 0.6);
   border: 1px solid #3a5a3a;
-  border-radius: 4px;
+  border-radius: 3px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
   flex-shrink: 0;
   transition: all 0.2s ease;
+  gap: 1px;
 }
 
 .quickslot-btn:hover {
@@ -2084,8 +2067,8 @@ body {
 }
 
 .quickslot-btn img {
-  width: 85%;
-  height: 85%;
+  width: 80%;
+  height: 80%;
   object-fit: contain;
   display: block;
   pointer-events: none;
@@ -2093,13 +2076,17 @@ body {
 
 .qs-key {
   font-size: 7px;
-  color: #3a5a3a;
-  letter-spacing: 0.5px;
+  color: #5a9a5a;
+  letter-spacing: 1px;
+  position: absolute;
+  top: 2px;
+  left: 4px;
   pointer-events: none;
 }
 
 .quickslot-btn.qs-occupied .qs-key {
-  display: none;
+  display: block;
+  /* keep showing key but subtle */
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -2334,7 +2321,7 @@ body {
     0 6px 24px rgba(0, 0, 0, 0.85),
     inset 0 1px 0 rgba(255, 220, 120, 0.07);
   pointer-events: none;
-  z-index: 1100;
+  z-index: 10002;
   /* fade in smoothly */
   opacity: 1;
   transition: opacity 0.1s ease;
@@ -3773,7 +3760,7 @@ body {
   box-shadow:
     0 6px 24px rgba(0, 0, 0, 0.85),
     inset 0 1px 0 rgba(255, 220, 120, 0.07);
-  z-index: 1200;
+  z-index: 10002;
   user-select: none;
 }
 
@@ -3783,95 +3770,141 @@ body {
 
 /* ── Battle Log panel ───────────────────────────────────────────────────── */
 #battle-log-panel {
-  position: fixed;
-  left: 0;
-  right: 420px;
-  bottom: 0;
-  height: 170px;
-  background: rgba(5, 5, 5, 0.93);
-  border-top: 1px solid rgba(232, 200, 122, 0.18);
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  width: clamp(300px, 40vw, 460px);
+  height: 240px;
+  background: linear-gradient(135deg, rgba(14, 10, 6, 0.95), rgba(8, 5, 3, 0.98));
+  border: 1px solid rgba(232, 200, 122, 0.3);
+  border-radius: 6px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(232, 200, 122, 0.15);
   display: none;
   flex-direction: column;
   font-family: 'Courier New', monospace;
   font-size: 11px;
   z-index: 500;
-  transition: top 0.2s ease, right 0.2s ease, height 0.2s ease;
+  pointer-events: auto;
 }
 
 #battle-log-panel.bl--visible {
   display: flex;
+  animation: bl-slide-up 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes bl-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Expanded (full-screen) state — B key still controls show/hide */
 #battle-log-panel.bl--expanded {
-  top: 0;
-  right: 0;
-  height: auto;
-  border-left: none;
+  left: 50%;
+  top: 50%;
+  bottom: auto;
+  transform: translate(-50%, -50%) !important;
+  width: 80%;
+  max-width: 900px;
+  height: 80%;
+  max-height: 800px;
+  z-index: 1000;
+  box-shadow: 0 0 100px rgba(0, 0, 0, 0.95), 0 0 0 9999px rgba(0, 0, 0, 0.7);
+  animation: bl-pop-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
+@keyframes bl-pop-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -45%) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
 
 .bl-header {
-  padding: 3px 10px 3px 14px;
-  background: rgba(232, 200, 122, 0.07);
-  border-bottom: 1px solid rgba(232, 200, 122, 0.18);
+  padding: 8px 14px;
+  background: rgba(232, 200, 122, 0.08);
+  border-bottom: 1px solid rgba(232, 200, 122, 0.25);
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
   color: #e8c87a;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: bold;
   display: flex;
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .bl-expand-btn {
   margin-left: auto;
-  background: none;
-  border: 1px solid rgba(232, 200, 122, 0.28);
-  color: rgba(232, 200, 122, 0.65);
-  font-size: 13px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(232, 200, 122, 0.35);
+  color: rgba(232, 200, 122, 0.8);
+  font-size: 14px;
   line-height: 1;
-  padding: 0 5px 1px;
-  border-radius: 2px;
+  padding: 3px 8px;
+  border-radius: 3px;
   cursor: pointer;
   pointer-events: auto;
   user-select: none;
-  transition: color 0.15s, border-color 0.15s;
+  transition: all 0.15s;
 }
 
 .bl-expand-btn:hover {
-  color: #e8c87a;
-  border-color: rgba(232, 200, 122, 0.65);
+  color: #fff;
+  border-color: #e8c87a;
+  background: rgba(232, 200, 122, 0.15);
 }
 
 .bl-entries {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  padding: 4px 0;
 }
 
 .bl-entries::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 
 .bl-entries::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .bl-entries::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 2px;
+  background: rgba(232, 200, 122, 0.3);
+  border-radius: 3px;
+}
+
+.bl-entries::-webkit-scrollbar-thumb:hover {
+  background: rgba(232, 200, 122, 0.5);
 }
 
 .bl-row {
   display: flex;
   align-items: baseline;
-  gap: 5px;
-  padding: 2px 8px 2px 14px;
+  gap: 8px;
+  padding: 4px 14px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   line-height: 1.6;
   white-space: nowrap;
   overflow: hidden;
+}
+
+.bl-row:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .bl--hit {
@@ -4281,6 +4314,94 @@ body.cursor-interact #renderer-canvas {
   color: #668866;
   font-size: 12px;
   font-style: italic;
+}
+
+/* ── Alchemy message bar ─────────────────── */
+#alchemy-message-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 24px;
+  background: rgba(0, 0, 0, 0.45);
+  border-top: 1px solid rgba(0, 90, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle animated shimmer line above the bar */
+#alchemy-message-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.25), transparent);
+  animation: alchemy-bar-shimmer 4s linear infinite;
+}
+
+@keyframes alchemy-bar-shimmer {
+  0% {
+    left: -60%;
+  }
+
+  100% {
+    left: 160%;
+  }
+}
+
+#alchemy-message-icon {
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  color: #44aa44;
+  flex-shrink: 0;
+}
+
+#alchemy-message-text {
+  font-size: 13px;
+  font-style: italic;
+  letter-spacing: 0.3px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  color: #88bb88;
+}
+
+/* Visible state */
+#alchemy-message-bar.alchemy-msg-visible #alchemy-message-icon,
+#alchemy-message-bar.alchemy-msg-visible #alchemy-message-text {
+  opacity: 1;
+}
+
+/* Type variants */
+#alchemy-message-bar.alchemy-msg-success #alchemy-message-text {
+  color: #88ff88;
+  text-shadow: 0 0 10px rgba(0, 255, 0, 0.35);
+}
+
+#alchemy-message-bar.alchemy-msg-success #alchemy-message-icon {
+  color: #88ff88;
+  text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+#alchemy-message-bar.alchemy-msg-fail #alchemy-message-text {
+  color: #e8a84a;
+  text-shadow: 0 0 10px rgba(232, 168, 74, 0.35);
+}
+
+#alchemy-message-bar.alchemy-msg-fail #alchemy-message-icon {
+  color: #c08030;
+}
+
+#alchemy-message-bar.alchemy-msg-info #alchemy-message-text {
+  color: #aaccaa;
+}
+
+#alchemy-message-bar.alchemy-msg-info #alchemy-message-icon {
+  color: #668866;
 }
 
 /* ═══════════════════════════════════════════
