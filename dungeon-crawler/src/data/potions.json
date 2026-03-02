@@ -57,5 +57,17 @@
         },
         "value": 20,
         "weight": 0.4
+    },
+    {
+        "name": "Minor Rejuvenate Potion",
+        "icon": "/icons/minor_rejuvenate_potion.svg",
+        "description": "A glowing yellow elixir that restores 100 stamina points.",
+        "type": "potion",
+        "effect": {
+            "type": "restore-sp",
+            "value": 100
+        },
+        "value": 50,
+        "weight": 0.3
     }
 ]

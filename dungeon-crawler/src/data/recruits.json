@@ -175,7 +175,8 @@
         "rightHand": "Dagger",
         "startingInventory": [
             "Cure Poison Potion",
-            "Healing Potion"
+            "Healing Potion",
+            "Minor Rejuvenate Potion"
         ],
         "gridCol": 14,
         "gridRow": 9,
@@ -202,7 +203,8 @@
         ],
         "startingInventory": [
             "Cure Poison Potion",
-            "Healing Potion"
+            "Healing Potion",
+            "Minor Rejuvenate Potion"
         ],
         "image": "/heros/high-elf.png",
         "leftHand": "Dagger",
