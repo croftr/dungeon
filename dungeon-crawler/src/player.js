@@ -214,7 +214,7 @@ export function initInput(camera) {
     // Strafe left / right
     'a': () => strafePlayer(camera, -1),
     'd': () => strafePlayer(camera, 1),
-    'm': () => {
+    'Tab': () => {
       document.getElementById('minimap-wrap').classList.toggle('hud-hidden');
       document.getElementById('status').classList.toggle('hud-hidden');
     }

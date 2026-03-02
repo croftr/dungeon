@@ -635,20 +635,12 @@ export function spawnObjectsForLevel() {
         // 2nd Chest in the Northwest room, next to the other one, containing all rings
         addChest(objectsGroup, gltfLoader, 5, 1, Math.PI, -0.65, [
             { name: 'Gold Coins', quantity: 100 },
-            "Ring of Vigour", "Ring of Wisdom", "Ring of Strength", "Ring of Dexterity", "Ring of Resilience"
+            "Ring of Vigour", "Ring of Wisdom", "Ring of Dexterity"
         ], undefined, true, 0.35);
         // Crystals in the starter room
         addCrystals(objectsGroup, gltfLoader, 9, 11, 0, -0.7);
         // Bone pile in the passage
         addBonePile(objectsGroup, gltfLoader, 1, 27);
-        // Corpse in the starter room area (with empty slots for inventory)
-        addBonePile(objectsGroup, gltfLoader, 11, 12, [
-            null, null, null, null, null,
-            null, null, null, null, null,
-            null, null, null, null, null,
-            null, null, null, null, null,
-            null, null, null, null, null
-        ]);
 
         // Spell Cabinet in the starter room
         addSpellCabinet(objectsGroup, gltfLoader, 12, 13, Math.PI, 0.6, [
