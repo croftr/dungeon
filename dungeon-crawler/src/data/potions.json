@@ -11,6 +11,18 @@
         "weight": 0.3
     },
     {
+        "name": "Minor Mana Potion",
+        "icon": "/icons/mana_potion.svg",
+        "description": "A crystalline blue liquid that restores 30 mana points.",
+        "type": "potion",
+        "effect": {
+            "type": "restore-mp",
+            "value": 30
+        },
+        "value": 40,
+        "weight": 0.3
+    },
+    {
         "name": "Healing Potion",
         "icon": "/icons/healing_potion.svg",
         "description": "A soothing elixir that restores 20 hit points.",

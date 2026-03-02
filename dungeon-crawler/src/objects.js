@@ -6,7 +6,7 @@ import { tweenGroup, isInFrontOfPlayer, player } from './player.js';
 import { showMessage } from './minimap.js';
 import { getItemDef } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold } from './party.js';
-import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound } from './audio.js';
+import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
 import { triggerMummyAmbush } from './monster.js';
 
@@ -87,6 +87,7 @@ export function initObjects(scene, camera) {
 
     window.addEventListener('click', (e) => {
         // If any modal overlay is currently visible, let the DOM handle it — don't raycast.
+        const weaponRackOverlay = document.getElementById('weapon-rack-overlay');
         const cabinetOverlay = document.getElementById('cabinet-overlay');
         const chestOverlay = document.getElementById('chest-overlay');
         const corpseOverlay = document.getElementById('corpse-overlay');
@@ -95,6 +96,7 @@ export function initObjects(scene, camera) {
         const alchemyOverlay = document.getElementById('alchemy-overlay');
         const charDevOverlay = document.getElementById('char-dev-overlay');
         if (
+            (weaponRackOverlay && !weaponRackOverlay.classList.contains('chest-hidden')) ||
             (cabinetOverlay && !cabinetOverlay.classList.contains('chest-hidden')) ||
             (chestOverlay && !chestOverlay.classList.contains('chest-hidden')) ||
             (corpseOverlay && !corpseOverlay.classList.contains('chest-hidden')) ||
@@ -205,6 +207,14 @@ export function initObjects(scene, camera) {
                     showMessage("The merchant watches you from behind the counter.");
                 }
                 break;
+            } else if (obj.userData.isWeaponRack) {
+                const isOnSameSquare = (player.gridRow === obj.userData.gridRow && player.gridCol === obj.userData.gridCol);
+                if (isOnSameSquare) {
+                    openWeaponRackModal(obj);
+                } else {
+                    showMessage("Stand by the weapon rack to inspect it.");
+                }
+                break;
             } else if (obj.userData.isSpellCabinet) {
                 const isOnSameSquare = (player.gridRow === obj.userData.gridRow && player.gridCol === obj.userData.gridCol);
                 if (isOnSameSquare) {
@@ -238,6 +248,7 @@ export function initObjects(scene, camera) {
                                 if (equip.addItemToInventory(i, obj.userData.itemName)) {
                                     added = true;
                                     showMessage(`Picked up ${obj.userData.itemName}.`);
+                                    playItemSound(obj.userData.itemName);
                                     obj.parent.remove(obj);
                                     break;
                                 }
@@ -438,6 +449,17 @@ export function initObjects(scene, camera) {
     if (tabBuy) tabBuy.onclick = (e) => { e.stopPropagation(); _switchMerchantTab('buy'); };
     if (tabSell) tabSell.onclick = (e) => { e.stopPropagation(); _switchMerchantTab('sell'); };
 
+    // Weapon rack modal close
+    const weaponRackCloseBtn = document.getElementById('weapon-rack-close');
+    if (weaponRackCloseBtn) {
+        weaponRackCloseBtn.onclick = (e) => {
+            e.stopPropagation();
+            document.getElementById('weapon-rack-overlay').classList.add('chest-hidden');
+            _hideChestCtxMenu();
+            import('./equipment.js').then(m => m.hideTooltip());
+        };
+    }
+
     // Cabinet modal close
     const cabinetCloseBtn = document.getElementById('cabinet-close');
     if (cabinetCloseBtn) {
@@ -489,6 +511,12 @@ export function initObjects(scene, camera) {
             e.stopPropagation();
             _transmute();
         };
+    }
+
+    // Stop ALL clicks inside the weapon rack overlay from reaching the window listener
+    const weaponRackOverlayEl = document.getElementById('weapon-rack-overlay');
+    if (weaponRackOverlayEl) {
+        weaponRackOverlayEl.addEventListener('click', (e) => e.stopPropagation());
     }
 
     // Stop ALL clicks inside the cabinet overlay from reaching the window listener
@@ -642,13 +670,25 @@ export function spawnObjectsForLevel() {
         // Bone pile in the passage
         addBonePile(objectsGroup, gltfLoader, 1, 27);
 
+        // 2nd Weapon Rack (facing West, pushed against East wall)
+        addWeaponRack(objectsGroup, gltfLoader, 21, 21, Math.PI / 2, 0.65, 0, [
+            'War Hammer', 'Longbow'
+        ]);
+
         // Spell Cabinet in the starter room
-        addSpellCabinet(objectsGroup, gltfLoader, 12, 13, Math.PI, 0.6, [
+        addSpellCabinet(objectsGroup, gltfLoader, 12, 13, Math.PI, 0, 0.6, [
             'Scroll of Fireball',
             'Scroll of Heal',
             'Scroll of Regeneration',
             'Scroll of Cure Poison',
             'Scroll of Resist Poison',
+        ]);
+
+        // Spell Cabinet at the end of the dead-end passage near the zombie room
+        addSpellCabinet(objectsGroup, gltfLoader, 21, 16, -Math.PI / 2, -0.6, 0, [
+            'Resist Poison Spellbook',
+            'Scroll of Regeneration',
+            'Scroll of Cure Poison',
         ]);
 
         // Shop against the east wall of the 8×8 room, centre row
@@ -869,11 +909,46 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
 
 
 
-function addSpellCabinet(scene, loader, col, row, rotY, offsetZ = 0, contents = []) {
+function addWeaponRack(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, contents = []) {
+    loader.load('/items/weapon-rack.glb', (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(0.46);
+        model.position.set(col * CELL + offsetX, 0.45, row * CELL + offsetZ);
+        model.rotation.y = rotY;
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.userData.isWeaponRack = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+                child.userData.contents = contents;
+
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
+            }
+        });
+
+        scene.add(model);
+    });
+}
+
+function addSpellCabinet(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, contents = []) {
     loader.load('/items/spell-cabinet.glb', (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
-        model.position.set(col * CELL, 0.65, row * CELL + offsetZ);
+        model.position.set(col * CELL + offsetX, 0.65, row * CELL + offsetZ);
         model.rotation.y = rotY;
 
         model.traverse((child) => {
@@ -1097,6 +1172,7 @@ export function openPortcullis(p, skipEverything = false) {
 }
 
 export function openChestModal(chestObj) {
+    playChestOpenSound();
     _activeSentLabelId = 'chest-sent-label';
     const overlay = document.getElementById('chest-overlay');
     overlay.classList.remove('chest-hidden');
@@ -1111,7 +1187,23 @@ export function openChestModal(chestObj) {
     });
 }
 
+export function openWeaponRackModal(rackObj) {
+    playWeaponRackSound();
+    _activeSentLabelId = 'weapon-rack-sent-label';
+    const overlay = document.getElementById('weapon-rack-overlay');
+    overlay.classList.remove('chest-hidden');
+    document.getElementById('weapon-rack-sent-label').textContent = '';
+
+    const slots = document.querySelectorAll('.weapon-rack-slot');
+    const contents = rackObj.userData.contents || [];
+
+    import('./equipment.js').then(equip => {
+        _bindChestSlots(equip, slots, contents);
+    });
+}
+
 export function openSpellCabinetModal(cabinetObj) {
+    playSpellCabinetSound();
     _activeSentLabelId = 'cabinet-sent-label';
     const overlay = document.getElementById('cabinet-overlay');
     overlay.classList.remove('chest-hidden');

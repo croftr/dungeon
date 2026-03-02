@@ -83,7 +83,7 @@
         "leftHand": "Axe",
         "rightHand": "Wooden Shield",
         "startingInventory": [
-            "Cure Poison Potion",
+            "Minor Mana Potion",
             "Healing Potion"
         ],
         "gridCol": 12,
@@ -113,8 +113,7 @@
         "startingInventory": [
             "Scroll of Fireball",
             "Scroll of Heal",
-            "Cure Poison Potion",
-            "Healing Potion"
+            "Minor Mana Potion"
         ],
         "image": "/human_wizard_head.png",
         "leftHand": "Spellbook",
@@ -190,7 +189,7 @@
         "race": "High Elf",
         "stats": {
             "strength": 6,
-            "dexterity": 10,
+            "dexterity": 100,
             "vitality": 6,
             "intelligence": 7,
             "resilience": 6

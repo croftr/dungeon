@@ -745,6 +745,25 @@ function _updateChase(m, dt) {
 
 const FOG_CULL_SQ = 14 * 14; // slightly beyond fog end (12 units)
 
+function _hasLineOfSight(r1, c1, r2, c2) {
+  const dr = r2 - r1;
+  const dc = c2 - c1;
+  const absR = Math.abs(dr);
+  const absC = Math.abs(dc);
+  // Same cell or orthogonally adjacent — no cell between them, always visible
+  if (absR + absC <= 1) return true;
+  // Diagonally adjacent (1,1) — blocked only if BOTH corner cells are walls
+  if (absR === 1 && absC === 1) return isPassable(r1, c1 + dc) || isPassable(r1 + dr, c1);
+  // Straight lines (distance 2)
+  if (dr === 0) return isPassable(r1, c1 + Math.sign(dc));
+  if (dc === 0) return isPassable(r1 + Math.sign(dr), c1);
+  // Mixed / full diagonals at distance 2
+  if (absR === 2 && absC === 2) return isPassable(r1 + Math.sign(dr), c1 + Math.sign(dc));
+  if (absR === 2 && absC === 1) return isPassable(r1 + Math.sign(dr), c1) || isPassable(r1 + Math.sign(dr), c1 + Math.sign(dc));
+  if (absR === 1 && absC === 2) return isPassable(r1, c1 + Math.sign(dc)) || isPassable(r1 + Math.sign(dr), c1 + Math.sign(dc));
+  return true;
+}
+
 export function updateMonsters(dt, playerCamera, scene) {
   const currentLevel = window.currentLevel || 1;
   const playerPos = playerCamera ? playerCamera.position : null;
@@ -813,10 +832,22 @@ export function updateMonsters(dt, playerCamera, scene) {
     const distCol = Math.abs(m.gridCol - player.gridCol);
     let inRange = distRow <= 1 && distCol <= 1;
 
-    // Monsters detect characters and start chasing from 2 grid squares away
-    if (!m.engaged && m.name !== 'Training Dummy' && distRow <= 2 && distCol <= 2) {
-      m.engaged = true;
-      setInCombat();
+    // Monsters detect characters only within 1 grid square and when facing them
+    if (!m.engaged && m.name !== 'Training Dummy' && distRow <= 1 && distCol <= 1) {
+      if (_hasLineOfSight(m.gridRow, m.gridCol, player.gridRow, player.gridCol)) {
+        let seesPlayer = true;
+        if (m.mesh && playerPos) {
+          const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(m.mesh.quaternion);
+          forward.y = 0;
+          forward.normalize();
+          const toPlayer = new THREE.Vector3(playerPos.x - m.mesh.position.x, 0, playerPos.z - m.mesh.position.z).normalize();
+          if (forward.dot(toPlayer) <= 0) seesPlayer = false; // Player must be in forward-facing hemisphere
+        }
+        if (seesPlayer) {
+          m.engaged = true;
+          setInCombat();
+        }
+      }
     }
 
     // Prevent attacking through walls if monster is somehow in a wall or cornered
@@ -830,9 +861,9 @@ export function updateMonsters(dt, playerCamera, scene) {
       }
     }
 
-    // Non-patrol monsters always face the player; patrol monsters only turn
-    // to face the player once they are adjacent (otherwise patrol handles rotation).
-    if (m.mesh && playerCamera && m.lookAtPlayer && (!m.patrol || inRange)) {
+    // Non-patrol monsters face the player when engaged or in range; 
+    // patrol monsters only turn to face the player once they are adjacent.
+    if (m.mesh && playerCamera && m.lookAtPlayer && ((!m.patrol && m.engaged) || inRange)) {
       m.lookAtPlayer(playerCamera.position);
     }
 

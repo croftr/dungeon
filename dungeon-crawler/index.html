@@ -743,6 +743,31 @@
     </div>
   </div>
 
+  <!-- ── WEAPON RACK MODAL ── -->
+  <div id="weapon-rack-overlay" class="chest-hidden">
+    <div id="weapon-rack-modal">
+      <div id="weapon-rack-header" class="chest-header-style">
+        <div id="weapon-rack-title-wrap">
+          <img src="/icons/sword-icon.svg" id="weapon-rack-header-icon" alt="Weapon Rack" onerror="this.src='/icons/combat-sword.svg'">
+          <span id="weapon-rack-title">Weapon Rack</span>
+        </div>
+        <span id="weapon-rack-sent-label"></span>
+        <button id="weapon-rack-close" aria-label="Close">&times;</button>
+      </div>
+      <div id="weapon-rack-body">
+        <div id="weapon-rack-grid">
+          <!-- 6 slots (wide 3x2) -->
+          <div class="chest-slot weapon-rack-slot" data-index="0"></div>
+          <div class="chest-slot weapon-rack-slot" data-index="1"></div>
+          <div class="chest-slot weapon-rack-slot" data-index="2"></div>
+          <div class="chest-slot weapon-rack-slot" data-index="3"></div>
+          <div class="chest-slot weapon-rack-slot" data-index="4"></div>
+          <div class="chest-slot weapon-rack-slot" data-index="5"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── CORPSE MODAL ── -->
   <div id="corpse-overlay" class="chest-hidden">
     <div id="corpse-modal">

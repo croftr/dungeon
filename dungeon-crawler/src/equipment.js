@@ -799,7 +799,11 @@ function populateTooltip(obj) {
     actionEl.textContent = def?.attackType ? 'Attack: ' + def.attackType.charAt(0).toUpperCase() + def.attackType.slice(1) : '';
   }
 
-  descEl.textContent = def?.description ?? '—';
+  let descText = def?.description ?? '—';
+  if (def?.type === 'potion' && def?.effect?.value) {
+    descText = descText.replace(/\d+/, def.effect.value);
+  }
+  descEl.textContent = descText;
 
   if (isAmmo) {
     document.getElementById('item-detail-ammo-mod').textContent = '×' + (def?.damageModifier ?? 1.0);

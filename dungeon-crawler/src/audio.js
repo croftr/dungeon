@@ -28,6 +28,7 @@ const SOUND_MAP = {
 const ITEM_SOUNDS = {
   'Gold Coins': '/sounds/items/gold-coins.mp3',
   'potion': '/sounds/items/alchemy-bubbles.mp3',
+  'scroll': '/sounds/items/scroll.mp3',
 };
 
 const bufferCache = new Map();
@@ -365,6 +366,9 @@ export async function playItemSound(itemName, slot = '') {
   if (!url && itemName === 'Gold Coins') {
     url = ITEM_SOUNDS['Gold Coins'];
   }
+  if (!url && itemName.toLowerCase().includes('scroll')) {
+    url = ITEM_SOUNDS['scroll'];
+  }
 
   if (!url) return;
 
@@ -413,6 +417,66 @@ export async function playSkillSound(name, volume = 0.7) {
     source.start(0, def.offset);
   } catch (err) {
     console.warn('[audio] playSkillSound failed:', err);
+  }
+}
+
+/**
+ * Play the spell cabinet interaction sound.
+ */
+export async function playSpellCabinetSound() {
+  const buffer = await getBuffer('/sounds/items/scroll.mp3');
+  if (!buffer) return;
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.8;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playSpellCabinetSound failed:', err);
+  }
+}
+
+/**
+ * Play the chest opening sound.
+ */
+export async function playChestOpenSound() {
+  const buffer = await getBuffer('/sounds/items/chest-open.mp3');
+  if (!buffer) return;
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.8;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playChestOpenSound failed:', err);
+  }
+}
+
+/**
+ * Play the weapon rack interaction sound.
+ */
+export async function playWeaponRackSound() {
+  const buffer = await getBuffer('/sounds/items/weapon-rack.mp3');
+  if (!buffer) return;
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.8;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playWeaponRackSound failed:', err);
   }
 }
 
