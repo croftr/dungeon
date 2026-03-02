@@ -22,7 +22,12 @@ const SOUND_MAP = {
   'shield-bash': { url: '/sounds/actions/bash.mp3', offset: 0.05 },
   death: { url: '/sounds/actions/monster-killed-1.mp3 ', offset: 0.0 },
   hit: { url: '/sounds/actions/hit.mp3', offset: 0.0 },
-  'gold-coins': { url: '/sounds/actions/gold-coins.mp3', offset: 0.0 },
+  'gold-coins': { url: '/sounds/items/gold-coins.mp3', offset: 0.0 },
+};
+
+const ITEM_SOUNDS = {
+  'Gold Coins': '/sounds/items/gold-coins.mp3',
+  'potion': '/sounds/items/alchemy-bubbles.mp3',
 };
 
 const bufferCache = new Map();
@@ -206,7 +211,7 @@ export async function playHitSound() {
 }
 
 export async function playGoldSound() {
-  const buffer = await getBuffer('/sounds/actions/gold-coins.mp3');
+  const buffer = await getBuffer('/sounds/items/gold-coins.mp3');
   if (!buffer) return;
 
   try {
@@ -344,8 +349,41 @@ const SKILL_SOUND_MAP = {
   'magic': { url: '/sounds/actions/skills/magic.mp3', offset: 0.0 },
   'render': { url: '/sounds/actions/skills/render.mp3', offset: 0.0 },
   'heal': { url: '/sounds/actions/life-crystal.mp3', offset: 0.0 },
-  'alchemy': { url: '/sounds/actions/alchemy-bubbles.mp3', offset: 0.0 },
+  'alchemy': { url: '/sounds/items/alchemy-bubbles.mp3', offset: 0.0 },
 };
+
+/**
+ * Play a sound for a specific item interaction.
+ * @param {string} itemName
+ * @param {string} slot - used to identify if it's a potion
+ */
+export async function playItemSound(itemName, slot = '') {
+  let url = ITEM_SOUNDS[itemName];
+  if (!url && (itemName.toLowerCase().includes('potion') || slot === 'potion')) {
+    url = ITEM_SOUNDS['potion'];
+  }
+  if (!url && itemName === 'Gold Coins') {
+    url = ITEM_SOUNDS['Gold Coins'];
+  }
+
+  if (!url) return;
+
+  const buffer = await getBuffer(url);
+  if (!buffer) return;
+
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.8;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playItemSound failed:', err);
+  }
+}
 
 /**
  * Play the alchemy bubbling sound.

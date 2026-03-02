@@ -10,7 +10,7 @@ import { dropMember } from './recruits.js';
 import { isInFrontOfPlayer } from './player.js';
 import { isAlchemyModalOpen, addItemToAlchemy } from './objects.js';
 import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude } from './combat-rules.js';
-import { playCritSound, playSkillSound } from './audio.js';
+import { playCritSound, playSkillSound, playItemSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { skillsState } from './skills-state.js';
 import { getNextLevelXP, hydrateSkill } from './leveling.js';
@@ -91,6 +91,10 @@ const SLOT_KEYS = [
   'ring1', 'ring2',
   'legs', 'feet', 'ammo', 'skill',
 ];
+
+// Item types that can be placed in quick-use slots.
+// Add new type strings here when new quickslottable item categories are introduced.
+const QUICKSLOT_TYPES = ['potion'];
 
 const INVENTORY_SIZE = 20; // 4 cols × 5 rows
 
@@ -228,6 +232,7 @@ export function extendPartyData() {
     if (!m.statBonuses) m.statBonuses = { strength: 0, dexterity: 0, vitality: 0, intelligence: 0, resilience: 0 };
     if (!m.skillProgression) m.skillProgression = [];
     if (m.pendingLevelUp === undefined) m.pendingLevelUp = false;
+    if (!m.quickslots) m.quickslots = [null, null];
     if (m.pendingSkillChoice === undefined) m.pendingSkillChoice = null;
 
     if (m.equipment) {
@@ -383,6 +388,16 @@ function renderModal(memberIndex) {
     const isSecondary = isBothHands && key === 'rightHand';
     el.classList.toggle('occupied', item !== null);
     el.classList.toggle('both-hands-secondary', isSecondary);
+    const pdItemEl = el.querySelector('.pd-item') || el;
+    renderItemIcon(item, pdItemEl);
+  });
+
+  // ── Quickslots (paperdoll) ──
+  [0, 1].forEach(qsi => {
+    const el = document.getElementById(`pd-quickslot-${qsi}`);
+    if (!el) return;
+    const item = m.quickslots?.[qsi] ?? null;
+    el.classList.toggle('occupied', !!item);
     const pdItemEl = el.querySelector('.pd-item') || el;
     renderItemIcon(item, pdItemEl);
   });
@@ -998,7 +1013,7 @@ function _equipItem(memberIndex, invIndex) {
       const fi = m.inventory.indexOf(null);
       if (fi !== -1) m.inventory[fi] = { name: d.name, slot: d.slot };
     });
-  } else {
+  } else if (SLOT_KEYS.includes(item.slot)) {
     // ── Smart ring-slot assignment ──────────────────────────────────────────
     // If the item targets a ring slot but that slot is already occupied and the
     // other ring slot is empty, automatically redirect to the free slot instead.
@@ -1054,6 +1069,11 @@ function _equipItem(memberIndex, invIndex) {
       const fi = m.inventory.indexOf(null);
       if (fi !== -1) m.inventory[fi] = { name: d.name, slot: d.slot };
     });
+  } else {
+    // This item is not equippable (e.g. loot, potion, or unrecognized slot).
+    // Restore it to the inventory so it doesn't disappear.
+    m.inventory[invIndex] = item;
+    return;
   }
 
   updateEffectiveStats(m);
@@ -1111,18 +1131,53 @@ function _learnSpell(memberIndex, invIndex) {
   refreshPartyCards();
 }
 
-function _usePotion(memberIndex, invIndex) {
+/**
+ * Moves the item in inventory slot `invIndex` into the member's quickslot `slotIdx`.
+ * If the slot is already occupied, the old item is returned to the first free inventory slot.
+ */
+function _assignQuickslot(memberIndex, slotIdx, invIndex) {
   const m = party[memberIndex];
-  if (m.isDead) return;
+  if (!m || m.isEmpty) return;
+  const item = m.inventory[invIndex];
+  if (!item) return;
+  if (!m.quickslots) m.quickslots = [null, null];
+  // If slot already has an item, move it back to inventory first
+  if (m.quickslots[slotIdx]) {
+    const freeInvSlot = m.inventory.findIndex((s, idx) => !s && idx !== invIndex);
+    if (freeInvSlot !== -1) m.inventory[freeInvSlot] = m.quickslots[slotIdx];
+  }
+  m.quickslots[slotIdx] = item;
+  m.inventory[invIndex] = null;
+  showMessage(`${item.name} assigned to Quick Slot ${slotIdx + 1}.`);
+  renderModal(memberIndex);
+  refreshPartyCards();
+}
+
+/**
+ * Uses the potion (or other consumable) assigned to a party member's quickslot.
+ * Searches the member's inventory for the first matching item, applies its effect
+ * and removes it. If none found the quickslot is cleared and the player is notified.
+ */
+export function useQuickslotPotion(memberIndex, slotIdx) {
+  const m = party[memberIndex];
+  if (!m || m.isEmpty || m.isDead) return;
   if (hasEffectFlag(m, 'preventsAction')) {
     showMessage(`${m.name} cannot use items!`);
     return;
   }
-  const item = m.inventory[invIndex];
+  if (!m.quickslots) m.quickslots = [null, null];
+  const item = m.quickslots[slotIdx];
   if (!item) return;
 
+  if (_applyPotionEffect(m, item)) {
+    m.quickslots[slotIdx] = null;
+  }
+  refreshPartyCards();
+}
+
+function _applyPotionEffect(m, item) {
   const def = getItemDef(item.name);
-  if (!def || def.type !== 'potion' || !def.effect) return;
+  if (!def || def.type !== 'potion' || !def.effect) return false;
 
   const { type, value } = def.effect;
   let msg = '';
@@ -1163,11 +1218,25 @@ function _usePotion(memberIndex, invIndex) {
     }
     default:
       console.warn(`Unknown potion effect type: ${type}`);
-      return;
+      return false;
   }
 
   showMessage(`${m.name} drinks ${item.name} and ${msg}.`);
+  playItemSound(item.name, 'potion');
   if (sound) playSkillSound(sound);
+  return true;
+}
+
+function _usePotion(memberIndex, invIndex) {
+  const m = party[memberIndex];
+  if (m.isDead) return;
+  if (hasEffectFlag(m, 'preventsAction')) {
+    showMessage(`${m.name} cannot use items!`);
+    return;
+  }
+  const item = m.inventory[invIndex];
+  if (!item) return;
+  if (!_applyPotionEffect(m, item)) return;
 
   // Consume the potion
   m.inventory[invIndex] = null;
@@ -1215,8 +1284,31 @@ function onInventoryCellClick(e) {
   }
 
   const def = getItemDef(item.name);
-  if (def?.type === 'potion') {
-    _usePotion(activeCharIndex, invIndex);
+  if (def?.type && QUICKSLOT_TYPES.includes(def.type)) {
+    // Left-click moves into the first empty quickslot (like equipping).
+    // To drink, use right-click → Drink, a shortcut key, or the party panel button.
+    const m2 = party[activeCharIndex];
+    if (!m2.quickslots) m2.quickslots = [null, null];
+    const freeSlot = m2.quickslots.findIndex(s => !s);
+    if (freeSlot !== -1) {
+      playItemSound(item.name, 'potion');
+      m2.quickslots[freeSlot] = item;
+      m2.inventory[invIndex] = null;
+      showMessage(`${item.name} assigned to Quick Slot ${freeSlot + 1}.`);
+      renderModal(activeCharIndex);
+      refreshPartyCards();
+    } else {
+      showMessage(`Quick Slots are full. Right-click to reassign.`);
+    }
+    return;
+  }
+
+  if (item.name === 'Gold Coins') {
+    const goldVal = def?.value ?? 0;
+    addGold(goldVal);
+    showMessage(`Collected ${goldVal} Gold Coins.`);
+    m.inventory[invIndex] = null;
+    renderModal(activeCharIndex);
     return;
   }
 
@@ -1263,6 +1355,29 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
   equipBtn.style.display = 'none';
   learnBtn.style.display = 'none';
   if (sellBtn) sellBtn.style.display = 'none';
+
+  // ── Quick-slot assignment buttons ──
+  const qs1Btn = document.getElementById('inv-ctx-qs1');
+  const qs2Btn = document.getElementById('inv-ctx-qs2');
+  if (qs1Btn) qs1Btn.style.display = 'none';
+  if (qs2Btn) qs2Btn.style.display = 'none';
+
+  if (def?.type && QUICKSLOT_TYPES.includes(def.type)) {
+    if (qs1Btn) {
+      qs1Btn.style.display = 'block';
+      qs1Btn.onclick = () => {
+        _assignQuickslot(activeCharIndex, 0, _ctxInvIndex);
+        _hideContextMenu();
+      };
+    }
+    if (qs2Btn) {
+      qs2Btn.style.display = 'block';
+      qs2Btn.onclick = () => {
+        _assignQuickslot(activeCharIndex, 1, _ctxInvIndex);
+        _hideContextMenu();
+      };
+    }
+  }
 
   if (def?.type === 'potion') {
     if (useBtn) {
@@ -2981,6 +3096,30 @@ function attachPaperdollListeners() {
       return party[activeCharIndex].equipment[key] ?? null;
     });
   });
+
+  // Quickslot divs: click to clear the assignment; tooltip shows assigned item
+  [0, 1].forEach(qsi => {
+    const el = document.getElementById(`pd-quickslot-${qsi}`);
+    if (!el) return;
+    el.addEventListener('click', () => {
+      if (activeCharIndex === null) return;
+      const m = party[activeCharIndex];
+      if (!m.quickslots) return;
+      const prev = m.quickslots[qsi];
+      if (!prev) return;
+      // Return item to first free inventory slot
+      const freeInvSlot = m.inventory.findIndex(s => !s);
+      if (freeInvSlot !== -1) m.inventory[freeInvSlot] = prev;
+      m.quickslots[qsi] = null;
+      showMessage(`${prev.name} returned to inventory.`);
+      renderModal(activeCharIndex);
+      refreshPartyCards();
+    });
+    attachTooltipListeners(el, () => {
+      if (activeCharIndex === null) return null;
+      return party[activeCharIndex].quickslots?.[qsi] ?? null;
+    });
+  });
 }
 
 function attachBarTooltipListeners() {
@@ -3075,6 +3214,17 @@ function attachCardListeners() {
         }
       });
     }
+
+    // Quickslot click → use the assigned potion
+    [0, 1].forEach(qsi => {
+      const qsBtn = document.getElementById(`qs-${i}-${qsi}`);
+      if (qsBtn) {
+        qsBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          useQuickslotPotion(i, qsi);
+        });
+      }
+    });
 
   });
 }

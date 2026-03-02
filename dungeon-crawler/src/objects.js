@@ -6,7 +6,7 @@ import { tweenGroup, isInFrontOfPlayer, player } from './player.js';
 import { showMessage } from './minimap.js';
 import { getItemDef } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold } from './party.js';
-import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAnvilSound, playKeyLockSound, playGateOpeningSound } from './audio.js';
+import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
 import { triggerMummyAmbush } from './monster.js';
 
@@ -1211,6 +1211,7 @@ function _renderMerchantShop() {
                 slot.appendChild(price);
 
                 slot.addEventListener('click', () => {
+                    playItemSound(name);
                     _merchantBasket.push(name);
                     _renderMerchantShop();
                     _renderMerchantBasket();
@@ -1247,6 +1248,7 @@ function _renderMerchantBasket() {
 
             // Click basket item → return it to the shop
             slot.addEventListener('click', () => {
+                playItemSound(name);
                 _merchantBasket.splice(idx, 1);
                 _renderMerchantShop();
                 _renderMerchantBasket();
@@ -1371,6 +1373,7 @@ function _renderMerchantPartyItems() {
                 slot.appendChild(price);
 
                 slot.addEventListener('click', () => {
+                    playItemSound(item.name);
                     _merchantSellBasket.push({ charIndex: ci, invIndex: invIdx, name: item.name });
                     _renderMerchantPartyItems();
                     _renderMerchantSellBasket();
@@ -1410,6 +1413,7 @@ function _renderMerchantSellBasket() {
 
             // Click → return item to party panel
             slot.addEventListener('click', () => {
+                playItemSound(entry.name);
                 _merchantSellBasket.splice(idx, 1);
                 _renderMerchantPartyItems();
                 _renderMerchantSellBasket();
@@ -1529,6 +1533,7 @@ function _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx) {
     const target = party[targetIdx];
     const success = equip.addItemToInventory(targetIdx, itemDef.name);
     if (success) {
+        playItemSound(itemDef.name);
         if (_activeSentLabelId) {
             const label = document.getElementById(_activeSentLabelId);
             if (label) label.textContent = `Sent to ${target.name}`;

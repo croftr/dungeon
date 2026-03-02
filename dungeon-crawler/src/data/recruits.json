@@ -12,7 +12,9 @@
             "resilience": 5
         },
         "startingInventory": [
-            "Torch"
+            "Torch",
+            "Cure Poison Potion",
+            "Healing Potion"
         ],
         "skillProgression": [
             "Entangle",
@@ -52,8 +54,7 @@
         "rightHand": "Shield",
         "startingInventory": [
             "Cure Poison Potion",
-            "Healing Potion",
-            "Life Berry"
+            "Healing Potion"
         ],
         "gridCol": 10,
         "gridRow": 8,
@@ -81,6 +82,10 @@
         "image": "/dwarf_barbarian_head.png",
         "leftHand": "Axe",
         "rightHand": "Wooden Shield",
+        "startingInventory": [
+            "Cure Poison Potion",
+            "Healing Potion"
+        ],
         "gridCol": 12,
         "gridRow": 8,
         "facing": "front",
@@ -107,7 +112,9 @@
         ],
         "startingInventory": [
             "Scroll of Fireball",
-            "Scroll of Heal"
+            "Scroll of Heal",
+            "Cure Poison Potion",
+            "Healing Potion"
         ],
         "image": "/human_wizard_head.png",
         "leftHand": "Spellbook",
@@ -138,6 +145,10 @@
         "image": "/human_barbarian_head.png",
         "leftHand": "Greataxe",
         "rightHand": "—",
+        "startingInventory": [
+            "Cure Poison Potion",
+            "Healing Potion"
+        ],
         "gridCol": 11,
         "gridRow": 8,
         "facing": "front",
@@ -163,6 +174,10 @@
         "image": "/heros/dwarf-ranger.png",
         "leftHand": "Crossbow",
         "rightHand": "Dagger",
+        "startingInventory": [
+            "Cure Poison Potion",
+            "Healing Potion"
+        ],
         "gridCol": 14,
         "gridRow": 9,
         "facing": "left",
@@ -186,7 +201,10 @@
             "Dagger Master",
             "Dagger Master"
         ],
-        "startingInventory": [],
+        "startingInventory": [
+            "Cure Poison Potion",
+            "Healing Potion"
+        ],
         "image": "/heros/high-elf.png",
         "leftHand": "Dagger",
         "rightHand": "Dagger",

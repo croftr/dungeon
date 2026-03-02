@@ -1,5 +1,5 @@
 import { getItemDef } from './items.js';
-import { renderItemIcon, attachTooltipListeners, hideTooltip } from './equipment.js';
+import { renderItemIcon, attachTooltipListeners, hideTooltip, useQuickslotPotion } from './equipment.js';
 import { addLogEntry } from './battle-log.js';
 import { isInCombat, playGoldSound } from './audio.js';
 import { skillsState } from './skills-state.js';
@@ -21,11 +21,13 @@ export let partyGold = 0;
 
 export function addGold(amount) {
   partyGold += amount;
+  if (amount > 0) playGoldSound();
   updateGoldDisplay();
 }
 
 export function removeGold(amount) {
   partyGold = Math.max(0, partyGold - amount);
+  if (amount > 0) playGoldSound();
   updateGoldDisplay();
 }
 
@@ -450,6 +452,27 @@ function refreshMember(m) {
       }, remaining);
     }
   }
+
+  // ── Quickslot buttons ──
+  [0, 1].forEach(qsi => {
+    const btn = document.getElementById(`qs-${i}-${qsi}`);
+    if (!btn) return;
+    const item = m.quickslots?.[qsi] ?? null;
+    btn.classList.toggle('qs-occupied', !!item);
+    const keyLabels = [[1, 2], [3, 4], [5, 6], [7, 8]];
+    const keyNum = keyLabels[i]?.[qsi] ?? (i * 2 + qsi + 1);
+    if (item) {
+      const def = getItemDef(item.name);
+      const iconSrc = def?.icon ?? null;
+      if (iconSrc) {
+        btn.innerHTML = `<img src="${iconSrc}" draggable="false" />`;
+      } else {
+        btn.innerHTML = `<span class="qs-key" style="font-size:6px">${item.name.substring(0, 3)}</span>`;
+      }
+    } else {
+      btn.innerHTML = `<span class="qs-key">${keyNum}</span>`;
+    }
+  });
 }
 
 // ─────────────────────────────────────────────
@@ -622,6 +645,27 @@ export function initParty() {
     }
     if (e.key === 'Escape' && tacticsOverlay.style.display !== 'none') {
       closeTacticsModal();
+    }
+
+    // Keys 1–8: quick-use potions for party members
+    // 1/2 → member 0 slots 0/1  |  3/4 → member 1  |  5/6 → member 2  |  7/8 → member 3
+    const quickKeyMap = {
+      '1': [0, 0], '2': [0, 1], '3': [1, 0], '4': [1, 1],
+      '5': [2, 0], '6': [2, 1], '7': [3, 0], '8': [3, 1]
+    };
+    if (!e.ctrlKey && !e.altKey && !e.metaKey && quickKeyMap[e.key]) {
+      const modalOpen = ['equip-overlay', 'tactics-overlay', 'chest-overlay',
+        'merchant-overlay', 'main-menu-overlay', 'char-dev-overlay'].some(id => {
+          const el = document.getElementById(id);
+          return el && window.getComputedStyle(el).display !== 'none';
+        });
+      if (modalOpen) return;
+      const [memberIdx, slotIdx] = quickKeyMap[e.key];
+      const m = party[memberIdx];
+      if (m && !m.isEmpty) {
+        e.preventDefault();
+        useQuickslotPotion(memberIdx, slotIdx);
+      }
     }
   });
 }

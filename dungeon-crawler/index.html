@@ -101,6 +101,10 @@
             </div>
           </div>
         </div>
+        <div class="member-quickslots">
+          <div class="quickslot-btn" id="qs-0-0"><span class="qs-key">1</span></div>
+          <div class="quickslot-btn" id="qs-0-1"><span class="qs-key">2</span></div>
+        </div>
         <div class="member-equip">
           <div class="equip-slot" id="slot-lh-0"><span class="slot-label">L</span><span class="slot-item"
               id="item-lh-0"></span></div>
@@ -133,6 +137,10 @@
               </div>
             </div>
           </div>
+        </div>
+        <div class="member-quickslots">
+          <div class="quickslot-btn" id="qs-1-0"><span class="qs-key">3</span></div>
+          <div class="quickslot-btn" id="qs-1-1"><span class="qs-key">4</span></div>
         </div>
         <div class="member-equip">
           <div class="equip-slot" id="slot-lh-1"><span class="slot-label">L</span><span class="slot-item"
@@ -167,6 +175,10 @@
             </div>
           </div>
         </div>
+        <div class="member-quickslots">
+          <div class="quickslot-btn" id="qs-2-0"><span class="qs-key">5</span></div>
+          <div class="quickslot-btn" id="qs-2-1"><span class="qs-key">6</span></div>
+        </div>
         <div class="member-equip">
           <div class="equip-slot" id="slot-lh-2"><span class="slot-label">L</span><span class="slot-item"
               id="item-lh-2"></span></div>
@@ -199,6 +211,10 @@
               </div>
             </div>
           </div>
+        </div>
+        <div class="member-quickslots">
+          <div class="quickslot-btn" id="qs-3-0"><span class="qs-key">7</span></div>
+          <div class="quickslot-btn" id="qs-3-1"><span class="qs-key">8</span></div>
         </div>
         <div class="member-equip">
           <div class="equip-slot" id="slot-lh-3"><span class="slot-label">L</span><span class="slot-item"
@@ -523,6 +539,16 @@
               <span class="pd-item"></span>
             </div>
             <div class="pd-slot" id="pd-skill" data-slot="skill">
+              <span class="pd-item"></span>
+            </div>
+
+            <!-- Quick-use potion slots — below chest, assigned via right-click in inventory -->
+            <div class="pd-slot pd-quickslot" id="pd-quickslot-0" data-qs="0">
+              <span class="qs-pd-label">Q1</span>
+              <span class="pd-item"></span>
+            </div>
+            <div class="pd-slot pd-quickslot" id="pd-quickslot-1" data-qs="1">
+              <span class="qs-pd-label">Q2</span>
               <span class="pd-item"></span>
             </div>
 
@@ -920,6 +946,8 @@
   <!-- Right-click context menu for inventory items -->
   <div id="inv-context-menu" class="inv-ctx-hidden">
     <div class="inv-ctx-item inv-ctx-use" id="inv-ctx-use" style="display: none;">🍹 Drink</div>
+    <div class="inv-ctx-item inv-ctx-qs1" id="inv-ctx-qs1" style="display: none;">⚗ Quick Slot 1</div>
+    <div class="inv-ctx-item inv-ctx-qs2" id="inv-ctx-qs2" style="display: none;">⚗ Quick Slot 2</div>
     <div class="inv-ctx-item inv-ctx-equip" id="inv-ctx-equip">⚔ Equip</div>
     <div class="inv-ctx-item inv-ctx-learn" id="inv-ctx-learn" style="display: none;">📜 Learn</div>
     <div class="inv-ctx-item inv-ctx-sell" id="inv-ctx-sell" style="display: none;">💰 Sell</div>
