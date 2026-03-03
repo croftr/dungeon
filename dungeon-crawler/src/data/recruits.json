@@ -12,6 +12,7 @@
             "resilience": 5
         },
         "bio": "A swift and silent guardian of the deep woods. Elrond's bow strikes with the fury of nature itself.",
+        "recruitVideo": "/heros/elf_ranger_recruit.mp4.mp4",
         "startingInventory": [
             "Torch",
             "Cure Poison Potion",
@@ -23,7 +24,7 @@
             "Bow Master",
             "Bow Master"
         ],
-        "image": "/elf_ranger_head.png",
+        "image": "/heros/elf_ranger_head.png",
         "leftHand": "Short Bow",
         "rightHand": "—",
         "ammo": "Wooden Arrows",
@@ -115,6 +116,7 @@
             "resilience": 5
         },
         "bio": "An eccentric scholar weaving arcane tapestries. Merlin's thirst for forbidden knowledge is matched only by his formidable spellcraft.",
+        "recruitVideo": "/heros/human_wizard_recruit.mp4",
         "skillProgression": [
             "Arcane Lantern",
             "Runic Scholar",
@@ -127,7 +129,7 @@
             "Scroll of Heal",
             "Minor Mana Potion"
         ],
-        "image": "/human_wizard_head.png",
+        "image": "heros/human_wizard_head.png",
         "leftHand": "Spellbook",
         "rightHand": "Oak Staff",
         "gridCol": 13,
@@ -148,13 +150,14 @@
             "resilience": 6
         },
         "bio": "A raging storm of muscle and steel. Korg thrives in the heat of battle, leaving devastation in his wake.",
+        "recruitVideo": "/heros/human_barbarian_recruit.mp4",
         "skillProgression": [
             "Berserk",
             "Warcry",
             "Two-Handed Master",
             "Two-Handed Master"
         ],
-        "image": "/human_barbarian_head.png",
+        "image": "/heros/human_barbarian_head.png",
         "leftHand": "Greataxe",
         "rightHand": "—",
         "startingInventory": [

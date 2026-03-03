@@ -583,11 +583,19 @@ body {
   height: 100%;
 }
 
+.member-bottom {
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+
 /* Bars column */
 .bars {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 4px;
+  flex: 1;
 }
 
 .bar-row {
