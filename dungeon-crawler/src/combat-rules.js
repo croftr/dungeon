@@ -78,9 +78,23 @@ export const SHIELD_BASH_STUN_DURATION_MS = RULES.shieldBashStunDurationMs;
  * @param {object} monster    Monster object (needs stats.dexterity)
  * @returns {number}          Clamped probability
  */
-export function playerHitChance(character, monster) {
+export function playerHitChance(character, monster, weaponDef = null) {
   const dexDiff = (character.stats?.dexterity ?? 10) - (monster.stats?.dexterity ?? 10);
-  return clamp(BASE_PLAYER_HIT_CHANCE + dexDiff * DEX_HIT_MODIFIER, MIN_HIT_CHANCE, MAX_HIT_CHANCE);
+  let chance = BASE_PLAYER_HIT_CHANCE + dexDiff * DEX_HIT_MODIFIER;
+
+  if (character.skills) {
+    character.skills.forEach(skill => {
+      const name = typeof skill === 'string' ? skill : skill.name;
+      const skillDef = SKILLS_DATA[name];
+      if (skillDef?.isPassive && skillDef.effectType === 'weaponAccuracyBonus') {
+        if (weaponDef && weaponDef.weaponType === skillDef.weaponType) {
+          chance += skillDef.magnitude || 0;
+        }
+      }
+    });
+  }
+
+  return clamp(chance, MIN_HIT_CHANCE, MAX_HIT_CHANCE);
 }
 
 /**
@@ -293,18 +307,18 @@ export function pickRandomFrontLineTarget(party) {
 // Player facing → forward unit vector in grid space { dr, dc }
 // (row increases South, col increases East)
 const _FWD = [
-  { dr: -1, dc:  0 }, // 0 North
-  { dr:  0, dc:  1 }, // 1 East
-  { dr:  1, dc:  0 }, // 2 South
-  { dr:  0, dc: -1 }, // 3 West
+  { dr: -1, dc: 0 }, // 0 North
+  { dr: 0, dc: 1 }, // 1 East
+  { dr: 1, dc: 0 }, // 2 South
+  { dr: 0, dc: -1 }, // 3 West
 ];
 
 // Right-hand vector (90° CW from forward in top-down grid space)
 const _RIGHT = [
-  { dr:  0, dc:  1 }, // 0 North → right is East
-  { dr:  1, dc:  0 }, // 1 East  → right is South
-  { dr:  0, dc: -1 }, // 2 South → right is West
-  { dr: -1, dc:  0 }, // 3 West  → right is North
+  { dr: 0, dc: 1 }, // 0 North → right is East
+  { dr: 1, dc: 0 }, // 1 East  → right is South
+  { dr: 0, dc: -1 }, // 2 South → right is West
+  { dr: -1, dc: 0 }, // 3 West  → right is North
 ];
 
 /**
@@ -327,14 +341,14 @@ const _RIGHT = [
  * @returns {object|null}
  */
 export function pickDirectionalTarget(party, monster, facing, playerRow, playerCol) {
-  const fwd   = _FWD[facing]   ?? _FWD[0];
+  const fwd = _FWD[facing] ?? _FWD[0];
   const right = _RIGHT[facing] ?? _RIGHT[0];
 
   // Vector from player to monster
   const dr = monster.gridRow - playerRow;
   const dc = monster.gridCol - playerCol;
 
-  const dotFwd   = dr * fwd.dr   + dc * fwd.dc;
+  const dotFwd = dr * fwd.dr + dc * fwd.dc;
   const dotRight = dr * right.dr + dc * right.dc;
 
   // Which axis dominates?  Tie goes to front/back.

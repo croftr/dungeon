@@ -76,5 +76,22 @@
         "description": "A wave of restorative energy that mends wounds. Restores HP equal to double the caster's Intelligence to one party member.",
         "value": 0,
         "weight": 0
+    },
+    {
+        "name": "Rejuvenate",
+        "type": "healing",
+        "target": "party-member",
+        "slot": "spell",
+        "attackType": "rejuvenate",
+        "baseDamage": 0,
+        "magnitudeFormula": "intelligence",
+        "magnitudeScale": 2.0,
+        "magnitudeBonusMode": "flat",
+        "delay": 5,
+        "mpCost": 12,
+        "icon": "/icons/rejuvenate.png",
+        "description": "A surge of golden light that banishes fatigue. Restores SP equal to double the caster's Intelligence to one party member.",
+        "value": 0,
+        "weight": 0
     }
 ]

@@ -263,22 +263,22 @@
     "onHitEffects": [
       {
         "effectId": "fear",
-        "chance": 0.90
+        "chance": 0.40
       }
     ]
   },
   "dummy": {
     "name": "Training Dummy",
     "hp": 100000,
-    "defence": 0,
+    "defence": 5,
     "xp": 0,
     "attackSpeed": 1,
     "stats": {
       "strength": 0,
       "dexterity": 0,
-      "vitality": 100,
+      "vitality": 10,
       "intelligence": 0,
-      "resilience": 0
+      "resilience": 10
     },
     "drops": []
   }

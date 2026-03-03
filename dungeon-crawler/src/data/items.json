@@ -856,6 +856,26 @@
         "weight": 0.2
     },
     {
+        "name": "Rejuvenate Spellbook",
+        "type": "spellbook",
+        "spellName": "Rejuvenate",
+        "requiredInt": 10,
+        "icon": "/icons/scroll_rejuvenate.png",
+        "description": "A golden-bound tome glowing with vitality. Requires 10 Intelligence to decypher.",
+        "value": 540,
+        "weight": 0.5
+    },
+    {
+        "name": "Scroll of Rejuvenate",
+        "type": "spellbook",
+        "spellName": "Rejuvenate",
+        "requiredInt": 10,
+        "icon": "/icons/scroll_rejuvenate.png",
+        "description": "A parchment scroll radiating a warm, glowing yellowish aura. Study it to learn Rejuvenate. Requires 10 Intelligence.",
+        "value": 540,
+        "weight": 0.2
+    },
+    {
         "name": "Gold Coins",
         "slot": "loot",
         "icon": "/icons/gold_coins.png",

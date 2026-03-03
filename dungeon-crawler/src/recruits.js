@@ -30,6 +30,7 @@ function hydrateSkillName(skillName) {
 export const RECRUITS = RECRUITS_DATA.map(r => ({
     ...r,
     skillProgression: (r.skillProgression || []).map(hydrateSkillName),
+    startingSkills: (r.startingSkills || []).map(hydrateSkillName),
 }));
 
 let uiContainer = null;
@@ -254,7 +255,7 @@ function recruitCharacter(r) {
         unspentStatPoints: 0,
         statBonuses: { strength: 0, dexterity: 0, vitality: 0, intelligence: 0, resilience: 0 },
         skillProgression: JSON.parse(JSON.stringify(r.skillProgression)),
-        skills: [],  // empty — skills are learned by leveling up
+        skills: r.startingSkills ? JSON.parse(JSON.stringify(r.startingSkills)) : [],
         leftHand: r.leftHand,
         rightHand: r.rightHand,
         ammo: r.ammo,

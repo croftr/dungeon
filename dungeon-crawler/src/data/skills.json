@@ -158,7 +158,7 @@
         "effectType": "attackSpeedMultiplier",
         "effectTarget": "party",
         "stateKey": "warDance",
-        "magnitude": 1.75,
+        "magnitude": 0.8,
         "magnitudeBonusMode": "percent"
     },
     "Mace Master": {
@@ -232,5 +232,77 @@
         "effectType": "weaponDamageBonus",
         "weaponType": "bow",
         "magnitude": 1
+    },
+    "Mace Tactician": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/mace-tactician.png",
+        "description": "Increases hit chance with maces by 10%.",
+        "effectType": "weaponAccuracyBonus",
+        "weaponType": "mace",
+        "magnitude": 0.1
+    },
+    "Sword Tactician": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/sword-tactician.png",
+        "description": "Increases hit chance with swords by 10%.",
+        "effectType": "weaponAccuracyBonus",
+        "weaponType": "sword",
+        "magnitude": 0.1
+    },
+    "Axe Tactician": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/axe-tactician.png",
+        "description": "Increases hit chance with axes by 10%.",
+        "effectType": "weaponAccuracyBonus",
+        "weaponType": "axe",
+        "magnitude": 0.1
+    },
+    "Staff Tactician": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/staff-tactician.png",
+        "description": "Increases hit chance with staffs by 10%.",
+        "effectType": "weaponAccuracyBonus",
+        "weaponType": "staff",
+        "magnitude": 0.1
+    },
+    "Two-Handed Tactician": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/two-handed-tactician.png",
+        "description": "Increases hit chance with two-handed weapons by 10%.",
+        "effectType": "weaponAccuracyBonus",
+        "weaponType": "twoHanded",
+        "magnitude": 0.1
+    },
+    "Crossbow Tactician": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/crossbow-tactician.png",
+        "description": "Increases hit chance with crossbows by 10%.",
+        "effectType": "weaponAccuracyBonus",
+        "weaponType": "crossbow",
+        "magnitude": 0.1
+    },
+    "Dagger Tactician": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/dagger-tactician.png",
+        "description": "Increases hit chance with daggers by 10%.",
+        "effectType": "weaponAccuracyBonus",
+        "weaponType": "dagger",
+        "magnitude": 0.1
+    },
+    "Bow Tactician": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/bow-tactician.png",
+        "description": "Increases hit chance with bows by 10%.",
+        "effectType": "weaponAccuracyBonus",
+        "weaponType": "bow",
+        "magnitude": 0.1
     }
 }

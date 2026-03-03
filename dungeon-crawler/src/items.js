@@ -25,6 +25,7 @@ export const ACTIONS = Object.freeze({
   CURE_POISON: 'cure-poison',
   RESIST_POISON: 'resist-poison',
   HEAL: 'heal',
+  REJUVENATE: 'rejuvenate',
 });
 
 export const ITEMS = [

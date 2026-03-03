@@ -1102,7 +1102,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   // Apply status effect stat modifiers to the attacker's stats for this attack
   const effChar = { ...character, stats: getEffectiveStats(character) };
 
-  let hitChance = playerHitChance(effChar, m);
+  let hitChance = playerHitChance(effChar, m, weaponDef);
 
   // True Shot: Never miss with ranged attacks
   const ts = skillsState.trueShot;

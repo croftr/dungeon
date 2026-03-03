@@ -2110,9 +2110,31 @@ function _executePartyMemberSpell(caster, casterIndex, hand, spellDef, target) {
     _executeCurePoison(caster, target);
   } else if (spellDef.attackType === ACTIONS.HEAL) {
     _executeHeal(caster, spellDef, target);
+  } else if (spellDef.attackType === ACTIONS.REJUVENATE) {
+    _executeRejuvenate(caster, spellDef, target);
   } else if (spellDef.attackType === ACTIONS.REGENERATE) {
     _executeRegenerate(caster, spellDef, target);
   }
+}
+
+function _executeRejuvenate(caster, spellDef, target) {
+  const amount = Math.floor(resolveSpellMagnitude('Rejuvenate', spellDef, caster));
+  const oldSp = target.sp;
+  setSp(target.id, target.sp + amount);
+  const actualHeal = target.sp - oldSp;
+
+  showMessage(`${caster.name} casts <b>Rejuvenate</b> on ${target.name} — restored ${actualHeal} SP!`, 2500);
+
+  addLogEntry({
+    time: Date.now(),
+    type: 'skill',
+    actor: caster.name,
+    skillName: 'Rejuvenate',
+    target: target.name,
+    finalDamage: -actualHeal
+  });
+
+  refreshPartyCards();
 }
 
 function _executeRegenerate(caster, spellDef, target) {

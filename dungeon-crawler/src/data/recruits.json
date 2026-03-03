@@ -20,8 +20,14 @@
         "skillProgression": [
             "Entangle",
             "Hunter's Eye",
+            "Bow Tactician",
+            "Bow Tactician",
             "Bow Master",
             "Bow Master"
+        ],
+        "startingSkills": [
+            "Bow Tactician",
+            "Bow Tactician"
         ],
         "image": "/heros/elf_ranger_head.png",
         "leftHand": "Short Bow",
@@ -48,9 +54,12 @@
         "skillProgression": [
             "Sanctuary",
             "Holy Radiance",
+            "Mace Tactician",
+            "Mace Tactician",
             "Mace Master",
             "Mace Master"
         ],
+        "startingSkills": [],
         "image": "/heros/human_paladin.png",
         "leftHand": "Sword",
         "rightHand": "Shield",
@@ -86,9 +95,12 @@
         "skillProgression": [
             "Sunder Armor",
             "Miners Light",
+            "Axe Tactician",
+            "Axe Tactician",
             "Axe Master",
             "Axe Master"
         ],
+        "startingSkills": [],
         "image": "/dwarf_barbarian_head.png",
         "leftHand": "Axe",
         "rightHand": "Wooden Shield",
@@ -118,13 +130,17 @@
             "Arcane Lantern",
             "Runic Scholar",
             "Mana Tap",
+            "Staff Tactician",
+            "Staff Tactician",
             "Staff Master",
             "Staff Master"
         ],
+        "startingSkills": [],
         "startingInventory": [
             "Scroll of Fireball",
             "Scroll of Heal",
-            "Minor Mana Potion"
+            "Minor Mana Potion",
+            "Scroll of Rejuvenate"
         ],
         "image": "heros/human_wizard_head.png",
         "leftHand": "Spellbook",
@@ -150,9 +166,12 @@
         "skillProgression": [
             "Berserk",
             "Warcry",
+            "Two-Handed Tactician",
+            "Two-Handed Tactician",
             "Two-Handed Master",
             "Two-Handed Master"
         ],
+        "startingSkills": [],
         "image": "/heros/human_barbarian_head.png",
         "leftHand": "Greataxe",
         "rightHand": "—",
@@ -180,9 +199,12 @@
         "bio": "A keen-eyed marksman who traded the mines for the open hunt. Baldur's crossbow never misses its mark.",
         "skillProgression": [
             "True Shot",
+            "Crossbow Tactician",
+            "Crossbow Tactician",
             "Crossbow Master",
             "Crossbow Master"
         ],
+        "startingSkills": [],
         "image": "/heros/dwarf-ranger.png",
         "leftHand": "Crossbow",
         "rightHand": "Dagger",
@@ -212,9 +234,12 @@
         "skillProgression": [
             "Whirlwind",
             "War Dance",
+            "Dagger Tactician",
+            "Dagger Tactician",
             "Dagger Master",
             "Dagger Master"
         ],
+        "startingSkills": [],
         "startingInventory": [
             "Cure Poison Potion",
             "Healing Potion",
