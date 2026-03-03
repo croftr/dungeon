@@ -3,6 +3,7 @@ import { party } from './party.js';
 import { extendPartyData } from './equipment.js';
 import { CELL, WALL_H, findCell } from './map.js';
 import { isInFrontOfPlayer } from './player.js';
+import { interactables } from './objects.js';
 import RECRUITS_DATA from './data/recruits.json';
 import SKILLS_DATA from './data/skills.json';
 
@@ -92,6 +93,7 @@ export function initRecruits(scene, camera) {
 
         mesh.position.set(wx, WALL_H * 0.5, wz);
         mesh.userData = { isRecruit: true, recruitId: r.id };
+        interactables.push(mesh);
 
         scene.add(mesh);
         r.mesh = mesh;
@@ -134,7 +136,7 @@ export function initRecruits(scene, camera) {
         mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
         raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(scene.children, false);
+        const intersects = raycaster.intersectObjects(interactables, false);
 
         for (let hit of intersects) {
             if (hit.object.userData.isRecruit && hit.object.visible) {

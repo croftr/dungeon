@@ -12,7 +12,6 @@
             "resilience": 5
         },
         "bio": "A swift and silent guardian of the deep woods. Elrond's bow strikes with the fury of nature itself.",
-        "recruitVideo": "/heros/elf_ranger_recruit.mp4.mp4",
         "startingInventory": [
             "Torch",
             "Cure Poison Potion",
@@ -46,7 +45,6 @@
             "resilience": 10
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
-        "recruitVideo": "/heros/human-paladin-recruit.mp4",
         "skillProgression": [
             "Sanctuary",
             "Holy Radiance",
@@ -116,7 +114,6 @@
             "resilience": 5
         },
         "bio": "An eccentric scholar weaving arcane tapestries. Merlin's thirst for forbidden knowledge is matched only by his formidable spellcraft.",
-        "recruitVideo": "/heros/human_wizard_recruit.mp4",
         "skillProgression": [
             "Arcane Lantern",
             "Runic Scholar",
@@ -150,7 +147,6 @@
             "resilience": 6
         },
         "bio": "A raging storm of muscle and steel. Korg thrives in the heat of battle, leaving devastation in his wake.",
-        "recruitVideo": "/heros/human_barbarian_recruit.mp4",
         "skillProgression": [
             "Berserk",
             "Warcry",
@@ -206,8 +202,8 @@
         "job": "War Dancer",
         "race": "High Elf",
         "stats": {
-            "strength": 106,
-            "dexterity": 100,
+            "strength": 6,
+            "dexterity": 10,
             "vitality": 6,
             "intelligence": 7,
             "resilience": 6

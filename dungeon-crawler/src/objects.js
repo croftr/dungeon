@@ -13,6 +13,7 @@ import { triggerMummyAmbush } from './monster.js';
 import * as equip from './equipment.js';
 
 export const objects = [];
+export const interactables = [];
 
 const _mixers = [];
 const _intervals = [];
@@ -79,6 +80,7 @@ export function clearObjects(scene) {
     }
     _shopGridCells.clear();
     _statueGridCells.clear();
+    interactables.length = 0;
 }
 
 export function initObjects(scene, camera) {
@@ -114,7 +116,7 @@ export function initObjects(scene, camera) {
         mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
         mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
         raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(objectsGroup.children, true);
+        const intersects = raycaster.intersectObjects(interactables, false);
 
         for (let hit of intersects) {
             let obj = hit.object;
@@ -587,6 +589,7 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
                     child.userData.gridCol = col;
                     child.userData.contents = contents;
                     child.userData.title = title;
+                    interactables.push(child);
                 }
 
                 if (child.material) {
@@ -623,6 +626,7 @@ function addStatue(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) 
                 child.userData.isStatue = true;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
+                interactables.push(child);
 
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];
@@ -731,6 +735,7 @@ export function spawnObjectsForLevel() {
         const btn = new THREE.Mesh(btnGeo, btnMat);
         btn.position.x = 0.04;
         btn.userData = { isButton: true, target: 'portcullis' };
+        interactables.push(btn);
         buttonContainer.add(btn);
 
         buttonContainer.position.set(8 * CELL - 1.0, 1.25, 8 * CELL);
@@ -808,6 +813,7 @@ function addKeyhole(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, tar
                 // Which portcullis does it open? If not specified, open the one on its own cell
                 child.userData.targetRow = targetRow !== null ? targetRow : row;
                 child.userData.targetCol = targetCol !== null ? targetCol : col;
+                interactables.push(child);
 
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];
@@ -849,6 +855,7 @@ function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offsetX = 0, 
                 child.userData.targetLevel = targetLevel;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
+                interactables.push(child);
 
                 // Fix pixelation by ensuring smooth filtering and max texture resolution across all material maps
                 if (child.material) {
@@ -885,6 +892,7 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
                 child.userData.isShop = true;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
+                interactables.push(child);
 
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];
@@ -930,6 +938,7 @@ function addWeaponRack(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, 
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = contents;
+                interactables.push(child);
 
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];
@@ -965,6 +974,7 @@ function addSpellCabinet(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = contents;
+                interactables.push(child);
 
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];
@@ -1006,6 +1016,7 @@ function addCrystals(scene, loader, col, row, rotY, offsetX = 0) {
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.light = light; // Store light reference for animation
+                interactables.push(child);
 
                 if (child.material) {
                     // Give them a nice cyan mystical glow
@@ -1045,6 +1056,7 @@ function addAlchemyWorkshop(scene, loader, col, row, rotY = 0, offsetX = 0, offs
                     child.userData.isAlchemyWorkshop = true;
                     child.userData.gridRow = row;
                     child.userData.gridCol = col;
+                    interactables.push(child);
                 }
 
                 if (child.material) {
@@ -1092,6 +1104,7 @@ function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, c
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = contents;
+                interactables.push(child);
 
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];
@@ -1127,6 +1140,7 @@ function addJester(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) 
                 child.userData.isJester = true;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
+                interactables.push(child);
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];
                     mats.forEach(mat => {
@@ -2037,6 +2051,7 @@ function addBonePile(scene, loader, col, row, contents = []) {
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = contents;
+                interactables.push(child);
 
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];
@@ -2090,6 +2105,7 @@ export function spawnCorpse(col, row, droppedItems = []) {
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = corpseContents;
+                interactables.push(child);
 
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];
@@ -2148,6 +2164,7 @@ export function spawnDroppedItem(col, row, itemName, quantity = 1) {
         sprite.userData.quantity = quantity;
         sprite.userData.gridCol = col;
         sprite.userData.gridRow = row;
+        interactables.push(sprite);
 
         const light = new THREE.PointLight(0xffaa00, 1, 3);
         light.position.set(0, 0.2, 0);
@@ -2178,6 +2195,7 @@ export function spawnDroppedItem(col, row, itemName, quantity = 1) {
     mesh.userData.itemName = itemName;
     mesh.userData.gridCol = col;
     mesh.userData.gridRow = row;
+    interactables.push(mesh);
 
     // Optional: add a light
     const light = new THREE.PointLight(0xffaa00, 1, 3);
