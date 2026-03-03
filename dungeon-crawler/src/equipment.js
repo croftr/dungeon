@@ -1177,53 +1177,64 @@ export function useQuickslotPotion(memberIndex, slotIdx) {
 
 function _applyPotionEffect(m, item) {
   const def = getItemDef(item.name);
-  if (!def || def.type !== 'potion' || !def.effect) return false;
+  if (!def || def.type !== 'potion') return false;
 
-  const { type, value } = def.effect;
-  let msg = '';
-  let sound = 'heal';
+  const effects = [];
+  if (def.effect) effects.push(def.effect);
+  if (def.effect2) effects.push(def.effect2);
+  if (def.effect3) effects.push(def.effect3);
 
-  switch (type) {
-    case 'heal':
-    case 'restore-hp': {
-      const oldHp = m.hp;
-      const newHp = Math.min(m.hpMax, m.hp + (value || 0));
-      setHp(m.id, newHp);
-      msg = `restores ${newHp - oldHp} HP`;
-      sound = 'heal';
-      break;
+  if (effects.length === 0) return false;
+
+  const results = [];
+  let mainSound = 'heal';
+
+  effects.forEach(eff => {
+    const { type, value } = eff;
+    switch (type) {
+      case 'heal':
+      case 'restore-hp': {
+        const oldHp = m.hp;
+        const newHp = Math.min(m.hpMax, m.hp + (value || 0));
+        setHp(m.id, newHp);
+        results.push(`${newHp - oldHp} HP`);
+        mainSound = 'heal';
+        break;
+      }
+      case 'restore-mp': {
+        const oldMp = m.mp;
+        const newMp = Math.min(m.mpMax, m.mp + (value || 0));
+        setMp(m.id, newMp);
+        results.push(`${newMp - oldMp} MP`);
+        mainSound = 'magic';
+        break;
+      }
+      case 'restore-sp': {
+        const oldSp = m.sp;
+        const newSp = Math.min(m.spMax ?? 100, m.sp + (value || 0));
+        setSp(m.id, newSp);
+        results.push(`${newSp - oldSp} SP`);
+        mainSound = 'magic';
+        break;
+      }
+      case 'cure-poison': {
+        const hadPoison = (m.activeDebuffs || []).some(d => d.effectId === 'poison');
+        m.activeDebuffs = (m.activeDebuffs || []).filter(d => d.effectId !== 'poison');
+        results.push(hadPoison ? 'is cured of poison' : 'feels refreshed');
+        mainSound = 'cure';
+        break;
+      }
     }
-    case 'restore-mp': {
-      const oldMp = m.mp;
-      const newMp = Math.min(m.mpMax, m.mp + (value || 0));
-      setMp(m.id, newMp);
-      msg = `restores ${newMp - oldMp} MP`;
-      sound = 'magic';
-      break;
-    }
-    case 'restore-sp': {
-      const oldSp = m.sp;
-      const newSp = Math.min(m.spMax ?? 100, m.sp + (value || 0));
-      setSp(m.id, newSp);
-      msg = `restores ${newSp - oldSp} SP`;
-      sound = 'magic';
-      break;
-    }
-    case 'cure-poison': {
-      const hadPoison = (m.activeDebuffs || []).some(d => d.effectId === 'poison');
-      m.activeDebuffs = (m.activeDebuffs || []).filter(d => d.effectId !== 'poison');
-      msg = hadPoison ? `is cured of poison` : 'feels refreshed';
-      sound = 'cure';
-      break;
-    }
-    default:
-      console.warn(`Unknown potion effect type: ${type}`);
-      return false;
-  }
+  });
+
+  if (results.length === 0) return false;
+
+  const msg = results.some(r => r.includes('HP') || r.includes('MP') || r.includes('SP'))
+    ? `restores ${results.join(' and ')}`
+    : results.join(' and ');
 
   showMessage(`${m.name} drinks ${item.name} and ${msg}.`);
   playItemSound(item.name, 'potion');
-  if (sound) playSkillSound(sound);
   return true;
 }
 
@@ -1792,7 +1803,7 @@ function renderCharDevModal(memberIndex) {
         const card = document.createElement('div');
         card.className = 'skill-card skill-card--learned';
         renderItemIcon({ icon: skill.icon }, card);
-        card.addEventListener('click', () => _showSkillDetail(skill, m));
+        card.addEventListener('click', () => _showSkillDetail(skill, m, card));
         cdSkillsEl.appendChild(card);
       });
     }
@@ -1850,7 +1861,7 @@ function renderCharDevModal(memberIndex) {
 
           card.addEventListener('click', () => {
             m.pendingSkillChoice = skill.name;
-            _showSkillDetail(skill, m);
+            _showSkillDetail(skill, m, card);
             renderCharDevModal(memberIndex);
           });
           availEl.appendChild(card);
@@ -1858,18 +1869,29 @@ function renderCharDevModal(memberIndex) {
       }
     }
   } else {
-    // ── View mode: show full progression with level badges ──
+    // ── View mode: show only unlearned skills in progression ──
     if (futureHeading) futureHeading.textContent = 'Skill Progression';
     if (availEl) {
       availEl.innerHTML = '';
       const progression = m.skillProgression ?? [];
-      const learnedNames = new Set((m.skills ?? []).map(s => s.name));
 
+      // Track learned counts to handle duplicate skill slots correctly
+      const learnedCounts = {};
+      for (const s of (m.skills ?? [])) {
+        learnedCounts[s.name] = (learnedCounts[s.name] ?? 0) + 1;
+      }
+
+      const seen = {};
+      let hasUnlearned = false;
       progression.forEach((skill, idx) => {
+        seen[skill.name] = (seen[skill.name] ?? 0) + 1;
+        // Skip if this copy of the skill has already been learned
+        if (seen[skill.name] <= (learnedCounts[skill.name] ?? 0)) return;
+
+        hasUnlearned = true;
         const card = document.createElement('div');
-        card.className = 'skill-card';
+        card.className = 'skill-card skill-card--locked';
         card.style.position = 'relative';
-        card.classList.add(learnedNames.has(skill.name) ? 'skill-card--learned' : 'skill-card--locked');
 
         renderItemIcon({ icon: skill.icon }, card);
 
@@ -1878,9 +1900,16 @@ function renderCharDevModal(memberIndex) {
         badge.textContent = idx + 1;
         card.appendChild(badge);
 
-        card.addEventListener('click', () => _showSkillDetail(skill, m));
+        card.addEventListener('click', () => _showSkillDetail(skill, m, card));
         availEl.appendChild(card);
       });
+
+      if (!hasUnlearned) {
+        const p = document.createElement('p');
+        p.className = 'skill-empty';
+        p.textContent = 'All skills learned!';
+        availEl.appendChild(p);
+      }
     }
   }
 
@@ -1901,7 +1930,7 @@ function renderCharDevModal(memberIndex) {
   }
 }
 
-function _showSkillDetail(skill, m) {
+function _showSkillDetail(skill, m, cardEl = null) {
   document.getElementById('cd-detail-name').textContent = skill.name;
   const def = getItemDef(skill.name) || SKILLS_DATA[skill.name];
   document.getElementById('cd-detail-action').textContent = (def?.isPassive ? 'Passive' : 'Action') + ' Skill';
@@ -1910,8 +1939,8 @@ function _showSkillDetail(skill, m) {
   const pot = _formatSkillPotency(skill.name, m);
   document.getElementById('cd-detail-potency').innerHTML = pot ? (Array.isArray(pot) ? pot.join('<br>') : pot) : '';
 
-  document.querySelectorAll('#cd-char-skills .skill-card, #cd-available-skills .skill-card').forEach(c => c.classList.remove('skill-card--equipped'));
-  // Find and highlight the clicked card (event delegation would be cleaner but this works)
+  document.querySelectorAll('#cd-char-skills .skill-card, #cd-available-skills .skill-card').forEach(c => c.classList.remove('skill-card--detail-selected'));
+  if (cardEl) cardEl.classList.add('skill-card--detail-selected');
 }
 
 // ─────────────────────────────────────────────

@@ -25,10 +25,7 @@
             "Bow Master",
             "Bow Master"
         ],
-        "startingSkills": [
-            "Bow Tactician",
-            "Bow Tactician"
-        ],
+        "startingSkills": [],
         "image": "/heros/elf_ranger_head.png",
         "leftHand": "Short Bow",
         "rightHand": "—",
@@ -68,6 +65,8 @@
             "Healing Potion",
             "Fermented Sugar",
             "Mana Berry",
+            "Life Berry",
+            "Life Berry",
             "Life Berry",
             "Poison Vial",
             "Life Essence",

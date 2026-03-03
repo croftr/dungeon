@@ -14,7 +14,7 @@
             },
             {
                 "name": "Poison Vial",
-                "quantity": 1
+                "quantity": 2
             }
         ],
         "value": 25,
@@ -32,7 +32,7 @@
             },
             {
                 "name": "Mana Berry",
-                "quantity": 1
+                "quantity": 2
             }
         ],
         "effect": {
@@ -58,7 +58,7 @@
             },
             {
                 "name": "Life Berry",
-                "quantity": 1
+                "quantity": 2
             }
         ],
         "value": 30,
@@ -92,6 +92,36 @@
             },
             {
                 "name": "Fermented Sugar",
+                "quantity": 2
+            }
+        ],
+        "value": 50,
+        "weight": 0.3
+    },
+    {
+        "name": "Vigor Potion",
+        "icon": "/icons/vigor_potion.svg",
+        "description": "A glowing orange elixir that restores 50 stamina and 50 health points.",
+        "type": "potion",
+        "effect": {
+            "type": "restore-sp",
+            "value": 50
+        },
+        "effect2": {
+            "type": "heal",
+            "value": 50
+        },
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Fermented Sugar",
+                "quantity": 1
+            },
+            {
+                "name": "Life Berry",
                 "quantity": 1
             }
         ],

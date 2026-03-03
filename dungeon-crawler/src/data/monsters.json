@@ -155,7 +155,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 1
+        "chance": 0.50
       }
     ]
   },
@@ -253,7 +253,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 1
+        "chance": 0.5
       },
       {
         "item": "Life Berry",

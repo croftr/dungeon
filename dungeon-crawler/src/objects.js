@@ -1782,7 +1782,7 @@ function _transmute() {
             }
             if (!matched) break;
         }
-        if (matched) {
+        if (matched && pool.length === 0) {
             matchedResult = recipe.result;
             break;
         }

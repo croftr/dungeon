@@ -1355,6 +1355,16 @@ body {
   scrollbar-color: #4a3a20 #0d0a06;
 }
 
+/* In the development modal, give skill grids more room — no height cap */
+#char-dev-modal #cd-char-skills,
+#char-dev-modal #cd-available-skills {
+  max-height: none;
+  overflow: visible;
+  align-content: flex-start;
+  gap: 12px;
+  padding: 12px;
+}
+
 #char-skills::-webkit-scrollbar {
   width: 6px;
 }
@@ -1475,9 +1485,9 @@ body {
 }
 
 #char-dev-modal {
-  width: 800px;
-  max-width: 95vw;
-  max-height: 90vh;
+  width: 1080px;
+  max-width: 97vw;
+  max-height: 92vh;
   background: rgba(15, 12, 10, 0.98);
   border: 1px solid #6a5030;
   border-radius: 6px;
@@ -1548,13 +1558,14 @@ body {
 #char-dev-body {
   display: flex;
   flex: 1;
-  min-height: 400px;
+  min-height: 520px;
 }
 
 #char-dev-stats-section {
-  width: 240px;
+  width: 260px;
   border-right: 1px solid #2a2010;
   background: rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
 }
 
 #char-dev-skills-section {
@@ -1562,11 +1573,15 @@ body {
   border-right: 1px solid #2a2010;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #4a3a20 #0d0a06;
 }
 
 #char-dev-detail-section {
-  width: 260px;
+  width: 300px;
   background: rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
 }
 
 .stat-controls {
@@ -1666,14 +1681,46 @@ body {
 }
 
 /* ── Skill Progression Cards ── */
-.skill-card--locked {
-  opacity: 0.35;
-  filter: grayscale(0.8);
+
+/* In the dev modal, all icons are full colour — dim is only via card opacity */
+#char-dev-modal .skill-card img {
+  opacity: 1;
+  filter: none;
 }
 
+/* Not yet learned: full colour icon, dimmer card + dashed border to show "locked" */
+.skill-card--locked {
+  opacity: 0.55;
+  filter: none;
+  border-style: dashed;
+  border-color: #5a4520;
+}
+
+/* Learned: solid bright green border + inner glow — clearly owned */
 .skill-card--learned {
-  border-color: #80ff80;
-  box-shadow: 0 0 6px rgba(128, 255, 128, 0.2);
+  opacity: 1;
+  border: 2px solid #52c052;
+  box-shadow: 0 0 8px rgba(82, 192, 82, 0.35), inset 0 0 6px rgba(82, 192, 82, 0.1);
+}
+
+/* Small checkmark badge on learned cards in the dev modal */
+#char-dev-modal .skill-card--learned::after {
+  content: '✓';
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  width: 14px;
+  height: 14px;
+  background: #52c052;
+  color: #0a1a0a;
+  font-size: 9px;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 14px;
+  text-align: center;
 }
 
 .skill-card--new {
@@ -1724,13 +1771,27 @@ body {
   transform: scale(1.08);
 }
 
-.skill-card--chosen {
-  border-color: #c8a84a !important;
-  box-shadow: 0 0 12px rgba(200, 168, 74, 0.6) !important;
-  background: rgba(200, 168, 74, 0.12);
+/* ── Selected skill (detail panel focus) — view mode & level-up chosen ── */
+.skill-card--chosen,
+.skill-card--detail-selected {
+  border: 2px solid #e8d080 !important;
+  box-shadow: 0 0 0 2px rgba(232, 208, 128, 0.5), 0 0 16px rgba(200, 168, 74, 0.7) !important;
+  background: rgba(200, 168, 74, 0.18) !important;
+  outline: none;
 }
 
-/* ── Confirm footer ── */
+/* Extra ring on the level-up chosen skill so it's unmistakable */
+.skill-card--chosen {
+  box-shadow: 0 0 0 3px #e8d080, 0 0 0 5px rgba(232, 208, 128, 0.35), 0 0 20px rgba(200, 168, 74, 0.8) !important;
+}
+
+/* ── Larger skill cards in development modal ── */
+#char-dev-modal .skill-card {
+  width: 62px;
+  height: 62px;
+}
+
+/* Confirm footer ── */
 #char-dev-footer {
   flex-direction: row;
   justify-content: center;
@@ -1777,10 +1838,15 @@ body {
 
 /* ── Level Up! button pulse in inventory header ── */
 #equip-char-dev.level-up-pending {
-  background: rgba(200, 168, 74, 0.2);
-  border-color: #c8a84a;
-  color: #e8d090;
-  animation: levelup-btn-pulse 1.8s ease-in-out infinite;
+  background: rgba(200, 168, 74, 0.3);
+  border: 2px solid #e8c84a;
+  color: #fff8d0;
+  font-weight: bold;
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  padding: 3px 12px;
+  text-shadow: 0 0 6px rgba(255, 220, 80, 0.5);
+  animation: levelup-btn-pulse 1.6s ease-in-out infinite;
 }
 
 @keyframes levelup-btn-pulse {
@@ -1788,10 +1854,16 @@ body {
   0%,
   100% {
     box-shadow: 0 0 4px rgba(200, 168, 74, 0.3);
+    background: rgba(200, 168, 74, 0.22);
+    border-color: #c8a84a;
+    transform: scale(1);
   }
 
   50% {
-    box-shadow: 0 0 14px rgba(200, 168, 74, 0.7);
+    box-shadow: 0 0 12px rgba(255, 210, 60, 0.75), 0 0 24px rgba(200, 168, 74, 0.35);
+    background: rgba(200, 168, 74, 0.38);
+    border-color: #f0d060;
+    transform: scale(1.06);
   }
 }
 
