@@ -207,8 +207,8 @@
         "race": "High Elf",
         "stats": {
             "strength": 6,
-            "dexterity": 100,
-            "vitality": 106,
+            "dexterity": 10,
+            "vitality": 6,
             "intelligence": 7,
             "resilience": 6
         },
