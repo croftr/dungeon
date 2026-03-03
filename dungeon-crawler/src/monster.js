@@ -4,6 +4,7 @@ import { tweenGroup, player } from './player.js';
 import { createHitSpark } from './particles.js';
 import { CELL, isPassable } from './map.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { party, setHp, flashPortraitHit, showMemberDamage, refreshPartyCards, applyStatusEffect, getEffectiveStats, getEffectiveStatusResistances, getDefenceModifier, describeEffect } from './party.js';
 import { STATUS_EFFECT_DEFS } from './status-effects.js';
@@ -400,7 +401,10 @@ function _updateStatsPanel(m) {
     debuffsHtml;
 }
 
+const _draco = new DRACOLoader();
+_draco.setDecoderPath('/draco/');
 const _gltfLoader = new GLTFLoader();
+_gltfLoader.setDRACOLoader(_draco);
 
 function _loadMonster(m, scene) {
   // Load the idle/walking GLB as the base mesh

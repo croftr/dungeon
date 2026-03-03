@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { CELL, dungeonMap, CELL_FLOOR } from './map.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, isInFrontOfPlayer, player } from './player.js';
@@ -71,6 +72,11 @@ let _alchemyModalOpen = false;
 
 let objectsGroup = new THREE.Group();
 
+const _draco = new DRACOLoader();
+_draco.setDecoderPath('/draco/');
+const _gltfLoader = new GLTFLoader();
+_gltfLoader.setDRACOLoader(_draco);
+
 export function clearObjects(scene) {
     scene.remove(objectsGroup);
     objectsGroup = new THREE.Group();
@@ -87,10 +93,9 @@ export function clearObjects(scene) {
 }
 
 export function initObjects(scene, camera) {
-    const gltfLoader = new GLTFLoader();
     scene.add(objectsGroup);
 
-    spawnObjectsForLevel(gltfLoader);
+    spawnObjectsForLevel();
 
     window.addEventListener('click', (e) => {
         // If any modal overlay is currently visible, let the DOM handle it — don't raycast.
@@ -645,7 +650,7 @@ function addStatue(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) 
 
 
 export function spawnObjectsForLevel() {
-    const gltfLoader = new GLTFLoader();
+    const gltfLoader = _gltfLoader;
     const level = window.currentLevel || 1;
     objects.length = 0; // clear logical array
 
@@ -2095,8 +2100,7 @@ export function spawnCorpse(col, row, droppedItems = []) {
         slotIdx++;
     }
 
-    const gltfLoader = new GLTFLoader();
-    gltfLoader.load('/items/Meshy_AI_Bone_pile_0221211647_texture.glb', (gltf) => {
+    _gltfLoader.load('/items/Meshy_AI_Bone_pile_0221211647_texture.glb', (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.4);
         model.position.set(col * CELL, 0.05, row * CELL);
