@@ -1,9 +1,8 @@
 import * as THREE from 'three';
 import { party } from './party.js';
-import { extendPartyData, calcDerivedMaxStats } from './equipment.js';
+import { extendPartyData } from './equipment.js';
 import { CELL, WALL_H, findCell } from './map.js';
 import { isInFrontOfPlayer } from './player.js';
-import { getItemDef } from './items.js';
 import RECRUITS_DATA from './data/recruits.json';
 import SKILLS_DATA from './data/skills.json';
 
@@ -108,13 +107,16 @@ export function initRecruits(scene, camera) {
     uiContainer.style.top = '50%';
     uiContainer.style.left = '50%';
     uiContainer.style.transform = 'translate(-50%, -50%)';
-    uiContainer.style.background = 'rgba(10, 7, 4, 0.95)';
-    uiContainer.style.border = '1px solid #c8a84a';
-    uiContainer.style.padding = '20px';
+    uiContainer.style.background = 'radial-gradient(circle at center, rgba(30, 20, 15, 0.95), rgba(10, 7, 4, 0.98))';
+    uiContainer.style.border = '2px solid rgba(200, 168, 74, 0.4)';
+    uiContainer.style.boxShadow = '0 0 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(200, 168, 74, 0.1)';
+    uiContainer.style.padding = '30px';
+    uiContainer.style.borderRadius = '8px';
     uiContainer.style.color = '#e8c87a';
     uiContainer.style.zIndex = '2000';
-    uiContainer.style.fontFamily = 'monospace';
-    uiContainer.style.minWidth = '300px';
+    uiContainer.style.fontFamily = 'Georgia, serif';
+    uiContainer.style.width = '600px';
+    uiContainer.style.boxSizing = 'border-box';
     document.body.appendChild(uiContainer);
 
     window.addEventListener('click', (e) => {
@@ -166,65 +168,33 @@ function openRecruitModal(recruitId) {
     const freeSlot = party.find(m => m.isEmpty);
     const canRecruit = !!freeSlot;
 
-    const { hpMax, mpMax, spMax } = calcDerivedMaxStats(r.stats);
-
-    const lhDef = r.leftHand && r.leftHand !== '—' ? getItemDef(r.leftHand) : null;
-    const rhDef = r.rightHand && r.rightHand !== '—' ? getItemDef(r.rightHand) : null;
-    const ammoDef = r.ammo && r.ammo !== '—' ? getItemDef(r.ammo) : null;
-
-    function renderEqSlot(def, fallback) {
-        if (!def) {
-            return `<div style="width:48px; height:48px; background:rgba(0,0,0,0.5); border:1px solid #3a2a10; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#5a4a2a; font-size:8px; border-radius:3px;">${fallback}</div>`;
-        }
-        return `<div style="width:48px; height:48px; background:rgba(0,0,0,0.7); border:1px solid #7a5a28; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; border-radius:3px; overflow:hidden;" title="${def.name}">
-            <img src="${def.icon}" style="position:absolute; inset:0; width:100%; height:100%; opacity:0.18; pointer-events:none; object-fit:contain; padding:2px;">
-            <span style="font-size:8px; color:#c8a84a; z-index:1; padding:2px; text-align:center; word-break:break-word;">${def.name}</span>
-        </div>`;
-    }
+    const mediaHtml = r.recruitVideo
+        ? `<video src="${r.recruitVideo}" autoplay loop muted playsinline style="width: 250px; height: 350px; object-fit: cover; border-radius: 4px; border: 1px solid #c8a84a; box-shadow: 0 0 15px rgba(200, 168, 74, 0.3); background: #000;"></video>`
+        : `<img src="${r.image}" style="width: 250px; height: 350px; object-fit: cover; border-radius: 4px; border: 1px solid #c8a84a; box-shadow: 0 0 15px rgba(200, 168, 74, 0.3); image-rendering: pixelated; background: #000;">`;
 
     uiContainer.innerHTML = `
-    <div style="display:flex; gap:15px; margin-bottom:10px;">
-        <img src="${r.image}" style="width:80px; height:80px; border:1px solid #6a5030; border-radius:4px; image-rendering:pixelated; background:#000;">
-        <div>
-            <h2 style="margin:0 0 5px 0; color:#fff">${r.name}</h2>
-            <p style="margin:0; font-size:12px;"><strong>${r.race} ${r.job}</strong></p>
-            <p style="margin:4px 0 0 0; font-size:11px; color:#e8c87a;">HP: ${hpMax}/${hpMax} &nbsp;&nbsp; MP: ${mpMax}/${mpMax} &nbsp;&nbsp; SP: ${spMax}/${spMax}</p>
+    <div style="display: flex; gap: 30px;">
+        <div style="flex-shrink: 0;">
+            ${mediaHtml}
         </div>
-    </div>
-    
-    <div style="border-top:1px solid #4a3a20; padding-top:10px; display:flex; justify-content:space-between; font-size:11px;">
-      <div>STR: <span style="color:#c8a84a">${r.stats.strength}</span></div>
-      <div>DEX: <span style="color:#c8a84a">${r.stats.dexterity}</span></div>
-      <div>VIT: <span style="color:#c8a84a">${r.stats.vitality}</span></div>
-      <div>INT: <span style="color:#c8a84a">${r.stats.intelligence}</span></div>
-      <div>RES: <span style="color:#c8a84a">${r.stats.resilience}</span></div>
-    </div>
-
-    <div style="border-top:1px solid #4a3a20; padding-top:10px; margin-top:10px;">
-      <h3 style="margin:0 0 8px; color:#c8a84a; font-size:11px; text-transform:uppercase; letter-spacing:1px;">Equipped</h3>
-      <div style="display:flex; gap:8px;">
-          ${renderEqSlot(lhDef, 'L.Hand')}
-          ${renderEqSlot(rhDef, 'R.Hand')}
-          ${renderEqSlot(ammoDef, 'Ammo')}
-      </div>
-    </div>
-
-    <div style="border-top:1px solid #4a3a20; padding-top:10px; margin-top:10px; font-size:11px;">
-      <h3 style="margin:0 0 8px; color:#c8a84a; font-size:11px; text-transform:uppercase; letter-spacing:1px;">Skill Progression</h3>
-      <div style="display:flex; flex-direction:column; gap:6px;">
-        ${r.skillProgression.map((s, i) => `
-            <div style="background:rgba(0,0,0,0.3); border:1px solid #3a2e14; padding:6px 8px; border-radius:3px;">
-                <div style="color:#8a7850; font-size:9px; margin-bottom:2px;">Level ${i + 1}</div>
-                <div style="color:#c8a84a; font-weight:bold; margin-bottom:2px;">${s.name}</div>
-                <div style="color:#7a6a50; font-size:9px; line-height:1.4;">${s.description || ''}</div>
+        <div style="display: flex; flex-direction: column; justify-content: center; flex: 1;">
+            <h2 style="margin: 0 0 10px 0; color: #fff; font-size: 32px; font-weight: normal; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">${r.name}</h2>
+            <div style="margin: 0 0 20px 0; font-size: 16px; color: #c8a84a; text-transform: uppercase; letter-spacing: 2px;">
+                ${r.race} ${r.job}
             </div>
-        `).join('')}
-      </div>
-    </div>
+            
+            <div style="margin: 0 0 30px 0; font-size: 16px; color: #d0c0a0; line-height: 1.6; font-style: italic; border-left: 3px solid #c8a84a; padding-left: 15px;">
+                "${r.bio || 'A mysterious adventurer looking for glory.'}"
+            </div>
 
-    <div style="margin-top:20px; text-align:right;">
-      <button id="btn-recruit-close" style="padding:6px 12px; cursor:pointer; background:transparent; border:1px solid #6a5030; color:#a09070;">Close</button>
-      ${canRecruit ? `<button id="btn-recruit-add" style="padding:6px 12px; cursor:pointer; background:rgba(200, 168, 74, 0.15); color:#e8c87a; border:1px solid #c8a84a; margin-left:10px; font-weight:bold;">Recruit to Party</button>` : '<span style="color:#cc4444; margin-left:10px; font-size:11px;">Party Full!</span>'}
+            <div style="margin-top: auto; display: flex; justify-content: flex-end; gap: 15px;">
+              <button id="btn-recruit-close" style="padding: 10px 20px; cursor: pointer; background: rgba(0,0,0,0.5); border: 1px solid #6a5030; color: #a09070; font-family: inherit; font-size: 14px; border-radius: 4px; transition: all 0.2s;">Decline</button>
+              ${canRecruit
+            ? `<button id="btn-recruit-add" style="padding: 10px 20px; cursor: pointer; background: linear-gradient(to bottom, #c8a84a, #8a6a20); color: #fff; border: 1px solid #e8c87a; font-family: inherit; font-size: 14px; font-weight: bold; border-radius: 4px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); box-shadow: 0 0 10px rgba(200, 168, 74, 0.4);">Recruit to Party</button>`
+            : `<span style="color: #cc4444; font-size: 14px; display: flex; align-items: center; border: 1px solid #cc4444; padding: 10px 20px; border-radius: 4px; background: rgba(204, 68, 68, 0.1);">Party Full!</span>`
+        }
+            </div>
+        </div>
     </div>
   `;
 

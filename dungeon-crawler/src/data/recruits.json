@@ -11,6 +11,7 @@
             "intelligence": 7,
             "resilience": 5
         },
+        "bio": "A swift and silent guardian of the deep woods. Elrond's bow strikes with the fury of nature itself.",
         "startingInventory": [
             "Torch",
             "Cure Poison Potion",
@@ -43,13 +44,15 @@
             "intelligence": 6,
             "resilience": 10
         },
+        "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
+        "recruitVideo": "/heros/human-paladin-recruit.mp4",
         "skillProgression": [
             "Sanctuary",
             "Holy Radiance",
             "Mace Master",
             "Mace Master"
         ],
-        "image": "/human_paladin_head.png",
+        "image": "/heros/human_paladin.png",
         "leftHand": "Sword",
         "rightHand": "Shield",
         "startingInventory": [
@@ -80,6 +83,7 @@
             "intelligence": 4,
             "resilience": 10
         },
+        "bio": "A stout and hearty fighter from the mountainous deeps. Thorek believes every problem can be solved with a sharp axe and enough ale.",
         "skillProgression": [
             "Sunder Armor",
             "Miners Light",
@@ -110,6 +114,7 @@
             "intelligence": 10,
             "resilience": 5
         },
+        "bio": "An eccentric scholar weaving arcane tapestries. Merlin's thirst for forbidden knowledge is matched only by his formidable spellcraft.",
         "skillProgression": [
             "Arcane Lantern",
             "Runic Scholar",
@@ -142,6 +147,7 @@
             "intelligence": 4,
             "resilience": 6
         },
+        "bio": "A raging storm of muscle and steel. Korg thrives in the heat of battle, leaving devastation in his wake.",
         "skillProgression": [
             "Berserk",
             "Warcry",
@@ -172,6 +178,7 @@
             "intelligence": 4,
             "resilience": 7
         },
+        "bio": "A keen-eyed marksman who traded the mines for the open hunt. Baldur's crossbow never misses its mark.",
         "skillProgression": [
             "True Shot",
             "Crossbow Master",
@@ -202,6 +209,7 @@
             "intelligence": 7,
             "resilience": 6
         },
+        "bio": "A graceful tempest of flashing blades. Lumni dances through her enemies, turning battle into a bloody, beautiful art form.",
         "skillProgression": [
             "Whirlwind",
             "War Dance",
