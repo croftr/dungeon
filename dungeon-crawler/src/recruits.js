@@ -5,6 +5,9 @@ import { CELL, WALL_H, findCell } from './map.js';
 import { isInFrontOfPlayer } from './player.js';
 import { interactables } from './objects.js';
 import RECRUITS_DATA from './data/recruits.json';
+
+const _recruitRaycaster = new THREE.Raycaster();
+const _recruitMouse = new THREE.Vector2();
 import SKILLS_DATA from './data/skills.json';
 
 // Hydrate skill progression strings into full skill objects using skills.json definitions
@@ -130,13 +133,11 @@ export function initRecruits(scene, camera) {
         }
 
         // Raycast to find clicks on recruits
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        _recruitMouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        _recruitMouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(interactables, false);
+        _recruitRaycaster.setFromCamera(_recruitMouse, camera);
+        const intersects = _recruitRaycaster.intersectObjects(interactables, false);
 
         for (let hit of intersects) {
             if (hit.object.userData.isRecruit && hit.object.visible) {

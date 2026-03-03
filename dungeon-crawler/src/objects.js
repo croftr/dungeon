@@ -15,6 +15,9 @@ import * as equip from './equipment.js';
 export const objects = [];
 export const interactables = [];
 
+const _clickRaycaster = new THREE.Raycaster();
+const _clickMouse = new THREE.Vector2();
+
 const _mixers = [];
 const _intervals = [];
 
@@ -111,12 +114,10 @@ export function initObjects(scene, camera) {
         ) return;
 
         // Raycast
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(interactables, false);
+        _clickMouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        _clickMouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        _clickRaycaster.setFromCamera(_clickMouse, camera);
+        const intersects = _clickRaycaster.intersectObjects(interactables, false);
 
         for (let hit of intersects) {
             let obj = hit.object;
@@ -564,12 +565,6 @@ export function initObjects(scene, camera) {
         anvilOverlayEl.addEventListener('click', (e) => e.stopPropagation());
     }
 
-    // Dismiss chest context menu on outside click
-    document.addEventListener('mousedown', (e) => {
-        if (!_chestCtxOpen) return;
-        const menu = document.getElementById('chest-ctx-menu');
-        if (!menu.contains(e.target)) _hideChestCtxMenu();
-    });
 }
 
 export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = [], modelPath = '/items/Meshy_AI_Treasure_Chest_0221184131_texture.glb', interactive = true, offsetX = 0, title = 'Chest') {
@@ -1662,6 +1657,14 @@ function _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx) {
     }
 }
 
+function _outsideClickHandler(e) {
+    const menu = document.getElementById('chest-ctx-menu');
+    if (!menu.contains(e.target)) {
+        _hideChestCtxMenu();
+        document.removeEventListener('mousedown', _outsideClickHandler);
+    }
+}
+
 function _showChestCtxMenu(x, y, equip, slots, contents, slotIdx, itemDef) {
     const menu = document.getElementById('chest-ctx-menu');
     const list = document.getElementById('chest-ctx-list');
@@ -1691,6 +1694,7 @@ function _showChestCtxMenu(x, y, equip, slots, contents, slotIdx, itemDef) {
 
     menu.classList.remove('chest-ctx-hidden');
     _chestCtxOpen = true;
+    document.addEventListener('mousedown', _outsideClickHandler);
 
     // Position near cursor, flip if near viewport edges
     const mw = menu.offsetWidth || 160;
@@ -1909,6 +1913,7 @@ function _showAlchemyCtxMenu(x, y, equip, slotIdx, itemDef) {
 
     menu.classList.remove('chest-ctx-hidden');
     _chestCtxOpen = true;
+    document.addEventListener('mousedown', _outsideClickHandler);
 
     // Position near cursor
     const mw = menu.offsetWidth || 160;
