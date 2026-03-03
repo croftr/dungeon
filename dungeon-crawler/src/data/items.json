@@ -348,6 +348,7 @@
         "slot": "rightHand",
         "attackType": "bash",
         "weaponType": "mace",
+        "staminaDrain": 1,
         "baseDamage": 5,
         "delay": 2,
         "statWeights": {
@@ -365,6 +366,7 @@
         "slot": "leftHand",
         "attackType": "shield-bash",
         "weaponType": "shield",
+        "staminaDrain": 1,
         "baseDamage": 2,
         "statWeights": {
             "str": 1,
@@ -382,6 +384,7 @@
         "slot": "leftHand",
         "attackType": "shield-bash",
         "weaponType": "shield",
+        "staminaDrain": 1,
         "baseDamage": 2,
         "statWeights": {
             "str": 1,
@@ -398,6 +401,7 @@
         "slot": "leftHand",
         "attackType": "shoot",
         "weaponType": "bow",
+        "staminaDrain": 2,
         "baseDamage": 15,
         "delay": 4,
         "statWeights": {
@@ -414,6 +418,7 @@
         "slot": "leftHand",
         "attackType": "shoot",
         "weaponType": "crossbow",
+        "staminaDrain": 2,
         "baseDamage": 20,
         "delay": 6,
         "statWeights": {
@@ -472,6 +477,7 @@
         "slot": "rightHand",
         "attackType": "swipe",
         "weaponType": "dagger",
+        "staminaDrain": 1,
         "baseDamage": 5,
         "delay": 2,
         "statWeights": {
@@ -488,6 +494,7 @@
         "slot": "leftHand",
         "attackType": "swipe",
         "weaponType": "dagger",
+        "staminaDrain": 1,
         "baseDamage": 6,
         "delay": 2,
         "statWeights": {
@@ -504,6 +511,7 @@
         "slot": "rightHand",
         "attackType": "swipe",
         "weaponType": "dagger",
+        "staminaDrain": 1,
         "baseDamage": 5,
         "damageType": "poison",
         "onHitEffects": [
@@ -527,6 +535,7 @@
         "slot": "rightHand",
         "attackType": "swipe",
         "weaponType": "sword",
+        "staminaDrain": 1,
         "baseDamage": 10,
         "delay": 2,
         "statWeights": {
@@ -543,6 +552,7 @@
         "slot": "enable-spell",
         "attackType": "bash",
         "weaponType": "staff",
+        "staminaDrain": 1,
         "baseDamage": 5,
         "delay": 4,
         "statWeights": {
@@ -571,6 +581,7 @@
         "slot": "rightHand",
         "attackType": "swipe",
         "weaponType": "axe",
+        "staminaDrain": 1,
         "baseDamage": 10,
         "delay": 2,
         "statWeights": {
@@ -587,6 +598,7 @@
         "slot": "rightHand",
         "attackType": "bash",
         "weaponType": "mace",
+        "staminaDrain": 1,
         "baseDamage": 15,
         "delay": 2,
         "statWeights": {
@@ -603,6 +615,7 @@
         "slot": "bothHands",
         "attackType": "swipe",
         "weaponType": "twoHanded",
+        "staminaDrain": 2,
         "baseDamage": 30,
         "delay": 4,
         "statWeights": {
@@ -619,6 +632,7 @@
         "slot": "bothHands",
         "attackType": "swipe",
         "weaponType": "twoHanded",
+        "staminaDrain": 2,
         "baseDamage": 20,
         "delay": 4,
         "statWeights": {
@@ -635,6 +649,7 @@
         "slot": "bothHands",
         "attackType": "bash",
         "weaponType": "twoHanded",
+        "staminaDrain": 2,
         "baseDamage": 25,
         "delay": 4,
         "statWeights": {
@@ -651,6 +666,7 @@
         "slot": "leftHand",
         "attackType": "shoot",
         "weaponType": "bow",
+        "staminaDrain": 2,
         "baseDamage": 20,
         "delay": 4,
         "statWeights": {

@@ -926,7 +926,7 @@ export function updateMonsters(dt, playerCamera, scene) {
         m.attackCooldown = (m.attackCooldown || 0) - dt;
         if (m.attackCooldown <= 0) {
           triggerMonsterAttack(m.id);
-          let nextAttack = 5.0 + (Math.random() * 2.0); // Next attack in 5.0 - 7.0 seconds
+          let nextAttack = (5.0 + (Math.random() * 2.0)) / (m.attackSpeed ?? 1); // Next attack in 5.0 - 7.0 seconds (scaled by attackSpeed)
           if (skillsState.entangle?.active && skillsState.entangle?.targetId === m.id) {
             nextAttack *= skillsState.entangle.magnitude;
           }

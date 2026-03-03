@@ -2299,9 +2299,9 @@ function useHand(memberIndex, hand) {
     setMp(m.id, m.mp - mpCost);
   }
 
-  // Physical attacks cost 5 SP; spells and skills do not
+  // Physical attacks cost 5 SP per staminaDrain level; spells and skills do not
   // Whirlwind / War Dance buff: also prevents SP drain
-  let spCost = 5;
+  let spCost = 5 * (def?.staminaDrain ?? 1);
   const wwActive = ww.active && ww.actorName === m.name && now < ww.expiresAt;
   const wdActive = skillsState.warDance.active && now < skillsState.warDance.expiresAt;
 

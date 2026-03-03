@@ -4,6 +4,7 @@
     "hp": 100,
     "defence": 5,
     "xp": 100,
+    "attackSpeed": 1,
     "stats": {
       "strength": 12,
       "dexterity": 15,
@@ -27,6 +28,7 @@
     "hp": 100,
     "defence": 6,
     "xp": 100,
+    "attackSpeed": 1,
     "stats": {
       "strength": 13,
       "dexterity": 13,
@@ -56,6 +58,7 @@
     "hp": 120,
     "defence": 4,
     "xp": 120,
+    "attackSpeed": 1,
     "stats": {
       "strength": 14,
       "dexterity": 18,
@@ -85,6 +88,7 @@
     "hp": 200,
     "defence": 6,
     "xp": 160,
+    "attackSpeed": 1,
     "stats": {
       "strength": 20,
       "dexterity": 8,
@@ -104,6 +108,7 @@
     "hp": 180,
     "defence": 3,
     "xp": 150,
+    "attackSpeed": 1,
     "stats": {
       "strength": 16,
       "dexterity": 12,
@@ -130,9 +135,10 @@
   },
   "zombie": {
     "name": "Zombie",
-    "hp": 100,
+    "hp": 200,
     "defence": 1,
     "xp": 120,
+    "attackSpeed": 1,
     "stats": {
       "strength": 14,
       "dexterity": 4,
@@ -156,8 +162,9 @@
   "iceman": {
     "name": "IceMan",
     "hp": 200,
-    "defence": 7,
+    "defence": 8,
     "xp": 265,
+    "attackSpeed": 1,
     "stats": {
       "strength": 15,
       "dexterity": 8,
@@ -183,6 +190,7 @@
     "hp": 150,
     "defence": 9,
     "xp": 245,
+    "attackSpeed": 1,
     "stats": {
       "strength": 18,
       "dexterity": 6,
@@ -203,9 +211,10 @@
   },
   "treeman": {
     "name": "Treeman",
-    "hp": 250,
+    "hp": 280,
     "defence": 9,
     "xp": 1000,
+    "attackSpeed": 1.2,
     "stats": {
       "strength": 30,
       "dexterity": 18,
@@ -233,6 +242,7 @@
     "hp": 150,
     "defence": 9,
     "xp": 255,
+    "attackSpeed": 1.2,
     "stats": {
       "strength": 24,
       "dexterity": 18,
@@ -262,6 +272,7 @@
     "hp": 100000,
     "defence": 0,
     "xp": 0,
+    "attackSpeed": 1,
     "stats": {
       "strength": 0,
       "dexterity": 0,

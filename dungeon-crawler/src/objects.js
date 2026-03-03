@@ -392,27 +392,31 @@ export function initObjects(scene, camera) {
     if (sarcophagusYes) {
         sarcophagusYes.onclick = (e) => {
             e.stopPropagation();
-            document.getElementById('sarcophagus-overlay').classList.add('chest-hidden');
             _mummyGateOpened = true;
 
-            playGateOpeningSound();
+            // 1 second delay before the actual gate operation and ambush
+            setTimeout(() => {
+                playGateOpeningSound();
 
-            // Engage mummies immediately so they start moving toward the gate
-            // as it rises. The portcullis cell stays impassable for ~2500 ms,
-            // so they queue up at the gate and flood through the moment it opens.
-            triggerMummyAmbush();
+                // Engage mummies 
+                triggerMummyAmbush();
 
-            if (window.playMummyVideo) {
-                window.playMummyVideo(() => {
-                    objects
-                        .filter(o => o.name === 'Portcullis' && o.gridCol === 16 && o.gridRow >= 2 && o.gridRow <= 4)
-                        .forEach(p => openPortcullis(p, true));
-                });
-            } else {
+                // Open the three-wide portcullis 
                 objects
                     .filter(o => o.name === 'Portcullis' && o.gridCol === 16 && o.gridRow >= 2 && o.gridRow <= 4)
-                    .forEach(p => openPortcullis(p));
-            }
+                    .forEach(p => openPortcullis(p, true));
+
+                if (window.playMummyVideo) {
+                    window.playMummyVideo();
+                }
+            }, 1000);
+
+            // Close the modal after the delay + a slight overlap (1000ms + 400ms)
+            // so the player sees the interaction start before the screen clears.
+            setTimeout(() => {
+                const overlay = document.getElementById('sarcophagus-overlay');
+                if (overlay) overlay.classList.add('chest-hidden');
+            }, 1400);
         };
     }
 
@@ -1693,7 +1697,7 @@ function _showChestCtxMenu(x, y, equip, slots, contents, slotIdx, itemDef) {
 let _alchemyMsgTimer = null;
 
 function showAlchemyMessage(text, type = 'info') {
-    const bar  = document.getElementById('alchemy-message-bar');
+    const bar = document.getElementById('alchemy-message-bar');
     const span = document.getElementById('alchemy-message-text');
     if (!bar || !span) return;
 
