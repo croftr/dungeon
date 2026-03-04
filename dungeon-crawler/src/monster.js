@@ -1582,14 +1582,18 @@ function _playHitAnimation(m, attackType, killer) {
     }
   }
 
-  // Flash red on emissive channel
+  // Flash red on emissive channel (or green for poison)
   mesh.traverse((child) => {
     if (child.isMesh && child.material) {
       const materials = Array.isArray(child.material) ? child.material : [child.material];
       materials.forEach(mat => {
         if (mat.emissive) {
           const origEmissive = mat.emissive.getHex();
-          mat.emissive.setHex(0xaa0000);
+          if (attackType === 'poison-dot') {
+            mat.emissive.setHex(0x00aa00);
+          } else {
+            mat.emissive.setHex(0xaa0000);
+          }
           setTimeout(() => { mat.emissive.setHex(origEmissive); }, 150);
         }
       });
