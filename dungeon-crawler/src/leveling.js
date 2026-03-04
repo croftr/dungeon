@@ -9,7 +9,6 @@
 import LEVELING from './data/leveling.json';
 import SKILLS_DATA from './data/skills.json';
 import { party, refreshPartyCards } from './party.js';
-import { showMessage } from './minimap.js';
 import { playLevelUpSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 
@@ -100,7 +99,7 @@ function showDramaticLevelUp(levelUps) {
     setTimeout(() => {
       container.remove();
     }, 1000); // Wait for fade out transition
-  }, 4000);
+  }, 8000); // Doubled from 4000 to 8000
 }
 
 /**

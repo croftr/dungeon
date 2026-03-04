@@ -829,7 +829,9 @@ body {
   z-index: 1000;
 }
 
-.equip-hidden {
+.equip-hidden,
+.chest-hidden,
+.party-confirm-hidden {
   display: none !important;
 }
 
@@ -4771,6 +4773,22 @@ body.cursor-interact #renderer-canvas {
   border-color: #666;
   color: #aaa;
 }
+
+/* ── PARTY CONFIRM MODAL ── */
+#party-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10002;
+}
+
+#party-confirm-overlay.chest-hidden {
+  display: none !important;
+}
+
 /* ─────────────────────────────────────────────────────────────────────────────
    LOADOUT B — alternate item slots in the inventory paperdoll
 ───────────────────────────────────────────────────────────────────────────── */
@@ -4925,7 +4943,10 @@ body.cursor-interact #renderer-canvas {
 .dramatic-levelup-card::before {
   content: '';
   position: absolute;
-  top: -50%; left: -50%; width: 200%; height: 200%;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
   background: radial-gradient(circle, rgba(232, 200, 122, 0.15) 0%, transparent 60%);
   animation: shine-rotate 6s linear infinite;
   z-index: 0;
@@ -4933,8 +4954,13 @@ body.cursor-interact #renderer-canvas {
 }
 
 @keyframes shine-rotate {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .dramatic-levelup-portrait {
@@ -4943,7 +4969,7 @@ body.cursor-interact #renderer-canvas {
   border: 2px solid #5a4a30;
   border-radius: 6px;
   background: #0d0a06;
-  box-shadow: 0 0 15px rgba(0,0,0,0.8);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
   margin-bottom: 20px;
   z-index: 1;
   position: relative;
@@ -4958,7 +4984,7 @@ body.cursor-interact #renderer-canvas {
   line-height: 1.4;
   z-index: 1;
   position: relative;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .dramatic-levelup-text .dl-name {

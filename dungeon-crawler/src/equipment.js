@@ -2291,14 +2291,34 @@ function _executeCurePoison(caster, target) {
     d => d.effectId === 'poison' && performance.now() < d.expiresAt
   );
 
+  let amount = 0;
+  if (caster.skills) {
+    caster.skills.forEach(skill => {
+      const name = typeof skill === 'string' ? skill : skill.name;
+      if (name === 'Lifewarden') {
+        const skillDef = SKILLS_DATA['Lifewarden'];
+        amount += (skillDef?.magnitude ?? 1);
+      }
+    });
+  }
+
+  if (amount > 0) {
+    setHp(target.id, target.hp + amount);
+  }
+
   // Strip all poison stacks from the target
   if (target.activeDebuffs) {
     target.activeDebuffs = target.activeDebuffs.filter(d => d.effectId !== 'poison');
   }
 
-  const msg = hadPoison
+  let msg = hadPoison
     ? `${caster.name} casts <b>Cure Poison</b> on ${target.name} — venom purged!`
     : `${caster.name} casts <b>Cure Poison</b> on ${target.name}.`;
+
+  if (amount > 0) {
+    msg += ` Restored ${amount} HP!`;
+  }
+
   showMessage(msg, 2500);
 
   addLogEntry({
@@ -2307,6 +2327,7 @@ function _executeCurePoison(caster, target) {
     actor: caster.name,
     skillName: 'Cure Poison',
     target: target.name,
+    finalDamage: amount > 0 ? -amount : 0
   });
 
   refreshPartyCards();

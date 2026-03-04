@@ -170,9 +170,19 @@ export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef 
  * @returns {number}          Final damage (minimum 1)
  */
 export function calcPlayerMagicDamage(character, weaponDef, monster) {
-  const raw = weaponDef?.magnitudeFormula
+  let raw = weaponDef?.magnitudeFormula
     ? resolveSpellMagnitude(weaponDef.name, weaponDef, character)
     : (weaponDef?.baseDamage ?? 0) + (character.stats?.intelligence ?? 10);
+  // Apply Pyromancer passive skill bonus: +1 base damage per instance of the skill
+  if (character.skills) {
+    character.skills.forEach(skill => {
+      const name = typeof skill === 'string' ? skill : skill.name;
+      if (name === 'Pyromancer') {
+        const skillDef = SKILLS_DATA['Pyromancer'];
+        raw += (skillDef?.magnitude ?? 1);
+      }
+    });
+  }
   const statMitigation = Math.floor(
     ((monster.stats?.resilience ?? 0) + (monster.stats?.vitality ?? 0)) * RESILIENCE_DAMAGE_FACTOR / 2
   );

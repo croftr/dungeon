@@ -102,17 +102,8 @@ setCallbacks({
         playOgreVideo();
       }
 
-      if (prepVideoTimer) {
-        clearTimeout(prepVideoTimer);
-        prepVideoTimer = null;
-      }
-
-      if (!hasSeenPrepVideo && player.gridRow === 13 && player.gridCol === 9) {
-        prepVideoTimer = setTimeout(() => {
-          hasSeenPrepVideo = true;
-          playBattlePrepVideo();
-        }, 2000);
-      }
+      // Prep video triggers ONLY when confirming the NPC modal now,
+      // so we remove the position-based trigger entirely.
     }
   },
   reached() {
@@ -476,7 +467,7 @@ window.addEventListener('mousemove', (e) => {
   let isHoveringInteractable = false;
   for (let hit of intersects) {
     const ud = hit.object.userData;
-    if (ud && (ud.isButton || ud.isChest || ud.isCrystal || ud.isBonePile || ud.isRecruit)) {
+    if (ud && (ud.isButton || ud.isChest || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC)) {
       if (hit.object.visible) {
         isHoveringInteractable = true;
         break;

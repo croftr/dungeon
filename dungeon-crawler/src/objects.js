@@ -29,7 +29,8 @@ export function updateObjects(dt) {
 // ─────────────────────────────────────────────
 //  SARCOPHAGUS STATE
 // ─────────────────────────────────────────────
-let _mummyGateOpened = false; // true once the player confirms — prevents re-triggering
+let _mummyGateOpened = false;
+let _partyConfirmNPCModel = null; // true once the player confirms — prevents re-triggering
 
 // ─────────────────────────────────────────────
 //  CHEST / MERCHANT SHARED STATE
@@ -107,6 +108,7 @@ export function initObjects(scene, camera) {
         const merchantOverlay = document.getElementById('merchant-overlay');
         const alchemyOverlay = document.getElementById('alchemy-overlay');
         const charDevOverlay = document.getElementById('char-dev-overlay');
+        const partyConfirmOverlay = document.getElementById('party-confirm-overlay');
         if (
             (weaponRackOverlay && !weaponRackOverlay.classList.contains('chest-hidden')) ||
             (cabinetOverlay && !cabinetOverlay.classList.contains('chest-hidden')) ||
@@ -115,7 +117,8 @@ export function initObjects(scene, camera) {
             (equipOverlay && !equipOverlay.classList.contains('equip-hidden')) ||
             (merchantOverlay && !merchantOverlay.classList.contains('merchant-hidden')) ||
             (alchemyOverlay && !alchemyOverlay.classList.contains('chest-hidden')) ||
-            (charDevOverlay && !charDevOverlay.classList.contains('char-dev-hidden'))
+            (charDevOverlay && !charDevOverlay.classList.contains('char-dev-hidden')) ||
+            (partyConfirmOverlay && !partyConfirmOverlay.classList.contains('chest-hidden'))
         ) return;
 
         // Raycast
@@ -358,6 +361,19 @@ export function initObjects(scene, camera) {
                     showMessage("The Jester beckons you from afar.");
                 }
                 break;
+            } else if (obj.userData.isPartyConfirmNPC || (obj.parent && obj.parent.userData && obj.parent.userData.isPartyConfirmNPC)) {
+                // Determine which object holds the grid info (submesh or parent)
+                const data = obj.userData.isPartyConfirmNPC ? obj.userData : obj.parent.userData;
+                const distRow = Math.abs(player.gridRow - data.gridRow);
+                const distCol = Math.abs(player.gridCol - data.gridCol);
+                // Increased range to 3 for better accessibility
+                if (distRow <= 3 && distCol <= 3) {
+                    const overlay = document.getElementById('party-confirm-overlay');
+                    if (overlay) overlay.classList.remove('chest-hidden');
+                } else {
+                    showMessage("The mysterious figure beckons you from afar.");
+                }
+                break;
             }
         }
     });
@@ -430,6 +446,42 @@ export function initObjects(scene, camera) {
                 const overlay = document.getElementById('sarcophagus-overlay');
                 if (overlay) overlay.classList.add('chest-hidden');
             }, 1400);
+        };
+    }
+
+    const partyConfirmNo = document.getElementById('party-confirm-no');
+    if (partyConfirmNo) {
+        partyConfirmNo.onclick = (e) => {
+            e.stopPropagation();
+            const overlay = document.getElementById('party-confirm-overlay');
+            if (overlay) overlay.classList.add('chest-hidden');
+        };
+    }
+
+    const partyConfirmYes = document.getElementById('party-confirm-yes');
+    if (partyConfirmYes) {
+        partyConfirmYes.onclick = (e) => {
+            e.stopPropagation();
+            const overlay = document.getElementById('party-confirm-overlay');
+            if (overlay) overlay.classList.add('chest-hidden');
+
+            // Hide the NPC
+            if (_partyConfirmNPCModel) {
+                if (_partyConfirmNPCModel.parent) _partyConfirmNPCModel.parent.remove(_partyConfirmNPCModel);
+                _partyConfirmNPCModel.traverse((child) => {
+                    const idx = interactables.indexOf(child);
+                    if (idx !== -1) interactables.splice(idx, 1);
+                });
+                _partyConfirmNPCModel = null;
+            }
+
+            if (window.playBattlePrepVideo) {
+                window.playBattlePrepVideo();
+            }
+            // Also ensure the drop button is hidden immediately for good measure
+            if (equip.hideDropButton) {
+                equip.hideDropButton();
+            }
         };
     }
 
@@ -748,6 +800,9 @@ export function spawnObjectsForLevel() {
 
         // Statue in the center of the new 5x5 room
         addStatue(objectsGroup, gltfLoader, 13, 3);
+
+        // Party Confirm NPC
+        addPartyConfirmNPC(objectsGroup, gltfLoader, 9, 13, Math.PI, -1, 0);
 
         // Three-wide portcullis on the far side of the 5x5 room —
         // rows 2, 3 & 4 all open together so mummies can't be funnelled.
@@ -1230,6 +1285,52 @@ function addJester(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) 
         scene.add(model);
     });
 }
+
+function addPartyConfirmNPC(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
+    const path = '/npcs/jester/jester-idle1.glb';
+    loader.load(path, (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(0.55);
+        model.position.set(col * CELL + offsetX, 0, row * CELL + offsetZ);
+        model.rotation.y = rotY;
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.userData.isPartyConfirmNPC = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+                interactables.push(child);
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
+            }
+        });
+
+        if (gltf.animations && gltf.animations.length > 0) {
+            const mixer = new THREE.AnimationMixer(model);
+            const action = mixer.clipAction(gltf.animations[0]);
+            action.setLoop(THREE.LoopRepeat);
+            action.play();
+            _mixers.push(mixer);
+        }
+
+        model.name = 'PartyConfirmNPCModel';
+        _partyConfirmNPCModel = model;
+        scene.add(model);
+    });
+}
+
 
 export function openPortcullis(p, skipEverything = false) {
     if (p.isOpen) return;

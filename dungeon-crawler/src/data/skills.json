@@ -304,5 +304,21 @@
         "effectType": "weaponAccuracyBonus",
         "weaponType": "bow",
         "magnitude": 0.1
+    },
+    "Pyromancer": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/pyromancer.png",
+        "description": "Increases fireball base damage by 2.",
+        "effectType": "fireballDamageBonus",
+        "magnitude": 2
+    },
+    "Lifewarden": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/lifewarden.png",
+        "description": "Increases HP restored by cure spells by 2.",
+        "effectType": "cureHealBonus",
+        "magnitude": 2
     }
 }
