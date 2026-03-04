@@ -280,8 +280,7 @@ export function buildLevel(scene) {
       if (cell === CELL_WALL) {
         wallCount++;
       } else {
-        if (cell === CELL_EXIT) exitFloorCount++;
-        else floorCount++;
+        floorCount++;
         ceilCount++;
       }
     }
@@ -297,15 +296,9 @@ export function buildLevel(scene) {
 
   const ceilIM = new THREE.InstancedMesh(tileGeo, ceilMat, ceilCount);
 
-  let exitFloorIM = null;
-  if (exitFloorCount > 0) {
-    exitFloorIM = new THREE.InstancedMesh(tileGeo, exitMat, exitFloorCount);
-    exitFloorIM.receiveShadow = true;
-  }
-
   // 3. Set matrices
   const dummy = new THREE.Object3D();
-  let wId = 0, fId = 0, cId = 0, eId = 0;
+  let wId = 0, fId = 0, cId = 0;
 
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
@@ -323,25 +316,13 @@ export function buildLevel(scene) {
         dummy.position.set(wx, 0, wz);
         dummy.rotation.set(-Math.PI / 2, 0, 0);
         dummy.updateMatrix();
-        if (cell === CELL_EXIT) {
-          exitFloorIM.setMatrixAt(eId++, dummy.matrix);
-        } else {
-          floorIM.setMatrixAt(fId++, dummy.matrix);
-        }
+        floorIM.setMatrixAt(fId++, dummy.matrix);
 
         // Ceiling
         dummy.position.set(wx, WALL_H, wz);
         dummy.rotation.set(Math.PI / 2, 0, 0);
         dummy.updateMatrix();
         ceilIM.setMatrixAt(cId++, dummy.matrix);
-
-        // Exit glow light
-        if (cell === CELL_EXIT) {
-          exitLight = new THREE.PointLight(0x44ff44, 1.5, 5, 2);
-          exitLight.position.set(wx, 1, wz);
-          scene.add(exitLight);
-          currentMapMeshes.push(exitLight);
-        }
       }
     }
   }
@@ -349,15 +330,10 @@ export function buildLevel(scene) {
   wallIM.instanceMatrix.needsUpdate = true;
   floorIM.instanceMatrix.needsUpdate = true;
   ceilIM.instanceMatrix.needsUpdate = true;
-  if (exitFloorIM) exitFloorIM.instanceMatrix.needsUpdate = true;
 
   scene.add(wallIM); currentMapMeshes.push(wallIM);
   scene.add(floorIM); currentMapMeshes.push(floorIM);
   scene.add(ceilIM); currentMapMeshes.push(ceilIM);
-  if (exitFloorIM) {
-    scene.add(exitFloorIM);
-    currentMapMeshes.push(exitFloorIM);
-  }
 
-  return exitLight;
+  return null;
 }

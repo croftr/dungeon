@@ -223,9 +223,9 @@
         "job": "War Dancer",
         "race": "High Elf",
         "stats": {
-            "strength": 6,
+            "strength": 106,
             "dexterity": 10,
-            "vitality": 6,
+            "vitality": 106,
             "intelligence": 7,
             "resilience": 6
         },

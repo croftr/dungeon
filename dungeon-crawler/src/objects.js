@@ -193,6 +193,11 @@ export function initObjects(scene, camera) {
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 1 && distCol <= 1) {
                     const targetLevel = obj.userData.targetLevel;
+                    if (targetLevel === -1) {
+                        showMessage('YOU ESCAPED!<br><small style="font-size:14px;color:#aaa">The dungeon is conquered.</small>');
+                        return;
+                    }
+
                     const isTreemanTransition = (targetLevel === 2 && window.currentLevel === 1);
 
                     showMessage("You step into the swirling blue portal...");
@@ -748,8 +753,8 @@ export function spawnObjectsForLevel() {
         // rows 2, 3 & 4 all open together so mummies can't be funnelled.
         addPortcullis(objectsGroup, gltfLoader, 16, 2, Math.PI / 2);
         addPortcullis(objectsGroup, gltfLoader, 16, 3, Math.PI / 2);
-        addPortcullis(objectsGroup, gltfLoader, 16, 4, Math.PI / 2);
-
+        // Exit Portal (Escape) at the end of the dungeon
+        addPortal(objectsGroup, gltfLoader, 1, 22, -1, 0, 0, 0);
 
     } else if (level === 2) {
         // Portal back to Level 1.
