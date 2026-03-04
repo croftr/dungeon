@@ -58,7 +58,6 @@
         ],
         "startingSkills": [],
         "image": "/heros/human_paladin.png",
-        "recruitVideo": "/videos/paladin.mp4",
         "leftHand": "Sword",
         "rightHand": "Shield",
         "startingInventory": [
