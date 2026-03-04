@@ -58,6 +58,7 @@
         ],
         "startingSkills": [],
         "image": "/heros/human_paladin.png",
+        "recruitVideo": "/videos/paladin.mp4",
         "leftHand": "Sword",
         "rightHand": "Shield",
         "startingInventory": [
@@ -142,8 +143,7 @@
             "Scroll of Rejuvenate"
         ],
         "image": "heros/human_wizard_head.png",
-        "leftHand": "Spellbook",
-        "rightHand": "Oak Staff",
+        "ammo": "Spellbook",
         "gridCol": 13,
         "gridRow": 8,
         "facing": "front",
@@ -223,8 +223,8 @@
         "job": "War Dancer",
         "race": "High Elf",
         "stats": {
-            "strength": 106,
-            "dexterity": 100,
+            "strength": 6,
+            "dexterity": 10,
             "vitality": 6,
             "intelligence": 7,
             "resilience": 6

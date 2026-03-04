@@ -61,6 +61,18 @@
       Video</button>
   </div>
 
+  <!-- ── BATTLE PREP VIDEO OVERLAY ── -->
+  <div id="battle-prep-video-overlay" class="hidden"
+    style="position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 1.5s ease;">
+    <video id="battle-prep-video" preload="none"
+      style="width: 100%; height: 100%; object-fit: contain; box-shadow: 0 0 100px rgba(0, 0, 0, 1);">
+      <source src="/videos/Dramatic_Battle_Preparation_Video_Generated.mp4" type="video/mp4">
+    </video>
+    <button id="skip-battle-prep-btn"
+      style="position: absolute; bottom: 40px; right: 40px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(232, 200, 122, 0.3); color: #aaa; padding: 10px 24px; font-family: monospace; font-size: 12px; cursor: pointer; border-radius: 4px;">Skip
+      Video</button>
+  </div>
+
   <canvas id="renderer-canvas"></canvas>
 
   <div id="hud">
@@ -110,7 +122,7 @@
               </div>
             </div>
           </div>
-          <div class="quickslot-btn" id="qs-0-0"><span class="qs-key">1</span></div>
+          <div class="quickslot-btn" id="qs-0-0" title="Active potion · Press 1 to rotate loadout"><span class="qs-key">1</span></div>
         </div>
       </div>
 
@@ -146,7 +158,7 @@
               </div>
             </div>
           </div>
-          <div class="quickslot-btn" id="qs-1-0"><span class="qs-key">3</span></div>
+          <div class="quickslot-btn" id="qs-1-0" title="Active potion · Press 2 to rotate loadout"><span class="qs-key">2</span></div>
         </div>
       </div>
 
@@ -182,7 +194,7 @@
               </div>
             </div>
           </div>
-          <div class="quickslot-btn" id="qs-2-0"><span class="qs-key">5</span></div>
+          <div class="quickslot-btn" id="qs-2-0" title="Active potion · Press 3 to rotate loadout"><span class="qs-key">3</span></div>
         </div>
       </div>
 
@@ -218,7 +230,7 @@
               </div>
             </div>
           </div>
-          <div class="quickslot-btn" id="qs-3-0"><span class="qs-key">7</span></div>
+          <div class="quickslot-btn" id="qs-3-0" title="Active potion · Press 4 to rotate loadout"><span class="qs-key">4</span></div>
         </div>
       </div>
 
@@ -545,6 +557,25 @@
             </div>
 
           </div><!-- /#paperdoll-wrap -->
+
+          <!-- Loadout B section — alternate items that swap in when rotating -->
+          <div id="loadout-b-section">
+            <button id="loadout-rotate-btn" title="Rotate all loadout slots (keys 1-4 in game)">&#8644; Rotate</button>
+            <div id="loadout-b-slots">
+              <div class="pd-loadout-b-slot" id="pd-lhB" data-lb="leftHand">
+                <span class="lb-slot-label">L</span>
+                <span class="pd-item"></span>
+              </div>
+              <div class="pd-loadout-b-slot" id="pd-rhB" data-lb="rightHand">
+                <span class="lb-slot-label">R</span>
+                <span class="pd-item"></span>
+              </div>
+              <div class="pd-loadout-b-slot" id="pd-potB" data-lb="potion">
+                <span class="lb-slot-label">Q</span>
+                <span class="pd-item"></span>
+              </div>
+            </div>
+          </div>
         </section>
 
       </div><!-- /#equip-body -->
@@ -969,9 +1000,11 @@
   <!-- Right-click context menu for inventory items -->
   <div id="inv-context-menu" class="inv-ctx-hidden">
     <div class="inv-ctx-item inv-ctx-use" id="inv-ctx-use" style="display: none;">🍹 Drink</div>
-    <div class="inv-ctx-item inv-ctx-qs1" id="inv-ctx-qs1" style="display: none;">⚗ Quick Slot 1</div>
-    <div class="inv-ctx-item inv-ctx-qs2" id="inv-ctx-qs2" style="display: none;">⚗ Quick Slot 2</div>
-    <div class="inv-ctx-item inv-ctx-equip" id="inv-ctx-equip">⚔ Equip</div>
+    <div class="inv-ctx-item inv-ctx-qs1" id="inv-ctx-qs1" style="display: none;">⚗ Quick Slot A</div>
+    <div class="inv-ctx-item inv-ctx-qs2" id="inv-ctx-qs2" style="display: none;">⚗ Quick Slot B</div>
+    <div class="inv-ctx-item inv-ctx-equip" id="inv-ctx-equip">⚔ Equip (A)</div>
+    <div class="inv-ctx-item" id="inv-ctx-equip-lb-left" style="display: none;">⚔ Equip B Left</div>
+    <div class="inv-ctx-item" id="inv-ctx-equip-lb-right" style="display: none;">⚔ Equip B Right</div>
     <div class="inv-ctx-item inv-ctx-learn" id="inv-ctx-learn" style="display: none;">📜 Learn</div>
     <div class="inv-ctx-item inv-ctx-sell" id="inv-ctx-sell" style="display: none;">💰 Sell</div>
     <div class="inv-ctx-item inv-ctx-alchemy" id="inv-ctx-alchemy" style="display: none;">🧪 Put in Alchemy</div>

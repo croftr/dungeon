@@ -38,19 +38,69 @@ export function awardXP(totalXP) {
   if (allEvents.length > 0) {
     playLevelUpSound();
     // Group by member name and take the highest level reached per member
-    const byName = {};
+    const highestLevel = {}; // member.id -> { member, level }
     for (const ev of allEvents) {
-      if (!byName[ev.name] || ev.level > byName[ev.name]) {
-        byName[ev.name] = ev.level;
+      if (!highestLevel[ev.member.id] || ev.level > highestLevel[ev.member.id].level) {
+        highestLevel[ev.member.id] = { member: ev.member, level: ev.level };
       }
     }
-    const msg = Object.entries(byName)
-      .map(([name, level]) => `<b>${name}</b> reached <b>Level ${level}</b>!`)
-      .join('  ·  ');
-    showMessage(msg, 4000);
+    showDramaticLevelUp(Object.values(highestLevel));
   }
 
   refreshPartyCards();
+}
+
+/**
+ * Display a dramatic level up overlay for one or more party members.
+ */
+function showDramaticLevelUp(levelUps) {
+  let overlay = document.getElementById('dramatic-levelup-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'dramatic-levelup-overlay';
+    document.body.appendChild(overlay);
+  }
+
+  const container = document.createElement('div');
+  container.className = 'dramatic-levelup-group';
+
+  for (const { member, level } of levelUps) {
+    const card = document.createElement('div');
+    card.className = 'dramatic-levelup-card';
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 120;
+    canvas.height = 120;
+    canvas.className = 'dramatic-levelup-portrait';
+
+    // We must import drawPortrait from party.js to draw the face
+    import('./party.js').then(({ drawPortrait }) => {
+      drawPortrait(canvas, member);
+    });
+
+    const text = document.createElement('div');
+    text.className = 'dramatic-levelup-text';
+    text.innerHTML = `<span class="dl-name">${member.name}</span><br/>has attained<br/><span class="dl-level">Level ${level}!</span>`;
+
+    card.appendChild(canvas);
+    card.appendChild(text);
+    container.appendChild(card);
+  }
+
+  overlay.appendChild(container);
+
+  // Trigger animation
+  requestAnimationFrame(() => {
+    container.classList.add('dl-show');
+  });
+
+  // Remove after a few seconds
+  setTimeout(() => {
+    container.classList.remove('dl-show');
+    setTimeout(() => {
+      container.remove();
+    }, 1000); // Wait for fade out transition
+  }, 4000);
 }
 
 /**
@@ -70,7 +120,7 @@ function checkLevelUp(m) {
     m.unspentStatPoints = (m.unspentStatPoints ?? 0) + statPointsPerLevel;
     m.pendingLevelUp = true;
 
-    events.push({ name: m.name, level: m.level });
+    events.push({ member: m, level: m.level });
     addLogEntry({ type: 'levelup', target: m.name, level: m.level, time: Date.now() });
   }
   return events;

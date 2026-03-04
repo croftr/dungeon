@@ -549,7 +549,7 @@
     },
     {
         "name": "Oak Staff",
-        "slot": "enable-spell",
+        "slot": "rightHand",
         "attackType": "bash",
         "weaponType": "staff",
         "staminaDrain": 1,
@@ -560,18 +560,18 @@
             "dex": 0.2
         },
         "icon": "/icons/oak_staff.png",
-        "description": "A gnarled wooden staff. Requires one hand, but enables a spell in the offhand.",
+        "description": "A gnarled wooden staff. A reliable melee weapon for wizards who want to bash enemies.",
         "value": 54,
         "weight": 1.5
     },
     {
         "name": "Spellbook",
-        "slot": "spell",
+        "slot": "ammo",
         "attackType": null,
         "baseDamage": null,
         "delay": 4,
         "icon": "/icons/spellbook.png",
-        "description": "An ancient tome. Once equipped, Right-Click it in the paperdoll to select your active spell.",
+        "description": "An ancient tome. Equip it in the ammo slot, then Right-Click it in the paperdoll to select a spell for your hands. Both hands can hold different spells.",
         "value": 360,
         "weight": 1,
         "isSpellBook": true
@@ -616,7 +616,7 @@
         "attackType": "swipe",
         "weaponType": "twoHanded",
         "staminaDrain": 2,
-        "baseDamage": 30,
+        "baseDamage": 28,
         "delay": 4,
         "statWeights": {
             "str": 0.7,
@@ -650,7 +650,7 @@
         "attackType": "bash",
         "weaponType": "twoHanded",
         "staminaDrain": 2,
-        "baseDamage": 25,
+        "baseDamage": 22,
         "delay": 4,
         "statWeights": {
             "str": 1,

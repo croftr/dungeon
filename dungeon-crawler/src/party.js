@@ -1,5 +1,5 @@
 import { getItemDef } from './items.js';
-import { renderItemIcon, attachTooltipListeners, hideTooltip, useQuickslotPotion } from './equipment.js';
+import { renderItemIcon, attachTooltipListeners, hideTooltip, useQuickslotPotion, rotateLoadout } from './equipment.js';
 import { addLogEntry } from './battle-log.js';
 import { isInCombat, playGoldSound } from './audio.js';
 import { skillsState } from './skills-state.js';
@@ -355,10 +355,6 @@ function refreshMember(m) {
     ? (m.equipment.skill?.name ?? null)
     : null;
 
-  // If the left or right hand holds a Spellbook, visually pretend it's the selected spell for the HUD
-  if (lhName === 'Spellbook' && m.selectedSpell) lhName = m.selectedSpell;
-  if (rhName === 'Spellbook' && m.selectedSpell) rhName = m.selectedSpell;
-
   let lhDef = null;
   let rhDef = null;
   try {
@@ -453,26 +449,30 @@ function refreshMember(m) {
     }
   }
 
-  // ── Quickslot buttons ──
-  [0].forEach(qsi => {
-    const btn = document.getElementById(`qs-${i}-${qsi}`);
-    if (!btn) return;
-    const item = m.quickslots?.[qsi] ?? null;
-    btn.classList.toggle('qs-occupied', !!item);
-    const keyLabels = [[1, 2], [3, 4], [5, 6], [7, 8]];
-    const keyNum = keyLabels[i]?.[qsi] ?? (i * 2 + qsi + 1);
+  // ── Quickslot button (active potion slot) ──
+  const qsBtn = document.getElementById(`qs-${i}-0`);
+  if (qsBtn) {
+    const item = m.quickslots?.[0] ?? null;
+    qsBtn.classList.toggle('qs-occupied', !!item);
+    // Key label is the rotate-loadout key (1-4 per member)
+    const rotateKey = i + 1;
+    const hasAltItems = !!(m.loadoutB?.leftHand || m.loadoutB?.rightHand || m.loadoutB?.potion);
     if (item) {
       const def = getItemDef(item.name);
       const iconSrc = def?.icon ?? null;
       if (iconSrc) {
-        btn.innerHTML = `<img src="${iconSrc}" draggable="false" />`;
+        qsBtn.innerHTML = `<img src="${iconSrc}" draggable="false" /><span class="qs-key">${rotateKey}</span>`;
       } else {
-        btn.innerHTML = `<span class="qs-key" style="font-size:6px">${item.name.substring(0, 3)}</span>`;
+        qsBtn.innerHTML = `<span class="qs-key" style="font-size:6px">${item.name.substring(0, 3)}</span>`;
       }
     } else {
-      btn.innerHTML = `<span class="qs-key">${keyNum}</span>`;
+      qsBtn.innerHTML = `<span class="qs-key">${rotateKey}</span>`;
     }
-  });
+    // Show an indicator dot if loadout B has any items
+    if (hasAltItems) {
+      qsBtn.innerHTML += `<span class="qs-alt-dot" title="Loadout B has items — press ${rotateKey} to rotate"></span>`;
+    }
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -647,24 +647,22 @@ export function initParty() {
       closeTacticsModal();
     }
 
-    // Keys 1–8: quick-use potions for party members
-    // 1/2 → member 0 slots 0/1  |  3/4 → member 1  |  5/6 → member 2  |  7/8 → member 3
-    const quickKeyMap = {
-      '1': [0, 0], '2': [0, 1], '3': [1, 0], '4': [1, 1],
-      '5': [2, 0], '6': [2, 1], '7': [3, 0], '8': [3, 1]
-    };
-    if (!e.ctrlKey && !e.altKey && !e.metaKey && quickKeyMap[e.key]) {
+    // Keys 1–4: rotate loadout for each party member
+    // 1 → member 0 (top-left)  |  2 → member 1 (top-right)
+    // 3 → member 2 (bottom-left)  |  4 → member 3 (bottom-right)
+    const loadoutKeyMap = { '1': 0, '2': 1, '3': 2, '4': 3 };
+    if (!e.ctrlKey && !e.altKey && !e.metaKey && loadoutKeyMap[e.key] !== undefined) {
       const modalOpen = ['equip-overlay', 'tactics-overlay', 'chest-overlay',
         'merchant-overlay', 'main-menu-overlay', 'char-dev-overlay'].some(id => {
           const el = document.getElementById(id);
           return el && window.getComputedStyle(el).display !== 'none';
         });
       if (modalOpen) return;
-      const [memberIdx, slotIdx] = quickKeyMap[e.key];
+      const memberIdx = loadoutKeyMap[e.key];
       const m = party[memberIdx];
       if (m && !m.isEmpty) {
         e.preventDefault();
-        useQuickslotPotion(memberIdx, slotIdx);
+        rotateLoadout(memberIdx);
       }
     }
   });

@@ -7,7 +7,7 @@ import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
 import { initParty, updateParty } from './party.js';
-import { initEquipment } from './equipment.js';
+import { initEquipment, hideDropButton } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables } from './objects.js';
@@ -71,6 +71,8 @@ const start = findCell(CELL_START);
 initPlayer(start.row, start.col, camera);
 
 let hasSeenOgreVideo = false;
+let hasSeenPrepVideo = false;
+let prepVideoTimer = null;
 
 setCallbacks({
   moved() {
@@ -98,6 +100,18 @@ setCallbacks({
       if (!hasSeenOgreVideo && player.gridRow === 6 && player.gridCol === 1) {
         hasSeenOgreVideo = true;
         playOgreVideo();
+      }
+
+      if (prepVideoTimer) {
+        clearTimeout(prepVideoTimer);
+        prepVideoTimer = null;
+      }
+
+      if (!hasSeenPrepVideo && player.gridRow === 13 && player.gridCol === 9) {
+        prepVideoTimer = setTimeout(() => {
+          hasSeenPrepVideo = true;
+          playBattlePrepVideo();
+        }, 2000);
       }
     }
   },
@@ -341,6 +355,53 @@ function finishMummyVideo() {
 
 if (skipMummyBtn) skipMummyBtn.addEventListener('click', finishMummyVideo);
 if (mummyVideo) mummyVideo.addEventListener('ended', finishMummyVideo);
+
+// ─────────────────────────────────────────────
+//  BATTLE PREP VIDEO OVERLAY
+// ─────────────────────────────────────────────
+const battlePrepOverlay = document.getElementById('battle-prep-video-overlay');
+const battlePrepVideo = document.getElementById('battle-prep-video');
+const skipBattlePrepBtn = document.getElementById('skip-battle-prep-btn');
+let _battlePrepCallback = null;
+
+window.playBattlePrepVideo = function (onComplete) {
+  _battlePrepCallback = onComplete;
+  if (!battlePrepOverlay || !battlePrepVideo) {
+    if (_battlePrepCallback) _battlePrepCallback();
+    return;
+  }
+  battlePrepOverlay.classList.remove('hidden');
+
+  setTimeout(() => {
+    battlePrepOverlay.style.opacity = '1';
+    battlePrepVideo.play().catch(e => {
+      console.warn("Battle prep video play failed:", e);
+      finishBattlePrepVideo();
+    });
+  }, 50);
+};
+
+function finishBattlePrepVideo() {
+  if (!battlePrepOverlay) {
+    if (_battlePrepCallback) _battlePrepCallback();
+    return;
+  }
+  battlePrepOverlay.style.opacity = '0';
+
+  setTimeout(() => {
+    battlePrepVideo.pause();
+    battlePrepOverlay.classList.add('hidden');
+    if (_battlePrepCallback) {
+      _battlePrepCallback();
+      _battlePrepCallback = null;
+    }
+    // Remove the option to drop party members after this dramatic event
+    hideDropButton();
+  }, 1500);
+}
+
+if (skipBattlePrepBtn) skipBattlePrepBtn.addEventListener('click', finishBattlePrepVideo);
+if (battlePrepVideo) battlePrepVideo.addEventListener('ended', finishBattlePrepVideo);
 
 // ─────────────────────────────────────────────
 //  MUSIC

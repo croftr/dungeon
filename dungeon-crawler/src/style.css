@@ -4771,3 +4771,209 @@ body.cursor-interact #renderer-canvas {
   border-color: #666;
   color: #aaa;
 }
+/* ─────────────────────────────────────────────────────────────────────────────
+   LOADOUT B — alternate item slots in the inventory paperdoll
+───────────────────────────────────────────────────────────────────────────── */
+#loadout-b-section {
+  margin: 10px auto 0;
+  padding: 8px;
+  border: 1px solid #3a3020;
+  border-radius: 4px;
+  background: rgba(10, 8, 4, 0.5);
+  width: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+#loadout-rotate-btn {
+  background: rgba(50, 35, 10, 0.8);
+  border: 1px solid #7a6a3a;
+  border-radius: 3px;
+  color: #c8a84a;
+  font-family: monospace;
+  font-size: 11px;
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+#loadout-rotate-btn:hover {
+  background: rgba(80, 60, 20, 0.9);
+  border-color: #c8a84a;
+  color: #ffd070;
+}
+
+#loadout-b-slots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.pd-loadout-b-slot {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border: 1px dashed #4a3a1a;
+  border-radius: 3px;
+  background: rgba(15, 12, 5, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  overflow: hidden;
+}
+
+.pd-loadout-b-slot:hover {
+  border-color: #7a6a3a;
+  background: rgba(30, 22, 8, 0.8);
+}
+
+.pd-loadout-b-slot.occupied {
+  border-color: #6a5a2a;
+  border-style: solid;
+  cursor: pointer;
+}
+
+.pd-loadout-b-slot.occupied:hover {
+  border-color: #c8a84a;
+  background: rgba(40, 30, 10, 0.9);
+}
+
+.pd-loadout-b-slot .pd-item {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pd-loadout-b-slot .pd-item img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+}
+
+.lb-slot-label {
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  font-size: 7px;
+  color: #5a4a1a;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.pd-loadout-b-slot.occupied .lb-slot-label {
+  color: #7a6a2a;
+}
+
+/* Alt-loadout indicator dot on HUD quickslot button */
+.quickslot-btn .qs-alt-dot {
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #c8a84a;
+  pointer-events: none;
+}
+
+/* ── Dramatic Level Up Overlay ─────────────────────────────────────────── */
+#dramatic-levelup-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10005;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+.dramatic-levelup-group {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.8) translateY(20px);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.dramatic-levelup-group.dl-show {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+.dramatic-levelup-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(10, 5, 0, 0.85);
+  border: 2px solid #e8c87a;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 0 40px rgba(232, 200, 122, 0.4), inset 0 0 20px rgba(0, 0, 0, 0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+.dramatic-levelup-card::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle, rgba(232, 200, 122, 0.15) 0%, transparent 60%);
+  animation: shine-rotate 6s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+@keyframes shine-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.dramatic-levelup-portrait {
+  width: 120px;
+  height: 120px;
+  border: 2px solid #5a4a30;
+  border-radius: 6px;
+  background: #0d0a06;
+  box-shadow: 0 0 15px rgba(0,0,0,0.8);
+  margin-bottom: 20px;
+  z-index: 1;
+  position: relative;
+}
+
+.dramatic-levelup-text {
+  text-align: center;
+  font-family: Georgia, serif;
+  color: #bbb;
+  font-size: 16px;
+  letter-spacing: 1px;
+  line-height: 1.4;
+  z-index: 1;
+  position: relative;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+.dramatic-levelup-text .dl-name {
+  color: #e8c87a;
+  font-size: 24px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: bold;
+}
+
+.dramatic-levelup-text .dl-level {
+  color: #f0d870;
+  font-size: 20px;
+  font-weight: bold;
+  display: inline-block;
+  margin-top: 8px;
+  text-transform: uppercase;
+}
