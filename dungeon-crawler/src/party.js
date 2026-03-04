@@ -33,7 +33,7 @@ export function removeGold(amount) {
 
 function updateGoldDisplay() {
   const el = document.getElementById('tactics-gold');
-  if (el) el.innerHTML = `<img src="/icons/gold_pile.png" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}`;
+  if (el) el.innerHTML = `<img src="/icons/gold_coins.png" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}`;
 }
 
 export const lastAttackTimes = {};
@@ -513,7 +513,6 @@ function buildTacticsOverlay() {
     <div id="tactics-modal">
       <div id="tactics-header">
         <span>Party Tactics</span>
-        <span id="tactics-gold" style="margin-left:auto; display:flex; align-items:center; font-size:1.1em; color:#ffd700; text-shadow:1px 1px 0 #000;"><img src="/icons/gold_pile.png" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}</span>
         <button id="tactics-close" aria-label="Close">&times;</button>
       </div>
       <div id="tactics-body">
@@ -523,6 +522,7 @@ function buildTacticsOverlay() {
         <div class="tactics-row-label tactics-row-label--back">Back Row &mdash; Ranged only</div>
         <div class="tactics-row" id="tactics-back"></div>
         <p class="tactics-hint">Click a character to select &bull; Click another slot to move them</p>
+        <span id="tactics-gold" style="margin-top:10px; display:flex; justify-content:center; align-items:center; font-size:1.1em; color:#ffd700; text-shadow:1px 1px 0 #000;"><img src="/icons/gold_coins.png" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}</span>
       </div>
     </div>
   `;
