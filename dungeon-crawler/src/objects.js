@@ -753,8 +753,8 @@ export function spawnObjectsForLevel() {
         // rows 2, 3 & 4 all open together so mummies can't be funnelled.
         addPortcullis(objectsGroup, gltfLoader, 16, 2, Math.PI / 2);
         addPortcullis(objectsGroup, gltfLoader, 16, 3, Math.PI / 2);
-        // Exit Portal (Escape) at the end of the dungeon
-        addPortal(objectsGroup, gltfLoader, 1, 22, -1, 0, 0, 0);
+        // Portal to Level 3 (The Abyssal Crypts) at the end of the dungeon
+        addPortal(objectsGroup, gltfLoader, 1, 22, 3, 0, 0, 0);
 
     } else if (level === 2) {
         // Portal back to Level 1.
@@ -773,10 +773,64 @@ export function spawnObjectsForLevel() {
         // Keyhole next to the portcullis on the West wall (moved 1.0 grid squares back for accessibility)
         addKeyhole(objectsGroup, gltfLoader, 5, 8, Math.PI / 2, -0.85, -2.0);
     } else if (level === 3) {
-        // Portal back to Level 2.
-        // Start position in level 3 is [5, 1], against the West wall (col 0)
-        // Math.PI/2 faces East (into the room)
-        addPortal(objectsGroup, gltfLoader, 1, 5, 2, Math.PI / 2, -0.85, 0);
+        // ── Portals ──────────────────────────────────────────────────────────
+        // Return portal to Level 1 — near start (row 1), pushed against north wall
+        addPortal(objectsGroup, gltfLoader, 4, 1, 1, 0, 0, -0.85);
+
+        // Exit portal (game escape) at the far end of the exit corridor
+        addPortal(objectsGroup, gltfLoader, 20, 21, -1, Math.PI, 0, 0.85);
+
+        // ── Chests ───────────────────────────────────────────────────────────
+        // Entry wing chest — south wall of starting room
+        addChest(objectsGroup, gltfLoader, 4, 3, 0, 0.7, [
+            { name: 'Gold Coins', quantity: 100 },
+            'Poison Dagger',
+            'Ring of Dexterity',
+            'Life Essence',
+        ]);
+
+        // Eastern alcove chest — hidden reward for exploration
+        addChest(objectsGroup, gltfLoader, 19, 5, 0, 0.7, [
+            { name: 'Gold Coins', quantity: 200 },
+            'Elven Dagger',
+            'Steel Arrows',
+            'Life Essence',
+            'Life Essence',
+        ]);
+
+        // Southern deep chest — high-value loot near the exit corridor
+        addChest(objectsGroup, gltfLoader, 18, 14, Math.PI, -0.7, [
+            { name: 'Gold Coins', quantity: 150 },
+            'War Hammer',
+            'Adventurer\'s Belt',
+            'Scroll of Fireball',
+            'Scroll of Regeneration',
+        ]);
+
+        // ── Spell Cabinet ────────────────────────────────────────────────────
+        // Mid-dungeon cabinet along the long central corridor
+        addSpellCabinet(objectsGroup, gltfLoader, 11, 12, Math.PI, -0.6, [
+            'Scroll of Heal',
+            'Scroll of Fireball',
+            'Scroll of Cure Poison',
+            'Resist Poison Spellbook',
+        ]);
+
+        // ── Anvil ────────────────────────────────────────────────────────────
+        // Supplies for the journey — against west wall near start
+        addAnvil(objectsGroup, gltfLoader, 3, 8, Math.PI / 2, -0.85, 0, [
+            'Life Essence', 'Life Essence',
+        ]);
+
+        // ── Weapon Rack ──────────────────────────────────────────────────────
+        // Deep southern section, against east wall
+        addWeaponRack(objectsGroup, gltfLoader, 17, 19, Math.PI / 2, 0.85, 0, [
+            'Longbow', 'Mace',
+        ]);
+
+        // ── Crystal Healing Shrine ───────────────────────────────────────────
+        // On the long central corridor — useful mid-run
+        addCrystals(objectsGroup, gltfLoader, 9, 10, 0, 0);
     }
 }
 

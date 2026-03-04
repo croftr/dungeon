@@ -62,9 +62,11 @@ const _FACING_DC = [0, 1, 0, -1];
  * wins (stable, deterministic).
  */
 export function getInRangeMonster() {
+  const currentLevel = window.currentLevel || 1;
   // Collect all passable-reachable adjacent monsters
   const candidates = monsters.filter((m) => {
     if (!m.alive) return false;
+    if ((m.level ?? 1) !== currentLevel) return false;
     const distRow = Math.abs(m.gridRow - player.gridRow);
     const distCol = Math.abs(m.gridCol - player.gridCol);
     if (distRow > 1 || distCol > 1) return false;
@@ -285,19 +287,164 @@ export const monsters = [
     '/monsters/zombie-animation/zombie-attack.mp3', 0.45, 0, 0, 1, null,
     '/monsters/zombie-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/zombie-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+
+  // ── Level 3 – The Abyssal Crypts ─────────────────────────────────────────
+  // Goblin scouts near the entrance
+  inst(D.goblin, 300, 3, 4,
+    '/monsters/goblin-animation/goblin-alert.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/goblin-animation/goblin-attack.wav', 0.45, 0, 0, 3, null,
+    '/monsters/goblin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+
+  inst(D.goblin, 301, 5, 7,
+    '/monsters/goblin-animation/goblin-alert.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/goblin-animation/goblin-attack.wav', 0.45, 0, 0, 3, null,
+    '/monsters/goblin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+
+  inst(D.goblin, 302, 7, 9,
+    '/monsters/goblin-animation/goblin-alert.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/goblin-animation/goblin-attack.wav', 0.45, 0, 0, 3, null,
+    '/monsters/goblin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+
+  // Albino Goblins — middle section, venomous ambushers
+  inst(D.albino_goblin, 310, 8, 10,
+    '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
+    '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    '/monsters/albino_goblin-aimation/albino-goblin-attack.mp3', 0.45, 0, 0, 3, null,
+    '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Walking_withSkin.glb'),
+
+  inst(D.albino_goblin, 311, 9, 12,
+    '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
+    '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    '/monsters/albino_goblin-aimation/albino-goblin-attack.mp3', 0.45, 0, 0, 3, null,
+    '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/albino_goblin-aimation/Meshy_AI_Animation_Walking_withSkin.glb'),
+
+  // Zombies — shambling in the western maze
+  inst(D.zombie, 320, 11, 7,
+    '/monsters/zombie-animation/Meshy_AI_Animation_Idle_3_withSkin.glb',
+    '/monsters/zombie-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/zombie-animation/zombie-attack.mp3', 0.45, 0, 0, 3, null,
+    '/monsters/zombie-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/zombie-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+
+  inst(D.zombie, 321, 12, 9,
+    '/monsters/zombie-animation/Meshy_AI_Animation_Idle_3_withSkin.glb',
+    '/monsters/zombie-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/zombie-animation/zombie-attack.mp3', 0.45, 0, 0, 3, null,
+    '/monsters/zombie-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/zombie-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+
+  inst(D.zombie, 322, 13, 9,
+    '/monsters/zombie-animation/Meshy_AI_Animation_Idle_3_withSkin.glb',
+    '/monsters/zombie-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/zombie-animation/zombie-attack.mp3', 0.45, 0, 0, 3, null,
+    '/monsters/zombie-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/zombie-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+
+  // Mummies — lurking in the dark eastern alcoves
+  inst(D.mummy, 330, 6, 18,
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/mummy-annimation/mummy-attack.mp3', 0.6, 0, 0, 3, null,
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Dead_withSkin.glb',
+    null,
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Walking_withSkin.glb'),
+
+  inst(D.mummy, 331, 7, 18,
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/mummy-annimation/mummy-attack.mp3', 0.6, 0, 0, 3, null,
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Dead_withSkin.glb',
+    null,
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Walking_withSkin.glb'),
+
+  inst(D.mummy, 332, 8, 18,
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/mummy-annimation/mummy-attack.mp3', 0.6, 0, 0, 3, null,
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Dead_withSkin.glb',
+    null,
+    '/monsters/mummy-annimation/Meshy_AI_Animation_Walking_withSkin.glb'),
+
+  // Ghouls — southern catacombs
+  inst(D.ghoul, 340, 15, 13,
+    '/monsters/ghoul-aimation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/ghoul-aimation/Meshy_AI_Animation_Basic_Jump_withSkin.glb',
+    '/monsters/ghoul-aimation/ghoul-attack.mp3', 0.45, 0, 0, 3, null,
+    '/monsters/ghoul-aimation/Meshy_AI_Animation_Dead_withSkin (1).glb'),
+
+  inst(D.ghoul, 341, 17, 8,
+    '/monsters/ghoul-aimation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/ghoul-aimation/Meshy_AI_Animation_Basic_Jump_withSkin.glb',
+    '/monsters/ghoul-aimation/ghoul-attack.mp3', 0.45, 0, 0, 3, null,
+    '/monsters/ghoul-aimation/Meshy_AI_Animation_Dead_withSkin (1).glb'),
+
+  // Orcs — deep south, guarding the exit approach
+  inst(D.orc, 350, 18, 9,
+    '/monsters/orc-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/orc-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/orc-animation/orc-attack.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/orc-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/orc-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+
+  inst(D.orc, 351, 19, 13,
+    '/monsters/orc-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/orc-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/orc-animation/orc-attack.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/orc-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/orc-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+
+  // IceMan — frozen sentinel blocking the exit corridor
+  inst(D.iceman, 360, 21, 10,
+    '/monsters/iceMan-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/iceMan-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/iceMan-animation/iceman-attack.mp3', 0.6, 0, 0, 3, null,
+    '/monsters/iceMan-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/iceMan-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+
+  // Ogre — patrols the long central corridor (row 10), cols 5–17
+  inst(D.ogre, 370, 10, 10,
+    '/monsters/ogre/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/ogre/Meshy_AI_Animation_Attack_withSkin.glb',
+    '/monsters/ogre/ogre.mp3', 0.7, 0, 0, 3,
+    { bounds: { minRow: 10, maxRow: 10, minCol: 5, maxCol: 17 }, speed: 0.6, waitTime: 1.5 },
+    '/monsters/ogre/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/ogre/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+
+  // TreeKin — territorial guardian in the southern maze
+  inst(D.treekin, 380, 16, 3,
+    '/monsters/treekin-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/treekin-animation/Meshy_AI_Animation_mage_soell_cast_withSkin.glb',
+    '/monsters/treekin-animation/treeKin-attack.mp3', 0.45, 0, 0, 3, null,
+    '/monsters/treekin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/treekin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 ];
 
 /** Triggers the mummies to start chasing the player immediately. */
 export function triggerMummyAmbush() {
+  const currentLevel = window.currentLevel || 1;
   monsters.forEach(m => {
-    if (m.name === 'Mummy' && m.alive) {
+    if (m.name === 'Mummy' && m.alive && (m.level ?? 1) === currentLevel) {
       m.engaged = true;
     }
   });
 }
 
 export function isMonsterAt(row, col) {
-  return monsters.some(m => m.alive && m.gridRow === row && m.gridCol === col);
+  const currentLevel = window.currentLevel || 1;
+  return monsters.some(m => m.alive && (m.level ?? 1) === currentLevel && m.gridRow === row && m.gridCol === col);
 }
 
 /**
@@ -308,8 +455,10 @@ export function isMonsterAt(row, col) {
  * that are mid-step.
  */
 function _isCellReserved(row, col, excludeId) {
+  const currentLevel = window.currentLevel || 1;
   return monsters.some(m => {
     if (!m.alive || m.id === excludeId) return false;
+    if ((m.level ?? 1) !== currentLevel) return false;
     if (m.gridRow === row && m.gridCol === col) return true;
     if (m._cs?.moving && m._cs.targetRow === row && m._cs.targetCol === col) return true;
     if (m._ps?.moving && m._ps.targetRow === row && m._ps.targetCol === col) return true;
