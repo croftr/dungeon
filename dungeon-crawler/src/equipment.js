@@ -3605,6 +3605,7 @@ function attachCharDevListeners() {
   // Stat Adjustments — uses unspentStatPoints and statBonuses
   document.querySelectorAll('#cd-char-stats .stat-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       if (activeCharDevIndex === null) return;
       const statName = e.target.dataset.stat;
       const delta = parseInt(e.target.dataset.delta, 10);
@@ -3637,7 +3638,8 @@ function attachCharDevListeners() {
   // Confirm Level Up — locks in skill choice and stat allocation
   const confirmBtn = document.getElementById('char-dev-confirm');
   if (confirmBtn) {
-    confirmBtn.addEventListener('click', () => {
+    confirmBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       if (activeCharDevIndex === null) return;
       const m = party[activeCharDevIndex];
       if (!m || m.isEmpty || !m.pendingLevelUp) return;
