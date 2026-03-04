@@ -99,7 +99,7 @@ function showDramaticLevelUp(levelUps) {
     setTimeout(() => {
       container.remove();
     }, 1000); // Wait for fade out transition
-  }, 8000); // Doubled from 4000 to 8000
+  }, 6000);
 }
 
 /**
