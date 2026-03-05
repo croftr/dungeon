@@ -18,7 +18,7 @@ import {
   MONSTER_BASE_ATTACK, RESILIENCE_DAMAGE_FACTOR,
   SHIELD_BASH_STUN_CHANCE, SHIELD_BASH_STUN_DURATION_MS,
 } from './combat-rules.js';
-import { setInCombat, clearCombat, playCritSound, playActionSound, playHitSound, isInCombat } from './audio.js';
+import { setInCombat, clearCombat, playCritSound, playActionSound, playHitSound, playPartyHitSound, isInCombat } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { resetBattleStats, recordDamageDealt, recordDamageTaken, showBattleStatsIcon } from './battle-stats.js';
 import { getItemDef } from './items.js';
@@ -194,7 +194,7 @@ export const monsters = [
   inst(D.skeletonWarrior, 110, 10, 21,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    null, 0.5, 0, 0, 1, null,
+    '/monsters/skeleton-animation/skeleton-attack.mp3', 0.5, 0, 0, 1, null,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
@@ -203,7 +203,7 @@ export const monsters = [
   inst(D.minotaur, 111, 11, 22,
     '/monsters/minotaur/Meshy_AI_Animation_Idle_03_withSkin.glb',
     '/monsters/minotaur/Meshy_AI_Animation_Weapon_Combo_withSkin.glb',
-    null, 0.6, 0, 0, 1, null,
+    '/monsters/minotaur/minator-attack.mp3', 0.6, 0, 0, 1, null,
     '/monsters/minotaur/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/minotaur/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/minotaur/Meshy_AI_Animation_Walking_withSkin.glb'),
@@ -1511,6 +1511,7 @@ function _applyMonsterDamage(monster) {
 
   setHp(target.id, target.hp - damage);
   flashPortraitHit(target.id);
+  playPartyHitSound();
   if (isCrit) playCritSound('bash');
 
   // Track damage taken for battle summary

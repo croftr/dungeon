@@ -211,6 +211,27 @@ export async function playHitSound() {
   }
 }
 
+export async function playPartyHitSound() {
+  const buffer = await getBuffer('/sounds/actions/party-hit.mp3');
+  if (!buffer) return;
+
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.7;
+
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playPartyHitSound failed:', err);
+  }
+}
+
 export async function playGoldSound() {
   const buffer = await getBuffer('/sounds/items/gold-coins.mp3');
   if (!buffer) return;
