@@ -621,6 +621,12 @@ export function initObjects(scene, camera) {
         alchemyOverlayEl.addEventListener('click', (e) => e.stopPropagation());
     }
 
+    // Ditto for char dev overlay
+    const charDevOverlayEl = document.getElementById('char-dev-overlay');
+    if (charDevOverlayEl) {
+        charDevOverlayEl.addEventListener('click', (e) => e.stopPropagation());
+    }
+
     // Ditto for anvil overlay
     const anvilOverlayEl = document.getElementById('anvil-overlay');
     if (anvilOverlayEl) {
