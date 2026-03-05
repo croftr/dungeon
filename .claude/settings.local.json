@@ -17,7 +17,31 @@
       "Bash(ls:*)",
       "Bash(npx vite build)",
       "Bash(node:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(find /c/Users/rob/projects/dungeon/dungeon-crawler/public/videos -type f -exec ls -lh {} ;)",
+      "Bash(find /c/Users/rob/projects/dungeon/dungeon-crawler/public/heros -type f -exec ls -lh {} ;)",
+      "Bash(find /c/Users/rob/projects/dungeon/dungeon-crawler/public/icons -type f -exec ls -lh {} ;)",
+      "Bash(find /c/Users/rob/projects/dungeon/dungeon-crawler/public/items -type f -exec ls -lh {} ;)",
+      "Bash(find /c/Users/rob/projects/dungeon/dungeon-crawler/public/monsters -type f -exec ls -lh {} ;)",
+      "Bash(find /c/Users/rob/projects/dungeon/dungeon-crawler/public/npcs -type f -exec ls -lh {} ;)",
+      "Bash(find /c/Users/rob/projects/dungeon/dungeon-crawler/public/skills -type f -exec ls -lh {} ;)",
+      "Bash(find /c/Users/rob/projects/dungeon/dungeon-crawler/public/sounds -type f -exec ls -lh {} ;)",
+      "Bash(wc -l /c/Users/rob/projects/dungeon/dungeon-crawler/src/data/*.json)",
+      "Bash(find \"C:\\\\Users\\\\rob\\\\projects\\\\dungeon\\\\dungeon-crawler\" -name \"*.glb\" -type f -exec ls -lh {} ;)",
+      "Bash(find \"C:\\\\Users\\\\rob\\\\projects\\\\dungeon\\\\dungeon-crawler\" -name \"*.glb\" -type f -exec du -ch {} ;)",
+      "Bash(sort -k5 -rh)",
+      "Bash(gltf-pipeline -i \"/c/Users/rob/projects/dungeon/dungeon-crawler/public/items/chest1.glb\" -o \"/c/Users/rob/projects/dungeon/dungeon-crawler/public/items/chest1-draco-test.glb\" --draco.compressionLevel 10)",
+      "Bash(while read f)",
+      "Bash(do)",
+      "Bash(echo \"Compressing: $f\")",
+      "Bash(gltf-pipeline -i \"$f\" -o \"$f\" --draco.compressionLevel 10)",
+      "Bash(done)",
+      "Bash(find \"/c/Users/rob/projects/dungeon/dungeon-crawler/public\" -name \"*.glb\" -exec du -sb {} +)",
+      "Bash(gltf-pipeline -i \"/c/Users/rob/projects/dungeon/dungeon-crawler/public/items/chest1.glb\" -o \"/c/Users/rob/projects/dungeon/dungeon-crawler/public/items/chest1-decompressed-test.glb\")",
+      "Bash(gltf-transform decompress \"/c/Users/rob/projects/dungeon/dungeon-crawler/public/items/chest1.glb\" \"/c/Users/rob/projects/dungeon/dungeon-crawler/public/items/chest1-decompressed-test.glb\")",
+      "Bash(gltf-transform --help)",
+      "Bash(gltf-transform draco --help)",
+      "Bash(C:/Users/rob/projects/dungeon/dungeon-crawler/src/style.css:*)"
     ]
   }
 }

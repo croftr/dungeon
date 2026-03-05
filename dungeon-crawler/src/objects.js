@@ -130,19 +130,34 @@ export function initObjects(scene, camera) {
         for (let hit of intersects) {
             let obj = hit.object;
             if (obj.userData.isButton) {
-                // Check if player is facing the wall at (8, 8) from (8, 7)
-                if (isInFrontOfPlayer(8, 8, 1)) {
-                    // Small button press animation
-                    new Tween(obj.position)
-                        .to({ x: 0.01 }, 100)
-                        .easing(Easing.Quadratic.Out)
-                        .chain(new Tween(obj.position).to({ x: 0.04 }, 100).easing(Easing.Quadratic.In))
-                        .start();
-                    // Hardcoded portcullis open
-                    const p = objects.find(o => o.name === 'Portcullis' && o.gridRow === 7 && o.gridCol === 7);
-                    if (p) openPortcullis(p);
+                if (obj.userData.target === 'escape_mummy_room') {
+                    // Check if player is facing the wall at (3, 21) from (3, 20)
+                    if (isInFrontOfPlayer(3, 21, 1)) {
+                        new Tween(obj.position)
+                            .to({ x: -0.01 }, 100)
+                            .easing(Easing.Quadratic.Out)
+                            .chain(new Tween(obj.position).to({ x: -0.04 }, 100).easing(Easing.Quadratic.In))
+                            .start();
+                        const trapDoor = objects.find(o => o.name === 'Portcullis' && o.gridRow === 1 && o.gridCol === 10);
+                        if (trapDoor) openPortcullis(trapDoor);
+                    } else {
+                        showMessage("You can't reach that from here.");
+                    }
                 } else {
-                    showMessage("You can't reach that from here.");
+                    // Check if player is facing the wall at (8, 8) from (8, 7)
+                    if (isInFrontOfPlayer(8, 8, 1)) {
+                        // Small button press animation
+                        new Tween(obj.position)
+                            .to({ x: 0.01 }, 100)
+                            .easing(Easing.Quadratic.Out)
+                            .chain(new Tween(obj.position).to({ x: 0.04 }, 100).easing(Easing.Quadratic.In))
+                            .start();
+                        // Hardcoded portcullis open
+                        const p = objects.find(o => o.name === 'Portcullis' && o.gridRow === 7 && o.gridCol === 7);
+                        if (p) openPortcullis(p);
+                    } else {
+                        showMessage("You can't reach that from here.");
+                    }
                 }
                 break;
             } else if (obj.userData.isChest) {
@@ -434,6 +449,10 @@ export function initObjects(scene, camera) {
                 objects
                     .filter(o => o.name === 'Portcullis' && o.gridCol === 16 && o.gridRow >= 2 && o.gridRow <= 4)
                     .forEach(p => openPortcullis(p, true));
+
+                // Close the entrance portcullis to trap the players
+                const trapDoor = objects.find(o => o.name === 'Portcullis' && o.gridRow === 1 && o.gridCol === 10);
+                if (trapDoor) closePortcullis(trapDoor);
 
                 if (window.playMummyVideo) {
                     window.playMummyVideo();
@@ -810,10 +829,38 @@ export function spawnObjectsForLevel() {
         // Party Confirm NPC
         addPartyConfirmNPC(objectsGroup, gltfLoader, 9, 13, Math.PI, -1, 0);
 
+        // Blocking portcullis at the entrance of the mummy area (starts open)
+        addPortcullis(objectsGroup, gltfLoader, 10, 1, Math.PI / 2, true);
+
         // Three-wide portcullis on the far side of the 5x5 room —
         // rows 2, 3 & 4 all open together so mummies can't be funnelled.
         addPortcullis(objectsGroup, gltfLoader, 16, 2, Math.PI / 2);
         addPortcullis(objectsGroup, gltfLoader, 16, 3, Math.PI / 2);
+        // Wait, where is 16, 4?
+        addPortcullis(objectsGroup, gltfLoader, 16, 4, Math.PI / 2);
+
+        // Button to escape mummy room
+        const buttonContainerMummy = new THREE.Group();
+        const plateGeoMummy = new THREE.BoxGeometry(0.05, 0.3, 0.2);
+        const plateMatMummy = new THREE.MeshLambertMaterial({ color: 0x443322 });
+        const plateMummy = new THREE.Mesh(plateGeoMummy, plateMatMummy);
+        buttonContainerMummy.add(plateMummy);
+
+        const btnGeoMummy = new THREE.BoxGeometry(0.08, 0.12, 0.12);
+        const btnMatMummy = new THREE.MeshLambertMaterial({ color: 0xaa2222 });
+        const btnMummy = new THREE.Mesh(btnGeoMummy, btnMatMummy);
+        btnMummy.position.x = -0.04;
+        btnMummy.userData = { isButton: true, target: 'escape_mummy_room', targetRow: 3, targetCol: 21 };
+        interactables.push(btnMummy);
+        buttonContainerMummy.add(btnMummy);
+
+        // Col 21 wall facing west. 
+        buttonContainerMummy.position.set(21 * CELL - 1.0, 1.25, 3 * CELL);
+        objectsGroup.add(buttonContainerMummy);
+
+        // Weapon rack at the end of the new dead-end passage
+        addWeaponRack(objectsGroup, gltfLoader, 22, 4, Math.PI / 2, 0.65, 0, []);
+
         // Portal to Level 3 (The Abyssal Crypts) at the end of the dungeon
         addPortal(objectsGroup, gltfLoader, 1, 22, 3, 0, 0, 0);
 
@@ -895,7 +942,7 @@ export function spawnObjectsForLevel() {
     }
 }
 
-function addPortcullis(scene, loader, col, row, rotY = 0) {
+function addPortcullis(scene, loader, col, row, rotY = 0, startOpen = false) {
     const portcullis = {
         name: 'Portcullis',
         path: '/items/Meshy_AI_Iron_Portcullis_0221184348_texture.glb',
@@ -903,12 +950,12 @@ function addPortcullis(scene, loader, col, row, rotY = 0) {
         gridCol: col,
         x: col * CELL,
         z: row * CELL,
-        isOpen: false
+        isOpen: startOpen
     };
     loader.load(portcullis.path, (gltf) => {
         const model = gltf.scene;
         model.scale.set(1.15, 0.9, 1.15);
-        model.position.set(portcullis.x, 1.1, portcullis.z);
+        model.position.set(portcullis.x, startOpen ? 3.3 : 1.1, portcullis.z);
         model.rotation.y = rotY;
         scene.add(model);
         portcullis.mesh = model;
@@ -1354,6 +1401,24 @@ export function openPortcullis(p, skipEverything = false) {
             // Update map passability
             dungeonMap[p.gridRow][p.gridCol] = CELL_FLOOR;
         })
+        .start();
+}
+
+export function closePortcullis(p, skipEverything = false) {
+    if (!p.isOpen) return;
+    p.isOpen = false;
+    if (!skipEverything) {
+        showMessage("A portcullis slams shut!");
+        playGateOpeningSound();
+    }
+
+    // Update map passability immediately to block movement
+    dungeonMap[p.gridRow][p.gridCol] = 4; // CELL_PORTCULLIS
+
+    // Animate mesh down
+    new Tween(p.mesh.position, tweenGroup)
+        .to({ y: 1.1 }, 1000)
+        .easing(Easing.Quadratic.In)
         .start();
 }
 

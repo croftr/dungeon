@@ -8,5 +8,6 @@
       "cwd": "C:\\Users\\rob\\projects\\dungeon\\dungeon-crawler",
       "port": 5174
     }
-  ]
+  ],
+  "autoVerify": false
 }
