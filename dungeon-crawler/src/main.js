@@ -2,12 +2,12 @@ import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import { buildLevel, findCell, CELL_START, changeMapArray, level1Map, level2Map, level3Map, cellToWorld } from './map.js';
-import { initPlayer, initInput, setCallbacks, tweenGroup, player } from './player.js';
+import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES } from './player.js';
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
-import { initParty, updateParty } from './party.js';
-import { initEquipment, hideDropButton } from './equipment.js';
+import { initParty, updateParty, party, setPartyGold, refreshPartyCards } from './party.js';
+import { initEquipment, hideDropButton, updateEffectiveStats } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables } from './objects.js';
@@ -15,6 +15,7 @@ import { startMusic, updateAudio, setAmbientLevel, setZoneMusic } from './audio.
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
+import { consumePendingLoad } from './save-game.js';
 import { initQuarks, updateQuarks } from './quarks-intro.js';
 
 import './style.css';
@@ -534,4 +535,47 @@ window.addEventListener('mousemove', (e) => {
 
 console.log('%c Grid Dungeon Crawler ', 'background:#333;color:#e8c87a;font-size:14px;padding:4px 8px;');
 console.log('Map: 0=floor 1=wall 2=start 3=exit | Controls: W/S=move  Q/E=turn  A/D=strafe  Arrows=move+turn');
+
+// ─────────────────────────────────────────────
+//  SAVE GAME — RESTORE ON LOAD
+// ─────────────────────────────────────────────
+(function _checkPendingLoad() {
+  const save = consumePendingLoad();
+  if (!save) return;
+
+  // 1. Restore party members
+  for (let i = 0; i < 4; i++) {
+    const src = save.party[i];
+    const dest = party[i];
+    for (const k of Object.keys(dest)) delete dest[k];
+    Object.assign(dest, JSON.parse(JSON.stringify(src)));
+    dest.cooldownTimers = {};
+    if (!dest.isEmpty) updateEffectiveStats(dest);
+  }
+
+  // 2. Restore gold
+  setPartyGold(save.partyGold ?? 0);
+
+  // 3. Level — load if different from default (1)
+  if (save.currentLevel && save.currentLevel !== window.currentLevel) {
+    window.loadLevel(save.currentLevel);
+  }
+
+  // 4. Player position
+  player.gridRow = save.player.gridRow;
+  player.gridCol = save.player.gridCol;
+  player.facing  = save.player.facing;
+  const w = cellToWorld(player.gridRow, player.gridCol);
+  camera.position.set(w.x, w.y, w.z);
+  camera.rotation.order = 'YXZ';
+  camera.rotation.y = FACING_ANGLES[player.facing];
+
+  // 5. Refresh HUD
+  refreshPartyCards();
+  drawMinimap();
+  updateStatus();
+
+  // Skip the intro overlay so the player is dropped straight into the game
+  finishIntro();
+})();
 

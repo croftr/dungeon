@@ -299,7 +299,13 @@ let currentMusicIndex = 0;
 const MUSIC_TRACKS_BY_LEVEL = {
   1: ['/sounds/back1.mp3', '/sounds/back2.mp3'],
   2: ['/sounds/backing/level-2.mp3'],
-  3: ['/sounds/backing/level-2.mp3'],
+  3: ['/sounds/backing/minotaur-level.mp3'],
+};
+
+// Per-track volume overrides — default for all tracks is 0.3
+const TRACK_VOLUME = {
+  '/sounds/backing/minotaur-level.mp3': 0.6,
+  '/sounds/backing/battle.mp3': 0.15,
 };
 let _ambientLevel = 1;
 const BATTLE_TRACK = '/sounds/backing/battle.mp3';
@@ -680,7 +686,7 @@ async function _playTrack(url, loop, gen) {
   source.loop = loop;
 
   const gainNode = ctx.createGain();
-  gainNode.gain.value = 0.3;
+  gainNode.gain.value = TRACK_VOLUME[url] ?? 0.3;
 
   source.connect(gainNode);
   gainNode.connect(ctx.destination);

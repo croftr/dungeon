@@ -265,6 +265,35 @@ body {
   font-size: 12px;
 }
 
+.mm-item--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.mm-item--disabled:hover {
+  color: #bbb;
+  border-color: rgba(232, 200, 122, 0.25);
+  background: none;
+}
+
+.mm-toast {
+  font-size: 12px;
+  color: #7ec87e;
+  text-align: center;
+  padding: 5px 0 2px;
+  letter-spacing: 0.5px;
+  min-height: 22px;
+  transition: opacity 0.3s;
+}
+
+.mm-toast--hidden {
+  opacity: 0;
+}
+
+.mm-toast--error {
+  color: #c87e7e;
+}
+
 /* Status bar — flows naturally below minimap inside #top-right */
 #status {
   color: #aaa;

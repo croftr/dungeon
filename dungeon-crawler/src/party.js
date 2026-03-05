@@ -31,6 +31,11 @@ export function removeGold(amount) {
   updateGoldDisplay();
 }
 
+export function setPartyGold(amount) {
+  partyGold = Math.max(0, amount);
+  updateGoldDisplay();
+}
+
 function updateGoldDisplay() {
   const el = document.getElementById('tactics-gold');
   if (el) el.innerHTML = `<img src="/icons/gold_coins.png" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}`;

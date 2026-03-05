@@ -303,21 +303,21 @@ export const monsters = [
   inst(D.skeletonWarrior, 311, 3, 2,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/skeleton-animation/skeleton-attack.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
   inst(D.skeletonWarrior, 312, 3, 3,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/skeleton-animation/skeleton-attack.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
   inst(D.skeletonWarrior, 313, 2, 3,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/skeleton-animation/skeleton-attack.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
@@ -326,21 +326,21 @@ export const monsters = [
   inst(D.skeletonWarrior, 321, 3, 18,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/skeleton-animation/skeleton-attack.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
   inst(D.skeletonWarrior, 322, 3, 19,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/skeleton-animation/skeleton-attack.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
   inst(D.skeletonWarrior, 323, 2, 18,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/skeleton-animation/skeleton-attack.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
@@ -349,21 +349,21 @@ export const monsters = [
   inst(D.skeletonWarrior, 331, 19, 2,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/skeleton-animation/skeleton-attack.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
   inst(D.skeletonWarrior, 332, 19, 3,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/skeleton-animation/skeleton-attack.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
   inst(D.skeletonWarrior, 333, 20, 3,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/skeleton-animation/skeleton-attack.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
@@ -372,21 +372,21 @@ export const monsters = [
   inst(D.skeletonWarrior, 341, 19, 18,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/skeleton-animation/skeleton-attack.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
   inst(D.skeletonWarrior, 342, 19, 19,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/skeleton-animation/skeleton-attack.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
   inst(D.skeletonWarrior, 343, 20, 18,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/skeleton-animation/skeleton-attack.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
@@ -1357,9 +1357,17 @@ export function triggerMonsterAttack(monsterId) {
     fromAction.crossFadeTo(m.actions.attack, 0.2, true);
 
     if (m.attackSound) {
-      const audio = new Audio(m.attackSound);
-      audio.volume = 0.6;
-      audio.play().catch(e => console.warn('Audio play prevented:', e));
+      const _playAttackSound = () => {
+        const audio = new Audio(m.attackSound);
+        audio.volume = 0.6;
+        audio.play().catch(e => console.warn('Audio play prevented:', e));
+      };
+      _playAttackSound();
+      // Skeleton Warrior: play the sound a second time at the end of the animation
+      if (m.name === 'Skeleton Warrior' && m.actions.attack) {
+        const clipDuration = m.actions.attack.getClip().duration;
+        setTimeout(_playAttackSound, Math.max(0, (clipDuration - 0.15) * 1000));
+      }
     }
   }
 

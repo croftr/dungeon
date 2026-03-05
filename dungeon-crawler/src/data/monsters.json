@@ -20,6 +20,14 @@
       {
         "item": "Poison Vial",
         "chance": 0.40
+      },
+      {
+        "item": "Cloth Trousers",
+        "chance": 0.05
+      },
+      {
+        "item": "Shawl",
+        "chance": 0.05
       }
     ]
   },
@@ -44,6 +52,14 @@
       {
         "item": "Poison Vial",
         "chance": 0.40
+      },
+      {
+        "item": "Worn Boots",
+        "chance": 0.05
+      },
+      {
+        "item": "Leather Belt",
+        "chance": 0.05
       }
     ]
   },
@@ -74,6 +90,10 @@
       {
         "item": "Poison Vial",
         "chance": 0.40
+      },
+      {
+        "item": "Travelling Cloak",
+        "chance": 0.05
       }
     ]
   },
@@ -104,6 +124,14 @@
       {
         "item": "Poison Vial",
         "chance": 0.40
+      },
+      {
+        "item": "Leather Cap",
+        "chance": 0.08
+      },
+      {
+        "item": "Leather Gloves",
+        "chance": 0.08
       }
     ]
   },
@@ -124,6 +152,14 @@
       {
         "item": "Life Essence",
         "chance": 0.50
+      },
+      {
+        "item": "Padded Vest",
+        "chance": 0.1
+      },
+      {
+        "item": "Leather Boots",
+        "chance": 0.1
       }
     ]
   },
@@ -154,6 +190,10 @@
       {
         "item": "Poison Vial",
         "chance": 0.40
+      },
+      {
+        "item": "Cloth Trousers",
+        "chance": 0.05
       }
     ]
   },
@@ -180,6 +220,10 @@
       {
         "item": "Life Essence",
         "chance": 0.50
+      },
+      {
+        "item": "Shawl",
+        "chance": 0.1
       }
     ]
   },
@@ -206,6 +250,10 @@
       {
         "item": "Life Essence",
         "chance": 0.50
+      },
+      {
+        "item": "Travelling Cloak",
+        "chance": 0.05
       }
     ]
   },
@@ -230,6 +278,10 @@
       {
         "item": "Life Berry",
         "chance": 0.70
+      },
+      {
+        "item": "Worn Boots",
+        "chance": 0.05
       }
     ]
   },
@@ -258,6 +310,14 @@
       {
         "item": "Bronze Key",
         "chance": 1
+      },
+      {
+        "item": "Travelling Cloak",
+        "chance": 0.2
+      },
+      {
+        "item": "Leather Cap",
+        "chance": 0.2
       }
     ]
   },
@@ -282,6 +342,14 @@
       {
         "item": "Life Berry",
         "chance": 0.5
+      },
+      {
+        "item": "Leather Belt",
+        "chance": 0.1
+      },
+      {
+        "item": "Padded Vest",
+        "chance": 0.1
       }
     ],
     "onHitEffects": [
@@ -327,6 +395,14 @@
       {
         "item": "Life Berry",
         "chance": 1
+      },
+      {
+        "item": "Leather Boots",
+        "chance": 0.5
+      },
+      {
+        "item": "Leather Belt",
+        "chance": 0.5
       }
     ],
     "onHitEffects": [

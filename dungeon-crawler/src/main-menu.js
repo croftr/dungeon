@@ -3,6 +3,8 @@
 //  Contains sub-views; currently just "Controls" (key map).
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { saveGame, loadGame, hasSaveGame, getSaveInfo } from './save-game.js';
+
 let _isOpen = false;
 
 export function initMainMenu() {
@@ -28,6 +30,34 @@ function _anyOverlayOpen() {
   });
 }
 
+let _toastTimer = null;
+
+function _showToast(msg, isError = false) {
+  const toast = document.getElementById('mm-toast');
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.className = 'mm-toast' + (isError ? ' mm-toast--error' : '');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { toast.className = 'mm-toast mm-toast--hidden'; }, 2500);
+}
+
+function _refreshLoadBtn() {
+  const btn  = document.getElementById('mm-load-btn');
+  const info = getSaveInfo();
+  if (!btn) return;
+  if (info) {
+    const d = new Date(info.savedAt);
+    const stamp = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    btn.textContent = `Load Game  (${stamp})`;
+    btn.disabled = false;
+    btn.classList.remove('mm-item--disabled');
+  } else {
+    btn.textContent = 'Load Game';
+    btn.disabled = true;
+    btn.classList.add('mm-item--disabled');
+  }
+}
+
 // ── DOM ───────────────────────────────────────────────────────────────────────
 
 function _buildModal() {
@@ -40,6 +70,9 @@ function _buildModal() {
       <!-- Main view -->
       <div id="mm-main-view">
         <h2 class="mm-title">Menu</h2>
+        <div id="mm-toast" class="mm-toast mm-toast--hidden"></div>
+        <button class="mm-item" id="mm-save-btn">Save Game</button>
+        <button class="mm-item mm-item--disabled" id="mm-load-btn" disabled>Load Game</button>
         <button class="mm-item" id="mm-controls-btn">Controls</button>
       </div>
 
@@ -70,6 +103,17 @@ function _buildModal() {
   // Backdrop click closes
   overlay.addEventListener('click', (e) => { if (e.target === overlay) _close(); });
 
+  document.getElementById('mm-save-btn').addEventListener('click', () => {
+    saveGame();
+    _showToast('Game saved.');
+    _refreshLoadBtn();
+  });
+
+  document.getElementById('mm-load-btn').addEventListener('click', () => {
+    if (!hasSaveGame()) return;
+    loadGame(); // reloads the page
+  });
+
   document.getElementById('mm-controls-btn').addEventListener('click', () => {
     document.getElementById('mm-main-view').classList.add('mm-hidden');
     document.getElementById('mm-controls-view').classList.remove('mm-hidden');
@@ -86,6 +130,7 @@ function _openMenu() {
   document.getElementById('mm-main-view').classList.remove('mm-hidden');
   document.getElementById('mm-controls-view').classList.add('mm-hidden');
   document.getElementById('main-menu-overlay').classList.remove('mm-hidden');
+  _refreshLoadBtn();
   _isOpen = true;
 }
 
