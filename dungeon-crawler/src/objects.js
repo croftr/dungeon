@@ -438,7 +438,7 @@ export function initObjects(scene, camera) {
             e.stopPropagation();
             _mummyGateOpened = true;
 
-            // 1 second delay before the actual gate operation and ambush
+            // 2 second delay before the actual gate operation and ambush
             setTimeout(() => {
                 playGateOpeningSound();
 
@@ -457,14 +457,14 @@ export function initObjects(scene, camera) {
                 if (window.playMummyVideo) {
                     window.playMummyVideo();
                 }
-            }, 1000);
+            }, 2000);
 
-            // Close the modal after the delay + a slight overlap (1000ms + 400ms)
+            // Close the modal after the delay + a slight overlap (2000ms + 400ms)
             // so the player sees the interaction start before the screen clears.
             setTimeout(() => {
                 const overlay = document.getElementById('sarcophagus-overlay');
                 if (overlay) overlay.classList.add('chest-hidden');
-            }, 1400);
+            }, 2400);
         };
     }
 
@@ -745,7 +745,7 @@ export function spawnObjectsForLevel() {
         // New Chest at the end of the long passage
         addChest(objectsGroup, gltfLoader, 7, 1, 0, -0.7, [
             { name: 'Gold Coins', quantity: 50 },
-            'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Dagger', 'Axe', 'Ring of Vigour', 'Mace', 'Ring of Wisdom'
+            'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Ring of Vigour', 'Ring of Wisdom', 'Ring of Dexterity', 'Leather Gloves', 'Cloth Trousers', 'Worn Boots',
         ]);
         // Chest in the Northwest room, tucked into the far northeast corner (against Rows 0 & Col 6)
         addChest(objectsGroup, gltfLoader, 5, 1, Math.PI, -0.65, [
@@ -858,8 +858,10 @@ export function spawnObjectsForLevel() {
         buttonContainerMummy.position.set(21 * CELL - 1.0, 1.25, 3 * CELL);
         objectsGroup.add(buttonContainerMummy);
 
-        // Weapon rack at the end of the new dead-end passage
-        addWeaponRack(objectsGroup, gltfLoader, 22, 4, Math.PI / 2, 0.65, 0, []);
+        // Weapon rack at the end of the new dead-end passage in mummy room
+        addWeaponRack(objectsGroup, gltfLoader, 22, 4, Math.PI / 2, 0.65, 0, [
+            'Elven Dagger', 'Mace', 'Dagger', 'Axe'
+        ]);
 
         // Portal to Level 3 (The Abyssal Crypts) at the end of the dungeon
         addPortal(objectsGroup, gltfLoader, 1, 22, 3, 0, 0, 0);

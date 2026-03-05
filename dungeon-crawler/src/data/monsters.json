@@ -211,7 +211,7 @@
   },
   "treekin": {
     "name": "TreeKin",
-    "hp": 1,
+    "hp": 150,
     "defence": 9,
     "xp": 245,
     "attackSpeed": 1,

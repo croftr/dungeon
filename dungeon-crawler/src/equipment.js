@@ -2129,12 +2129,47 @@ function _openPartyTargetPicker(caster, casterIndex, hand, spellDef) {
       d => d.effectId === 'poison' && performance.now() < d.expiresAt
     );
 
+    const info = document.createElement('div');
+    info.className = 'party-target-info';
+
     const label = document.createElement('span');
     label.className = 'party-target-name';
     label.innerHTML = m.name + (isPoisoned ? ' <span class="party-target-poisoned">☠ Poisoned</span>' : '');
 
+    // HP, MP, SP bars
+    const bars = document.createElement('div');
+    bars.className = 'party-target-bars';
+
+    const hpTrack = document.createElement('div');
+    hpTrack.className = 'bar-track';
+    const hpFill = document.createElement('div');
+    hpFill.className = 'bar-fill bar-hp';
+    hpFill.style.width = Math.max(0, Math.min(100, (m.hp / (m.hpMax || 100)) * 100)) + '%';
+    hpTrack.appendChild(hpFill);
+
+    const mpTrack = document.createElement('div');
+    mpTrack.className = 'bar-track';
+    const mpFill = document.createElement('div');
+    mpFill.className = 'bar-fill bar-mp';
+    mpFill.style.width = Math.max(0, Math.min(100, (m.mp / (m.mpMax || 100)) * 100)) + '%';
+    mpTrack.appendChild(mpFill);
+
+    const spTrack = document.createElement('div');
+    spTrack.className = 'bar-track';
+    const spFill = document.createElement('div');
+    spFill.className = 'bar-fill bar-sp';
+    spFill.style.width = Math.max(0, Math.min(100, ((m.sp ?? 100) / (m.spMax || 100)) * 100)) + '%';
+    spTrack.appendChild(spFill);
+
+    bars.appendChild(hpTrack);
+    bars.appendChild(mpTrack);
+    bars.appendChild(spTrack);
+
+    info.appendChild(label);
+    info.appendChild(bars);
+
     btn.appendChild(canvas);
-    btn.appendChild(label);
+    btn.appendChild(info);
 
     btn.addEventListener('click', () => {
       _closePartyTargetPicker();

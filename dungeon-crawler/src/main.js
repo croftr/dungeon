@@ -72,6 +72,7 @@ initPlayer(start.row, start.col, camera);
 
 let hasSeenOgreVideo = false;
 let hasSeenPrepVideo = false;
+let hasSeenMinotaurVideo = false;
 let prepVideoTimer = null;
 
 setCallbacks({
@@ -104,6 +105,14 @@ setCallbacks({
 
       // Prep video triggers ONLY when confirming the NPC modal now,
       // so we remove the position-based trigger entirely.
+    } else if (window.currentLevel === 3) {
+      const inMinotaurRoom = player.gridRow >= 8 && player.gridRow <= 14
+        && player.gridCol >= 8 && player.gridCol <= 14;
+
+      if (inMinotaurRoom && !hasSeenMinotaurVideo) {
+        hasSeenMinotaurVideo = true;
+        if (window.playMinotaurVideo) window.playMinotaurVideo();
+      }
     }
   },
   reached() {
@@ -395,8 +404,49 @@ if (skipBattlePrepBtn) skipBattlePrepBtn.addEventListener('click', finishBattleP
 if (battlePrepVideo) battlePrepVideo.addEventListener('ended', finishBattlePrepVideo);
 
 // ─────────────────────────────────────────────
-//  MUSIC
+//  MINOTAUR VIDEO OVERLAY
 // ─────────────────────────────────────────────
+const minotaurOverlay = document.getElementById('minotaur-video-overlay');
+const minotaurVideo = document.getElementById('minotaur-video');
+const skipMinotaurBtn = document.getElementById('skip-minotaur-btn');
+let _minotaurCallback = null;
+
+window.playMinotaurVideo = function (onComplete) {
+  _minotaurCallback = onComplete;
+  if (!minotaurOverlay || !minotaurVideo) {
+    if (_minotaurCallback) _minotaurCallback();
+    return;
+  }
+  minotaurOverlay.classList.remove('hidden');
+
+  setTimeout(() => {
+    minotaurOverlay.style.opacity = '1';
+    minotaurVideo.play().catch(e => {
+      console.warn("Minotaur video play failed:", e);
+      finishMinotaurVideo();
+    });
+  }, 50);
+};
+
+function finishMinotaurVideo() {
+  if (!minotaurOverlay) {
+    if (_minotaurCallback) _minotaurCallback();
+    return;
+  }
+  minotaurOverlay.style.opacity = '0';
+
+  setTimeout(() => {
+    minotaurVideo.pause();
+    minotaurOverlay.classList.add('hidden');
+    if (_minotaurCallback) {
+      _minotaurCallback();
+      _minotaurCallback = null;
+    }
+  }, 1500);
+}
+
+if (skipMinotaurBtn) skipMinotaurBtn.addEventListener('click', finishMinotaurVideo);
+if (minotaurVideo) minotaurVideo.addEventListener('ended', finishMinotaurVideo);
 function handleFirstInteraction() {
   startMusic();
   window.removeEventListener('click', handleFirstInteraction);

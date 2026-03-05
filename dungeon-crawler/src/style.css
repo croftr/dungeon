@@ -1198,8 +1198,16 @@ body {
   flex-shrink: 0;
 }
 
-.party-target-name {
+.party-target-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.party-target-name {
+  font-size: 13px;
+  white-space: nowrap;
 }
 
 /* ☠ Poisoned badge inside the picker */
@@ -1209,6 +1217,24 @@ body {
   font-size: 11px;
   color: #6dcc55;
   opacity: 0.9;
+}
+
+.party-target-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  max-width: 120px;
+}
+
+.party-target-bars .bar-track {
+  height: 4px;
+  border: none;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.party-target-bars .bar-fill {
+  box-shadow: none;
 }
 
 /* ── SPELL SELECTION MODAL ── */
