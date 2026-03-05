@@ -23,6 +23,30 @@
       }
     ]
   },
+  "skeletonWarrior": {
+    "name": "Skeleton Warrior",
+    "hp": 100,
+    "defence": 5,
+    "xp": 100,
+    "attackSpeed": 1,
+    "stats": {
+      "strength": 12,
+      "dexterity": 15,
+      "vitality": 8,
+      "intelligence": 5,
+      "resilience": 5
+    },
+    "drops": [
+      {
+        "item": "Life Essence",
+        "chance": 0.50
+      },
+      {
+        "item": "Poison Vial",
+        "chance": 0.40
+      }
+    ]
+  },
   "mummy": {
     "name": "Mummy",
     "hp": 100,
@@ -281,5 +305,35 @@
       "resilience": 10
     },
     "drops": []
+  },
+  "minotaur": {
+    "name": "Minotaur",
+    "hp": 350,
+    "defence": 10,
+    "xp": 1200,
+    "attackSpeed": 1.5,
+    "stats": {
+      "strength": 35,
+      "dexterity": 20,
+      "vitality": 30,
+      "intelligence": 10,
+      "resilience": 25
+    },
+    "drops": [
+      {
+        "item": "Life Essence",
+        "chance": 1
+      },
+      {
+        "item": "Life Berry",
+        "chance": 1
+      }
+    ],
+    "onHitEffects": [
+      {
+        "effectId": "stun",
+        "chance": 0.2
+      }
+    ]
   }
 }

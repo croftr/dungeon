@@ -190,6 +190,24 @@ export const monsters = [
     '/monsters/dummy-annimation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     null, 0.5),
 
+  // Skeleton Warrior for experimentation in the big east room
+  inst(D.skeletonWarrior, 110, 10, 21,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    null, 0.5, 0, 0, 1, null,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+
+  // Minotaur for experimentation in the big east room
+  inst(D.minotaur, 111, 11, 22,
+    '/monsters/minotaur/Meshy_AI_Animation_Idle_03_withSkin.glb',
+    '/monsters/minotaur/Meshy_AI_Animation_Weapon_Combo_withSkin.glb',
+    null, 0.6, 0, 0, 1, null,
+    '/monsters/minotaur/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/minotaur/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/minotaur/Meshy_AI_Animation_Walking_withSkin.glb'),
+
   // Ogre in the new north-west room — now on patrol
   inst(D.ogre, 21, 2, 2,
     '/monsters/ogre/Meshy_AI_Animation_Walking_withSkin.glb',
