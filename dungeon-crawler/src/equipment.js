@@ -1911,12 +1911,19 @@ function renderCharDevModal(memberIndex) {
         p.textContent = 'No skills left to learn.';
         availEl.appendChild(p);
       } else {
-        choosable.forEach(skill => {
+        choosable.forEach((skill, index) => {
           const def = SKILLS_DATA[skill.name];
           const card = document.createElement('div');
           card.className = 'skill-card skill-card--choosable';
           card.dataset.skillName = skill.name;
-          if (m.pendingSkillChoice === skill.name) card.classList.add('skill-card--chosen');
+
+          if (m.pendingSkillChoice === skill.name && m.pendingSkillChoiceIndex === index) {
+            card.classList.add('skill-card--chosen');
+          } else if (m.pendingSkillChoice === skill.name && m.pendingSkillChoiceIndex === undefined) {
+            // Backward compatibility or first click sets the index properly if it was missing
+            m.pendingSkillChoiceIndex = index;
+            card.classList.add('skill-card--chosen');
+          }
 
           renderItemIcon({ icon: skill.icon }, card);
 
@@ -1928,6 +1935,7 @@ function renderCharDevModal(memberIndex) {
 
           card.addEventListener('click', () => {
             m.pendingSkillChoice = skill.name;
+            m.pendingSkillChoiceIndex = index;
             _showSkillDetail(skill, m, card);
             renderCharDevModal(memberIndex);
           });
@@ -3660,6 +3668,7 @@ function attachCharDevListeners() {
       updateEffectiveStats(m);
       m.pendingLevelUp = false;
       m.pendingSkillChoice = null;
+      m.pendingSkillChoiceIndex = undefined;
       playLevelUpConfirmSound();
 
       const messages = [
