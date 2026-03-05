@@ -729,6 +729,35 @@ function addStatue(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) 
     });
 }
 
+function addDecoration(scene, loader, col, row, rotY = 0, modelPath, scale = 0.5, blockCell = true) {
+    if (blockCell) _statueGridCells.add(`${row},${col}`);
+    loader.load(modelPath, (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(scale);
+        model.position.set(col * CELL, 0.5, row * CELL);
+        model.rotation.y = rotY;
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
+            }
+        });
+        scene.add(model);
+    });
+}
+
 
 
 export function spawnObjectsForLevel() {
@@ -890,57 +919,8 @@ export function spawnObjectsForLevel() {
         // Exit portal (game escape) at the far end of the exit corridor
         addPortal(objectsGroup, gltfLoader, 20, 21, -1, Math.PI, 0, 0.85);
 
-        // ── Chests ───────────────────────────────────────────────────────────
-        // Entry wing chest — south wall of starting room
-        addChest(objectsGroup, gltfLoader, 4, 3, 0, 0.7, [
-            { name: 'Gold Coins', quantity: 100 },
-            'Poison Dagger',
-            'Ring of Dexterity',
-            'Life Essence',
-        ]);
-
-        // Eastern alcove chest — hidden reward for exploration
-        addChest(objectsGroup, gltfLoader, 19, 5, 0, 0.7, [
-            { name: 'Gold Coins', quantity: 200 },
-            'Elven Dagger',
-            'Steel Arrows',
-            'Life Essence',
-            'Life Essence',
-        ]);
-
-        // Southern deep chest — high-value loot near the exit corridor
-        addChest(objectsGroup, gltfLoader, 18, 14, Math.PI, -0.7, [
-            { name: 'Gold Coins', quantity: 150 },
-            'War Hammer',
-            'Adventurer\'s Belt',
-            'Scroll of Fireball',
-            'Scroll of Regeneration',
-        ]);
-
-        // ── Spell Cabinet ────────────────────────────────────────────────────
-        // Mid-dungeon cabinet along the long central corridor
-        addSpellCabinet(objectsGroup, gltfLoader, 11, 12, Math.PI, -0.6, [
-            'Scroll of Heal',
-            'Scroll of Fireball',
-            'Scroll of Cure Poison',
-            'Resist Poison Spellbook',
-        ]);
-
-        // ── Anvil ────────────────────────────────────────────────────────────
-        // Supplies for the journey — against west wall near start
-        addAnvil(objectsGroup, gltfLoader, 3, 8, Math.PI / 2, -0.85, 0, [
-            'Life Essence', 'Life Essence',
-        ]);
-
-        // ── Weapon Rack ──────────────────────────────────────────────────────
-        // Deep southern section, against east wall
-        addWeaponRack(objectsGroup, gltfLoader, 17, 19, Math.PI / 2, 0.85, 0, [
-            'Longbow', 'Mace',
-        ]);
-
-        // ── Crystal Healing Shrine ───────────────────────────────────────────
-        // On the long central corridor — useful mid-run
-        addCrystals(objectsGroup, gltfLoader, 9, 10, 0, 0);
+        // Statue in the center of the minotaur room
+        addDecoration(objectsGroup, gltfLoader, 11, 11, 0, '/items/statue1.glb');
     }
 }
 
