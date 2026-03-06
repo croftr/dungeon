@@ -819,7 +819,7 @@
         "name": "Scroll of Heal",
         "type": "spellbook",
         "spellName": "Heal",
-        "requiredInt": 10,
+        "requiredInt": 9,
         "icon": "/icons/scroll_heal.png",
         "description": "A roll of white vellum filled with restorative prayers. Study it to learn Heal. Requires 10 Intelligence.",
         "value": 540,
@@ -829,7 +829,7 @@
         "name": "Scroll of Regeneration",
         "type": "spellbook",
         "spellName": "Regeneration",
-        "requiredInt": 10,
+        "requiredInt": 9,
         "icon": "/icons/scroll_regeneration.png",
         "description": "A scroll smelling of damp earth and fresh moss. Study it to learn Regeneration. Requires 10 Intelligence.",
         "value": 660,
@@ -839,7 +839,7 @@
         "name": "Scroll of Cure Poison",
         "type": "spellbook",
         "spellName": "Cure Poison",
-        "requiredInt": 10,
+        "requiredInt": 9,
         "icon": "/icons/scroll_cure_poison.png",
         "description": "A scroll bearing botanical sketches and purifying incantations. Study it to learn Cure Poison. Requires 10 Intelligence.",
         "value": 480,
@@ -883,5 +883,44 @@
         "value": 3,
         "weight": 0,
         "sellable": false
+    },
+    {
+        "name": "Silver Mace",
+        "slot": "rightHand",
+        "attackType": "bash",
+        "weaponType": "mace",
+        "staminaDrain": 1,
+        "baseDamage": 18,
+        "delay": 2,
+        "statWeights": {
+            "str": 1,
+            "dex": 0
+        },
+        "icon": "/icons/silver_mace.png",
+        "description": "A mace forged from pure silver, blessed with divine power. Grants sanctuary and holy radiance bonuses.",
+        "value": 450,
+        "weight": 2.0,
+        "skillBonuses": {
+            "Sanctuary": 50,
+            "Holy Radiance": 50
+        }
+    },
+    {
+        "name": "Warden's Shield",
+        "blockChance": 25,
+        "slot": "leftHand",
+        "attackType": "shield-bash",
+        "weaponType": "shield",
+        "staminaDrain": 1,
+        "baseDamage": 3,
+        "statWeights": {
+            "str": 1.5,
+            "dex": 0
+        },
+        "icon": "/icons/wardens_shield.png",
+        "description": "A heavy, reinforced shield used by the keepers of the deep. Provides exceptional protection.",
+        "defence": 4,
+        "value": 300,
+        "weight": 4.0
     }
 ]

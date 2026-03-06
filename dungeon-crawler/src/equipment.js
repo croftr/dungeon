@@ -233,7 +233,7 @@ export function extendPartyData() {
     if (!m.skillProgression) m.skillProgression = [];
     if (m.pendingLevelUp === undefined) m.pendingLevelUp = false;
     if (!m.quickslots) m.quickslots = [null];
-    if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null };
+    if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null, skill: null };
     if (m.pendingSkillChoice === undefined) m.pendingSkillChoice = null;
 
     if (m.equipment) {
@@ -395,10 +395,11 @@ function renderModal(memberIndex) {
   });
 
   // ── Loadout B slots ──
-  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null };
+  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null, skill: null };
   const lhbEl = document.getElementById('pd-lhB');
   const rhbEl = document.getElementById('pd-rhB');
   const potbEl = document.getElementById('pd-potB');
+  const skbEl = document.getElementById('pd-skB');
   if (lhbEl) {
     lhbEl.classList.toggle('occupied', !!m.loadoutB.leftHand);
     renderItemIcon(m.loadoutB.leftHand, lhbEl.querySelector('.pd-item') || lhbEl);
@@ -413,6 +414,10 @@ function renderModal(memberIndex) {
   if (potbEl) {
     potbEl.classList.toggle('occupied', !!m.loadoutB.potion);
     renderItemIcon(m.loadoutB.potion, potbEl.querySelector('.pd-item') || potbEl);
+  }
+  if (skbEl) {
+    skbEl.classList.toggle('occupied', !!m.loadoutB.skill);
+    renderItemIcon(m.loadoutB.skill, skbEl.querySelector('.pd-item') || skbEl);
   }
 
   // ── Inventory cells ──
@@ -1110,13 +1115,13 @@ export function useQuickslotPotion(memberIndex, slotIdx) {
 // ─────────────────────────────────────────────
 
 /**
- * Rotates all three loadout slots simultaneously (left hand, right hand, potion).
- * Active ↔ Loadout B. All three swap together — you cannot rotate just one slot.
+ * Rotates all four loadout slots simultaneously (left hand, right hand, potion, skill).
+ * Active ↔ Loadout B. All four swap together — you cannot rotate just one slot.
  */
 export function rotateLoadout(memberIndex) {
   const m = party[memberIndex];
   if (!m || m.isEmpty || m.isDead) return;
-  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null };
+  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null, skill: null };
   if (!m.quickslots) m.quickslots = [null];
 
   const activeLeft = m.equipment.leftHand;
@@ -1124,10 +1129,12 @@ export function rotateLoadout(memberIndex) {
   // For bothHands, rightHand is just a mirror — don't save it separately into loadoutB
   const activeRight = isActiveBothHands ? null : m.equipment.rightHand;
   const activePotion = m.quickslots[0] ?? null;
+  const activeSkill = m.equipment.skill ?? null;
 
   const newLeft = m.loadoutB.leftHand ?? null;
   const newRight = m.loadoutB.rightHand ?? null;
   const newPotion = m.loadoutB.potion ?? null;
+  const newSkill = m.loadoutB.skill ?? null;
 
   // Apply new active loadout
   m.equipment.leftHand = newLeft;
@@ -1137,11 +1144,13 @@ export function rotateLoadout(memberIndex) {
     m.equipment.rightHand = newRight;
   }
   m.quickslots[0] = newPotion;
+  m.equipment.skill = newSkill;
 
   // Store old active into loadout B
   m.loadoutB.leftHand = activeLeft ?? null;
   m.loadoutB.rightHand = activeRight ?? null;
   m.loadoutB.potion = activePotion;
+  m.loadoutB.skill = activeSkill;
 
   updateEffectiveStats(m);
   refreshPartyCards();
@@ -1153,7 +1162,7 @@ export function rotateLoadout(memberIndex) {
 function _assignLoadoutBLeft(memberIndex, invIndex) {
   const m = party[memberIndex];
   if (!m || m.isEmpty) return;
-  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null };
+  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null, skill: null };
   const item = m.inventory[invIndex];
   if (!item) return;
   const def = getItemDef(item.name);
@@ -1179,7 +1188,7 @@ function _assignLoadoutBLeft(memberIndex, invIndex) {
 function _assignLoadoutBRight(memberIndex, invIndex) {
   const m = party[memberIndex];
   if (!m || m.isEmpty) return;
-  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null };
+  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null, skill: null };
   const item = m.inventory[invIndex];
   if (!item) return;
   const def = getItemDef(item.name);
@@ -1200,13 +1209,32 @@ function _assignLoadoutBRight(memberIndex, invIndex) {
 function _assignLoadoutBPotion(memberIndex, invIndex) {
   const m = party[memberIndex];
   if (!m || m.isEmpty) return;
-  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null };
+  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null, skill: null };
   const item = m.inventory[invIndex];
   if (!item) return;
   const displaced = m.loadoutB.potion;
   m.loadoutB.potion = { name: item.name, slot: 'quickslot' };
   m.inventory[invIndex] = displaced;
   showMessage(`${item.name} assigned to Loadout B potion slot.`);
+  renderModal(memberIndex);
+  refreshPartyCards();
+}
+
+/**
+ * Assigns the skill at invIndex to the loadout B skill slot.
+ */
+function _assignLoadoutBSkill(memberIndex, invIndex) {
+  const m = party[memberIndex];
+  if (!m || m.isEmpty) return;
+  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null, skill: null };
+  const item = m.inventory[invIndex];
+  if (!item) return;
+  const def = getItemDef(item.name);
+  if (def?.slot !== 'skill') return;
+  const displaced = m.loadoutB.skill;
+  m.loadoutB.skill = { name: item.name, slot: 'skill', type: def.type, delay: (def.cooldownMs ?? 0) / 1000 };
+  m.inventory[invIndex] = displaced;
+  showMessage(`${item.name} assigned to Loadout B skill slot.`);
   renderModal(memberIndex);
   refreshPartyCards();
 }
@@ -1410,8 +1438,10 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
   // ── Loadout B equip buttons ──
   const lbLeftBtn = document.getElementById('inv-ctx-equip-lb-left');
   const lbRightBtn = document.getElementById('inv-ctx-equip-lb-right');
+  const lbSkillBtn = document.getElementById('inv-ctx-skill-b');
   if (lbLeftBtn) lbLeftBtn.style.display = 'none';
   if (lbRightBtn) lbRightBtn.style.display = 'none';
+  if (lbSkillBtn) lbSkillBtn.style.display = 'none';
 
   if (def?.type && QUICKSLOT_TYPES.includes(def.type)) {
     if (qs1Btn) {
@@ -1477,6 +1507,19 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
       _learnSpell(activeCharIndex, _ctxInvIndex);
       _hideContextMenu();
     };
+  } else if (def?.slot === 'skill') {
+    equipBtn.style.display = 'block';
+    equipBtn.onclick = () => {
+      _equipItem(activeCharIndex, _ctxInvIndex);
+      _hideContextMenu();
+    };
+    if (lbSkillBtn) {
+      lbSkillBtn.style.display = 'block';
+      lbSkillBtn.onclick = () => {
+        _assignLoadoutBSkill(activeCharIndex, _ctxInvIndex);
+        _hideContextMenu();
+      };
+    }
   } else if (def?.slot && def.slot !== 'loot' && def.slot !== 'skill' && def.slot !== 'spell' && def.type !== 'spellbook') {
     equipBtn.style.display = 'block';
     equipBtn.onclick = () => {
@@ -2198,7 +2241,7 @@ function _executePartySpell(caster, casterIndex, hand, spellDef) {
   }
   setMp(caster.id, caster.mp - spellDef.mpCost);
 
-  const timeKey = (hand === 'skill') ? `${casterIndex}-skill` : `${casterIndex}-${hand}`;
+  const timeKey = (hand === 'skill') ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
   lastAttackTimes[timeKey] = performance.now();
 
   if (hand === 'skill') {
@@ -2244,7 +2287,7 @@ function _executePartyMemberSpell(caster, casterIndex, hand, spellDef, target) {
   setMp(caster.id, caster.mp - spellDef.mpCost);
 
   // Record cooldown so the slot greys out normally
-  const timeKey = (hand === 'skill') ? `${casterIndex}-skill` : `${casterIndex}-${hand}`;
+  const timeKey = (hand === 'skill') ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
   lastAttackTimes[timeKey] = performance.now();
 
   if (hand === 'skill') {
@@ -2634,7 +2677,7 @@ function useSkill(memberIndex) {
 
   const def = getItemDef(skill.name);
   if (def && def.delay) {
-    lastAttackTimes[`${memberIndex}-skill`] = performance.now();
+    lastAttackTimes[`${memberIndex}-skill-${skill.name}`] = performance.now();
     _startSkillCooldownUI(memberIndex, performance.now() + (def.delay * 1000));
   }
 
@@ -2666,7 +2709,7 @@ function _useHuntersEye(member, memberIndex) {
   const def = getItemDef(member.equipment.skill.name);
   const delayMs = (def?.delay ?? 60) * 1000;
   _huntersEyeCooldownEnd = now + delayMs;
-  lastAttackTimes[`${memberIndex}-skill`] = now;
+  lastAttackTimes[`${memberIndex}-skill-Hunter's Eye`] = now;
   setHuntersEyeTarget(target.id);
   playSkillSound('hunters-eye');
   triggerHuntersEyeEffect();
@@ -2697,7 +2740,7 @@ function _useEntangle(member, memberIndex) {
   skillsState.entangle.expiresAt = now + ENTANGLE_DURATION_MS;
   skillsState.entangle.magnitude = resolveSkillMagnitude('Entangle', SKILLS_DATA['Entangle'], member);
   _entangleCooldownEnd = now + delayMs;
-  lastAttackTimes[`${memberIndex}-skill`] = now;
+  lastAttackTimes[`${memberIndex}-skill-Entangle`] = now;
 
   playSkillSound('magic');
   triggerEntangleEffect();
@@ -2741,7 +2784,7 @@ function _useSunderArmor(member, memberIndex) {
   skillsState.sunderArmor.expiresAt = now + SUNDER_ARMOR_DURATION_MS;
   skillsState.sunderArmor.magnitude = resolveSkillMagnitude('Sunder Armor', SKILLS_DATA['Sunder Armor'], member);
   _sunderArmorCooldownEnd = now + delayMs;
-  lastAttackTimes[`${memberIndex}-skill`] = now;
+  lastAttackTimes[`${memberIndex}-skill-Sunder Armor`] = now;
 
   playSkillSound('render');
   triggerSunderArmorEffect();
@@ -2784,7 +2827,7 @@ function _useBerserk(member, memberIndex) {
   skillsState.berserk.expiresAt = now + BERSERK_DURATION_MS;
   skillsState.berserk.magnitude = resolveSkillMagnitude('Berserk', SKILLS_DATA['Berserk'], member);
   _berserkCooldownEnd = now + delayMs;
-  lastAttackTimes[`${memberIndex}-skill`] = now;
+  lastAttackTimes[`${memberIndex}-skill-Berserk`] = now;
 
   playSkillSound('berserk');
   triggerBerserkEffect();
@@ -2826,7 +2869,7 @@ function _useWarcry(member, memberIndex) {
   skillsState.warcry.expiresAt = now + WARCRY_DURATION_MS;
   skillsState.warcry.magnitude = resolveSkillMagnitude('Warcry', SKILLS_DATA['Warcry'], member);
   _warcryCooldownEnd = now + delayMs;
-  lastAttackTimes[`${memberIndex}-skill`] = now;
+  lastAttackTimes[`${memberIndex}-skill-Warcry`] = now;
 
   playSkillSound('berserk'); // reuse berserk roar for now
   triggerWarcryEffect();
@@ -2864,7 +2907,7 @@ function _useSanctuary(member, memberIndex) {
   skillsState.sanctuary.expiresAt = now + SANCTUARY_DURATION_MS;
   skillsState.sanctuary.magnitude = resolveSkillMagnitude('Sanctuary', SKILLS_DATA['Sanctuary'], member);
   _sanctuaryCooldownEnd = now + delayMs;
-  lastAttackTimes[`${memberIndex}-skill`] = now;
+  lastAttackTimes[`${memberIndex}-skill-Sanctuary`] = now;
 
   playSkillSound('holy');
   triggerSanctuaryEffect();
@@ -2898,7 +2941,7 @@ function _useHolyRadiance(member, memberIndex) {
   const def = getItemDef(member.equipment.skill.name);
   const delayMs = (def?.delay ?? 120) * 1000;
   _holyRadianceCooldownEnd = now + delayMs;
-  lastAttackTimes[`${memberIndex}-skill`] = now;
+  lastAttackTimes[`${memberIndex}-skill-Holy Radiance`] = now;
 
   const holyRadianceHeal = resolveSkillMagnitude('Holy Radiance', SKILLS_DATA['Holy Radiance'], member);
   let healed = 0;
@@ -2943,7 +2986,7 @@ function _useArcaneLantern(member, memberIndex) {
   skillsState.arcaneLight.active = true;
   skillsState.arcaneLight.expiresAt = now + ARCANE_LANTERN_DURATION_MS;
   _arcaneLanternCooldownEnd = now + delayMs;
-  lastAttackTimes[`${memberIndex}-skill`] = now;
+  lastAttackTimes[`${memberIndex}-skill-Arcane Lantern`] = now;
 
   playSkillSound('magic');
   triggerArcaneLanternEffect();
@@ -2981,7 +3024,7 @@ function _useMinersLight(member, memberIndex) {
   skillsState.arcaneLight.active = true;
   skillsState.arcaneLight.expiresAt = now + ARCANE_LANTERN_DURATION_MS;
   _minersLightCooldownEnd = now + delayMs;
-  lastAttackTimes[`${memberIndex}-skill`] = now;
+  lastAttackTimes[`${memberIndex}-skill-Miners Light`] = now;
 
   playSkillSound('magic');
   triggerArcaneLanternEffect();
@@ -3022,7 +3065,7 @@ function _useWarDance(member, memberIndex) {
   skillsState.warDance.expiresAt = now + WAR_DANCE_DURATION_MS;
   skillsState.warDance.magnitude = resolveSkillMagnitude('War Dance', SKILLS_DATA['War Dance'], member);
   _warDanceCooldownEnd = now + delayMs;
-  lastAttackTimes[`${memberIndex}-skill`] = now;
+  lastAttackTimes[`${memberIndex}-skill-War Dance`] = now;
 
   playSkillSound('berserk');
   triggerWarDanceEffect();
@@ -3065,7 +3108,7 @@ function _useWhirlwind(member, memberIndex) {
   skillsState.whirlwind.expiresAt = now + WHIRLWIND_DURATION_MS;
   skillsState.whirlwind.magnitude = resolveSkillMagnitude('Whirlwind', SKILLS_DATA['Whirlwind'], member);
   _whirlwindCooldownEnds[memberIndex] = now + delayMs;
-  lastAttackTimes[`${memberIndex}-skill`] = now;
+  lastAttackTimes[`${memberIndex}-skill-Whirlwind`] = now;
 
   playSkillSound('berserk');
   triggerWhirlwindEffect();
@@ -3107,7 +3150,7 @@ function _useTrueShot(member, memberIndex) {
   skillsState.trueShot.actorName = member.name;
   skillsState.trueShot.expiresAt = now + TRUE_SHOT_DURATION_MS;
   _trueShotCooldownEnds[memberIndex] = now + delayMs;
-  lastAttackTimes[`${memberIndex}-skill`] = now;
+  lastAttackTimes[`${memberIndex}-skill-True Shot`] = now;
 
   playSkillSound('magic');
   triggerTrueShotEffect();
@@ -3171,7 +3214,7 @@ function _useManaTap(member, memberIndex) {
   const def = getItemDef(member.equipment.skill.name);
   const delayMs = (def?.delay ?? 120) * 1000;
   _manaTapCooldownEnd = now + delayMs;
-  lastAttackTimes[`${memberIndex}-skill`] = now;
+  lastAttackTimes[`${memberIndex}-skill-Mana Tap`] = now;
   setMp(member.id, member.mpMax);
 
   playSkillSound('magic');
@@ -3433,7 +3476,7 @@ function attachOverlayListeners() {
   }
 
   // Loadout B slots — clicking a B slot with an item unequips it back to inventory
-  ['pd-lhB', 'pd-rhB', 'pd-potB'].forEach(id => {
+  ['pd-lhB', 'pd-rhB', 'pd-potB', 'pd-skB'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('click', () => {
@@ -3452,6 +3495,9 @@ function attachOverlayListeners() {
       } else if (lb === 'potion') {
         item = m.loadoutB.potion;
         m.loadoutB.potion = null;
+      } else if (lb === 'skill') {
+        item = m.loadoutB.skill;
+        m.loadoutB.skill = null;
       }
       if (item) {
         const slot = m.inventory.indexOf(null);
@@ -3462,7 +3508,8 @@ function attachOverlayListeners() {
           // Restore on slot if inventory full
           if (lb === 'leftHand') m.loadoutB.leftHand = item;
           else if (lb === 'rightHand') m.loadoutB.rightHand = item;
-          else m.loadoutB.potion = item;
+          else if (lb === 'potion') m.loadoutB.potion = item;
+          else m.loadoutB.skill = item;
           showMessage('Inventory full!');
         }
       }

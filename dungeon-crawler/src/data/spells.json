@@ -26,7 +26,7 @@
         "magnitudeScale": 0.1,
         "magnitudeBonusMode": "flat",
         "delay": 30,
-        "mpCost": 15,
+        "mpCost": 10,
         "icon": "/icons/regeneration.png",
         "description": "A restorative blessing. Once cast, slowly heals the targeted party member for (Intelligence / 10) HP every 2 seconds for 30 seconds.",
         "value": 0,

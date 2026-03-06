@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
-import { createHitSpark } from './particles.js';
+import { createHitSpark, createIceBurst, createNatureBurst } from './particles.js';
 import { CELL, isPassable } from './map.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
@@ -208,15 +208,37 @@ export const monsters = [
     '/monsters/goblin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
 
-  // Additional Goblins spread through Level 1 corridors (avoiding big rooms)
-  inst(D.goblin, 24, 14, 3,
-    '/monsters/goblin-animation/goblin-alert.glb',
-    '/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    '/monsters/goblin-animation/goblin-attack.wav', 0.45, 0, 0, 1, null,
-    '/monsters/goblin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
-    '/monsters/goblin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
-    '/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+  // New Level 1 Monsters
+  inst(D.treekin, 60, 4, 3,
+    '/monsters/treekin-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/treekin-animation/Meshy_AI_Animation_mage_soell_cast_withSkin.glb',
+    '/monsters/treekin-animation/treeKin-attack.mp3', 0.45, 0, 0, 1, null,
+    '/monsters/treekin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/treekin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 
+  inst(D.treekin, 61, 7, 5,
+    '/monsters/treekin-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/treekin-animation/Meshy_AI_Animation_mage_soell_cast_withSkin.glb',
+    '/monsters/treekin-animation/treeKin-attack.mp3', 0.45, 0, 0, 1, null,
+    '/monsters/treekin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/treekin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+
+  inst(D.iceman, 62, 15, 10,
+    '/monsters/iceMan-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/iceMan-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/iceMan-animation/iceman-attack.mp3', 0.6, 0, 0, 1, null,
+    '/monsters/iceMan-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/iceMan-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+
+  inst(D.iceman, 63, 19, 4,
+    '/monsters/iceMan-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/iceMan-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    '/monsters/iceMan-animation/iceman-attack.mp3', 0.6, 0, 0, 1, null,
+    '/monsters/iceMan-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/iceMan-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+
+
+  // Additional Goblins spread through Level 1 corridors (avoiding big rooms)
   inst(D.goblin, 25, 16, 7,
     '/monsters/goblin-animation/goblin-alert.glb',
     '/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
@@ -226,14 +248,6 @@ export const monsters = [
     '/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
 
   inst(D.goblin, 26, 18, 3,
-    '/monsters/goblin-animation/goblin-alert.glb',
-    '/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    '/monsters/goblin-animation/goblin-attack.wav', 0.45, 0, 0, 1, null,
-    '/monsters/goblin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
-    '/monsters/goblin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
-    '/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
-
-  inst(D.goblin, 27, 20, 9,
     '/monsters/goblin-animation/goblin-alert.glb',
     '/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
     '/monsters/goblin-animation/goblin-attack.wav', 0.45, 0, 0, 1, null,
@@ -288,14 +302,13 @@ export const monsters = [
     '/monsters/zombie-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/zombie-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 
-  // Skeleton Warrior in the big east room near the starting room
-  inst(D.skeletonWarrior, 50, 11, 16,
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 1, null,
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+  // PLACE HERE FOR TESTING MONSTERS IN THE BIG EAST ROOM
+  // inst(D.iceman, 50, 11, 16,
+  //   '/monsters/iceMan-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+  //   '/monsters/iceMan-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+  //   '/monsters/iceMan-animation/iceman-attack.mp3', 0.6, 0, 0, 1, null,
+  //   '/monsters/iceMan-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+  //   '/monsters/iceMan-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 
   // ── Level 3 – The Abyssal Crypts ─────────────────────────────────────────
   // Minotaur in the central chamber
@@ -428,6 +441,48 @@ _applyMultiAttacks('Skeleton Warrior', [
     soundTimings: [0.45],
     damageTimings: [0.45],
     weight: 1,
+  },
+]);
+
+_applyMultiAttacks('IceMan', [
+  {
+    name: 'doubleCombo',
+    glb: '/monsters/iceMan-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    sound: '/monsters/iceMan-animation/iceman-attack.mp3',
+    soundTimings: [0.2, 0.6],
+    damageTimings: [0.2, 0.6],
+    weight: 3,
+  },
+  {
+    name: 'iceCast',
+    glb: '/monsters/iceMan-animation/Meshy_AI_Animation_mage_soell_cast_3_withSkin.glb',
+    sound: '/monsters/iceMan-animation/ice-attack.mp3',
+    soundTimings: [0.5],
+    damageTimings: [0.5],
+    weight: 1,
+    specialAttack: true,       // hits all party members
+    specialOnHitEffects: [{ effectId: 'frozen', chance: 0.20 }],
+  },
+]);
+
+_applyMultiAttacks('TreeKin', [
+  {
+    name: 'swing',
+    glb: '/monsters/treekin-animation/attack.glb',
+    sound: '/monsters/treekin-animation/wood-hit.mp3',
+    soundTimings: [0.4],
+    damageTimings: [0.4],
+    weight: 7,
+  },
+  {
+    name: 'natureCast',
+    glb: '/monsters/treekin-animation/Meshy_AI_Animation_mage_soell_cast_withSkin.glb',
+    sound: '/monsters/treekin-animation/treeKin-attack.mp3',
+    soundTimings: [0.5],
+    damageTimings: [0.5],
+    weight: 3,
+    specialAttack: true, // hits all party members
+    specialOnHitEffects: [{ effectId: 'slow', chance: 0.30 }],
   },
 ]);
 
@@ -664,6 +719,8 @@ function _loadMonster(m, scene) {
               soundTimings: atkDef.soundTimings ?? [0],
               damageTimings: atkDef.damageTimings ?? [0.3],
               weight: atkDef.weight ?? 1,
+              specialAttack: atkDef.specialAttack ?? false,
+              specialOnHitEffects: atkDef.specialOnHitEffects ?? null,
             };
             // Keep m.actions.attack pointing to first variant for backward compat
             if (idx === 0) m.actions.attack = action;
@@ -1437,7 +1494,7 @@ export function triggerMonsterAttack(monsterId) {
   setInCombat();
 
   // ── Pick attack variant (or fall back to single attack) ──
-  let attackAction, soundTimings, damageTimings, attackSound;
+  let attackAction, soundTimings, damageTimings, attackSound, activeVariant;
 
   if (m.attackVariants && m.attackVariants.length > 0) {
     const variant = _pickWeightedVariant(m.attackVariants);
@@ -1446,6 +1503,20 @@ export function triggerMonsterAttack(monsterId) {
       soundTimings = variant.soundTimings;
       damageTimings = variant.damageTimings;
       attackSound = variant.sound;
+      activeVariant = variant;
+
+      if (variant.name === 'iceCast' && m.mesh) {
+        const duration = attackAction.getClip().duration;
+        const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
+        setTimeout(() => { if (m.alive) createIceBurst(m.mesh.position); }, duration * pts * 1000);
+        showMessage(`<b>${m.name}</b> conjures a freezing blizzard!`, 2000);
+      }
+      if (variant.name === 'natureCast' && m.mesh) {
+        const duration = attackAction.getClip().duration;
+        const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
+        setTimeout(() => { if (m.alive) createNatureBurst(m.mesh.position); }, duration * pts * 1000);
+        showMessage(`<b>${m.name}</b> unleashes a nature surge!`, 2000);
+      }
     }
   }
   // Legacy fallback
@@ -1454,6 +1525,7 @@ export function triggerMonsterAttack(monsterId) {
     soundTimings = null;
     damageTimings = null;
     attackSound = m.attackSound;
+
   }
 
   if (attackAction && m.actions.idle) {
@@ -1485,7 +1557,13 @@ export function triggerMonsterAttack(monsterId) {
     if (damageTimings && damageTimings.length > 0) {
       const clipDuration = attackAction.getClip().duration;
       damageTimings.forEach(t => {
-        setTimeout(() => { _applyMonsterDamage(m); }, clipDuration * t * 1000);
+        setTimeout(() => {
+          if (activeVariant?.specialAttack) {
+            _applyMonsterSpecialAttack(m, activeVariant);
+          } else {
+            _applyMonsterDamage(m);
+          }
+        }, clipDuration * t * 1000);
       });
     } else {
       setTimeout(() => { _applyMonsterDamage(m); }, 300);
@@ -1496,10 +1574,28 @@ export function triggerMonsterAttack(monsterId) {
   }
 }
 
-function _applyMonsterDamage(monster) {
+// Applies a monster's special attack to all alive party members simultaneously.
+// Uses variant.specialOnHitEffects to override the normal onHitEffects for the hit.
+function _applyMonsterSpecialAttack(monster, variant) {
+  const aliveMembers = party.filter(m => m && !m.isEmpty && !m.isDead);
+  if (aliveMembers.length === 0) return;
+
+  const effectsOverride = variant.specialOnHitEffects ?? null;
+
+  aliveMembers.forEach(target => {
+    _applyMonsterDamage(monster, { forceTarget: target, onHitEffectsOverride: effectsOverride });
+  });
+}
+
+function _applyMonsterDamage(monster, opts = {}) {
+  // opts.forceTarget — bypass directional targeting (used for special/AoE attacks)
+  // opts.onHitEffectsOverride — replace monster.onHitEffects for this hit
+  const { forceTarget, onHitEffectsOverride } = opts;
+  const isSpecial = forceTarget !== undefined;
+
   // Target whoever is on the face of the formation the monster is attacking from.
   // Falls back to any alive member if that face is completely wiped.
-  const target = pickDirectionalTarget(party, monster, player.facing, player.gridRow, player.gridCol);
+  const target = forceTarget ?? pickDirectionalTarget(party, monster, player.facing, player.gridRow, player.gridCol);
   if (!target) return;   // entire party wiped
 
   // Apply status effect stat modifiers to the target for this damage calculation
@@ -1511,7 +1607,7 @@ function _applyMonsterDamage(monster) {
     addLogEntry({
       time: Date.now(), actor: 'monster',
       attacker: monster.name, target: target.name,
-      attackType: 'attack', hitChance, hit: false, crit: false,
+      attackType: isSpecial ? 'special' : 'attack', hitChance, hit: false, crit: false,
     });
     return;
   }
@@ -1534,9 +1630,14 @@ function _applyMonsterDamage(monster) {
     addLogEntry({
       time: Date.now(), actor: 'monster',
       attacker: monster.name, target: target.name,
-      attackType: 'attack', hitChance, hit: true, crit: false,
+      attackType: isSpecial ? 'special' : 'attack', hitChance, hit: true, crit: false,
       blocked: true,
     });
+
+    // Shield block sound
+    const blockAudio = new Audio('/sounds/actions/shield-block.mp3');
+    blockAudio.volume = 0.8;
+    blockAudio.play().catch(e => console.warn('Audio play prevented:', e));
 
     // UI Feedback for block
     const memberTop = document.querySelector(`#member-${target.id} .member-top`);
@@ -1594,7 +1695,7 @@ function _applyMonsterDamage(monster) {
   addLogEntry({
     time: Date.now(), actor: 'monster',
     attacker: monster.name, target: target.name,
-    attackType: 'attack', hitChance, hit: true, crit: isCrit,
+    attackType: isSpecial ? 'special' : 'attack', hitChance, hit: true, crit: isCrit,
     statBonus: monster.stats?.strength ?? 10,
     baseBonus: MONSTER_BASE_ATTACK,
     mitigation: resMitigation,
@@ -1604,9 +1705,9 @@ function _applyMonsterDamage(monster) {
     critMultiplier: isCrit ? CRIT_MULTIPLIER : 1,
   });
 
-  // Apply on-hit status effects defined on this monster type
+  // Apply on-hit status effects defined on this monster type (or override for special attacks)
   if (!target.isDead) {
-    (monster.onHitEffects ?? []).forEach(effect => {
+    (onHitEffectsOverride ?? monster.onHitEffects ?? []).forEach(effect => {
       const effectiveChance = calcOnHitChance(
         effect.chance,
         target.stats?.resilience ?? 0,

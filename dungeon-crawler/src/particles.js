@@ -143,3 +143,95 @@ export function createCritSpark(position) {
         setTimeout(() => { proton.removeEmitter(emitter); }, 700);
     }, 100);
 }
+
+export function createIceBurst(position) {
+    if (!proton) return;
+
+    const emitter = new Proton.Emitter();
+
+    // Emit fewer particles spread out over a longer timeframe
+    emitter.rate = new Proton.Rate(new Proton.Span(8, 15), new Proton.Span(0.05));
+
+    emitter.addInitialize(new Proton.Mass(1));
+    emitter.addInitialize(new Proton.Radius(0.3, 0.8)); // Smaller, delicate dust/crystals
+    emitter.addInitialize(new Proton.Life(1.0, 2.0)); // Last longer, drifting slowly
+
+    // Slow outward and upward movement
+    emitter.addInitialize(new Proton.V(0.8, new Proton.Vector3D(0, 1, 0), 180));
+
+    const material = new THREE.SpriteMaterial({
+        map: sparkTexture,
+        color: 0xffffff,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        depthWrite: false,
+    });
+    emitter.addInitialize(new Proton.Body(new THREE.Sprite(material)));
+
+    if (position) {
+        emitter.addInitialize(new Proton.Position(new Proton.PointZone(position.x, position.y + 0.8, position.z)));
+    }
+
+    // Not intensely bright, fading gently
+    emitter.addBehaviour(new Proton.Alpha(0.6, 0.0));
+    emitter.addBehaviour(new Proton.Scale(1.0, 0.2));
+    emitter.addBehaviour(new Proton.Color('#e0f7ff', '#44aaff'));
+
+    // Subtle swirling effect
+    emitter.addBehaviour(new Proton.RandomDrift(1.5, 1.5, 1.5, 0.05));
+
+    emitter.emit();
+    proton.addEmitter(emitter);
+
+    // Keep emitting the chilled air for half a second
+    setTimeout(() => {
+        emitter.stopEmit();
+        setTimeout(() => { proton.removeEmitter(emitter); }, 2500);
+    }, 500);
+}
+
+export function createNatureBurst(position) {
+    if (!proton) return;
+
+    const emitter = new Proton.Emitter();
+
+    // Subtle, wispy spores
+    emitter.rate = new Proton.Rate(new Proton.Span(10, 20), new Proton.Span(0.05));
+
+    emitter.addInitialize(new Proton.Mass(1));
+    emitter.addInitialize(new Proton.Radius(0.2, 0.6));
+    emitter.addInitialize(new Proton.Life(1.5, 2.5));
+
+    // Slow outward drift
+    emitter.addInitialize(new Proton.V(0.5, new Proton.Vector3D(0, 1, 0), 180));
+
+    const material = new THREE.SpriteMaterial({
+        map: sparkTexture,
+        color: 0xffffff,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        depthWrite: false,
+    });
+    emitter.addInitialize(new Proton.Body(new THREE.Sprite(material)));
+
+    if (position) {
+        // Emit from roughly chest height
+        emitter.addInitialize(new Proton.Position(new Proton.PointZone(position.x, position.y + 0.8, position.z)));
+    }
+
+    // Green to yellow-green fade
+    emitter.addBehaviour(new Proton.Alpha(0.5, 0.0));
+    emitter.addBehaviour(new Proton.Scale(1.0, 0.5));
+    // Color fade from a strong green to a very light green/yellow
+    emitter.addBehaviour(new Proton.Color('#55ff55', '#bbffbb'));
+    emitter.addBehaviour(new Proton.RandomDrift(1.0, 1.0, 1.0, 0.05));
+
+    emitter.emit();
+    proton.addEmitter(emitter);
+
+    // Fade out generation over half a second
+    setTimeout(() => {
+        emitter.stopEmit();
+        setTimeout(() => { proton.removeEmitter(emitter); }, 3000);
+    }, 500);
+}

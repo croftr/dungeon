@@ -441,7 +441,7 @@ function refreshMember(m) {
 
     const skDef = skName ? getSkillOrSpellDef(skName) : null;
     const skDelaySec = skDef?.delay ?? 0;
-    const lastUsed = lastAttackTimes[`${i}-skill`];
+    const lastUsed = lastAttackTimes[`${i}-skill-${skName}`];
     const skCanUse = lastUsed === undefined || (performance.now() - lastUsed) >= (skDelaySec * 1000);
     skSlot.classList.toggle('slot-cooling-down', !!skName && !skCanUse);
 
@@ -461,7 +461,7 @@ function refreshMember(m) {
     qsBtn.classList.toggle('qs-occupied', !!item);
     // Key label is the rotate-loadout key (1-4 per member)
     const rotateKey = i + 1;
-    const hasAltItems = !!(m.loadoutB?.leftHand || m.loadoutB?.rightHand || m.loadoutB?.potion);
+    const hasAltItems = !!(m.loadoutB?.leftHand || m.loadoutB?.rightHand || m.loadoutB?.potion || m.loadoutB?.skill);
     if (item) {
       const def = getItemDef(item.name);
       const iconSrc = def?.icon ?? null;

@@ -6,7 +6,7 @@
     "type": "debuff",
     "icon": "/icons/poison.svg",
     "color": "#50ff50",
-    "duration": 30,
+    "duration": 60,
     "tickInterval": 2,
     "tickDamage": 1
   },
@@ -62,5 +62,15 @@
     "color": "#8000ff",
     "duration": 20,
     "preventsAction": true
+  },
+  "slow": {
+    "id": "slow",
+    "name": "Slow",
+    "description": "Roots slow your movement — attack speed halved for 15 seconds.",
+    "type": "debuff",
+    "icon": "/icons/slow.svg",
+    "color": "#8080c0",
+    "duration": 15,
+    "attackSpeedMultiplier": 2.0
   }
 }

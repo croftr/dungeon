@@ -807,9 +807,8 @@ export function spawnObjectsForLevel() {
 
         // Spell Cabinet at the end of the dead-end passage near the zombie room
         addSpellCabinet(objectsGroup, gltfLoader, 21, 16, -Math.PI / 2, 0.7, 0, [
-            'Resist Poison Spellbook',
             'Scroll of Regeneration',
-            'Scroll of Cure Poison',
+            'Scroll of Rejuvenate'
         ]);
 
         // Shop against the east wall of the 8×8 room, centre row
@@ -891,6 +890,9 @@ export function spawnObjectsForLevel() {
         addWeaponRack(objectsGroup, gltfLoader, 22, 4, Math.PI / 2, 0.65, 0, [
             'Elven Dagger', 'Mace', 'Dagger', 'Axe'
         ]);
+
+        // Ethereal Egg tucked into the corner of the mummy room
+        addEtherealEgg(objectsGroup, gltfLoader, 19, 2);
 
         // Portal to Level 3 (The Abyssal Crypts) at the end of the dungeon
         addPortal(objectsGroup, gltfLoader, 1, 22, 3, 0, 0, 0);
@@ -1182,6 +1184,44 @@ function addCrystals(scene, loader, col, row, rotY, offsetX = 0) {
                             }
                         });
                     });
+                }
+            }
+        });
+
+        scene.add(model);
+    });
+}
+
+function addEtherealEgg(scene, loader, col, row, rotY = 0) {
+    _statueGridCells.add(`${row},${col}`);
+    loader.load('/items/ethereal_egg.glb', (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(0.5);
+        // Put it on the floor but slightly raised
+        model.position.set(col * CELL, 0.5, row * CELL);
+        model.rotation.y = rotY;
+
+        // Give it a magical purple/white glow
+        const light = new THREE.PointLight(0xff00ff, 4, 3);
+        light.position.set(col * CELL, 0.8, row * CELL);
+        scene.add(light);
+
+        // Pulsing light effect
+        new Tween({ i: 4 })
+            .to({ i: 8 }, 1500)
+            .easing(Easing.Quadratic.InOut)
+            .yoyo(true)
+            .repeat(Infinity)
+            .onUpdate((o) => { light.intensity = o.i; })
+            .start();
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                if (child.material) {
+                    child.material.emissive = new THREE.Color(0xaa00aa);
+                    child.material.emissiveIntensity = 0.3;
                 }
             }
         });

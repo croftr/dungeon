@@ -5,7 +5,7 @@
         "job": "Ranger",
         "race": "Wood Elf",
         "stats": {
-            "strength": 5,
+            "strength": 115,
             "dexterity": 10,
             "vitality": 5,
             "intelligence": 7,
@@ -56,7 +56,10 @@
             "Mace Master",
             "Mace Master"
         ],
-        "startingSkills": [],
+        "startingSkills": [
+            "Sanctuary",
+            "Holy Radiance"
+        ],
         "image": "/heros/human_paladin.png",
         "leftHand": "Sword",
         "rightHand": "Shield",
@@ -213,7 +216,7 @@
         "race": "High Elf",
         "stats": {
             "strength": 6,
-            "dexterity": 110,
+            "dexterity": 10,
             "vitality": 6,
             "intelligence": 7,
             "resilience": 6
@@ -268,9 +271,8 @@
         ],
         "startingSkills": [],
         "startingInventory": [
-            "Heal Spellbook",
             "Scroll of Heal",
-            "Scroll of Regeneration",
+            "Scroll of Cure Poison",
             "Minor Mana Potion"
         ],
         "image": "/heros/white-mage.png",

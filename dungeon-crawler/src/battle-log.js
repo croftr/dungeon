@@ -103,6 +103,7 @@ const TYPE_ABBR = {
   shoot: 'shoot',
   fireball: 'fire',
   attack: 'atk',
+  special: 'spell',
 };
 
 function _buildRowHtml(e) {

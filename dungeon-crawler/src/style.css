@@ -1162,8 +1162,8 @@ body {
 #party-target-modal {
   background: #14100c;
   border: 2px solid #6a5030;
-  padding: 16px 20px;
-  min-width: 240px;
+  padding: 20px 24px;
+  min-width: 300px;
   box-shadow: 0 5px 24px rgba(0, 0, 0, 0.95);
   border-radius: 4px;
 }
@@ -1172,11 +1172,20 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   color: #c8a84a;
   font-size: 13px;
   border-bottom: 1px solid #3a2a10;
   padding-bottom: 10px;
   margin-bottom: 14px;
+}
+
+#party-target-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 #party-target-close {
@@ -1186,6 +1195,7 @@ body {
   font-size: 16px;
   cursor: pointer;
   line-height: 1;
+  flex-shrink: 0;
 }
 
 #party-target-grid {
@@ -1201,7 +1211,7 @@ body {
   gap: 12px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid #3a2a10;
-  padding: 6px 12px 6px 8px;
+  padding: 8px 14px 8px 10px;
   cursor: pointer;
   color: #e8d090;
   font-family: monospace;
@@ -1253,11 +1263,12 @@ body {
   flex-direction: column;
   gap: 2px;
   width: 100%;
-  max-width: 120px;
+  max-width: 160px;
 }
 
 .party-target-bars .bar-track {
-  height: 4px;
+  flex: none;          /* override HUD row-flex sizing so height takes effect */
+  height: 6px;
   border: none;
   background: rgba(0, 0, 0, 0.5);
 }
@@ -4853,7 +4864,7 @@ body.cursor-interact #renderer-canvas {
   border: 1px solid #3a3020;
   border-radius: 4px;
   background: rgba(10, 8, 4, 0.5);
-  width: 160px;
+  width: 180px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -4880,14 +4891,14 @@ body.cursor-interact #renderer-canvas {
 
 #loadout-b-slots {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   justify-content: center;
 }
 
 .pd-loadout-b-slot {
   position: relative;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border: 1px dashed #4a3a1a;
   border-radius: 3px;
   background: rgba(15, 12, 5, 0.6);
