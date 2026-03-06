@@ -5,7 +5,7 @@
         "job": "Ranger",
         "race": "Wood Elf",
         "stats": {
-            "strength": 115,
+            "strength": 6,
             "dexterity": 10,
             "vitality": 5,
             "intelligence": 7,
@@ -56,10 +56,7 @@
             "Mace Master",
             "Mace Master"
         ],
-        "startingSkills": [
-            "Sanctuary",
-            "Holy Radiance"
-        ],
+        "startingSkills": [],
         "image": "/heros/human_paladin.png",
         "leftHand": "Sword",
         "rightHand": "Shield",
@@ -216,7 +213,7 @@
         "race": "High Elf",
         "stats": {
             "strength": 6,
-            "dexterity": 10,
+            "dexterity": 100,
             "vitality": 6,
             "intelligence": 7,
             "resilience": 6

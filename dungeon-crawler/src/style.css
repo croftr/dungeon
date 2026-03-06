@@ -1267,7 +1267,8 @@ body {
 }
 
 .party-target-bars .bar-track {
-  flex: none;          /* override HUD row-flex sizing so height takes effect */
+  flex: none;
+  /* override HUD row-flex sizing so height takes effect */
   height: 6px;
   border: none;
   background: rgba(0, 0, 0, 0.5);
@@ -2953,6 +2954,11 @@ body {
     transform: translate(-50%, -100px) scale(1.0);
     opacity: 0;
   }
+}
+
+.damage-popup--heal {
+  color: #55ff55;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 5px rgba(0, 255, 0, 0.4);
 }
 
 /* Incoming damage (monster → party member) — centred over the 56 px portrait */

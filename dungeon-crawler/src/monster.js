@@ -6,7 +6,7 @@ import { CELL, isPassable } from './map.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
-import { party, setHp, flashPortraitHit, showMemberDamage, refreshPartyCards, applyStatusEffect, getEffectiveStats, getEffectiveStatusResistances, getDefenceModifier, describeEffect } from './party.js';
+import { party, setHp, flashPortraitHit, showMemberDamage, showMemberHeal, refreshPartyCards, applyStatusEffect, getEffectiveStats, getEffectiveStatusResistances, getDefenceModifier, describeEffect } from './party.js';
 import { STATUS_EFFECT_DEFS } from './status-effects.js';
 import { showMessage } from './minimap.js';
 import {
@@ -1481,6 +1481,18 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
         appliedEffects.push(effect.effectId);
       }
     });
+
+    // Vampiric Dagger effect
+    if (weaponDef?.name === 'Vampiric Dagger') {
+      const pIndex = party.findIndex(p => p.name === character.name);
+      if (pIndex !== -1) {
+        const p = party[pIndex];
+        if (p && !p.isDead && p.hp < p.hpMax) {
+          setHp(pIndex, p.hp + 1);
+          showMemberHeal(pIndex, 1);
+        }
+      }
+    }
   }
   const poisoned = appliedEffects.includes('poison');
 

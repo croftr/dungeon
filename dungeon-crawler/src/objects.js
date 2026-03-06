@@ -918,6 +918,11 @@ export function spawnObjectsForLevel() {
         // Return portal to Level 1 — near start (row 1), pushed against north wall
         addPortal(objectsGroup, gltfLoader, 4, 1, 1, 0, 0, -0.85);
 
+        // Weapon rack next to the entrance
+        addWeaponRack(objectsGroup, gltfLoader, 5, 2, -Math.PI / 2, 0.85, 0, [
+            "Vampiric Dagger", "Silver Mace", "Warden's Shield"
+        ]);
+
         // Exit portal (game escape) at the far end of the exit corridor
         addPortal(objectsGroup, gltfLoader, 20, 21, -1, Math.PI, 0, 0.85);
 

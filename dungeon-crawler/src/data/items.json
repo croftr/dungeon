@@ -507,6 +507,23 @@
         "weight": 0.4
     },
     {
+        "name": "Vampiric Dagger",
+        "slot": "leftHand",
+        "attackType": "swipe",
+        "weaponType": "dagger",
+        "staminaDrain": 1,
+        "baseDamage": 6,
+        "delay": 2,
+        "statWeights": {
+            "str": 0.1,
+            "dex": 0.9
+        },
+        "icon": "/icons/vampiric_dagger.png",
+        "description": "A black blade dripping with blood. Restores 1 HP on every successful hit.",
+        "value": 200,
+        "weight": 0.4
+    },
+    {
         "name": "Poison Dagger",
         "slot": "rightHand",
         "attackType": "swipe",

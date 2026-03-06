@@ -335,7 +335,13 @@ export function setAmbientLevel(level) {
   _ambientLevel = level;
   _zoneTrack = null;          // clear any room override when changing levels
   currentMusicIndex = 0;
-  if (!isCombatMusicPlaying) {
+
+  // Level 3 never plays combat music, so if we are switching to level 3,
+  // ensure we stop any current combat music and switch to ambient.
+  if (!isCombatMusicPlaying || _ambientLevel === 3) {
+    if (isCombatMusicPlaying && _ambientLevel === 3) {
+      isCombatMusicPlaying = false;
+    }
     _musicGen++;
     _stopCurrent();
     _playNextTrack();
@@ -625,7 +631,9 @@ export function updateAudio(dt) {
 
   const shouldBeInCombat = combatTimer > 0;
 
-  if (shouldBeInCombat && !isCombatMusicPlaying) {
+  // Level 3 (Minotaur level) has its own atmospheric music that should not be 
+  // interrupted by the generic battle track.
+  if (shouldBeInCombat && !isCombatMusicPlaying && _ambientLevel !== 3) {
     _switchToCombatMusic();
   } else if (!shouldBeInCombat && isCombatMusicPlaying) {
     _switchToNormalMusic();

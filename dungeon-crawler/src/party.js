@@ -486,6 +486,25 @@ function refreshMember(m) {
 
 /** Swaps two party slots (by index), keeping id fields correct, then redraws. */
 function swapSlots(a, b) {
+  // Cancel any pending cooldown timers so stale callbacks don't overwrite the
+  // display with the old occupant's (possibly empty) equipment after the swap.
+  [party[a], party[b]].forEach(m => {
+    if (m.cooldownTimers) {
+      Object.values(m.cooldownTimers).forEach(id => { if (id != null) clearTimeout(id); });
+      m.cooldownTimers = {};
+    }
+  });
+
+  // Swap lastAttackTimes entries so cooldowns follow the member to their new position.
+  const aKeys = Object.keys(lastAttackTimes).filter(k => k.startsWith(`${a}-`));
+  const bKeys = Object.keys(lastAttackTimes).filter(k => k.startsWith(`${b}-`));
+  const aTimes = {};
+  aKeys.forEach(k => { aTimes[k] = lastAttackTimes[k]; delete lastAttackTimes[k]; });
+  const bTimes = {};
+  bKeys.forEach(k => { bTimes[k] = lastAttackTimes[k]; delete lastAttackTimes[k]; });
+  aKeys.forEach(k => { lastAttackTimes[k.replace(`${a}-`, `${b}-`)] = aTimes[k]; });
+  bKeys.forEach(k => { lastAttackTimes[k.replace(`${b}-`, `${a}-`)] = bTimes[k]; });
+
   const tmp = { ...party[a] };
   party[a] = { ...party[b], id: a };
   party[b] = { ...tmp, id: b };
@@ -738,6 +757,17 @@ export function showMemberDamage(memberIndex, damage, isCrit) {
   popup.className = 'damage-popup damage-popup--incoming' +
     (isCrit ? ' damage-popup--crit' : '');
   popup.textContent = damage;
+  memberTop.appendChild(popup);
+  setTimeout(() => popup.remove(), 900);
+}
+
+/** Float a green text above the member's portrait to indicate healing. */
+export function showMemberHeal(memberIndex, amount) {
+  const memberTop = document.querySelector(`#member-${memberIndex} .member-top`);
+  if (!memberTop) return;
+  const popup = document.createElement('span');
+  popup.className = 'damage-popup damage-popup--heal damage-popup--incoming';
+  popup.textContent = '+' + amount;
   memberTop.appendChild(popup);
   setTimeout(() => popup.remove(), 900);
 }
