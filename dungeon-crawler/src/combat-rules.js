@@ -484,7 +484,23 @@ export function resolveSpellMagnitude(spellName, spellDef, caster) {
     ? _evalFormula(spellDef.magnitudeFormula, spellDef, caster)
     : (spellDef.baseDamage ?? 0);
 
-  const bonus = _itemMagnitudeBonus(spellName, spellDef, caster);
+  let bonus = _itemMagnitudeBonus(spellName, spellDef, caster);
+
+  // Apply passive skill bonuses
+  if (caster?.skills) {
+    caster.skills.forEach(skill => {
+      const name = typeof skill === 'string' ? skill : skill.name;
+      if (name === 'Lifewarden') {
+        const skillDef = SKILLS_DATA['Lifewarden'];
+        if (spellName === 'Regeneration') {
+          bonus += (skillDef?.regenMagnitude ?? 1);
+        } else if (spellName === 'Heal' || spellName === 'Cure Poison') {
+          bonus += (skillDef?.magnitude ?? 2);
+        }
+      }
+    });
+  }
+
   if (bonus === 0) return base;
 
   const result = _applyBonus(base, bonus, spellDef.magnitudeBonusMode ?? 'flat');

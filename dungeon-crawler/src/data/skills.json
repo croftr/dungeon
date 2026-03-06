@@ -317,8 +317,9 @@
         "isPassive": true,
         "type": "passive",
         "icon": "/skills/lifewarden.png",
-        "description": "Increases HP restored by cure spells by 2.",
+        "description": "Increases HP restored by cure and heal spells by 2, and increases Regeneration healing by 1 HP per tick.",
         "effectType": "cureHealBonus",
-        "magnitude": 2
+        "magnitude": 2,
+        "regenMagnitude": 1
     }
 }

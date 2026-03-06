@@ -28,6 +28,10 @@
       {
         "item": "Shawl",
         "chance": 0.05
+      },
+      {
+        "item": "Fermented Sugar",
+        "chance": 0.15
       }
     ]
   },
@@ -60,6 +64,10 @@
       {
         "item": "Leather Belt",
         "chance": 0.05
+      },
+      {
+        "item": "Mana Berry",
+        "chance": 0.1
       }
     ]
   },
@@ -94,6 +102,10 @@
       {
         "item": "Travelling Cloak",
         "chance": 0.05
+      },
+      {
+        "item": "Mana Berry",
+        "chance": 0.15
       }
     ]
   },
@@ -132,6 +144,10 @@
       {
         "item": "Leather Gloves",
         "chance": 0.08
+      },
+      {
+        "item": "Fermented Sugar",
+        "chance": 0.2
       }
     ]
   },
@@ -159,6 +175,10 @@
       },
       {
         "item": "Leather Boots",
+        "chance": 0.1
+      },
+      {
+        "item": "Fermented Sugar",
         "chance": 0.1
       }
     ]
@@ -194,6 +214,10 @@
       {
         "item": "Cloth Trousers",
         "chance": 0.05
+      },
+      {
+        "item": "Mana Berry",
+        "chance": 0.1
       }
     ]
   },
@@ -223,6 +247,10 @@
       },
       {
         "item": "Shawl",
+        "chance": 0.1
+      },
+      {
+        "item": "Fermented Sugar",
         "chance": 0.1
       }
     ]
@@ -254,6 +282,10 @@
       {
         "item": "Travelling Cloak",
         "chance": 0.05
+      },
+      {
+        "item": "Mana Berry",
+        "chance": 0.15
       }
     ]
   },

@@ -288,6 +288,15 @@ export const monsters = [
     '/monsters/zombie-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/zombie-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 
+  // Skeleton Warrior in the big east room near the starting room
+  inst(D.skeletonWarrior, 50, 11, 16,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 1, null,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+
   // ── Level 3 – The Abyssal Crypts ─────────────────────────────────────────
   // Minotaur in the central chamber
   inst(D.minotaur, 300, 11, 11,
@@ -391,6 +400,48 @@ export const monsters = [
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
 ];
+
+// ── Multi-attack variant definitions ────────────────────────────────────────
+// Post-process monsters that have multiple attack animations.
+// Each variant defines its own GLB, sound, sound timings, and damage timings.
+function _applyMultiAttacks(monsterName, attacks) {
+  monsters.forEach(m => {
+    if (m.name === monsterName && !m.attacks) {
+      m.attacks = attacks;
+    }
+  });
+}
+
+_applyMultiAttacks('Skeleton Warrior', [
+  {
+    name: 'tripleCombo',
+    glb: '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    sound: '/monsters/skeleton-animation/attack.mp3',
+    soundTimings: [0.25, 0.75],
+    damageTimings: [0.25, 0.75],
+    weight: 1,
+  },
+  {
+    name: 'leftSlash',
+    glb: '/monsters/skeleton-animation/Meshy_AI_Animation_Left_Slash_withSkin.glb',
+    sound: '/monsters/skeleton-animation/attack.mp3',
+    soundTimings: [0.45],
+    damageTimings: [0.45],
+    weight: 1,
+  },
+]);
+
+function _pickWeightedVariant(variants) {
+  const loaded = variants.filter(v => v != null);
+  if (loaded.length === 0) return null;
+  const totalWeight = loaded.reduce((sum, v) => sum + v.weight, 0);
+  let roll = Math.random() * totalWeight;
+  for (const v of loaded) {
+    roll -= v.weight;
+    if (roll <= 0) return v;
+  }
+  return loaded[loaded.length - 1];
+}
 
 /** Triggers the mummies to start chasing the player immediately. */
 export function triggerMummyAmbush() {
@@ -595,28 +646,65 @@ function _loadMonster(m, scene) {
     model.add(statsLabel);
     m.statsLabel = statsLabel;
 
-    // Load the attack animation GLB
-    _gltfLoader.load(m.glbAttack, (animGltf) => {
-      if (animGltf.animations && animGltf.animations.length > 0) {
-        const attackClip = animGltf.animations[0];
-        const attackAction = m.mixer.clipAction(attackClip);
-        m.actions.attack = attackAction;
-
-        attackAction.setLoop(THREE.LoopOnce, 1);
-        attackAction.clampWhenFinished = true;
-
-        // When attack finishes, fade back to idle or walk (except for training dummy)
-        m.mixer.addEventListener('finished', (e) => {
-          if (e.action === m.actions.attack && m.actions.idle && m.name !== 'Training Dummy') {
-            const isMoving = (m._cs && m._cs.moving) || (m._ps && m._ps.moving);
-            const toAction = (isMoving && m.actions.walk) ? m.actions.walk : m.actions.idle;
-            toAction.reset().play();
-            m.actions.attack.crossFadeTo(toAction, 0.25, false);
-            m._animState = isMoving ? 'walk' : 'idle';
+    // Load attack animation(s)
+    if (m.attacks && m.attacks.length > 0) {
+      // ── Multiple attack variants ──
+      m.attackVariants = [];
+      m.attacks.forEach((atkDef, idx) => {
+        _gltfLoader.load(atkDef.glb, (animGltf) => {
+          if (animGltf.animations && animGltf.animations.length > 0) {
+            const clip = animGltf.animations[0];
+            const action = m.mixer.clipAction(clip);
+            action.setLoop(THREE.LoopOnce, 1);
+            action.clampWhenFinished = true;
+            m.attackVariants[idx] = {
+              action,
+              name: atkDef.name,
+              sound: atkDef.sound ?? m.attackSound,
+              soundTimings: atkDef.soundTimings ?? [0],
+              damageTimings: atkDef.damageTimings ?? [0.3],
+              weight: atkDef.weight ?? 1,
+            };
+            // Keep m.actions.attack pointing to first variant for backward compat
+            if (idx === 0) m.actions.attack = action;
           }
         });
-      }
-    });
+      });
+      // One finished listener for all attack variants
+      m.mixer.addEventListener('finished', (e) => {
+        const isAttackAction = m.attackVariants?.some(v => v && v.action === e.action);
+        if (isAttackAction && m.actions.idle && m.name !== 'Training Dummy') {
+          const isMoving = (m._cs && m._cs.moving) || (m._ps && m._ps.moving);
+          const toAction = (isMoving && m.actions.walk) ? m.actions.walk : m.actions.idle;
+          toAction.reset().play();
+          e.action.crossFadeTo(toAction, 0.25, false);
+          m._animState = isMoving ? 'walk' : 'idle';
+        }
+      });
+    } else {
+      // ── Legacy single-attack path ──
+      _gltfLoader.load(m.glbAttack, (animGltf) => {
+        if (animGltf.animations && animGltf.animations.length > 0) {
+          const attackClip = animGltf.animations[0];
+          const attackAction = m.mixer.clipAction(attackClip);
+          m.actions.attack = attackAction;
+
+          attackAction.setLoop(THREE.LoopOnce, 1);
+          attackAction.clampWhenFinished = true;
+
+          // When attack finishes, fade back to idle or walk (except for training dummy)
+          m.mixer.addEventListener('finished', (e) => {
+            if (e.action === m.actions.attack && m.actions.idle && m.name !== 'Training Dummy') {
+              const isMoving = (m._cs && m._cs.moving) || (m._ps && m._ps.moving);
+              const toAction = (isMoving && m.actions.walk) ? m.actions.walk : m.actions.idle;
+              toAction.reset().play();
+              m.actions.attack.crossFadeTo(toAction, 0.25, false);
+              m._animState = isMoving ? 'walk' : 'idle';
+            }
+          });
+        }
+      });
+    }
 
     // Load the death animation GLB if provided
     if (m.glbDeath) {
@@ -1348,31 +1436,64 @@ export function triggerMonsterAttack(monsterId) {
 
   setInCombat();
 
-  if (m.actions.attack && m.actions.idle) {
-    m.actions.attack.reset();
-    m.actions.attack.setEffectiveTimeScale(1);
-    m.actions.attack.setEffectiveWeight(1);
-    m.actions.attack.play();
-    const fromAction = (m.actions.walk && m._animState === 'walk') ? m.actions.walk : m.actions.idle;
-    fromAction.crossFadeTo(m.actions.attack, 0.2, true);
+  // ── Pick attack variant (or fall back to single attack) ──
+  let attackAction, soundTimings, damageTimings, attackSound;
 
-    if (m.attackSound) {
-      const _playAttackSound = () => {
-        const audio = new Audio(m.attackSound);
-        audio.volume = 0.6;
-        audio.play().catch(e => console.warn('Audio play prevented:', e));
-      };
-      _playAttackSound();
-      // Skeleton Warrior: play the sound a second time at the end of the animation
-      if (m.name === 'Skeleton Warrior' && m.actions.attack) {
-        const clipDuration = m.actions.attack.getClip().duration;
-        setTimeout(_playAttackSound, Math.max(0, (clipDuration - 0.15) * 1000));
-      }
+  if (m.attackVariants && m.attackVariants.length > 0) {
+    const variant = _pickWeightedVariant(m.attackVariants);
+    if (variant) {
+      attackAction = variant.action;
+      soundTimings = variant.soundTimings;
+      damageTimings = variant.damageTimings;
+      attackSound = variant.sound;
     }
   }
+  // Legacy fallback
+  if (!attackAction) {
+    attackAction = m.actions.attack;
+    soundTimings = null;
+    damageTimings = null;
+    attackSound = m.attackSound;
+  }
 
-  // Apply damage timed to mid-swing (~300ms in)
-  setTimeout(() => { _applyMonsterDamage(m); }, 300);
+  if (attackAction && m.actions.idle) {
+    attackAction.reset();
+    attackAction.setEffectiveTimeScale(1);
+    attackAction.setEffectiveWeight(1);
+    attackAction.play();
+    const fromAction = (m.actions.walk && m._animState === 'walk') ? m.actions.walk : m.actions.idle;
+    fromAction.crossFadeTo(attackAction, 0.2, true);
+
+    // ── Sound scheduling ──
+    if (attackSound) {
+      const _playAttackSound = () => {
+        const audio = new Audio(attackSound);
+        audio.volume = 0.8;
+        audio.play().catch(e => console.warn('Audio play prevented:', e));
+      };
+      if (soundTimings && soundTimings.length > 0) {
+        const clipDuration = attackAction.getClip().duration;
+        soundTimings.forEach(t => {
+          setTimeout(_playAttackSound, clipDuration * t * 1000);
+        });
+      } else {
+        _playAttackSound();
+      }
+    }
+
+    // ── Damage scheduling ──
+    if (damageTimings && damageTimings.length > 0) {
+      const clipDuration = attackAction.getClip().duration;
+      damageTimings.forEach(t => {
+        setTimeout(() => { _applyMonsterDamage(m); }, clipDuration * t * 1000);
+      });
+    } else {
+      setTimeout(() => { _applyMonsterDamage(m); }, 300);
+    }
+  } else {
+    // No animation — still apply damage
+    setTimeout(() => { _applyMonsterDamage(m); }, 300);
+  }
 }
 
 function _applyMonsterDamage(monster) {

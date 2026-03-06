@@ -61,17 +61,7 @@
         "leftHand": "Sword",
         "rightHand": "Shield",
         "startingInventory": [
-            "Cure Poison Potion",
-            "Healing Potion",
-            "Fermented Sugar",
-            "Mana Berry",
-            "Life Berry",
-            "Life Berry",
-            "Life Berry",
-            "Poison Vial",
-            "Life Essence",
-            "Life Essence",
-            "Life Essence"
+            "Healing Potion"
         ],
         "gridCol": 10,
         "gridRow": 8,
@@ -135,17 +125,11 @@
             "Staff Master",
             "Pyromancer",
             "Pyromancer",
-            "Pyromancer",
-            "Lifewarden",
-            "Lifewarden",
-            "Lifewarden"
+            "Pyromancer"
         ],
         "startingSkills": [],
         "startingInventory": [
-            "Scroll of Fireball",
-            "Scroll of Heal",
-            "Minor Mana Potion",
-            "Scroll of Rejuvenate"
+            "Scroll of Fireball"
         ],
         "image": "heros/human_wizard_head.png",
         "ammo": "Spellbook",
@@ -254,6 +238,47 @@
         "rightHand": "Dagger",
         "gridCol": 8,
         "gridRow": 9,
+        "facing": "right",
+        "isRecruited": false
+    },
+    {
+        "id": "recruit_8",
+        "name": "Seraphina",
+        "job": "White Mage",
+        "race": "Human",
+        "stats": {
+            "strength": 4,
+            "dexterity": 6,
+            "vitality": 6,
+            "intelligence": 9,
+            "resilience": 8
+        },
+        "bio": "A devoted healer whose presence brings hope to the darkest depths. Seraphina draws upon pure light to mend flesh and soul.",
+        "skillProgression": [
+            "Arcane Lantern",
+            "Runic Scholar",
+            "Mana Tap",
+            "Staff Tactician",
+            "Staff Tactician",
+            "Staff Master",
+            "Staff Master",
+            "Lifewarden",
+            "Lifewarden",
+            "Lifewarden"
+        ],
+        "startingSkills": [],
+        "startingInventory": [
+            "Heal Spellbook",
+            "Scroll of Heal",
+            "Scroll of Regeneration",
+            "Minor Mana Potion"
+        ],
+        "image": "/heros/white-mage.png",
+        "leftHand": "Oak Staff",
+        "rightHand": "—",
+        "ammo": "Spellbook",
+        "gridCol": 8,
+        "gridRow": 10,
         "facing": "right",
         "isRecruited": false
     }
