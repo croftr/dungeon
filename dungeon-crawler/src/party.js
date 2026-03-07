@@ -475,7 +475,7 @@ function refreshMember(m) {
     }
     // Show an indicator dot if loadout B has any items
     if (hasAltItems) {
-      qsBtn.innerHTML += `<span class="qs-alt-dot" title="Loadout B has items — press ${rotateKey} to rotate"></span>`;
+      qsBtn.innerHTML += `<span class="qs-alt-dot" title="Loadout B has items — press ${rotateKey} (or Space for all) to rotate"></span>`;
     }
   }
 }
@@ -671,22 +671,32 @@ export function initParty() {
       closeTacticsModal();
     }
 
-    // Keys 1–4: rotate loadout for each party member
+    // Keys 1–4: rotate loadout for each party member, Space: rotate all
     // 1 → member 0 (top-left)  |  2 → member 1 (top-right)
     // 3 → member 2 (bottom-left)  |  4 → member 3 (bottom-right)
     const loadoutKeyMap = { '1': 0, '2': 1, '3': 2, '4': 3 };
-    if (!e.ctrlKey && !e.altKey && !e.metaKey && loadoutKeyMap[e.key] !== undefined) {
+    if (!e.ctrlKey && !e.altKey && !e.metaKey && (loadoutKeyMap[e.key] !== undefined || e.key === ' ')) {
       const modalOpen = ['equip-overlay', 'tactics-overlay', 'chest-overlay',
         'merchant-overlay', 'main-menu-overlay', 'char-dev-overlay'].some(id => {
           const el = document.getElementById(id);
           return el && window.getComputedStyle(el).display !== 'none';
         });
       if (modalOpen) return;
-      const memberIdx = loadoutKeyMap[e.key];
-      const m = party[memberIdx];
-      if (m && !m.isEmpty) {
+
+      if (e.key === ' ') {
         e.preventDefault();
-        rotateLoadout(memberIdx);
+        party.forEach((m, idx) => {
+          if (m && !m.isEmpty) {
+            rotateLoadout(idx);
+          }
+        });
+      } else {
+        const memberIdx = loadoutKeyMap[e.key];
+        const m = party[memberIdx];
+        if (m && !m.isEmpty) {
+          e.preventDefault();
+          rotateLoadout(memberIdx);
+        }
       }
     }
   });

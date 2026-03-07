@@ -907,8 +907,8 @@ export function spawnObjectsForLevel() {
         buttonContainer.position.set(8 * CELL - 1.0, 1.25, 8 * CELL);
         objectsGroup.add(buttonContainer);
 
-        // Ethereal Egg in the center of the new 5x5 room (swapped)
-        addEtherealEgg(objectsGroup, gltfLoader, 13, 3);
+        // Statue in the center of the new 5x5 room
+        addStatue(objectsGroup, gltfLoader, 13, 3);
 
         // Party Confirm NPC
         addPartyConfirmNPC(objectsGroup, gltfLoader, 9, 13, Math.PI, -1, 0);
@@ -950,8 +950,8 @@ export function spawnObjectsForLevel() {
             'Elven Dagger', 'Mace', 'Dagger', 'Axe'
         ]);
 
-        // Statue in the corner of the mummy room (swapped)
-        addStatue(objectsGroup, gltfLoader, 19, 2);
+        // Statue in the corner of the mummy room (swapped with level 3 minotaur room)
+        addDecoration(objectsGroup, gltfLoader, 19, 2, 0, '/items/statue1.glb');
 
         // Portal to Level 3 (The Abyssal Crypts) at the end of the dungeon
         addPortal(objectsGroup, gltfLoader, 1, 22, 3, 0, 0, 0);
@@ -982,11 +982,16 @@ export function spawnObjectsForLevel() {
             "Vampiric Dagger", "Silver Mace", "Warden's Shield"
         ]);
 
+        // Weapon rack near the minotaur room
+        addWeaponRack(objectsGroup, gltfLoader, 1, 19, -Math.PI / 2, 0.85, 0, [
+            "Vampiric Dagger", "Silver Mace", "Warden's Shield"
+        ]);
+
         // Exit portal (game escape) at the far end of the exit corridor
         addPortal(objectsGroup, gltfLoader, 20, 21, -1, Math.PI, 0, 0.85);
 
-        // Statue in the center of the minotaur room
-        addDecoration(objectsGroup, gltfLoader, 11, 11, 0, '/items/statue1.glb');
+        // Ethereal Egg in the center of the minotaur room (swapped with level 1 mummy room)
+        addEtherealEgg(objectsGroup, gltfLoader, 11, 11);
     }
 }
 

@@ -37,16 +37,16 @@
   },
   "skeletonWarrior": {
     "name": "Skeleton Warrior",
-    "hp": 100,
-    "defence": 5,
+    "hp": 120,
+    "defence": 10,
     "xp": 100,
-    "attackSpeed": 1,
+    "attackSpeed": 1.5,
     "stats": {
-      "strength": 12,
+      "strength": 13,
       "dexterity": 15,
-      "vitality": 8,
-      "intelligence": 5,
-      "resilience": 5
+      "vitality": 9,
+      "intelligence": 6,
+      "resilience": 8
     },
     "drops": [
       {
@@ -408,7 +408,7 @@
   },
   "minotaur": {
     "name": "Minotaur",
-    "hp": 350,
+    "hp": 370,
     "defence": 10,
     "xp": 1200,
     "attackSpeed": 1.5,
@@ -417,7 +417,7 @@
       "dexterity": 20,
       "vitality": 30,
       "intelligence": 10,
-      "resilience": 25
+      "resilience": 30
     },
     "drops": [
       {
