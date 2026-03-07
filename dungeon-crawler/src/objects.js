@@ -32,6 +32,9 @@ export function updateObjects(dt) {
 let _mummyGateOpened = false;
 let _partyConfirmNPCModel = null; // true once the player confirms — prevents re-triggering
 let _starterGate = null; // portcullis behind the party-confirm NPC; opens only via dialogue
+let _npcMixer = null;
+let _npcIdleAction = null;
+let _npcTalkAction = null;
 
 // ─────────────────────────────────────────────
 //  CHEST / MERCHANT SHARED STATE
@@ -360,18 +363,33 @@ export function initObjects(scene, camera) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 2 && distCol <= 2) {
-                    const audio = new Audio('/npcs/jester/jester-welcome.mp3');
+                    const audio = new Audio('/sounds/npcs/welcome-adventure.mp3');
                     audio.volume = 0.7;
                     audio.play().catch(e => console.error("Audio play failed:", e));
                     showMessage("The Jester greets you with a cackle!");
 
-                    // Play animation if available
-                    let actObj = obj;
-                    while (actObj && !actObj.userData.action) {
-                        actObj = actObj.parent;
+                    // Walk up to the root model (which holds mixer / animations)
+                    let root = obj;
+                    while (root && !root.userData.mixer) root = root.parent;
+
+                    // Turn to face the player
+                    if (root) {
+                        const px = player.gridCol * CELL;
+                        const pz = player.gridRow * CELL;
+                        const targetAngle = Math.atan2(px - root.position.x, pz - root.position.z);
+                        let diff = targetAngle - root.rotation.y;
+                        while (diff >  Math.PI) diff -= 2 * Math.PI;
+                        while (diff < -Math.PI) diff += 2 * Math.PI;
+                        new Tween(root.rotation, tweenGroup)
+                            .to({ y: root.rotation.y + diff }, 600)
+                            .easing(Easing.Quadratic.Out)
+                            .start();
                     }
-                    if (actObj && actObj.userData.action) {
-                        actObj.userData.action.reset().play();
+
+                    // Crossfade idle → talking
+                    if (root && root.userData.idleAction && root.userData.talkAction) {
+                        root.userData.idleAction.fadeOut(0.3);
+                        root.userData.talkAction.reset().fadeIn(0.3).play();
                     }
                 } else {
                     showMessage("The Jester beckons you from afar.");
@@ -384,10 +402,35 @@ export function initObjects(scene, camera) {
                 const distCol = Math.abs(player.gridCol - data.gridCol);
                 // Increased range to 3 for better accessibility
                 if (distRow <= 3 && distCol <= 3) {
-                    const overlay = document.getElementById('party-confirm-overlay');
-                    if (overlay) overlay.classList.remove('chest-hidden');
+                    // Turn to face the player
+                    if (_partyConfirmNPCModel) {
+                        const npcPos = _partyConfirmNPCModel.position;
+                        const px = player.gridCol * CELL;
+                        const pz = player.gridRow * CELL;
+                        const targetAngle = Math.atan2(px - npcPos.x, pz - npcPos.z);
+                        // Normalise to shortest rotation arc from current angle
+                        let diff = targetAngle - _partyConfirmNPCModel.rotation.y;
+                        while (diff >  Math.PI) diff -= 2 * Math.PI;
+                        while (diff < -Math.PI) diff += 2 * Math.PI;
+                        new Tween(_partyConfirmNPCModel.rotation, tweenGroup)
+                            .to({ y: _partyConfirmNPCModel.rotation.y + diff }, 600)
+                            .easing(Easing.Quadratic.Out)
+                            .start();
+                    }
+                    // Switch to talking animation
+                    if (_npcIdleAction && _npcTalkAction) {
+                        _npcIdleAction.fadeOut(0.3);
+                        _npcTalkAction.reset().fadeIn(0.3).play();
+                    }
                     const npcAudio = new Audio('/sounds/npcs/party-chosen.mp3');
                     npcAudio.volume = 0.8;
+                    npcAudio.addEventListener('loadedmetadata', () => {
+                        const delay = Math.max(0, (npcAudio.duration - 0.8) * 1000);
+                        setTimeout(() => {
+                            const overlay = document.getElementById('party-confirm-overlay');
+                            if (overlay) overlay.classList.remove('chest-hidden');
+                        }, delay);
+                    });
                     npcAudio.play().catch(e => console.warn("NPC audio failed:", e));
                 } else {
                     showMessage("The mysterious figure beckons you from afar.");
@@ -478,6 +521,11 @@ export function initObjects(scene, camera) {
             e.stopPropagation();
             const overlay = document.getElementById('party-confirm-overlay');
             if (overlay) overlay.classList.add('chest-hidden');
+            // Return to idle animation
+            if (_npcTalkAction && _npcIdleAction) {
+                _npcTalkAction.fadeOut(0.3);
+                _npcIdleAction.reset().fadeIn(0.3).play();
+            }
         };
     }
 
@@ -859,8 +907,8 @@ export function spawnObjectsForLevel() {
         buttonContainer.position.set(8 * CELL - 1.0, 1.25, 8 * CELL);
         objectsGroup.add(buttonContainer);
 
-        // Statue in the center of the new 5x5 room
-        addStatue(objectsGroup, gltfLoader, 13, 3);
+        // Ethereal Egg in the center of the new 5x5 room (swapped)
+        addEtherealEgg(objectsGroup, gltfLoader, 13, 3);
 
         // Party Confirm NPC
         addPartyConfirmNPC(objectsGroup, gltfLoader, 9, 13, Math.PI, -1, 0);
@@ -902,8 +950,8 @@ export function spawnObjectsForLevel() {
             'Elven Dagger', 'Mace', 'Dagger', 'Axe'
         ]);
 
-        // Ethereal Egg tucked into the corner of the mummy room
-        addEtherealEgg(objectsGroup, gltfLoader, 19, 2);
+        // Statue in the corner of the mummy room (swapped)
+        addStatue(objectsGroup, gltfLoader, 19, 2);
 
         // Portal to Level 3 (The Abyssal Crypts) at the end of the dungeon
         addPortal(objectsGroup, gltfLoader, 1, 22, 3, 0, 0, 0);
@@ -1332,7 +1380,7 @@ function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, c
 }
 
 function addJester(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
-    const path = '/npcs/jester/jester-idle1.glb';
+    const path = '/npcs/otter/Meshy_AI_Animation_Idle_withSkin.glb';
     loader.load(path, (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
@@ -1364,14 +1412,22 @@ function addJester(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) 
 
         if (gltf.animations && gltf.animations.length > 0) {
             const mixer = new THREE.AnimationMixer(model);
-            const action = mixer.clipAction(gltf.animations[0]);
-            action.setLoop(THREE.LoopRepeat);
-            action.play();
+            const idleAction = mixer.clipAction(gltf.animations[0]);
+            idleAction.setLoop(THREE.LoopRepeat);
+            idleAction.play();
 
-            // Store reference so we can trigger it on click
             model.userData.mixer = mixer;
-            model.userData.action = action;
+            model.userData.idleAction = idleAction;
             _mixers.push(mixer);
+
+            // Preload talking animation on the same mixer
+            loader.load('/npcs/otter/talking.glb', (talkGltf) => {
+                if (talkGltf.animations && talkGltf.animations.length > 0) {
+                    const talkAction = mixer.clipAction(talkGltf.animations[0]);
+                    talkAction.setLoop(THREE.LoopRepeat);
+                    model.userData.talkAction = talkAction;
+                }
+            });
         }
 
         scene.add(model);
@@ -1411,10 +1467,21 @@ function addPartyConfirmNPC(scene, loader, col, row, rotY = 0, offsetX = 0, offs
 
         if (gltf.animations && gltf.animations.length > 0) {
             const mixer = new THREE.AnimationMixer(model);
-            const action = mixer.clipAction(gltf.animations[0]);
-            action.setLoop(THREE.LoopRepeat);
-            action.play();
+            _npcMixer = mixer;
+            const idleAction = mixer.clipAction(gltf.animations[0]);
+            idleAction.setLoop(THREE.LoopRepeat);
+            idleAction.play();
+            _npcIdleAction = idleAction;
             _mixers.push(mixer);
+
+            // Preload talking animation from separate GLB, registered on the same mixer
+            loader.load('/npcs/otter/talking.glb', (talkGltf) => {
+                if (talkGltf.animations && talkGltf.animations.length > 0) {
+                    const talkAction = mixer.clipAction(talkGltf.animations[0]);
+                    talkAction.setLoop(THREE.LoopRepeat);
+                    _npcTalkAction = talkAction;
+                }
+            });
         }
 
         model.name = 'PartyConfirmNPCModel';
