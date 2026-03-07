@@ -31,6 +31,7 @@ export function updateObjects(dt) {
 // ─────────────────────────────────────────────
 let _mummyGateOpened = false;
 let _partyConfirmNPCModel = null; // true once the player confirms — prevents re-triggering
+let _starterGate = null; // portcullis behind the party-confirm NPC; opens only via dialogue
 
 // ─────────────────────────────────────────────
 //  CHEST / MERCHANT SHARED STATE
@@ -385,6 +386,9 @@ export function initObjects(scene, camera) {
                 if (distRow <= 3 && distCol <= 3) {
                     const overlay = document.getElementById('party-confirm-overlay');
                     if (overlay) overlay.classList.remove('chest-hidden');
+                    const npcAudio = new Audio('/sounds/npcs/party-chosen.mp3');
+                    npcAudio.volume = 0.8;
+                    npcAudio.play().catch(e => console.warn("NPC audio failed:", e));
                 } else {
                     showMessage("The mysterious figure beckons you from afar.");
                 }
@@ -495,7 +499,11 @@ export function initObjects(scene, camera) {
             }
 
             if (window.playBattlePrepVideo) {
-                window.playBattlePrepVideo();
+                window.playBattlePrepVideo(() => {
+                    if (_starterGate) openPortcullis(_starterGate);
+                });
+            } else {
+                if (_starterGate) openPortcullis(_starterGate);
             }
             // Also ensure the drop button is hidden immediately for good measure
             if (equip.hideDropButton) {
@@ -857,6 +865,9 @@ export function spawnObjectsForLevel() {
         // Party Confirm NPC
         addPartyConfirmNPC(objectsGroup, gltfLoader, 9, 13, Math.PI, -1, 0);
 
+        // Starter gate — behind the NPC, only opens via NPC dialogue (no button)
+        _starterGate = addPortcullis(objectsGroup, gltfLoader, 8, 13, Math.PI / 2);
+
         // Blocking portcullis at the entrance of the mummy area (starts open)
         addPortcullis(objectsGroup, gltfLoader, 10, 1, Math.PI / 2, true);
 
@@ -950,6 +961,7 @@ function addPortcullis(scene, loader, col, row, rotY = 0, startOpen = false) {
         portcullis.mesh = model;
     });
     objects.push(portcullis);
+    return portcullis;
 }
 
 function addKeyhole(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, targetRow = null, targetCol = null) {
@@ -1367,7 +1379,7 @@ function addJester(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) 
 }
 
 function addPartyConfirmNPC(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
-    const path = '/npcs/jester/jester-idle1.glb';
+    const path = '/npcs/otter/Meshy_AI_Animation_Idle_withSkin.glb';
     loader.load(path, (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.55);
