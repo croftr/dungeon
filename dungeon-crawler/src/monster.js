@@ -1897,10 +1897,22 @@ function _applyMonsterDamage(monster, opts = {}) {
   const leftItem = target.equipment?.leftHand ? getItemDef(target.equipment.leftHand.name) : null;
   const rightItem = target.equipment?.rightHand ? getItemDef(target.equipment.rightHand.name) : null;
 
+  const hasShield = leftItem?.weaponType === 'shield' || rightItem?.weaponType === 'shield';
+  let shieldMasterBlockBonus = 0;
+  if (hasShield && target.skills) {
+    target.skills.forEach(skill => {
+      const name = typeof skill === 'string' ? skill : skill.name;
+      const skillDef = SKILLS_DATA[name];
+      if (skillDef?.isPassive && skillDef.effectType === 'shieldMasterBonus') {
+        shieldMasterBlockBonus += skillDef.blockChanceBonus ?? 0;
+      }
+    });
+  }
+
   const blockChance = Math.max(
     leftItem?.blockChance ?? 0,
     rightItem?.blockChance ?? 0
-  );
+  ) + shieldMasterBlockBonus;
 
   if (blockChance > 0 && Math.random() * 100 < blockChance) {
     blocked = true;
@@ -1941,6 +1953,15 @@ function _applyMonsterDamage(monster, opts = {}) {
       if (itemDef?.defence) charDefence += itemDef.defence;
     }
   });
+  if (target.skills) {
+    target.skills.forEach(skill => {
+      const name = typeof skill === 'string' ? skill : skill.name;
+      const skillDef = SKILLS_DATA[name];
+      if (skillDef?.isPassive && skillDef.effectType === 'shieldMasterBonus') {
+        charDefence += skillDef.defenceBonus ?? 0;
+      }
+    });
+  }
   charDefence = Math.max(0, charDefence + getDefenceModifier(target));
   const rampartActive = skillsState.rampart.active && skillsState.rampart.actorName === target.name && performance.now() < skillsState.rampart.expiresAt;
   if (rampartActive) {

@@ -147,6 +147,9 @@ export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef 
           passiveBonus += skillDef.magnitude || 0;
         }
       }
+      if (skillDef?.isPassive && skillDef.effectType === 'shieldMasterBonus') {
+        passiveBonus += skillDef.magnitude || 0;
+      }
     });
   }
 

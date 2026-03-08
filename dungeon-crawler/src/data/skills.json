@@ -343,5 +343,15 @@
         "effectType": "cureHealBonus",
         "magnitude": 2,
         "regenMagnitude": 1
+    },
+    "Shield Master": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/shield-master.png",
+        "description": "Mastery of the shield increases block chance by 2% (when a shield is equipped), base damage by 1, and defence by 1.",
+        "effectType": "shieldMasterBonus",
+        "blockChanceBonus": 2,
+        "magnitude": 1,
+        "defenceBonus": 1
     }
 }

@@ -848,7 +848,7 @@ export function spawnObjectsForLevel() {
         // New Chest at the end of the long passage
         addChest(objectsGroup, gltfLoader, 7, 1, 0, -0.7, [
             { name: 'Gold Coins', quantity: 50 },
-            'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Ring of Vigour', 'Ring of Wisdom', 'Ring of Dexterity', 'Leather Gloves', 'Cloth Trousers', 'Worn Boots',
+            'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Ring of Vigour', 'Ring of Wisdom', 'Ring of Dexterity', 'Leather Gloves', 'Cloth Trousers', 'Worn Boots', "Scroll of Cure Poison"
         ]);
         // Chest in the Northwest room, tucked into the far northeast corner (against Rows 0 & Col 6)
         addChest(objectsGroup, gltfLoader, 5, 1, Math.PI, -0.65, [

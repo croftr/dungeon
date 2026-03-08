@@ -1053,6 +1053,7 @@ function getActiveEffectsForMember(m) {
   if (skillsState.berserk.active && skillsState.berserk.actorName === m.name) active.push('Berserk');
   if (skillsState.whirlwind.active && skillsState.whirlwind.actorName === m.name) active.push('Whirlwind');
   if (skillsState.trueShot.active && skillsState.trueShot.actorName === m.name) active.push('True Shot');
+  if (skillsState.doubleAttack.active && skillsState.doubleAttack.actorName === m.name) active.push('Double Attack');
   const now = performance.now();
   if (skillsState.rampart.active && skillsState.rampart.actorName === m.name && now < skillsState.rampart.expiresAt) active.push('Rampart');
   if (m.runicScholarActive) active.push('Runic Scholar');

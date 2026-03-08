@@ -92,6 +92,7 @@
         "slot": "cloak",
         "attackType": null,
         "baseDamage": null,
+        "icon": "/icons/travelling_cloak.png",
         "description": "A heavy wool cloak that keeps wind and rain at bay.",
         "defence": 1,
         "value": 24,

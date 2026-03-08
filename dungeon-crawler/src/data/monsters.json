@@ -15,7 +15,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.50
+        "chance": 0.25
       },
       {
         "item": "Poison Vial",
@@ -51,7 +51,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.50
+        "chance": 0.25
       },
       {
         "item": "Poison Vial",
@@ -93,7 +93,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.50
+        "chance": 0.25
       },
       {
         "item": "Poison Vial",
@@ -131,7 +131,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.50
+        "chance": 0.25
       },
       {
         "item": "Poison Vial",
@@ -167,7 +167,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.50
+        "chance": 0.25
       },
       {
         "item": "Padded Vest",
@@ -205,7 +205,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.50
+        "chance": 0.25
       },
       {
         "item": "Poison Vial",
@@ -243,7 +243,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.50
+        "chance": 0.25
       },
       {
         "item": "Shawl",
@@ -277,7 +277,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.50
+        "chance": 0.25
       },
       {
         "item": "Travelling Cloak",
@@ -305,7 +305,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.50
+        "chance": 0.25
       },
       {
         "item": "Life Berry",
@@ -333,7 +333,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 1
+        "chance": 0.5
       },
       {
         "item": "Life Berry",
@@ -355,7 +355,7 @@
   },
   "ogre": {
     "name": "Ogre",
-    "hp": 150,
+    "hp": 200,
     "defence": 9,
     "xp": 255,
     "attackSpeed": 1.2,
@@ -369,7 +369,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.5
+        "chance": 0.25
       },
       {
         "item": "Life Berry",
@@ -416,7 +416,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 1
+        "chance": 0.5
       },
       {
         "item": "Life Berry",
@@ -454,7 +454,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.60
+        "chance": 0.30
       },
       {
         "item": "Mana Berry",
