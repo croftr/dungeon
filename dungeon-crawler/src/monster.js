@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
-import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam } from './particles.js';
+import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening } from './particles.js';
 import { CELL, isPassable } from './map.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
@@ -18,7 +18,7 @@ import {
   MONSTER_BASE_ATTACK, RESILIENCE_DAMAGE_FACTOR,
   SHIELD_BASH_STUN_CHANCE, SHIELD_BASH_STUN_DURATION_MS,
 } from './combat-rules.js';
-import { setInCombat, clearCombat, playCritSound, playActionSound, playHitSound, playPartyHitSound, isInCombat } from './audio.js';
+import { setInCombat, clearCombat, playCritSound, playActionSound, playHitSound, playPartyHitSound, playShieldBlockSound, isInCombat, playSoundByUrl } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { resetBattleStats, recordDamageDealt, recordDamageTaken, showBattleStatsIcon } from './battle-stats.js';
 import { getItemDef } from './items.js';
@@ -208,13 +208,6 @@ export const monsters = [
     '/monsters/goblin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
 
-  // New Level 1 Monsters
-  inst(D.treekin, 60, 4, 3,
-    '/monsters/treekin-animation/Meshy_AI_Animation_Walking_withSkin.glb',
-    '/monsters/treekin-animation/Meshy_AI_Animation_mage_soell_cast_withSkin.glb',
-    '/monsters/treekin-animation/treeKin-attack.mp3', 0.45, 0, 0, 1, null,
-    '/monsters/treekin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
-    '/monsters/treekin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 
   inst(D.treekin, 61, 7, 5,
     '/monsters/treekin-animation/Meshy_AI_Animation_Walking_withSkin.glb',
@@ -314,7 +307,7 @@ export const monsters = [
   // Minotaur in the central chamber
   inst(D.minotaur, 300, 11, 11,
     '/monsters/minotaur/Meshy_AI_Animation_Idle_03_withSkin.glb',
-    '/monsters/minotaur/Meshy_AI_Animation_Weapon_Combo_withSkin.glb',
+    '/monsters/minotaur/Meshy_AI_Animation_Attack_withSkin.glb',
     '/monsters/minotaur/minator-attack.mp3', 0.8, 0, 0, 3,
     { bounds: { minRow: 9, maxRow: 13, minCol: 8, maxCol: 14 }, speed: 0.6, waitTime: 1.5 },
     '/monsters/minotaur/Meshy_AI_Animation_Dead_withSkin.glb',
@@ -344,51 +337,37 @@ export const monsters = [
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
 
-  // North-East Room (Skeletons)
-  inst(D.skeletonWarrior, 321, 3, 18,
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
-  inst(D.skeletonWarrior, 322, 3, 19,
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
-  inst(D.skeletonWarrior, 323, 2, 18,
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+  // North-East Room (Demons)
+  inst(D.demon, 321, 3, 18,
+    '/items/demon/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
+    '/items/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
+    '/items/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
+  inst(D.demon, 322, 3, 19,
+    '/items/demon/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
+    '/items/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
+    '/items/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
 
-  // South-West Room (Skeletons)
-  inst(D.skeletonWarrior, 331, 19, 2,
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
-  inst(D.skeletonWarrior, 332, 19, 3,
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
-  inst(D.skeletonWarrior, 333, 20, 3,
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
-    '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+  // South-West Room (Demons)
+  inst(D.demon, 331, 19, 2,
+    '/items/demon/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
+    '/items/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
+    '/items/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
+  inst(D.demon, 332, 19, 3,
+    '/items/demon/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
+    '/items/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
+    '/items/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
 
   // South-East Room (Skeletons)
   inst(D.skeletonWarrior, 341, 19, 18,
@@ -501,10 +480,78 @@ _applyMultiAttacks('Ogre', [
     sound: '/monsters/ogre/ogre.mp3',
     soundTimings: [0.3, 0.7],
     damageTimings: [0.3, 0.7],
+    weight: 2,
+    specialAttack: true,
+    damageMultiplier: 1.5,
+    specialOnHitEffects: [{ effectId: 'fear', chance: 0.75 }],
+  },
+]);
+
+_applyMultiAttacks('Treeman', [
+  {
+    name: 'normalAttack',
+    glb: '/monsters/treeman-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    sound: '/monsters/treeman-animation/attack-sound.mp3',
+    soundTimings: [0.25, 0.65],
+    damageTimings: [0.25, 0.65],
+    weight: 1,
+  },
+  {
+    name: 'treemanAwakening',
+    glb: '/monsters/treeman-animation/Meshy_AI_Animation_mage_soell_cast_1_withSkin.glb',
+    sound: '/monsters/treeman-animation/attack-sound.mp3',
+    soundTimings: [0.5],
+    damageTimings: [0.5],
+    weight: 0,              // never picked randomly — triggered by half-HP only
+    specialAttack: true,     // AoE hits all party members
+  },
+]);
+
+_applyMultiAttacks('Minotaur', [
+  {
+    name: 'normalAttack',
+    glb: '/monsters/minotaur/Meshy_AI_Animation_Attack_withSkin.glb',
+    sound: '/monsters/minotaur/minator-attack.mp3',
+    soundTimings: [0.4],
+    damageTimings: [0.4],
+    weight: 5,
+  },
+  {
+    name: 'weaponCombo',
+    glb: '/monsters/minotaur/Meshy_AI_Animation_Weapon_Combo_withSkin.glb',
+    sound: '/monsters/minotaur/minator-attack.mp3',
+    soundTimings: [0.25, 0.65],
+    damageTimings: [0.25, 0.65],
+    weight: 3,
+  },
+  {
+    name: 'minotaurRage',
+    glb: '/monsters/minotaur/Meshy_AI_Animation_mage_soell_cast_1_withSkin.glb',
+    sound: '/monsters/minotaur/minator-attack.mp3',
+    soundTimings: [0.5],
+    damageTimings: [0.5],
     weight: 1,
     specialAttack: true,
-    specialAttackType: 'randomAny',
-    damageMultiplier: 2,
+    specialOnHitEffects: [{ effectId: 'fear', chance: 0.20 }],
+  },
+]);
+
+_applyMultiAttacks('Demon', [
+  {
+    name: 'chargedSlash',
+    glb: '/items/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
+    sound: '/items/demon/demon-hit.mp3',
+    soundTimings: [0.4],
+    damageTimings: [0.4],
+    weight: 5,
+  },
+  {
+    name: 'tripleCombo',
+    glb: '/items/demon/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    sound: '/items/demon/demon-hit.mp3',
+    soundTimings: [0.25, 0.65],
+    damageTimings: [0.25, 0.65],
+    weight: 2,
   },
 ]);
 
@@ -518,6 +565,94 @@ function _pickWeightedVariant(variants) {
     if (roll <= 0) return v;
   }
   return loaded[loaded.length - 1];
+}
+
+let _nextSummonId = 800;
+
+/**
+ * Dynamically spawns a treekin next to the given monster during combat.
+ * Used by the Treeman's "Awakening of the Woods" ability.
+ */
+function _spawnTreekin(parentMonster, scene, offsetRow, offsetCol) {
+  const row = parentMonster.gridRow + offsetRow;
+  const col = parentMonster.gridCol + offsetCol;
+  const id = _nextSummonId++;
+
+  const m = inst(D.treekin, id, row, col,
+    '/monsters/treekin-animation/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/treekin-animation/Meshy_AI_Animation_mage_soell_cast_withSkin.glb',
+    '/monsters/treekin-animation/treeKin-attack.mp3', 0.45, 0, 0,
+    parentMonster.level ?? 2, null,
+    '/monsters/treekin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/treekin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb');
+
+  m.engaged = true; // immediately hostile
+  monsters.push(m);
+  _loadMonster(m, scene);
+
+  // Apply treekin attack variants to the summoned monster
+  _applyMultiAttacks('TreeKin', [
+    {
+      name: 'swing',
+      glb: '/monsters/treekin-animation/attack.glb',
+      sound: '/monsters/treekin-animation/wood-hit.mp3',
+      soundTimings: [0.4],
+      damageTimings: [0.4],
+      weight: 7,
+    },
+    {
+      name: 'natureCast',
+      glb: '/monsters/treekin-animation/Meshy_AI_Animation_mage_soell_cast_withSkin.glb',
+      sound: '/monsters/treekin-animation/treeKin-attack.mp3',
+      soundTimings: [0.5],
+      damageTimings: [0.5],
+      weight: 3,
+      specialAttack: true,
+      specialOnHitEffects: [{ effectId: 'slow', chance: 0.30 }],
+    },
+  ]);
+}
+
+/**
+ * Triggers the Treeman's "Awakening of the Woods" — forces the cast animation,
+ * spawns 2 treekin, and plays the green magic effect.  Called once when HP
+ * drops below 50%.
+ */
+function _triggerTreemanAwakening(treeman, scene) {
+  if (treeman._awakeningUsed) return;
+  treeman._awakeningUsed = true;
+
+  // Find the awakening variant
+  const variant = treeman.attackVariants?.find(v => v && v.name === 'treemanAwakening');
+  if (!variant || !variant.action) return;
+
+  // Force-play the cast animation
+  const attackAction = variant.action;
+  attackAction.reset();
+  attackAction.setEffectiveTimeScale(1);
+  attackAction.setEffectiveWeight(1);
+  attackAction.play();
+  const fromAction = (treeman.actions.walk && treeman._animState === 'walk')
+    ? treeman.actions.walk : treeman.actions.idle;
+  if (fromAction) fromAction.crossFadeTo(attackAction, 0.2, true);
+
+  showMessage(`<b>${treeman.name}</b> channels the Awakening of the Woods!`, 3000);
+
+  // Schedule particle effect + treekin spawning at the damage timing point
+  const duration = attackAction.getClip().duration;
+  const pts = (variant.damageTimings && variant.damageTimings.length > 0) ? variant.damageTimings[0] : 0.5;
+  setTimeout(() => {
+    if (!treeman.alive) return;
+    if (treeman.mesh) createTreemanAwakening(treeman.mesh.position);
+    _spawnTreekin(treeman, scene, -1, 0);
+    _spawnTreekin(treeman, scene, 1, 0);
+  }, duration * pts * 1000);
+
+  // Apply AoE damage at the timing point (same as other specials)
+  setTimeout(() => {
+    if (!treeman.alive) return;
+    _applyMonsterSpecialAttack(treeman, variant);
+  }, duration * pts * 1000);
 }
 
 /** Triggers the mummies to start chasing the player immediately. */
@@ -693,7 +828,20 @@ function _loadMonster(m, scene) {
       // Training dummy doesn't loop its idle animation; it's triggered manually on hit
       if (m.name !== 'Training Dummy') {
         idleAction.play();
+        if (m.name === 'Minotaur') {
+          const audio = new Audio('/monsters/minotaur/scream.mp3');
+          audio.volume = 0.8;
+          audio.play().catch(() => { });
+        }
       }
+
+      m.mixer.addEventListener('loop', (e) => {
+        if (m.name === 'Minotaur' && e.action === m.actions.idle && m._animState !== 'walk') {
+          const audio = new Audio('/monsters/minotaur/scream.mp3');
+          audio.volume = 0.8;
+          audio.play().catch(() => { });
+        }
+      });
     }
 
     scene.add(model);
@@ -835,7 +983,10 @@ function _loadMonster(m, scene) {
   });
 }
 
+let _sceneRef = null;
+
 export function initMonsters(scene) {
+  _sceneRef = scene;
   const currentLevel = window.currentLevel || 1;
   monsters.forEach((m) => {
     if (!m.alive) return;
@@ -1195,6 +1346,16 @@ export function updateMonsters(dt, playerCamera, scene) {
       }
     }
 
+    // Demon idle growl — plays when the party is within 1 grid square
+    if (m.name === 'Demon' && m.alive && inRange && !m._demonSoundCooldown) {
+      m._demonSoundCooldown = true;
+      const audio = new Audio('/items/demon/no-mercy.mp3');
+      audio.volume = 0.5;
+      audio.play().catch(() => { });
+      // Cooldown so it doesn't spam every frame — wait until the clip finishes + a pause
+      setTimeout(() => { m._demonSoundCooldown = false; }, 8000);
+    }
+
     // Proximity attack logic: if player is adjacent, attack them periodically
     if (inRange && m.name !== 'Training Dummy') {
       m.engaged = true;
@@ -1299,6 +1460,12 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
   m.hp = Math.max(0, m.hp - damage);
   const hpAfter = m.hp;
   const killedByThisHit = (hpBefore > 0 && hpAfter === 0);
+
+  // Treeman "Awakening of the Woods" — triggers once when HP drops below 50%
+  if (m.name === 'Treeman' && !m._awakeningUsed && m.alive
+    && hpBefore > m.hpMax / 2 && hpAfter <= m.hpMax / 2 && _sceneRef) {
+    _triggerTreemanAwakening(m, _sceneRef);
+  }
 
   if (killedByThisHit) {
     m.alive = false;
@@ -1557,6 +1724,12 @@ export function triggerMonsterAttack(monsterId) {
         setTimeout(() => { if (m.alive) createOgreSlam(m.mesh.position); }, duration * pts * 1000);
         showMessage(`<b>${m.name}</b> unleashes a furious double strike!`, 2000);
       }
+      if (variant.name === 'minotaurRage' && m.mesh) {
+        const duration = attackAction.getClip().duration;
+        const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
+        setTimeout(() => { if (m.alive) createMinotaurRage(m.mesh.position); }, duration * pts * 1000);
+        showMessage(`<b>${m.name}</b> roars with terrifying fury!`, 2000);
+      }
     }
   }
   // Legacy fallback
@@ -1689,9 +1862,7 @@ function _applyMonsterDamage(monster, opts = {}) {
     });
 
     // Shield block sound
-    const blockAudio = new Audio('/sounds/actions/shield-block.mp3');
-    blockAudio.volume = 0.8;
-    blockAudio.play().catch(e => console.warn('Audio play prevented:', e));
+    playShieldBlockSound();
 
     // UI Feedback for block
     const memberTop = document.querySelector(`#member-${target.id} .member-top`);

@@ -23,6 +23,7 @@ const SOUND_MAP = {
   death: { url: '/sounds/actions/monster-killed-1.mp3 ', offset: 0.0 },
   hit: { url: '/sounds/actions/hit.mp3', offset: 0.0 },
   'gold-coins': { url: '/sounds/items/gold-coins.mp3', offset: 0.0 },
+  'shield-block': { url: '/sounds/actions/shield-block .mp3', offset: 0.0 },
 };
 
 const ITEM_SOUNDS = {
@@ -229,6 +230,27 @@ export async function playPartyHitSound() {
     source.start(0);
   } catch (err) {
     console.warn('[audio] playPartyHitSound failed:', err);
+  }
+}
+
+export async function playShieldBlockSound() {
+  const buffer = await getBuffer('/sounds/actions/shield-block .mp3');
+  if (!buffer) return;
+
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.8;
+
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playShieldBlockSound failed:', err);
   }
 }
 
@@ -620,6 +642,23 @@ export async function playAnvilSound() {
     source.start(0);
   } catch (err) {
     console.warn('[audio] playAnvilSound failed:', err);
+  }
+}
+
+export async function playSoundByUrl(url, volume = 0.8) {
+  const buffer = await getBuffer(url);
+  if (!buffer) return;
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = volume;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
+  } catch (err) {
+    console.warn(`[audio] playSoundByUrl failed for ${url}:`, err);
   }
 }
 

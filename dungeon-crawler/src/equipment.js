@@ -258,7 +258,7 @@ export function extendPartyData() {
 
     if (m.leftHand && m.leftHand !== '—') {
       const def = getItemDef(m.leftHand);
-      const slot = def?.slot ?? 'leftHand';
+      const slot = def?.slot ?? 'hand';
       if (slot === 'bothHands') {
         const item = { name: m.leftHand, slot: 'bothHands' };
         m.equipment.leftHand = item;
@@ -269,7 +269,7 @@ export function extendPartyData() {
     }
     if (m.rightHand && m.rightHand !== '—') {
       const def = getItemDef(m.rightHand);
-      const slot = def?.slot ?? 'rightHand';
+      const slot = def?.slot ?? 'hand';
       // Only seed rightHand if not already filled by a bothHands item
       if (slot === 'bothHands') {
         if (!m.equipment.leftHand) {
@@ -970,6 +970,50 @@ function _equipItem(memberIndex, invIndex) {
       const fi = m.inventory.indexOf(null);
       if (fi !== -1) m.inventory[fi] = { name: d.name, slot: d.slot };
     });
+  } else if (item.slot === 'hand') {
+    // ── Either-hand items: prefer right hand, fall back to left ─────────
+    const rhItem = m.equipment.rightHand;
+    const lhItem = m.equipment.leftHand;
+
+    let targetSlot;
+    if (!rhItem || rhItem.slot === 'spell') {
+      targetSlot = 'rightHand';
+    } else if (!lhItem || lhItem.slot === 'spell') {
+      targetSlot = 'leftHand';
+    } else {
+      // Both hands occupied with physical items — displace right hand
+      targetSlot = 'rightHand';
+    }
+
+    const displaced = [];
+    const currentlyWorn = m.equipment[targetSlot];
+
+    // If the target slot holds a bothHands weapon, clear both slots
+    if (currentlyWorn?.slot === 'bothHands') {
+      displaced.push(currentlyWorn);
+      const otherSlot = targetSlot === 'rightHand' ? 'leftHand' : 'rightHand';
+      m.equipment[otherSlot] = null;
+    } else if (currentlyWorn && currentlyWorn.slot !== 'spell') {
+      displaced.push(currentlyWorn);
+    }
+
+    const freeSlots = m.inventory.filter(i => i === null).length;
+    if (displaced.length > freeSlots) {
+      const cell = document.querySelector(`.inv-cell[data-index="${invIndex}"]`);
+      if (cell) {
+        cell.style.borderColor = '#c04040';
+        setTimeout(() => { cell.style.borderColor = ''; }, 400);
+      }
+      m.inventory[invIndex] = item;
+      return;
+    }
+
+    m.equipment[targetSlot] = item;
+
+    displaced.forEach((d) => {
+      const fi = m.inventory.indexOf(null);
+      if (fi !== -1) m.inventory[fi] = { name: d.name, slot: d.slot };
+    });
   } else if (SLOT_KEYS.includes(item.slot)) {
     // ── Smart ring-slot assignment ──────────────────────────────────────────
     // If the item targets a ring slot but that slot is already occupied and the
@@ -1166,8 +1210,8 @@ function _assignLoadoutBLeft(memberIndex, invIndex) {
   const item = m.inventory[invIndex];
   if (!item) return;
   const def = getItemDef(item.name);
-  const slot = def?.slot ?? 'leftHand';
-  if (slot === 'rightHand' || slot === 'leftHand' || slot === 'bothHands') {
+  const slot = def?.slot ?? 'hand';
+  if (slot === 'hand' || slot === 'bothHands') {
     const displaced = m.loadoutB.leftHand;
     const itemObj = { name: item.name, slot };
     // For bothHands items also clear B rightHand since mirror will be set on rotate
@@ -1192,8 +1236,8 @@ function _assignLoadoutBRight(memberIndex, invIndex) {
   const item = m.inventory[invIndex];
   if (!item) return;
   const def = getItemDef(item.name);
-  const slot = def?.slot ?? 'rightHand';
-  if (slot === 'rightHand' || slot === 'leftHand') {
+  const slot = def?.slot ?? 'hand';
+  if (slot === 'hand') {
     const displaced = m.loadoutB.rightHand;
     m.loadoutB.rightHand = { name: item.name, slot };
     m.inventory[invIndex] = displaced;
@@ -1527,7 +1571,7 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
       _hideContextMenu();
     };
     // Show B-slot options for hand items
-    const handSlots = ['leftHand', 'rightHand', 'bothHands'];
+    const handSlots = ['hand', 'bothHands'];
     if (handSlots.includes(def.slot)) {
       if (lbLeftBtn) {
         lbLeftBtn.style.display = 'block';

@@ -56,10 +56,7 @@
             "Mace Master",
             "Mace Master"
         ],
-        "startingSkills": [
-            "Sanctuary",
-            "Holy Radiance"
-        ],
+        "startingSkills": [],
         "image": "/heros/human_paladin.png",
         "leftHand": "Sword",
         "rightHand": "Shield",

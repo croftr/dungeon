@@ -278,3 +278,89 @@ export function createOgreSlam(position) {
         setTimeout(() => { proton.removeEmitter(emitter); }, 1500);
     }, 200);
 }
+
+export function createTreemanAwakening(position) {
+    if (!proton) return;
+
+    const emitter = new Proton.Emitter();
+
+    // Gentle magical green swirl
+    emitter.rate = new Proton.Rate(new Proton.Span(8, 14), new Proton.Span(0.04));
+
+    emitter.addInitialize(new Proton.Mass(1));
+    emitter.addInitialize(new Proton.Radius(0.3, 0.7));
+    emitter.addInitialize(new Proton.Life(1.2, 2.0));
+
+    // Upward spiralling drift
+    emitter.addInitialize(new Proton.V(1.0, new Proton.Vector3D(0, 1, 0), 150));
+
+    const material = new THREE.SpriteMaterial({
+        map: sparkTexture,
+        color: 0xffffff,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        depthWrite: false,
+    });
+    emitter.addInitialize(new Proton.Body(new THREE.Sprite(material)));
+
+    if (position) {
+        emitter.addInitialize(new Proton.Position(new Proton.PointZone(position.x, position.y + 0.5, position.z)));
+    }
+
+    emitter.addBehaviour(new Proton.Alpha(0.6, 0.0));
+    emitter.addBehaviour(new Proton.Scale(1.0, 0.3));
+    // Deep green → bright emerald
+    emitter.addBehaviour(new Proton.Color('#22cc44', '#88ffaa'));
+    emitter.addBehaviour(new Proton.RandomDrift(1.2, 0.8, 1.2, 0.04));
+
+    emitter.emit();
+    proton.addEmitter(emitter);
+
+    setTimeout(() => {
+        emitter.stopEmit();
+        setTimeout(() => { proton.removeEmitter(emitter); }, 2500);
+    }, 2000);
+}
+
+export function createMinotaurRage(position) {
+    if (!proton) return;
+
+    const emitter = new Proton.Emitter();
+
+    // Subtle, menacing red aura — not over-the-top
+    emitter.rate = new Proton.Rate(new Proton.Span(6, 10), new Proton.Span(0.05));
+
+    emitter.addInitialize(new Proton.Mass(1));
+    emitter.addInitialize(new Proton.Radius(0.2, 0.5));
+    emitter.addInitialize(new Proton.Life(0.8, 1.5));
+
+    // Slow upward drift — ominous rising energy
+    emitter.addInitialize(new Proton.V(1.2, new Proton.Vector3D(0, 1, 0), 140));
+
+    const material = new THREE.SpriteMaterial({
+        map: sparkTexture,
+        color: 0xffffff,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        depthWrite: false,
+    });
+    emitter.addInitialize(new Proton.Body(new THREE.Sprite(material)));
+
+    if (position) {
+        emitter.addInitialize(new Proton.Position(new Proton.PointZone(position.x, position.y + 0.5, position.z)));
+    }
+
+    emitter.addBehaviour(new Proton.Alpha(0.5, 0.0));
+    emitter.addBehaviour(new Proton.Scale(0.8, 0.1));
+    // Dark red → crimson
+    emitter.addBehaviour(new Proton.Color('#ff2222', '#aa0000'));
+    emitter.addBehaviour(new Proton.RandomDrift(0.8, 0.3, 0.8, 0.05));
+
+    emitter.emit();
+    proton.addEmitter(emitter);
+
+    setTimeout(() => {
+        emitter.stopEmit();
+        setTimeout(() => { proton.removeEmitter(emitter); }, 2000);
+    }, 1500);
+}

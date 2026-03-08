@@ -383,12 +383,6 @@
         "item": "Padded Vest",
         "chance": 0.1
       }
-    ],
-    "onHitEffects": [
-      {
-        "effectId": "fear",
-        "chance": 0.40
-      }
     ]
   },
   "dummy": {
@@ -441,6 +435,42 @@
       {
         "effectId": "stun",
         "chance": 0.2
+      }
+    ]
+  },
+  "demon": {
+    "name": "Demon",
+    "hp": 250,
+    "defence": 20,
+    "xp": 220,
+    "attackSpeed": 1.3,
+    "stats": {
+      "strength": 28,
+      "dexterity": 28,
+      "vitality": 20,
+      "intelligence": 14,
+      "resilience": 18
+    },
+    "drops": [
+      {
+        "item": "Life Essence",
+        "chance": 0.60
+      },
+      {
+        "item": "Mana Berry",
+        "chance": 0.40
+      },
+      {
+        "item": "Life Berry",
+        "chance": 0.30
+      },
+      {
+        "item": "Leather Boots",
+        "chance": 0.10
+      },
+      {
+        "item": "Leather Belt",
+        "chance": 0.10
       }
     ]
   }
