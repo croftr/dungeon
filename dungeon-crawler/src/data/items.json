@@ -399,7 +399,7 @@
         "attackType": "shield-bash",
         "weaponType": "shield",
         "staminaDrain": 1,
-        "baseDamage": 2,
+        "baseDamage": 4,
         "statWeights": {
             "str": 1,
             "dex": 0
@@ -445,16 +445,73 @@
         "weight": 3.5
     },
     {
+        "name": "Dwarf Crossbow",
+        "slot": "hand",
+        "attackType": "shoot",
+        "weaponType": "crossbow",
+        "staminaDrain": 2,
+        "baseDamage": 26,
+        "delay": 5.5,
+        "statWeights": {
+            "str": 0.6,
+            "dex": 0.4
+        },
+        "icon": "/icons/dwarf_crossbow.png",
+        "description": "A heavy, short-limbed mechanical crossbow made of dark iron and reinforced with brass dwarven runes. Robust and deadly.",
+        "value": 480,
+        "weight": 4.2
+    },
+    {
         "name": "Wooden Arrows",
         "slot": "ammo",
         "attackType": null,
         "baseDamage": null,
         "damageModifier": 1,
         "damageType": "normal",
+        "ammoType": "arrow",
         "icon": "/icons/wooden_arrows.png",
         "description": "A bundle of simple wooden arrows.",
         "value": 15,
         "weight": 1
+    },
+    {
+        "name": "Wooden Bolts",
+        "slot": "ammo",
+        "attackType": null,
+        "baseDamage": null,
+        "damageModifier": 1,
+        "damageType": "normal",
+        "ammoType": "bolt",
+        "icon": "/icons/wooden_bolts.png",
+        "description": "A bundle of simple wooden bolts.",
+        "value": 15,
+        "weight": 1
+    },
+    {
+        "name": "Steel Bolts",
+        "slot": "ammo",
+        "attackType": null,
+        "baseDamage": null,
+        "damageModifier": 1.2,
+        "damageType": "normal",
+        "ammoType": "bolt",
+        "icon": "/icons/steel_bolts.png",
+        "description": "A bundle of steel bolts.",
+        "value": 275,
+        "weight": 1.2
+    },
+    {
+        "name": "Silver Bolts",
+        "slot": "ammo",
+        "attackType": null,
+        "baseDamage": null,
+        "damageModifier": 1.5,
+        "damageType": "normal",
+        "ammoType": "bolt",
+        "icon": "/icons/silver_bolts.png",
+        "description": "Crossbow bolts tipped with fine silver. Especially effective against the undead.",
+        "value": 450,
+        "weight": 1.1
     },
     {
         "name": "Steel Arrows",
@@ -463,6 +520,7 @@
         "baseDamage": null,
         "damageModifier": 1.5,
         "damageType": "normal",
+        "ammoType": "arrow",
         "icon": "/icons/steel_arrows.png",
         "description": "Sharp, steel-tipped arrows with balanced fletching. Deploys deadly force.",
         "value": 275,
@@ -475,6 +533,7 @@
         "baseDamage": null,
         "damageModifier": 1,
         "damageType": "poison",
+        "ammoType": "arrow",
         "onHitEffects": [
             {
                 "effectId": "poison",

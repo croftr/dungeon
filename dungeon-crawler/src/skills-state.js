@@ -74,4 +74,10 @@ export const skillsState = {
     expiresAt: 0,
     magnitude: 1,     // resolved at cast time
   },
+  /** Double Attack — allows the caster to attack twice per action */
+  doubleAttack: {
+    active: false,
+    actorName: null,
+    expiresAt: 0,
+  },
 };

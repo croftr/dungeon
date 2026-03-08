@@ -860,3 +860,41 @@ export function triggerTrueShotEffect() {
     pulse.addBehavior(new SizeOverLife(FADE_OUT));
     _spawn(pulse, pos, 1.0);
 }
+// ══════════════════════════════════════════════════════════════════════════
+//  DOUBLE ATTACK — (New Skill)
+//  Fast, sharp horizontal slice in bright orange/red
+// ══════════════════════════════════════════════════════════════════════════
+export function triggerDoubleAttackEffect() {
+    if (!batchRenderer || !sceneRef || !cameraRef) return;
+    const tex = createGlowTexture();
+    const pos = _frontPos(1.0);
+
+    // Fast horizontal slash of particles
+    const slash = new ParticleSystem({
+        duration: 0.4, looping: false,
+        startLife: new IntervalValue(0.15, 0.4),
+        startSpeed: new IntervalValue(6.0, 12.0),
+        startSize: new IntervalValue(0.04, 0.12),
+        startColor: new ConstantColor(new Vector4(1, 0.4, 0.1, 1)),
+        worldSpace: true, maxParticle: 120,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(100), cycle: 1, interval: 0.005, probability: 1 }],
+        // Narrow horizontal fan
+        shape: new ConeEmitter({ radius: 0.1, thickness: 1, arc: Math.PI / 1.5, angle: Math.PI / 10 }),
+        material: _mat(tex), startTileIndex: new ConstantValue(0),
+        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    slash.addBehavior(new ColorOverLife(new ColorRange(
+        new Vector4(1.0, 0.9, 0.2, 1),
+        new Vector4(1.0, 0.1, 0.0, 0),
+    )));
+    slash.addBehavior(new SizeOverLife(FADE_OUT));
+
+    // Orient to face camera and then rotate so it's a horizontal slash
+    const dir = new THREE.Vector3();
+    cameraRef.getWorldDirection(dir);
+    slash.emitter.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+    // Rotate 90 degrees around the local forward axis maybe? 
+    // For now, let's just use the cone angle to make it look sharp.
+    _spawn(slash, pos, 0.8);
+}

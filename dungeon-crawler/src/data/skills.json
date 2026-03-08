@@ -125,6 +125,16 @@
         "effectTarget": "self",
         "stateKey": "trueShot"
     },
+    "Double Attack": {
+        "type": "buff",
+        "icon": "/skills/double-attack.png",
+        "description": "Enters a state of focused aggression, allowing the character to strike twice with every attack for 20 seconds. Cooldown: 90s.",
+        "cooldownMs": 90000,
+        "durationMs": 20000,
+        "effectType": "doubleAttack",
+        "effectTarget": "self",
+        "stateKey": "doubleAttack"
+    },
     "Heal": {
         "type": "healing",
         "icon": "/skills/heal.png",

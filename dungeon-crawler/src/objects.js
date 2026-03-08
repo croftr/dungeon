@@ -30,6 +30,7 @@ export function updateObjects(dt) {
 //  SARCOPHAGUS STATE
 // ─────────────────────────────────────────────
 let _mummyGateOpened = false;
+let _starterGateOpened = false; // persists across level reloads — once open, never re-closes
 let _partyConfirmNPCModel = null; // true once the player confirms — prevents re-triggering
 let _starterGate = null; // portcullis behind the party-confirm NPC; opens only via dialogue
 let _npcMixer = null;
@@ -42,6 +43,11 @@ let _npcTalkAction = null;
 let _chestCtxOpen = false;
 // Tracks which modal's "Sent to" label to update ('chest-sent-label' or 'merchant-sent-label')
 let _activeSentLabelId = 'chest-sent-label';
+// Tracks the currently open chest's contents/slots so items can be deposited
+let _activeChestContents = null;
+let _activeChestSlots = null;
+// Which party member's inventory is shown in the chest deposit panel
+let _chestPartyMemberIdx = 0;
 
 // ─────────────────────────────────────────────
 //  SHOP GRID BLOCKING
@@ -458,6 +464,8 @@ export function initObjects(scene, camera) {
         closeBtn.onclick = (e) => {
             e.stopPropagation();
             document.getElementById('chest-overlay').classList.add('chest-hidden');
+            _activeChestContents = null;
+            _activeChestSlots = null;
             _hideChestCtxMenu();
             equip.hideTooltip();
         };
@@ -558,6 +566,7 @@ export function initObjects(scene, camera) {
                 _partyConfirmNPCModel = null;
             }
 
+            _starterGateOpened = true;
             if (window.playBattlePrepVideo) {
                 window.playBattlePrepVideo(() => {
                     if (_starterGate) openPortcullis(_starterGate);
@@ -854,6 +863,11 @@ export function spawnObjectsForLevel() {
             { name: 'Gold Coins', quantity: 100 },
             "Ring of Vigour", "Ring of Wisdom", "Ring of Dexterity"
         ], undefined, true, 0.35);
+
+        // 3rd Chest in the Northwest room (Ogre room) tucked in the southwest corner
+        addChest(objectsGroup, gltfLoader, 1, 5, 0, 0.65, [
+            "Dwarf Crossbow", "Steel Bolts", "Steel Bolts"
+        ], undefined, true, 0.35);
         // Chest in the mummy room (secret east chamber)
         addChest(objectsGroup, gltfLoader, 19, 1, 0, -0.7, [
             'Chain Shirt', 'Iron Gauntlets', 'Chainmail Leggings', 'Iron-Shod Boots', 'Healers Vest'
@@ -866,7 +880,7 @@ export function spawnObjectsForLevel() {
 
         // 2nd Weapon Rack (facing West, pushed against East wall)
         addWeaponRack(objectsGroup, gltfLoader, 21, 21, Math.PI / 2, 0.65, 0, [
-            'War Hammer', 'Longbow'
+            'War Hammer', 'Longbow', 'Steel Bolts'
         ]);
 
         // Spell Cabinet in the starter room
@@ -927,11 +941,13 @@ export function spawnObjectsForLevel() {
         // Statue in the center of the new 5x5 room
         addStatue(objectsGroup, gltfLoader, 13, 3);
 
-        // Party Confirm NPC
-        addPartyConfirmNPC(objectsGroup, gltfLoader, 9, 13, Math.PI, -1, 0);
+        // Party Confirm NPC — skip if the gate was already opened in a previous visit
+        if (!_starterGateOpened) {
+            addPartyConfirmNPC(objectsGroup, gltfLoader, 9, 13, Math.PI, -1, 0);
+        }
 
-        // Starter gate — behind the NPC, only opens via NPC dialogue (no button)
-        _starterGate = addPortcullis(objectsGroup, gltfLoader, 8, 13, Math.PI / 2);
+        // Starter gate — already open if the player confirmed their party before
+        _starterGate = addPortcullis(objectsGroup, gltfLoader, 8, 13, Math.PI / 2, _starterGateOpened);
 
         // Blocking portcullis at the entrance of the mummy area (starts open)
         addPortcullis(objectsGroup, gltfLoader, 10, 1, Math.PI / 2, true);
@@ -1001,7 +1017,7 @@ export function spawnObjectsForLevel() {
 
         // Weapon rack near the minotaur room
         addWeaponRack(objectsGroup, gltfLoader, 1, 19, -Math.PI / 2, -0.15, 0, [
-            "Vampiric Dagger", "Silver Mace", "Warden's Shield"
+            "Vampiric Dagger", "Silver Mace", "Warden's Shield", "Silver Bolts"
         ]);
 
         // Exit portal (game escape) at the far end of the exit corridor
@@ -1550,6 +1566,68 @@ export function closePortcullis(p, skipEverything = false) {
         .start();
 }
 
+function _renderChestPartyInv() {
+    const tabsEl = document.getElementById('chest-party-tabs');
+    const gridEl = document.getElementById('chest-party-inv-grid');
+    if (!tabsEl || !gridEl) return;
+
+    // ── Tabs ──
+    tabsEl.innerHTML = '';
+    party.forEach((m, i) => {
+        if (m.isEmpty) return;
+        const btn = document.createElement('button');
+        btn.className = 'chest-party-tab' + (i === _chestPartyMemberIdx ? ' active' : '');
+        btn.title = m.name;
+        const canvas = document.createElement('canvas');
+        canvas.width = 30;
+        canvas.height = 30;
+        drawPortrait(canvas, m);
+        btn.appendChild(canvas);
+        btn.addEventListener('click', () => {
+            _chestPartyMemberIdx = i;
+            _renderChestPartyInv();
+        });
+        tabsEl.appendChild(btn);
+    });
+
+    // ── Inventory grid ──
+    gridEl.innerHTML = '';
+    const m = party[_chestPartyMemberIdx];
+    if (!m || m.isEmpty) return;
+
+    m.inventory.forEach((item, invIdx) => {
+        const slot = document.createElement('div');
+        slot.className = 'chest-inv-slot' + (item ? ' occupied' : '');
+        if (item) {
+            const def = getItemDef(item.name);
+            if (def) {
+                const img = document.createElement('img');
+                img.src = def.icon;
+                slot.appendChild(img);
+
+                // Left-click → deposit into chest
+                slot.addEventListener('click', () => {
+                    if (!_activeChestContents) return;
+                    const freeIdx = _activeChestContents.findIndex(e => e === null || e === undefined);
+                    if (freeIdx === -1) {
+                        showMessage('The stash is full!');
+                        return;
+                    }
+                    _activeChestContents[freeIdx] = item.name;
+                    m.inventory[invIdx] = null;
+                    equip.updateEffectiveStats(m);
+                    refreshPartyCards();
+                    _bindChestSlots(equip, _activeChestSlots, _activeChestContents);
+                    _renderChestPartyInv();
+                });
+
+                equip.attachTooltipListeners(slot, () => ({ name: item.name }));
+            }
+        }
+        gridEl.appendChild(slot);
+    });
+}
+
 export function openChestModal(chestObj) {
     playChestOpenSound();
     _activeSentLabelId = 'chest-sent-label';
@@ -1560,11 +1638,19 @@ export function openChestModal(chestObj) {
 
     const slots = document.querySelectorAll('.chest-slot');
     const contents = chestObj.userData.contents || [];
+    _activeChestContents = contents;
+    _activeChestSlots = slots;
+
+    // Default to first non-empty party member
+    _chestPartyMemberIdx = party.findIndex(m => !m.isEmpty);
+    if (_chestPartyMemberIdx === -1) _chestPartyMemberIdx = 0;
 
     {
         _bindChestSlots(equip, slots, contents);
     }
+    _renderChestPartyInv();
 }
+
 
 export function openWeaponRackModal(rackObj) {
     playWeaponRackSound();
@@ -2016,6 +2102,8 @@ function _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx) {
         slot.onclick = null;
         slot.oncontextmenu = null;
         equip.hideTooltip();
+        // Refresh the deposit panel so the received item shows up
+        if (targetIdx === _chestPartyMemberIdx) _renderChestPartyInv();
     } else {
         showMessage(`${target.name}'s inventory is full!`);
     }

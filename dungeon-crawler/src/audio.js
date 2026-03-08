@@ -407,6 +407,7 @@ const SKILL_SOUND_MAP = {
   'war-dance': { url: '/skills/war-dance.mp3', offset: 0.0 },
   'heal': { url: '/sounds/actions/life-crystal.mp3', offset: 0.0 },
   'alchemy': { url: '/sounds/items/alchemy-bubbles.mp3', offset: 0.0 },
+  'double-attack': { url: '/skills/double-attack.mp3', offset: 0.0 },
 };
 
 /**

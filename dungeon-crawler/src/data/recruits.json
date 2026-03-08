@@ -20,6 +20,7 @@
         "skillProgression": [
             "Entangle",
             "Hunter's Eye",
+            "Double Attack",
             "Bow Tactician",
             "Bow Tactician",
             "Bow Master",
@@ -85,12 +86,15 @@
         "skillProgression": [
             "Sunder Armor",
             "Miners Light",
+            "Double Attack",
             "Axe Tactician",
             "Axe Tactician",
             "Axe Master",
             "Axe Master"
         ],
-        "startingSkills": [],
+        "startingSkills": [
+            "Double Attack"
+        ],
         "image": "/dwarf_barbarian_head.png",
         "leftHand": "Axe",
         "rightHand": "Wooden Shield",
@@ -156,12 +160,15 @@
         "skillProgression": [
             "Berserk",
             "Warcry",
+            "Double Attack",
             "Two-Handed Tactician",
             "Two-Handed Tactician",
             "Two-Handed Master",
             "Two-Handed Master"
         ],
-        "startingSkills": [],
+        "startingSkills": [
+            "Double Attack"
+        ],
         "image": "/heros/human_barbarian_head.png",
         "leftHand": "Greataxe",
         "rightHand": "—",
@@ -189,19 +196,26 @@
         "bio": "A keen-eyed marksman who traded the mines for the open hunt. Baldur's crossbow never misses its mark.",
         "skillProgression": [
             "True Shot",
+            "Double Attack",
             "Crossbow Tactician",
             "Crossbow Tactician",
             "Crossbow Master",
             "Crossbow Master"
         ],
-        "startingSkills": [],
+        "startingSkills": [
+            "Double Attack"
+        ],
         "image": "/heros/dwarf-ranger.png",
         "leftHand": "Crossbow",
         "rightHand": "Dagger",
+        "ammo": "Wooden Bolts",
         "startingInventory": [
             "Cure Poison Potion",
             "Healing Potion",
-            "Minor Rejuvenate Potion"
+            "Minor Rejuvenate Potion",
+            "Steel Bolts",
+            "Silver Bolts",
+            "Dwarf Crossbow"
         ],
         "gridCol": 14,
         "gridRow": 9,

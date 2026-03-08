@@ -31,6 +31,7 @@ import {
   triggerWhirlwindEffect,
   triggerWarDanceEffect,
   triggerTrueShotEffect,
+  triggerDoubleAttackEffect,
   triggerDefaultSpellEffect,
   triggerDefaultSkillEffect,
 } from './quarks-intro.js';
@@ -2567,6 +2568,23 @@ function useHand(memberIndex, hand) {
     return;
   }
 
+  // Ammo requirement check for bows and crossbows
+  if (def?.weaponType === 'bow' || def?.weaponType === 'crossbow') {
+    const ammoItem = m.equipment?.ammo;
+    const ammoDef = ammoItem ? getItemDef(ammoItem.name) : null;
+    if (def.weaponType === 'bow') {
+      if (!ammoDef || ammoDef.ammoType !== 'arrow') {
+        showMessage(`${m.name} needs arrows equipped to use the ${def.name}!`);
+        return;
+      }
+    } else if (def.weaponType === 'crossbow') {
+      if (!ammoDef || ammoDef.ammoType !== 'bolt') {
+        showMessage(`${m.name} needs bolts equipped to use the ${def.name}!`);
+        return;
+      }
+    }
+  }
+
   const maxRange = isRanged ? 3 : 1;
 
   // Find the first alive monster that is in range and directly in front
@@ -2651,6 +2669,57 @@ function useHand(memberIndex, hand) {
     warcryMultiplier: result.formula?.warcryMultiplier ?? 1.0,
   });
 
+  // Double Attack Effect
+  const da = skillsState.doubleAttack;
+  if (da.active && da.actorName === m.name && now < da.expiresAt) {
+    // For ranged attacks the 150ms rapid-fire feel is fine; melee animations run
+    // ~400ms so we wait long enough for the first swing to visually complete.
+    const daDelay = attackType === ACTIONS.SHOOT ? 150 : 450;
+    setTimeout(() => {
+      let daResult, daTarget;
+      if (!target.alive) {
+        // Find a new target if the first one died
+        daTarget = monsters.find(
+          t => t.alive && isInFrontOfPlayer(t.gridRow, t.gridCol, maxRange)
+        );
+        if (daTarget) {
+          daResult = attackMonster(daTarget.id, m, def, attackType, ammoDef);
+          playAction(attackType, hand);
+          if (isSpell || isBuff) _dispatchSpellVFX(attackType);
+        }
+      } else {
+        daTarget = target;
+        daResult = attackMonster(target.id, m, def, attackType, ammoDef);
+        playAction(attackType, hand);
+        if (isSpell || isBuff) _dispatchSpellVFX(attackType);
+      }
+      if (daResult) {
+        addLogEntry({
+          time: Date.now(),
+          actor: 'player',
+          attacker: m.name,
+          target: daResult.monsterName || daTarget.name,
+          attackType,
+          hitChance: daResult.hitChance ?? 0,
+          hit: daResult.hit,
+          crit: daResult.crit,
+          weaponBase: daResult.formula?.weaponBase ?? 0,
+          statBonus: daResult.formula?.statBonus ?? 0,
+          statLabel: daResult.formula?.statLabel ?? 'STR',
+          mitigation: daResult.formula?.mitigation ?? 0,
+          preCritDamage: daResult.formula?.preCritDamage ?? 0,
+          finalDamage: daResult.damage,
+          critMultiplier: daResult.formula?.critMultiplier ?? 1,
+          stunned: daResult.stunned ?? false,
+          poisoned: daResult.poisoned ?? false,
+          sundered: daResult.sundered ?? false,
+          ammoModifier: daResult.formula?.ammoModifier ?? null,
+          warcryMultiplier: daResult.formula?.warcryMultiplier ?? 1.0,
+        });
+      }
+    }, daDelay);
+  }
+
   if (!result.hit) {
     return;
   }
@@ -2724,6 +2793,7 @@ function useSkill(memberIndex) {
   if (skill.name === 'Whirlwind') { _useWhirlwind(m, memberIndex); return; }
   if (skill.name === 'War Dance') { _useWarDance(m, memberIndex); return; }
   if (skill.name === 'True Shot') { _useTrueShot(m, memberIndex); return; }
+  if (skill.name === 'Double Attack') { _useDoubleAttack(m, memberIndex); return; }
   if (skill.name === 'Heal') { _useHealSkill(m, memberIndex); return; }
 
   playSkillSound('magic');
@@ -3189,6 +3259,53 @@ const TRUE_SHOT_COOLDOWN_MS = SKILLS_DATA['True Shot'].cooldownMs;
 const TRUE_SHOT_DURATION_MS = SKILLS_DATA['True Shot'].durationMs;
 let _trueShotCooldownEnds = [0, 0, 0, 0];
 let _trueShotExpireTimers = [null, null, null, null];
+
+// ── Double Attack ──────────────────────────────────────────────────────────
+const DOUBLE_ATTACK_DURATION_MS = SKILLS_DATA['Double Attack']?.durationMs ?? 20000;
+let _doubleAttackCooldownEnds = [0, 0, 0, 0];
+let _doubleAttackExpireTimers = [null, null, null, null];
+
+function _useDoubleAttack(member, memberIndex) {
+  const now = performance.now();
+  if (now < _doubleAttackCooldownEnds[memberIndex]) {
+    const remaining = Math.ceil((_doubleAttackCooldownEnds[memberIndex] - now) / 1000);
+    showMessage(`<span style="color:#ff8080">Double Attack</span> — ready in ${remaining}s`, 2000);
+    return;
+  }
+
+  const def = SKILLS_DATA['Double Attack'];
+  const delayMs = (def?.cooldownMs ?? 90000);
+
+  skillsState.doubleAttack.active = true;
+  skillsState.doubleAttack.actorName = member.name;
+  skillsState.doubleAttack.expiresAt = now + DOUBLE_ATTACK_DURATION_MS;
+
+  _doubleAttackCooldownEnds[memberIndex] = now + delayMs;
+  lastAttackTimes[`${memberIndex}-skill-Double Attack`] = now;
+
+  playSkillSound('double-attack');
+  triggerDoubleAttackEffect();
+
+  showMessage(
+    `<span style="color:#ff8080">✦ Double Attack</span> — ${member.name} enters a state of focused aggression! Striking twice with every attack for 20s.`,
+    3000
+  );
+  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Double Attack' });
+
+  if (_doubleAttackExpireTimers[memberIndex]) clearTimeout(_doubleAttackExpireTimers[memberIndex]);
+  _doubleAttackExpireTimers[memberIndex] = setTimeout(() => {
+    // Only deactivate if this member was the one who activated the current state
+    // (In case of multiple Double Attackers, though unlikely for now)
+    if (skillsState.doubleAttack.actorName === member.name) {
+      skillsState.doubleAttack.active = false;
+      skillsState.doubleAttack.actorName = null;
+      showMessage(`<span style="color:#ff8080">Double Attack</span> fades — focus returns to normal.`, 2500);
+    }
+    _doubleAttackExpireTimers[memberIndex] = null;
+  }, DOUBLE_ATTACK_DURATION_MS);
+
+  _startSkillCooldownUI(memberIndex, _doubleAttackCooldownEnds[memberIndex]);
+}
 
 function _useTrueShot(member, memberIndex) {
   const now = performance.now();
