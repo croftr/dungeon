@@ -382,6 +382,7 @@ const SKILL_SOUND_MAP = {
   'hunters-eye': { url: '/sounds/actions/skills/hunters-eye.mp3', offset: 0.0 },
   'magic': { url: '/sounds/actions/skills/magic.mp3', offset: 0.0 },
   'render': { url: '/sounds/actions/skills/render.mp3', offset: 0.0 },
+  'war-dance': { url: '/skills/war-dance.mp3', offset: 0.0 },
   'heal': { url: '/sounds/actions/life-crystal.mp3', offset: 0.0 },
   'alchemy': { url: '/sounds/items/alchemy-bubbles.mp3', offset: 0.0 },
 };

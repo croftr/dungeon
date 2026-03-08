@@ -3067,7 +3067,7 @@ function _useWarDance(member, memberIndex) {
   _warDanceCooldownEnd = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill-War Dance`] = now;
 
-  playSkillSound('berserk');
+  playSkillSound('war-dance');
   triggerWarDanceEffect();
   const warDanceDelayStr = skillsState.warDance.magnitude.toFixed(2);
   showMessage(

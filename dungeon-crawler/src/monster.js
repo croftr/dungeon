@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
-import { createHitSpark, createIceBurst, createNatureBurst } from './particles.js';
+import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam } from './particles.js';
 import { CELL, isPassable } from './map.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
@@ -483,6 +483,28 @@ _applyMultiAttacks('TreeKin', [
     weight: 3,
     specialAttack: true, // hits all party members
     specialOnHitEffects: [{ effectId: 'slow', chance: 0.30 }],
+  },
+]);
+
+_applyMultiAttacks('Ogre', [
+  {
+    name: 'normalAttack',
+    glb: '/monsters/ogre/Meshy_AI_Animation_Attack_withSkin.glb',
+    sound: '/monsters/ogre/ogre.mp3',
+    soundTimings: [0.3],
+    damageTimings: [0.3],
+    weight: 8,
+  },
+  {
+    name: 'doubleCombo',
+    glb: '/monsters/ogre/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
+    sound: '/monsters/ogre/ogre.mp3',
+    soundTimings: [0.3, 0.7],
+    damageTimings: [0.3, 0.7],
+    weight: 1,
+    specialAttack: true,
+    specialAttackType: 'randomAny',
+    damageMultiplier: 2,
   },
 ]);
 
@@ -1529,6 +1551,12 @@ export function triggerMonsterAttack(monsterId) {
         setTimeout(() => { if (m.alive) createNatureBurst(m.mesh.position); }, duration * pts * 1000);
         showMessage(`<b>${m.name}</b> unleashes a nature surge!`, 2000);
       }
+      if (variant.name === 'doubleCombo' && m.mesh) {
+        const duration = attackAction.getClip().duration;
+        const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.3;
+        setTimeout(() => { if (m.alive) createOgreSlam(m.mesh.position); }, duration * pts * 1000);
+        showMessage(`<b>${m.name}</b> unleashes a furious double strike!`, 2000);
+      }
     }
   }
   // Legacy fallback
@@ -1586,7 +1614,9 @@ export function triggerMonsterAttack(monsterId) {
   }
 }
 
-// Applies a monster's special attack to all alive party members simultaneously.
+// Applies a monster's special attack.
+// Default (AoE): hits all alive party members simultaneously.
+// 'randomAny': picks one random alive member (ignoring formation).
 // Uses variant.specialOnHitEffects to override the normal onHitEffects for the hit.
 function _applyMonsterSpecialAttack(monster, variant) {
   const aliveMembers = party.filter(m => m && !m.isEmpty && !m.isDead);
@@ -1594,15 +1624,27 @@ function _applyMonsterSpecialAttack(monster, variant) {
 
   const effectsOverride = variant.specialOnHitEffects ?? null;
 
-  aliveMembers.forEach(target => {
-    _applyMonsterDamage(monster, { forceTarget: target, onHitEffectsOverride: effectsOverride });
-  });
+  if (variant.specialAttackType === 'randomAny') {
+    // Pick one random alive party member (ignoring formation rules)
+    const target = aliveMembers[Math.floor(Math.random() * aliveMembers.length)];
+    _applyMonsterDamage(monster, {
+      forceTarget: target,
+      onHitEffectsOverride: effectsOverride,
+      damageMultiplier: variant.damageMultiplier ?? 1,
+    });
+  } else {
+    // Default AoE: hit all alive members
+    aliveMembers.forEach(target => {
+      _applyMonsterDamage(monster, { forceTarget: target, onHitEffectsOverride: effectsOverride });
+    });
+  }
 }
 
 function _applyMonsterDamage(monster, opts = {}) {
   // opts.forceTarget — bypass directional targeting (used for special/AoE attacks)
   // opts.onHitEffectsOverride — replace monster.onHitEffects for this hit
-  const { forceTarget, onHitEffectsOverride } = opts;
+  // opts.damageMultiplier — multiply base damage (e.g. 2 for ogre double combo)
+  const { forceTarget, onHitEffectsOverride, damageMultiplier } = opts;
   const isSpecial = forceTarget !== undefined;
 
   // Target whoever is on the face of the formation the monster is attacking from.
@@ -1677,7 +1719,8 @@ function _applyMonsterDamage(monster, opts = {}) {
   });
   charDefence = Math.max(0, charDefence + getDefenceModifier(target));
 
-  const preCritDamage = calcMonsterDamage(monster, effTarget, charDefence);
+  const baseDamage = calcMonsterDamage(monster, effTarget, charDefence);
+  const preCritDamage = damageMultiplier ? Math.round(baseDamage * damageMultiplier) : baseDamage;
   const resMitigation = Math.floor((effTarget.stats?.resilience ?? 0) * RESILIENCE_DAMAGE_FACTOR);
 
   // 5% chance to critically hit — triples the calculated damage

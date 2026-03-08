@@ -235,3 +235,46 @@ export function createNatureBurst(position) {
         setTimeout(() => { proton.removeEmitter(emitter); }, 3000);
     }, 500);
 }
+
+export function createOgreSlam(position) {
+    if (!proton) return;
+
+    const emitter = new Proton.Emitter();
+
+    // Short, punchy burst — ground-slam dust/debris
+    emitter.rate = new Proton.Rate(new Proton.Span(12, 18), new Proton.Span(0.03));
+
+    emitter.addInitialize(new Proton.Mass(1));
+    emitter.addInitialize(new Proton.Radius(0.3, 0.7));
+    emitter.addInitialize(new Proton.Life(0.6, 1.2));
+
+    // Fast outward + slightly upward — like a shockwave
+    emitter.addInitialize(new Proton.V(3, new Proton.Vector3D(0, 0.5, 0), 160));
+
+    const material = new THREE.SpriteMaterial({
+        map: sparkTexture,
+        color: 0xffffff,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        depthWrite: false,
+    });
+    emitter.addInitialize(new Proton.Body(new THREE.Sprite(material)));
+
+    if (position) {
+        emitter.addInitialize(new Proton.Position(new Proton.PointZone(position.x, position.y + 0.3, position.z)));
+    }
+
+    emitter.addBehaviour(new Proton.Alpha(0.7, 0.0));
+    emitter.addBehaviour(new Proton.Scale(1.2, 0.2));
+    // Orange-brown dust cloud
+    emitter.addBehaviour(new Proton.Color('#ff8844', '#aa5522'));
+    emitter.addBehaviour(new Proton.RandomDrift(1.5, 0.5, 1.5, 0.05));
+
+    emitter.emit();
+    proton.addEmitter(emitter);
+
+    setTimeout(() => {
+        emitter.stopEmit();
+        setTimeout(() => { proton.removeEmitter(emitter); }, 1500);
+    }, 200);
+}

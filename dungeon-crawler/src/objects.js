@@ -983,7 +983,7 @@ export function spawnObjectsForLevel() {
         ]);
 
         // Weapon rack near the minotaur room
-        addWeaponRack(objectsGroup, gltfLoader, 1, 19, -Math.PI / 2, 0.85, 0, [
+        addWeaponRack(objectsGroup, gltfLoader, 1, 19, -Math.PI / 2, -0.15, 0, [
             "Vampiric Dagger", "Silver Mace", "Warden's Shield"
         ]);
 
