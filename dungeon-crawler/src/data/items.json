@@ -399,7 +399,7 @@
         "attackType": "shield-bash",
         "weaponType": "shield",
         "staminaDrain": 1,
-        "baseDamage": 4,
+        "baseDamage": 2,
         "statWeights": {
             "str": 1,
             "dex": 0
@@ -409,6 +409,24 @@
         "defence": 1,
         "value": 60,
         "weight": 2.5
+    },
+    {
+        "name": "Spiked Shield",
+        "blockChance": 12,
+        "slot": "hand",
+        "attackType": "shield-bash",
+        "weaponType": "shield",
+        "staminaDrain": 1,
+        "baseDamage": 10,
+        "statWeights": {
+            "str": 1,
+            "dex": 0
+        },
+        "icon": "/icons/spiked_shield.png",
+        "description": "A sturdy metal-rimmed shield with a wicked central spike for offensive bashing.",
+        "defence": 2,
+        "value": 140,
+        "weight": 4.0
     },
     {
         "name": "Short Bow",
@@ -682,6 +700,23 @@
         "description": "A heavy war axe. Slower than a sword but hits with devastating force.",
         "value": 150,
         "weight": 2.8
+    },
+    {
+        "name": "Dwarven Axe",
+        "slot": "hand",
+        "attackType": "swipe",
+        "weaponType": "axe",
+        "staminaDrain": 1,
+        "baseDamage": 13,
+        "delay": 2.0,
+        "statWeights": {
+            "str": 0.9,
+            "dex": 0.1
+        },
+        "icon": "/icons/dwarven_axe.png",
+        "description": "A mastercrafted battle axe of dwarven design. Its heavy iron head is engraved with ancient runes of power.",
+        "value": 300,
+        "weight": 3.5
     },
     {
         "name": "Mace",

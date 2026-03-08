@@ -1053,9 +1053,10 @@ function getActiveEffectsForMember(m) {
   if (skillsState.berserk.active && skillsState.berserk.actorName === m.name) active.push('Berserk');
   if (skillsState.whirlwind.active && skillsState.whirlwind.actorName === m.name) active.push('Whirlwind');
   if (skillsState.trueShot.active && skillsState.trueShot.actorName === m.name) active.push('True Shot');
+  const now = performance.now();
+  if (skillsState.rampart.active && skillsState.rampart.actorName === m.name && now < skillsState.rampart.expiresAt) active.push('Rampart');
   if (m.runicScholarActive) active.push('Runic Scholar');
   // Active debuffs from monster on-hit effects
-  const now = performance.now();
   m.activeDebuffs?.forEach(d => {
     if (now < d.expiresAt) {
       const def = STATUS_EFFECT_DEFS[d.effectId];

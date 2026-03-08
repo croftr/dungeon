@@ -80,4 +80,11 @@ export const skillsState = {
     actorName: null,
     expiresAt: 0,
   },
+  /** Rampart — doubles the caster's armor while active. */
+  rampart: {
+    active: false,
+    actorName: null,
+    expiresAt: 0,
+    magnitude: 1, // resolved at cast time
+  },
 };

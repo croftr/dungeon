@@ -1942,6 +1942,10 @@ function _applyMonsterDamage(monster, opts = {}) {
     }
   });
   charDefence = Math.max(0, charDefence + getDefenceModifier(target));
+  const rampartActive = skillsState.rampart.active && skillsState.rampart.actorName === target.name && performance.now() < skillsState.rampart.expiresAt;
+  if (rampartActive) {
+    charDefence *= (skillsState.rampart.magnitude || 2);
+  }
 
   const baseDamage = calcMonsterDamage(monster, effTarget, charDefence);
   const preCritDamage = damageMultiplier ? Math.round(baseDamage * damageMultiplier) : baseDamage;

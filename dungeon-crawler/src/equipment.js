@@ -32,6 +32,7 @@ import {
   triggerWarDanceEffect,
   triggerTrueShotEffect,
   triggerDoubleAttackEffect,
+  triggerRampartEffect,
   triggerDefaultSpellEffect,
   triggerDefaultSkillEffect,
 } from './quarks-intro.js';
@@ -468,6 +469,11 @@ function renderModal(memberIndex) {
       }
     }
   });
+  // Apply Rampart doubling if active for this member
+  const rampart = skillsState.rampart;
+  if (rampart.active && rampart.actorName === m.name && performance.now() < rampart.expiresAt) {
+    totalDef = Math.round(totalDef * (rampart.magnitude || 2));
+  }
   const defEl = document.getElementById('stat-total-defence');
   if (defEl) defEl.textContent = totalDef;
 
@@ -643,6 +649,7 @@ function _formatSkillPotency(skillName, member) {
       if (skillDef.effectTarget === 'monster') return `Monster attack delay ×${mag.toFixed(1)}`;
       return `Attack delay ×${mag.toFixed(2)}`;
     case 'defenceMultiplier':
+      if (skillDef.effectTarget === 'self') return `+${Math.round((mag - 1) * 100)}% defence`;
       return `-${Math.round((1 - mag) * 100)}% monster defence`;
     default:
       return null;
@@ -2794,6 +2801,7 @@ function useSkill(memberIndex) {
   if (skill.name === 'War Dance') { _useWarDance(m, memberIndex); return; }
   if (skill.name === 'True Shot') { _useTrueShot(m, memberIndex); return; }
   if (skill.name === 'Double Attack') { _useDoubleAttack(m, memberIndex); return; }
+  if (skill.name === 'Rampart') { _useRampart(m, memberIndex); return; }
   if (skill.name === 'Heal') { _useHealSkill(m, memberIndex); return; }
 
   playSkillSound('magic');
@@ -3340,6 +3348,52 @@ function _useTrueShot(member, memberIndex) {
   }, TRUE_SHOT_DURATION_MS);
 
   _startSkillCooldownUI(memberIndex, _trueShotCooldownEnds[memberIndex]);
+}
+
+// ── Rampart ──────────────────────────────────────────────────────────────
+const RAMPART_DURATION_MS = SKILLS_DATA['Rampart']?.durationMs ?? 60000;
+let _rampartCooldownEnds = [0, 0, 0, 0];
+let _rampartExpireTimers = [null, null, null, null];
+
+function _useRampart(member, memberIndex) {
+  const now = performance.now();
+  if (now < _rampartCooldownEnds[memberIndex]) {
+    const remaining = Math.ceil((_rampartCooldownEnds[memberIndex] - now) / 1000);
+    showMessage(`<span style="color:#ffd700">Rampart</span> — ready in ${remaining}s`, 2000);
+    return;
+  }
+
+  const skillDef = SKILLS_DATA['Rampart'];
+  const mag = resolveSkillMagnitude('Rampart', skillDef, member);
+  const cooldownMs = (skillDef.cooldownMs ?? 120000);
+
+  skillsState.rampart.active = true;
+  skillsState.rampart.actorName = member.name;
+  skillsState.rampart.expiresAt = now + RAMPART_DURATION_MS;
+  skillsState.rampart.magnitude = mag;
+
+  _rampartCooldownEnds[memberIndex] = now + cooldownMs;
+  lastAttackTimes[`${memberIndex}-skill-Rampart`] = now;
+
+  playSkillSound('rampart');
+  triggerRampartEffect();
+  showMessage(
+    `<span style="color:#ffd700">✦ Rampart</span> — ${member.name} braces themselves! Defence rating doubled for 60s.`,
+    3000
+  );
+  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Rampart' });
+
+  if (_rampartExpireTimers[memberIndex]) clearTimeout(_rampartExpireTimers[memberIndex]);
+  _rampartExpireTimers[memberIndex] = setTimeout(() => {
+    if (skillsState.rampart.actorName === member.name) {
+      skillsState.rampart.active = false;
+      skillsState.rampart.actorName = null;
+      showMessage(`<span style="color:#ffd700">Rampart</span> fades — the character lowers their guard.`, 2500);
+    }
+    _rampartExpireTimers[memberIndex] = null;
+  }, RAMPART_DURATION_MS);
+
+  _startSkillCooldownUI(memberIndex, _rampartCooldownEnds[memberIndex]);
 }
 
 // ── Runic Scholar (Merlin) ────────────────────────────────────────────────

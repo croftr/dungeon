@@ -973,7 +973,7 @@ export function spawnObjectsForLevel() {
 
         // Weapon rack at the end of the new dead-end passage in mummy room
         addWeaponRack(objectsGroup, gltfLoader, 22, 4, Math.PI / 2, 0.65, 0, [
-            'Elven Dagger', 'Mace', 'Dagger', 'Axe'
+            'Elven Dagger', 'Mace', 'Dagger', 'Dwarven Axe', 'Spiked Shield'
         ]);
 
         // Statue in the corner of the mummy room (swapped with level 3 minotaur room)

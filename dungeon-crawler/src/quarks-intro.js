@@ -898,3 +898,55 @@ export function triggerDoubleAttackEffect() {
     // For now, let's just use the cone angle to make it look sharp.
     _spawn(slash, pos, 0.8);
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+//  RAMPART — (New Skill)
+//  A golden burst that forms a protective shell shape (golden-yellow)
+// ══════════════════════════════════════════════════════════════════════════
+export function triggerRampartEffect() {
+    if (!batchRenderer || !sceneRef || !cameraRef) return;
+    const tex = createGlowTexture();
+    const pos = cameraRef.position;
+
+    // Golden sphere shell expansion
+    const shell = new ParticleSystem({
+        duration: 1.0, looping: false,
+        startLife: new IntervalValue(0.4, 0.8),
+        startSpeed: new IntervalValue(2.5, 5.0),
+        startSize: new IntervalValue(0.08, 0.3),
+        startColor: new ConstantColor(new Vector4(1, 0.85, 0.2, 1)),
+        worldSpace: true, maxParticle: 140,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(100), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.2, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex), startTileIndex: new ConstantValue(0),
+        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    shell.addBehavior(new ColorOverLife(new ColorRange(
+        new Vector4(1, 0.95, 0.5, 1),
+        new Vector4(1, 0.7, 0.1, 0),
+    )));
+    shell.addBehavior(new SizeOverLife(GROW_FADE));
+    _spawn(shell, pos, 1.5);
+
+    // Some sparks rising 
+    const sparks = new ParticleSystem({
+        duration: 1.5, looping: false,
+        startLife: new IntervalValue(0.6, 1.2),
+        startSpeed: new IntervalValue(0.5, 2.0),
+        startSize: new IntervalValue(0.02, 0.08),
+        startColor: new ConstantColor(new Vector4(1, 1, 0.8, 1)),
+        worldSpace: true, maxParticle: 60,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(40), cycle: 1, interval: 0.05, probability: 1 }],
+        shape: new ConeEmitter({ radius: 0.7, thickness: 1, arc: Math.PI * 2, angle: Math.PI / 6 }),
+        material: _mat(tex), startTileIndex: new ConstantValue(0),
+        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    sparks.addBehavior(new ColorOverLife(new ColorRange(
+        new Vector4(1, 1, 0.6, 1),
+        new Vector4(1, 0.8, 0.4, 0),
+    )));
+    sparks.addBehavior(new SizeOverLife(FADE_OUT));
+    _spawn(sparks, pos.clone().add(new THREE.Vector3(0, -0.5, 0)), 2.5);
+}

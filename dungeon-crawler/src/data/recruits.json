@@ -85,6 +85,7 @@
         "bio": "A stout and hearty fighter from the mountainous deeps. Thorek believes every problem can be solved with a sharp axe and enough ale.",
         "skillProgression": [
             "Sunder Armor",
+            "Rampart",
             "Miners Light",
             "Double Attack",
             "Axe Tactician",
@@ -99,7 +100,9 @@
         "startingInventory": [
             "Minor Mana Potion",
             "Healing Potion",
-            "Minor Rejuvenate Potion"
+            "Minor Rejuvenate Potion",
+            "Spiked Shield",
+            "Dwarven Axe"
         ],
         "gridCol": 12,
         "gridRow": 8,

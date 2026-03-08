@@ -135,6 +135,18 @@
         "effectTarget": "self",
         "stateKey": "doubleAttack"
     },
+    "Rampart": {
+        "type": "buff",
+        "icon": "/skills/rampart.png",
+        "description": "The character braces themselves like a fortress, doubling their current defense rating for 60 seconds. Cooldown: 120s.",
+        "cooldownMs": 120000,
+        "durationMs": 60000,
+        "effectType": "defenceMultiplier",
+        "effectTarget": "self",
+        "stateKey": "rampart",
+        "magnitude": 2.0,
+        "magnitudeBonusMode": "percent"
+    },
     "Heal": {
         "type": "healing",
         "icon": "/skills/heal.png",
