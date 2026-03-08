@@ -505,6 +505,10 @@ export function initObjects(scene, camera) {
             e.stopPropagation();
             _mummyGateOpened = true;
 
+            // Close the modal immediately
+            const overlay = document.getElementById('sarcophagus-overlay');
+            if (overlay) overlay.classList.add('chest-hidden');
+
             // 2 second delay before the actual gate operation and ambush
             setTimeout(() => {
                 playGateOpeningSound();
@@ -525,13 +529,6 @@ export function initObjects(scene, camera) {
                     window.playMummyVideo();
                 }
             }, 2000);
-
-            // Close the modal after the delay + a slight overlap (2000ms + 400ms)
-            // so the player sees the interaction start before the screen clears.
-            setTimeout(() => {
-                const overlay = document.getElementById('sarcophagus-overlay');
-                if (overlay) overlay.classList.add('chest-hidden');
-            }, 2400);
         };
     }
 
@@ -855,18 +852,14 @@ export function spawnObjectsForLevel() {
         ]);
         // Chest in the Northwest room, tucked into the far northeast corner (against Rows 0 & Col 6)
         addChest(objectsGroup, gltfLoader, 5, 1, Math.PI, -0.65, [
-            "Ring of Dexterity", "Steel Arrows", "Poison Dagger", "Leather Belt", "Adventurer's Belt"
+            "Ring of Dexterity", "Steel Arrows", "Poison Dagger", "Leather Belt", "Adventurer's Belt",
+            "Dwarf Crossbow", "Steel Bolts"
         ], undefined, true, -0.35);
 
         // 2nd Chest in the Northwest room, next to the other one, containing all rings
         addChest(objectsGroup, gltfLoader, 5, 1, Math.PI, -0.65, [
             { name: 'Gold Coins', quantity: 100 },
             "Ring of Vigour", "Ring of Wisdom", "Ring of Dexterity"
-        ], undefined, true, 0.35);
-
-        // 3rd Chest in the Northwest room (Ogre room) tucked in the southwest corner
-        addChest(objectsGroup, gltfLoader, 1, 5, 0, 0.65, [
-            "Dwarf Crossbow", "Steel Bolts", "Steel Bolts"
         ], undefined, true, 0.35);
         // Chest in the mummy room (secret east chamber)
         addChest(objectsGroup, gltfLoader, 19, 1, 0, -0.7, [

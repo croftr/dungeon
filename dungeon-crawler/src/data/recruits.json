@@ -92,9 +92,7 @@
             "Axe Master",
             "Axe Master"
         ],
-        "startingSkills": [
-            "Double Attack"
-        ],
+        "startingSkills": [],
         "image": "/dwarf_barbarian_head.png",
         "leftHand": "Axe",
         "rightHand": "Wooden Shield",
@@ -166,9 +164,7 @@
             "Two-Handed Master",
             "Two-Handed Master"
         ],
-        "startingSkills": [
-            "Double Attack"
-        ],
+        "startingSkills": [],
         "image": "/heros/human_barbarian_head.png",
         "leftHand": "Greataxe",
         "rightHand": "—",
@@ -202,9 +198,7 @@
             "Crossbow Master",
             "Crossbow Master"
         ],
-        "startingSkills": [
-            "Double Attack"
-        ],
+        "startingSkills": [],
         "image": "/heros/dwarf-ranger.png",
         "leftHand": "Crossbow",
         "rightHand": "Dagger",
@@ -212,10 +206,7 @@
         "startingInventory": [
             "Cure Poison Potion",
             "Healing Potion",
-            "Minor Rejuvenate Potion",
-            "Steel Bolts",
-            "Silver Bolts",
-            "Dwarf Crossbow"
+            "Minor Rejuvenate Potion"
         ],
         "gridCol": 14,
         "gridRow": 9,
