@@ -1601,7 +1601,12 @@ function _renderChestPartyInv() {
                 // Left-click → deposit into chest
                 slot.addEventListener('click', () => {
                     if (!_activeChestContents) return;
-                    const freeIdx = _activeChestContents.findIndex(e => e === null || e === undefined);
+                    // Scan all 25 chest positions (array may be shorter than 25 if not all slots used)
+                    const CHEST_SIZE = 25;
+                    let freeIdx = -1;
+                    for (let ci = 0; ci < CHEST_SIZE; ci++) {
+                        if (_activeChestContents[ci] == null) { freeIdx = ci; break; }
+                    }
                     if (freeIdx === -1) {
                         showMessage('The stash is full!');
                         return;
@@ -2032,10 +2037,9 @@ function _bindChestSlots(equip, slots, contents) {
                 img.src = itemDef.icon;
                 slot.appendChild(img);
 
-                // Left-click → send to first available party member
+                // Left-click → send to the currently selected party member tab
                 slot.onclick = () => {
-                    const defaultIdx = party.findIndex(m => !m.isEmpty);
-                    if (defaultIdx !== -1) _sendChestItem(equip, slots, contents, i, itemDef, defaultIdx);
+                    _sendChestItem(equip, slots, contents, i, itemDef, _chestPartyMemberIdx);
                 };
 
                 // Right-click → pick recipient

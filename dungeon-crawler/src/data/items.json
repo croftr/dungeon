@@ -707,7 +707,7 @@
         "weaponType": "twoHanded",
         "staminaDrain": 2,
         "baseDamage": 28,
-        "delay": 4,
+        "delay": 5,
         "statWeights": {
             "str": 0.7,
             "dex": 0.3
@@ -724,10 +724,10 @@
         "weaponType": "twoHanded",
         "staminaDrain": 2,
         "baseDamage": 20,
-        "delay": 4,
+        "delay": 5,
         "statWeights": {
-            "str": 1,
-            "dex": 0
+            "str": 0.8,
+            "dex": 0.2
         },
         "icon": "/icons/greataxe.png",
         "description": "A massive two-handed axe that cleaves through enemies in a single arc.",
@@ -741,10 +741,10 @@
         "weaponType": "twoHanded",
         "staminaDrain": 2,
         "baseDamage": 22,
-        "delay": 4,
+        "delay": 5,
         "statWeights": {
-            "str": 1,
-            "dex": 0
+            "str": 0.8,
+            "dex": 0.2
         },
         "icon": "/icons/war_hammer.png",
         "description": "A two-handed war hammer. Slow to swing but crushes stone and bone alike.",
