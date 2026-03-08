@@ -2285,7 +2285,9 @@ function _executePartySpell(caster, casterIndex, hand, spellDef) {
   }
   setMp(caster.id, caster.mp - spellDef.mpCost);
 
-  const timeKey = (hand === 'skill') ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
+  const isSpellSlot = (hand !== 'skill') && spellDef.slot === 'spell';
+  const baseKey = (hand === 'skill') ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
+  const timeKey = isSpellSlot ? `${baseKey}-${spellDef.name}` : baseKey;
   lastAttackTimes[timeKey] = performance.now();
 
   if (hand === 'skill') {
@@ -2330,8 +2332,12 @@ function _executePartyMemberSpell(caster, casterIndex, hand, spellDef, target) {
   }
   setMp(caster.id, caster.mp - spellDef.mpCost);
 
-  // Record cooldown so the slot greys out normally
-  const timeKey = (hand === 'skill') ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
+  // Record cooldown so the slot greys out normally.
+  // Spells include the spell name so switching spells in the same hand doesn't
+  // inherit the previous spell's cooldown.
+  const isSpellSlot = (hand !== 'skill') && spellDef.slot === 'spell';
+  const baseKey = (hand === 'skill') ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
+  const timeKey = isSpellSlot ? `${baseKey}-${spellDef.name}` : baseKey;
   lastAttackTimes[timeKey] = performance.now();
 
   if (hand === 'skill') {
@@ -2521,9 +2527,13 @@ function useHand(memberIndex, hand) {
   delaySec *= getAttackSpeedMultiplier(m);
 
   // Check cooldown timer
-  // A 'bothHands' weapon is driven by the left or right hand click but acts as 
+  // A 'bothHands' weapon is driven by the left or right hand click but acts as
   // one cooldown, we only care about its primary slot timer (left).
-  const timeKey = isBothHands ? `${memberIndex}-left` : `${memberIndex}-${hand}`;
+  // Spells include the spell name in the key so switching spells in the same
+  // hand slot doesn't inherit the previous spell's cooldown.
+  const isSpellSlot = def?.slot === 'spell';
+  const baseKey = isBothHands ? `${memberIndex}-left` : `${memberIndex}-${hand}`;
+  const timeKey = isSpellSlot ? `${baseKey}-${item.name}` : baseKey;
   const now = performance.now();
   if (lastAttackTimes[timeKey]) {
     if (now - lastAttackTimes[timeKey] < delaySec * 1000) {

@@ -99,7 +99,7 @@ export function getInRangeMonster() {
 //  Only instance-specific data lives here: map position, assets, game state.
 // ─────────────────────────────────────────────────────────────────────────────
 
-function inst(def, id, gridRow, gridCol, glbIdle, glbAttack, attackSound, scale = 0.45, offsetX = 0, offsetZ = 0, level = 1, patrol = null, glbDeath = null, glbHit = null, glbWalk = null) {
+function inst(def, id, gridRow, gridCol, glbIdle, glbAttack, attackSound, scale = 0.45, offsetX = 0, offsetZ = 0, level = 1, patrol = null, glbDeath = null, glbHit = null, glbWalk = null, glbIdleAlt = null) {
   return {
     id, type: 'glb',
     ...def,
@@ -110,6 +110,7 @@ function inst(def, id, gridRow, gridCol, glbIdle, glbAttack, attackSound, scale 
     glbIdle, glbAttack, glbDeath, glbHit, glbWalk, attackSound, scale,
     level,
     patrol,
+    glbIdleAlt,
   };
 }
 
@@ -312,7 +313,8 @@ export const monsters = [
     { bounds: { minRow: 9, maxRow: 13, minCol: 8, maxCol: 14 }, speed: 0.6, waitTime: 1.5 },
     '/monsters/minotaur/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/minotaur/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
-    '/monsters/minotaur/Meshy_AI_Animation_Walking_withSkin.glb'),
+    '/monsters/minotaur/Meshy_AI_Animation_Walking_withSkin.glb',
+    '/monsters/minotaur/Meshy_AI_Animation_Alert_withSkin.glb'),
 
   // North-West Room (Skeletons)
   inst(D.skeletonWarrior, 311, 3, 2,
@@ -824,22 +826,47 @@ function _loadMonster(m, scene) {
     if (gltf.animations && gltf.animations.length > 0) {
       const idleAction = m.mixer.clipAction(gltf.animations[0]);
       m.actions.idle = idleAction;
+      m._activeIdle = idleAction;
+
+      m.getIdleAction = function () {
+        if (!m.actions.idleAlt) return m.actions.idle;
+        return (Math.random() < 0.25) ? m.actions.idle : m.actions.idleAlt;
+      };
+
       // Agree Gesture animations run fast — halve the speed so they look natural
       // Training dummy doesn't loop its idle animation; it's triggered manually on hit
       if (m.name !== 'Training Dummy') {
-        idleAction.play();
-        if (m.name === 'Minotaur') {
-          const audio = new Audio('/monsters/minotaur/scream.mp3');
-          audio.volume = 0.8;
-          audio.play().catch(() => { });
+        const initialIdle = m.getIdleAction();
+        m._activeIdle = initialIdle;
+        initialIdle.play();
+        if (m.name === 'Minotaur' && initialIdle === m.actions.idle) {
+          playSoundByUrl('/monsters/minotaur/scream.mp3', 0.8);
         }
       }
 
       m.mixer.addEventListener('loop', (e) => {
-        if (m.name === 'Minotaur' && e.action === m.actions.idle && m._animState !== 'walk') {
-          const audio = new Audio('/monsters/minotaur/scream.mp3');
-          audio.volume = 0.8;
-          audio.play().catch(() => { });
+        if (m._animState !== 'walk' && (e.action === m.actions.idle || e.action === m.actions.idleAlt)) {
+          if (m.actions.idleAlt) {
+            const nextIdle = m.getIdleAction();
+            if (e.action !== nextIdle) {
+              nextIdle.reset().play();
+              e.action.crossFadeTo(nextIdle, 0.4, true);
+              m._activeIdle = nextIdle;
+            }
+            if (m.name === 'Minotaur' && nextIdle === m.actions.idle) {
+              playSoundByUrl('/monsters/minotaur/scream.mp3', 0.8);
+            }
+          } else if (m.name === 'Minotaur' && e.action === m.actions.idle) {
+            playSoundByUrl('/monsters/minotaur/scream.mp3', 0.8);
+          }
+        }
+      });
+    }
+
+    if (m.glbIdleAlt) {
+      _gltfLoader.load(m.glbIdleAlt, (altGltf) => {
+        if (altGltf.animations && altGltf.animations.length > 0) {
+          m.actions.idleAlt = m.mixer.clipAction(altGltf.animations[0]);
         }
       });
     }
@@ -902,7 +929,14 @@ function _loadMonster(m, scene) {
         const isAttackAction = m.attackVariants?.some(v => v && v.action === e.action);
         if (isAttackAction && m.actions.idle && m.name !== 'Training Dummy') {
           const isMoving = (m._cs && m._cs.moving) || (m._ps && m._ps.moving);
-          const toAction = (isMoving && m.actions.walk) ? m.actions.walk : m.actions.idle;
+          let toAction = (isMoving && m.actions.walk) ? m.actions.walk : null;
+          if (!toAction) {
+            toAction = m.getIdleAction ? m.getIdleAction() : m.actions.idle;
+            m._activeIdle = toAction;
+            if (m.name === 'Minotaur' && toAction === m.actions.idle) {
+              playSoundByUrl('/monsters/minotaur/scream.mp3', 0.8);
+            }
+          }
           toAction.reset().play();
           e.action.crossFadeTo(toAction, 0.25, false);
           m._animState = isMoving ? 'walk' : 'idle';
@@ -923,7 +957,14 @@ function _loadMonster(m, scene) {
           m.mixer.addEventListener('finished', (e) => {
             if (e.action === m.actions.attack && m.actions.idle && m.name !== 'Training Dummy') {
               const isMoving = (m._cs && m._cs.moving) || (m._ps && m._ps.moving);
-              const toAction = (isMoving && m.actions.walk) ? m.actions.walk : m.actions.idle;
+              let toAction = (isMoving && m.actions.walk) ? m.actions.walk : null;
+              if (!toAction) {
+                toAction = m.getIdleAction ? m.getIdleAction() : m.actions.idle;
+                m._activeIdle = toAction;
+                if (m.name === 'Minotaur' && toAction === m.actions.idle) {
+                  playSoundByUrl('/monsters/minotaur/scream.mp3', 0.8);
+                }
+              }
               toAction.reset().play();
               m.actions.attack.crossFadeTo(toAction, 0.25, false);
               m._animState = isMoving ? 'walk' : 'idle';
@@ -960,7 +1001,14 @@ function _loadMonster(m, scene) {
           m.mixer.addEventListener('finished', (e) => {
             if (e.action === m.actions.hit && m.actions.idle) {
               const isMoving = (m._cs && m._cs.moving) || (m._ps && m._ps.moving);
-              const toAction = (isMoving && m.actions.walk) ? m.actions.walk : m.actions.idle;
+              let toAction = (isMoving && m.actions.walk) ? m.actions.walk : null;
+              if (!toAction) {
+                toAction = m.getIdleAction ? m.getIdleAction() : m.actions.idle;
+                m._activeIdle = toAction;
+                if (m.name === 'Minotaur' && toAction === m.actions.idle) {
+                  playSoundByUrl('/monsters/minotaur/scream.mp3', 0.8);
+                }
+              }
               toAction.reset().play();
               m.actions.hit.crossFadeTo(toAction, 0.2, false);
               m._animState = isMoving ? 'walk' : 'idle';
@@ -1333,14 +1381,19 @@ export function updateMonsters(dt, playerCamera, scene) {
         if (isMoving) {
           if (m._animState !== 'walk') {
             m.actions.walk.reset().play();
-            m.actions.idle.crossFadeTo(m.actions.walk, 0.3, true);
+            (m._activeIdle || m.actions.idle).crossFadeTo(m.actions.walk, 0.3, true);
             m._animState = 'walk';
           }
         } else {
           if (m._animState !== 'idle') {
-            m.actions.idle.reset().play();
-            m.actions.walk.crossFadeTo(m.actions.idle, 0.3, true);
+            const nextIdle = m.getIdleAction ? m.getIdleAction() : m.actions.idle;
+            nextIdle.reset().play();
+            m.actions.walk.crossFadeTo(nextIdle, 0.3, true);
             m._animState = 'idle';
+            m._activeIdle = nextIdle;
+            if (m.name === 'Minotaur' && nextIdle === m.actions.idle) {
+              playSoundByUrl('/monsters/minotaur/scream.mp3', 0.8);
+            }
           }
         }
       }

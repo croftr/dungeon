@@ -138,6 +138,20 @@
         }
     },
     {
+        "name": "Healers Vest",
+        "slot": "chest",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/healers_vest.png",
+        "description": "Thick quilted padding stitched into a vest. Absorbs blows.",
+        "defence": 2,
+        "value": 45,
+        "weight": 2,
+        "skillBonuses": {
+            "Heal": 1
+        }
+    },
+    {
         "name": "Padded Vest",
         "slot": "chest",
         "attackType": null,

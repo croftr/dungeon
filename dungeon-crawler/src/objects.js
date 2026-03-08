@@ -225,10 +225,22 @@ export function initObjects(scene, camera) {
                     showMessage("You step into the swirling blue portal...");
                     playPortalSound();
 
+                    // Transport the player immediately
                     if (window.loadLevel) window.loadLevel(targetLevel);
 
-                    if (isTreemanTransition && window.playTreemanVideo) {
-                        window.playTreemanVideo();
+                    // Play the portal animation at the same time
+                    if (window.playPortalVideo) {
+                        window.playPortalVideo(() => {
+                            // After the portal video finishes, check for secondary transitions (Treeman)
+                            if (isTreemanTransition && window.playTreemanVideo) {
+                                window.playTreemanVideo();
+                            }
+                        });
+                    } else {
+                        // Fallback if video isn't available
+                        if (isTreemanTransition && window.playTreemanVideo) {
+                            window.playTreemanVideo();
+                        }
                     }
                 } else {
                     showMessage("Step closer to the portal to enter.");
@@ -378,7 +390,7 @@ export function initObjects(scene, camera) {
                         const pz = player.gridRow * CELL;
                         const targetAngle = Math.atan2(px - root.position.x, pz - root.position.z);
                         let diff = targetAngle - root.rotation.y;
-                        while (diff >  Math.PI) diff -= 2 * Math.PI;
+                        while (diff > Math.PI) diff -= 2 * Math.PI;
                         while (diff < -Math.PI) diff += 2 * Math.PI;
                         new Tween(root.rotation, tweenGroup)
                             .to({ y: root.rotation.y + diff }, 600)
@@ -410,7 +422,7 @@ export function initObjects(scene, camera) {
                         const targetAngle = Math.atan2(px - npcPos.x, pz - npcPos.z);
                         // Normalise to shortest rotation arc from current angle
                         let diff = targetAngle - _partyConfirmNPCModel.rotation.y;
-                        while (diff >  Math.PI) diff -= 2 * Math.PI;
+                        while (diff > Math.PI) diff -= 2 * Math.PI;
                         while (diff < -Math.PI) diff += 2 * Math.PI;
                         new Tween(_partyConfirmNPCModel.rotation, tweenGroup)
                             .to({ y: _partyConfirmNPCModel.rotation.y + diff }, 600)
@@ -834,7 +846,7 @@ export function spawnObjectsForLevel() {
         ]);
         // Chest in the Northwest room, tucked into the far northeast corner (against Rows 0 & Col 6)
         addChest(objectsGroup, gltfLoader, 5, 1, Math.PI, -0.65, [
-            "Ring of Dexterity", "Elven Dagger", "Steel Arrows", "Poison Dagger", "Leather Belt", "Adventurer's Belt"
+            "Ring of Dexterity", "Steel Arrows", "Poison Dagger", "Leather Belt", "Adventurer's Belt"
         ], undefined, true, -0.35);
 
         // 2nd Chest in the Northwest room, next to the other one, containing all rings
@@ -842,6 +854,11 @@ export function spawnObjectsForLevel() {
             { name: 'Gold Coins', quantity: 100 },
             "Ring of Vigour", "Ring of Wisdom", "Ring of Dexterity"
         ], undefined, true, 0.35);
+        // Chest in the mummy room (secret east chamber)
+        addChest(objectsGroup, gltfLoader, 19, 1, 0, -0.7, [
+            'Chain Shirt', 'Iron Gauntlets', 'Chainmail Leggings', 'Iron-Shod Boots', 'Healers Vest'
+        ]);
+
         // Crystals in the starter room
         addCrystals(objectsGroup, gltfLoader, 9, 11, 0, -0.7);
         // Bone pile in the passage
@@ -974,8 +991,8 @@ export function spawnObjectsForLevel() {
         addKeyhole(objectsGroup, gltfLoader, 5, 8, Math.PI / 2, -0.85, -2.0);
     } else if (level === 3) {
         // ── Portals ──────────────────────────────────────────────────────────
-        // Return portal to Level 1 — near start (row 1), pushed against north wall
-        addPortal(objectsGroup, gltfLoader, 4, 1, 1, 0, 0, -0.85);
+        // Return portal to Level 1 — behind the player at spawn
+        addPortal(objectsGroup, gltfLoader, 11, 21, 1, Math.PI, 0, 0.85);
 
         // Weapon rack next to the entrance
         addWeaponRack(objectsGroup, gltfLoader, 5, 2, -Math.PI / 2, 0.85, 0, [

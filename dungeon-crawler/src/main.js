@@ -448,6 +448,51 @@ function finishMinotaurVideo() {
 
 if (skipMinotaurBtn) skipMinotaurBtn.addEventListener('click', finishMinotaurVideo);
 if (minotaurVideo) minotaurVideo.addEventListener('ended', finishMinotaurVideo);
+
+// ─────────────────────────────────────────────
+//  PORTAL VIDEO OVERLAY
+// ─────────────────────────────────────────────
+const portalOverlay = document.getElementById('portal-video-overlay');
+const portalVideo = document.getElementById('portal-video');
+const skipPortalBtn = document.getElementById('skip-portal-btn');
+let _portalCallback = null;
+
+window.playPortalVideo = function (onComplete) {
+  _portalCallback = onComplete;
+  if (!portalOverlay || !portalVideo) {
+    if (_portalCallback) _portalCallback();
+    return;
+  }
+  portalOverlay.classList.remove('hidden');
+
+  setTimeout(() => {
+    portalOverlay.style.opacity = '1';
+    portalVideo.play().catch(e => {
+      console.warn("Portal video play failed:", e);
+      finishPortalVideo();
+    });
+  }, 50);
+};
+
+function finishPortalVideo() {
+  if (!portalOverlay) {
+    if (_portalCallback) _portalCallback();
+    return;
+  }
+  portalOverlay.style.opacity = '0';
+
+  setTimeout(() => {
+    portalVideo.pause();
+    portalOverlay.classList.add('hidden');
+    if (_portalCallback) {
+      _portalCallback();
+      _portalCallback = null;
+    }
+  }, 1500);
+}
+
+if (skipPortalBtn) skipPortalBtn.addEventListener('click', finishPortalVideo);
+if (portalVideo) portalVideo.addEventListener('ended', finishPortalVideo);
 function handleFirstInteraction() {
   startMusic();
   window.removeEventListener('click', handleFirstInteraction);
@@ -487,6 +532,12 @@ window.loadLevel = function (levelNum) {
   player.gridCol = start.col;
   const w = cellToWorld(start.row, start.col);
   camera.position.set(w.x, w.y, w.z);
+
+  if (levelNum === 3 && oldLevel === 1) {
+    player.facing = (player.facing + 2) % 4; // Turn 180 degrees
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = FACING_ANGLES[player.facing];
+  }
 
   // 5. Update Minimap bounds
   drawMinimap();
@@ -564,7 +615,7 @@ console.log('Map: 0=floor 1=wall 2=start 3=exit | Controls: W/S=move  Q/E=turn  
   // 4. Player position
   player.gridRow = save.player.gridRow;
   player.gridCol = save.player.gridCol;
-  player.facing  = save.player.facing;
+  player.facing = save.player.facing;
   const w = cellToWorld(player.gridRow, player.gridCol);
   camera.position.set(w.x, w.y, w.z);
   camera.rotation.order = 'YXZ';

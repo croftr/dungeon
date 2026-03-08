@@ -396,7 +396,8 @@ function refreshMember(m) {
     }
     lhDelaySec *= getAttackSpeedMultiplier(m);
 
-    const lastUsed = lastAttackTimes[`${i}-left`];
+    const lhTimeKey = (lhDef?.slot === 'spell' && lhName) ? `${i}-left-${lhName}` : `${i}-left`;
+    const lastUsed = lastAttackTimes[lhTimeKey];
     const lhCanAttack = lastUsed === undefined || (performance.now() - lastUsed) >= (lhDelaySec * 1000);
     lhSlot.classList.toggle('slot-cooling-down', !lhCanAttack);
     // Auto-refresh when cooldown expires if it's currently on cooldown
@@ -423,7 +424,11 @@ function refreshMember(m) {
     }
     rhDelaySec *= getAttackSpeedMultiplier(m);
 
-    const lastUsed = lhBothHands ? lastAttackTimes[`${i}-left`] : lastAttackTimes[`${i}-right`];
+    const rhCurName = lhBothHands ? lhName : rhName;
+    const rhCurDef = lhBothHands ? lhDef : rhDef;
+    const rhTimeKey = (!lhBothHands && rhCurDef?.slot === 'spell' && rhCurName)
+      ? `${i}-right-${rhCurName}` : (lhBothHands ? `${i}-left` : `${i}-right`);
+    const lastUsed = lastAttackTimes[rhTimeKey];
     const rhCanAttack = lastUsed === undefined || (performance.now() - lastUsed) >= (rhDelaySec * 1000);
 
     rhSlot.classList.toggle('slot-cooling-down', !rhCanAttack);

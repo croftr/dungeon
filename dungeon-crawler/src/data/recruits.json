@@ -14,7 +14,7 @@
         "bio": "A swift and silent guardian of the deep woods. Elrond's bow strikes with the fury of nature itself.",
         "startingInventory": [
             "Torch",
-            "Cure Poison Potion",
+            "Minor Rejuvenate Potion",
             "Healing Potion"
         ],
         "skillProgression": [
@@ -61,7 +61,8 @@
         "leftHand": "Sword",
         "rightHand": "Shield",
         "startingInventory": [
-            "Healing Potion"
+            "Healing Potion",
+            "Minor Rejuvenate Potion"
         ],
         "gridCol": 10,
         "gridRow": 8,
@@ -95,7 +96,8 @@
         "rightHand": "Wooden Shield",
         "startingInventory": [
             "Minor Mana Potion",
-            "Healing Potion"
+            "Healing Potion",
+            "Minor Rejuvenate Potion"
         ],
         "gridCol": 12,
         "gridRow": 8,
@@ -229,7 +231,6 @@
         ],
         "startingSkills": [],
         "startingInventory": [
-            "Cure Poison Potion",
             "Healing Potion",
             "Minor Rejuvenate Potion"
         ],
@@ -273,7 +274,7 @@
             "Minor Mana Potion"
         ],
         "image": "/heros/white-mage.png",
-        "leftHand": "Oak Staff",
+        "leftHand": "",
         "rightHand": "—",
         "ammo": "Spellbook",
         "gridCol": 8,
