@@ -4,12 +4,12 @@ import { SPELLS } from './spells.js';
 import { ACTIONS } from './items.js';
 import SKILLS_DATA from './data/skills.json';
 import { playAction } from './actions.js';
-import { attackMonster, monsters, getInRangeMonster, setHuntersEyeTarget, getHuntersEyeTargetId } from './monster.js';
+import { attackMonster, monsters, getInRangeMonster, setHuntersEyeTarget, getHuntersEyeTargetId, applyMonsterStatusEffect } from './monster.js';
 import { showMessage } from './minimap.js';
 import { dropMember } from './recruits.js';
-import { isInFrontOfPlayer } from './player.js';
+import { isInFrontOfPlayer, player } from './player.js';
 import { isAlchemyModalOpen, addItemToAlchemy } from './objects.js';
-import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude } from './combat-rules.js';
+import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude, calcOnHitChance } from './combat-rules.js';
 import { playCritSound, playSkillSound, playItemSound, playLevelUpConfirmSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { skillsState } from './skills-state.js';
@@ -35,6 +35,7 @@ import {
   triggerRampartEffect,
   triggerDefaultSpellEffect,
   triggerDefaultSkillEffect,
+  triggerSleepEffect,
 } from './quarks-intro.js';
 
 // Maps spell attackType → VFX + sound. Add new entries here as spells grow.
@@ -56,6 +57,10 @@ function _dispatchSpellVFX(attackType) {
     case 'heal':
       playSkillSound('heal');
       triggerHolyRadianceEffect();
+      break;
+    case 'sleep':
+      playSkillSound('sleep');
+      triggerSleepEffect();
       break;
     default:
       playSkillSound('magic');
@@ -2331,6 +2336,70 @@ function _executeResistPoison(caster) {
   refreshPartyCards();
 }
 
+/**
+ * Dispatcher for AoE debuff spells that target nearby monsters (e.g. Sleep).
+ * Finds all alive monsters within 1 grid square of the player and applies the
+ * status effect from spellDef.attackType to each, gated by a resilience-based
+ * resistance roll using spellDef.hitChance.
+ */
+function _executeAoEDebuffSpell(caster, casterIndex, hand, spellDef) {
+  if (caster.mp < spellDef.mpCost) {
+    showMessage(`${caster.name} does not have enough mana!`);
+    return;
+  }
+  setMp(caster.id, caster.mp - spellDef.mpCost);
+
+  const isSpellSlot = (hand !== 'skill') && spellDef.slot === 'spell';
+  const baseKey = (hand === 'skill') ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
+  const timeKey = isSpellSlot ? `${baseKey}-${spellDef.name}` : baseKey;
+  lastAttackTimes[timeKey] = performance.now();
+
+  refreshPartyCards();
+  playAction(spellDef.attackType, hand);
+  _dispatchSpellVFX(spellDef.attackType);
+
+  // Determine the status effect to apply (same as the spell's attackType, e.g. 'sleep')
+  const effectId = spellDef.attackType;
+  const duration = spellDef.statusDuration ?? null; // null → use status-effects.json default
+
+  // Collect all alive monsters within 1 grid square of the player
+  const aoeTargets = monsters.filter(m =>
+    m.alive &&
+    Math.abs(m.gridRow - player.gridRow) <= 1 &&
+    Math.abs(m.gridCol - player.gridCol) <= 1
+  );
+
+  if (aoeTargets.length === 0) {
+    showMessage(`${caster.name} casts <b>${spellDef.name}</b> — but there are no nearby targets!`, 2000);
+    return;
+  }
+
+  let hitCount = 0;
+  aoeTargets.forEach(target => {
+    const chance = calcOnHitChance(spellDef.hitChance ?? 0.65, target.stats?.resilience ?? 0, null, effectId);
+    if (Math.random() < chance) {
+      applyMonsterStatusEffect(target.id, effectId, caster.name, duration);
+      hitCount++;
+    }
+  });
+
+  const total = aoeTargets.length;
+  let outcomeMsg, logTarget;
+  if (hitCount === 0) {
+    outcomeMsg = `${caster.name} casts <b>${spellDef.name}</b> — all monsters resist!`;
+    logTarget = `no monsters (all resisted)`;
+  } else if (hitCount === total) {
+    outcomeMsg = `${caster.name} casts <b>${spellDef.name}</b> — ${hitCount} monster${hitCount > 1 ? 's fall' : ' falls'} into slumber!`;
+    logTarget = `all ${total} monster${total > 1 ? 's' : ''}`;
+  } else {
+    outcomeMsg = `${caster.name} casts <b>${spellDef.name}</b> — ${hitCount} of ${total} monsters succumb!`;
+    logTarget = `${hitCount} of ${total} monsters`;
+  }
+
+  showMessage(outcomeMsg, 2500);
+  addLogEntry({ time: Date.now(), type: 'skill', actor: caster.name, skillName: spellDef.name, target: logTarget });
+}
+
 /** Dispatcher for party-member targeted spells — routes to the correct handler. */
 function _executePartyMemberSpell(caster, casterIndex, hand, spellDef, target) {
   // MP check (deducted here, after the player has confirmed their target choice)
@@ -2562,6 +2631,12 @@ function useHand(memberIndex, hand) {
   // Spells that target the whole party execute immediately without a target picker.
   if (def?.target === 'party') {
     _executePartySpell(m, memberIndex, hand, def);
+    return;
+  }
+
+  // AoE debuff spells targeting nearby monsters (e.g. Sleep).
+  if (def?.target === 'monsters-aoe') {
+    _executeAoEDebuffSpell(m, memberIndex, hand, def);
     return;
   }
 

@@ -42,8 +42,8 @@
     "xp": 100,
     "attackSpeed": 1.5,
     "stats": {
-      "strength": 13,
-      "dexterity": 15,
+      "strength": 16,
+      "dexterity": 16,
       "vitality": 9,
       "intelligence": 6,
       "resilience": 8

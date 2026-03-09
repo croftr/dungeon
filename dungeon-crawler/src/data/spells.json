@@ -93,5 +93,21 @@
         "description": "A surge of golden light that banishes fatigue. Restores SP equal to double the caster's Intelligence to one party member.",
         "value": 0,
         "weight": 0
+    },
+    {
+        "name": "Sleep",
+        "type": "aoe-debuff",
+        "target": "monsters-aoe",
+        "slot": "spell",
+        "attackType": "sleep",
+        "baseDamage": 0,
+        "hitChance": 0.65,
+        "statusDuration": 20,
+        "delay": 10,
+        "mpCost": 14,
+        "icon": "/icons/sleep.png",
+        "description": "An arcane lullaby that lulls all nearby monsters into magical slumber. Affects all enemies within 1 grid square. Each monster resists based on its Resilience. Modify hitChance (0–1) and statusDuration (seconds) in spells.json.",
+        "value": 0,
+        "weight": 0
     }
 ]

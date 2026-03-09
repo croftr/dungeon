@@ -316,54 +316,36 @@ export const monsters = [
     '/monsters/minotaur/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/minotaur/Meshy_AI_Animation_Alert_withSkin.glb'),
 
-  // North-West Room (Skeletons)
-  inst(D.skeletonWarrior, 311, 3, 2,
+  // North-West Room (4 Skeletons, 1 Demon)
+  inst(D.skeletonWarrior, 311, 2, 2,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
     '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
-  inst(D.skeletonWarrior, 312, 3, 3,
+  inst(D.skeletonWarrior, 312, 2, 4,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
     '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
-  inst(D.skeletonWarrior, 313, 2, 3,
+  inst(D.skeletonWarrior, 313, 4, 2,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
     '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
-
-  // North-East Room (Demons)
-  inst(D.demon, 321, 3, 18,
-    '/items/demon/Meshy_AI_Animation_Idle_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
-    '/items/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
-    '/items/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
-  inst(D.demon, 322, 3, 19,
-    '/items/demon/Meshy_AI_Animation_Idle_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
-    '/items/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
-    '/items/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
-
-  // South-West Room (Demons)
-  inst(D.demon, 331, 19, 2,
-    '/items/demon/Meshy_AI_Animation_Idle_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
-    '/items/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
-    '/items/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
-  inst(D.demon, 332, 19, 3,
+  inst(D.skeletonWarrior, 314, 4, 4,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+  inst(D.demon, 315, 3, 3,
     '/items/demon/Meshy_AI_Animation_Idle_withSkin.glb',
     '/items/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
     '/items/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
@@ -371,29 +353,124 @@ export const monsters = [
     '/items/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
     '/items/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
 
-  // South-East Room (Skeletons)
-  inst(D.skeletonWarrior, 341, 19, 18,
+  // North-East Room (4 Skeletons, 1 Demon)
+  inst(D.skeletonWarrior, 321, 2, 17,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
     '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
-  inst(D.skeletonWarrior, 342, 19, 19,
+  inst(D.skeletonWarrior, 322, 2, 19,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
     '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
-  inst(D.skeletonWarrior, 343, 20, 18,
+  inst(D.skeletonWarrior, 323, 4, 17,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
     '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+  inst(D.skeletonWarrior, 324, 4, 19,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+  inst(D.demon, 325, 3, 18,
+    '/items/demon/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
+    '/items/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
+    '/items/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
+
+  // South-West Room (4 Skeletons, 1 Demon)
+  inst(D.skeletonWarrior, 331, 18, 2,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+  inst(D.skeletonWarrior, 332, 18, 4,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+  inst(D.skeletonWarrior, 333, 20, 2,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+  inst(D.skeletonWarrior, 334, 20, 4,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+  inst(D.demon, 335, 19, 3,
+    '/items/demon/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
+    '/items/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
+    '/items/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
+
+  // South-East Room (4 Skeletons, 1 Demon)
+  inst(D.skeletonWarrior, 341, 18, 17,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+  inst(D.skeletonWarrior, 342, 18, 19,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+  inst(D.skeletonWarrior, 343, 20, 17,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+  inst(D.skeletonWarrior, 344, 20, 19,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    '/monsters/skeleton-animation/attack - Copy.mp3', 0.5, 0, 0, 3, null,
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
+    '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+  inst(D.demon, 345, 19, 18,
+    '/items/demon/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
+    '/items/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
+    '/items/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
 ];
+
+// ── Assign Block Animations ─────────────────────────────────────────────────
+monsters.forEach(m => {
+  if (m.name.includes('Skeleton')) {
+    m.glbBlock = '/monsters/skeleton-animation/Meshy_AI_Animation_Shield_Push_Left_withSkin.glb';
+  }
+});
 
 // ── Multi-attack variant definitions ────────────────────────────────────────
 // Post-process monsters that have multiple attack animations.
@@ -898,6 +975,22 @@ function _loadMonster(m, scene) {
     model.add(statsLabel);
     m.statsLabel = statsLabel;
 
+    // ── Sleep indicator (three staggered Z-bubbles) ────────────────────
+    const sleepDiv = document.createElement('div');
+    sleepDiv.className = 'monster-sleep-indicator';
+    ['z', 'Z', 'Z'].forEach((letter, i) => {
+      const z = document.createElement('span');
+      z.className = `sleep-z sleep-z--${i}`;
+      z.textContent = letter;
+      sleepDiv.appendChild(z);
+    });
+
+    const sleepLabel = new CSS2DObject(sleepDiv);
+    sleepLabel.position.set(0, 2.2, 0); // centred above the HP bar
+    sleepLabel.visible = false;
+    model.add(sleepLabel);
+    m.sleepLabel = sleepLabel;
+
     // Load attack animation(s)
     if (m.attacks && m.attacks.length > 0) {
       // ── Multiple attack variants ──
@@ -1011,6 +1104,34 @@ function _loadMonster(m, scene) {
               }
               toAction.reset().play();
               m.actions.hit.crossFadeTo(toAction, 0.2, false);
+              m._animState = isMoving ? 'walk' : 'idle';
+            }
+          });
+        }
+      });
+    }
+
+    // Load the block animation GLB if provided
+    if (m.glbBlock) {
+      _gltfLoader.load(m.glbBlock, (blockGltf) => {
+        if (blockGltf.animations && blockGltf.animations.length > 0) {
+          const blockClip = blockGltf.animations[0];
+          const blockAction = m.mixer.clipAction(blockClip);
+          m.actions.block = blockAction;
+          blockAction.setLoop(THREE.LoopOnce, 1);
+          blockAction.clampWhenFinished = true;
+
+          // When block finishes, fade back to idle or walk
+          m.mixer.addEventListener('finished', (e) => {
+            if (e.action === m.actions.block && m.actions.idle) {
+              const isMoving = (m._cs && m._cs.moving) || (m._ps && m._ps.moving);
+              let toAction = (isMoving && m.actions.walk) ? m.actions.walk : null;
+              if (!toAction) {
+                toAction = m.getIdleAction ? m.getIdleAction() : m.actions.idle;
+                m._activeIdle = toAction;
+              }
+              toAction.reset().play();
+              m.actions.block.crossFadeTo(toAction, 0.2, false);
               m._animState = isMoving ? 'walk' : 'idle';
             }
           });
@@ -1250,6 +1371,7 @@ export function updateMonsters(dt, playerCamera, scene) {
     if (currentLevel !== (m.level ?? 1)) {
       if (m.hpLabel) m.hpLabel.visible = false;
       if (m.statsLabel) m.statsLabel.visible = false;
+      if (m.sleepLabel) m.sleepLabel.visible = false;
       if (_huntersEyeTargetId === m.id) _huntersEyeTargetId = null;
       if (m.mesh) m.mesh.visible = false;
       return;
@@ -1266,6 +1388,7 @@ export function updateMonsters(dt, playerCamera, scene) {
         if (m.mixer && m.mixer.timeScale !== 0) m.mixer.timeScale = 0;
         if (m.hpLabel) m.hpLabel.visible = false;
         if (m.statsLabel) m.statsLabel.visible = false;
+        if (m.sleepLabel) m.sleepLabel.visible = false;
         m.mesh.visible = false;
         return;
       }
@@ -1282,16 +1405,19 @@ export function updateMonsters(dt, playerCamera, scene) {
     if (!m.alive) {
       if (m.hpLabel) m.hpLabel.visible = false;
       if (m.statsLabel) m.statsLabel.visible = false;
+      if (m.sleepLabel) m.sleepLabel.visible = false;
       if (_huntersEyeTargetId === m.id) _huntersEyeTargetId = null;
       return;
     }
 
     // ── Process active status effects (poison ticks, stat debuffs, etc.) ──
+    let isAsleep = false;
     if (m.activeDebuffs?.length) {
       const now = performance.now();
       m.activeDebuffs = m.activeDebuffs.filter(d => now < d.expiresAt);
       let panelDirty = false;
       m.activeDebuffs.forEach(d => {
+        if (d.effectId === 'sleep') isAsleep = true;
         const def = STATUS_EFFECT_DEFS[d.effectId];
         if (!def?.tickInterval) return;
         d.tickAccum += dt;
@@ -1306,13 +1432,20 @@ export function updateMonsters(dt, playerCamera, scene) {
       if (panelDirty && m.statsLabel?.visible) _updateStatsPanel(m);
     }
 
+    if (m.sleepLabel) m.sleepLabel.visible = isAsleep;
+
+    // Check if monster is suppressed by an action-preventing debuff (sleep, frozen, fear, etc.)
+    // Expired debuffs have already been filtered above, so no extra time check needed here.
+    // isAsleep is set above during the activeDebuffs loop.
+    const isSuppressed = isAsleep || (m.activeDebuffs ?? []).some(d => STATUS_EFFECT_DEFS[d.effectId]?.preventsAction);
+
     // Proximity check — used for HP bar, Hunter's Eye, patrol, and attack logic
     const distRow = Math.abs(m.gridRow - player.gridRow);
     const distCol = Math.abs(m.gridCol - player.gridCol);
     let inRange = distRow <= 1 && distCol <= 1;
 
     // Monsters detect characters only within 1 grid square and when facing them
-    if (!m.engaged && m.name !== 'Training Dummy' && distRow <= 1 && distCol <= 1) {
+    if (!isSuppressed && !m.engaged && m.name !== 'Training Dummy' && distRow <= 1 && distCol <= 1) {
       if (_hasLineOfSight(m.gridRow, m.gridCol, player.gridRow, player.gridCol)) {
         let seesPlayer = true;
         if (m.mesh && playerPos) {
@@ -1340,9 +1473,10 @@ export function updateMonsters(dt, playerCamera, scene) {
       }
     }
 
-    // Non-patrol monsters face the player when engaged or in range; 
+    // Non-patrol monsters face the player when engaged or in range;
     // patrol monsters only turn to face the player once they are adjacent.
-    if (m.mesh && playerCamera && m.lookAtPlayer && ((!m.patrol && m.engaged) || inRange)) {
+    // Suppressed (sleeping) monsters don't track the player.
+    if (!isSuppressed && m.mesh && playerCamera && m.lookAtPlayer && ((!m.patrol && m.engaged) || inRange)) {
       m.lookAtPlayer(playerCamera.position);
     }
 
@@ -1356,9 +1490,10 @@ export function updateMonsters(dt, playerCamera, scene) {
       if (m.statsLabel) m.statsLabel.visible = false;
     }
 
-    // Movement when player is out of attack range
+    // Movement when player is out of attack range.
+    // Suppressed (sleeping) monsters cannot chase or patrol.
     let isMoving = false;
-    if (!inRange) {
+    if (!inRange && !isSuppressed) {
       if (m.engaged && m.name !== 'Training Dummy') {
         // Combat has started — chase the player
         _updateChase(m, dt);
@@ -1409,12 +1544,15 @@ export function updateMonsters(dt, playerCamera, scene) {
       setTimeout(() => { m._demonSoundCooldown = false; }, 8000);
     }
 
-    // Proximity attack logic: if player is adjacent, attack them periodically
+    // Proximity attack logic: if player is adjacent, attack them periodically.
+    // Suppressed (sleeping) monsters cannot attack but still mark combat engaged.
     if (inRange && m.name !== 'Training Dummy') {
       m.engaged = true;
       setInCombat();
 
-      if (m.stunUntil && performance.now() < m.stunUntil) {
+      if (isSuppressed) {
+        // Monster is asleep (or otherwise suppressed) — cannot attack
+      } else if (m.stunUntil && performance.now() < m.stunUntil) {
         // Monster is stunned; cooldown timer doesn't tick down yet
       } else {
         m.attackCooldown = (m.attackCooldown || 0) - dt;
@@ -1444,22 +1582,30 @@ export function updateMonsters(dt, playerCamera, scene) {
  * Apply (or refresh) a status effect on a monster.
  * effectId must match a key in STATUS_EFFECT_DEFS.
  */
-export function applyMonsterStatusEffect(monsterId, effectId, caster = null) {
+/**
+ * Apply (or refresh) a status effect on a monster.
+ * effectId must match a key in STATUS_EFFECT_DEFS.
+ * durationSec optionally overrides the duration defined in status-effects.json
+ * (used by spells that store their own duration in spells.json).
+ */
+export function applyMonsterStatusEffect(monsterId, effectId, caster = null, durationSec = null) {
   const m = monsters.find(x => x.id === monsterId && x.alive);
   if (!m) return;
   const def = STATUS_EFFECT_DEFS[effectId];
   if (!def) return;
 
+  const duration = durationSec ?? def.duration;
+
   if (!m.activeDebuffs) m.activeDebuffs = [];
   const existing = m.activeDebuffs.find(d => d.effectId === effectId);
   if (existing) {
-    existing.expiresAt = performance.now() + def.duration * 1000;
+    existing.expiresAt = performance.now() + duration * 1000;
     if (caster) existing.caster = caster; // refresh caster on re-apply
   } else {
     m.activeDebuffs.push({
       effectId,
       caster,
-      expiresAt: performance.now() + def.duration * 1000,
+      expiresAt: performance.now() + duration * 1000,
       tickAccum: def.tickInterval ? def.tickInterval * 0.95 : 0, // fast first tick
     });
   }
@@ -1508,11 +1654,60 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
     resetBattleStats();
   }
 
+  // ── Skeleton Shield Block ──────────────────────────────────────────────────
+  if (m.name.includes('Skeleton') && attackType !== 'poison-dot' && attackType !== 'fireball') {
+    if (Math.random() <= 0.10) {
+      addLogEntry({
+        time: Date.now(), actor: 'player',
+        attacker: killer || 'Player', target: m.name,
+        attackType: attackType || 'attack', hitChance: 1, hit: true, crit: false,
+        blocked: true,
+      });
+
+      if (m.name !== 'Training Dummy') {
+        setInCombat();
+      }
+
+      // Sync visual/audio feedback with the action animation
+      const delay = (attackType === 'poison-dot') ? 0 : 250;
+      setTimeout(() => {
+        if (!m.mesh) return;
+
+        playShieldBlockSound();
+
+        // UI Feedback for block
+        const wrapper = document.createElement('div');
+        wrapper.className = 'monster-damage-wrapper';
+        const inner = document.createElement('div');
+        inner.className = 'monster-damage-popup';
+        inner.style.color = '#a0d8ff';
+        inner.style.fontSize = '12px';
+        inner.textContent = 'BLOCKED';
+        wrapper.appendChild(inner);
+
+        const label = new CSS2DObject(wrapper);
+        label.position.set(0, 1.5, 0); // Above mid-body
+        m.mesh.add(label);
+        setTimeout(() => { if (m.mesh) m.mesh.remove(label); }, 850);
+
+        _playBlockAnimation(m);
+      }, delay);
+
+      return { hit: false, damage: 0, killed: false, monsterHp: m.hp, blocked: true };
+    }
+  }
+
   const damage = Math.max(1, finalDamage);
   const hpBefore = m.hp;
   m.hp = Math.max(0, m.hp - damage);
   const hpAfter = m.hp;
   const killedByThisHit = (hpBefore > 0 && hpAfter === 0);
+
+  // Any direct hit wakes a sleeping monster immediately
+  if (attackType !== 'poison-dot' && m.activeDebuffs?.some(d => d.effectId === 'sleep')) {
+    m.activeDebuffs = m.activeDebuffs.filter(d => d.effectId !== 'sleep');
+    if (m.sleepLabel) m.sleepLabel.visible = false;
+  }
 
   // Treeman "Awakening of the Woods" — triggers once when HP drops below 50%
   if (m.name === 'Treeman' && !m._awakeningUsed && m.alive
@@ -2045,6 +2240,36 @@ function _applyMonsterDamage(monster, opts = {}) {
 // ─────────────────────────────────────────────────────────────────────────────
 //  HIT / DEATH TWEENS
 // ─────────────────────────────────────────────────────────────────────────────
+
+function _playBlockAnimation(m) {
+  if (!m.mesh) return;
+  const mesh = m.mesh;
+
+  if (m.mixer && m.actions.block) {
+    if (m.actions.hit && m.actions.hit.isRunning()) m.actions.hit.stop();
+    if (m.actions.attack && m.actions.attack.isRunning()) m.actions.attack.stop();
+
+    const currentAction = (m.actions.walk && m._animState === 'walk') ? m.actions.walk : m.actions.idle;
+    if (currentAction && currentAction.isRunning()) {
+      m.actions.block.reset().play();
+      currentAction.crossFadeTo(m.actions.block, 0.1, true);
+    } else {
+      m.actions.block.reset().play();
+    }
+  }
+
+  // Small defensive knockback for visual weight
+  const origin = { z: mesh.position.z };
+  new Tween(mesh.position, tweenGroup)
+    .to({ z: origin.z + 0.05 }, 60)
+    .easing(Easing.Quadratic.Out)
+    .chain(
+      new Tween(mesh.position, tweenGroup)
+        .to({ z: origin.z }, 100)
+        .easing(Easing.Quadratic.In)
+    )
+    .start();
+}
 
 function _playHitAnimation(m, attackType, killer) {
   if (!m.mesh) return;

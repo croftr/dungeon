@@ -691,6 +691,59 @@ export function triggerCurePoisonEffect() {
 //  DEFAULT SPELL — generic arcane flash for any unregistered spell
 //  Clean white/pale-blue burst — neutral, readable, not overshadowing
 // ══════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════
+//  SLEEP — AoE lullaby spell
+//  Slow indigo/violet dream-dust drifts down around the caster
+// ══════════════════════════════════════════════════════════════════════════
+export function triggerSleepEffect() {
+    if (!batchRenderer || !sceneRef || !cameraRef) return;
+    const tex = createGlowTexture();
+
+    // Slow downward drift of dreamy motes — wide sphere burst, low speed
+    const motes = new ParticleSystem({
+        duration: 2.0, looping: false,
+        startLife: new IntervalValue(1.0, 2.0),
+        startSpeed: new IntervalValue(0.2, 1.2),
+        startSize: new IntervalValue(0.04, 0.18),
+        startColor: new ConstantColor(new Vector4(0.45, 0.35, 1.0, 1)),
+        worldSpace: true, maxParticle: 120,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(90), cycle: 1, interval: 0.02, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.6, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex), startTileIndex: new ConstantValue(0),
+        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    motes.addBehavior(new ColorOverLife(new ColorRange(
+        new Vector4(0.6, 0.5, 1.0, 1),
+        new Vector4(0.2, 0.1, 0.6, 0)
+    )));
+    motes.addBehavior(new SizeOverLife(FADE_OUT));
+    // Tilt emitter slightly downward so motes drift towards the floor
+    motes.emitter.rotation.set(Math.PI * 0.25, 0, 0);
+    _spawn(motes, cameraRef.position, 2.5);
+
+    // Small bright star-sparks — twinkle burst at the centre
+    const stars = new ParticleSystem({
+        duration: 0.8, looping: false,
+        startLife: new IntervalValue(0.4, 1.0),
+        startSpeed: new IntervalValue(1.5, 4.0),
+        startSize: new IntervalValue(0.02, 0.08),
+        startColor: new ConstantColor(new Vector4(0.8, 0.7, 1.0, 1)),
+        worldSpace: true, maxParticle: 60,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(45), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.05, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex), startTileIndex: new ConstantValue(0),
+        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    stars.addBehavior(new ColorOverLife(new ColorRange(
+        new Vector4(1.0, 0.9, 1.0, 1),
+        new Vector4(0.3, 0.2, 0.8, 0)
+    )));
+    stars.addBehavior(new SizeOverLife(GROW_FADE));
+    _spawn(stars, cameraRef.position, 1.5);
+}
+
 export function triggerDefaultSpellEffect() {
     if (!batchRenderer || !sceneRef || !cameraRef) return;
     const tex = createGlowTexture();

@@ -119,8 +119,8 @@
         "value": 780,
         "weight": 0.1,
         "skillBonuses": {
-            "Fireball": 100,
-            "Heal": 100
+            "Fireball": 1,
+            "Heal": 1
         }
     },
     {
@@ -134,7 +134,7 @@
         "value": 825,
         "weight": 0.1,
         "skillBonuses": {
-            "all": 100,
+            "all": 1,
             "Sanctuary": 50
         }
     },
@@ -511,7 +511,7 @@
         "slot": "ammo",
         "attackType": null,
         "baseDamage": null,
-        "damageModifier": 1.2,
+        "damageModifier": 1.1,
         "damageType": "normal",
         "ammoType": "bolt",
         "icon": "/icons/steel_bolts.png",
@@ -524,7 +524,7 @@
         "slot": "ammo",
         "attackType": null,
         "baseDamage": null,
-        "damageModifier": 1.5,
+        "damageModifier": 1.2,
         "damageType": "normal",
         "ammoType": "bolt",
         "icon": "/icons/silver_bolts.png",
@@ -999,6 +999,16 @@
         "icon": "/icons/scroll_rejuvenate.png",
         "description": "A parchment scroll radiating a warm, glowing yellowish aura. Study it to learn Rejuvenate. Requires 10 Intelligence.",
         "value": 540,
+        "weight": 0.2
+    },
+    {
+        "name": "Scroll of Sleep",
+        "type": "spellbook",
+        "spellName": "Sleep",
+        "requiredInt": 12,
+        "icon": "/icons/scroll_sleep.png",
+        "description": "A whispering scroll etched with soporific runes. Study it to learn Sleep. Requires 12 Intelligence.",
+        "value": 680,
         "weight": 0.2
     },
     {

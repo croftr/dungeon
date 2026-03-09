@@ -2767,6 +2767,36 @@ body {
   transform: translateX(-50%);
 }
 
+.monster-sleep-indicator {
+  display: flex;
+  gap: 3px;
+  align-items: flex-end;
+  pointer-events: none;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+/* Each Z bubble — small → medium → large, staggered in time */
+.sleep-z {
+  font-family: monospace;
+  font-weight: bold;
+  color: #a0a0ff;
+  text-shadow: 0 0 8px rgba(100, 100, 255, 0.85), 1px 1px 2px rgba(0, 0, 0, 0.9);
+  display: inline-block;
+  opacity: 0;
+  animation: sleep-z-float 2.4s ease-in-out infinite;
+}
+.sleep-z--0 { font-size: 13px; animation-delay: 0s;    }
+.sleep-z--1 { font-size: 18px; animation-delay: 0.8s;  }
+.sleep-z--2 { font-size: 23px; animation-delay: 1.6s;  }
+
+@keyframes sleep-z-float {
+  0%   { transform: translateY(0px)   scale(0.6); opacity: 0;   }
+  18%  { opacity: 0.95; }
+  65%  { opacity: 0.75; }
+  100% { transform: translateY(-28px) scale(1.1); opacity: 0;   }
+}
+
 .monster-hp-fill {
   height: 100%;
   width: 100%;

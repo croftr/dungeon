@@ -72,5 +72,15 @@
     "color": "#8080c0",
     "duration": 15,
     "attackSpeedMultiplier": 2.0
+  },
+  "sleep": {
+    "id": "sleep",
+    "name": "Sleep",
+    "description": "Fallen into magical slumber — cannot act or move.",
+    "type": "debuff",
+    "icon": "/icons/sleep.png",
+    "color": "#6060cc",
+    "duration": 20,
+    "preventsAction": true
   }
 }

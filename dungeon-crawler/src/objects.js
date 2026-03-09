@@ -883,6 +883,7 @@ export function spawnObjectsForLevel() {
             'Scroll of Regeneration',
             'Scroll of Cure Poison',
             'Scroll of Resist Poison',
+            'Scroll of Sleep',
         ]);
 
         // Spell Cabinet at the end of the dead-end passage near the zombie room
@@ -1003,14 +1004,25 @@ export function spawnObjectsForLevel() {
         // Return portal to Level 1 — behind the player at spawn
         addPortal(objectsGroup, gltfLoader, 11, 21, 1, Math.PI, 0, 0.85);
 
-        // Weapon rack next to the entrance
-        addWeaponRack(objectsGroup, gltfLoader, 5, 2, -Math.PI / 2, 0.85, 0, [
-            "Vampiric Dagger", "Silver Mace", "Warden's Shield"
-        ]);
-
-        // Weapon rack near the minotaur room
+        // Weapon rack in South-West room (row 19, col 1 against west wall)
         addWeaponRack(objectsGroup, gltfLoader, 1, 19, -Math.PI / 2, -0.15, 0, [
             "Vampiric Dagger", "Silver Mace", "Warden's Shield", "Silver Bolts"
+        ]);
+
+        // Spell Cabinet in North-East room (row 3, col 18)
+        addSpellCabinet(objectsGroup, gltfLoader, 18, 2, 0, 0.65, 0, [
+            "Scroll of Fireball",
+            "Scroll of Sleep"
+        ]);
+
+        // Chest in North-West room (row 2, col 3)
+        addChest(objectsGroup, gltfLoader, 3, 2, 0, 0, [
+            "Rune Pendant"
+        ]);
+
+        // Chest in South-East room (row 18, col 19)
+        addChest(objectsGroup, gltfLoader, 19, 18, 0, 0, [
+            "Sun Pendant"
         ]);
 
         // Exit portal (game escape) at the far end of the exit corridor
