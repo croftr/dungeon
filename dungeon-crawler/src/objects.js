@@ -31,6 +31,8 @@ export function updateObjects(dt) {
 // ─────────────────────────────────────────────
 let _mummyGateOpened = false;
 let _starterGateOpened = false; // persists across level reloads — once open, never re-closes
+let _starterPortalEnabled = false;
+let _disabledPortalMesh = null;
 let _partyConfirmNPCModel = null; // true once the player confirms — prevents re-triggering
 let _starterGate = null; // portcullis behind the party-confirm NPC; opens only via dialogue
 let _npcMixer = null;
@@ -153,6 +155,19 @@ export function initObjects(scene, camera) {
                     } else {
                         showMessage("You can't reach that from here.");
                     }
+                } else if (obj.userData.target === 'demon_room') {
+                    // Check if player is facing the chest-vault portcullis at (17, 7)
+                    if (isInFrontOfPlayer(17, 7, 1)) {
+                        new Tween(obj.position)
+                            .to({ x: -0.01 }, 100)
+                            .easing(Easing.Quadratic.Out)
+                            .chain(new Tween(obj.position).to({ x: -0.04 }, 100).easing(Easing.Quadratic.In))
+                            .start();
+                        const vaultDoor = objects.find(o => o.name === 'Portcullis' && o.gridRow === 17 && o.gridCol === 7);
+                        if (vaultDoor) openPortcullis(vaultDoor);
+                    } else {
+                        showMessage("You can't reach that from here.");
+                    }
                 } else {
                     // Check if player is facing the wall at (8, 8) from (8, 7)
                     if (isInFrontOfPlayer(8, 8, 1)) {
@@ -216,6 +231,60 @@ export function initObjects(scene, camera) {
                 } else {
                     showMessage("The corpse lies just out of reach.");
                 }
+            } else if (obj.userData.isDisabledPortal) {
+                const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
+                const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
+                if (distRow <= 1 && distCol <= 1) {
+                    showMessage("Its some kind of portal but appears not to be working");
+                } else {
+                    showMessage("The dormant portal waits silently.");
+                }
+                break;
+            } else if (obj.userData.isPortalActivatorStatue) {
+                const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
+                const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
+                if (distRow <= 2 && distCol <= 2) {
+                    if (!_starterPortalEnabled) {
+                        _starterPortalEnabled = true;
+
+                        if (window.playStatuePortalVideo) {
+                            window.playStatuePortalVideo(() => {
+                                // Swap out the portal model after video finishes
+                                if (_disabledPortalMesh) {
+                                    _disabledPortalMesh.traverse((child) => {
+                                        const idx = interactables.indexOf(child);
+                                        if (idx !== -1) interactables.splice(idx, 1);
+                                    });
+                                    if (_disabledPortalMesh.parent) {
+                                        _disabledPortalMesh.parent.remove(_disabledPortalMesh);
+                                    }
+                                    _disabledPortalMesh = null;
+                                }
+                                // Add the enabled portal in the same spot (Level 1 Starter Room)
+                                addPortal(objectsGroup, _gltfLoader, 13, 13, 2, Math.PI / 2, 0.85, 0);
+                            });
+                        } else {
+                            // Fallback if video isn't available
+                            showMessage("A portal has been opened somewhere!");
+                            if (_disabledPortalMesh) {
+                                _disabledPortalMesh.traverse((child) => {
+                                    const idx = interactables.indexOf(child);
+                                    if (idx !== -1) interactables.splice(idx, 1);
+                                });
+                                if (_disabledPortalMesh.parent) {
+                                    _disabledPortalMesh.parent.remove(_disabledPortalMesh);
+                                }
+                                _disabledPortalMesh = null;
+                            }
+                            addPortal(objectsGroup, _gltfLoader, 13, 13, 2, Math.PI / 2, 0.85, 0);
+                        }
+                    } else {
+                        showMessage("The statue emits a faint glow.");
+                    }
+                } else {
+                    showMessage("The ancient statue watches you.");
+                }
+                break;
             } else if (obj.userData.isPortal) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
@@ -234,19 +303,12 @@ export function initObjects(scene, camera) {
                     // Transport the player immediately
                     if (window.loadLevel) window.loadLevel(targetLevel);
 
-                    // Play the portal animation at the same time
-                    if (window.playPortalVideo) {
-                        window.playPortalVideo(() => {
-                            // After the portal video finishes, check for secondary transitions (Treeman)
-                            if (isTreemanTransition && window.playTreemanVideo) {
-                                window.playTreemanVideo();
-                            }
-                        });
+                    if (isTreemanTransition) {
+                        // Skip the generic portal transport video, go straight to Treeman
+                        if (window.playTreemanVideo) window.playTreemanVideo();
                     } else {
-                        // Fallback if video isn't available
-                        if (isTreemanTransition && window.playTreemanVideo) {
-                            window.playTreemanVideo();
-                        }
+                        // Play the normal portal animation for other portals
+                        if (window.playPortalVideo) window.playPortalVideo();
                     }
                 } else {
                     showMessage("Step closer to the portal to enter.");
@@ -902,7 +964,11 @@ export function spawnObjectsForLevel() {
         // Portal to Level 2
         // Positioned at col 13, row 13 against the East wall.
         // It's on an East wall, so rotate it Math.PI / 2 radians to face West (inward to the room).
-        addPortal(objectsGroup, gltfLoader, 13, 13, 2, Math.PI / 2, 0.85, 0);
+        if (_starterPortalEnabled) {
+            addPortal(objectsGroup, gltfLoader, 13, 13, 2, Math.PI / 2, 0.85, 0);
+        } else {
+            addDisabledPortal(objectsGroup, gltfLoader, 13, 13, Math.PI / 2, 0.85, 0);
+        }
 
         // Alchemy Workshop in the big east room against the south wall
         addAlchemyWorkshop(objectsGroup, gltfLoader, 19, 14, 0, 0, 0.85);
@@ -977,8 +1043,8 @@ export function spawnObjectsForLevel() {
             'Elven Dagger', 'Mace', 'Dagger', 'Dwarven Axe', 'Spiked Shield'
         ]);
 
-        // Statue in the corner of the mummy room (swapped with level 3 minotaur room)
-        addDecoration(objectsGroup, gltfLoader, 19, 2, 0, '/items/statue1.glb');
+        // Statue in the corner of the mummy room (activates the starter portal)
+        addPortalActivatorStatue(objectsGroup, gltfLoader, 19, 2, 0);
 
         // Portal to Level 3 (The Abyssal Crypts) at the end of the dungeon
         addPortal(objectsGroup, gltfLoader, 1, 22, 3, 0, 0, 0);
@@ -987,18 +1053,43 @@ export function spawnObjectsForLevel() {
         // Portal back to Level 1.
         addPortal(objectsGroup, gltfLoader, 5, 1, 1, 0, 0, -0.85);
 
-        // Opposite side of the room (South wall).
-        // It's at the end of the long south passage now.
-        // row=12, col=5
-        // Math.PI faces North.
-        // Jester at the end of the long south passage
-        addJester(objectsGroup, gltfLoader, 5, 12, Math.PI, 0, 0.85);
-
-        // Locked Portcullis at the entrance of the passage (moved 2 squares back for vestibule)
+        // Locked Portcullis at the entrance of the passage
         addPortcullis(objectsGroup, gltfLoader, 5, 8);
 
-        // Keyhole next to the portcullis on the West wall (moved 1.0 grid squares back for accessibility)
+        // Keyhole next to the portcullis on the West wall
         addKeyhole(objectsGroup, gltfLoader, 5, 8, Math.PI / 2, -0.85, -2.0);
+
+        // Portcullis on the right (east) wall of the demon room — guards the chest vault
+        addPortcullis(objectsGroup, gltfLoader, 7, 17);
+
+        // Button on the west face of the col-7 wall to open the chest vault
+        const demonRoomBtnGroup = new THREE.Group();
+        const drPlateGeo = new THREE.BoxGeometry(0.05, 0.3, 0.2);
+        const drPlateMat = new THREE.MeshLambertMaterial({ color: 0x443322 });
+        const drPlate = new THREE.Mesh(drPlateGeo, drPlateMat);
+        demonRoomBtnGroup.add(drPlate);
+
+        const drBtnGeo = new THREE.BoxGeometry(0.08, 0.12, 0.12);
+        const drBtnMat = new THREE.MeshLambertMaterial({ color: 0xaa2222 });
+        const drBtn = new THREE.Mesh(drBtnGeo, drBtnMat);
+        drBtn.position.x = -0.04;
+        drBtn.userData = { isButton: true, target: 'demon_room' };
+        interactables.push(drBtn);
+        demonRoomBtnGroup.add(drBtn);
+
+        // Position on the west face of col 7, at row 17
+        demonRoomBtnGroup.position.set(7 * CELL - 1.0, 1.25, 17 * CELL);
+        objectsGroup.add(demonRoomBtnGroup);
+
+        // Two chests in the chest vault (col 8, rows 18–19)
+        addChest(objectsGroup, gltfLoader, 8, 18, Math.PI / 2, 0, [
+            { name: 'Gold Coins', quantity: 300 },
+            'Life Essence', 'Mana Berry', 'Scroll of Fireball'
+        ]);
+        addChest(objectsGroup, gltfLoader, 8, 19, Math.PI / 2, 0, [
+            { name: 'Gold Coins', quantity: 200 },
+            'Ring of Vigour', 'Ring of Wisdom', 'Ring of Dexterity'
+        ]);
     } else if (level === 3) {
         // ── Portals ──────────────────────────────────────────────────────────
         // Return portal to Level 1 — behind the player at spawn
@@ -1129,6 +1220,51 @@ function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offsetX = 0, 
                         });
                     });
                 }
+            }
+        });
+
+        scene.add(model);
+    });
+}
+
+function addDisabledPortal(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
+    loader.load('/items/disabled-portal.glb', (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(0.7);
+        model.position.set(col * CELL + offsetX, 0.6, row * CELL + offsetZ);
+        model.rotation.y = rotY;
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = false;
+                child.userData.isDisabledPortal = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+                interactables.push(child);
+            }
+        });
+
+        scene.add(model);
+        _disabledPortalMesh = model;
+    });
+}
+
+function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.45) {
+    loader.load('/items/statue1.glb', (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(scale);
+        model.position.set(col * CELL, 0.5, row * CELL);
+        model.rotation.y = rotY;
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.userData.isPortalActivatorStatue = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+                interactables.push(child);
             }
         });
 

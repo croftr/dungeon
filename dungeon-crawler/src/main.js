@@ -74,6 +74,7 @@ initPlayer(start.row, start.col, camera);
 let hasSeenOgreVideo = false;
 let hasSeenPrepVideo = false;
 let hasSeenMinotaurVideo = false;
+let hasSeenDemonVideo = false;
 let prepVideoTimer = null;
 
 setCallbacks({
@@ -106,6 +107,15 @@ setCallbacks({
 
       // Prep video triggers ONLY when confirming the NPC modal now,
       // so we remove the position-based trigger entirely.
+    } else if (window.currentLevel === 2) {
+      // Demon room: the big chamber at the south end of the passage
+      const inDemonRoom = player.gridRow >= 14 && player.gridRow <= 20
+        && player.gridCol >= 1 && player.gridCol <= 7;
+
+      if (inDemonRoom && !hasSeenDemonVideo) {
+        hasSeenDemonVideo = true;
+        playDemonVideo();
+      }
     } else if (window.currentLevel === 3) {
       const inMinotaurRoom = player.gridRow >= 8 && player.gridRow <= 14
         && player.gridCol >= 8 && player.gridCol <= 14;
@@ -450,6 +460,51 @@ if (skipMinotaurBtn) skipMinotaurBtn.addEventListener('click', finishMinotaurVid
 if (minotaurVideo) minotaurVideo.addEventListener('ended', finishMinotaurVideo);
 
 // ─────────────────────────────────────────────
+//  DEMON VIDEO OVERLAY
+// ─────────────────────────────────────────────
+const demonOverlay = document.getElementById('demon-video-overlay');
+const demonVideo = document.getElementById('demon-video');
+const skipDemonBtn = document.getElementById('skip-demon-btn');
+
+function playDemonVideo() {
+  if (!demonOverlay || !demonVideo) return;
+  demonOverlay.classList.remove('hidden');
+
+  setTimeout(() => {
+    demonOverlay.style.opacity = '1';
+    demonVideo.play().catch(e => {
+      console.warn("Demon video play failed:", e);
+      finishDemonVideo();
+    });
+  }, 50);
+}
+
+function finishDemonVideo() {
+  if (!demonOverlay) return;
+  demonOverlay.style.opacity = '0';
+
+  const startVol = demonVideo.volume;
+  const fadeInterval = setInterval(() => {
+    if (demonVideo.volume > 0.05) {
+      demonVideo.volume -= 0.05;
+    } else {
+      demonVideo.volume = 0;
+      clearInterval(fadeInterval);
+    }
+  }, 50);
+
+  setTimeout(() => {
+    demonVideo.pause();
+    clearInterval(fadeInterval);
+    demonVideo.volume = startVol;
+    demonOverlay.classList.add('hidden');
+  }, 1500);
+}
+
+if (skipDemonBtn) skipDemonBtn.addEventListener('click', finishDemonVideo);
+if (demonVideo) demonVideo.addEventListener('ended', finishDemonVideo);
+
+// ─────────────────────────────────────────────
 //  PORTAL VIDEO OVERLAY
 // ─────────────────────────────────────────────
 const portalOverlay = document.getElementById('portal-video-overlay');
@@ -493,6 +548,51 @@ function finishPortalVideo() {
 
 if (skipPortalBtn) skipPortalBtn.addEventListener('click', finishPortalVideo);
 if (portalVideo) portalVideo.addEventListener('ended', finishPortalVideo);
+
+// ─────────────────────────────────────────────
+//  STATUE PORTAL VIDEO OVERLAY
+// ─────────────────────────────────────────────
+const statuePortalOverlay = document.getElementById('statue-portal-video-overlay');
+const statuePortalVideo = document.getElementById('statue-portal-video');
+const skipStatuePortalBtn = document.getElementById('skip-statue-portal-btn');
+let _statuePortalCallback = null;
+
+window.playStatuePortalVideo = function (onComplete) {
+  _statuePortalCallback = onComplete;
+  if (!statuePortalOverlay || !statuePortalVideo) {
+    if (_statuePortalCallback) _statuePortalCallback();
+    return;
+  }
+  statuePortalOverlay.classList.remove('hidden');
+
+  setTimeout(() => {
+    statuePortalOverlay.style.opacity = '1';
+    statuePortalVideo.play().catch(e => {
+      console.warn("Statue portal video play failed:", e);
+      finishStatuePortalVideo();
+    });
+  }, 50);
+};
+
+function finishStatuePortalVideo() {
+  if (!statuePortalOverlay) {
+    if (_statuePortalCallback) _statuePortalCallback();
+    return;
+  }
+  statuePortalOverlay.style.opacity = '0';
+
+  setTimeout(() => {
+    statuePortalVideo.pause();
+    statuePortalOverlay.classList.add('hidden');
+    if (_statuePortalCallback) {
+      _statuePortalCallback();
+      _statuePortalCallback = null;
+    }
+  }, 1500);
+}
+
+if (skipStatuePortalBtn) skipStatuePortalBtn.addEventListener('click', finishStatuePortalVideo);
+if (statuePortalVideo) statuePortalVideo.addEventListener('ended', finishStatuePortalVideo);
 function handleFirstInteraction() {
   startMusic();
   window.removeEventListener('click', handleFirstInteraction);

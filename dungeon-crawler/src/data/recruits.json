@@ -78,11 +78,11 @@
         "job": "Warrior",
         "race": "Dwarf",
         "stats": {
-            "strength": 8,
-            "dexterity": 6,
+            "strength": 118,
+            "dexterity": 116,
             "vitality": 8,
             "intelligence": 4,
-            "resilience": 10
+            "resilience": 110
         },
         "bio": "A stout and hearty fighter from the mountainous deeps. Thorek believes every problem can be solved with a sharp axe and enough ale.",
         "skillProgression": [
@@ -153,9 +153,9 @@
         "job": "Barbarian",
         "race": "Human",
         "stats": {
-            "strength": 9,
-            "dexterity": 6,
-            "vitality": 6,
+            "strength": 119,
+            "dexterity": 116,
+            "vitality": 116,
             "intelligence": 4,
             "resilience": 6
         },

@@ -185,6 +185,14 @@ export const monsters = [
     '/monsters/treeman-animation/Meshy_AI_Animation_Dead_withSkin (1).glb',
     '/monsters/treeman-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin (1).glb'),
 
+  // Demon guards the demon room at the south end of the level-2 passage
+  inst(D.demon, 9, 17, 3,
+    '/items/demon/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    '/items/demon/no-mercy.mp3', 0.70, 0, 0, 2, null,
+    '/items/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
+    '/items/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb'),
+
   // Training dummy in the big east room
   inst(D.dummy, 10, 11, 20,
     '/monsters/dummy-annimation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
