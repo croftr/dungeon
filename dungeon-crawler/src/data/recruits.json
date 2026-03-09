@@ -78,11 +78,11 @@
         "job": "Warrior",
         "race": "Dwarf",
         "stats": {
-            "strength": 118,
-            "dexterity": 116,
+            "strength": 8,
+            "dexterity": 6,
             "vitality": 8,
             "intelligence": 4,
-            "resilience": 110
+            "resilience": 10
         },
         "bio": "A stout and hearty fighter from the mountainous deeps. Thorek believes every problem can be solved with a sharp axe and enough ale.",
         "skillProgression": [
@@ -153,9 +153,9 @@
         "job": "Barbarian",
         "race": "Human",
         "stats": {
-            "strength": 119,
-            "dexterity": 116,
-            "vitality": 116,
+            "strength": 9,
+            "dexterity": 6,
+            "vitality": 6,
             "intelligence": 4,
             "resilience": 6
         },
@@ -190,11 +190,11 @@
         "job": "Ranger",
         "race": "Dwarf",
         "stats": {
-            "strength": 7,
-            "dexterity": 7,
-            "vitality": 6,
+            "strength": 107,
+            "dexterity": 107,
+            "vitality": 106,
             "intelligence": 4,
-            "resilience": 7
+            "resilience": 107
         },
         "bio": "A keen-eyed marksman who traded the mines for the open hunt. Baldur's crossbow never misses its mark.",
         "skillProgression": [
@@ -262,7 +262,7 @@
             "strength": 4,
             "dexterity": 6,
             "vitality": 6,
-            "intelligence": 9,
+            "intelligence": 109,
             "resilience": 8
         },
         "bio": "A devoted healer whose presence brings hope to the darkest depths. Seraphina draws upon pure light to mend flesh and soul.",

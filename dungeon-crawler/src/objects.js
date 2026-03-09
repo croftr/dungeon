@@ -156,14 +156,14 @@ export function initObjects(scene, camera) {
                         showMessage("You can't reach that from here.");
                     }
                 } else if (obj.userData.target === 'demon_room') {
-                    // Check if player is facing the chest-vault portcullis at (17, 7)
-                    if (isInFrontOfPlayer(17, 7, 1)) {
+                    // Player at (18, 3) facing west presses button on east face of col-2 wall
+                    if (isInFrontOfPlayer(18, 2, 1)) {
                         new Tween(obj.position)
-                            .to({ x: -0.01 }, 100)
+                            .to({ x: 0.01 }, 100)
                             .easing(Easing.Quadratic.Out)
-                            .chain(new Tween(obj.position).to({ x: -0.04 }, 100).easing(Easing.Quadratic.In))
+                            .chain(new Tween(obj.position).to({ x: 0.04 }, 100).easing(Easing.Quadratic.In))
                             .start();
-                        const vaultDoor = objects.find(o => o.name === 'Portcullis' && o.gridRow === 17 && o.gridCol === 7);
+                        const vaultDoor = objects.find(o => o.name === 'Portcullis' && o.gridRow === 17 && o.gridCol === 2);
                         if (vaultDoor) openPortcullis(vaultDoor);
                     } else {
                         showMessage("You can't reach that from here.");
@@ -1050,19 +1050,21 @@ export function spawnObjectsForLevel() {
         addPortal(objectsGroup, gltfLoader, 1, 22, 3, 0, 0, 0);
 
     } else if (level === 2) {
-        // Portal back to Level 1.
-        addPortal(objectsGroup, gltfLoader, 5, 1, 1, 0, 0, -0.85);
+        // Portal back to Level 1 — north wall of main room, col 7 (passage col), row 1.
+        addPortal(objectsGroup, gltfLoader, 7, 1, 1, 0, 0, -0.85);
 
-        // Locked Portcullis at the entrance of the passage
-        addPortcullis(objectsGroup, gltfLoader, 5, 8);
+        // Locked Portcullis at the entrance of the passage (col 7, row 8)
+        addPortcullis(objectsGroup, gltfLoader, 7, 8);
 
         // Keyhole next to the portcullis on the West wall
-        addKeyhole(objectsGroup, gltfLoader, 5, 8, Math.PI / 2, -0.85, -2.0);
+        addKeyhole(objectsGroup, gltfLoader, 7, 8, Math.PI / 2, -0.85, -2.0);
 
-        // Portcullis on the right (east) wall of the demon room — guards the chest vault
-        addPortcullis(objectsGroup, gltfLoader, 7, 17);
+        // Portcullis on the WEST wall of the demon room (col 2, row 17) — player's right side
+        // rotY = Math.PI/2 so it sits flat against the north-south wall correctly
+        addPortcullis(objectsGroup, gltfLoader, 2, 17, Math.PI / 2);
 
-        // Button on the west face of the col-7 wall to open the chest vault
+        // Button on the EAST face of the col-2 wall, one row SOUTH of the portcullis
+        // (row 18 = solid wall). Player stands at (18, 3) facing west to press it.
         const demonRoomBtnGroup = new THREE.Group();
         const drPlateGeo = new THREE.BoxGeometry(0.05, 0.3, 0.2);
         const drPlateMat = new THREE.MeshLambertMaterial({ color: 0x443322 });
@@ -1072,21 +1074,21 @@ export function spawnObjectsForLevel() {
         const drBtnGeo = new THREE.BoxGeometry(0.08, 0.12, 0.12);
         const drBtnMat = new THREE.MeshLambertMaterial({ color: 0xaa2222 });
         const drBtn = new THREE.Mesh(drBtnGeo, drBtnMat);
-        drBtn.position.x = -0.04;
+        drBtn.position.x = 0.04;   // protrudes east into the demon room
         drBtn.userData = { isButton: true, target: 'demon_room' };
         interactables.push(drBtn);
         demonRoomBtnGroup.add(drBtn);
 
-        // Position on the west face of col 7, at row 17
-        demonRoomBtnGroup.position.set(7 * CELL - 1.0, 1.25, 17 * CELL);
+        // East face of col 2, row 18 (solid wall just south of the portcullis)
+        demonRoomBtnGroup.position.set(2 * CELL + 1.0, 1.25, 18 * CELL);
         objectsGroup.add(demonRoomBtnGroup);
 
-        // Two chests in the chest vault (col 8, rows 18–19)
-        addChest(objectsGroup, gltfLoader, 8, 18, Math.PI / 2, 0, [
+        // Two chests in the chest vault (col 1, rows 18–19), rotY=0 so they face the room
+        addChest(objectsGroup, gltfLoader, 1, 18, 0, 0, [
             { name: 'Gold Coins', quantity: 300 },
             'Life Essence', 'Mana Berry', 'Scroll of Fireball'
         ]);
-        addChest(objectsGroup, gltfLoader, 8, 19, Math.PI / 2, 0, [
+        addChest(objectsGroup, gltfLoader, 1, 19, 0, 0, [
             { name: 'Gold Coins', quantity: 200 },
             'Ring of Vigour', 'Ring of Wisdom', 'Ring of Dexterity'
         ]);

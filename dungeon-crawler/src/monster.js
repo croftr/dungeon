@@ -175,18 +175,17 @@ export const monsters = [
     '/monsters/iceMan-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 
   // ── Level 2 ─────────────────────────────────────────────────────────────
-  // One Treeman patrols the chamber. Patrol bounds match the level-2 map
-  // interior: rows 1–5, cols 1–6.
-  inst(D.treeman, 8, 5, 5,
+  // One Treeman patrols the chamber. Map shifted +2 cols: room is now cols 3–8.
+  inst(D.treeman, 8, 5, 7,
     '/monsters/treeman-animation/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/treeman-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
     '/monsters/treeman-animation/attack-sound.mp3', 0.90, 0, 0, 2,
-    { bounds: { minRow: 1, maxRow: 5, minCol: 1, maxCol: 6 }, speed: 0.6, waitTime: 2.5 },
+    { bounds: { minRow: 1, maxRow: 5, minCol: 3, maxCol: 8 }, speed: 0.6, waitTime: 2.5 },
     '/monsters/treeman-animation/Meshy_AI_Animation_Dead_withSkin (1).glb',
     '/monsters/treeman-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin (1).glb'),
 
   // Demon guards the demon room at the south end of the level-2 passage
-  inst(D.demon, 9, 17, 3,
+  inst(D.demon, 9, 17, 5,
     '/items/demon/Meshy_AI_Animation_Idle_withSkin.glb',
     '/items/demon/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
     '/items/demon/no-mercy.mp3', 0.70, 0, 0, 2, null,

@@ -38,27 +38,31 @@ export const level1Map = [
 ];
 
 // cols:  0  1  2  3  4  5  6  7  8  9
+// Upper section: all content shifted +2 cols right vs the original 8-wide map.
+// Passage is at col 7.  Start at col 5.  Main room cols 3-8.
+// Demon room: col 1 = chest vault, col 2 = portcullis/west-wall, cols 3-8 = room floor.
+// Player travels south → right hand side = west (lower cols) → portcullis on west wall.
 export const level2Map = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],  // row 0  — top wall
-  [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],  // row 1  — main room
-  [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],  // row 2
-  [1, 0, 0, 2, 0, 0, 0, 1, 1, 1],  // row 3  — start at col 3
-  [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],  // row 4
-  [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],  // row 5  — main room
-  [1, 1, 1, 1, 1, 0, 1, 1, 1, 1],  // row 6  — passage begins
-  [1, 1, 1, 1, 1, 0, 1, 1, 1, 1],  // row 7
-  [1, 1, 1, 1, 1, 4, 1, 1, 1, 1],  // row 8  — portcullis (keyhole unlock)
-  [1, 1, 1, 1, 1, 0, 1, 1, 1, 1],  // row 9
-  [1, 1, 1, 1, 1, 0, 1, 1, 1, 1],  // row 10
-  [1, 1, 1, 1, 1, 0, 1, 1, 1, 1],  // row 11
-  [1, 1, 1, 1, 1, 0, 1, 1, 1, 1],  // row 12
-  [1, 1, 1, 1, 1, 0, 1, 1, 1, 1],  // row 13 — passage ends
-  [1, 1, 1, 0, 0, 0, 0, 1, 1, 1],  // row 14 — passage widens into demon room
-  [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],  // row 15 — demon room
-  [1, 0, 0, 0, 0, 0, 0, 1, 1, 1],  // row 16
-  [1, 0, 0, 0, 0, 0, 0, 4, 0, 1],  // row 17 — portcullis (col 7) → chest vault (col 8)
-  [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],  // row 18 — demon room | wall | chest vault
-  [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],  // row 19 — demon room | wall | chest vault
+  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],  // row 1  — main room (cols 3-8)
+  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],  // row 2
+  [1, 1, 1, 0, 0, 2, 0, 0, 0, 1],  // row 3  — start at col 5
+  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],  // row 4
+  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],  // row 5  — main room
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1],  // row 6  — passage at col 7
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1],  // row 7
+  [1, 1, 1, 1, 1, 1, 1, 4, 1, 1],  // row 8  — portcullis (keyhole unlock)
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1],  // row 9
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1],  // row 10
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1],  // row 11
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1],  // row 12
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1],  // row 13 — passage ends
+  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],  // row 14 — passage opens into demon room
+  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],  // row 15 — demon room (cols 3-8)
+  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],  // row 16
+  [1, 0, 4, 0, 0, 0, 0, 0, 0, 1],  // row 17 — chest vault (col 1) | portcullis (col 2) | room
+  [1, 0, 1, 0, 0, 0, 0, 0, 0, 1],  // row 18 — chest vault | wall | demon room
+  [1, 0, 1, 0, 0, 0, 0, 0, 0, 1],  // row 19 — chest vault | wall | demon room
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],  // row 20 — bottom wall
 ];
 

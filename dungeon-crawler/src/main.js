@@ -110,7 +110,7 @@ setCallbacks({
     } else if (window.currentLevel === 2) {
       // Demon room: the big chamber at the south end of the passage
       const inDemonRoom = player.gridRow >= 14 && player.gridRow <= 20
-        && player.gridCol >= 1 && player.gridCol <= 7;
+        && player.gridCol >= 3 && player.gridCol <= 8;
 
       if (inDemonRoom && !hasSeenDemonVideo) {
         hasSeenDemonVideo = true;
