@@ -35,6 +35,7 @@ let _starterPortalEnabled = false;
 let _disabledPortalMesh = null;
 let _partyConfirmNPCModel = null; // true once the player confirms — prevents re-triggering
 let _starterGate = null; // portcullis behind the party-confirm NPC; opens only via dialogue
+let _level2PortcullisOpened = false;
 let _npcMixer = null;
 let _npcIdleAction = null;
 let _npcTalkAction = null;
@@ -305,7 +306,11 @@ export function initObjects(scene, camera) {
 
                     if (isTreemanTransition) {
                         // Skip the generic portal transport video, go straight to Treeman
-                        if (window.playTreemanVideo) window.playTreemanVideo();
+                        if (window.playTreemanVideo && !window.hasSeenTreemanVideo) {
+                            window.playTreemanVideo();
+                        } else if (window.playPortalVideo) {
+                            window.playPortalVideo();
+                        }
                     } else {
                         // Play the normal portal animation for other portals
                         if (window.playPortalVideo) window.playPortalVideo();
@@ -412,6 +417,9 @@ export function initObjects(scene, camera) {
                                 playKeyLockSound();
                                 setTimeout(() => {
                                     openPortcullis(p, true);
+                                    if (window.currentLevel === 2 && p.gridRow === 8 && p.gridCol === 7) {
+                                        _level2PortcullisOpened = true;
+                                    }
                                 }, 400);
                                 refreshPartyCards();
                             } else {
@@ -1054,7 +1062,7 @@ export function spawnObjectsForLevel() {
         addPortal(objectsGroup, gltfLoader, 7, 1, 1, 0, 0, -0.85);
 
         // Locked Portcullis at the entrance of the passage (col 7, row 8)
-        addPortcullis(objectsGroup, gltfLoader, 7, 8);
+        addPortcullis(objectsGroup, gltfLoader, 7, 8, 0, _level2PortcullisOpened);
 
         // Keyhole next to the portcullis on the West wall
         addKeyhole(objectsGroup, gltfLoader, 7, 8, Math.PI / 2, -0.85, -2.0);

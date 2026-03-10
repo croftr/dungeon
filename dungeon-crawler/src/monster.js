@@ -18,7 +18,7 @@ import {
   MONSTER_BASE_ATTACK, RESILIENCE_DAMAGE_FACTOR,
   SHIELD_BASH_STUN_CHANCE, SHIELD_BASH_STUN_DURATION_MS,
 } from './combat-rules.js';
-import { setInCombat, clearCombat, playCritSound, playActionSound, playHitSound, playPartyHitSound, playShieldBlockSound, isInCombat, playSoundByUrl } from './audio.js';
+import { setInCombat, clearCombat, playCritSound, playActionSound, playHitSound, playPartyHitSound, playShieldBlockSound, isInCombat, playSoundByUrl, setZoneMusic } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { resetBattleStats, recordDamageDealt, recordDamageTaken, showBattleStatsIcon } from './battle-stats.js';
 import { getItemDef } from './items.js';
@@ -176,11 +176,11 @@ export const monsters = [
 
   // ── Level 2 ─────────────────────────────────────────────────────────────
   // One Treeman patrols the chamber. Map shifted +2 cols: room is now cols 3–8.
-  inst(D.treeman, 8, 5, 7,
+  inst(D.treeman, 8, 7, 7,
     '/monsters/treeman-animation/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/treeman-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
     '/monsters/treeman-animation/attack-sound.mp3', 0.90, 0, 0, 2,
-    { bounds: { minRow: 1, maxRow: 5, minCol: 3, maxCol: 8 }, speed: 0.6, waitTime: 2.5 },
+    { bounds: { minRow: 1, maxRow: 7, minCol: 3, maxCol: 8 }, speed: 0.6, waitTime: 2.5 },
     '/monsters/treeman-animation/Meshy_AI_Animation_Dead_withSkin (1).glb',
     '/monsters/treeman-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin (1).glb'),
 
@@ -1772,6 +1772,10 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
             droppedItems.push(drop.item);
           }
         }
+      }
+
+      if (m.name === 'Treeman') {
+        setZoneMusic('/sounds/backing/demon-room.mp3');
       }
 
       spawnCorpse(m.gridCol, m.gridRow, droppedItems);

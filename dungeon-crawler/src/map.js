@@ -44,9 +44,9 @@ export const level1Map = [
 // Player travels south → right hand side = west (lower cols) → portcullis on west wall.
 export const level2Map = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],  // row 0  — top wall
-  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],  // row 1  — main room (cols 3-8)
+  [1, 1, 1, 0, 0, 0, 0, 2, 0, 1],  // row 1  — main room (cols 3-8)
   [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],  // row 2
-  [1, 1, 1, 0, 0, 2, 0, 0, 0, 1],  // row 3  — start at col 5
+  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],  // row 3  — start was here
   [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],  // row 4
   [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],  // row 5  — main room
   [1, 1, 1, 1, 1, 1, 1, 0, 1, 1],  // row 6  — passage at col 7

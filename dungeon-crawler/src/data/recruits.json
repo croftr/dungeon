@@ -18,10 +18,12 @@
         ],
         "skillProgression": [
             "Entangle",
-            "Hunter's Eye",
             "Double Attack",
+            "Hunter's Eye",
             "Bow Tactician",
             "Bow Tactician",
+            "Bow Tactician",
+            "Bow Master",
             "Bow Master",
             "Bow Master"
         ],
@@ -93,7 +95,6 @@
             "Shield Master",
             "Shield Master",
             "Shield Master",
-            "Double Attack",
             "Axe Tactician",
             "Axe Tactician",
             "Axe Master",
@@ -163,7 +164,6 @@
         "skillProgression": [
             "Berserk",
             "Warcry",
-            "Double Attack",
             "Two-Handed Tactician",
             "Two-Handed Tactician",
             "Two-Handed Tactician",
@@ -190,11 +190,11 @@
         "job": "Ranger",
         "race": "Dwarf",
         "stats": {
-            "strength": 107,
-            "dexterity": 107,
-            "vitality": 106,
+            "strength": 7,
+            "dexterity": 7,
+            "vitality": 6,
             "intelligence": 4,
-            "resilience": 107
+            "resilience": 7
         },
         "bio": "A keen-eyed marksman who traded the mines for the open hunt. Baldur's crossbow never misses its mark.",
         "skillProgression": [
@@ -262,7 +262,7 @@
             "strength": 4,
             "dexterity": 6,
             "vitality": 6,
-            "intelligence": 109,
+            "intelligence": 9,
             "resilience": 8
         },
         "bio": "A devoted healer whose presence brings hope to the darkest depths. Seraphina draws upon pure light to mend flesh and soul.",

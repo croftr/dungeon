@@ -82,6 +82,8 @@ const ACTION_SVG = {
     </svg>`,
 
   // Arrow in flight — viewed from behind, flying straight into the screen depth
+  // Tip is near the viewBox centre (60,57) so CSS scale() shrinks the arrow toward
+  // its own tip rather than toward the SVG midpoint, giving a straight-ahead flight path.
   [ACTIONS.SHOOT]: `
     <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"
          fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -90,35 +92,36 @@ const ACTION_SVG = {
           <feGaussianBlur stdDeviation="1.5" result="blur" />
           <feComposite in="SourceGraphic" in2="blur" operator="over" />
         </filter>
+        <!-- Gradient: dark near end (nock/bottom), lighter far end (tip/top) -->
         <linearGradient id="arrowShaft" x1="0%" y1="100%" x2="0%" y2="0%">
           <stop offset="0%" stop-color="#302010" />
           <stop offset="100%" stop-color="#906030" />
         </linearGradient>
       </defs>
       <g filter="url(#glowShoot)">
-        <!-- Tapered shaft extending into the distance -->
-        <polygon points="56,105 64,105 61,40 59,40" fill="url(#arrowShaft)" stroke="#201005" stroke-width="1" />
-        
-        <!-- Arrowhead (small, distant) -->
-        <polygon points="57,42 63,42 60,32" fill="#e0e0e0" stroke="#a0a0a0" stroke-width="1" />
-        
-        <!-- Fletching Left (Large and close) -->
-        <polygon points="56,100 25,120 58,75" fill="rgba(200,255,130,0.85)" stroke="#90d060" stroke-width="1.5"/>
-        
-        <!-- Fletching Right (Large and close) -->
-        <polygon points="64,100 95,120 62,75" fill="rgba(200,255,130,0.85)" stroke="#90d060" stroke-width="1.5"/>
-        
-        <!-- Fletching Top (Center ridge standing up towards us) -->
-        <polygon points="58,105 62,105 61,75 59,75" fill="#ccff90" opacity="0.95" stroke="#a0f060" stroke-width="1"/>
-        
-        <!-- Center arrow nock (where the string goes) -->
-        <circle cx="60" cy="105" r="3" fill="#201005" />
-        
-        <!-- Perspective wind lines pulling into the center -->
-        <line x1="30" y1="110" x2="52" y2="60" stroke-width="1.5" stroke="#d0ff80" opacity="0.4" stroke-dasharray="2 4"/>
-        <line x1="90" y1="110" x2="68" y2="60" stroke-width="1.5" stroke="#d0ff80" opacity="0.4" stroke-dasharray="2 4"/>
-        <line x1="10" y1="80" x2="45" y2="40" stroke-width="1" stroke="#a0f060" opacity="0.3" stroke-dasharray="2 6"/>
-        <line x1="110" y1="80" x2="75" y2="40" stroke-width="1" stroke="#a0f060" opacity="0.3" stroke-dasharray="2 6"/>
+        <!-- Tapered shaft: wide at nock (near), narrow near tip (far) -->
+        <polygon points="55,96 65,96 62,66 58,66" fill="url(#arrowShaft)" stroke="#201005" stroke-width="0.5" />
+
+        <!-- Arrowhead: small, near centre of viewBox so scale() keeps it near screen centre -->
+        <polygon points="57,68 63,68 60,57" fill="#e0e0e0" stroke="#a0a0a0" stroke-width="1" />
+
+        <!-- Fletching Left — large, sweeps to bottom-left -->
+        <polygon points="56,88 14,118 58,72" fill="rgba(200,255,130,0.85)" stroke="#90d060" stroke-width="1.5"/>
+
+        <!-- Fletching Right — mirrors left -->
+        <polygon points="64,88 106,118 62,72" fill="rgba(200,255,130,0.85)" stroke="#90d060" stroke-width="1.5"/>
+
+        <!-- Centre ridge between fletchings -->
+        <polygon points="58,94 62,94 61,73 59,73" fill="#ccff90" opacity="0.9" stroke="#a0f060" stroke-width="0.8"/>
+
+        <!-- Nock (string notch) -->
+        <circle cx="60" cy="97" r="3.5" fill="#201005" stroke="#604020" stroke-width="1" />
+
+        <!-- Speed lines converging toward the tip -->
+        <line x1="25" y1="112" x2="52" y2="72" stroke-width="1.5" stroke="#d0ff80" opacity="0.4" stroke-dasharray="2 4"/>
+        <line x1="95" y1="112" x2="68" y2="72" stroke-width="1.5" stroke="#d0ff80" opacity="0.4" stroke-dasharray="2 4"/>
+        <line x1="5"  y1="92"  x2="44" y2="62" stroke-width="1"   stroke="#a0f060" opacity="0.3" stroke-dasharray="2 6"/>
+        <line x1="115" y1="92" x2="76" y2="62" stroke-width="1"   stroke="#a0f060" opacity="0.3" stroke-dasharray="2 6"/>
       </g>
     </svg>`,
 

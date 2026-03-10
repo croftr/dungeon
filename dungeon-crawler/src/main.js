@@ -75,6 +75,7 @@ let hasSeenOgreVideo = false;
 let hasSeenPrepVideo = false;
 let hasSeenMinotaurVideo = false;
 let hasSeenDemonVideo = false;
+window.hasSeenTreemanVideo = false;
 let prepVideoTimer = null;
 
 setCallbacks({
@@ -115,6 +116,11 @@ setCallbacks({
       if (inDemonRoom && !hasSeenDemonVideo) {
         hasSeenDemonVideo = true;
         playDemonVideo();
+      }
+
+      const treeman = monsters.find(m => m.name === 'Treeman');
+      if (treeman && !treeman.alive) {
+        setZoneMusic('/sounds/backing/demon-room.mp3');
       }
     } else if (window.currentLevel === 3) {
       const inMinotaurRoom = player.gridRow >= 8 && player.gridRow <= 14
@@ -273,6 +279,7 @@ const skipTreemanBtn = document.getElementById('skip-treeman-btn');
 let _treemanCallback = null;
 
 window.playTreemanVideo = function (onComplete) {
+  window.hasSeenTreemanVideo = true;
   _treemanCallback = onComplete;
   if (!treemanOverlay || !treemanVideo) {
     if (_treemanCallback) _treemanCallback();
@@ -637,11 +644,24 @@ window.loadLevel = function (levelNum) {
     player.facing = (player.facing + 2) % 4; // Turn 180 degrees
     camera.rotation.order = 'YXZ';
     camera.rotation.y = FACING_ANGLES[player.facing];
+  } else if (levelNum === 2) {
+    // Face South to see the room and Treeman
+    player.facing = 2;
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = FACING_ANGLES[player.facing];
   }
 
   // 5. Update Minimap bounds
   drawMinimap();
   updateStatus();
+
+  // If Treeman is dead, ensure Level 2 music is override
+  if (levelNum === 2) {
+    const treeman = monsters.find(m => m.name === 'Treeman');
+    if (treeman && !treeman.alive) {
+      setZoneMusic('/sounds/backing/demon-room.mp3');
+    }
+  }
 };
 
 const raycaster = new THREE.Raycaster();

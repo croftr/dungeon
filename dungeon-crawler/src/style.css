@@ -2314,7 +2314,9 @@ body {
   animation: bash-thrust 0.5s cubic-bezier(0.2, 1, 0.3, 1) forwards;
 }
 
-/* ── SHOOT ── arrow flies straight into the screen depth ── */
+/* ── SHOOT ── arrow flies straight (slightly downward) into the screen depth ── */
+/* The SVG tip sits near the viewBox centre so scale() shrinks toward the tip.   */
+/* A small translateY downward drift simulates aiming at an enemy's torso level. */
 @keyframes shoot-fly {
   0% {
     transform: translateY(0) scale(1.0);
@@ -2328,17 +2330,17 @@ body {
   }
 
   40% {
-    transform: translateY(0) scale(0.35);
+    transform: translateY(4%) scale(0.35);
     opacity: 1;
   }
 
   80% {
-    transform: translateY(0) scale(0.15);
+    transform: translateY(8%) scale(0.15);
     opacity: 0.9;
   }
 
   100% {
-    transform: translateY(0) scale(0.05);
+    transform: translateY(10%) scale(0.05);
     opacity: 0;
     filter: blur(1px);
   }
