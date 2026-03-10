@@ -1,5 +1,5 @@
 import { getItemDef } from './items.js';
-import { renderItemIcon, attachTooltipListeners, hideTooltip, useQuickslotPotion, rotateLoadout } from './equipment.js';
+import { renderItemIcon, attachTooltipListeners, hideTooltip, useQuickslotPotion, rotateLoadout, clearAutoAttackTimers } from './equipment.js';
 import { addLogEntry } from './battle-log.js';
 import { isInCombat, playGoldSound } from './audio.js';
 import { skillsState } from './skills-state.js';
@@ -567,6 +567,7 @@ function buildTacticsOverlay() {
   document.getElementById('tactics-close').addEventListener('click', closeTacticsModal);
   document.getElementById('tactics-auto-attack').addEventListener('change', (e) => {
     autoAttack = e.target.checked;
+    if (!autoAttack) clearAutoAttackTimers();
   });
   document.getElementById('tactics-swap-rows').addEventListener('click', () => {
     tacticsSel = null;

@@ -7,7 +7,7 @@ import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
 import { initParty, updateParty, party, setPartyGold, refreshPartyCards, autoAttack } from './party.js';
-import { initEquipment, hideDropButton, updateEffectiveStats, useHand } from './equipment.js';
+import { initEquipment, hideDropButton, updateEffectiveStats, tickAutoAttack, clearAutoAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables } from './objects.js';
@@ -185,16 +185,19 @@ function animate(now) {
   updateAudio(dt);
   updateParty(dt);
 
-  // Auto-attack: front row members attack automatically when a monster is in range
+  // Auto-attack: front row members attack automatically when a monster is in melee range
   if (autoAttack) {
     const hasTarget = monsters.some(t => t.alive && isInFrontOfPlayer(t.gridRow, t.gridCol, 1));
     if (hasTarget) {
       for (const i of [0, 1]) {
         const m = party[i];
         if (!m || m.isEmpty || m.isDead) continue;
-        useHand(i, 'left', true);
-        useHand(i, 'right', true);
+        tickAutoAttack(i);
       }
+    } else {
+      // Monster stepped away — clear any pending fire timers so they don't
+      // fire the instant combat resumes, giving the player a fresh 1-second window
+      clearAutoAttackTimers();
     }
   }
 

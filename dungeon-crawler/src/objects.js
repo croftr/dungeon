@@ -371,7 +371,11 @@ export function initObjects(scene, camera) {
                                     added = true;
                                     showMessage(`Picked up ${obj.userData.itemName}.`);
                                     playItemSound(obj.userData.itemName);
-                                    obj.parent.remove(obj);
+                                    if (obj.userData.modelContainer) {
+                                        obj.userData.modelContainer.parent.remove(obj.userData.modelContainer);
+                                    } else {
+                                        obj.parent.remove(obj);
+                                    }
                                     break;
                                 }
                             }
@@ -969,6 +973,53 @@ export function spawnObjectsForLevel() {
         // Decorative chest beside the merchant (same cell, nudged south, non-interactive)
         addChest(objectsGroup, gltfLoader, 23, 11, -Math.PI / 2, 0.7, [], '/items/chest1.glb', false);
 
+        // Torch item beside the merchant, nudged north, interactive dropped item
+        gltfLoader.load('/items/torch.glb', (gltf) => {
+            const model = gltf.scene;
+            model.scale.setScalar(0.7);
+            model.position.set(23 * CELL - 0.2, 0.5, 11 * CELL - 0.7);
+            model.rotation.y = -Math.PI / 2;
+            
+            const light = new THREE.PointLight(0xffaa00, 2.5, 4);
+            light.position.set(0, 0.4, 0);
+            model.add(light);
+
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    child.userData.isDroppedItem = true;
+                    child.userData.itemName = 'Torch';
+                    child.userData.gridCol = 23;
+                    child.userData.gridRow = 11;
+                    child.userData.modelContainer = model;
+                    interactables.push(child);
+                    if (child.material) {
+                        const mats = Array.isArray(child.material) ? child.material : [child.material];
+                        mats.forEach(mat => {
+                            ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                                if (mat[mapName]) {
+                                    mat[mapName].magFilter = THREE.LinearFilter;
+                                    mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                    mat[mapName].anisotropy = 16;
+                                }
+                            });
+                        });
+                    }
+                }
+            });
+
+            const originY = model.position.y;
+            new Tween(model.position, tweenGroup)
+                .to({ y: originY + 0.15 }, 1200)
+                .easing(Easing.Quadratic.InOut)
+                .yoyo(true)
+                .repeat(Infinity)
+                .start();
+
+            objectsGroup.add(model);
+        });
+
         // Portal to Level 2
         // Positioned at col 13, row 13 against the East wall.
         // It's on an East wall, so rotate it Math.PI / 2 radians to face West (inward to the room).
@@ -990,22 +1041,9 @@ export function spawnObjectsForLevel() {
         addPortcullis(objectsGroup, gltfLoader, 7, 7);
 
         // Button for portcullis
-        const buttonContainer = new THREE.Group();
-        const plateGeo = new THREE.BoxGeometry(0.05, 0.3, 0.2);
-        const plateMat = new THREE.MeshLambertMaterial({ color: 0x443322 });
-        const plate = new THREE.Mesh(plateGeo, plateMat);
-        buttonContainer.add(plate);
-
-        const btnGeo = new THREE.BoxGeometry(0.08, 0.12, 0.12);
-        const btnMat = new THREE.MeshLambertMaterial({ color: 0xaa2222 });
-        const btn = new THREE.Mesh(btnGeo, btnMat);
-        btn.position.x = 0.04;
-        btn.userData = { isButton: true, target: 'portcullis' };
-        interactables.push(btn);
-        buttonContainer.add(btn);
-
-        buttonContainer.position.set(8 * CELL - 1.0, 1.25, 8 * CELL);
-        objectsGroup.add(buttonContainer);
+        const { group: portcullisBtn } = createWallButton(+1, { target: 'portcullis' });
+        portcullisBtn.position.set(8 * CELL - 1.0, 1.25, 8 * CELL);
+        objectsGroup.add(portcullisBtn);
 
         // Statue in the center of the new 5x5 room
         addStatue(objectsGroup, gltfLoader, 13, 3);
@@ -1029,23 +1067,9 @@ export function spawnObjectsForLevel() {
         addPortcullis(objectsGroup, gltfLoader, 16, 4, Math.PI / 2);
 
         // Button to escape mummy room
-        const buttonContainerMummy = new THREE.Group();
-        const plateGeoMummy = new THREE.BoxGeometry(0.05, 0.3, 0.2);
-        const plateMatMummy = new THREE.MeshLambertMaterial({ color: 0x443322 });
-        const plateMummy = new THREE.Mesh(plateGeoMummy, plateMatMummy);
-        buttonContainerMummy.add(plateMummy);
-
-        const btnGeoMummy = new THREE.BoxGeometry(0.08, 0.12, 0.12);
-        const btnMatMummy = new THREE.MeshLambertMaterial({ color: 0xaa2222 });
-        const btnMummy = new THREE.Mesh(btnGeoMummy, btnMatMummy);
-        btnMummy.position.x = -0.04;
-        btnMummy.userData = { isButton: true, target: 'escape_mummy_room', targetRow: 3, targetCol: 21 };
-        interactables.push(btnMummy);
-        buttonContainerMummy.add(btnMummy);
-
-        // Col 21 wall facing west. 
-        buttonContainerMummy.position.set(21 * CELL - 1.0, 1.25, 3 * CELL);
-        objectsGroup.add(buttonContainerMummy);
+        const { group: mummyBtn } = createWallButton(-1, { target: 'escape_mummy_room', targetRow: 3, targetCol: 21 });
+        mummyBtn.position.set(21 * CELL - 1.0, 1.25, 3 * CELL);
+        objectsGroup.add(mummyBtn);
 
         // Weapon rack at the end of the new dead-end passage in mummy room
         addWeaponRack(objectsGroup, gltfLoader, 22, 4, Math.PI / 2, 0.65, 0, [
@@ -1074,23 +1098,9 @@ export function spawnObjectsForLevel() {
 
         // Button on the EAST face of the col-2 wall, one row SOUTH of the portcullis
         // (row 18 = solid wall). Player stands at (18, 3) facing west to press it.
-        const demonRoomBtnGroup = new THREE.Group();
-        const drPlateGeo = new THREE.BoxGeometry(0.05, 0.3, 0.2);
-        const drPlateMat = new THREE.MeshLambertMaterial({ color: 0x443322 });
-        const drPlate = new THREE.Mesh(drPlateGeo, drPlateMat);
-        demonRoomBtnGroup.add(drPlate);
-
-        const drBtnGeo = new THREE.BoxGeometry(0.08, 0.12, 0.12);
-        const drBtnMat = new THREE.MeshLambertMaterial({ color: 0xaa2222 });
-        const drBtn = new THREE.Mesh(drBtnGeo, drBtnMat);
-        drBtn.position.x = 0.04;   // protrudes east into the demon room
-        drBtn.userData = { isButton: true, target: 'demon_room' };
-        interactables.push(drBtn);
-        demonRoomBtnGroup.add(drBtn);
-
-        // East face of col 2, row 18 (solid wall just south of the portcullis)
-        demonRoomBtnGroup.position.set(2 * CELL + 1.0, 1.25, 18 * CELL);
-        objectsGroup.add(demonRoomBtnGroup);
+        const { group: demonBtn } = createWallButton(+1, { target: 'demon_room' });
+        demonBtn.position.set(2 * CELL + 1.0, 1.25, 18 * CELL);
+        objectsGroup.add(demonBtn);
 
         // Two chests in the chest vault (col 1, rows 18–19), rotY=0 so they face the room
         addChest(objectsGroup, gltfLoader, 1, 18, 0, 0, [
@@ -1133,6 +1143,37 @@ export function spawnObjectsForLevel() {
         // Ethereal Egg in the center of the minotaur room (swapped with level 1 mummy room)
         addEtherealEgg(objectsGroup, gltfLoader, 11, 11);
     }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  WALL BUTTON FACTORY
+//  Single source of truth for every portcullis button in the dungeon.
+//  To restyle all buttons at once, edit only this function.
+//
+//  protrusionDir  +1 = button face points east  (+X)
+//                 -1 = button face points west  (-X)
+//  userData       merged onto the interactive sphere (must include `target`)
+// ─────────────────────────────────────────────────────────────────────────────
+function createWallButton(protrusionDir, userData) {
+    const group = new THREE.Group();
+
+    // Round backing plate — thin disc mounted flush on the wall face
+    const plateGeo = new THREE.CylinderGeometry(0.09, 0.09, 0.018, 28);
+    const plateMat = new THREE.MeshLambertMaterial({ color: 0x1e1008 });
+    const plate = new THREE.Mesh(plateGeo, plateMat);
+    plate.rotation.z = Math.PI / 2; // rotate so the circular face is perpendicular to X
+    group.add(plate);
+
+    // Dome button — sphere protruding from the plate centre
+    const btnGeo = new THREE.SphereGeometry(0.055, 20, 14);
+    const btnMat = new THREE.MeshLambertMaterial({ color: 0xbb2020 });
+    const btn = new THREE.Mesh(btnGeo, btnMat);
+    btn.position.x = protrusionDir * 0.04;
+    btn.userData = { isButton: true, ...userData };
+    interactables.push(btn);
+    group.add(btn);
+
+    return { group, btn };
 }
 
 function addPortcullis(scene, loader, col, row, rotY = 0, startOpen = false) {

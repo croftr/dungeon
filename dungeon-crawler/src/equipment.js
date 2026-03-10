@@ -2823,6 +2823,77 @@ export function useHand(memberIndex, hand, silent = false) {
 }
 
 // ─────────────────────────────────────────────
+//  AUTO-ATTACK TICK
+// ─────────────────────────────────────────────
+// How long after a weapon's cooldown expires before auto-attack fires (ms).
+const AUTO_EXTRA_DELAY_MS = 1000;
+// How much later the right hand fires vs the left when both are ready (ms).
+const AUTO_STAGGER_MS = 600;
+
+// Per "memberIndex-hand" scheduled fire timestamp.
+const autoNextFireAt = {};
+
+// Call once per frame per front-row member when auto-attack is active and a
+// monster is in melee range.  All timing / cooldown logic lives here so that
+// main.js doesn't need weapon definitions.
+export function tickAutoAttack(memberIndex) {
+  const m = party[memberIndex];
+  if (!m || m.isEmpty || m.isDead) return;
+  if (hasEffectFlag(m, 'preventsAction')) return;
+
+  _tickAutoHand(memberIndex, 'left',  0);
+  _tickAutoHand(memberIndex, 'right', AUTO_STAGGER_MS);
+}
+
+// Reset scheduled timers (e.g. when auto-attack is toggled off).
+export function clearAutoAttackTimers() {
+  for (const k of Object.keys(autoNextFireAt)) delete autoNextFireAt[k];
+}
+
+function _tickAutoHand(memberIndex, hand, staggerOffsetMs) {
+  const key = `${memberIndex}-${hand}`;
+  const now = performance.now();
+
+  // ── Phase 2: a fire is already scheduled — check if it's time ──
+  if (autoNextFireAt[key] !== undefined) {
+    if (now >= autoNextFireAt[key]) {
+      delete autoNextFireAt[key];
+      useHand(memberIndex, hand, true);
+    }
+    return;
+  }
+
+  // ── Phase 1: no fire scheduled — check if cooldown has expired ──
+  const m = party[memberIndex];
+  const slotKey = hand === 'left' ? 'leftHand' : 'rightHand';
+  const item = m.equipment?.[slotKey];
+  const def = item ? getItemDef(item.name) : null;
+  const attackType = item ? (def?.attackType ?? null) : ACTIONS.PUNCH;
+  if (!attackType) return; // passive item (plain shield) or empty slot with no punch intent
+
+  const isBothHands = def?.slot === 'bothHands';
+  if (hand === 'right' && isBothHands) return; // bothHands weapon is driven by left only
+
+  // Compute effective weapon delay (mirrors logic in useHand)
+  let delaySec = def?.delay ?? 2;
+  const ww = skillsState.whirlwind;
+  if (ww.active && ww.actorName === m.name && now < ww.expiresAt) delaySec *= ww.magnitude;
+  const wd = skillsState.warDance;
+  if (wd.active && now < wd.expiresAt) delaySec *= wd.magnitude;
+  delaySec *= getAttackSpeedMultiplier(m);
+
+  const isSpellSlot = def?.slot === 'spell';
+  const baseKey = isBothHands ? `${memberIndex}-left` : `${memberIndex}-${hand}`;
+  const timeKey = isSpellSlot ? `${baseKey}-${item.name}` : baseKey;
+
+  const lastFire = lastAttackTimes[timeKey] ?? 0;
+  if (now < lastFire + delaySec * 1000) return; // still on cooldown
+
+  // Cooldown just expired — schedule fire after extra delay + stagger offset
+  autoNextFireAt[key] = now + AUTO_EXTRA_DELAY_MS + staggerOffsetMs;
+}
+
+// ─────────────────────────────────────────────
 //  USE SKILL  — dispatcher + per-skill implementations
 // ─────────────────────────────────────────────
 
