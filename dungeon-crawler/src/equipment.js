@@ -2567,11 +2567,11 @@ function _showDamagePopup(slotEl, damage, isCrit) {
   setTimeout(() => popup.remove(), 900);
 }
 
-function useHand(memberIndex, hand) {
+export function useHand(memberIndex, hand, silent = false) {
   const m = party[memberIndex];
   if (!m) return;
   if (hasEffectFlag(m, 'preventsAction')) {
-    showMessage(`${m.name} cannot act!`);
+    if (!silent) showMessage(`${m.name} cannot act!`);
     return;
   }
 
@@ -2623,8 +2623,9 @@ function useHand(memberIndex, hand) {
 
   // Spells that target a single party member need a target picker before executing.
   // We intercept here — after cooldown/dead checks — but before the monster-targeting path.
+  // Skip during auto-attack (silent mode) — these require manual targeting.
   if (def?.target === 'party-member') {
-    _openPartyTargetPicker(m, memberIndex, hand, def);
+    if (!silent) _openPartyTargetPicker(m, memberIndex, hand, def);
     return;
   }
 
@@ -2646,7 +2647,7 @@ function useHand(memberIndex, hand) {
   // Back-row members can only melee if their front partner is dead (stepped up).
   // canMelee() centralises this logic — see combat-rules.js.
   if (!isRanged && !isBuff && !canMelee(party, memberIndex)) {
-    showMessage(`${m.name} is in the back row — only ranged attacks can reach the enemy!`);
+    if (!silent) showMessage(`${m.name} is in the back row — only ranged attacks can reach the enemy!`);
     return;
   }
 
@@ -2656,12 +2657,12 @@ function useHand(memberIndex, hand) {
     const ammoDef = ammoItem ? getItemDef(ammoItem.name) : null;
     if (def.weaponType === 'bow') {
       if (!ammoDef || ammoDef.ammoType !== 'arrow') {
-        showMessage(`${m.name} needs arrows equipped to use the ${def.name}!`);
+        if (!silent) showMessage(`${m.name} needs arrows equipped to use the ${def.name}!`);
         return;
       }
     } else if (def.weaponType === 'crossbow') {
       if (!ammoDef || ammoDef.ammoType !== 'bolt') {
-        showMessage(`${m.name} needs bolts equipped to use the ${def.name}!`);
+        if (!silent) showMessage(`${m.name} needs bolts equipped to use the ${def.name}!`);
         return;
       }
     }
@@ -2683,7 +2684,7 @@ function useHand(memberIndex, hand) {
   const isSpell = mpCost > 0; // spells / fireballs cost mana, not stamina
   if (isSpell) {
     if (m.mp < mpCost) {
-      showMessage(`${m.name} does not have enough mana!`);
+      if (!silent) showMessage(`${m.name} does not have enough mana!`);
       return;
     }
     setMp(m.id, m.mp - mpCost);
@@ -2700,7 +2701,7 @@ function useHand(memberIndex, hand) {
   }
 
   if (!isSpell && spCost > 0 && m.sp < spCost) {
-    showMessage(`${m.name} is too exhausted to attack!`);
+    if (!silent) showMessage(`${m.name} is too exhausted to attack!`);
     return;
   }
 

@@ -546,6 +546,30 @@ body {
   line-height: 1.8;
 }
 
+.tactics-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #c9a84c;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tactics-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #c9a84c;
+  cursor: pointer;
+}
+
+.tactics-toggle-hint {
+  font-size: 11px;
+  color: #6a5a48;
+}
+
 /* One member card */
 .member-card {
   width: max-content;

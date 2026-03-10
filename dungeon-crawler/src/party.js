@@ -19,6 +19,9 @@ export const party = [
 
 export let partyGold = 0;
 
+export let autoAttack = false;
+export function setAutoAttack(val) { autoAttack = val; }
+
 export function addGold(amount) {
   partyGold += amount;
   if (amount > 0) playGoldSound();
@@ -551,6 +554,10 @@ function buildTacticsOverlay() {
         <div class="tactics-row-label tactics-row-label--back">Back Row &mdash; Ranged only</div>
         <div class="tactics-row" id="tactics-back"></div>
         <p class="tactics-hint">Click a character to select &bull; Click another slot to move them</p>
+        <label class="tactics-toggle" id="tactics-auto-attack-label">
+          <input type="checkbox" id="tactics-auto-attack">
+          Auto Attack <span class="tactics-toggle-hint">(front row attacks automatically)</span>
+        </label>
         <span id="tactics-gold" style="margin-top:10px; display:flex; justify-content:center; align-items:center; font-size:1.1em; color:#ffd700; text-shadow:1px 1px 0 #000;"><img src="/icons/gold_coins.png" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}</span>
       </div>
     </div>
@@ -558,6 +565,9 @@ function buildTacticsOverlay() {
   document.body.appendChild(tacticsOverlay);
 
   document.getElementById('tactics-close').addEventListener('click', closeTacticsModal);
+  document.getElementById('tactics-auto-attack').addEventListener('change', (e) => {
+    autoAttack = e.target.checked;
+  });
   document.getElementById('tactics-swap-rows').addEventListener('click', () => {
     tacticsSel = null;
     swapSlots(0, 2);
@@ -631,6 +641,8 @@ function handleTacticsSlotClick(index) {
 export function openTacticsModal() {
   tacticsSel = null;
   renderTacticsSlots();
+  const cb = document.getElementById('tactics-auto-attack');
+  if (cb) cb.checked = autoAttack;
   tacticsOverlay.style.display = 'flex';
 }
 

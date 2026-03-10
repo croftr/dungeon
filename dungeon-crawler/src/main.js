@@ -2,12 +2,12 @@ import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import { buildLevel, findCell, CELL_START, changeMapArray, level1Map, level2Map, level3Map, cellToWorld } from './map.js';
-import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES } from './player.js';
+import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
-import { initParty, updateParty, party, setPartyGold, refreshPartyCards } from './party.js';
-import { initEquipment, hideDropButton, updateEffectiveStats } from './equipment.js';
+import { initParty, updateParty, party, setPartyGold, refreshPartyCards, autoAttack } from './party.js';
+import { initEquipment, hideDropButton, updateEffectiveStats, useHand } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables } from './objects.js';
@@ -184,6 +184,20 @@ function animate(now) {
   updateQuarks(dt);
   updateAudio(dt);
   updateParty(dt);
+
+  // Auto-attack: front row members attack automatically when a monster is in range
+  if (autoAttack) {
+    const hasTarget = monsters.some(t => t.alive && isInFrontOfPlayer(t.gridRow, t.gridCol, 1));
+    if (hasTarget) {
+      for (const i of [0, 1]) {
+        const m = party[i];
+        if (!m || m.isEmpty || m.isDead) continue;
+        useHand(i, 'left', true);
+        useHand(i, 'right', true);
+      }
+    }
+  }
+
   renderer.render(scene, camera);
   css2dRenderer.render(scene, camera);
 }

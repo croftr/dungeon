@@ -985,6 +985,7 @@ export function spawnObjectsForLevel() {
         addAnvil(objectsGroup, gltfLoader, 19, 7, 0, 0, -0.85, ['Life Essence', 'Life Essence']);
 
 
+
         // Portcullis: Row 7, Col 7.
         addPortcullis(objectsGroup, gltfLoader, 7, 7);
 
