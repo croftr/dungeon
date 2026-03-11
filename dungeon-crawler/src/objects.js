@@ -927,13 +927,13 @@ export function spawnObjectsForLevel() {
         // Chest in the Northwest room, tucked into the far northeast corner (against Rows 0 & Col 6)
         addChest(objectsGroup, gltfLoader, 5, 1, Math.PI, -0.65, [
             "Ring of Dexterity", "Steel Arrows", "Poison Dagger", "Leather Belt", "Adventurer's Belt",
-            "Dwarf Crossbow", "Steel Bolts"
+            "Dwarf Crossbow"
         ], undefined, true, -0.35);
 
         // 2nd Chest in the Northwest room, next to the other one, containing all rings
         addChest(objectsGroup, gltfLoader, 5, 1, Math.PI, -0.65, [
             { name: 'Gold Coins', quantity: 100 },
-            "Ring of Vigour", "Ring of Wisdom", "Ring of Dexterity"
+            "Ring of Vigour", "Travelling Cloak", "Iron Helm"
         ], undefined, true, 0.35);
         // Chest in the mummy room (secret east chamber)
         addChest(objectsGroup, gltfLoader, 19, 1, 0, -0.7, [
@@ -976,10 +976,10 @@ export function spawnObjectsForLevel() {
         // Torch item beside the merchant, nudged north, interactive dropped item
         gltfLoader.load('/items/torch.glb', (gltf) => {
             const model = gltf.scene;
-            model.scale.setScalar(0.7);
-            model.position.set(23 * CELL - 0.2, 0.5, 11 * CELL - 0.7);
+            model.scale.setScalar(0.35);
+            model.position.set(23 * CELL + 0.8, 0.25, 11 * CELL - 0.7);
             model.rotation.y = -Math.PI / 2;
-            
+
             const light = new THREE.PointLight(0xffaa00, 2.5, 4);
             light.position.set(0, 0.4, 0);
             model.add(light);
@@ -1008,14 +1008,6 @@ export function spawnObjectsForLevel() {
                     }
                 }
             });
-
-            const originY = model.position.y;
-            new Tween(model.position, tweenGroup)
-                .to({ y: originY + 0.15 }, 1200)
-                .easing(Easing.Quadratic.InOut)
-                .yoyo(true)
-                .repeat(Infinity)
-                .start();
 
             objectsGroup.add(model);
         });

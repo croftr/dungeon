@@ -1658,7 +1658,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
   const wasEngaged = m.engaged;
   if (m.name !== 'Training Dummy') m.engaged = true;
   if (!wasEngaged && !isInCombat() && m.name !== 'Training Dummy') {
-    resetBattleStats();
+    resetBattleStats(m.name);
   }
 
   // ── Skeleton Shield Block ──────────────────────────────────────────────────

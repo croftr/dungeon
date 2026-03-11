@@ -1,7 +1,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 //  BATTLE STATS  — tracks damage dealt / received per party member per fight.
-//  The icon appears bottom-right after a monster is killed; clicking it opens
-//  a summary panel. Stats reset when the next fight begins.
+//  The icon appears top-left after a monster is killed; clicking it opens a
+//  summary panel. Stats reset when the next fight begins. If the panel is open
+//  it stays open across fights, showing live data for the current monster.
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** @type {Map<string, {dealt: number, taken: number}>} */
@@ -12,26 +13,30 @@ let _iconVisible = false;
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
-/** Reset all stats and hide the icon (call when a new fight begins). */
-export function resetBattleStats() {
+/** Reset all stats for a new fight. Keeps the panel open if it was open. */
+export function resetBattleStats(monsterName = '') {
   _stats = new Map();
-  _monsterName = '';
+  _monsterName = monsterName;
   _hideIcon();
-  _closePanel();
+  if (_panelVisible) {
+    _refreshPanel();
+  } else {
+    _closePanel();
+  }
 }
 
 /** Record damage a party member dealt to a monster. */
 export function recordDamageDealt(characterName, amount) {
   if (!characterName) return;
-  const entry = _getOrCreate(characterName);
-  entry.dealt += amount;
+  _getOrCreate(characterName).dealt += amount;
+  _refreshPanel();
 }
 
 /** Record damage a party member took from a monster. */
 export function recordDamageTaken(memberName, amount) {
   if (!memberName) return;
-  const entry = _getOrCreate(memberName);
-  entry.taken += amount;
+  _getOrCreate(memberName).taken += amount;
+  _refreshPanel();
 }
 
 /** Show the battle-stats icon (call after a monster is killed). */
@@ -40,6 +45,7 @@ export function showBattleStatsIcon(monsterName = '') {
   _iconVisible = true;
   const btn = document.getElementById('battle-stats-btn');
   if (btn) btn.classList.add('bsb--visible');
+  _refreshPanel();
 }
 
 // ── Internals ─────────────────────────────────────────────────────────────────
@@ -73,38 +79,43 @@ function _togglePanel() {
   }
 }
 
+function _refreshPanel() {
+  if (!_panelVisible) return;
+  const panel = document.getElementById('battle-stats-panel');
+  if (panel) _renderPanel(panel);
+}
+
 function _renderPanel(panel) {
   const body = panel.querySelector('.bsp-body');
   if (!body) return;
 
   if (_stats.size === 0) {
     body.innerHTML = '<div class="bsp-empty">No combat data.</div>';
-    return;
-  }
+  } else {
+    const rows = [..._stats.entries()]
+      .sort((a, b) => b[1].dealt - a[1].dealt)
+      .map(([name, { dealt, taken }]) => `
+        <div class="bsp-row">
+          <span class="bsp-name">${name}</span>
+          <span class="bsp-dealt" title="Damage dealt">${dealt.toLocaleString()}</span>
+          <span class="bsp-taken" title="Damage taken">${taken.toLocaleString()}</span>
+        </div>
+      `).join('');
 
-  const rows = [..._stats.entries()]
-    .sort((a, b) => b[1].dealt - a[1].dealt)
-    .map(([name, { dealt, taken }]) => `
-      <div class="bsp-row">
-        <span class="bsp-name">${name}</span>
-        <span class="bsp-dealt" title="Damage dealt">${dealt.toLocaleString()}</span>
-        <span class="bsp-taken" title="Damage taken">${taken.toLocaleString()}</span>
+    body.innerHTML = `
+      <div class="bsp-header-row">
+        <span class="bsp-name"></span>
+        <span class="bsp-col-label" title="Damage dealt">DMG OUT</span>
+        <span class="bsp-col-label" title="Damage taken">DMG IN</span>
       </div>
-    `).join('');
+      ${rows}
+    `;
+  }
 
   const titleEl = panel.querySelector('.bsp-title');
   if (titleEl) {
     titleEl.textContent = _monsterName ? `Battle Summary — ${_monsterName}` : 'Battle Summary';
   }
-
-  body.innerHTML = `
-    <div class="bsp-header-row">
-      <span class="bsp-name"></span>
-      <span class="bsp-col-label" title="Damage dealt">DMG OUT</span>
-      <span class="bsp-col-label" title="Damage taken">DMG IN</span>
-    </div>
-    ${rows}
-  `;
 }
 
 // ── DOM init ──────────────────────────────────────────────────────────────────
