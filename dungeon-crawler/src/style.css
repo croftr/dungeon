@@ -5027,6 +5027,102 @@ body.cursor-interact #renderer-canvas {
   color: #aaa;
 }
 
+/* ── DROP CONFIRM MODAL ── */
+#drop-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+#drop-confirm-modal {
+  width: 300px;
+  background: rgba(10, 7, 4, 0.97);
+  border: 1px solid #5a4a30;
+  border-radius: 6px;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 220, 120, 0.07);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: monospace;
+}
+
+#drop-confirm-header {
+  display: flex;
+  align-items: center;
+  padding: 9px 14px;
+  border-bottom: 1px solid #3a2e18;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+#drop-confirm-title {
+  color: #c8a84a;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+#drop-confirm-body {
+  padding: 16px 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+#drop-confirm-text {
+  color: #b0946a;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+#drop-confirm-text strong {
+  color: #e8c87a;
+}
+
+#drop-confirm-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+#drop-confirm-buttons button {
+  padding: 6px 18px;
+  font-family: monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+#drop-confirm-yes {
+  background: rgba(80, 25, 10, 0.7);
+  border: 1px solid #8a3010;
+  color: #e07050;
+}
+
+#drop-confirm-yes:hover {
+  background: rgba(110, 35, 10, 0.9);
+  border-color: #c04030;
+  color: #ff8060;
+}
+
+#drop-confirm-no {
+  background: rgba(20, 20, 20, 0.6);
+  border: 1px solid #444;
+  color: #888;
+}
+
+#drop-confirm-no:hover {
+  background: rgba(40, 40, 40, 0.8);
+  border-color: #666;
+  color: #aaa;
+}
+
 /* ── PARTY CONFIRM MODAL ── */
 #party-confirm-overlay {
   position: fixed;

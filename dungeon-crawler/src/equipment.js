@@ -1520,13 +1520,8 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
   if (dropBtn && item) {
     dropBtn.style.display = 'block';
     dropBtn.onclick = () => {
-      const dropItem = party[activeCharIndex]?.inventory[_ctxInvIndex];
-      if (dropItem) {
-        party[activeCharIndex].inventory[_ctxInvIndex] = null;
-        showMessage(`Dropped ${dropItem.name}.`);
-        renderModal(activeCharIndex);
-      }
       _hideContextMenu();
+      _showDropConfirm(activeCharIndex, _ctxInvIndex, item.name);
     };
   }
 
@@ -1836,6 +1831,36 @@ function closeModal() {
   activeCharIndex = null;
   // Sync party card HUD to reflect any equipment changes (weapons, torch, etc.)
   refreshPartyCards();
+}
+
+// ─────────────────────────────────────────────
+//  DROP CONFIRMATION
+// ─────────────────────────────────────────────
+let _dropPendingCharIndex = null;
+let _dropPendingInvIndex = null;
+
+function _showDropConfirm(charIndex, invIndex, itemName) {
+  _dropPendingCharIndex = charIndex;
+  _dropPendingInvIndex = invIndex;
+  document.getElementById('drop-confirm-item-name').textContent = itemName;
+  document.getElementById('drop-confirm-overlay').classList.remove('chest-hidden');
+}
+
+function _hideDropConfirm() {
+  document.getElementById('drop-confirm-overlay').classList.add('chest-hidden');
+  _dropPendingCharIndex = null;
+  _dropPendingInvIndex = null;
+}
+
+function _confirmDrop() {
+  if (_dropPendingCharIndex === null || _dropPendingInvIndex === null) return;
+  const dropItem = party[_dropPendingCharIndex]?.inventory[_dropPendingInvIndex];
+  if (dropItem) {
+    party[_dropPendingCharIndex].inventory[_dropPendingInvIndex] = null;
+    showMessage(`Dropped ${dropItem.name}.`);
+    renderModal(_dropPendingCharIndex);
+  }
+  _hideDropConfirm();
 }
 
 // ─────────────────────────────────────────────
@@ -4035,6 +4060,12 @@ export function initEquipment() {
   // Sort button
   const sortBtn = document.getElementById('inv-sort-btn');
   if (sortBtn) sortBtn.addEventListener('click', _sortInventory);
+
+  // Drop confirmation buttons
+  const dropYes = document.getElementById('drop-confirm-yes');
+  const dropNo = document.getElementById('drop-confirm-no');
+  if (dropYes) dropYes.addEventListener('click', _confirmDrop);
+  if (dropNo) dropNo.addEventListener('click', _hideDropConfirm);
 }
 
 function attachCharDevListeners() {
