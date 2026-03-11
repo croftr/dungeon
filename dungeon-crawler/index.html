@@ -323,7 +323,10 @@
         <div id="equip-party-bar"></div>
         <!-- LEFT: Inventory -->
         <section id="equip-inventory">
-          <h4 class="equip-section-title">Inventory</h4>
+          <div class="equip-inv-header">
+            <h4 class="equip-section-title">Inventory</h4>
+            <button id="inv-sort-btn" title="Sort items by type, filling from top-left">Sort</button>
+          </div>
           <div id="inventory-grid">
             <!-- cells injected by equipment.js -->
           </div>
@@ -1093,7 +1096,7 @@
     <div class="inv-ctx-item" id="inv-ctx-equip-lb-right" style="display: none;">⚔ Equip B Right</div>
     <div class="inv-ctx-item" id="inv-ctx-skill-b" style="display: none;">✦ Skill B</div>
     <div class="inv-ctx-item inv-ctx-learn" id="inv-ctx-learn" style="display: none;">📜 Learn</div>
-    <div class="inv-ctx-item inv-ctx-sell" id="inv-ctx-sell" style="display: none;">💰 Sell</div>
+    <div class="inv-ctx-item inv-ctx-drop" id="inv-ctx-drop" style="display: none;">🗑 Drop</div>
     <div class="inv-ctx-item inv-ctx-alchemy" id="inv-ctx-alchemy" style="display: none;">🧪 Put in Alchemy</div>
     <div class="inv-ctx-divider"></div>
     <div class="inv-ctx-give-label" id="inv-ctx-give-label">Give to</div>

@@ -76,7 +76,7 @@ function _dispatchSpellVFX(attackType) {
 // Derived max stat formulas — single source of truth
 // HP scales with vitality, MP with intelligence, SP with resilience.
 const HP_PER_VIT = 8;
-const MP_PER_INT = 5;
+const MP_PER_INT = 4;
 const SP_PER_RES = 10;
 
 /**
@@ -1474,15 +1474,15 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
   const item = m.inventory[invIndex];
   const def = item ? getItemDef(item.name) : null;
 
-  // ── Sell button (loot items only) ──
-  const sellBtn = document.getElementById('inv-ctx-sell');
+  // ── Drop button (all inventory items) ──
+  const dropBtn = document.getElementById('inv-ctx-drop');
   const alchemyBtn = document.getElementById('inv-ctx-alchemy'); // We need to add this to the HTML
 
   // Reset all buttons
   if (useBtn) useBtn.style.display = 'none';
   equipBtn.style.display = 'none';
   learnBtn.style.display = 'none';
-  if (sellBtn) sellBtn.style.display = 'none';
+  if (dropBtn) dropBtn.style.display = 'none';
 
   // ── Quick-slot assignment buttons ──
   const qs1Btn = document.getElementById('inv-ctx-qs1');
@@ -1516,43 +1516,25 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
     }
   }
 
+  // ── Drop button — available for all inventory items ──
+  if (dropBtn && item) {
+    dropBtn.style.display = 'block';
+    dropBtn.onclick = () => {
+      const dropItem = party[activeCharIndex]?.inventory[_ctxInvIndex];
+      if (dropItem) {
+        party[activeCharIndex].inventory[_ctxInvIndex] = null;
+        showMessage(`Dropped ${dropItem.name}.`);
+        renderModal(activeCharIndex);
+      }
+      _hideContextMenu();
+    };
+  }
+
   if (def?.type === 'potion') {
     if (useBtn) {
       useBtn.style.display = 'block';
       useBtn.onclick = () => {
         _usePotion(activeCharIndex, _ctxInvIndex);
-        _hideContextMenu();
-      };
-    }
-    // Potions are also sellable
-    if (sellBtn) {
-      sellBtn.style.display = 'block';
-      sellBtn.onclick = () => {
-        const sellItem = party[activeCharIndex]?.inventory[_ctxInvIndex];
-        if (sellItem) {
-          const sellDef = getItemDef(sellItem.name);
-          const goldValue = sellDef?.value ?? 0;
-          party[activeCharIndex].inventory[_ctxInvIndex] = null;
-          addGold(goldValue);
-          showMessage(`Sold ${sellItem.name} for ${goldValue} gold.`);
-          renderModal(activeCharIndex);
-        }
-        _hideContextMenu();
-      };
-    }
-  } else if (def?.slot === 'loot') {
-    if (sellBtn) {
-      sellBtn.style.display = 'block';
-      sellBtn.onclick = () => {
-        const sellItem = party[activeCharIndex]?.inventory[_ctxInvIndex];
-        if (sellItem) {
-          const sellDef = getItemDef(sellItem.name);
-          const goldValue = sellDef?.value ?? 0;
-          party[activeCharIndex].inventory[_ctxInvIndex] = null;
-          addGold(goldValue);
-          showMessage(`Sold ${sellItem.name} for ${goldValue} gold.`);
-          renderModal(activeCharIndex);
-        }
         _hideContextMenu();
       };
     }
@@ -3671,6 +3653,44 @@ function _startSkillCooldownUI(memberIndex, expiresAt) {
 // ─────────────────────────────────────────────
 //  DOM WIRING
 // ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+//  INVENTORY SORT
+// ─────────────────────────────────────────────
+function _getItemSortPriority(item) {
+  const def = getItemDef(item.name);
+  if (!def) return 99;
+  const slot = def.slot;
+  const type = def.type;
+  if (slot === 'bothHands' || slot === 'hand') return 0;        // weapons
+  if (slot === 'head' || slot === 'body' || slot === 'legs' || slot === 'feet') return 1; // armour
+  if (slot === 'neck' || slot === 'ring' || slot === 'ammo') return 2;  // accessories
+  if (slot === 'skill') return 3;                                // skills
+  if (type === 'spellbook') return 4;                           // spellbooks
+  if (type === 'potion') return 5;                              // potions
+  if (slot === 'loot') return 6;                                // loot
+  return 7;
+}
+
+function _sortInventory() {
+  if (activeCharIndex === null) return;
+  const m = party[activeCharIndex];
+
+  // Collect all non-null items, sort by type then name, then repack from index 0
+  const items = m.inventory.filter(item => item !== null);
+  items.sort((a, b) => {
+    const pa = _getItemSortPriority(a);
+    const pb = _getItemSortPriority(b);
+    if (pa !== pb) return pa - pb;
+    return a.name.localeCompare(b.name);
+  });
+
+  for (let i = 0; i < m.inventory.length; i++) {
+    m.inventory[i] = items[i] ?? null;
+  }
+
+  renderModal(activeCharIndex);
+}
+
 function buildInventoryGrid() {
   const grid = document.getElementById('inventory-grid');
   grid.innerHTML = '';
@@ -4011,6 +4031,10 @@ export function initEquipment() {
   attachCardListeners();
   attachOverlayListeners();
   attachCharDevListeners();
+
+  // Sort button
+  const sortBtn = document.getElementById('inv-sort-btn');
+  if (sortBtn) sortBtn.addEventListener('click', _sortInventory);
 }
 
 function attachCharDevListeners() {
