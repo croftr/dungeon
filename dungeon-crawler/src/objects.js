@@ -941,9 +941,16 @@ export function spawnObjectsForLevel() {
         ]);
 
         // Added chest at the end of the new passage in the southwest (row 17, col 2)
-        addChest(objectsGroup, gltfLoader, 2, 17, 0, 0, [
+        // Moved north against the wall
+        addChest(objectsGroup, gltfLoader, 2, 17, 0, -0.7, [
             "Shawl", "Leather Cap", "Iron Helm"
         ]);
+
+        // New chest in the alcove east of (row 15, col 13)
+        // (col 14, row 15) nudged east against the wall, rotated 90 degrees
+        addChest(objectsGroup, gltfLoader, 14, 15, Math.PI / 2, 0, [
+            "Travelling Cloak", "Travelling Cloak"
+        ], undefined, true, 0.7);
 
         // Crystals in the starter room
         addCrystals(objectsGroup, gltfLoader, 9, 11, 0, -0.7);
@@ -1100,11 +1107,11 @@ export function spawnObjectsForLevel() {
         objectsGroup.add(demonBtn);
 
         // Two chests in the chest vault (col 1, rows 18–19), rotY=0 so they face the room
-        addChest(objectsGroup, gltfLoader, 1, 18, 0, 0, [
+        addChest(objectsGroup, gltfLoader, 1, 18, 0, 0.7, [
             { name: 'Gold Coins', quantity: 300 },
             'Life Essence', 'Mana Berry', 'Scroll of Fireball'
         ]);
-        addChest(objectsGroup, gltfLoader, 1, 19, 0, 0, [
+        addChest(objectsGroup, gltfLoader, 1, 19, 0, 0.7, [
             { name: 'Gold Coins', quantity: 200 },
             'Ring of Vigour', 'Ring of Wisdom', 'Ring of Dexterity'
         ]);

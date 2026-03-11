@@ -106,6 +106,10 @@
       {
         "item": "Mana Berry",
         "chance": 0.15
+      },
+      {
+        "item": "Fermented Sugar",
+        "chance": 0.25
       }
     ]
   },
@@ -218,6 +222,10 @@
       {
         "item": "Mana Berry",
         "chance": 0.1
+      },
+      {
+        "item": "Fermented Sugar",
+        "chance": 0.25
       }
     ]
   },
@@ -286,6 +294,10 @@
       {
         "item": "Mana Berry",
         "chance": 0.15
+      },
+      {
+        "item": "Fermented Sugar",
+        "chance": 0.25
       }
     ]
   },
@@ -350,6 +362,10 @@
       {
         "item": "Leather Cap",
         "chance": 0.2
+      },
+      {
+        "item": "Fermented Sugar",
+        "chance": 0.25
       }
     ]
   },
@@ -382,6 +398,10 @@
       {
         "item": "Padded Vest",
         "chance": 0.1
+      },
+      {
+        "item": "Fermented Sugar",
+        "chance": 0.25
       }
     ]
   },
@@ -429,6 +449,10 @@
       {
         "item": "Leather Belt",
         "chance": 0.5
+      },
+      {
+        "item": "Fermented Sugar",
+        "chance": 0.25
       }
     ],
     "onHitEffects": [
@@ -441,13 +465,13 @@
   "demon": {
     "name": "Demon",
     "hp": 150,
-    "defence": 20,
+    "defence": 18,
     "xp": 220,
     "attackSpeed": 1.3,
     "stats": {
-      "strength": 28,
-      "dexterity": 28,
-      "vitality": 20,
+      "strength": 24,
+      "dexterity": 24,
+      "vitality": 18,
       "intelligence": 14,
       "resilience": 18
     },
