@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import { buildLevel, findCell, CELL_START, changeMapArray, level1Map, level2Map, level3Map, cellToWorld } from './map.js';
+import { buildLevel, findCell, CELL_START, changeMapArray, level1Map, level2Map, level3Map, cellToWorld, isPassable } from './map.js';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles } from './particles.js';
@@ -187,7 +187,14 @@ function animate(now) {
 
   // Auto-attack: front row members attack automatically when a monster is in melee range
   if (autoAttack) {
-    const hasTarget = monsters.some(t => t.alive && isInFrontOfPlayer(t.gridRow, t.gridCol, 1));
+    const currentLevel = window.currentLevel || 1;
+    const hasTarget = monsters.some(t =>
+      t.alive &&
+      (t.level ?? 1) === currentLevel &&
+      isInFrontOfPlayer(t.gridRow, t.gridCol, 1) &&
+      isPassable(t.gridRow, t.gridCol) &&
+      isPassable(player.gridRow, player.gridCol)
+    );
     if (hasTarget) {
       for (const i of [0, 1]) {
         const m = party[i];

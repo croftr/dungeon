@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
-import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening } from './particles.js';
+import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave } from './particles.js';
 import { CELL, isPassable } from './map.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
@@ -186,11 +186,11 @@ export const monsters = [
 
   // Demon guards the demon room at the south end of the level-2 passage
   inst(D.demon, 9, 17, 5,
-    '/items/demon/Meshy_AI_Animation_Idle_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    '/items/demon/no-mercy.mp3', 0.70, 0, 0, 2, null,
-    '/items/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb'),
+    '/monsters/demon/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/demon/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    '/monsters/demon/no-mercy.mp3', 0.70, 0, 0, 2, null,
+    '/monsters/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
+    '/monsters/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb'),
 
   // Training dummy in the big east room
   inst(D.dummy, 10, 11, 20,
@@ -353,12 +353,12 @@ export const monsters = [
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
   inst(D.demon, 315, 3, 3,
-    '/items/demon/Meshy_AI_Animation_Idle_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
-    '/items/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
-    '/items/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
+    '/monsters/demon/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
+    '/monsters/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
+    '/monsters/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
+    '/monsters/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
+    '/monsters/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
 
   // North-East Room (4 Skeletons, 1 Demon)
   inst(D.skeletonWarrior, 321, 2, 17,
@@ -390,12 +390,12 @@ export const monsters = [
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
   inst(D.demon, 325, 3, 18,
-    '/items/demon/Meshy_AI_Animation_Idle_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
-    '/items/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
-    '/items/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
+    '/monsters/demon/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
+    '/monsters/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
+    '/monsters/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
+    '/monsters/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
+    '/monsters/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
 
   // South-West Room (4 Skeletons, 1 Demon)
   inst(D.skeletonWarrior, 331, 18, 2,
@@ -427,12 +427,12 @@ export const monsters = [
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
   inst(D.demon, 335, 19, 3,
-    '/items/demon/Meshy_AI_Animation_Idle_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
-    '/items/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
-    '/items/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
+    '/monsters/demon/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
+    '/monsters/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
+    '/monsters/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
+    '/monsters/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
+    '/monsters/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
 
   // South-East Room (4 Skeletons, 1 Demon)
   inst(D.skeletonWarrior, 341, 18, 17,
@@ -464,12 +464,12 @@ export const monsters = [
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
   inst(D.demon, 345, 19, 18,
-    '/items/demon/Meshy_AI_Animation_Idle_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
-    '/items/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
-    '/items/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
-    '/items/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
+    '/monsters/demon/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
+    '/monsters/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
+    '/monsters/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
+    '/monsters/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
+    '/monsters/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
 ];
 
 // ── Assign Block Animations ─────────────────────────────────────────────────
@@ -625,19 +625,30 @@ _applyMultiAttacks('Minotaur', [
 _applyMultiAttacks('Demon', [
   {
     name: 'chargedSlash',
-    glb: '/items/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
-    sound: '/items/demon/demon-hit.mp3',
+    glb: '/monsters/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
+    sound: '/monsters/demon/demon-hit.mp3',
     soundTimings: [0.4],
     damageTimings: [0.4],
     weight: 5,
   },
   {
     name: 'tripleCombo',
-    glb: '/items/demon/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    sound: '/items/demon/demon-hit.mp3',
+    glb: '/monsters/demon/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
+    sound: '/monsters/demon/demon-hit.mp3',
     soundTimings: [0.25, 0.65],
     damageTimings: [0.25, 0.65],
     weight: 2,
+  },
+  {
+    name: 'demonCleave',
+    glb: '/monsters/demon/special-attack.glb',
+    sound: '/monsters/demon/no-mercy.mp3',
+    soundTimings: [0.5],
+    damageTimings: [0.5],
+    weight: 3,
+    damageMultiplier: 0.7,
+    specialAttack: true,
+    specialOnHitEffects: [{ effectId: 'fear', chance: 0.75, durationSec: 20 }],
   },
 ]);
 
@@ -1544,7 +1555,7 @@ export function updateMonsters(dt, playerCamera, scene) {
     // Demon idle growl — plays when the party is within 1 grid square
     if (m.name === 'Demon' && m.alive && inRange && !m._demonSoundCooldown) {
       m._demonSoundCooldown = true;
-      const audio = new Audio('/items/demon/no-mercy.mp3');
+      const audio = new Audio('/monsters/demon/no-mercy.mp3');
       audio.volume = 0.5;
       audio.play().catch(() => { });
       // Cooldown so it doesn't spam every frame — wait until the clip finishes + a pause
@@ -1989,6 +2000,12 @@ export function triggerMonsterAttack(monsterId) {
         setTimeout(() => { if (m.alive) createMinotaurRage(m.mesh.position); }, duration * pts * 1000);
         showMessage(`<b>${m.name}</b> roars with terrifying fury!`, 2000);
       }
+      if (variant.name === 'demonCleave' && m.mesh) {
+        const duration = attackAction.getClip().duration;
+        const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
+        setTimeout(() => { if (m.alive) createDemonCleave(m.mesh.position); }, duration * pts * 1000);
+        showMessage(`<b>${m.name}</b> unleashes a nightmarish cleave!`, 2000);
+      }
     }
   }
   // Legacy fallback
@@ -2225,7 +2242,7 @@ function _applyMonsterDamage(monster, opts = {}) {
         effect.effectId,
       );
       if (Math.random() < effectiveChance) {
-        applyStatusEffect(target.id, effect.effectId);
+        applyStatusEffect(target.id, effect.effectId, null, effect.durationSec);
         const def = STATUS_EFFECT_DEFS[effect.effectId];
         showMessage(`<b>${target.name}</b> is afflicted with <b>${def?.name ?? effect.effectId}</b>!`, 2500);
         addLogEntry({

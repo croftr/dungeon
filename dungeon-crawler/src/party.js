@@ -19,7 +19,7 @@ export const party = [
 
 export let partyGold = 0;
 
-export let autoAttack = false;
+export let autoAttack = true;
 export function setAutoAttack(val) { autoAttack = val; }
 
 export function addGold(amount) {
@@ -855,24 +855,26 @@ let spRegenAccum = 0;
  * @param {string} effectId
  * @param {number} [customTickValue=null] - Optional override for tick damage/heal
  */
-export function applyStatusEffect(memberId, effectId, customTickValue = null) {
+export function applyStatusEffect(memberId, effectId, customTickValue = null, durationSecOverride = null) {
   const m = party.find(p => p.id == memberId);
   if (!m || m.isEmpty || m.isDead) return;
 
   const def = STATUS_EFFECT_DEFS[effectId];
   if (!def) return;
 
+  const durationSec = durationSecOverride ?? def.duration;
+
   if (!m.activeDebuffs) m.activeDebuffs = [];
 
   const existing = m.activeDebuffs.find(d => d.effectId === effectId);
   if (existing) {
     // Refresh duration without resetting the tick accumulator
-    existing.expiresAt = performance.now() + def.duration * 1000;
+    existing.expiresAt = performance.now() + (durationSec * 1000);
     if (customTickValue !== null) existing.customTickValue = customTickValue;
   } else {
     m.activeDebuffs.push({
       effectId,
-      expiresAt: performance.now() + def.duration * 1000,
+      expiresAt: performance.now() + (durationSec * 1000),
       tickAccum: 0,
       customTickValue
     });
