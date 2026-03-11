@@ -38,7 +38,7 @@
   "skeletonWarrior": {
     "name": "Skeleton Warrior",
     "hp": 120,
-    "defence": 10,
+    "defence": 12,
     "xp": 100,
     "attackSpeed": 1.5,
     "stats": {
@@ -422,7 +422,7 @@
   },
   "minotaur": {
     "name": "Minotaur",
-    "hp": 370,
+    "hp": 400,
     "defence": 10,
     "xp": 1200,
     "attackSpeed": 1.5,
@@ -464,7 +464,7 @@
   },
   "demon": {
     "name": "Demon",
-    "hp": 150,
+    "hp": 170,
     "defence": 18,
     "xp": 220,
     "attackSpeed": 1.3,

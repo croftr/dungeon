@@ -1125,19 +1125,19 @@ export function spawnObjectsForLevel() {
             "Vampiric Dagger", "Silver Mace", "Warden's Shield", "Silver Bolts"
         ]);
 
-        // Spell Cabinet in North-East room (row 3, col 18)
-        addSpellCabinet(objectsGroup, gltfLoader, 18, 2, 0, 0.65, 0, [
+        // Spell Cabinet in North-East room (row 3, col 19)
+        addSpellCabinet(objectsGroup, gltfLoader, 19, 2, 0, 0.65, -1.0, [
             "Scroll of Fireball",
             "Scroll of Sleep"
         ]);
 
         // Chest in North-West room (row 2, col 3)
-        addChest(objectsGroup, gltfLoader, 3, 2, 0, 0, [
+        addChest(objectsGroup, gltfLoader, 3, 2, 0, -1.0, [
             "Rune Pendant"
         ]);
 
         // Chest in South-East room (row 18, col 19)
-        addChest(objectsGroup, gltfLoader, 19, 18, 0, 0, [
+        addChest(objectsGroup, gltfLoader, 19, 18, 0, -1.0, [
             "Sun Pendant"
         ]);
 
