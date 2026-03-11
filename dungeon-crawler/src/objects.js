@@ -940,6 +940,11 @@ export function spawnObjectsForLevel() {
             'Chain Shirt', 'Iron Gauntlets', 'Chainmail Leggings', 'Iron-Shod Boots', 'Healers Vest'
         ]);
 
+        // Added chest at the end of the new passage in the southwest (row 17, col 2)
+        addChest(objectsGroup, gltfLoader, 2, 17, 0, 0, [
+            "Shawl", "Leather Cap", "Iron Helm"
+        ]);
+
         // Crystals in the starter room
         addCrystals(objectsGroup, gltfLoader, 9, 11, 0, -0.7);
         // Bone pile in the passage

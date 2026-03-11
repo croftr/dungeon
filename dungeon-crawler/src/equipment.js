@@ -250,8 +250,6 @@ export function extendPartyData() {
 
     // All slots empty by default
     m.equipment = Object.fromEntries(SLOT_KEYS.map((k) => [k, null]));
-    // Every character starts with a Shawl on their head
-    m.equipment.head = { name: 'Shawl', slot: 'head' };
     // Seed left/right hand from party card data (skip '—' placeholder)
     // For bothHands items, fill both slots with the same item object reference
 
