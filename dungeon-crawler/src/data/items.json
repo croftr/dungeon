@@ -708,7 +708,7 @@
         "attackType": "swipe",
         "weaponType": "axe",
         "staminaDrain": 1,
-        "baseDamage": 13,
+        "baseDamage": 12,
         "delay": 2.0,
         "statWeights": {
             "str": 0.9,
@@ -742,7 +742,7 @@
         "attackType": "swipe",
         "weaponType": "twoHanded",
         "staminaDrain": 2,
-        "baseDamage": 26,
+        "baseDamage": 24,
         "delay": 5,
         "statWeights": {
             "str": 0.7,
@@ -759,7 +759,7 @@
         "attackType": "swipe",
         "weaponType": "twoHanded",
         "staminaDrain": 2,
-        "baseDamage": 22,
+        "baseDamage": 20,
         "delay": 5,
         "statWeights": {
             "str": 0.8,
@@ -776,7 +776,7 @@
         "attackType": "bash",
         "weaponType": "twoHanded",
         "staminaDrain": 2,
-        "baseDamage": 24,
+        "baseDamage": 22,
         "delay": 5,
         "statWeights": {
             "str": 0.9,

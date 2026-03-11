@@ -10,7 +10,7 @@ import { dropMember } from './recruits.js';
 import { isInFrontOfPlayer, player } from './player.js';
 import { isAlchemyModalOpen, addItemToAlchemy } from './objects.js';
 import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude, calcOnHitChance } from './combat-rules.js';
-import { playCritSound, playSkillSound, playItemSound, playLevelUpConfirmSound } from './audio.js';
+import { playCritSound, playSkillSound, playItemSound, playLevelUpConfirmSound, playInventorySortSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { skillsState } from './skills-state.js';
 import { getNextLevelXP, hydrateSkill } from './leveling.js';
@@ -2899,6 +2899,75 @@ function _tickAutoHand(memberIndex, hand, staggerOffsetMs) {
 }
 
 // ─────────────────────────────────────────────
+//  AUTO-RANGE-ATTACK TICK
+// ─────────────────────────────────────────────
+// Mirrors AUTO-ATTACK TICK but only fires when the relevant hand holds a bow
+// or crossbow.  Uses its own schedule map so it never collides with melee
+// auto-attack timers.
+
+const autoRangeNextFireAt = {};
+
+// Call once per frame per party member when auto-range-attack is active and a
+// monster is within ranged range.
+export function tickAutoRangeAttack(memberIndex) {
+  const m = party[memberIndex];
+  if (!m || m.isEmpty || m.isDead) return;
+  if (hasEffectFlag(m, 'preventsAction')) return;
+
+  _tickAutoRangeHand(memberIndex, 'left',  0);
+  _tickAutoRangeHand(memberIndex, 'right', AUTO_STAGGER_MS);
+}
+
+// Reset ranged scheduled timers (e.g. when auto-range-attack is toggled off).
+export function clearAutoRangeAttackTimers() {
+  for (const k of Object.keys(autoRangeNextFireAt)) delete autoRangeNextFireAt[k];
+}
+
+function _tickAutoRangeHand(memberIndex, hand, staggerOffsetMs) {
+  const key = `${memberIndex}-${hand}`;
+  const now = performance.now();
+
+  // ── Phase 2: a fire is already scheduled — check if it's time ──
+  if (autoRangeNextFireAt[key] !== undefined) {
+    if (now >= autoRangeNextFireAt[key]) {
+      delete autoRangeNextFireAt[key];
+      useHand(memberIndex, hand, true);
+    }
+    return;
+  }
+
+  // ── Phase 1: no fire scheduled — check weapon type and cooldown ──
+  const m = party[memberIndex];
+  const slotKey = hand === 'left' ? 'leftHand' : 'rightHand';
+  const item = m.equipment?.[slotKey];
+  const def = item ? getItemDef(item.name) : null;
+
+  // Only trigger for bow or crossbow weapons
+  if (!def || (def.weaponType !== 'bow' && def.weaponType !== 'crossbow')) return;
+
+  const attackType = def.attackType ?? null;
+  if (!attackType) return;
+
+  const isBothHands = def.slot === 'bothHands';
+  if (hand === 'right' && isBothHands) return; // bothHands weapon driven by left only
+
+  // Compute effective weapon delay (mirrors logic in useHand)
+  let delaySec = def.delay ?? 2;
+  const ww = skillsState.whirlwind;
+  if (ww.active && ww.actorName === m.name && now < ww.expiresAt) delaySec *= ww.magnitude;
+  const wd = skillsState.warDance;
+  if (wd.active && now < wd.expiresAt) delaySec *= wd.magnitude;
+  delaySec *= getAttackSpeedMultiplier(m);
+
+  const baseKey = isBothHands ? `${memberIndex}-left` : `${memberIndex}-${hand}`;
+  const lastFire = lastAttackTimes[baseKey] ?? 0;
+  if (now < lastFire + delaySec * 1000) return; // still on cooldown
+
+  // Cooldown just expired — schedule fire after the human-feel delay
+  autoRangeNextFireAt[key] = now + AUTO_EXTRA_DELAY_MS + staggerOffsetMs;
+}
+
+// ─────────────────────────────────────────────
 //  USE SKILL  — dispatcher + per-skill implementations
 // ─────────────────────────────────────────────
 
@@ -3698,6 +3767,7 @@ function _getItemSortPriority(item) {
 
 function _sortInventory() {
   if (activeCharIndex === null) return;
+  playInventorySortSound();
   const m = party[activeCharIndex];
 
   // Collect all non-null items, sort by type then name, then repack from index 0

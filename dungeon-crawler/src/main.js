@@ -6,8 +6,8 @@ import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES,
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
-import { initParty, updateParty, party, setPartyGold, refreshPartyCards, autoAttack } from './party.js';
-import { initEquipment, hideDropButton, updateEffectiveStats, tickAutoAttack, clearAutoAttackTimers } from './equipment.js';
+import { initParty, updateParty, party, setPartyGold, refreshPartyCards, autoAttack, autoRangeAttack } from './party.js';
+import { initEquipment, hideDropButton, updateEffectiveStats, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables } from './objects.js';
@@ -205,6 +205,30 @@ function animate(now) {
       // Monster stepped away — clear any pending fire timers so they don't
       // fire the instant combat resumes, giving the player a fresh 1-second window
       clearAutoAttackTimers();
+    }
+  }
+
+  // Auto-range-attack: any party member with a bow or crossbow shoots automatically
+  // when a monster is within ranged range (3 cells).  The 1-second human-feel delay
+  // is baked into tickAutoRangeAttack via AUTO_EXTRA_DELAY_MS.
+  if (autoRangeAttack) {
+    const currentLevel = window.currentLevel || 1;
+    const hasRangedTarget = monsters.some(t =>
+      t.alive &&
+      (t.level ?? 1) === currentLevel &&
+      isInFrontOfPlayer(t.gridRow, t.gridCol, 3) &&
+      isPassable(t.gridRow, t.gridCol) &&
+      isPassable(player.gridRow, player.gridCol)
+    );
+    if (hasRangedTarget) {
+      for (const i of [0, 1, 2, 3]) {
+        const m = party[i];
+        if (!m || m.isEmpty || m.isDead) continue;
+        tickAutoRangeAttack(i);
+      }
+    } else {
+      // No target in range — reset pending timers for a clean start next encounter
+      clearAutoRangeAttackTimers();
     }
   }
 

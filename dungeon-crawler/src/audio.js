@@ -756,3 +756,20 @@ async function _playTrack(url, loop, gen) {
   musicGainNode = gainNode;
   source.start(0);
 }
+
+export async function playInventorySortSound() {
+  const buffer = await getBuffer('/sounds/actions/inventory-sort.mp3');
+  if (!buffer) return;
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.8;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playInventorySortSound failed:', err);
+  }
+}

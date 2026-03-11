@@ -583,26 +583,23 @@ export function initObjects(scene, camera) {
             const overlay = document.getElementById('sarcophagus-overlay');
             if (overlay) overlay.classList.add('chest-hidden');
 
-            // 2 second delay before the actual gate operation and ambush
-            setTimeout(() => {
-                playGateOpeningSound();
+            playGateOpeningSound();
 
-                // Engage mummies 
-                triggerMummyAmbush();
+            // Engage mummies 
+            triggerMummyAmbush();
 
-                // Open the three-wide portcullis 
-                objects
-                    .filter(o => o.name === 'Portcullis' && o.gridCol === 16 && o.gridRow >= 2 && o.gridRow <= 4)
-                    .forEach(p => openPortcullis(p, true));
+            // Open the three-wide portcullis 
+            objects
+                .filter(o => o.name === 'Portcullis' && o.gridCol === 16 && o.gridRow >= 2 && o.gridRow <= 4)
+                .forEach(p => openPortcullis(p, true));
 
-                // Close the entrance portcullis to trap the players
-                const trapDoor = objects.find(o => o.name === 'Portcullis' && o.gridRow === 1 && o.gridCol === 10);
-                if (trapDoor) closePortcullis(trapDoor);
+            // Close the entrance portcullis to trap the players
+            const trapDoor = objects.find(o => o.name === 'Portcullis' && o.gridRow === 1 && o.gridCol === 10);
+            if (trapDoor) closePortcullis(trapDoor);
 
-                if (window.playMummyVideo) {
-                    window.playMummyVideo();
-                }
-            }, 2000);
+            if (window.playMummyVideo) {
+                window.playMummyVideo();
+            }
         };
     }
 

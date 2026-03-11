@@ -1,5 +1,5 @@
 import { getItemDef } from './items.js';
-import { renderItemIcon, attachTooltipListeners, hideTooltip, useQuickslotPotion, rotateLoadout, clearAutoAttackTimers } from './equipment.js';
+import { renderItemIcon, attachTooltipListeners, hideTooltip, useQuickslotPotion, rotateLoadout, clearAutoAttackTimers, clearAutoRangeAttackTimers } from './equipment.js';
 import { addLogEntry } from './battle-log.js';
 import { isInCombat, playGoldSound } from './audio.js';
 import { skillsState } from './skills-state.js';
@@ -21,6 +21,9 @@ export let partyGold = 0;
 
 export let autoAttack = true;
 export function setAutoAttack(val) { autoAttack = val; }
+
+export let autoRangeAttack = false;
+export function setAutoRangeAttack(val) { autoRangeAttack = val; }
 
 export function addGold(amount) {
   partyGold += amount;
@@ -558,6 +561,10 @@ function buildTacticsOverlay() {
           <input type="checkbox" id="tactics-auto-attack">
           Auto Attack <span class="tactics-toggle-hint">(front row attacks automatically)</span>
         </label>
+        <label class="tactics-toggle" id="tactics-auto-range-attack-label">
+          <input type="checkbox" id="tactics-auto-range-attack">
+          Auto Range Attack <span class="tactics-toggle-hint">(bow/crossbow users attack automatically)</span>
+        </label>
         <span id="tactics-gold" style="margin-top:10px; display:flex; justify-content:center; align-items:center; font-size:1.1em; color:#ffd700; text-shadow:1px 1px 0 #000;"><img src="/icons/gold_coins.png" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}</span>
       </div>
     </div>
@@ -568,6 +575,10 @@ function buildTacticsOverlay() {
   document.getElementById('tactics-auto-attack').addEventListener('change', (e) => {
     autoAttack = e.target.checked;
     if (!autoAttack) clearAutoAttackTimers();
+  });
+  document.getElementById('tactics-auto-range-attack').addEventListener('change', (e) => {
+    autoRangeAttack = e.target.checked;
+    if (!autoRangeAttack) clearAutoRangeAttackTimers();
   });
   document.getElementById('tactics-swap-rows').addEventListener('click', () => {
     tacticsSel = null;
@@ -644,6 +655,8 @@ export function openTacticsModal() {
   renderTacticsSlots();
   const cb = document.getElementById('tactics-auto-attack');
   if (cb) cb.checked = autoAttack;
+  const cbRange = document.getElementById('tactics-auto-range-attack');
+  if (cbRange) cbRange.checked = autoRangeAttack;
   tacticsOverlay.style.display = 'flex';
 }
 
