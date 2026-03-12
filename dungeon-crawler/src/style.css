@@ -2482,7 +2482,7 @@ body {
 /* ── SHIELD BASH ── shield rises powerfully from bottom to top ── */
 @keyframes shield-bash {
   0% {
-    transform: translateY(120%) scale(0.6) rotate(-5deg);
+    transform: translateY(120%) scale(0.3) rotate(-5deg);
     opacity: 0;
     filter: blur(5px);
   }
@@ -2493,17 +2493,17 @@ body {
   }
 
   45% {
-    transform: translateY(-20%) scale(1.1) rotate(0deg);
+    transform: translateY(5%) scale(0.55) rotate(0deg);
     opacity: 1;
   }
 
   70% {
-    transform: translateY(-35%) scale(1.05) rotate(2deg);
+    transform: translateY(-5%) scale(0.525) rotate(2deg);
     opacity: 0.9;
   }
 
   100% {
-    transform: translateY(-80%) scale(0.5) rotate(5deg);
+    transform: translateY(-15%) scale(0.25) rotate(5deg);
     opacity: 0;
     filter: blur(4px);
   }
