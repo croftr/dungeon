@@ -1,28 +1,19 @@
 // ─────────────────────────────────────────────────────────────────────────────
-//  BATTLE STATS  — tracks damage dealt / received per party member per fight.
-//  The icon appears top-left after a monster is killed; clicking it opens a
-//  summary panel. Stats reset when the next fight begins. If the panel is open
-//  it stays open across fights, showing live data for the current monster.
+//  BATTLE STATS  — tracks cumulative damage dealt / received per party member.
+//  The icon is always visible top-left. Stats accumulate across all fights
+//  until the user manually resets them with the Reset button in the panel.
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** @type {Map<string, {dealt: number, taken: number}>} */
 let _stats = new Map();
-let _monsterName = '';
 let _panelVisible = false;
-let _iconVisible = false;
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
-/** Reset all stats for a new fight. Keeps the panel open if it was open. */
-export function resetBattleStats(monsterName = '') {
+/** Clear all accumulated stats (called by the Reset button). */
+export function resetBattleStats() {
   _stats = new Map();
-  _monsterName = monsterName;
-  _hideIcon();
-  if (_panelVisible) {
-    _refreshPanel();
-  } else {
-    _closePanel();
-  }
+  _refreshPanel();
 }
 
 /** Record damage a party member dealt to a monster. */
@@ -39,26 +30,14 @@ export function recordDamageTaken(memberName, amount) {
   _refreshPanel();
 }
 
-/** Show the battle-stats icon (call after a monster is killed). */
-export function showBattleStatsIcon(monsterName = '') {
-  _monsterName = monsterName;
-  _iconVisible = true;
-  const btn = document.getElementById('battle-stats-btn');
-  if (btn) btn.classList.add('bsb--visible');
-  _refreshPanel();
-}
+/** No-op kept for call-site compatibility — icon is now always visible. */
+export function showBattleStatsIcon() {}
 
 // ── Internals ─────────────────────────────────────────────────────────────────
 
 function _getOrCreate(name) {
   if (!_stats.has(name)) _stats.set(name, { dealt: 0, taken: 0 });
   return _stats.get(name);
-}
-
-function _hideIcon() {
-  _iconVisible = false;
-  const btn = document.getElementById('battle-stats-btn');
-  if (btn) btn.classList.remove('bsb--visible');
 }
 
 function _closePanel() {
@@ -111,20 +90,15 @@ function _renderPanel(panel) {
       ${rows}
     `;
   }
-
-  const titleEl = panel.querySelector('.bsp-title');
-  if (titleEl) {
-    titleEl.textContent = _monsterName ? `Battle Summary — ${_monsterName}` : 'Battle Summary';
-  }
 }
 
 // ── DOM init ──────────────────────────────────────────────────────────────────
 
 export function initBattleStats() {
-  // Bar button
+  // Bar button — always visible
   const btn = document.createElement('button');
   btn.id = 'battle-stats-btn';
-  btn.title = 'Battle summary';
+  btn.title = 'Battle stats';
   btn.innerHTML = '⚔';
   btn.addEventListener('click', _togglePanel);
   document.body.appendChild(btn);
@@ -134,11 +108,15 @@ export function initBattleStats() {
   panel.id = 'battle-stats-panel';
   panel.innerHTML = `
     <div class="bsp-titlebar">
-      <span class="bsp-title">Battle Summary</span>
-      <button class="bsp-close" title="Close">✕</button>
+      <span class="bsp-title">Battle Stats</span>
+      <div class="bsp-titlebar-actions">
+        <button class="bsp-reset" title="Reset all stats">Reset</button>
+        <button class="bsp-close" title="Close">✕</button>
+      </div>
     </div>
     <div class="bsp-body"></div>
   `;
   panel.querySelector('.bsp-close').addEventListener('click', _closePanel);
+  panel.querySelector('.bsp-reset').addEventListener('click', resetBattleStats);
   document.body.appendChild(panel);
 }

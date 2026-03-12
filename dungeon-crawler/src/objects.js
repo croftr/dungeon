@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
-import { CELL, dungeonMap, CELL_FLOOR } from './map.js';
+import { CELL, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS } from './map.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, isInFrontOfPlayer, player } from './player.js';
 import { showMessage } from './minimap.js';
@@ -83,6 +83,12 @@ let _merchantMode = 'buy';
 const ALCHEMY_SLOTS = 9; // 8 ingredients + 1 result
 const _alchemyContents = Array(ALCHEMY_SLOTS).fill(null);
 let _alchemyModalOpen = false;
+
+// ─────────────────────────────────────────────
+//  SAVE GAME — container tracking
+// ─────────────────────────────────────────────
+let _nextContainerId = 0;
+let _pendingContainerOverrides = null;
 
 let objectsGroup = new THREE.Group();
 
@@ -800,6 +806,10 @@ export function initObjects(scene, camera) {
 }
 
 export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = [], modelPath = '/items/Meshy_AI_Treasure_Chest_0221184131_texture.glb', interactive = true, offsetX = 0, title = 'Chest') {
+    const cid = interactive ? _nextContainerId++ : -1;
+    if (interactive && _pendingContainerOverrides && cid in _pendingContainerOverrides) {
+        contents = _pendingContainerOverrides[cid];
+    }
     loader.load(modelPath, (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.3);
@@ -816,6 +826,7 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
                     child.userData.gridCol = col;
                     child.userData.contents = contents;
                     child.userData.title = title;
+                    child.userData.containerId = cid;
                     interactables.push(child);
                 }
 
@@ -909,6 +920,7 @@ export function spawnObjectsForLevel() {
     const gltfLoader = _gltfLoader;
     const level = window.currentLevel || 1;
     objects.length = 0; // clear logical array
+    _nextContainerId = 0; // reset container IDs for deterministic save/load
 
     if (level === 1) {
         // Stash in the starter room
@@ -1057,15 +1069,16 @@ export function spawnObjectsForLevel() {
         // Starter gate — already open if the player confirmed their party before
         _starterGate = addPortcullis(objectsGroup, gltfLoader, 8, 13, Math.PI / 2, _starterGateOpened);
 
-        // Blocking portcullis at the entrance of the mummy area (starts open)
-        addPortcullis(objectsGroup, gltfLoader, 10, 1, Math.PI / 2, true);
+        // Blocking portcullis at the entrance of the mummy area
+        // (starts open; closes when mummy ambush triggers, stays closed after)
+        addPortcullis(objectsGroup, gltfLoader, 10, 1, Math.PI / 2, !_mummyGateOpened);
 
         // Three-wide portcullis on the far side of the 5x5 room —
         // rows 2, 3 & 4 all open together so mummies can't be funnelled.
-        addPortcullis(objectsGroup, gltfLoader, 16, 2, Math.PI / 2);
-        addPortcullis(objectsGroup, gltfLoader, 16, 3, Math.PI / 2);
-        // Wait, where is 16, 4?
-        addPortcullis(objectsGroup, gltfLoader, 16, 4, Math.PI / 2);
+        // Stays open once mummy gate has been opened.
+        addPortcullis(objectsGroup, gltfLoader, 16, 2, Math.PI / 2, _mummyGateOpened);
+        addPortcullis(objectsGroup, gltfLoader, 16, 3, Math.PI / 2, _mummyGateOpened);
+        addPortcullis(objectsGroup, gltfLoader, 16, 4, Math.PI / 2, _mummyGateOpened);
 
         // Button to escape mummy room
         const { group: mummyBtn } = createWallButton(-1, { target: 'escape_mummy_room', targetRow: 3, targetCol: 21 });
@@ -1187,6 +1200,10 @@ function addPortcullis(scene, loader, col, row, rotY = 0, startOpen = false) {
         z: row * CELL,
         isOpen: startOpen
     };
+    // If starting open, make the cell passable on the map
+    if (startOpen && dungeonMap[row]?.[col] === CELL_PORTCULLIS) {
+        dungeonMap[row][col] = CELL_FLOOR;
+    }
     loader.load(portcullis.path, (gltf) => {
         const model = gltf.scene;
         model.scale.set(1.15, 0.9, 1.15);
@@ -1372,6 +1389,10 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
 
 
 function addWeaponRack(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, contents = []) {
+    const cid = _nextContainerId++;
+    if (_pendingContainerOverrides && cid in _pendingContainerOverrides) {
+        contents = _pendingContainerOverrides[cid];
+    }
     loader.load('/items/weapon-rack.glb', (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.46);
@@ -1386,6 +1407,7 @@ function addWeaponRack(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, 
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = contents;
+                child.userData.containerId = cid;
                 interactables.push(child);
 
                 if (child.material) {
@@ -1408,6 +1430,10 @@ function addWeaponRack(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, 
 }
 
 function addSpellCabinet(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, contents = []) {
+    const cid = _nextContainerId++;
+    if (_pendingContainerOverrides && cid in _pendingContainerOverrides) {
+        contents = _pendingContainerOverrides[cid];
+    }
     loader.load('/items/spell-cabinet.glb', (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
@@ -1422,6 +1448,7 @@ function addSpellCabinet(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = contents;
+                child.userData.containerId = cid;
                 interactables.push(child);
 
                 if (child.material) {
@@ -1576,6 +1603,10 @@ function addAlchemyWorkshop(scene, loader, col, row, rotY = 0, offsetX = 0, offs
 }
 
 function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, contents = []) {
+    const cid = _nextContainerId++;
+    if (_pendingContainerOverrides && cid in _pendingContainerOverrides) {
+        contents = _pendingContainerOverrides[cid];
+    }
     loader.load('/items/anvil.glb', (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
@@ -1590,6 +1621,7 @@ function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, c
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = contents;
+                child.userData.containerId = cid;
                 interactables.push(child);
 
                 if (child.material) {
@@ -2692,6 +2724,10 @@ function _hideChestCtxMenu() {
 }
 
 function addBonePile(scene, loader, col, row, contents = []) {
+    const cid = _nextContainerId++;
+    if (_pendingContainerOverrides && cid in _pendingContainerOverrides) {
+        contents = _pendingContainerOverrides[cid];
+    }
     loader.load('/items/Meshy_AI_Bone_pile_0221211647_texture.glb', (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.4);
@@ -2706,6 +2742,7 @@ function addBonePile(scene, loader, col, row, contents = []) {
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = contents;
+                child.userData.containerId = cid;
                 interactables.push(child);
 
                 if (child.material) {
@@ -2866,4 +2903,52 @@ export function spawnDroppedItem(col, row, itemName, quantity = 1) {
         .start();
 
     objectsGroup.add(mesh);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  SAVE GAME — world state serialization
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Returns all gate/portal progression flags. */
+export function getWorldFlags() {
+    return {
+        mummyGateOpened: _mummyGateOpened,
+        starterGateOpened: _starterGateOpened,
+        starterPortalEnabled: _starterPortalEnabled,
+        level2PortcullisOpened: _level2PortcullisOpened,
+    };
+}
+
+/** Restores gate/portal flags. Call BEFORE spawnObjectsForLevel(). */
+export function setWorldFlags(flags) {
+    if (!flags) return;
+    _mummyGateOpened = flags.mummyGateOpened ?? false;
+    _starterGateOpened = flags.starterGateOpened ?? false;
+    _starterPortalEnabled = flags.starterPortalEnabled ?? false;
+    _level2PortcullisOpened = flags.level2PortcullisOpened ?? false;
+}
+
+/** Returns a snapshot of merchant stock. */
+export function getMerchantStock() { return [..._merchantAvailable]; }
+
+/** Restores merchant stock. */
+export function setMerchantStock(stock) { if (stock) _merchantAvailable = [...stock]; }
+
+/** Returns container contents keyed by containerId. */
+export function getContainerStates() {
+    const result = {};
+    const seen = new Set();
+    for (const obj of interactables) {
+        const ud = obj.userData;
+        if (ud.containerId === undefined || !ud.contents) continue;
+        if (seen.has(ud.containerId)) continue;
+        seen.add(ud.containerId);
+        result[ud.containerId] = JSON.parse(JSON.stringify(ud.contents));
+    }
+    return result;
+}
+
+/** Sets container content overrides. Call BEFORE spawnObjectsForLevel(). */
+export function setPendingContainerOverrides(overrides) {
+    _pendingContainerOverrides = overrides ?? null;
 }

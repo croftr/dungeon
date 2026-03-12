@@ -648,7 +648,7 @@ _applyMultiAttacks('Demon', [
     weight: 3,
     damageMultiplier: 0.7,
     specialAttack: true,
-    specialOnHitEffects: [{ effectId: 'fear', chance: 0.50, durationSec: 20 }],
+    specialOnHitEffects: [{ effectId: 'fear', chance: 0.50, durationSec: 10 }],
   },
 ]);
 
@@ -878,6 +878,9 @@ _gltfLoader.setDRACOLoader(_draco);
 function _loadMonster(m, scene) {
   // Load the idle/walking GLB as the base mesh
   _gltfLoader.load(m.glbIdle, (gltf) => {
+    // If monster was killed (e.g. save restore) before model finished loading, discard
+    if (!m.alive) return;
+
     const model = gltf.scene;
     m.mesh = model;
 
@@ -980,6 +983,11 @@ function _loadMonster(m, scene) {
     hpLabel.position.set(0, 1.8, 0);
     model.add(hpLabel);
     m.hpLabel = hpLabel;
+
+    // If HP was reduced before loading (e.g. save restore), sync the bar
+    if (m.hp < m.hpMax) {
+      barFill.style.width = `${Math.max(0, (m.hp / m.hpMax) * 100)}%`;
+    }
 
     // ── Hunter's Eye stats panel (CSS2DObject) ─────────────────────────
     const statsDiv = document.createElement('div');
@@ -1668,9 +1676,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
   // not currently mid-combat, this marks the start of a new fight — reset stats.
   const wasEngaged = m.engaged;
   if (m.name !== 'Training Dummy') m.engaged = true;
-  if (!wasEngaged && !isInCombat() && m.name !== 'Training Dummy') {
-    resetBattleStats(m.name);
-  }
+  // Stats are now cumulative — no auto-reset on new fight.
 
   // ── Skeleton Shield Block ──────────────────────────────────────────────────
   if (m.name.includes('Skeleton') && attackType !== 'poison-dot' && attackType !== 'fireball') {
@@ -1737,8 +1743,8 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
     m.alive = false;
   }
 
-  // Track damage dealt for battle summary (Training Dummy excluded)
-  if (killer && m.name !== 'Training Dummy') {
+  // Track damage dealt for battle summary
+  if (killer) {
     recordDamageDealt(killer, damage);
   }
 
@@ -2407,4 +2413,29 @@ function _startFadeOut(m) {
       m.mesh = null;
     })
     .start();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  SAVE GAME — monster state serialization
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Returns { id: { alive, hp } } for all monsters on the given level. */
+export function getMonsterStates(level) {
+  const result = {};
+  for (const m of monsters) {
+    if ((m.level ?? 1) !== level) continue;
+    result[m.id] = { alive: m.alive, hp: m.hp };
+  }
+  return result;
+}
+
+/** Restores alive/hp on monster objects. Call BEFORE loadMonstersForLevel. */
+export function restoreMonsterStates(saved) {
+  if (!saved) return;
+  for (const m of monsters) {
+    const s = saved[m.id];
+    if (!s) continue;
+    m.alive = s.alive;
+    m.hp = s.hp;
+  }
 }

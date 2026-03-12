@@ -6,16 +6,16 @@ import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES,
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
-import { initParty, updateParty, party, setPartyGold, refreshPartyCards, autoAttack, autoRangeAttack } from './party.js';
+import { initParty, updateParty, party, setPartyGold, refreshPartyCards, autoAttack, autoRangeAttack, setAutoAttack, setAutoRangeAttack } from './party.js';
 import { initEquipment, hideDropButton, updateEffectiveStats, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
-import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
-import { initRecruits, updateRecruitsMeshState } from './recruits.js';
-import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables } from './objects.js';
+import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt, restoreMonsterStates } from './monster.js';
+import { initRecruits, updateRecruitsMeshState, RECRUITS } from './recruits.js';
+import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, setWorldFlags, setPendingContainerOverrides, setMerchantStock } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
-import { consumePendingLoad } from './save-game.js';
+import { consumePendingLoad, snapshotCurrentLevel, setAccumulatedWorldState, getAccumulatedWorldState } from './save-game.js';
 import { initQuarks, updateQuarks } from './quarks-intro.js';
 
 import './style.css';
@@ -78,6 +78,9 @@ let hasSeenDemonVideo = false;
 window.hasSeenTreemanVideo = false;
 let prepVideoTimer = null;
 
+// Bridge video flags to save system via window._saveFlags
+window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenDemonVideo };
+
 setCallbacks({
   moved() {
     drawMinimap();
@@ -102,7 +105,7 @@ setCallbacks({
       }
 
       if (!hasSeenOgreVideo && player.gridRow === 6 && player.gridCol === 1) {
-        hasSeenOgreVideo = true;
+        hasSeenOgreVideo = true; window._saveFlags.hasSeenOgreVideo = true;
         playOgreVideo();
       }
 
@@ -114,7 +117,7 @@ setCallbacks({
         && player.gridCol >= 3 && player.gridCol <= 8;
 
       if (inDemonRoom && !hasSeenDemonVideo) {
-        hasSeenDemonVideo = true;
+        hasSeenDemonVideo = true; window._saveFlags.hasSeenDemonVideo = true;
         playDemonVideo();
       }
 
@@ -127,7 +130,7 @@ setCallbacks({
         && player.gridCol >= 8 && player.gridCol <= 14;
 
       if (inMinotaurRoom && !hasSeenMinotaurVideo) {
-        hasSeenMinotaurVideo = true;
+        hasSeenMinotaurVideo = true; window._saveFlags.hasSeenMinotaurVideo = true;
         if (window.playMinotaurVideo) window.playMinotaurVideo();
       }
     }
@@ -158,6 +161,35 @@ initEquipment();
 initBattleLog();
 initBattleStats();
 initMainMenu();
+
+// ─────────────────────────────────────────────
+//  SAVE RESTORE — PRE-INIT PHASE
+//  Set up overrides BEFORE objects/monsters init so the first spawn uses saved state.
+// ─────────────────────────────────────────────
+const _pendingSave = consumePendingLoad();
+if (_pendingSave) {
+  // Restore gate/portal flags before objects spawn
+  setWorldFlags(_pendingSave.flags);
+
+  // Restore recruit state before recruit meshes init
+  if (_pendingSave.recruits) {
+    for (const r of RECRUITS) {
+      r.isRecruited = !!_pendingSave.recruits[r.id];
+    }
+  }
+
+  // Set container overrides before spawnObjectsForLevel
+  const _wsCurrentLevel = _pendingSave.worldState?.[_pendingSave.currentLevel ?? 1];
+  if (_wsCurrentLevel?.containers) setPendingContainerOverrides(_wsCurrentLevel.containers);
+  if (_pendingSave.worldState?.[1]?.merchantAvailable) setMerchantStock(_pendingSave.worldState[1].merchantAvailable);
+
+  // Restore monster alive/hp before initMonsters loads models
+  if (_wsCurrentLevel?.monsters) restoreMonsterStates(_wsCurrentLevel.monsters);
+
+  // Seed accumulated world state for level transitions
+  if (_pendingSave.worldState) setAccumulatedWorldState(_pendingSave.worldState);
+}
+
 initRecruits(scene, camera);
 initObjects(scene, camera);
 
@@ -660,6 +692,10 @@ window.addEventListener('keydown', handleFirstInteraction);
 //  LEVEL LOADING
 // ─────────────────────────────────────────────
 window.loadLevel = function (levelNum) {
+  // Snapshot departing level's world state before destroying it
+  // (skip during save restore — accumulated state was already seeded from save)
+  if (!window._isRestoring) snapshotCurrentLevel();
+
   const oldLevel = window.currentLevel;
   window.currentLevel = levelNum;
 
@@ -673,12 +709,18 @@ window.loadLevel = function (levelNum) {
   // 2. Rebuild map meshes for walls/floors
   buildLevel(scene);
 
-  // 3. Clear and respawn level objects
+  // 3. Restore accumulated state for arriving level (containers + monsters)
+  const ws = getAccumulatedWorldState(levelNum);
+  if (ws?.containers) setPendingContainerOverrides(ws.containers);
+  if (ws?.monsters) restoreMonsterStates(ws.monsters);
+  if (levelNum === 1 && ws?.merchantAvailable) setMerchantStock(ws.merchantAvailable);
+
+  // 4. Clear and respawn level objects (reads pending container overrides)
   clearObjects(scene);
   spawnObjectsForLevel();
   updateRecruitsMeshState();
 
-  // 4. Load monster models for this level (deferred from init)
+  // 5. Load monster models for this level (skips dead monsters)
   loadMonstersForLevel(scene, levelNum);
 
   // 4. Move player to start of new map
@@ -758,8 +800,13 @@ console.log('Map: 0=floor 1=wall 2=start 3=exit | Controls: W/S=move  Q/E=turn  
 // ─────────────────────────────────────────────
 //  SAVE GAME — RESTORE ON LOAD
 // ─────────────────────────────────────────────
-(function _checkPendingLoad() {
-  const save = consumePendingLoad();
+// ─────────────────────────────────────────────
+//  SAVE RESTORE — POST-INIT PHASE
+//  Restore party, gold, position, and level after objects/monsters are initialized.
+//  World state (containers, monsters, flags, recruits) was already applied in the pre-init phase.
+// ─────────────────────────────────────────────
+(function _applyPendingLoad() {
+  const save = _pendingSave;
   if (!save) return;
 
   // 1. Restore party members
@@ -775,12 +822,30 @@ console.log('Map: 0=floor 1=wall 2=start 3=exit | Controls: W/S=move  Q/E=turn  
   // 2. Restore gold
   setPartyGold(save.partyGold ?? 0);
 
-  // 3. Level — load if different from default (1)
-  if (save.currentLevel && save.currentLevel !== window.currentLevel) {
-    window.loadLevel(save.currentLevel);
+  // 3. Restore video flags
+  if (save.flags) {
+    hasSeenOgreVideo = !!save.flags.hasSeenOgreVideo;
+    hasSeenPrepVideo = !!save.flags.hasSeenPrepVideo;
+    hasSeenMinotaurVideo = !!save.flags.hasSeenMinotaurVideo;
+    hasSeenDemonVideo = !!save.flags.hasSeenDemonVideo;
+    window.hasSeenTreemanVideo = !!save.flags.hasSeenTreemanVideo;
+    window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenDemonVideo };
   }
 
-  // 4. Player position
+  // 4. Restore auto-attack toggles
+  if (save.autoAttack !== undefined) setAutoAttack(save.autoAttack);
+  if (save.autoRangeAttack !== undefined) setAutoRangeAttack(save.autoRangeAttack);
+
+  // 5. Level — load if different from default (1)
+  //    Skip snapshotCurrentLevel inside loadLevel during restore (we just seeded the state)
+  const currentLevel = save.currentLevel ?? 1;
+  window._isRestoring = true;
+  if (currentLevel && currentLevel !== window.currentLevel) {
+    window.loadLevel(currentLevel);
+  }
+  window._isRestoring = false;
+
+  // 6. Player position
   player.gridRow = save.player.gridRow;
   player.gridCol = save.player.gridCol;
   player.facing = save.player.facing;
@@ -789,7 +854,7 @@ console.log('Map: 0=floor 1=wall 2=start 3=exit | Controls: W/S=move  Q/E=turn  
   camera.rotation.order = 'YXZ';
   camera.rotation.y = FACING_ANGLES[player.facing];
 
-  // 5. Refresh HUD
+  // 7. Refresh HUD
   refreshPartyCards();
   drawMinimap();
   updateStatus();

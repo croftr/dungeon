@@ -331,7 +331,7 @@
   },
   "treeman": {
     "name": "Treeman",
-    "hp": 280,
+    "hp": 300,
     "defence": 9,
     "xp": 1000,
     "attackSpeed": 1.2,
@@ -371,7 +371,7 @@
   },
   "ogre": {
     "name": "Ogre",
-    "hp": 200,
+    "hp": 220,
     "defence": 9,
     "xp": 255,
     "attackSpeed": 1.2,

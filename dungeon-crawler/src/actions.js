@@ -44,7 +44,7 @@ const ACTION_SVG = {
       </g>
     </svg>`,
 
-  // Straight thrust — heavy 3D-like mace punching forward, impact shockwaves
+  // Heavy overhead slam — chunky mace descending with massive blunt impact
   [ACTIONS.BASH]: `
     <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"
          fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -54,30 +54,39 @@ const ACTION_SVG = {
           <feComposite in="SourceGraphic" in2="blur" operator="over" />
         </filter>
         <radialGradient id="impactGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#fff" stop-opacity="0.8"/>
-          <stop offset="40%" stop-color="#f0b050" stop-opacity="0.5"/>
+          <stop offset="0%" stop-color="#fff" stop-opacity="0.9"/>
+          <stop offset="40%" stop-color="#f0b050" stop-opacity="0.6"/>
           <stop offset="100%" stop-color="#e8a040" stop-opacity="0"/>
         </radialGradient>
       </defs>
       <g filter="url(#glowBash)">
-        <!-- Fast motion streak behind weapon -->
-        <line x1="15" y1="105" x2="65" y2="55" stroke-width="12" stroke="#402010" opacity="0.3"/>
-        <!-- Weapon shaft -->
-        <line x1="25" y1="95" x2="75" y2="45" stroke-width="8" stroke="#a06020" opacity="0.95"/>
-        <line x1="28" y1="92" x2="78" y2="42" stroke-width="3" stroke="#d89030" opacity="0.9"/>
-        <!-- Head of mace / heavy iron block -->
-        <rect x="65" y="27" width="28" height="28" rx="6" stroke-width="4" fill="rgba(60,30,10,0.8)" stroke="#f0b050"/>
-        <!-- Impact epicenter -->
-        <circle cx="82" cy="42" r="28" fill="url(#impactGlow)" stroke="none" />
-        <!-- Shockwave rings -->
-        <circle cx="82" cy="42" r="16" stroke-width="3.5" stroke="#f0b050" opacity="0.8"/>
-        <circle cx="82" cy="42" r="30" stroke-width="2" stroke="#e8a040" opacity="0.4"/>
-        <circle cx="82" cy="42" r="45" stroke-width="1" stroke="#e8a040" opacity="0.15"/>
-        <!-- Shrapnel / sparks flying out -->
-        <line x1="82" y1="18" x2="82" y2="4" stroke-width="3" stroke="#fff" opacity="0.9"/>
-        <line x1="102" y1="22" x2="114" y2="12" stroke-width="2.5" stroke="#ffdd80" opacity="0.8"/>
-        <line x1="106" y1="48" x2="118" y2="52" stroke-width="2.5" stroke="#ffdd80" opacity="0.8"/>
-        <line x1="94" y1="62" x2="104" y2="72" stroke-width="2" stroke="#ffaa40" opacity="0.6"/>
+        <!-- Motion blur trail (descending) -->
+        <rect x="52" y="10" width="16" height="60" fill="rgba(80,60,40,0.15)" rx="8" />
+        
+        <!-- Weapon shaft (oriented vertically for downward slam) -->
+        <line x1="60" y1="105" x2="60" y2="45" stroke-width="10" stroke="#8a6020" opacity="0.95"/>
+        <line x1="57" y1="105" x2="57" y2="45" stroke-width="3" stroke="#c0a060" opacity="0.8"/>
+        
+        <!-- Heavy Mace Head (chunky, spiked iron ball) -->
+        <circle cx="60" cy="35" r="22" fill="#3a2a18" stroke="#f0b050" stroke-width="3"/>
+        <!-- Mace Spikes -->
+        <path d="M60 10 L64 18 L56 18 Z" fill="#f0b050" />
+        <path d="M85 35 L77 31 L77 39 Z" fill="#f0b050" />
+        <path d="M35 35 L43 31 L43 39 Z" fill="#f0b050" />
+        <path d="M43 18 L48 24 L52 20 Z" fill="#f0b050" />
+        <path d="M77 18 L72 24 L68 20 Z" fill="#f0b050" />
+
+        <!-- Impact epicenter (active during collision phase) -->
+        <circle cx="60" cy="35" r="35" fill="url(#impactGlow)" opacity="0.6" />
+        
+        <!-- Heavy shockwave rings -->
+        <ellipse cx="60" cy="35" rx="30" ry="25" stroke="#f0b050" stroke-width="4" opacity="0.7"/>
+        <ellipse cx="60" cy="35" rx="50" ry="40" stroke="#e8a040" stroke-width="2" opacity="0.3"/>
+        
+        <!-- Blunt debris/dust clouds -->
+        <circle cx="25" cy="45" r="8" fill="rgba(180,160,140,0.4)" stroke="none"/>
+        <circle cx="95" cy="45" r="6" fill="rgba(180,160,140,0.3)" stroke="none"/>
+        <circle cx="45" cy="65" r="5" fill="rgba(180,160,140,0.2)" stroke="none"/>
       </g>
     </svg>`,
 
@@ -175,63 +184,51 @@ const ACTION_SVG = {
   [ACTIONS.FIREBALL]: null,
   [ACTIONS.REGENERATE]: null,
 
-  // Shield slam — a broad round shield punches straight forward, impact rings and debris
+  // Shield slam — a broad round shield rises from below, impact and dust
   [ACTIONS.SHIELD_BASH]: `
     <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"
          fill="none" stroke-linecap="round" stroke-linejoin="round">
       <defs>
         <filter id="glowShield" x="-25%" y="-25%" width="150%" height="150%">
-          <feGaussianBlur stdDeviation="3.5" result="blur" />
+          <feGaussianBlur stdDeviation="3" result="blur" />
           <feComposite in="SourceGraphic" in2="blur" operator="over" />
         </filter>
-        <radialGradient id="shieldFace" cx="42%" cy="35%" r="58%">
-          <stop offset="0%"  stop-color="#d0c090" stop-opacity="0.95"/>
-          <stop offset="45%" stop-color="#8a7040" stop-opacity="0.90"/>
-          <stop offset="100%" stop-color="#3a2a10" stop-opacity="0.85"/>
-        </radialGradient>
-        <radialGradient id="impactRing" cx="50%" cy="50%" r="50%">
-          <stop offset="0%"  stop-color="#fff" stop-opacity="0.9"/>
-          <stop offset="50%" stop-color="#f0c040" stop-opacity="0.5"/>
-          <stop offset="100%" stop-color="#e09020" stop-opacity="0"/>
+        <radialGradient id="shieldFace" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"  stop-color="#e8c87a" stop-opacity="1"/>
+          <stop offset="60%" stop-color="#8a7040" stop-opacity="0.95"/>
+          <stop offset="100%" stop-color="#3a2a10" stop-opacity="0.9"/>
         </radialGradient>
       </defs>
       <g filter="url(#glowShield)">
-        <!-- Motion blur streak behind the shield -->
-        <ellipse cx="60" cy="66" rx="28" ry="34" fill="rgba(80,60,20,0.18)" />
-        <ellipse cx="60" cy="70" rx="22" ry="28" fill="rgba(80,60,20,0.18)" />
+        <!-- Outer Rim -->
+        <circle cx="60" cy="60" r="50" fill="#2a1a0a" stroke="#d0b060" stroke-width="4"/>
+        
+        <!-- Main Shield Body -->
+        <circle cx="60" cy="60" r="44" fill="url(#shieldFace)" />
+        
+        <!-- Decorative Studs/Rivets around the rim -->
+        <circle cx="60" cy="16" r="2.5" fill="#f0e0b0" />
+        <circle cx="60" cy="104" r="2.5" fill="#f0e0b0" />
+        <circle cx="16" cy="60" r="2.5" fill="#f0e0b0" />
+        <circle cx="104" cy="60" r="2.5" fill="#f0e0b0" />
+        <circle cx="28" cy="28" r="2" fill="#f0e0b0" />
+        <circle cx="92" cy="28" r="2" fill="#f0e0b0" />
+        <circle cx="28" cy="92" r="2" fill="#f0e0b0" />
+        <circle cx="92" cy="92" r="2" fill="#f0e0b0" />
 
-        <!-- Shield body — slightly angled to imply a forward lunge -->
-        <ellipse cx="60" cy="58" rx="30" ry="36"
-                 fill="url(#shieldFace)" stroke="#c8a030" stroke-width="3.5"/>
-        <!-- Shield rim highlight -->
-        <ellipse cx="60" cy="58" rx="30" ry="36"
-                 fill="none" stroke="#ffe080" stroke-width="1" opacity="0.45"/>
-        <!-- Central boss (iron knob) -->
-        <circle cx="60" cy="58" r="9" fill="#5a4018" stroke="#c8a030" stroke-width="2.5"/>
-        <circle cx="57" cy="55" r="3" fill="rgba(255,240,180,0.5)" stroke="none"/>
-        <!-- Quadrant dividers -->
-        <line x1="60" y1="24" x2="60" y2="92" stroke="#b08028" stroke-width="1.5" opacity="0.6"/>
-        <line x1="31" y1="58" x2="89" y2="58" stroke="#b08028" stroke-width="1.5" opacity="0.6"/>
+        <!-- Central Boss (spiked iron protrusion) -->
+        <circle cx="60" cy="60" r="14" fill="#1a1005" stroke="#e8c87a" stroke-width="2"/>
+        <circle cx="60" cy="60" r="6" fill="#e8c87a" opacity="0.8" />
+        
+        <!-- Horizontal/Vertical bracing -->
+        <line x1="16" y1="60" x2="104" y2="60" stroke="#5a4018" stroke-width="1.5" opacity="0.5"/>
+        <line x1="60" y1="16" x2="60" y2="104" stroke="#5a4018" stroke-width="1.5" opacity="0.5"/>
 
-        <!-- Impact flash at boss centre -->
-        <circle cx="60" cy="58" r="38" fill="url(#impactRing)" opacity="0.7"/>
-
-        <!-- Shockwave rings expanding outward -->
-        <ellipse cx="60" cy="58" rx="34" ry="40" stroke="#f0c040" stroke-width="2.5" opacity="0.75"/>
-        <ellipse cx="60" cy="58" rx="44" ry="52" stroke="#d09030" stroke-width="1.5" opacity="0.45"/>
-        <ellipse cx="60" cy="58" rx="55" ry="64" stroke="#c07020" stroke-width="1"   opacity="0.2"/>
-
-        <!-- Flying debris sparks -->
-        <line x1="60" y1="18" x2="62" y2="4"  stroke-width="2.5" stroke="#fff"    opacity="0.9"/>
-        <line x1="92" y1="28" x2="106" y2="16" stroke-width="2"   stroke="#ffe080" opacity="0.85"/>
-        <line x1="98" y1="62" x2="114" y2="66" stroke-width="2"   stroke="#ffe080" opacity="0.8"/>
-        <line x1="86" y1="90" x2="98"  y2="104" stroke-width="1.5" stroke="#f0b040" opacity="0.65"/>
-        <line x1="28" y1="90" x2="16"  y2="104" stroke-width="1.5" stroke="#f0b040" opacity="0.65"/>
-        <line x1="22" y1="58" x2="6"   y2="56"  stroke-width="2"   stroke="#ffe080" opacity="0.8"/>
-        <!-- Spark dots -->
-        <circle cx="108" cy="42" r="2.5" fill="#fff" opacity="0.8"/>
-        <circle cx="112" cy="78" r="1.8" fill="#ffe080" opacity="0.7"/>
-        <circle cx="10"  cy="38" r="2"   fill="#fff" opacity="0.7"/>
+        <!-- Impact Shockwave -->
+        <circle cx="60" cy="60" r="55" stroke="#f0c040" stroke-width="3" opacity="0.4">
+          <animate attributeName="r" from="40" to="70" dur="0.4s" repeatCount="1" />
+          <animate attributeName="opacity" from="0.6" to="0" dur="0.4s" repeatCount="1" />
+        </circle>
       </g>
     </svg>`,
 

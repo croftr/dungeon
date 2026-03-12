@@ -1,12 +1,19 @@
 // ─────────────────────────────────────────────────────────────────────────────
-//  SAVE GAME  — localStorage persistence
+//  SAVE GAME  — localStorage persistence (v2: full world state)
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { party, partyGold } from './party.js';
+import { party, partyGold, autoAttack, autoRangeAttack } from './party.js';
 import { player } from './player.js';
+import { getMonsterStates } from './monster.js';
+import { getWorldFlags, getContainerStates, getMerchantStock } from './objects.js';
+import { RECRUITS } from './recruits.js';
 
 const SAVE_KEY = 'dungeon-save';
 const LOAD_KEY = 'dungeon-pending-load';
+
+// Accumulated world state across level transitions.
+// Keyed by level number (1, 2, 3).
+let _accumulatedWorldState = {};
 
 function _serializeMember(m) {
   // Deep-clone but strip non-serializable fields (setTimeout IDs etc.)
@@ -16,10 +23,40 @@ function _serializeMember(m) {
   }));
 }
 
+/**
+ * Snapshot the current level's world state into the accumulated store.
+ * Call BEFORE leaving a level (in loadLevel) and BEFORE saving.
+ */
+export function snapshotCurrentLevel() {
+  const level = window.currentLevel ?? 1;
+  _accumulatedWorldState[level] = {
+    monsters: getMonsterStates(level),
+    containers: getContainerStates(),
+  };
+  // Merchant is on Level 1
+  if (level === 1) {
+    _accumulatedWorldState[1].merchantAvailable = getMerchantStock();
+  }
+}
+
+/** Seed accumulated world state on restore (for levels not currently loaded). */
+export function setAccumulatedWorldState(ws) {
+  if (ws) _accumulatedWorldState = { ..._accumulatedWorldState, ...ws };
+}
+
+/** Get accumulated world state for a specific level. */
+export function getAccumulatedWorldState(level) {
+  return _accumulatedWorldState[level] ?? null;
+}
+
 /** Persist current game state to localStorage. Returns ISO timestamp of save. */
 export function saveGame() {
+  // Snapshot current level before building save object
+  snapshotCurrentLevel();
+
+  // Video flags are on window (set by main.js)
   const save = {
-    version: 1,
+    version: 2,
     savedAt: new Date().toISOString(),
     currentLevel: window.currentLevel ?? 1,
     player: {
@@ -29,6 +66,24 @@ export function saveGame() {
     },
     partyGold,
     party: party.map(_serializeMember),
+    autoAttack,
+    autoRangeAttack,
+
+    // World state for all visited levels
+    worldState: { ..._accumulatedWorldState },
+
+    // Global progression flags
+    flags: {
+      ...getWorldFlags(),
+      hasSeenOgreVideo: !!window._saveFlags?.hasSeenOgreVideo,
+      hasSeenPrepVideo: !!window._saveFlags?.hasSeenPrepVideo,
+      hasSeenMinotaurVideo: !!window._saveFlags?.hasSeenMinotaurVideo,
+      hasSeenDemonVideo: !!window._saveFlags?.hasSeenDemonVideo,
+      hasSeenTreemanVideo: !!window.hasSeenTreemanVideo,
+    },
+
+    // Recruit state
+    recruits: Object.fromEntries(RECRUITS.map(r => [r.id, !!r.isRecruited])),
   };
   localStorage.setItem(SAVE_KEY, JSON.stringify(save));
   return save.savedAt;
@@ -67,13 +122,23 @@ export function loadGame() {
  * Called once on startup.
  * Returns parsed save data if a load was pending, otherwise null.
  * Removes the pending flag so it only fires once.
+ * Handles v1 → v2 migration.
  */
 export function consumePendingLoad() {
   const raw = sessionStorage.getItem(LOAD_KEY);
   if (!raw) return null;
   sessionStorage.removeItem(LOAD_KEY);
   try {
-    return JSON.parse(raw);
+    const save = JSON.parse(raw);
+    // v1 → v2 migration: add empty world state
+    if (!save.version || save.version < 2) {
+      save.worldState = {};
+      save.flags = {};
+      save.recruits = {};
+      save.autoAttack = true;
+      save.autoRangeAttack = false;
+    }
+    return save;
   } catch {
     return null;
   }
