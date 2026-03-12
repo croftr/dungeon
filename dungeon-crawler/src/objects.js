@@ -7,7 +7,7 @@ import { tweenGroup, isInFrontOfPlayer, player } from './player.js';
 import { showMessage } from './minimap.js';
 import { getItemDef } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refreshPartyCards } from './party.js';
-import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound } from './audio.js';
+import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
 import POTIONS_DATA from './data/potions.json';
 import { triggerMummyAmbush } from './monster.js';
@@ -152,6 +152,7 @@ export function initObjects(scene, camera) {
                 if (obj.userData.target === 'escape_mummy_room') {
                     // Check if player is facing the wall at (3, 21) from (3, 20)
                     if (isInFrontOfPlayer(3, 21, 1)) {
+                        playButtonClickSound();
                         new Tween(obj.position)
                             .to({ x: -0.01 }, 100)
                             .easing(Easing.Quadratic.Out)
@@ -165,6 +166,7 @@ export function initObjects(scene, camera) {
                 } else if (obj.userData.target === 'demon_room') {
                     // Player at (18, 3) facing west presses button on east face of col-2 wall
                     if (isInFrontOfPlayer(18, 2, 1)) {
+                        playButtonClickSound();
                         new Tween(obj.position)
                             .to({ x: 0.01 }, 100)
                             .easing(Easing.Quadratic.Out)
@@ -178,6 +180,7 @@ export function initObjects(scene, camera) {
                 } else {
                     // Check if player is facing the wall at (8, 8) from (8, 7)
                     if (isInFrontOfPlayer(8, 8, 1)) {
+                        playButtonClickSound();
                         // Small button press animation
                         new Tween(obj.position)
                             .to({ x: 0.01 }, 100)
@@ -426,7 +429,7 @@ export function initObjects(scene, camera) {
                                 showMessage("You use the Bronze Key. The portcullis grinds open.");
                                 playKeyLockSound();
                                 setTimeout(() => {
-                                    openPortcullis(p, true);
+                                    openPortcullis(p);
                                     if (window.currentLevel === 2 && p.gridRow === 8 && p.gridCol === 7) {
                                         _level2PortcullisOpened = true;
                                     }
