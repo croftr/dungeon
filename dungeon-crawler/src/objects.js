@@ -1479,7 +1479,8 @@ export function spawnObjectsForLevel() {
         // Chest at the end of the long passage
         addChest(objectsGroup, gltfLoader, 28, 17, -Math.PI / 2, 0.7, [
             { name: 'Gold Coins', quantity: 500 },
-            'Ruby Ring', 'Mana Potion', 'Life Essence'
+            'Ruby Ring', 'Mana Potion', 'Life Essence',
+            'Chain Shirt', 'Plate Cuirass'
         ], '/items/chest1.glb', true, 1);
         // Trap in the long east passage
         addTrap1(objectsGroup, gltfLoader, 10, 17);
@@ -1492,23 +1493,24 @@ export function spawnObjectsForLevel() {
 
         // Weapon rack in South-West room (row 19, col 1 against west wall)
         addWeaponRack(objectsGroup, gltfLoader, 1, 19, -Math.PI / 2, -0.15, 0, [
-            "Vampiric Dagger", "Silver Mace", "Warden's Shield", "Silver Bolts"
+            "Vampiric Dagger", "Silver Mace", "Warden's Shield"
         ]);
 
         // Spell Cabinet in North-East room (row 3, col 19)
         addSpellCabinet(objectsGroup, gltfLoader, 19, 2, 0, 0.45, -1.0, [
-            "Scroll of Fireball",
             "Scroll of Sleep"
         ]);
 
         // Chest in North-West room (row 2, col 3)
         addChest(objectsGroup, gltfLoader, 3, 2, 0, -1.0, [
-            "Rune Pendant"
+            "Rune Pendant",
+            "Silver Bolts",
         ]);
 
         // Chest in South-East room (row 18, col 19)
         addChest(objectsGroup, gltfLoader, 19, 18, 0, -0.8, [
-            "Sun Pendant"
+            "Sun Pendant",
+            "Longsword"
         ]);
 
         // Exit portal (game escape) at the far end of the exit corridor

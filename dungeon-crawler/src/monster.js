@@ -369,7 +369,7 @@ export const monsters = [
     '/monsters/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
     '/monsters/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
 
-  // North-East Room (4 Skeletons, 1 Demon)
+  // North-East Room (4 Skeletons, 1 Aqua Man)
   inst(D.skeletonWarrior, 321, 2, 17,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
@@ -398,15 +398,15 @@ export const monsters = [
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
-  inst(D.demon, 325, 3, 18,
-    '/monsters/demon/Meshy_AI_Animation_Idle_withSkin.glb',
-    '/monsters/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
-    '/monsters/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
-    '/monsters/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
-    '/monsters/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
-    '/monsters/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
+  inst(D.aqua_man, 325, 3, 18,
+    '/monsters/aqua-man/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/aqua-man/Meshy_AI_Animation_Punch_Combo_withSkin.glb',
+    '/monsters/aqua-man/aqua-attack.mp3', 0.60, 0, 0, 3, null,
+    '/monsters/aqua-man/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/aqua-man/Meshy_AI_Animation_Face_Punch_Reaction_1_withSkin.glb',
+    '/monsters/aqua-man/Meshy_AI_Animation_Walking_withSkin.glb'),
 
-  // South-West Room (4 Skeletons, 1 Demon)
+  // South-West Room (4 Skeletons, 1 Aqua Man)
   inst(D.skeletonWarrior, 331, 18, 2,
     '/monsters/skeleton-animation/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
@@ -435,13 +435,13 @@ export const monsters = [
     '/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb',
     '/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
-  inst(D.demon, 335, 19, 3,
-    '/monsters/demon/Meshy_AI_Animation_Idle_withSkin.glb',
-    '/monsters/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
-    '/monsters/demon/demon-hit.mp3', 0.65, 0, 0, 3, null,
-    '/monsters/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb',
-    '/monsters/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb',
-    '/monsters/demon/Meshy_AI_Animation_Walking_withSkin.glb'),
+  inst(D.aqua_man, 335, 19, 3,
+    '/monsters/aqua-man/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/aqua-man/Meshy_AI_Animation_Punch_Combo_withSkin.glb',
+    '/monsters/aqua-man/aqua-attack.mp3', 0.60, 0, 0, 3, null,
+    '/monsters/aqua-man/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/aqua-man/Meshy_AI_Animation_Face_Punch_Reaction_1_withSkin.glb',
+    '/monsters/aqua-man/Meshy_AI_Animation_Walking_withSkin.glb'),
 
   // South-East Room (4 Skeletons, 1 Demon)
   inst(D.skeletonWarrior, 341, 18, 17,

@@ -134,8 +134,7 @@
         "value": 825,
         "weight": 0.1,
         "skillBonuses": {
-            "all": 1,
-            "Sanctuary": 50
+            "all": 1
         }
     },
     {
@@ -170,7 +169,7 @@
         "baseDamage": null,
         "icon": "/icons/chain_shirt.png",
         "description": "Interlocking iron rings form a flexible shirt of armour.",
-        "defence": 6,
+        "defence": 5,
         "value": 270,
         "weight": 5
     },
@@ -181,7 +180,7 @@
         "baseDamage": null,
         "icon": "/icons/plate_cuirass.png",
         "description": "Heavy forged steel chest plate. Near impenetrable — if you can move in it.",
-        "defence": 10,
+        "defence": 8,
         "value": 750,
         "weight": 12
     },

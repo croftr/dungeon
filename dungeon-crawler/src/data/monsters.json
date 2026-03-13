@@ -484,7 +484,7 @@
     "drops": [
       {
         "item": "Tridant",
-        "chance": 1.0
+        "chance": 0.5
       },
       {
         "item": "Life Essence",
