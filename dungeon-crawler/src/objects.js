@@ -1139,7 +1139,7 @@ export function spawnObjectsForLevel() {
         ]);
 
         // Spell Cabinet in North-East room (row 3, col 19)
-        addSpellCabinet(objectsGroup, gltfLoader, 19, 2, 0, 0.65, -1.0, [
+        addSpellCabinet(objectsGroup, gltfLoader, 19, 2, 0, 0.45, -1.0, [
             "Scroll of Fireball",
             "Scroll of Sleep"
         ]);
@@ -1150,7 +1150,7 @@ export function spawnObjectsForLevel() {
         ]);
 
         // Chest in South-East room (row 18, col 19)
-        addChest(objectsGroup, gltfLoader, 19, 18, 0, -1.0, [
+        addChest(objectsGroup, gltfLoader, 19, 18, 0, -0.8, [
             "Sun Pendant"
         ]);
 
