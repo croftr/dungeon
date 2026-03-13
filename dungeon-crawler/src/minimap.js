@@ -9,6 +9,8 @@ const CELL_COLORS = {
   1: '#7a6a55', // wall
   2: '#3355aa', // start
   3: '#22aa44', // exit
+  5: '#000000', // hole
+  6: '#aaaaaa', // stairs
 };
 
 let mmCtx    = null;

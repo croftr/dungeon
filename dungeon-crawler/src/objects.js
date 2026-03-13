@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
-import { CELL, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS } from './map.js';
+import { CELL, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld } from './map.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
-import { tweenGroup, isInFrontOfPlayer, player } from './player.js';
-import { showMessage } from './minimap.js';
+import { tweenGroup, isInFrontOfPlayer, player, FACING_ANGLES } from './player.js';
+import { showMessage, drawMinimap, updateStatus } from './minimap.js';
 import { getItemDef } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refreshPartyCards } from './party.js';
 import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound } from './audio.js';
@@ -231,6 +231,38 @@ export function initObjects(scene, camera) {
                     }
                 } else {
                     showMessage("Stand on the crystals to feel their power.");
+                }
+                break;
+            } else if (obj.userData.isTrap1) {
+                const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
+                const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
+                if (distRow <= 1 && distCol <= 1) {
+                    showMessage("A hidden mechanism! You are being pulled through...");
+                    playPortalSound();
+
+                    if (window.loadLevel) {
+                        window.loadLevel(2);
+                        // Teleport to demon room (row 16, col 5)
+                        player.gridRow = 16;
+                        player.gridCol = 5;
+                        const w = cellToWorld(16, 5);
+                        camera.position.set(w.x, w.y, w.z);
+                        // Face the demon (demon is at 17, 5, so face South)
+                        player.facing = 2;
+                        camera.rotation.order = 'YXZ';
+                        camera.rotation.y = FACING_ANGLES[player.facing];
+
+                        // Redraw minimap and update status
+                        drawMinimap();
+                        updateStatus();
+
+                        // Trigger demon video if possible
+                        if (window.playDemonVideo && !window._saveFlags?.hasSeenDemonVideo) {
+                            window.playDemonVideo();
+                        }
+                    }
+                } else {
+                    showMessage("You see something strange on the floor.");
                 }
                 break;
             } else if (obj.userData.isBonePile) {
@@ -917,6 +949,74 @@ function addDecoration(scene, loader, col, row, rotY = 0, modelPath, scale = 0.5
     });
 }
 
+function addTrap1(scene, loader, col, row, rotY = 0, scale = 0.35) {
+    loader.load('/items/torch.glb', (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(scale);
+        model.position.set(col * CELL, 0.25, row * CELL);
+        model.rotation.y = rotY;
+
+        const light = new THREE.PointLight(0xffaa00, 2.5, 4);
+        light.position.set(0, 0.4, 0);
+        model.add(light);
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.userData.isTrap1 = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+                interactables.push(child);
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
+            }
+        });
+
+        scene.add(model);
+    });
+}
+
+function addStairs(scene, loader, col, row, rotY = 0) {
+    loader.load('/items/stairs-up.glb', (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(0.7);
+        model.position.set(col * CELL, 0.45, row * CELL);
+        model.rotation.y = rotY;
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
+            }
+        });
+
+        scene.add(model);
+    });
+}
+
 
 
 export function spawnObjectsForLevel() {
@@ -1048,6 +1148,9 @@ export function spawnObjectsForLevel() {
         // Alchemy Workshop in the big east room against the south wall
         addAlchemyWorkshop(objectsGroup, gltfLoader, 19, 14, 0, 0, 0.85);
 
+        // Trap to Level 2 demon room
+        addTrap1(objectsGroup, gltfLoader, 12, 11);
+
         // Anvil in the big east room against the north wall
         addAnvil(objectsGroup, gltfLoader, 19, 7, 0, 0, -0.85, ['Life Essence', 'Life Essence']);
 
@@ -1128,6 +1231,15 @@ export function spawnObjectsForLevel() {
             { name: 'Gold Coins', quantity: 200 },
             'Ring of Vigour', 'Ring of Wisdom', 'Ring of Dexterity'
         ]);
+
+        // Stairs in the pit room
+        addStairs(objectsGroup, gltfLoader, 3, 26, Math.PI);
+
+        // Chest at the end of the long passage
+        addChest(objectsGroup, gltfLoader, 28, 17, -Math.PI / 2, 0.7, [
+            { name: 'Gold Coins', quantity: 500 },
+            'Ruby Ring', 'Mana Potion', 'Life Essence'
+        ], '/items/chest1.glb');
     } else if (level === 3) {
         // ── Portals ──────────────────────────────────────────────────────────
         // Return portal to Level 1 — behind the player at spawn

@@ -9,6 +9,9 @@ export const CELL_WALL = 1;
 export const CELL_START = 2;
 export const CELL_EXIT = 3;
 export const CELL_PORTCULLIS = 4;
+export const CELL_HOLE = 5;
+export const CELL_STAIRS_UP = 6;
+export const CELL_BLACK_WALL = 7;
 
 // cols:  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 |16-23(east room)|
 export const level1Map = [
@@ -43,27 +46,34 @@ export const level1Map = [
 // Demon room: col 1 = chest vault, col 2 = portcullis/west-wall, cols 3-8 = room floor.
 // Player travels south → right hand side = west (lower cols) → portcullis on west wall.
 export const level2Map = [
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],  // row 0  — top wall
-  [1, 1, 1, 0, 0, 0, 0, 2, 0, 1],  // row 1  — main room (cols 3-8)
-  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],  // row 2
-  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],  // row 3  — start was here
-  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],  // row 4
-  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],  // row 5  — main room
-  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1],  // row 6  — passage at col 7
-  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1],  // row 7
-  [1, 1, 1, 1, 1, 1, 1, 4, 1, 1],  // row 8  — portcullis (keyhole unlock)
-  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1],  // row 9
-  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1],  // row 10
-  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1],  // row 11
-  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1],  // row 12
-  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1],  // row 13 — passage ends
-  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],  // row 14 — passage opens into demon room
-  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],  // row 15 — demon room (cols 3-8)
-  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1],  // row 16
-  [1, 0, 4, 0, 0, 0, 0, 0, 0, 1],  // row 17 — chest vault (col 1) | portcullis (col 2) | room
-  [1, 0, 1, 0, 0, 0, 0, 0, 0, 1],  // row 18 — chest vault | wall | demon room
-  [1, 0, 1, 0, 0, 0, 0, 0, 0, 1],  // row 19 — chest vault | wall | demon room
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],  // row 20 — bottom wall
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 0
+  [1, 1, 1, 0, 0, 0, 0, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 1
+  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 2
+  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 3
+  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 4
+  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 5
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 6
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 7
+  [1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 8
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 9
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 10
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 11
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 12
+  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 13
+  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 14
+  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 15
+  [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 16
+  [1, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 1], // row 17 - hole at col 23 (moved 4 west)
+  [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 18
+  [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 19
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 20
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 21
+  [1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 22 - pit arrival chamber
+  [1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 23
+  [1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 24
+  [1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 25
+  [1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 26 - stairs at col 3
+  [1, 1, 1, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 27 - black wall behind stairs
 ];
 
 // Level 3 – The Abyssal Crypts (23 rows × 22 cols)
@@ -251,6 +261,7 @@ const wallMat = new THREE.MeshLambertMaterial({ map: brickTex });
 const floorMat = new THREE.MeshLambertMaterial({ map: floorTex });
 const ceilMat = new THREE.MeshLambertMaterial({ color: 0x111008 });
 const exitMat = new THREE.MeshLambertMaterial({ color: 0x226622, emissive: 0x113311 });
+const blackWallMat = new THREE.MeshLambertMaterial({ color: 0x000000 });
 
 // Shared geometries
 const wallGeo = new THREE.BoxGeometry(CELL, WALL_H, CELL);
@@ -275,7 +286,7 @@ export function isPassable(row, col) {
   if (row < 0 || row >= ROWS || col < 0 || col >= COLS) return false;
   const cell = dungeonMap[row][col];
   // Portcullis blocks movement until it's opened.
-  return cell === CELL_FLOOR || cell === CELL_START || cell === CELL_EXIT;
+  return cell === CELL_FLOOR || cell === CELL_START || cell === CELL_EXIT || cell === CELL_HOLE || cell === CELL_STAIRS_UP;
 }
 
 /** Converts grid coords to world-space position. */
@@ -299,6 +310,7 @@ export function buildLevel(scene) {
 
   // 1. Count instances needed
   let wallCount = 0;
+  let blackWallCount = 0;
   let floorCount = 0;
   let ceilCount = 0;
   let exitFloorCount = 0;
@@ -308,8 +320,13 @@ export function buildLevel(scene) {
       const cell = dungeonMap[row][col];
       if (cell === CELL_WALL) {
         wallCount++;
-      } else {
+      } else if (cell === CELL_BLACK_WALL) {
+        blackWallCount++;
+      } else if (cell !== CELL_HOLE) {
         floorCount++;
+        ceilCount++;
+      } else {
+        // Holes have a ceiling but no floor
         ceilCount++;
       }
     }
@@ -320,6 +337,10 @@ export function buildLevel(scene) {
   wallIM.castShadow = true;
   wallIM.receiveShadow = true;
 
+  const blackWallIM = new THREE.InstancedMesh(wallGeo, blackWallMat, blackWallCount);
+  blackWallIM.castShadow = true;
+  blackWallIM.receiveShadow = true;
+
   const floorIM = new THREE.InstancedMesh(tileGeo, floorMat, floorCount);
   floorIM.receiveShadow = true;
 
@@ -327,7 +348,7 @@ export function buildLevel(scene) {
 
   // 3. Set matrices
   const dummy = new THREE.Object3D();
-  let wId = 0, fId = 0, cId = 0;
+  let wId = 0, bwId = 0, fId = 0, cId = 0;
 
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
@@ -340,27 +361,36 @@ export function buildLevel(scene) {
         dummy.rotation.set(0, 0, 0);
         dummy.updateMatrix();
         wallIM.setMatrixAt(wId++, dummy.matrix);
-      } else {
-        // Floor
-        dummy.position.set(wx, 0, wz);
-        dummy.rotation.set(-Math.PI / 2, 0, 0);
+      } else if (cell === CELL_BLACK_WALL) {
+        dummy.position.set(wx, WALL_H / 2, wz);
+        dummy.rotation.set(0, 0, 0);
         dummy.updateMatrix();
-        floorIM.setMatrixAt(fId++, dummy.matrix);
-
-        // Ceiling
+        blackWallIM.setMatrixAt(bwId++, dummy.matrix);
+      } else {
+        // Ceiling (common to floor and hole)
         dummy.position.set(wx, WALL_H, wz);
         dummy.rotation.set(Math.PI / 2, 0, 0);
         dummy.updateMatrix();
         ceilIM.setMatrixAt(cId++, dummy.matrix);
+
+        // Floor (skip for hole)
+        if (cell !== CELL_HOLE) {
+          dummy.position.set(wx, 0, wz);
+          dummy.rotation.set(-Math.PI / 2, 0, 0);
+          dummy.updateMatrix();
+          floorIM.setMatrixAt(fId++, dummy.matrix);
+        }
       }
     }
   }
 
   wallIM.instanceMatrix.needsUpdate = true;
+  blackWallIM.instanceMatrix.needsUpdate = true;
   floorIM.instanceMatrix.needsUpdate = true;
   ceilIM.instanceMatrix.needsUpdate = true;
 
   scene.add(wallIM); currentMapMeshes.push(wallIM);
+  scene.add(blackWallIM); currentMapMeshes.push(blackWallIM);
   scene.add(floorIM); currentMapMeshes.push(floorIM);
   scene.add(ceilIM); currentMapMeshes.push(ceilIM);
 

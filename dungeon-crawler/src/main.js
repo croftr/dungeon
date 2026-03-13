@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import { buildLevel, findCell, CELL_START, changeMapArray, level1Map, level2Map, level3Map, cellToWorld, isPassable } from './map.js';
+import { buildLevel, findCell, CELL_START, changeMapArray, level1Map, level2Map, level3Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap } from './map.js';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles } from './particles.js';
@@ -132,6 +132,42 @@ setCallbacks({
       if (inMinotaurRoom && !hasSeenMinotaurVideo) {
         hasSeenMinotaurVideo = true; window._saveFlags.hasSeenMinotaurVideo = true;
         if (window.playMinotaurVideo) window.playMinotaurVideo();
+      }
+    }
+
+    // --- Special Grid Logic (Teleports) ---
+    const cell = dungeonMap[player.gridRow][player.gridCol];
+    if (window.currentLevel === 2) {
+      if (cell === CELL_HOLE) {
+        tweenGroup.removeAll();
+        player.moving = false;
+        showMessage("Aaaaaah! You fall through the hole!");
+        // Teleport to pit arrival chamber (row 22, col 3)
+        player.gridRow = 22;
+        player.gridCol = 3;
+        const w = cellToWorld(22, 3);
+        camera.position.set(w.x, w.y, w.z);
+        // Face South (2) towards the new passage
+        player.facing = 2;
+        camera.rotation.order = 'YXZ';
+        camera.rotation.y = FACING_ANGLES[player.facing];
+        drawMinimap();
+        updateStatus();
+      } else if (cell === CELL_STAIRS_UP) {
+        tweenGroup.removeAll();
+        player.moving = false;
+        showMessage("You climb the stairs back to the upper passage.");
+        // Teleport to far end of original passage (row 17, col 28)
+        player.gridRow = 17;
+        player.gridCol = 28;
+        const w = cellToWorld(17, 28);
+        camera.position.set(w.x, w.y, w.z);
+        // Face West (3) back towards the demon room
+        player.facing = 3;
+        camera.rotation.order = 'YXZ';
+        camera.rotation.y = FACING_ANGLES[player.facing];
+        drawMinimap();
+        updateStatus();
       }
     }
   },
@@ -553,6 +589,7 @@ const demonOverlay = document.getElementById('demon-video-overlay');
 const demonVideo = document.getElementById('demon-video');
 const skipDemonBtn = document.getElementById('skip-demon-btn');
 
+window.playDemonVideo = playDemonVideo;
 function playDemonVideo() {
   if (!demonOverlay || !demonVideo) return;
   demonOverlay.classList.remove('hidden');

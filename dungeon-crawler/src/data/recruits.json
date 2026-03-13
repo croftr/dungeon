@@ -43,11 +43,11 @@
         "job": "Paladin",
         "race": "Human",
         "stats": {
-            "strength": 7,
-            "dexterity": 5,
-            "vitality": 9,
-            "intelligence": 6,
-            "resilience": 10
+            "strength": 117,
+            "dexterity": 115,
+            "vitality": 119,
+            "intelligence": 116,
+            "resilience": 110
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
         "skillProgression": [
@@ -82,11 +82,11 @@
         "job": "Warrior",
         "race": "Dwarf",
         "stats": {
-            "strength": 8,
-            "dexterity": 6,
-            "vitality": 8,
-            "intelligence": 4,
-            "resilience": 10
+            "strength": 118,
+            "dexterity": 116,
+            "vitality": 118,
+            "intelligence": 114,
+            "resilience": 110
         },
         "bio": "A stout and hearty fighter from the mountainous deeps. Thorek believes every problem can be solved with a sharp axe and enough ale.",
         "skillProgression": [
