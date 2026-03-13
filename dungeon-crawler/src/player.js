@@ -29,6 +29,9 @@ export const player = {
   moving: false,  // input lock during tween
 };
 
+export let playerFrozen = false;
+export function setPlayerFrozen(val) { playerFrozen = val; }
+
 // Callbacks set by main.js
 let onMoved = () => { };
 let onReached = () => { };
@@ -55,7 +58,7 @@ export function initPlayer(startRow, startCol, camera) {
 }
 
 export function moveForward(camera, sign = 1) {
-  if (player.moving) return;
+  if (player.moving || playerFrozen) return;
 
   const dir = DIR[player.facing];
   const newRow = player.gridRow + dir.dz * sign;
@@ -86,7 +89,7 @@ export function moveForward(camera, sign = 1) {
 }
 
 export function turnPlayer(camera, sign = 1) {
-  if (player.moving) return;
+  if (player.moving || playerFrozen) return;
   player.moving = true;
 
   player.facing = ((player.facing + sign) + 4) % 4;
@@ -117,7 +120,7 @@ export function turnPlayer(camera, sign = 1) {
 // sign =  1 → strafe right (perpendicular clockwise from facing)
 // sign = -1 → strafe left  (perpendicular counter-clockwise from facing)
 export function strafePlayer(camera, sign = 1) {
-  if (player.moving) return;
+  if (player.moving || playerFrozen) return;
 
   // The strafe direction is 90° to the right of current facing (+1 turn),
   // or 90° to the left (-1 turn), without changing player.facing.

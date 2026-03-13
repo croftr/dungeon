@@ -121,6 +121,9 @@
       Video</button>
   </div>
 
+  <!-- ── FALL BLACKOUT OVERLAY ── -->
+  <div id="fall-blackout" class="hidden"></div>
+
   <canvas id="renderer-canvas"></canvas>
 
   <div id="hud">
@@ -918,6 +921,31 @@
         <div id="drop-confirm-buttons">
           <button id="drop-confirm-yes">Drop</button>
           <button id="drop-confirm-no">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TRAP DISARM MODAL ── -->
+  <div id="trap-disarm-overlay" class="chest-hidden">
+    <div id="trap-disarm-modal">
+      <div id="trap-disarm-header">
+        <div id="trap-disarm-title-wrap" style="display: flex; align-items: center; gap: 10px;">
+          <img src="/icons/bear-trap.svg" alt="Bear Trap" style="width: 24px; height: 24px;">
+          <span id="trap-disarm-title">Trap Detected</span>
+        </div>
+        <button id="trap-disarm-close" aria-label="Close">&times;</button>
+      </div>
+      <div id="trap-disarm-body">
+        <p class="trap-disarm-desc">Your party has spotted a hidden trap. Attempting to disarm it is dangerous — only the most skilled rogues succeed. Failure will trigger the trap.</p>
+        <div class="trap-disarm-chance-row">
+          <span>Disarm chance:</span>
+          <span id="trap-disarm-chance" class="trap-chance-value">15%</span>
+        </div>
+        <div id="trap-disarm-result" class="trap-disarm-result"></div>
+        <div id="trap-disarm-buttons">
+          <button id="trap-disarm-attempt">Attempt Disarm</button>
+          <button id="trap-disarm-leave">Leave It</button>
         </div>
       </div>
     </div>

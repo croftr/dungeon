@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
-import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave } from './particles.js';
+import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave } from './particles.js';
 import { CELL, isPassable } from './map.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
@@ -237,6 +237,15 @@ export const monsters = [
     '/monsters/iceMan-animation/iceman-attack.mp3', 0.6, 0, 0, 1, null,
     '/monsters/iceMan-animation/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/iceMan-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+
+  // Aqua Man guards the passage to the stairs after falling through the pit on level 2
+  inst(D.aqua_man, 70, 24, 3,
+    '/monsters/aqua-man/Meshy_AI_Animation_Idle_withSkin.glb',
+    '/monsters/aqua-man/Meshy_AI_Animation_Punch_Combo_withSkin.glb',
+    '/monsters/aqua-man/aqua-attack.mp3', 0.60, 0, 0, 2, null,
+    '/monsters/aqua-man/Meshy_AI_Animation_Dead_withSkin.glb',
+    '/monsters/aqua-man/Meshy_AI_Animation_Face_Punch_Reaction_1_withSkin.glb',
+    '/monsters/aqua-man/Meshy_AI_Animation_Walking_withSkin.glb'),
 
 
   // Additional Goblins spread through Level 1 corridors (avoiding big rooms)
@@ -649,6 +658,28 @@ _applyMultiAttacks('Demon', [
     damageMultiplier: 0.7,
     specialAttack: true,
     specialOnHitEffects: [{ effectId: 'fear', chance: 0.50, durationSec: 10 }],
+  },
+]);
+
+_applyMultiAttacks('Aqua Man', [
+  {
+    name: 'punchCombo',
+    glb: '/monsters/aqua-man/Meshy_AI_Animation_Punch_Combo_withSkin.glb',
+    sound: '/monsters/aqua-man/aqua-attack.mp3',
+    soundTimings: [0.3, 0.6],
+    damageTimings: [0.3, 0.6],
+    weight: 7,
+  },
+  {
+    name: 'tidalWave',
+    glb: '/monsters/aqua-man/Meshy_AI_Animation_mage_soell_cast_1_withSkin.glb',
+    sound: '/monsters/aqua-man/wave.mp3',
+    soundTimings: [0.6],
+    damageTimings: [0.6],
+    weight: 3,
+    damageMultiplier: 0.8,
+    specialAttack: true,
+    specialOnHitEffects: [{ effectId: 'slow', chance: 0.60, durationSec: 8 }, { effectId: 'poison', chance: 0.20 }],
   },
 ]);
 
@@ -2011,6 +2042,12 @@ export function triggerMonsterAttack(monsterId) {
         const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
         setTimeout(() => { if (m.alive) createDemonCleave(m.mesh.position); }, duration * pts * 1000);
         showMessage(`<b>${m.name}</b> unleashes a nightmarish cleave!`, 2000);
+      }
+      if (variant.name === 'tidalWave' && m.mesh) {
+        const duration = attackAction.getClip().duration;
+        const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.6;
+        setTimeout(() => { if (m.alive) createTidalWave(m.mesh.position); }, duration * pts * 1000);
+        showMessage(`<b>${m.name}</b> unleashes a devastating Tidal Wave!`, 2000);
       }
     }
   }

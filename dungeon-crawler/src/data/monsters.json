@@ -462,6 +462,48 @@
       }
     ]
   },
+  "aqua_man": {
+    "name": "Aqua Man",
+    "hp": 240,
+    "defence": 10,
+    "xp": 350,
+    "attackSpeed": 1.2,
+    "stats": {
+      "strength": 16,
+      "dexterity": 18,
+      "vitality": 14,
+      "intelligence": 22,
+      "resilience": 14
+    },
+    "onHitEffects": [
+      {
+        "effectId": "poison",
+        "chance": 0.05
+      }
+    ],
+    "drops": [
+      {
+        "item": "Tridant",
+        "chance": 1.0
+      },
+      {
+        "item": "Life Essence",
+        "chance": 0.40
+      },
+      {
+        "item": "Mana Berry",
+        "chance": 0.50
+      },
+      {
+        "item": "Life Berry",
+        "chance": 0.30
+      },
+      {
+        "item": "Travelling Cloak",
+        "chance": 0.10
+      }
+    ]
+  },
   "demon": {
     "name": "Demon",
     "hp": 170,

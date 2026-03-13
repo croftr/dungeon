@@ -3,11 +3,12 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { CELL, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld } from './map.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
-import { tweenGroup, isInFrontOfPlayer, player, FACING_ANGLES } from './player.js';
+import { tweenGroup, isInFrontOfPlayer, player, FACING_ANGLES, setPlayerFrozen } from './player.js';
 import { showMessage, drawMinimap, updateStatus } from './minimap.js';
 import { getItemDef } from './items.js';
-import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refreshPartyCards } from './party.js';
-import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound } from './audio.js';
+import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refreshPartyCards, setHp, applyStatusEffect } from './party.js';
+import { addLogEntry } from './battle-log.js';
+import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
 import POTIONS_DATA from './data/potions.json';
 import { triggerMummyAmbush } from './monster.js';
@@ -90,6 +91,13 @@ let _alchemyModalOpen = false;
 let _nextContainerId = 0;
 let _pendingContainerOverrides = null;
 
+// ─────────────────────────────────────────────
+//  TRAP STATE
+// ─────────────────────────────────────────────
+// Stores "row,col" keys of traps that have been disarmed
+const _trapDisarmedSet = new Set();
+let _activeTrapObj = null; // the trap mesh currently showing the disarm modal
+
 let objectsGroup = new THREE.Group();
 
 const _draco = new DRACOLoader();
@@ -128,6 +136,7 @@ export function initObjects(scene, camera) {
         const alchemyOverlay = document.getElementById('alchemy-overlay');
         const charDevOverlay = document.getElementById('char-dev-overlay');
         const partyConfirmOverlay = document.getElementById('party-confirm-overlay');
+        const trapDisarmOverlay = document.getElementById('trap-disarm-overlay');
         if (
             (weaponRackOverlay && !weaponRackOverlay.classList.contains('chest-hidden')) ||
             (cabinetOverlay && !cabinetOverlay.classList.contains('chest-hidden')) ||
@@ -135,6 +144,7 @@ export function initObjects(scene, camera) {
             (corpseOverlay && !corpseOverlay.classList.contains('chest-hidden')) ||
             (equipOverlay && !equipOverlay.classList.contains('equip-hidden')) ||
             (merchantOverlay && !merchantOverlay.classList.contains('merchant-hidden')) ||
+            (trapDisarmOverlay && !trapDisarmOverlay.classList.contains('chest-hidden')) ||
             (alchemyOverlay && !alchemyOverlay.classList.contains('chest-hidden')) ||
             (charDevOverlay && !charDevOverlay.classList.contains('char-dev-hidden')) ||
             (partyConfirmOverlay && !partyConfirmOverlay.classList.contains('chest-hidden'))
@@ -233,7 +243,16 @@ export function initObjects(scene, camera) {
                     showMessage("Stand on the crystals to feel their power.");
                 }
                 break;
-            } else if (obj.userData.isTrap1) {
+            } else if (obj.userData.isDamageTrap) {
+                const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
+                const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
+                if (distRow <= 1 && distCol <= 1) {
+                    openTrapDisarmModal(obj);
+                } else {
+                    showMessage("You spot what looks like a trap on the floor.");
+                }
+                break;
+            } else if (obj.userData.isTeleportTorch) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 1 && distCol <= 1) {
@@ -262,7 +281,7 @@ export function initObjects(scene, camera) {
                         }
                     }
                 } else {
-                    showMessage("You see something strange on the floor.");
+                    showMessage("You see a flickering torch on the floor.");
                 }
                 break;
             } else if (obj.userData.isBonePile) {
@@ -949,10 +968,227 @@ function addDecoration(scene, loader, col, row, rotY = 0, modelPath, scale = 0.5
     });
 }
 
-function addTrap1(scene, loader, col, row, rotY = 0, scale = 0.35) {
-    loader.load('/items/torch.glb', (gltf) => {
+// ─────────────────────────────────────────────────────────────────────────────
+//  TRAP SYSTEM
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Damage per party member by dungeon level. */
+const TRAP_DAMAGE = {
+    1: { min: 16, max: 28 },
+    2: { min: 36, max: 56 },
+    3: { min: 64, max: 90 },
+};
+
+/** Base chance to successfully disarm a trap (15%). */
+const TRAP_DISARM_CHANCE = 0.15;
+
+/** Freeze duration in ms after a trap fires. */
+const TRAP_FREEZE_MS = 10000;
+
+/**
+ * Fires the trap at (row, col): deals level-scaled damage to the whole party,
+ * freezes movement for TRAP_FREEZE_MS, plays the trap sound, and removes the
+ * trap model from the scene.
+ */
+function _fireTrap(trapObj) {
+    const row = trapObj.userData.gridRow;
+    const col = trapObj.userData.gridCol;
+    const key = `${row},${col}`;
+
+    // Prevent double-triggering
+    if (_trapDisarmedSet.has(key)) return;
+    _trapDisarmedSet.add(key);
+
+    playTrapSound();
+
+    const level = window.currentLevel || 1;
+    const dmgRange = TRAP_DAMAGE[level] ?? TRAP_DAMAGE[1];
+
+    let damageMessage = 'The trap springs! ';
+    party.forEach((m, i) => {
+        if (m.isEmpty || m.isDead) return;
+        const dmg = Math.floor(dmgRange.min + Math.random() * (dmgRange.max - dmgRange.min + 1));
+        const before = m.hp;
+        setHp(i, before - dmg);
+        damageMessage += `${m.name} takes ${dmg} damage. `;
+    });
+
+    showMessage(damageMessage.trim());
+
+    // Apply 'trapped' status effect to all living party members + log each one
+    party.forEach((m) => {
+        if (m.isEmpty || m.isDead) return;
+        applyStatusEffect(m.id, 'trapped');
+        addLogEntry({
+            type: 'status-effect',
+            target: m.name,
+            effectName: 'Trapped',
+            attacker: 'a trap',
+            effectColor: '#c07030',
+            time: Date.now(),
+        });
+    });
+
+    // Freeze movement for 5 seconds
+    setPlayerFrozen(true);
+    setTimeout(() => {
+        setPlayerFrozen(false);
+        showMessage('The party recovers and can move again.');
+    }, TRAP_FREEZE_MS);
+
+    // Remove trap model from scene
+    const model = trapObj.userData.modelContainer;
+    if (model) {
+        objectsGroup.remove(model);
+        model.traverse((child) => {
+            const idx = interactables.indexOf(child);
+            if (idx !== -1) interactables.splice(idx, 1);
+        });
+    }
+}
+
+/**
+ * Called from main.js onMoved (arrival only) to check if the player stepped on a trap.
+ */
+export function checkTrapAtPosition(row, col) {
+    for (const obj of interactables) {
+        if (obj.userData.isDamageTrap &&
+            obj.userData.gridRow === row &&
+            obj.userData.gridCol === col) {
+            _fireTrap(obj);
+            return;
+        }
+    }
+}
+
+/**
+ * Opens the trap disarm modal for an adjacent trap object.
+ */
+function openTrapDisarmModal(trapObj) {
+    _activeTrapObj = trapObj;
+
+    const overlay = document.getElementById('trap-disarm-overlay');
+    if (!overlay) return;
+
+    const chanceEl = document.getElementById('trap-disarm-chance');
+    if (chanceEl) chanceEl.textContent = `${Math.round(TRAP_DISARM_CHANCE * 100)}%`;
+
+    const resultEl = document.getElementById('trap-disarm-result');
+    if (resultEl) { resultEl.textContent = ''; resultEl.className = ''; }
+
+    overlay.classList.remove('chest-hidden');
+
+    // Wire up buttons (replace to avoid duplicate listeners)
+    const attemptBtn = document.getElementById('trap-disarm-attempt');
+    const leaveBtn = document.getElementById('trap-disarm-leave');
+
+    const newAttempt = attemptBtn.cloneNode(true);
+    const newLeave = leaveBtn.cloneNode(true);
+    attemptBtn.replaceWith(newAttempt);
+    leaveBtn.replaceWith(newLeave);
+
+    newAttempt.addEventListener('click', () => {
+        if (!_activeTrapObj) return;
+        const success = Math.random() < TRAP_DISARM_CHANCE;
+        const resultEl2 = document.getElementById('trap-disarm-result');
+
+        if (success) {
+            playSuccessSound();
+            if (resultEl2) {
+                resultEl2.textContent = 'Success! The trap has been disarmed.';
+                resultEl2.className = 'trap-result-success';
+            }
+            // Mark disarmed and remove model
+            const key = `${_activeTrapObj.userData.gridRow},${_activeTrapObj.userData.gridCol}`;
+            _trapDisarmedSet.add(key);
+
+            const model = _activeTrapObj.userData.modelContainer;
+            if (model) {
+                objectsGroup.remove(model);
+                _activeTrapObj.userData.modelContainer.traverse((child) => {
+                    const idx = interactables.indexOf(child);
+                    if (idx !== -1) interactables.splice(idx, 1);
+                });
+            }
+            _activeTrapObj = null;
+
+            setTimeout(() => {
+                overlay.classList.add('chest-hidden');
+            }, 1500);
+        } else {
+            if (resultEl2) {
+                resultEl2.textContent = 'Failed! The trap goes off!';
+                resultEl2.className = 'trap-result-fail';
+            }
+            const trapToFire = _activeTrapObj;
+            _activeTrapObj = null;
+            setTimeout(() => {
+                overlay.classList.add('chest-hidden');
+                _fireTrap(trapToFire);
+            }, 1200);
+        }
+        // Disable attempt button after first try
+        newAttempt.disabled = true;
+    });
+
+    newLeave.addEventListener('click', () => {
+        _activeTrapObj = null;
+        overlay.classList.add('chest-hidden');
+    });
+
+    const closeBtn = document.getElementById('trap-disarm-close');
+    if (closeBtn) {
+        const newClose = closeBtn.cloneNode(true);
+        closeBtn.replaceWith(newClose);
+        newClose.addEventListener('click', () => {
+            _activeTrapObj = null;
+            overlay.classList.add('chest-hidden');
+        });
+    }
+}
+
+function addTrap1(scene, loader, row, col, rotY = 0, scale = 0.6) {
+    const key = `${row},${col}`;
+    if (_trapDisarmedSet.has(key)) return; // already disarmed — don't spawn
+
+    loader.load('/items/trap1.glb', (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(scale);
+        model.position.set(col * CELL, 0.0, row * CELL);
+        model.rotation.y = rotY;
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.userData.isDamageTrap = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+                child.userData.modelContainer = model;
+                interactables.push(child);
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
+            }
+        });
+
+        objectsGroup.add(model);
+    });
+}
+
+function addTeleportTorch(scene, loader, col, row, rotY = 0) {
+    loader.load('/items/torch.glb', (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(0.35);
         model.position.set(col * CELL, 0.25, row * CELL);
         model.rotation.y = rotY;
 
@@ -964,7 +1200,7 @@ function addTrap1(scene, loader, col, row, rotY = 0, scale = 0.35) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
-                child.userData.isTrap1 = true;
+                child.userData.isTeleportTorch = true;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 interactables.push(child);
@@ -1148,8 +1384,13 @@ export function spawnObjectsForLevel() {
         // Alchemy Workshop in the big east room against the south wall
         addAlchemyWorkshop(objectsGroup, gltfLoader, 19, 14, 0, 0, 0.85);
 
-        // Trap to Level 2 demon room
-        addTrap1(objectsGroup, gltfLoader, 12, 11);
+        // Damage trap in the big east room near the start (row 9, col 18) — test trap
+        addTrap1(objectsGroup, gltfLoader, 9, 18);
+        // Trap in the long south corridor near the exit
+        addTrap1(objectsGroup, gltfLoader, 21, 10);
+
+        // Teleport torch in the starter room
+        addTeleportTorch(objectsGroup, gltfLoader, 12, 11);
 
         // Anvil in the big east room against the north wall
         addAnvil(objectsGroup, gltfLoader, 19, 7, 0, 0, -0.85, ['Life Essence', 'Life Essence']);
@@ -1240,6 +1481,10 @@ export function spawnObjectsForLevel() {
             { name: 'Gold Coins', quantity: 500 },
             'Ruby Ring', 'Mana Potion', 'Life Essence'
         ], '/items/chest1.glb');
+        // Trap in the narrow locked passage
+        addTrap1(objectsGroup, gltfLoader, 11, 7);
+        // Trap in the long east passage
+        addTrap1(objectsGroup, gltfLoader, 10, 17);
     } else if (level === 3) {
         // ── Portals ──────────────────────────────────────────────────────────
         // Return portal to Level 1 — behind the player at spawn
@@ -1271,6 +1516,8 @@ export function spawnObjectsForLevel() {
 
         // Ethereal Egg in the center of the minotaur room (swapped with level 1 mummy room)
         addEtherealEgg(objectsGroup, gltfLoader, 11, 11);
+        // Trap guarding the entry corridor to the central minotaur room
+        addTrap1(objectsGroup, gltfLoader, 16, 10);
     }
 }
 
@@ -3031,6 +3278,7 @@ export function getWorldFlags() {
         starterGateOpened: _starterGateOpened,
         starterPortalEnabled: _starterPortalEnabled,
         level2PortcullisOpened: _level2PortcullisOpened,
+        disarmedTraps: [..._trapDisarmedSet],
     };
 }
 
@@ -3041,6 +3289,10 @@ export function setWorldFlags(flags) {
     _starterGateOpened = flags.starterGateOpened ?? false;
     _starterPortalEnabled = flags.starterPortalEnabled ?? false;
     _level2PortcullisOpened = flags.level2PortcullisOpened ?? false;
+    _trapDisarmedSet.clear();
+    if (Array.isArray(flags.disarmedTraps)) {
+        for (const key of flags.disarmedTraps) _trapDisarmedSet.add(key);
+    }
 }
 
 /** Returns a snapshot of merchant stock. */

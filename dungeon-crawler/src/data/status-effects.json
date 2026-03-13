@@ -82,5 +82,15 @@
     "color": "#6060cc",
     "duration": 20,
     "preventsAction": true
+  },
+  "trapped": {
+    "id": "trapped",
+    "name": "Trapped",
+    "description": "Caught in a trap — the party cannot move for 10 seconds.",
+    "type": "debuff",
+    "icon": "/icons/bear-trap.svg",
+    "color": "#c07030",
+    "duration": 10,
+    "preventsAction": true
   }
 }

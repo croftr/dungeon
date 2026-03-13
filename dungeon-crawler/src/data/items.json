@@ -754,6 +754,23 @@
         "weight": 5.5
     },
     {
+        "name": "Tridant",
+        "slot": "bothHands",
+        "attackType": "swipe",
+        "weaponType": "twoHanded",
+        "staminaDrain": 1,
+        "baseDamage": 20,
+        "delay": 4,
+        "statWeights": {
+            "str": 0.8,
+            "dex": 0.2
+        },
+        "icon": "/icons/tridant.png",
+        "description": "A two-handed tridant. Slow to swing but crushes stone and bone alike.",
+        "value": 390,
+        "weight": 7
+    },
+    {
         "name": "Greataxe",
         "slot": "bothHands",
         "attackType": "swipe",

@@ -660,9 +660,18 @@ export async function playSoundByUrl(url, volume = 0.8) {
     source.connect(gainNode);
     gainNode.connect(ctx.destination);
     source.start(0);
+    return source; // Return source so we can listen to onended
   } catch (err) {
     console.warn(`[audio] playSoundByUrl failed for ${url}:`, err);
   }
+}
+
+export async function playFallSequence() {
+  playSoundByUrl('/sounds/fall-scream.mp3', 0.9);
+  // Start the land/thud sound after 1 second of screaming
+  setTimeout(() => {
+    playSoundByUrl('/sounds/fall-land.mp3', 0.9);
+  }, 1000);
 }
 
 export function isInCombat() {
@@ -798,5 +807,39 @@ export async function playButtonClickSound() {
     osc.stop(now + 0.04);
   } catch (err) {
     console.warn('[audio] playButtonClickSound failed:', err);
+  }
+}
+
+export async function playTrapSound() {
+  const buffer = await getBuffer('/sounds/items/trap.mp3');
+  if (!buffer) return;
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.9;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playTrapSound failed:', err);
+  }
+}
+
+export async function playSuccessSound() {
+  const buffer = await getBuffer('/sounds/items/success.mp3');
+  if (!buffer) return;
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.8;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playSuccessSound failed:', err);
   }
 }

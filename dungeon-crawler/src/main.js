@@ -10,8 +10,8 @@ import { initParty, updateParty, party, setPartyGold, refreshPartyCards, autoAtt
 import { initEquipment, hideDropButton, updateEffectiveStats, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt, restoreMonsterStates } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS } from './recruits.js';
-import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, setWorldFlags, setPendingContainerOverrides, setMerchantStock } from './objects.js';
-import { startMusic, updateAudio, setAmbientLevel, setZoneMusic } from './audio.js';
+import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, setWorldFlags, setPendingContainerOverrides, setMerchantStock, checkTrapAtPosition } from './objects.js';
+import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
@@ -141,18 +141,42 @@ setCallbacks({
       if (cell === CELL_HOLE) {
         tweenGroup.removeAll();
         player.moving = false;
+        
+        const blackout = document.getElementById('fall-blackout');
+        if (blackout) {
+          blackout.classList.remove('hidden');
+          // Force reflow
+          blackout.offsetHeight;
+          blackout.classList.add('visible');
+        }
+
+        playFallSequence();
         showMessage("Aaaaaah! You fall through the hole!");
-        // Teleport to pit arrival chamber (row 22, col 3)
-        player.gridRow = 22;
-        player.gridCol = 3;
-        const w = cellToWorld(22, 3);
-        camera.position.set(w.x, w.y, w.z);
-        // Face South (2) towards the new passage
-        player.facing = 2;
-        camera.rotation.order = 'YXZ';
-        camera.rotation.y = FACING_ANGLES[player.facing];
-        drawMinimap();
-        updateStatus();
+
+        // Wait 2 seconds before teleporting
+        setTimeout(() => {
+          // Teleport to pit arrival chamber (row 22, col 3)
+          player.gridRow = 22;
+          player.gridCol = 3;
+          const w = cellToWorld(22, 3);
+          camera.position.set(w.x, w.y, w.z);
+          // Face South (2) towards the new passage
+          player.facing = 2;
+          camera.rotation.order = 'YXZ';
+          camera.rotation.y = FACING_ANGLES[player.facing];
+          drawMinimap();
+          updateStatus();
+
+          // Fade back in after a short delay
+          setTimeout(() => {
+            if (blackout) {
+              blackout.classList.remove('visible');
+              setTimeout(() => {
+                blackout.classList.add('hidden');
+              }, 500); // Wait for transition
+            }
+          }, 200);
+        }, 2000);
       } else if (cell === CELL_STAIRS_UP) {
         tweenGroup.removeAll();
         player.moving = false;
@@ -169,6 +193,11 @@ setCallbacks({
         drawMinimap();
         updateStatus();
       }
+    }
+
+    // Check for traps on arrival (player.moving is false when tween completes)
+    if (!player.moving) {
+      checkTrapAtPosition(player.gridRow, player.gridCol);
     }
   },
   reached() {

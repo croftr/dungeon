@@ -407,3 +407,46 @@ export function createDemonCleave(position) {
         setTimeout(() => { proton.removeEmitter(emitter); }, 1500);
     }, 300);
 }
+
+export function createTidalWave(position) {
+    if (!proton) return;
+
+    const emitter = new Proton.Emitter();
+
+    // Sustained cascading blue burst — wider and longer than demonCleave
+    emitter.rate = new Proton.Rate(new Proton.Span(20, 35), new Proton.Span(0.02));
+
+    emitter.addInitialize(new Proton.Mass(1));
+    emitter.addInitialize(new Proton.Radius(0.4, 1.0));
+    emitter.addInitialize(new Proton.Life(0.6, 1.2));
+
+    // Outward spray with upward bias — wave-like
+    emitter.addInitialize(new Proton.V(2.0, new Proton.Vector3D(0, 1.0, 0), 180));
+
+    const material = new THREE.SpriteMaterial({
+        map: sparkTexture,
+        color: 0xffffff,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        depthWrite: false,
+    });
+    emitter.addInitialize(new Proton.Body(new THREE.Sprite(material)));
+
+    if (position) {
+        emitter.addInitialize(new Proton.Position(new Proton.PointZone(position.x, position.y + 0.8, position.z)));
+    }
+
+    emitter.addBehaviour(new Proton.Alpha(0.9, 0.0));
+    emitter.addBehaviour(new Proton.Scale(1.8, 0.1));
+    // Bright cyan-white to deep blue fade
+    emitter.addBehaviour(new Proton.Color('#aaeeff', '#0044cc'));
+    emitter.addBehaviour(new Proton.RandomDrift(1.2, 0.8, 1.2, 0.04));
+
+    emitter.emit();
+    proton.addEmitter(emitter);
+
+    setTimeout(() => {
+        emitter.stopEmit();
+        setTimeout(() => { proton.removeEmitter(emitter); }, 2000);
+    }, 500);
+}
