@@ -331,7 +331,7 @@
   },
   "treeman": {
     "name": "Treeman",
-    "hp": 300,
+    "hp": 340,
     "defence": 9,
     "xp": 1000,
     "attackSpeed": 1.2,
@@ -371,7 +371,7 @@
   },
   "ogre": {
     "name": "Ogre",
-    "hp": 220,
+    "hp": 230,
     "defence": 9,
     "xp": 255,
     "attackSpeed": 1.2,
@@ -464,7 +464,7 @@
   },
   "aqua_man": {
     "name": "Aqua Man",
-    "hp": 240,
+    "hp": 260,
     "defence": 10,
     "xp": 350,
     "attackSpeed": 1.2,
@@ -506,7 +506,7 @@
   },
   "demon": {
     "name": "Demon",
-    "hp": 170,
+    "hp": 200,
     "defence": 18,
     "xp": 220,
     "attackSpeed": 1.3,

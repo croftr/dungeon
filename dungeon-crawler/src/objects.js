@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
-import { CELL, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld } from './map.js';
+import { CELL, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld, buildLevel, level2Map } from './map.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, isInFrontOfPlayer, player, FACING_ANGLES, setPlayerFrozen } from './player.js';
 import { showMessage, drawMinimap, updateStatus } from './minimap.js';
@@ -37,6 +37,7 @@ let _disabledPortalMesh = null;
 let _partyConfirmNPCModel = null; // true once the player confirms — prevents re-triggering
 let _starterGate = null; // portcullis behind the party-confirm NPC; opens only via dialogue
 let _level2PortcullisOpened = false;
+let _level2HoleClosed = false;
 let _npcMixer = null;
 let _npcIdleAction = null;
 let _npcTalkAction = null;
@@ -184,6 +185,26 @@ export function initObjects(scene, camera) {
                             .start();
                         const vaultDoor = objects.find(o => o.name === 'Portcullis' && o.gridRow === 17 && o.gridCol === 2);
                         if (vaultDoor) openPortcullis(vaultDoor);
+                    } else {
+                        showMessage("You can't reach that from here.");
+                    }
+                } else if (obj.userData.target === 'close_hole') {
+                    if (isInFrontOfPlayer(16, 28, 1)) {
+                        playButtonClickSound();
+                        if (!_level2HoleClosed) {
+                            new Tween(obj.position)
+                                .to({ x: 0.01 }, 100)
+                                .easing(Easing.Quadratic.Out)
+                                .chain(new Tween(obj.position).to({ x: 0.04 }, 100).easing(Easing.Quadratic.In))
+                                .start();
+                            _level2HoleClosed = true;
+                            dungeonMap[17][23] = CELL_FLOOR;
+                            level2Map[17][23] = CELL_FLOOR;
+                            buildLevel(objectsGroup.parent);
+                            showMessage("You hear mechanisms grinding. The pit is closed.");
+                        } else {
+                            showMessage("The hole is already closed.");
+                        }
                     } else {
                         showMessage("You can't reach that from here.");
                     }
@@ -1482,6 +1503,13 @@ export function spawnObjectsForLevel() {
             'Ruby Ring', 'Mana Potion', 'Life Essence',
             'Chain Shirt', 'Plate Cuirass'
         ], '/items/chest1.glb', true, 1);
+
+        // Button to close the hole, placed on the North wall of cell (17, 28) facing South
+        const { group: closeHoleBtn } = createWallButton(+1, { target: 'close_hole', gridRow: 16, gridCol: 28 });
+        closeHoleBtn.position.set(28 * CELL, 1.25, 16 * CELL + 1.0);
+        closeHoleBtn.rotation.y = -Math.PI / 2;
+        objectsGroup.add(closeHoleBtn);
+
         // Trap in the long east passage
         addTrap1(objectsGroup, gltfLoader, 10, 17);
         // Trap at the start of the corridor leaving the demon room (east exit)
@@ -3280,6 +3308,7 @@ export function getWorldFlags() {
         starterGateOpened: _starterGateOpened,
         starterPortalEnabled: _starterPortalEnabled,
         level2PortcullisOpened: _level2PortcullisOpened,
+        level2HoleClosed: _level2HoleClosed,
         disarmedTraps: [..._trapDisarmedSet],
     };
 }
@@ -3291,6 +3320,8 @@ export function setWorldFlags(flags) {
     _starterGateOpened = flags.starterGateOpened ?? false;
     _starterPortalEnabled = flags.starterPortalEnabled ?? false;
     _level2PortcullisOpened = flags.level2PortcullisOpened ?? false;
+    _level2HoleClosed = flags.level2HoleClosed ?? false;
+    if (_level2HoleClosed) level2Map[17][23] = CELL_FLOOR;
     _trapDisarmedSet.clear();
     if (Array.isArray(flags.disarmedTraps)) {
         for (const key of flags.disarmedTraps) _trapDisarmedSet.add(key);

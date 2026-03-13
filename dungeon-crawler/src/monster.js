@@ -1614,6 +1614,8 @@ export function updateMonsters(dt, playerCamera, scene) {
         // Monster is asleep (or otherwise suppressed) — cannot attack
       } else if (m.stunUntil && performance.now() < m.stunUntil) {
         // Monster is stunned; cooldown timer doesn't tick down yet
+      } else if (window._cutscenePlaying) {
+        // Cutscene/transition in progress — hold attacks
       } else {
         m.attackCooldown = (m.attackCooldown || 0) - dt;
         if (m.attackCooldown <= 0) {

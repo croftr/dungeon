@@ -153,6 +153,7 @@ setCallbacks({
 
         playFallSequence();
         showMessage("Aaaaaah! You fall through the hole!");
+        window._cutscenePlaying = true;
 
         // Fall damage — every living party member takes 8–15 HP from the impact
         party.forEach((m, i) => {
@@ -163,13 +164,7 @@ setCallbacks({
           flashPortraitHit(i);
         });
 
-        if (!hasSeenAquaManVideo) {
-          hasSeenAquaManVideo = true;
-          window._saveFlags.hasSeenAquaManVideo = true;
-          playAquaManVideo();
-        }
-
-        // Wait 2 seconds before teleporting
+        // Wait 2 seconds before teleporting (while still blacked out)
         setTimeout(() => {
           // Teleport to pit arrival chamber (row 22, col 3)
           player.gridRow = 22;
@@ -183,15 +178,24 @@ setCallbacks({
           drawMinimap();
           updateStatus();
 
-          // Fade back in after a short delay
-          setTimeout(() => {
+          // Reveal the room only after video ends (or immediately if already seen)
+          function revealRoom() {
+            window._cutscenePlaying = false;
             if (blackout) {
               blackout.classList.remove('visible');
               setTimeout(() => {
                 blackout.classList.add('hidden');
-              }, 500); // Wait for transition
+              }, 500);
             }
-          }, 200);
+          }
+
+          if (!hasSeenAquaManVideo) {
+            hasSeenAquaManVideo = true;
+            window._saveFlags.hasSeenAquaManVideo = true;
+            playAquaManVideo(revealRoom);
+          } else {
+            setTimeout(revealRoom, 200);
+          }
         }, 2000);
       } else if (cell === CELL_STAIRS_UP) {
         tweenGroup.removeAll();
