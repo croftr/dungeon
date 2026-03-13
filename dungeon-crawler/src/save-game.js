@@ -79,6 +79,7 @@ export function saveGame() {
       hasSeenPrepVideo: !!window._saveFlags?.hasSeenPrepVideo,
       hasSeenMinotaurVideo: !!window._saveFlags?.hasSeenMinotaurVideo,
       hasSeenDemonVideo: !!window._saveFlags?.hasSeenDemonVideo,
+      hasSeenAquaManVideo: !!window._saveFlags?.hasSeenAquaManVideo,
       hasSeenTreemanVideo: !!window.hasSeenTreemanVideo,
     },
 

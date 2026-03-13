@@ -1480,11 +1480,11 @@ export function spawnObjectsForLevel() {
         addChest(objectsGroup, gltfLoader, 28, 17, -Math.PI / 2, 0.7, [
             { name: 'Gold Coins', quantity: 500 },
             'Ruby Ring', 'Mana Potion', 'Life Essence'
-        ], '/items/chest1.glb');
-        // Trap in the narrow locked passage
-        addTrap1(objectsGroup, gltfLoader, 11, 7);
+        ], '/items/chest1.glb', true, 1);
         // Trap in the long east passage
         addTrap1(objectsGroup, gltfLoader, 10, 17);
+        // Trap at the start of the corridor leaving the demon room (east exit)
+        addTrap1(objectsGroup, gltfLoader, 17, 10);
     } else if (level === 3) {
         // ── Portals ──────────────────────────────────────────────────────────
         // Return portal to Level 1 — behind the player at spawn

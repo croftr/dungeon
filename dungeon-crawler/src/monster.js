@@ -239,13 +239,13 @@ export const monsters = [
     '/monsters/iceMan-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
 
   // Aqua Man guards the passage to the stairs after falling through the pit on level 2
-  inst(D.aqua_man, 70, 24, 3,
+  Object.assign(inst(D.aqua_man, 70, 24, 3,
     '/monsters/aqua-man/Meshy_AI_Animation_Idle_withSkin.glb',
     '/monsters/aqua-man/Meshy_AI_Animation_Punch_Combo_withSkin.glb',
     '/monsters/aqua-man/aqua-attack.mp3', 0.60, 0, 0, 2, null,
     '/monsters/aqua-man/Meshy_AI_Animation_Dead_withSkin.glb',
     '/monsters/aqua-man/Meshy_AI_Animation_Face_Punch_Reaction_1_withSkin.glb',
-    '/monsters/aqua-man/Meshy_AI_Animation_Walking_withSkin.glb'),
+    '/monsters/aqua-man/Meshy_AI_Animation_Walking_withSkin.glb'), { faceNorth: true }),
 
 
   // Additional Goblins spread through Level 1 corridors (avoiding big rooms)
@@ -920,6 +920,9 @@ function _loadMonster(m, scene) {
     const wx = m.gridCol * CELL + (m.offsetX ?? 0);
     const wz = m.gridRow * CELL + (m.offsetZ ?? 0);
     model.position.set(wx, 0.0, wz);
+
+    // Apply initial facing direction before combat (lookAtPlayer takes over once engaged)
+    if (m.faceNorth) model.lookAt(wx, 0, wz - 10);
 
     m.lookAtPlayer = (playerPos) => {
       model.lookAt(playerPos.x, model.position.y, playerPos.z);

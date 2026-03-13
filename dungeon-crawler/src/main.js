@@ -6,7 +6,7 @@ import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES,
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
-import { initParty, updateParty, party, setPartyGold, refreshPartyCards, autoAttack, autoRangeAttack, setAutoAttack, setAutoRangeAttack } from './party.js';
+import { initParty, updateParty, party, setPartyGold, refreshPartyCards, autoAttack, autoRangeAttack, setAutoAttack, setAutoRangeAttack, setHp, flashPortraitHit, showMemberDamage } from './party.js';
 import { initEquipment, hideDropButton, updateEffectiveStats, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt, restoreMonsterStates } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS } from './recruits.js';
@@ -75,11 +75,12 @@ let hasSeenOgreVideo = false;
 let hasSeenPrepVideo = false;
 let hasSeenMinotaurVideo = false;
 let hasSeenDemonVideo = false;
+let hasSeenAquaManVideo = false;
 window.hasSeenTreemanVideo = false;
 let prepVideoTimer = null;
 
 // Bridge video flags to save system via window._saveFlags
-window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenDemonVideo };
+window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenDemonVideo, hasSeenAquaManVideo };
 
 setCallbacks({
   moved() {
@@ -153,6 +154,21 @@ setCallbacks({
         playFallSequence();
         showMessage("Aaaaaah! You fall through the hole!");
 
+        // Fall damage — every living party member takes 8–15 HP from the impact
+        party.forEach((m, i) => {
+          if (m.isEmpty || m.isDead) return;
+          const dmg = 8 + Math.floor(Math.random() * 8); // 8–15
+          setHp(i, m.hp - dmg);
+          showMemberDamage(i, dmg, false);
+          flashPortraitHit(i);
+        });
+
+        if (!hasSeenAquaManVideo) {
+          hasSeenAquaManVideo = true;
+          window._saveFlags.hasSeenAquaManVideo = true;
+          playAquaManVideo();
+        }
+
         // Wait 2 seconds before teleporting
         setTimeout(() => {
           // Teleport to pit arrival chamber (row 22, col 3)
@@ -180,8 +196,8 @@ setCallbacks({
       } else if (cell === CELL_STAIRS_UP) {
         tweenGroup.removeAll();
         player.moving = false;
-        showMessage("You climb the stairs back to the upper passage.");
-        // Teleport to far end of original passage (row 17, col 28)
+
+        // Teleport to far end of original passage (row 17, col 28) immediately
         player.gridRow = 17;
         player.gridCol = 28;
         const w = cellToWorld(17, 28);
@@ -192,6 +208,12 @@ setCallbacks({
         camera.rotation.y = FACING_ANGLES[player.facing];
         drawMinimap();
         updateStatus();
+
+        if (window.playStairsVideo) {
+          window.playStairsVideo(() => {
+            showMessage("You climb the stairs back to the upper passage.");
+          });
+        }
       }
     }
 
@@ -658,6 +680,99 @@ if (skipDemonBtn) skipDemonBtn.addEventListener('click', finishDemonVideo);
 if (demonVideo) demonVideo.addEventListener('ended', finishDemonVideo);
 
 // ─────────────────────────────────────────────
+//  AQUA MAN VIDEO OVERLAY
+// ─────────────────────────────────────────────
+const aquaManOverlay = document.getElementById('aqua-man-video-overlay');
+const aquaManVideo = document.getElementById('aqua-man-video');
+const skipAquaManBtn = document.getElementById('skip-aqua-man-btn');
+
+function playAquaManVideo(onComplete) {
+  if (!aquaManOverlay || !aquaManVideo) {
+    if (onComplete) onComplete();
+    return;
+  }
+  let _cb = onComplete;
+  aquaManOverlay.classList.remove('hidden');
+
+  function finishAquaManVideo() {
+    aquaManOverlay.style.opacity = '0';
+    const startVol = aquaManVideo.volume;
+    const fadeInterval = setInterval(() => {
+      if (aquaManVideo.volume > 0.05) {
+        aquaManVideo.volume -= 0.05;
+      } else {
+        aquaManVideo.volume = 0;
+        clearInterval(fadeInterval);
+      }
+    }, 50);
+    setTimeout(() => {
+      aquaManVideo.pause();
+      clearInterval(fadeInterval);
+      aquaManVideo.volume = startVol;
+      aquaManOverlay.classList.add('hidden');
+      if (_cb) { _cb(); _cb = null; }
+    }, 1500);
+  }
+
+  if (skipAquaManBtn) skipAquaManBtn.onclick = finishAquaManVideo;
+  if (aquaManVideo) aquaManVideo.onended = finishAquaManVideo;
+
+  setTimeout(() => {
+    aquaManOverlay.style.opacity = '1';
+    aquaManVideo.play().catch(e => {
+      console.warn("Aqua Man video play failed:", e);
+      finishAquaManVideo();
+    });
+  }, 50);
+}
+window.playAquaManVideo = playAquaManVideo;
+
+// ─────────────────────────────────────────────
+//  STAIRS VIDEO OVERLAY
+// ─────────────────────────────────────────────
+const stairsOverlay = document.getElementById('stairs-video-overlay');
+const stairsVideoElement = document.getElementById('stairs-video');
+const skipStairsBtn = document.getElementById('skip-stairs-btn');
+let _stairsVideoCallback = null;
+
+window.playStairsVideo = function(onComplete) {
+  _stairsVideoCallback = onComplete;
+  if (!stairsOverlay || !stairsVideoElement) {
+    if (_stairsVideoCallback) _stairsVideoCallback();
+    return;
+  }
+  stairsOverlay.classList.remove('hidden');
+  // Set opacity immediately (the 1.5s transition will still apply from 0 to 1,
+  // but starting it now ensures the black background covers the scene ASAP)
+  stairsOverlay.style.opacity = '1';
+
+  stairsVideoElement.play().catch(e => {
+    console.warn("Stairs video play failed:", e);
+    finishStairsVideo();
+  });
+}
+
+function finishStairsVideo() {
+  if (!stairsOverlay) {
+    if (_stairsVideoCallback) _stairsVideoCallback();
+    return;
+  }
+  stairsOverlay.style.opacity = '0';
+
+  setTimeout(() => {
+    stairsVideoElement.pause();
+    stairsOverlay.classList.add('hidden');
+    if (_stairsVideoCallback) {
+      _stairsVideoCallback();
+      _stairsVideoCallback = null;
+    }
+  }, 1500);
+}
+
+if (skipStairsBtn) skipStairsBtn.addEventListener('click', finishStairsVideo);
+if (stairsVideoElement) stairsVideoElement.addEventListener('ended', finishStairsVideo);
+
+// ─────────────────────────────────────────────
 //  PORTAL VIDEO OVERLAY
 // ─────────────────────────────────────────────
 const portalOverlay = document.getElementById('portal-video-overlay');
@@ -894,8 +1009,9 @@ console.log('Map: 0=floor 1=wall 2=start 3=exit | Controls: W/S=move  Q/E=turn  
     hasSeenPrepVideo = !!save.flags.hasSeenPrepVideo;
     hasSeenMinotaurVideo = !!save.flags.hasSeenMinotaurVideo;
     hasSeenDemonVideo = !!save.flags.hasSeenDemonVideo;
+    hasSeenAquaManVideo = !!save.flags.hasSeenAquaManVideo;
     window.hasSeenTreemanVideo = !!save.flags.hasSeenTreemanVideo;
-    window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenDemonVideo };
+    window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenDemonVideo, hasSeenAquaManVideo };
   }
 
   // 4. Restore auto-attack toggles
