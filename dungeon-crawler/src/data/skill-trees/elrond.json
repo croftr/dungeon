@@ -1,0 +1,32 @@
+{
+  "nodes": [
+    { "id": "start", "label": "Ranger Initiate", "type": "start", "edges": ["n1"] },
+    { "id": "n1", "label": "+2 Dexterity", "type": "stat", "benefit": { "dexterity": 2 }, "edges": ["n2", "n3"] },
+    { "id": "n2", "label": "Entangle", "type": "skill", "benefit": { "skill": "Entangle" }, "edges": ["n4"] },
+    { "id": "n3", "label": "+1 Strength, +1 Vitality", "type": "stat", "benefit": { "strength": 1, "vitality": 1 }, "edges": ["n4"] },
+    { "id": "n4", "label": "Double Attack", "type": "skill", "benefit": { "skill": "Double Attack" }, "edges": ["n5"] },
+    { "id": "n5", "label": "+2 Dexterity", "type": "stat", "benefit": { "dexterity": 2 }, "edges": ["n6", "n7"] },
+    { "id": "n6", "label": "Hunter's Eye", "type": "skill", "benefit": { "skill": "Hunter's Eye" }, "edges": ["n8"] },
+    { "id": "n7", "label": "+1 Intelligence, +1 Resilience", "type": "stat", "benefit": { "intelligence": 1, "resilience": 1 }, "edges": ["n8"] },
+    { "id": "n8", "label": "Bow Tactician", "type": "skill", "benefit": { "skill": "Bow Tactician" }, "edges": ["n9"] },
+    { "id": "n9", "label": "+2 Dexterity", "type": "stat", "benefit": { "dexterity": 2 }, "edges": ["n10", "n11"] },
+    { "id": "n10", "label": "Bow Tactician", "type": "skill", "benefit": { "skill": "Bow Tactician" }, "edges": ["n12"] },
+    { "id": "n11", "label": "+1 Strength, +1 Vitality", "type": "stat", "benefit": { "strength": 1, "vitality": 1 }, "edges": ["n12"] },
+    { "id": "n12", "label": "Bow Master", "type": "skill", "benefit": { "skill": "Bow Master" }, "edges": [] }
+  ],
+  "positions": {
+    "start": [200, 30],
+    "n1":  [200, 90],
+    "n2":  [90,  150],
+    "n3":  [310, 150],
+    "n4":  [200, 210],
+    "n5":  [200, 270],
+    "n6":  [90,  330],
+    "n7":  [310, 330],
+    "n8":  [200, 390],
+    "n9":  [200, 450],
+    "n10": [90,  510],
+    "n11": [310, 510],
+    "n12": [200, 570]
+  }
+}

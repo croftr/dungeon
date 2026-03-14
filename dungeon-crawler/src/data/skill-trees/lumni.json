@@ -1,0 +1,32 @@
+{
+  "nodes": [
+    { "id": "start", "label": "War Dancer Initiate", "type": "start", "edges": ["n1"] },
+    { "id": "n1", "label": "+2 Dexterity", "type": "stat", "benefit": { "dexterity": 2 }, "edges": ["n2", "n3"] },
+    { "id": "n2", "label": "Whirlwind", "type": "skill", "benefit": { "skill": "Whirlwind" }, "edges": ["n4"] },
+    { "id": "n3", "label": "+1 Strength, +1 Intelligence", "type": "stat", "benefit": { "strength": 1, "intelligence": 1 }, "edges": ["n4"] },
+    { "id": "n4", "label": "War Dance", "type": "skill", "benefit": { "skill": "War Dance" }, "edges": ["n5"] },
+    { "id": "n5", "label": "+2 Dexterity", "type": "stat", "benefit": { "dexterity": 2 }, "edges": ["n6", "n7"] },
+    { "id": "n6", "label": "Dagger Tactician", "type": "skill", "benefit": { "skill": "Dagger Tactician" }, "edges": ["n8"] },
+    { "id": "n7", "label": "+1 Vitality, +1 Resilience", "type": "stat", "benefit": { "vitality": 1, "resilience": 1 }, "edges": ["n8"] },
+    { "id": "n8", "label": "Dagger Tactician", "type": "skill", "benefit": { "skill": "Dagger Tactician" }, "edges": ["n9"] },
+    { "id": "n9", "label": "+2 Dexterity", "type": "stat", "benefit": { "dexterity": 2 }, "edges": ["n10", "n11"] },
+    { "id": "n10", "label": "Dagger Master", "type": "skill", "benefit": { "skill": "Dagger Master" }, "edges": ["n12"] },
+    { "id": "n11", "label": "+1 Strength, +1 Dexterity", "type": "stat", "benefit": { "strength": 1, "dexterity": 1 }, "edges": ["n12"] },
+    { "id": "n12", "label": "Dagger Master", "type": "skill", "benefit": { "skill": "Dagger Master" }, "edges": [] }
+  ],
+  "positions": {
+    "start": [200, 30],
+    "n1":  [200, 90],
+    "n2":  [90,  150],
+    "n3":  [310, 150],
+    "n4":  [200, 210],
+    "n5":  [200, 270],
+    "n6":  [90,  330],
+    "n7":  [310, 330],
+    "n8":  [200, 390],
+    "n9":  [200, 450],
+    "n10": [90,  510],
+    "n11": [310, 510],
+    "n12": [200, 570]
+  }
+}

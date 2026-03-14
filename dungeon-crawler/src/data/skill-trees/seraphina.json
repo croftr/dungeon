@@ -1,0 +1,32 @@
+{
+  "nodes": [
+    { "id": "start", "label": "White Mage Initiate", "type": "start", "edges": ["n1"] },
+    { "id": "n1", "label": "+2 Intelligence", "type": "stat", "benefit": { "intelligence": 2 }, "edges": ["n2", "n3"] },
+    { "id": "n2", "label": "Arcane Lantern", "type": "skill", "benefit": { "skill": "Arcane Lantern" }, "edges": ["n4"] },
+    { "id": "n3", "label": "+1 Intelligence, +1 Resilience", "type": "stat", "benefit": { "intelligence": 1, "resilience": 1 }, "edges": ["n4"] },
+    { "id": "n4", "label": "Runic Scholar", "type": "skill", "benefit": { "skill": "Runic Scholar" }, "edges": ["n5"] },
+    { "id": "n5", "label": "+2 Intelligence", "type": "stat", "benefit": { "intelligence": 2 }, "edges": ["n6", "n7"] },
+    { "id": "n6", "label": "Mana Tap", "type": "skill", "benefit": { "skill": "Mana Tap" }, "edges": ["n8"] },
+    { "id": "n7", "label": "+1 Vitality, +1 Resilience", "type": "stat", "benefit": { "vitality": 1, "resilience": 1 }, "edges": ["n8"] },
+    { "id": "n8", "label": "Staff Tactician", "type": "skill", "benefit": { "skill": "Staff Tactician" }, "edges": ["n9"] },
+    { "id": "n9", "label": "+2 Resilience", "type": "stat", "benefit": { "resilience": 2 }, "edges": ["n10", "n11"] },
+    { "id": "n10", "label": "Staff Master", "type": "skill", "benefit": { "skill": "Staff Master" }, "edges": ["n12"] },
+    { "id": "n11", "label": "+1 Intelligence, +1 Vitality", "type": "stat", "benefit": { "intelligence": 1, "vitality": 1 }, "edges": ["n12"] },
+    { "id": "n12", "label": "Lifewarden", "type": "skill", "benefit": { "skill": "Lifewarden" }, "edges": [] }
+  ],
+  "positions": {
+    "start": [200, 30],
+    "n1":  [200, 90],
+    "n2":  [90,  150],
+    "n3":  [310, 150],
+    "n4":  [200, 210],
+    "n5":  [200, 270],
+    "n6":  [90,  330],
+    "n7":  [310, 330],
+    "n8":  [200, 390],
+    "n9":  [200, 450],
+    "n10": [90,  510],
+    "n11": [310, 510],
+    "n12": [200, 570]
+  }
+}

@@ -676,108 +676,86 @@
   <!-- ── CHARACTER DEVELOPMENT MODAL ── -->
   <div id="char-dev-overlay" class="char-dev-hidden">
     <div id="char-dev-modal">
+
+      <!-- Header: prev | name + inline XP bar | next | close -->
       <div id="char-dev-header">
         <button id="char-dev-prev" aria-label="Previous member">&#8249;</button>
         <div id="char-dev-title-wrap">
-          <span id="char-dev-char-name"></span> <span style="margin-left:8px; color:#888;">(Development)</span>
+          <div id="cd-header-name-row">
+            <span id="char-dev-char-name"></span>
+            <span class="cd-header-sub">(Development)</span>
+            <span id="cd-level-label">Level 0</span>
+          </div>
+          <div id="cd-header-xp-row">
+            <div id="cd-xp-bar-bg"><div id="cd-xp-bar-fill"></div></div>
+            <span id="cd-xp-label">0 / 100 XP</span>
+          </div>
         </div>
         <button id="char-dev-next" aria-label="Next member">&#8250;</button>
         <button id="char-dev-close" aria-label="Close">&times;</button>
       </div>
 
+      <!-- Body: left panel (stats + node detail) | main (tree grows + learned skills) -->
       <div id="char-dev-body">
 
-        <!-- Level & XP -->
-        <section id="char-dev-level-section">
-          <div id="cd-level-row">
-            <span id="cd-level-label">Level 0</span>
-            <span id="cd-xp-label">0 / 100 XP</span>
-          </div>
-          <div id="cd-xp-bar-bg">
-            <div id="cd-xp-bar-fill"></div>
-          </div>
-        </section>
-
-        <!-- Stats -->
-        <section id="char-dev-stats-section">
-          <div id="cd-stat-points-row">
-            <h4 class="equip-section-title">Attributes</h4>
-            <span id="cd-stat-points-remaining"></span>
-          </div>
-          <div id="cd-char-stats">
-            <div class="stat-row">
-              <span class="stat-name">Strength</span>
-              <div class="stat-controls">
-                <button class="stat-btn" data-stat="strength" data-delta="-1">-</button>
+        <!-- LEFT PANEL: compact stats then node detail stacked -->
+        <div id="char-dev-left-panel">
+          <section id="char-dev-stats-section">
+            <div id="cd-stat-points-row" style="display:none;">
+              <span id="cd-stat-points-remaining"></span>
+            </div>
+            <div id="cd-char-stats">
+              <div class="stat-row">
+                <span class="stat-name">STR</span>
                 <span class="stat-value" id="cd-stat-strength"></span>
-                <button class="stat-btn" data-stat="strength" data-delta="1">+</button>
               </div>
-            </div>
-            <div class="stat-row">
-              <span class="stat-name">Dexterity</span>
-              <div class="stat-controls">
-                <button class="stat-btn" data-stat="dexterity" data-delta="-1">-</button>
+              <div class="stat-row">
+                <span class="stat-name">DEX</span>
                 <span class="stat-value" id="cd-stat-dexterity"></span>
-                <button class="stat-btn" data-stat="dexterity" data-delta="1">+</button>
               </div>
-            </div>
-            <div class="stat-row">
-              <span class="stat-name">Vitality</span>
-              <div class="stat-controls">
-                <button class="stat-btn" data-stat="vitality" data-delta="-1">-</button>
+              <div class="stat-row">
+                <span class="stat-name">VIT</span>
                 <span class="stat-value" id="cd-stat-vitality"></span>
-                <button class="stat-btn" data-stat="vitality" data-delta="1">+</button>
               </div>
-            </div>
-            <div class="stat-row">
-              <span class="stat-name">Intelligence</span>
-              <div class="stat-controls">
-                <button class="stat-btn" data-stat="intelligence" data-delta="-1">-</button>
+              <div class="stat-row">
+                <span class="stat-name">INT</span>
                 <span class="stat-value" id="cd-stat-intelligence"></span>
-                <button class="stat-btn" data-stat="intelligence" data-delta="1">+</button>
               </div>
-            </div>
-            <div class="stat-row">
-              <span class="stat-name">Resilience</span>
-              <div class="stat-controls">
-                <button class="stat-btn" data-stat="resilience" data-delta="-1">-</button>
+              <div class="stat-row">
+                <span class="stat-name">RES</span>
                 <span class="stat-value" id="cd-stat-resilience"></span>
-                <button class="stat-btn" data-stat="resilience" data-delta="1">+</button>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <!-- Skills -->
+          <section id="char-dev-detail-section">
+            <h4 class="equip-section-title">Node Detail</h4>
+            <div id="cd-detail-panel">
+              <div id="cd-detail-name">Select a node</div>
+              <div id="cd-detail-action"></div>
+              <div id="cd-detail-desc"></div>
+              <div id="cd-detail-potency"></div>
+            </div>
+          </section>
+        </div>
+
+        <!-- MAIN: skill tree fills all height, learned skills bar at bottom -->
         <section id="char-dev-skills-section">
-          <h4 class="equip-section-title equip-section-title--skills">Learned Skills</h4>
-          <div class="skill-tabs" id="cd-skill-tabs">
-            <button class="skill-tab-btn active" data-tab="action" id="cd-tab-action">Action</button>
-            <button class="skill-tab-btn" data-tab="passive" id="cd-tab-passive">Passive</button>
+          <h4 class="equip-section-title cd-tree-heading">Skill Tree</h4>
+          <div id="cd-skill-tree-container">
+            <!-- tree nodes + SVG edges rendered here -->
           </div>
-          <div id="cd-char-skills">
-            <!-- skill cards injected here -->
-          </div>
-          <div id="cd-future-skills">
-            <h4 class="equip-section-title equip-section-title--skills">Skill Progression</h4>
-            <div id="cd-available-skills">
-              <!-- progression cards injected here -->
+          <div id="cd-learned-skills-bar">
+            <div id="cd-learned-skills-header">
+              <h4 class="equip-section-title equip-section-title--skills">Learned Skills</h4>
+            </div>
+            <div id="cd-char-skills">
+              <!-- skill cards injected here -->
             </div>
           </div>
         </section>
 
-        <!-- Details -->
-        <section id="char-dev-detail-section">
-          <h4 class="equip-section-title">Selected Skill Detail</h4>
-          <div id="cd-detail-panel">
-            <div id="cd-detail-name">Select a skill</div>
-            <div id="cd-detail-action" style="color: #a08050; font-size: 11px; margin-bottom: 5px;"></div>
-            <div id="cd-detail-desc" style="font-size: 12px; line-height: 1.4; color: #d0c0a0;"></div>
-            <div id="cd-detail-potency" style="color: #c0a0f8; font-weight: bold; margin-top: 10px;"></div>
-          </div>
-        </section>
-
-      </div>
+      </div><!-- /#char-dev-body -->
 
       <!-- Confirm footer — only shown during a pending level-up -->
       <div id="char-dev-footer" style="display:none;">

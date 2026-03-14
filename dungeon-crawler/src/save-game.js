@@ -56,7 +56,7 @@ export function saveGame() {
 
   // Video flags are on window (set by main.js)
   const save = {
-    version: 2,
+    version: 3,
     savedAt: new Date().toISOString(),
     currentLevel: window.currentLevel ?? 1,
     player: {
@@ -138,6 +138,29 @@ export function consumePendingLoad() {
       save.recruits = {};
       save.autoAttack = true;
       save.autoRangeAttack = false;
+    }
+    // v2 → v3 migration: replace unspentStatPoints/pendingSkillChoice with skill tree fields
+    if (save.version < 3) {
+      for (const m of (save.party ?? [])) {
+        if (m.isEmpty) continue;
+        if (!m.acquiredNodes) m.acquiredNodes = ['start'];
+        if (m.pendingNodeChoice === undefined) m.pendingNodeChoice = null;
+        if (m.pendingNodePicks === undefined) {
+          // If they had a pending level-up with stat points, convert to node picks
+          const hadPending = !!m.pendingLevelUp;
+          m.pendingNodePicks = hadPending ? 1 : 0;
+        }
+        if (!m.skillTreeId) {
+          const r = RECRUITS.find(x => x.name === m.name);
+          if (r?.skillTree) m.skillTreeId = r.skillTree;
+        }
+        // Clear old fields
+        delete m.unspentStatPoints;
+        delete m.pendingSkillChoice;
+        delete m.pendingSkillChoiceIndex;
+        // Clear stale skillProgression (no longer needed — tree is authoritative)
+        delete m.skillProgression;
+      }
     }
     return save;
   } catch {

@@ -12,7 +12,7 @@ import { party, refreshPartyCards } from './party.js';
 import { playLevelUpSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 
-const { xpThresholds, statPointsPerLevel, maxLevel } = LEVELING;
+const { xpThresholds, maxLevel } = LEVELING;
 
 /**
  * Award XP from a monster kill to all living party members.
@@ -116,7 +116,7 @@ function checkLevelUp(m) {
     if (threshold === undefined || m.xp < threshold) break;
 
     m.level++;
-    m.unspentStatPoints = (m.unspentStatPoints ?? 0) + statPointsPerLevel;
+    m.pendingNodePicks = (m.pendingNodePicks ?? 0) + 1;
     m.pendingLevelUp = true;
 
     events.push({ member: m, level: m.level });

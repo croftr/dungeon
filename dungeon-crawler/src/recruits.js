@@ -252,9 +252,11 @@ function recruitCharacter(r) {
         // Leveling: characters start at level 0 with no skills
         level: 0,
         xp: 0,
-        unspentStatPoints: 0,
         statBonuses: { strength: 0, dexterity: 0, vitality: 0, intelligence: 0, resilience: 0 },
-        skillProgression: JSON.parse(JSON.stringify(r.skillProgression)),
+        skillTreeId: r.skillTree ?? null,
+        acquiredNodes: ['start'],
+        pendingNodePicks: 0,
+        pendingNodeChoice: null,
         skills: r.startingSkills ? JSON.parse(JSON.stringify(r.startingSkills)) : [],
         leftHand: r.leftHand,
         rightHand: r.rightHand,

@@ -1496,14 +1496,19 @@ body {
   scrollbar-color: #4a3a20 #0d0a06;
 }
 
-/* In the development modal, give skill grids more room — no height cap */
-#char-dev-modal #cd-char-skills,
-#char-dev-modal #cd-available-skills {
-  max-height: none;
-  overflow: visible;
-  align-content: flex-start;
-  gap: 12px;
-  padding: 12px;
+/* In the development modal, learned skills sit in a single scrollable row, newest on the left */
+#char-dev-modal #cd-char-skills {
+  max-height: 90px;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-wrap: nowrap;
+  gap: 8px;
+  padding: 8px 12px;
+  scrollbar-width: thin;
+  scrollbar-color: #4a3a20 #0d0a06;
 }
 
 #char-skills::-webkit-scrollbar {
@@ -1617,44 +1622,97 @@ body {
 #char-dev-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.92);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 1010;
-  /* above equip-overlay (1000) — never both open, but stacks correctly */
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
 }
 
 #char-dev-modal {
-  width: 1080px;
-  max-width: 97vw;
-  max-height: 92vh;
-  background: rgba(15, 12, 10, 0.98);
-  border: 1px solid #6a5030;
-  border-radius: 6px;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 220, 120, 0.1);
+  flex: 1;
+  background: rgba(12, 10, 8, 0.99);
+  border-top: 2px solid #6a5030;
   display: flex;
   flex-direction: column;
   font-family: monospace;
+  overflow: hidden;
 }
 
+/* ── Header with inline XP bar ── */
 #char-dev-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
+  gap: 12px;
+  padding: 8px 14px;
   background: linear-gradient(180deg, #2a2010, #14100c);
   border-bottom: 2px solid #3a2a10;
+  flex-shrink: 0;
 }
 
 #char-dev-title-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+#cd-header-name-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+#char-dev-char-name {
   font-size: 16px;
   color: #e8d090;
   font-weight: bold;
   letter-spacing: 2px;
   text-transform: uppercase;
+}
+
+.cd-header-sub {
+  font-size: 12px;
+  color: #666;
+}
+
+#cd-level-label {
+  font-size: 12px;
+  color: #c8a84a;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-left: auto;
+}
+
+#cd-header-xp-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#cd-xp-bar-bg {
   flex: 1;
-  text-align: center;
+  height: 7px;
+  background: #1a1408;
+  border: 1px solid #3a2a10;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+#cd-xp-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #8a6020, #c8a84a);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+#cd-xp-label {
+  font-size: 10px;
+  color: #8a7850;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 #char-dev-prev,
@@ -1665,9 +1723,10 @@ body {
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
-  padding: 2px 10px;
+  padding: 4px 12px;
   border-radius: 3px;
   transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
 }
 
 #char-dev-prev:hover,
@@ -1689,40 +1748,70 @@ body {
   font-size: 24px;
   line-height: 1;
   cursor: pointer;
-  margin-left: 12px;
+  flex-shrink: 0;
 }
 
 #char-dev-close:hover {
   color: #ff4040;
 }
 
+/* ── Body: 2-column layout ── */
 #char-dev-body {
   display: flex;
   flex: 1;
-  min-height: 520px;
+  min-height: 0; /* allow flex children to shrink past content height */
+  overflow: hidden;
 }
 
-#char-dev-stats-section {
-  width: 260px;
-  border-right: 1px solid #2a2010;
-  background: rgba(0, 0, 0, 0.2);
+/* ── Left panel: stats + detail stacked ── */
+#char-dev-left-panel {
+  width: 210px;
   flex-shrink: 0;
-}
-
-#char-dev-skills-section {
-  flex: 1;
-  border-right: 1px solid #2a2010;
   display: flex;
   flex-direction: column;
+  border-right: 1px solid #2a2010;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #4a3a20 #0d0a06;
 }
 
-#char-dev-detail-section {
-  width: 300px;
-  background: rgba(0, 0, 0, 0.3);
+#char-dev-stats-section {
   flex-shrink: 0;
+  border-bottom: 1px solid #2a2010;
+  background: rgba(0, 0, 0, 0.2);
+  padding-bottom: 4px;
+}
+
+#char-dev-detail-section {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+}
+
+/* ── Main skills section: tree grows, learned skills at bottom ── */
+#char-dev-skills-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.cd-tree-heading {
+  flex-shrink: 0;
+}
+
+/* ── Learned skills bar pinned to bottom ── */
+#cd-learned-skills-bar {
+  flex-shrink: 0;
+  border-top: 1px solid #2a2010;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+#cd-learned-skills-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 10px;
 }
 
 .stat-controls {
@@ -1752,62 +1841,21 @@ body {
   color: #fff;
 }
 
-/* ── Level & XP Bar ── */
-#char-dev-level-section {
-  padding: 10px 16px 8px;
-  border-bottom: 1px solid #2a2010;
-  background: rgba(0, 0, 0, 0.25);
-}
+/* XP bar elements are now inside #char-dev-header — see header block above */
 
-#cd-level-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-}
-
-#cd-level-label {
-  font-size: 13px;
-  color: #c8a84a;
-  font-weight: bold;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-#cd-xp-label {
-  font-size: 11px;
-  color: #8a7850;
-}
-
-#cd-xp-bar-bg {
-  width: 100%;
-  height: 8px;
-  background: #1a1408;
-  border: 1px solid #3a2a10;
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-#cd-xp-bar-fill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #8a6020, #c8a84a);
-  border-radius: 2px;
-  transition: width 0.4s ease;
-}
-
-/* ── Stat Points Remaining ── */
+/* ── Node picks available banner ── */
 #cd-stat-points-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 10px 0;
+  background: rgba(82, 192, 82, 0.1);
+  border-bottom: 1px solid rgba(82, 192, 82, 0.3);
+  padding: 5px 10px;
 }
 
 #cd-stat-points-remaining {
-  font-size: 11px;
+  font-size: 10px;
   color: #80ff80;
   font-weight: bold;
+  text-align: center;
+  display: block;
 }
 
 #cd-stat-points-remaining:empty {
@@ -1968,13 +2016,94 @@ body {
   color: #6a5a30;
 }
 
-/* ── Stat buttons hidden in view mode ── */
-#cd-char-stats:not(.level-up-mode) .stat-btn {
-  display: none;
+/* ── Skill Tree Container ── */
+#cd-skill-tree-container {
+  flex: 1;          /* grow to fill all available height in the skills section */
+  overflow-x: auto;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #4a3a20 #0d0a06;
+  display: flex;
+  justify-content: center;  /* centre the tree canvas horizontally */
+  align-items: flex-start;
 }
 
-#cd-char-stats:not(.level-up-mode) .stat-controls {
-  justify-content: flex-end;
+.tree-node {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid #444;
+  background: rgba(20, 16, 10, 0.9);
+  transition: box-shadow 0.2s, border-color 0.2s;
+  z-index: 1;
+}
+
+.tree-node--acquired {
+  border-color: #c8a84a;
+  background: rgba(200, 168, 74, 0.25);
+  cursor: default;
+}
+
+.tree-node--available {
+  border-color: #52c052;
+  background: rgba(82, 192, 82, 0.15);
+  animation: tree-node-pulse 1.8s ease-in-out infinite;
+}
+
+.tree-node--selected {
+  border-color: #ffffff;
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+}
+
+.tree-node--locked {
+  border-color: #333;
+  background: rgba(20, 16, 10, 0.7);
+  opacity: 0.45;
+  cursor: default;
+}
+
+.tree-node-icon {
+  font-size: 13px;
+  line-height: 1;
+  pointer-events: none;
+  color: inherit;
+}
+
+.tree-node--acquired .tree-node-icon { color: #c8a84a; }
+.tree-node--available .tree-node-icon { color: #80e080; }
+.tree-node--selected .tree-node-icon { color: #fff; }
+.tree-node--locked .tree-node-icon { color: #555; }
+
+.tree-node-label {
+  position: absolute;
+  top: calc(100% + 3px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: #a09070;
+  white-space: nowrap;
+  text-align: center;
+  pointer-events: none;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.tree-node--acquired .tree-node-label { color: #c8a84a; }
+.tree-node--available .tree-node-label { color: #80e080; }
+.tree-node--selected .tree-node-label { color: #fff; }
+
+@keyframes tree-node-pulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(82, 192, 82, 0.4); }
+  50% { box-shadow: 0 0 12px rgba(82, 192, 82, 0.8), 0 0 20px rgba(82, 192, 82, 0.3); }
 }
 
 /* ── Level Up! button pulse in inventory header ── */
@@ -2012,13 +2141,33 @@ body {
   padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 #cd-detail-name {
-  font-size: 14px;
+  font-size: 13px;
   color: #e8d090;
   font-weight: bold;
+  line-height: 1.3;
+}
+
+#cd-detail-action {
+  color: #a08050;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#cd-detail-desc {
+  font-size: 11px;
+  line-height: 1.45;
+  color: #d0c0a0;
+}
+
+#cd-detail-potency {
+  color: #c0a0f8;
+  font-weight: bold;
+  font-size: 11px;
 }
 
 /* ── RIGHT: Paperdoll ── */

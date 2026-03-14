@@ -7,6 +7,7 @@ import { playAction } from './actions.js';
 import { attackMonster, monsters, getInRangeMonster, setHuntersEyeTarget, getHuntersEyeTargetId, applyMonsterStatusEffect } from './monster.js';
 import { showMessage } from './minimap.js';
 import { dropMember } from './recruits.js';
+import RECRUITS_DATA from './data/recruits.json';
 import { isInFrontOfPlayer, player } from './player.js';
 import { isAlchemyModalOpen, addItemToAlchemy } from './objects.js';
 import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude, calcOnHitChance } from './combat-rules.js';
@@ -14,6 +15,7 @@ import { playCritSound, playSkillSound, playItemSound, playLevelUpConfirmSound, 
 import { addLogEntry } from './battle-log.js';
 import { skillsState } from './skills-state.js';
 import { getNextLevelXP, hydrateSkill } from './leveling.js';
+import { getSkillTree, applyNodeBenefit, renderSkillTree } from './skill-tree.js';
 import {
   triggerSanctuaryEffect,
   triggerHolyRadianceEffect,
@@ -130,7 +132,6 @@ const SLOT_LABELS = {
 let activeCharIndex = null;
 let activeCharDevIndex = null;
 let _equipSkillTab = 'action';
-let _cdSkillTab = 'action';
 let _ctxInvIndex = null;   // inventory slot most recently right-clicked
 let _skillSwMenuCtx = null; // { memberIndex, mode: 'skill'|'spell' } when skill-switch menu is open
 
@@ -235,13 +236,18 @@ export function extendPartyData() {
     // Initialize leveling fields if missing
     if (m.level === undefined) m.level = 0;
     if (m.xp === undefined) m.xp = 0;
-    if (m.unspentStatPoints === undefined) m.unspentStatPoints = 0;
     if (!m.statBonuses) m.statBonuses = { strength: 0, dexterity: 0, vitality: 0, intelligence: 0, resilience: 0 };
-    if (!m.skillProgression) m.skillProgression = [];
     if (m.pendingLevelUp === undefined) m.pendingLevelUp = false;
     if (!m.quickslots) m.quickslots = [null];
     if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null, skill: null };
-    if (m.pendingSkillChoice === undefined) m.pendingSkillChoice = null;
+    // Skill tree fields
+    if (!m.acquiredNodes) m.acquiredNodes = ['start'];
+    if (m.pendingNodeChoice === undefined) m.pendingNodeChoice = null;
+    if (m.pendingNodePicks === undefined) m.pendingNodePicks = 0;
+    if (!m.skillTreeId) {
+      const r = RECRUITS_DATA.find(x => x.name === m.name);
+      if (r?.skillTree) m.skillTreeId = r.skillTree;
+    }
 
     if (m.equipment) {
       updateEffectiveStats(m);
@@ -1912,185 +1918,66 @@ function renderCharDevModal(memberIndex) {
     }
   }
 
-  const pending = !!m.pendingLevelUp;
+  const pending = (m.pendingNodePicks ?? 0) > 0;
 
-  // ── Stat points row — only visible in level-up mode ──
+  // ── Pending node picks indicator ──
   const pointsRow = document.getElementById('cd-stat-points-row');
-  if (pointsRow) pointsRow.style.display = pending ? '' : 'none';
-
-  const pointsEl = document.getElementById('cd-stat-points-remaining');
-  if (pointsEl && pending) {
-    const pts = m.unspentStatPoints ?? 0;
-    pointsEl.textContent = pts > 0 ? `${pts} point${pts > 1 ? 's' : ''} to spend` : 'All points spent';
+  if (pointsRow) {
+    pointsRow.style.display = pending ? '' : 'none';
+    const pointsEl = document.getElementById('cd-stat-points-remaining');
+    if (pointsEl) {
+      const picks = m.pendingNodePicks ?? 0;
+      pointsEl.textContent = picks === 1 ? '1 node pick available' : `${picks} node picks available`;
+    }
   }
 
-  // ── Stat controls: show +/- only in level-up mode ──
-  const statsEl = document.getElementById('cd-char-stats');
-  if (statsEl) statsEl.classList.toggle('level-up-mode', pending);
-
-  // ── Render Stat values with button states ──
+  // ── Render Stat values (read-only) ──
   const base = m.baseStats ?? m.stats ?? {};
   const bonuses = m.statBonuses ?? {};
   ['strength', 'dexterity', 'vitality', 'intelligence', 'resilience'].forEach(key => {
     const valEl = document.getElementById(`cd-stat-${key}`);
     const totalVal = (base[key] ?? 0) + (bonuses[key] ?? 0);
     if (valEl) valEl.textContent = totalVal;
-
-    if (pending) {
-      const row = valEl?.closest('.stat-row');
-      if (row) {
-        const minusBtn = row.querySelector('[data-delta="-1"]');
-        const plusBtn = row.querySelector('[data-delta="1"]');
-        if (minusBtn) minusBtn.disabled = (bonuses[key] ?? 0) <= 0;
-        if (plusBtn) plusBtn.disabled = (m.unspentStatPoints ?? 0) <= 0;
-      }
-    }
   });
 
-  // ── Skill tabs: hidden in level-up mode (all skills shown together) ──
-  const tabsEl = document.getElementById('cd-skill-tabs');
-  if (tabsEl) tabsEl.style.display = pending ? 'none' : '';
-
-  // ── Render Learned Skills ──
+  // ── Render Learned Skills (all skills, single row, newest on left) ──
   const cdSkillsEl = document.getElementById('cd-char-skills');
   if (cdSkillsEl) {
     cdSkillsEl.innerHTML = '';
     const skills = m.skills ?? [];
 
-    // In level-up mode show all learned skills; otherwise apply tab filter
-    const filteredSkills = pending
-      ? skills
-      : skills.filter(skill => {
-        const def = getItemDef(skill.name) || SKILLS_DATA[skill.name];
-        return _cdSkillTab === 'passive' ? (def?.isPassive === true) : (def?.isPassive !== true);
-      });
-
-    if (filteredSkills.length === 0) {
+    if (skills.length === 0) {
       const empty = document.createElement('p');
       empty.className = 'skill-empty';
-      empty.textContent = pending ? 'No skills learned yet.' : `No ${_cdSkillTab} skills learned.`;
+      empty.textContent = 'No skills learned yet.';
       cdSkillsEl.appendChild(empty);
     } else {
-      filteredSkills.forEach(skill => {
+      skills.forEach(skill => {
         const card = document.createElement('div');
         card.className = 'skill-card skill-card--learned';
-        renderItemIcon({ icon: skill.icon }, card);
+        renderItemIcon(skill, card);
+        attachTooltipListeners(card, () => {
+          const potency = _formatSkillPotency(skill.name, m);
+          return { ...skill, isSkill: true, potency };
+        }, true);
         card.addEventListener('click', () => _showSkillDetail(skill, m, card));
         cdSkillsEl.appendChild(card);
       });
     }
   }
 
-  // ── Skill Progression / Choose a Skill ──
-  const futureSection = document.getElementById('cd-future-skills');
-  const futureHeading = futureSection?.querySelector('h4');
-  const availEl = document.getElementById('cd-available-skills');
-
-  if (pending) {
-    // ── Level-up mode: show choosable unlearned skills ──
-    if (futureHeading) futureHeading.textContent = 'Choose a Skill:';
-    if (availEl) {
-      availEl.innerHTML = '';
-      // Count how many times each skill name has been learned so duplicate
-      // progression entries (e.g. two "Bow Master" slots) each show as a
-      // separate choosable card, and only become unavailable once that many
-      // copies have been learned.
-      const learnedCounts = {};
-      for (const s of (m.skills ?? [])) {
-        learnedCounts[s.name] = (learnedCounts[s.name] ?? 0) + 1;
+  // ── Skill Tree ──
+  const treeContainer = document.getElementById('cd-skill-tree-container');
+  if (treeContainer) {
+    renderSkillTree(m, treeContainer, (node) => {
+      _showNodeDetail(node, m);
+      // Update confirm button state
+      const confirmBtn = document.getElementById('char-dev-confirm');
+      if (confirmBtn && pending) {
+        confirmBtn.disabled = !m.pendingNodeChoice;
+        confirmBtn.title = m.pendingNodeChoice ? '' : 'Select a node first';
       }
-      // Walk the progression in order; for each entry, skip it only if we've
-      // already "consumed" that many learned copies of the same name.
-      const seen = {};
-      const choosable = [];
-      for (const s of (m.skillProgression ?? [])) {
-        seen[s.name] = (seen[s.name] ?? 0) + 1;
-        if (seen[s.name] > (learnedCounts[s.name] ?? 0)) {
-          choosable.push(s);
-        }
-      }
-
-      if (choosable.length === 0) {
-        const p = document.createElement('p');
-        p.className = 'skill-empty';
-        p.textContent = 'No skills left to learn.';
-        availEl.appendChild(p);
-      } else {
-        choosable.forEach((skill, index) => {
-          const def = SKILLS_DATA[skill.name];
-          const card = document.createElement('div');
-          card.className = 'skill-card skill-card--choosable';
-          card.dataset.skillName = skill.name;
-
-          if (m.pendingSkillChoice === skill.name && m.pendingSkillChoiceIndex === index) {
-            card.classList.add('skill-card--chosen');
-          } else if (m.pendingSkillChoice === skill.name && m.pendingSkillChoiceIndex === undefined) {
-            // Backward compatibility or first click sets the index properly if it was missing
-            m.pendingSkillChoiceIndex = index;
-            card.classList.add('skill-card--chosen');
-          }
-
-          renderItemIcon({ icon: skill.icon }, card);
-
-          // Type badge (Passive / Active)
-          const typeBadge = document.createElement('span');
-          typeBadge.className = 'skill-level-badge';
-          typeBadge.textContent = def?.isPassive ? 'P' : 'A';
-          card.appendChild(typeBadge);
-
-          card.addEventListener('click', () => {
-            m.pendingSkillChoice = skill.name;
-            m.pendingSkillChoiceIndex = index;
-            _showSkillDetail(skill, m, card);
-            renderCharDevModal(memberIndex);
-          });
-          availEl.appendChild(card);
-        });
-      }
-    }
-  } else {
-    // ── View mode: show only unlearned skills in progression ──
-    if (futureHeading) futureHeading.textContent = 'Skill Progression';
-    if (availEl) {
-      availEl.innerHTML = '';
-      const progression = m.skillProgression ?? [];
-
-      // Track learned counts to handle duplicate skill slots correctly
-      const learnedCounts = {};
-      for (const s of (m.skills ?? [])) {
-        learnedCounts[s.name] = (learnedCounts[s.name] ?? 0) + 1;
-      }
-
-      const seen = {};
-      let hasUnlearned = false;
-      progression.forEach((skill, idx) => {
-        seen[skill.name] = (seen[skill.name] ?? 0) + 1;
-        // Skip if this copy of the skill has already been learned
-        if (seen[skill.name] <= (learnedCounts[skill.name] ?? 0)) return;
-
-        hasUnlearned = true;
-        const card = document.createElement('div');
-        card.className = 'skill-card skill-card--locked';
-        card.style.position = 'relative';
-
-        renderItemIcon({ icon: skill.icon }, card);
-
-        const badge = document.createElement('span');
-        badge.className = 'skill-level-badge';
-        badge.textContent = idx + 1;
-        card.appendChild(badge);
-
-        card.addEventListener('click', () => _showSkillDetail(skill, m, card));
-        availEl.appendChild(card);
-      });
-
-      if (!hasUnlearned) {
-        const p = document.createElement('p');
-        p.className = 'skill-empty';
-        p.textContent = 'All skills learned!';
-        availEl.appendChild(p);
-      }
-    }
+    });
   }
 
   // ── Confirm footer: visible only in level-up mode ──
@@ -2098,15 +1985,8 @@ function renderCharDevModal(memberIndex) {
   const confirmBtn = document.getElementById('char-dev-confirm');
   if (footer) footer.style.display = pending ? 'flex' : 'none';
   if (confirmBtn && pending) {
-    const canConfirm = m.pendingSkillChoice !== null && (m.unspentStatPoints ?? 0) === 0;
-    confirmBtn.disabled = !canConfirm;
-    if (!m.pendingSkillChoice) {
-      confirmBtn.title = 'Choose a skill first';
-    } else if ((m.unspentStatPoints ?? 0) > 0) {
-      confirmBtn.title = 'Spend all stat points first';
-    } else {
-      confirmBtn.title = '';
-    }
+    confirmBtn.disabled = !m.pendingNodeChoice;
+    confirmBtn.title = m.pendingNodeChoice ? '' : 'Select a node first';
   }
 }
 
@@ -2121,6 +2001,29 @@ function _showSkillDetail(skill, m, cardEl = null) {
 
   document.querySelectorAll('#cd-char-skills .skill-card, #cd-available-skills .skill-card').forEach(c => c.classList.remove('skill-card--detail-selected'));
   if (cardEl) cardEl.classList.add('skill-card--detail-selected');
+}
+
+function _showNodeDetail(node, m) {
+  document.getElementById('cd-detail-name').textContent = node.label;
+  if (node.type === 'start') {
+    document.getElementById('cd-detail-action').textContent = 'Starting Node';
+    document.getElementById('cd-detail-desc').textContent = 'Your journey begins here.';
+    document.getElementById('cd-detail-potency').textContent = '';
+  } else if (node.type === 'stat') {
+    document.getElementById('cd-detail-action').textContent = 'Stat Bonus';
+    const desc = Object.entries(node.benefit)
+      .map(([stat, val]) => `+${val} ${stat.charAt(0).toUpperCase() + stat.slice(1)}`)
+      .join(', ');
+    document.getElementById('cd-detail-desc').textContent = desc;
+    document.getElementById('cd-detail-potency').textContent = '';
+  } else if (node.type === 'skill') {
+    const skillName = node.benefit.skill;
+    const def = SKILLS_DATA[skillName];
+    document.getElementById('cd-detail-action').textContent = (def?.isPassive ? 'Passive' : 'Action') + ' Skill';
+    document.getElementById('cd-detail-desc').textContent = def?.description || '';
+    const pot = _formatSkillPotency(skillName, m);
+    document.getElementById('cd-detail-potency').innerHTML = pot ? (Array.isArray(pot) ? pot.join('<br>') : pot) : '';
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -4172,96 +4075,49 @@ function attachCharDevListeners() {
   if (prevBtn) prevBtn.addEventListener('click', () => navigateCharDev(-1));
   if (nextBtn) nextBtn.addEventListener('click', () => navigateCharDev(1));
 
-  // Char Dev Skill Tabs
-  document.querySelectorAll('#cd-skill-tabs .skill-tab-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      document.querySelectorAll('#cd-skill-tabs .skill-tab-btn').forEach(b => b.classList.remove('active'));
-      e.target.classList.add('active');
-      _cdSkillTab = e.target.dataset.tab;
-      if (activeCharDevIndex !== null) renderCharDevModal(activeCharDevIndex);
-      // Clear detail
-      document.getElementById('cd-detail-name').textContent = 'Select a skill';
-      document.getElementById('cd-detail-action').textContent = '';
-      document.getElementById('cd-detail-desc').textContent = '';
-      document.getElementById('cd-detail-potency').textContent = '';
-    });
-  });
-
-  // Stat Adjustments — uses unspentStatPoints and statBonuses
-  document.querySelectorAll('#cd-char-stats .stat-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (activeCharDevIndex === null) return;
-      const statName = e.target.dataset.stat;
-      const delta = parseInt(e.target.dataset.delta, 10);
-      const m = party[activeCharDevIndex];
-      if (!m || m.isEmpty) return;
-
-      if (!m.statBonuses) m.statBonuses = { strength: 0, dexterity: 0, vitality: 0, intelligence: 0, resilience: 0 };
-
-      if (delta > 0) {
-        // Adding a point — requires unspent points
-        if ((m.unspentStatPoints ?? 0) <= 0) return;
-        m.statBonuses[statName] = (m.statBonuses[statName] ?? 0) + 1;
-        m.unspentStatPoints--;
-      } else {
-        // Removing a point — can only undo level-up allocations
-        if ((m.statBonuses[statName] ?? 0) <= 0) return;
-        m.statBonuses[statName]--;
-        m.unspentStatPoints = (m.unspentStatPoints ?? 0) + 1;
-      }
-
-      // Re-evaluate equipment stats & derived stats immediately
-      updateEffectiveStats(m);
-
-      // Update UI
-      renderCharDevModal(activeCharDevIndex);
-      refreshPartyCards();
-    });
-  });
-
-  // Confirm Level Up — locks in skill choice and stat allocation
+  // Confirm Level Up — apply chosen tree node
   const confirmBtn = document.getElementById('char-dev-confirm');
   if (confirmBtn) {
     confirmBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       if (activeCharDevIndex === null) return;
       const m = party[activeCharDevIndex];
-      if (!m || m.isEmpty || !m.pendingLevelUp) return;
-      if (!m.pendingSkillChoice) return;
-      if ((m.unspentStatPoints ?? 0) > 0) return;
+      if (!m || m.isEmpty || (m.pendingNodePicks ?? 0) <= 0) return;
+      if (!m.pendingNodeChoice) return;
 
-      // Learn the chosen skill
-      const chosenSkill = hydrateSkill(m.pendingSkillChoice);
-      m.skills.push(chosenSkill);
+      const tree = getSkillTree(m.skillTreeId);
+      if (!tree) return;
+      const node = tree.nodes.find(n => n.id === m.pendingNodeChoice);
+      if (!node) return;
 
-      // Auto-equip in skill slot if empty and skill is active
-      const skillDef = SKILLS_DATA[chosenSkill.name];
-      if (m.equipment && !m.equipment.skill && skillDef && !skillDef.isPassive) {
-        m.equipment.skill = { name: chosenSkill.name, slot: 'skill', icon: chosenSkill.icon ?? null };
-      }
+      // Apply node benefit and record it
+      applyNodeBenefit(m, node);
+      if (!m.acquiredNodes) m.acquiredNodes = ['start'];
+      m.acquiredNodes.push(m.pendingNodeChoice);
+      m.pendingNodePicks = (m.pendingNodePicks ?? 1) - 1;
+      m.pendingNodeChoice = null;
 
-      // Finalize — stat bonuses are now locked
       updateEffectiveStats(m);
-      m.pendingLevelUp = false;
-      m.pendingSkillChoice = null;
-      m.pendingSkillChoiceIndex = undefined;
-      playLevelUpConfirmSound();
 
-      const messages = [
-        `${m.name} has grown in power!`,
-        `${m.name} feels a surge of new energy!`,
-        `${m.name} has mastered new techniques!`,
-        `${m.name} becomes even more formidable!`,
-        `${m.name} ascends to new heights!`
-      ];
-      const randomMsg = messages[Math.floor(Math.random() * messages.length)];
-      showMessage(randomMsg);
+      if ((m.pendingNodePicks ?? 0) > 0) {
+        // More picks remaining — re-render and stay open
+        renderCharDevModal(activeCharDevIndex);
+        refreshPartyCards();
+      } else {
+        // All picks used — finalize
+        m.pendingLevelUp = false;
+        playLevelUpConfirmSound();
 
-      // Close the dev screen and refresh the party bar.
-      // The modal must not stay open — it could navigate to another member via
-      // the prev/next buttons, causing confusion.
-      closeCharDevModal();
+        const messages = [
+          `${m.name} has grown in power!`,
+          `${m.name} feels a surge of new energy!`,
+          `${m.name} has mastered new techniques!`,
+          `${m.name} becomes even more formidable!`,
+          `${m.name} ascends to new heights!`
+        ];
+        showMessage(messages[Math.floor(Math.random() * messages.length)]);
+        closeCharDevModal();
+      }
     });
   }
 }

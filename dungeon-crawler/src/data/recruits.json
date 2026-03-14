@@ -2,6 +2,7 @@
     {
         "id": "recruit_1",
         "name": "Elrond",
+        "skillTree": "elrond",
         "job": "Ranger",
         "race": "Wood Elf",
         "stats": {
@@ -40,6 +41,7 @@
     {
         "id": "recruit_2",
         "name": "Alaric",
+        "skillTree": "alaric",
         "job": "Paladin",
         "race": "Human",
         "stats": {
@@ -79,6 +81,7 @@
     {
         "id": "recruit_3",
         "name": "Thorek",
+        "skillTree": "thorek",
         "job": "Warrior",
         "race": "Dwarf",
         "stats": {
@@ -119,6 +122,7 @@
     {
         "id": "recruit_4",
         "name": "Merlin",
+        "skillTree": "merlin",
         "job": "Wizard",
         "race": "Human",
         "stats": {
@@ -155,6 +159,7 @@
     {
         "id": "recruit_5",
         "name": "Korg",
+        "skillTree": "korg",
         "job": "Barbarian",
         "race": "Human",
         "stats": {
@@ -191,6 +196,7 @@
     {
         "id": "recruit_6",
         "name": "Baldur",
+        "skillTree": "baldur",
         "job": "Ranger",
         "race": "Dwarf",
         "stats": {
@@ -227,6 +233,7 @@
     {
         "id": "recruit_7",
         "name": "Lumni",
+        "skillTree": "lumni",
         "job": "War Dancer",
         "race": "High Elf",
         "stats": {
@@ -262,6 +269,7 @@
     {
         "id": "recruit_8",
         "name": "Seraphina",
+        "skillTree": "seraphina",
         "job": "White Mage",
         "race": "Human",
         "stats": {
