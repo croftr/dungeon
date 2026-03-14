@@ -1113,7 +1113,6 @@ function openTrapDisarmModal(trapObj) {
 
     newAttempt.addEventListener('click', () => {
         if (!_activeTrapObj) return;
-        playSoundByUrl('/sounds/actions/disarm-trap.mp3');
         const success = Math.random() < TRAP_DISARM_CHANCE;
         const resultEl2 = document.getElementById('trap-disarm-result');
 
@@ -1141,6 +1140,7 @@ function openTrapDisarmModal(trapObj) {
                 overlay.classList.add('chest-hidden');
             }, 1500);
         } else {
+            playSoundByUrl('/sounds/actions/disarm-trap.mp3');
             if (resultEl2) {
                 resultEl2.textContent = 'Failed! The trap goes off!';
                 resultEl2.className = 'trap-result-fail';
