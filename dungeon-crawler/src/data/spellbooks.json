@@ -1,0 +1,122 @@
+[
+    {
+        "name": "Heal Spellbook",
+        "type": "spellbook",
+        "spellName": "Heal",
+        "requiredInt": 8,
+        "icon": "/icons/heal.png",
+        "description": "A vellum scroll containing restorative prayers. Requires 8 Intelligence to decypher.",
+        "value": 450,
+        "weight": 0.5
+    },
+    {
+        "name": "Regeneration Spellbook",
+        "type": "spellbook",
+        "spellName": "Regeneration",
+        "requiredInt": 12,
+        "icon": "/icons/regeneration.png",
+        "description": "A thick book smelling of damp earth and moss. Requires 12 Intelligence to decypher.",
+        "value": 750,
+        "weight": 1.2
+    },
+    {
+        "name": "Cure Poison Spellbook",
+        "type": "spellbook",
+        "spellName": "Cure Poison",
+        "requiredInt": 6,
+        "icon": "/icons/cure-poison.png",
+        "description": "A small pamphlet detailed with botanical sketches. Requires 6 Intelligence to decypher.",
+        "value": 300,
+        "weight": 0.3
+    },
+    {
+        "name": "Resist Poison Spellbook",
+        "type": "spellbook",
+        "spellName": "Resist Poison",
+        "requiredInt": 6,
+        "icon": "/icons/resist-poison-scroll.png",
+        "description": "A small pamphlet detailed with botanical sketches. Reduces poison damage. Requires 6 Intelligence to decypher.",
+        "value": 300,
+        "weight": 0.3
+    },
+    {
+        "name": "Rejuvenate Spellbook",
+        "type": "spellbook",
+        "spellName": "Rejuvenate",
+        "requiredInt": 10,
+        "icon": "/icons/scroll_rejuvenate.png",
+        "description": "A golden-bound tome glowing with vitality. Requires 10 Intelligence to decypher.",
+        "value": 540,
+        "weight": 0.5
+    },
+    {
+        "name": "Scroll of Fireball",
+        "type": "spellbook",
+        "spellName": "Fireball",
+        "requiredInt": 10,
+        "icon": "/icons/scroll_fireball.png",
+        "description": "Ancient parchment inscribed with blazing runes. Study it to learn Fireball. Requires 10 Intelligence.",
+        "value": 600,
+        "weight": 0.2
+    },
+    {
+        "name": "Scroll of Heal",
+        "type": "spellbook",
+        "spellName": "Heal",
+        "requiredInt": 9,
+        "icon": "/icons/scroll_heal.png",
+        "description": "A roll of white vellum filled with restorative prayers. Study it to learn Heal. Requires 10 Intelligence.",
+        "value": 540,
+        "weight": 0.2
+    },
+    {
+        "name": "Scroll of Regeneration",
+        "type": "spellbook",
+        "spellName": "Regeneration",
+        "requiredInt": 9,
+        "icon": "/icons/scroll_regeneration.png",
+        "description": "A scroll smelling of damp earth and fresh moss. Study it to learn Regeneration. Requires 10 Intelligence.",
+        "value": 660,
+        "weight": 0.2
+    },
+    {
+        "name": "Scroll of Cure Poison",
+        "type": "spellbook",
+        "spellName": "Cure Poison",
+        "requiredInt": 9,
+        "icon": "/icons/scroll_cure_poison.png",
+        "description": "A scroll bearing botanical sketches and purifying incantations. Study it to learn Cure Poison. Requires 10 Intelligence.",
+        "value": 480,
+        "weight": 0.2
+    },
+    {
+        "name": "Scroll of Resist Poison",
+        "type": "spellbook",
+        "spellName": "Resist Poison",
+        "requiredInt": 10,
+        "icon": "/icons/resist-poison-scroll.png",
+        "description": "Ancient parchment bearer of purifying incantations. Study it to learn Resist Poison. Requires 10 Intelligence.",
+        "value": 480,
+        "weight": 0.2
+    },
+    {
+        "name": "Scroll of Rejuvenate",
+        "type": "spellbook",
+        "spellName": "Rejuvenate",
+        "requiredInt": 10,
+        "icon": "/icons/scroll_rejuvenate.png",
+        "description": "A parchment scroll radiating a warm, glowing yellowish aura. Study it to learn Rejuvenate. Requires 10 Intelligence.",
+        "value": 540,
+        "weight": 0.2
+    },
+    {
+        "name": "Scroll of Sleep",
+        "type": "spellbook",
+        "spellName": "Sleep",
+        "requiredInt": 12,
+        "icon": "/icons/scroll_sleep.png",
+        "description": "A whispering scroll etched with soporific runes. Study it to learn Sleep. Requires 12 Intelligence.",
+        "value": 680,
+        "weight": 0.2
+    }
+]

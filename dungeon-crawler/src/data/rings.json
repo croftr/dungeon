@@ -1,0 +1,72 @@
+[
+    {
+        "name": "Ring of Vigour",
+        "slot": "ring1",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/ring_of_vigour.png",
+        "description": "A carved bone ring that pulses with vitality. Bolsters the wearer's constitution.",
+        "value": 360,
+        "weight": 0.05,
+        "statChange": "+1 Vitality",
+        "statBonuses": {
+            "vitality": 1
+        }
+    },
+    {
+        "name": "Ring of Wisdom",
+        "slot": "ring2",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/ring_of_wisdom.png",
+        "description": "A finely crafted silver ring set with a pulsing sapphire. Sharpens the wearer's intelligence.",
+        "value": 360,
+        "weight": 0.05,
+        "statChange": "+1 Intelligence",
+        "statBonuses": {
+            "intelligence": 1
+        }
+    },
+    {
+        "name": "Ring of Strength",
+        "slot": "ring1",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/ring_of_strength.png",
+        "description": "A heavy iron ring that radiates power. Increases physical strength.",
+        "value": 360,
+        "weight": 0.05,
+        "statChange": "+1 Strength",
+        "statBonuses": {
+            "strength": 1
+        }
+    },
+    {
+        "name": "Ring of Dexterity",
+        "slot": "ring1",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/ring_of_dexterity.png",
+        "description": "A sleek golden band that feels weightless. Enhances agility and precision.",
+        "value": 360,
+        "weight": 0.05,
+        "statChange": "+1 Dexterity",
+        "statBonuses": {
+            "dexterity": 1
+        }
+    },
+    {
+        "name": "Ring of Resilience",
+        "slot": "ring1",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/ring_of_resilience.png",
+        "description": "A sturdy band of dark steel. Toughens the wearer against adversity.",
+        "value": 360,
+        "weight": 0.05,
+        "statChange": "+1 Resilience",
+        "statBonuses": {
+            "resilience": 1
+        }
+    }
+]

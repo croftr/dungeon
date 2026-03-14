@@ -1,0 +1,23 @@
+[
+    {
+        "name": "Travelling Cloak",
+        "slot": "cloak",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/travelling_cloak.png",
+        "description": "A heavy wool cloak that keeps wind and rain at bay.",
+        "defence": 1,
+        "value": 24,
+        "weight": 1
+    },
+    {
+        "name": "Shadow Cloak",
+        "slot": "cloak",
+        "attackType": null,
+        "baseDamage": null,
+        "description": "A dark cloak woven with shadow-silk. Hard to see in dim light.",
+        "defence": 1,
+        "value": 240,
+        "weight": 0.4
+    }
+]

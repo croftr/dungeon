@@ -1,0 +1,35 @@
+[
+    {
+        "name": "Worn Boots",
+        "slot": "feet",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/worn_boots.png",
+        "description": "A pair of well-worn leather boots. Comfortable for long marches.",
+        "defence": 1,
+        "value": 18,
+        "weight": 0.8
+    },
+    {
+        "name": "Iron-Shod Boots",
+        "slot": "feet",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/iron_shod_boots.png",
+        "description": "Reinforced leather boots with iron toe-caps. Sturdy and intimidating.",
+        "defence": 3,
+        "value": 105,
+        "weight": 2
+    },
+    {
+        "name": "Leather Boots",
+        "slot": "feet",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/leather_boots.png",
+        "description": "Rugged brown leather boots, perfect for exploring dark damp corridors.",
+        "defence": 1,
+        "value": 45,
+        "weight": 1
+    }
+]

@@ -1,0 +1,98 @@
+[
+    {
+        "name": "Wooden Arrows",
+        "slot": "ammo",
+        "attackType": null,
+        "baseDamage": null,
+        "damageModifier": 1,
+        "damageType": "normal",
+        "ammoType": "arrow",
+        "icon": "/icons/wooden_arrows.png",
+        "description": "A bundle of simple wooden arrows.",
+        "value": 15,
+        "weight": 1
+    },
+    {
+        "name": "Steel Arrows",
+        "slot": "ammo",
+        "attackType": null,
+        "baseDamage": null,
+        "damageModifier": 1.5,
+        "damageType": "normal",
+        "ammoType": "arrow",
+        "icon": "/icons/steel_arrows.png",
+        "description": "Sharp, steel-tipped arrows with balanced fletching. Deploys deadly force.",
+        "value": 275,
+        "weight": 1.2
+    },
+    {
+        "name": "Poison Arrows",
+        "slot": "ammo",
+        "attackType": null,
+        "baseDamage": null,
+        "damageModifier": 1,
+        "damageType": "poison",
+        "ammoType": "arrow",
+        "onHitEffects": [
+            {
+                "effectId": "poison",
+                "chance": 1
+            }
+        ],
+        "icon": "/icons/poison_arrows.png",
+        "description": "Arrows tipped with a viscous green neurotoxin. Inflicts 1 DPS for 30 seconds.",
+        "value": 290,
+        "weight": 1
+    },
+    {
+        "name": "Wooden Bolts",
+        "slot": "ammo",
+        "attackType": null,
+        "baseDamage": null,
+        "damageModifier": 1,
+        "damageType": "normal",
+        "ammoType": "bolt",
+        "icon": "/icons/wooden_bolts.png",
+        "description": "A bundle of simple wooden bolts.",
+        "value": 15,
+        "weight": 1
+    },
+    {
+        "name": "Steel Bolts",
+        "slot": "ammo",
+        "attackType": null,
+        "baseDamage": null,
+        "damageModifier": 1.1,
+        "damageType": "normal",
+        "ammoType": "bolt",
+        "icon": "/icons/steel_bolts.png",
+        "description": "A bundle of steel bolts.",
+        "value": 275,
+        "weight": 1.2
+    },
+    {
+        "name": "Silver Bolts",
+        "slot": "ammo",
+        "attackType": null,
+        "baseDamage": null,
+        "damageModifier": 1.2,
+        "damageType": "normal",
+        "ammoType": "bolt",
+        "icon": "/icons/silver_bolts.png",
+        "description": "Crossbow bolts tipped with fine silver. Especially effective against the undead.",
+        "value": 450,
+        "weight": 1.1
+    },
+    {
+        "name": "Spellbook",
+        "slot": "ammo",
+        "attackType": null,
+        "baseDamage": null,
+        "delay": 4,
+        "icon": "/icons/spellbook.png",
+        "description": "An ancient tome. Equip it in the ammo slot, then Right-Click it in the paperdoll to select a spell for your hands. Both hands can hold different spells.",
+        "value": 360,
+        "weight": 1,
+        "isSpellBook": true
+    }
+]

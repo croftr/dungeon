@@ -1,0 +1,24 @@
+[
+    {
+        "name": "Cloth Trousers",
+        "slot": "legs",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/cloth_trousers.png",
+        "description": "Sturdy travelling trousers. Not much protection but allow easy movement.",
+        "defence": 1,
+        "value": 12,
+        "weight": 0.5
+    },
+    {
+        "name": "Chainmail Leggings",
+        "slot": "legs",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/chainmail_leggings.png",
+        "description": "Riveted chain leggings that protect the thighs and shins.",
+        "defence": 4,
+        "value": 210,
+        "weight": 4
+    }
+]

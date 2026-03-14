@@ -1,0 +1,24 @@
+[
+    {
+        "name": "Leather Gloves",
+        "slot": "hands",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/leather_gloves.png",
+        "description": "Soft leather gloves. Improve grip and protect the knuckles.",
+        "defence": 1,
+        "value": 24,
+        "weight": 0.3
+    },
+    {
+        "name": "Iron Gauntlets",
+        "slot": "hands",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/iron_gauntlets.png",
+        "description": "Articulated iron gauntlets. Protect the hands from blade and fire.",
+        "defence": 3,
+        "value": 150,
+        "weight": 2
+    }
+]

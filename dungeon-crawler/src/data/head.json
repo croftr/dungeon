@@ -1,0 +1,36 @@
+[
+    {
+        "name": "Shawl",
+        "slot": "head",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/shawl.png",
+        "description": "A worn cloth shawl pulled over the head. Offers little protection but keeps out the chill.",
+        "defence": 1,
+        "value": 6,
+        "weight": 0.2,
+        "skillBonuses": {}
+    },
+    {
+        "name": "Leather Cap",
+        "slot": "head",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/leather_cap.png",
+        "description": "A simple cap of boiled leather. Better than nothing.",
+        "defence": 2,
+        "value": 36,
+        "weight": 0.5
+    },
+    {
+        "name": "Iron Helm",
+        "slot": "head",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/iron_helm.png",
+        "description": "A sturdy iron helmet that covers the skull and cheeks.",
+        "defence": 3,
+        "value": 120,
+        "weight": 2.5
+    }
+]

@@ -1,0 +1,89 @@
+[
+    {
+        "name": "Battle Cry",
+        "slot": "skill",
+        "type": "debuff",
+        "icon": "/icons/skill_generic.svg",
+        "description": "A terrifying shout that demoralizes enemies.",
+        "delay": 60,
+        "value": 0,
+        "weight": 0
+    },
+    {
+        "name": "Focus",
+        "slot": "skill",
+        "type": "buff",
+        "icon": "/icons/skill_generic.svg",
+        "description": "Concentrate for increased critical hit chance.",
+        "delay": 30,
+        "value": 0,
+        "weight": 0
+    },
+    {
+        "name": "Holy Shield",
+        "slot": "skill",
+        "type": "buff",
+        "blockChance": 20,
+        "attackType": "bash",
+        "baseDamage": 2,
+        "statWeights": {
+            "str": 1,
+            "dex": 0
+        },
+        "icon": "/icons/skill_generic.svg",
+        "description": "Divine protection against physical attacks.",
+        "delay": 120,
+        "value": 0,
+        "weight": 0
+    },
+    {
+        "name": "Sunder Armor",
+        "slot": "skill",
+        "type": "debuff",
+        "icon": "/skills/sunder-armor.png",
+        "description": "Crushes the targeted monster, halving its defence stats for 30s.",
+        "delay": 60,
+        "value": 0,
+        "weight": 0
+    },
+    {
+        "name": "Whirlwind",
+        "slot": "skill",
+        "type": "buff",
+        "icon": "/skills/whirlwind.png",
+        "description": "Becomes a blur of motion, doubling attack speed and preventing stamina drain for 30s.",
+        "delay": 60,
+        "value": 0,
+        "weight": 0
+    },
+    {
+        "name": "True Shot",
+        "slot": "skill",
+        "type": "buff",
+        "icon": "/skills/true-shot.png",
+        "description": "Becomes hyper-focused, ensuring every ranged attack finds its mark for 20 seconds.",
+        "delay": 60,
+        "value": 0,
+        "weight": 0
+    },
+    {
+        "name": "Miners Light",
+        "slot": "skill",
+        "type": "buff",
+        "icon": "/skills/arcane-lantern.png",
+        "description": "Ignites a specialized lantern, illuminating the dungeon brightly for 60 seconds.",
+        "delay": 60,
+        "value": 0,
+        "weight": 0
+    },
+    {
+        "name": "Rage",
+        "slot": "skill",
+        "type": "buff",
+        "icon": "/icons/skill_generic.svg",
+        "description": "Unleash inner fury for increased damage.",
+        "delay": 60,
+        "value": 0,
+        "weight": 0
+    }
+]

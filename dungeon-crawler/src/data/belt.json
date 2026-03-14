@@ -1,0 +1,28 @@
+[
+    {
+        "name": "Leather Belt",
+        "slot": "belt",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/leather_belt.png",
+        "description": "A plain leather belt with iron buckle. Holds pouches and scabbards.",
+        "defence": 1,
+        "value": 15,
+        "weight": 0.3
+    },
+    {
+        "name": "Adventurer's Belt",
+        "slot": "belt",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/adventurers_belt.png",
+        "description": "A wide belt with multiple loops and pouches for quick-draw access. Boosts the potency of all skills.",
+        "defence": 2,
+        "value": 75,
+        "weight": 0.5,
+        "skillBonuses": {},
+        "statusResistances": {
+            "poison": 0.25
+        }
+    }
+]

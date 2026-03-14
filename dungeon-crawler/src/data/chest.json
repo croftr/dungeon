@@ -1,0 +1,49 @@
+[
+    {
+        "name": "Healers Vest",
+        "slot": "chest",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/healers_vest.png",
+        "description": "Thick quilted padding stitched into a vest. Absorbs blows.",
+        "defence": 2,
+        "value": 45,
+        "weight": 2,
+        "skillBonuses": {
+            "Heal": 1
+        }
+    },
+    {
+        "name": "Padded Vest",
+        "slot": "chest",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/padded_vest.png",
+        "description": "Thick quilted padding stitched into a vest. Absorbs blows.",
+        "defence": 3,
+        "value": 45,
+        "weight": 2
+    },
+    {
+        "name": "Chain Shirt",
+        "slot": "chest",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/chain_shirt.png",
+        "description": "Interlocking iron rings form a flexible shirt of armour.",
+        "defence": 5,
+        "value": 270,
+        "weight": 5
+    },
+    {
+        "name": "Plate Cuirass",
+        "slot": "chest",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/plate_cuirass.png",
+        "description": "Heavy forged steel chest plate. Near impenetrable — if you can move in it.",
+        "defence": 8,
+        "value": 750,
+        "weight": 12
+    }
+]
