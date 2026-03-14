@@ -13,6 +13,9 @@ import MERCHANT_DATA from './data/merchant.json';
 import POTIONS_DATA from './data/potions.json';
 import { triggerMummyAmbush } from './monster.js';
 import * as equip from './equipment.js';
+import { spawnLevel1Objects } from './levels/level1/objects.js';
+import { spawnLevel2Objects } from './levels/level2/objects.js';
+import { spawnLevel3Objects } from './levels/level3/objects.js';
 
 export const objects = [];
 export const interactables = [];
@@ -1277,278 +1280,38 @@ function addStairs(scene, loader, col, row, rotY = 0) {
 
 
 export function spawnObjectsForLevel() {
-    const gltfLoader = _gltfLoader;
     const level = window.currentLevel || 1;
     objects.length = 0; // clear logical array
     _nextContainerId = 0; // reset container IDs for deterministic save/load
 
-    if (level === 1) {
-        // Stash in the starter room
-        addChest(objectsGroup, gltfLoader, 11, 13, 0, 0.7, [
-            { name: 'Gold Coins', quantity: 100 },
-            'Torch'
-        ], '/items/stash.glb', true, 0, 'Stash');
-        // New Chest at the end of the long passage
-        addChest(objectsGroup, gltfLoader, 7, 1, 0, -0.7, [
-            { name: 'Gold Coins', quantity: 50 },
-            'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Ring of Vigour', 'Ring of Wisdom', 'Ring of Dexterity', 'Leather Gloves', 'Cloth Trousers', 'Worn Boots', "Scroll of Cure Poison"
-        ]);
-        // Chest in the Northwest room, tucked into the far northeast corner (against Rows 0 & Col 6)
-        addChest(objectsGroup, gltfLoader, 5, 1, Math.PI, -0.65, [
-            "Ring of Dexterity", "Steel Arrows", "Poison Dagger", "Leather Belt", "Adventurer's Belt",
-            "Dwarf Crossbow"
-        ], undefined, true, -0.35);
+    // Build context object — passes all spawn helpers and current state flags to
+    // per-level files so they stay completely decoupled from objects.js internals.
+    const ctx = {
+        group: objectsGroup,
+        loader: _gltfLoader,
+        // Spawn helpers
+        addChest, addWeaponRack, addSpellCabinet, addShop,
+        addCrystals, addBonePile,
+        addPortal, addDisabledPortal, addPortcullis, addKeyhole,
+        addStatue, addPortalActivatorStatue, addPartyConfirmNPC,
+        addAnvil, addAlchemyWorkshop, addTeleportTorch, addEtherealEgg, addStairs,
+        addTrap1, createWallButton,
+        // Level 1 state flags
+        starterPortalEnabled: _starterPortalEnabled,
+        starterGateOpened: _starterGateOpened,
+        mummyGateOpened: _mummyGateOpened,
+        // Level 2 state flags
+        level2PortcullisOpened: _level2PortcullisOpened,
+        level2HoleClosed: _level2HoleClosed,
+        // State setters (values written back to objects.js module scope)
+        setStarterGate: (g) => { _starterGate = g; },
+        // Shared refs for custom object loading code in level files
+        interactables,
+    };
 
-        // 2nd Chest in the Northwest room, next to the other one, containing all rings
-        addChest(objectsGroup, gltfLoader, 5, 1, Math.PI, -0.65, [
-            { name: 'Gold Coins', quantity: 100 },
-            "Ring of Vigour", "Travelling Cloak", "Iron Helm"
-        ], undefined, true, 0.35);
-        // Chest in the mummy room (secret east chamber)
-        addChest(objectsGroup, gltfLoader, 19, 1, 0, -0.7, [
-            'Chain Shirt', 'Iron Gauntlets', 'Chainmail Leggings', 'Iron-Shod Boots', 'Healers Vest'
-        ]);
-
-        // Added chest at the end of the new passage in the southwest (row 17, col 2)
-        // Moved north against the wall
-        addChest(objectsGroup, gltfLoader, 2, 17, 0, -0.7, [
-            "Shawl", "Leather Cap", "Iron Helm"
-        ]);
-
-        // New chest in the alcove east of (row 15, col 13)
-        // (col 14, row 15) nudged east against the wall, rotated 90 degrees
-        addChest(objectsGroup, gltfLoader, 14, 15, Math.PI / 2, 0, [
-            "Travelling Cloak", "Travelling Cloak"
-        ], undefined, true, 0.7);
-
-        // Crystals in the starter room
-        addCrystals(objectsGroup, gltfLoader, 9, 11, 0, -0.7);
-        // Bone pile in the passage
-        addBonePile(objectsGroup, gltfLoader, 1, 27);
-
-        // 2nd Weapon Rack (facing West, pushed against East wall)
-        addWeaponRack(objectsGroup, gltfLoader, 21, 21, Math.PI / 2, 0.65, 0, [
-            'War Hammer', 'Longbow', 'Steel Bolts'
-        ]);
-
-        // Spell Cabinet in the starter room
-        addSpellCabinet(objectsGroup, gltfLoader, 12, 13, Math.PI, 0, 0.6, [
-            'Scroll of Fireball',
-            'Scroll of Heal',
-            'Scroll of Regeneration',
-            'Scroll of Cure Poison',
-            'Scroll of Resist Poison',
-            'Scroll of Sleep',
-        ]);
-
-        // Spell Cabinet at the end of the dead-end passage near the zombie room
-        addSpellCabinet(objectsGroup, gltfLoader, 21, 16, -Math.PI / 2, 0.7, 0, [
-            'Scroll of Regeneration',
-            'Scroll of Rejuvenate'
-        ]);
-
-        // Shop against the east wall of the 8×8 room, centre row
-        // col 23 is the last floor cell before the east wall (col 24); offsetX pushes it flush
-        addShop(objectsGroup, gltfLoader, 23, 11, -Math.PI / 2, -0.2, 0);
-
-        // Decorative chest beside the merchant (same cell, nudged south, non-interactive)
-        addChest(objectsGroup, gltfLoader, 23, 11, -Math.PI / 2, 0.7, [], '/items/chest1.glb', false);
-
-        // Torch item beside the merchant, nudged north, interactive dropped item
-        gltfLoader.load('/items/torch.glb', (gltf) => {
-            const model = gltf.scene;
-            model.scale.setScalar(0.35);
-            model.position.set(23 * CELL + 0.8, 0.25, 11 * CELL - 0.7);
-            model.rotation.y = -Math.PI / 2;
-
-            const light = new THREE.PointLight(0xffaa00, 2.5, 4);
-            light.position.set(0, 0.4, 0);
-            model.add(light);
-
-            model.traverse((child) => {
-                if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                    child.userData.isDroppedItem = true;
-                    child.userData.itemName = 'Torch';
-                    child.userData.gridCol = 23;
-                    child.userData.gridRow = 11;
-                    child.userData.modelContainer = model;
-                    interactables.push(child);
-                    if (child.material) {
-                        const mats = Array.isArray(child.material) ? child.material : [child.material];
-                        mats.forEach(mat => {
-                            ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
-                                if (mat[mapName]) {
-                                    mat[mapName].magFilter = THREE.LinearFilter;
-                                    mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
-                                    mat[mapName].anisotropy = 16;
-                                }
-                            });
-                        });
-                    }
-                }
-            });
-
-            objectsGroup.add(model);
-        });
-
-        // Portal to Level 2
-        // Positioned at col 13, row 13 against the East wall.
-        // It's on an East wall, so rotate it Math.PI / 2 radians to face West (inward to the room).
-        if (_starterPortalEnabled) {
-            addPortal(objectsGroup, gltfLoader, 13, 13, 2, Math.PI / 2, 0.85, 0);
-        } else {
-            addDisabledPortal(objectsGroup, gltfLoader, 13, 13, Math.PI / 2, 0.85, 0);
-        }
-
-        // Alchemy Workshop in the big east room against the south wall
-        addAlchemyWorkshop(objectsGroup, gltfLoader, 19, 14, 0, 0, 0.85);
-
-        // Damage trap in the big east room near the start (row 9, col 18) — test trap
-        addTrap1(objectsGroup, gltfLoader, 9, 18);
-        // Trap in the long south corridor near the exit
-        addTrap1(objectsGroup, gltfLoader, 21, 10);
-
-        // Teleport torch in the starter room
-        addTeleportTorch(objectsGroup, gltfLoader, 12, 11);
-
-        // Anvil in the big east room against the north wall
-        addAnvil(objectsGroup, gltfLoader, 19, 7, 0, 0, -0.85, ['Life Essence', 'Life Essence']);
-
-
-
-        // Portcullis: Row 7, Col 7.
-        addPortcullis(objectsGroup, gltfLoader, 7, 7);
-
-        // Button for portcullis
-        const { group: portcullisBtn } = createWallButton(+1, { target: 'portcullis' });
-        portcullisBtn.position.set(8 * CELL - 1.0, 1.25, 8 * CELL);
-        objectsGroup.add(portcullisBtn);
-
-        // Statue in the center of the new 5x5 room
-        addStatue(objectsGroup, gltfLoader, 13, 3);
-
-        // Party Confirm NPC — skip if the gate was already opened in a previous visit
-        if (!_starterGateOpened) {
-            addPartyConfirmNPC(objectsGroup, gltfLoader, 9, 13, Math.PI, -1, 0);
-        }
-
-        // Starter gate — already open if the player confirmed their party before
-        _starterGate = addPortcullis(objectsGroup, gltfLoader, 8, 13, Math.PI / 2, _starterGateOpened);
-
-        // Blocking portcullis at the entrance of the mummy area
-        // (starts open; closes when mummy ambush triggers, stays closed after)
-        addPortcullis(objectsGroup, gltfLoader, 10, 1, Math.PI / 2, !_mummyGateOpened);
-
-        // Three-wide portcullis on the far side of the 5x5 room —
-        // rows 2, 3 & 4 all open together so mummies can't be funnelled.
-        // Stays open once mummy gate has been opened.
-        addPortcullis(objectsGroup, gltfLoader, 16, 2, Math.PI / 2, _mummyGateOpened);
-        addPortcullis(objectsGroup, gltfLoader, 16, 3, Math.PI / 2, _mummyGateOpened);
-        addPortcullis(objectsGroup, gltfLoader, 16, 4, Math.PI / 2, _mummyGateOpened);
-
-        // Button to escape mummy room
-        const { group: mummyBtn } = createWallButton(-1, { target: 'escape_mummy_room', targetRow: 3, targetCol: 21 });
-        mummyBtn.position.set(21 * CELL - 1.0, 1.25, 3 * CELL);
-        objectsGroup.add(mummyBtn);
-
-        // Weapon rack at the end of the new dead-end passage in mummy room
-        addWeaponRack(objectsGroup, gltfLoader, 22, 4, Math.PI / 2, 0.65, 0, [
-            'Elven Dagger', 'Mace', 'Dagger', 'Dwarven Axe', 'Spiked Shield'
-        ]);
-
-        // Statue in the corner of the mummy room (activates the starter portal)
-        addPortalActivatorStatue(objectsGroup, gltfLoader, 19, 2, 0);
-
-        // Portal to Level 3 (The Abyssal Crypts) at the end of the dungeon
-        addPortal(objectsGroup, gltfLoader, 1, 22, 3, 0, 0, 0);
-
-    } else if (level === 2) {
-        // Portal back to Level 1 — north wall of main room, col 7 (passage col), row 1.
-        addPortal(objectsGroup, gltfLoader, 7, 1, 1, 0, 0, -0.85);
-
-        // Locked Portcullis at the entrance of the passage (col 7, row 8)
-        addPortcullis(objectsGroup, gltfLoader, 7, 8, 0, _level2PortcullisOpened);
-
-        // Keyhole next to the portcullis on the West wall
-        addKeyhole(objectsGroup, gltfLoader, 7, 8, Math.PI / 2, -0.85, -2.0);
-
-        // Portcullis on the WEST wall of the demon room (col 2, row 17) — player's right side
-        // rotY = Math.PI/2 so it sits flat against the north-south wall correctly
-        addPortcullis(objectsGroup, gltfLoader, 2, 17, Math.PI / 2);
-
-        // Button on the EAST face of the col-2 wall, one row SOUTH of the portcullis
-        // (row 18 = solid wall). Player stands at (18, 3) facing west to press it.
-        const { group: demonBtn } = createWallButton(+1, { target: 'demon_room' });
-        demonBtn.position.set(2 * CELL + 1.0, 1.25, 18 * CELL);
-        objectsGroup.add(demonBtn);
-
-        // Two chests in the chest vault (col 1, rows 18–19), rotY=0 so they face the room
-        addChest(objectsGroup, gltfLoader, 1, 18, 0, 0.7, [
-            { name: 'Gold Coins', quantity: 300 },
-            'Life Essence', 'Mana Berry', 'Scroll of Fireball'
-        ]);
-        addChest(objectsGroup, gltfLoader, 1, 19, 0, 0.7, [
-            { name: 'Gold Coins', quantity: 200 },
-            'Ring of Vigour', 'Ring of Wisdom', 'Ring of Dexterity'
-        ]);
-
-        // Stairs in the pit room
-        addStairs(objectsGroup, gltfLoader, 3, 26, Math.PI);
-
-        // Chest at the end of the long passage
-        addChest(objectsGroup, gltfLoader, 28, 17, -Math.PI / 2, 0.7, [
-            { name: 'Gold Coins', quantity: 500 },
-            'Ruby Ring', 'Mana Potion', 'Life Essence',
-            'Chain Shirt', 'Plate Cuirass'
-        ], '/items/chest1.glb', true, 1);
-
-        // Button to close the hole, placed on the North wall of cell (17, 28) facing South
-        const { group: closeHoleBtn } = createWallButton(+1, { target: 'close_hole', gridRow: 16, gridCol: 28 });
-        closeHoleBtn.position.set(28 * CELL, 1.25, 16 * CELL + 1.0);
-        closeHoleBtn.rotation.y = -Math.PI / 2;
-        objectsGroup.add(closeHoleBtn);
-
-        // Trap in the long east passage
-        addTrap1(objectsGroup, gltfLoader, 10, 17);
-        // Trap at the start of the corridor leaving the demon room (east exit)
-        addTrap1(objectsGroup, gltfLoader, 17, 10);
-    } else if (level === 3) {
-        // ── Portals ──────────────────────────────────────────────────────────
-        // Return portal to Level 1 — behind the player at spawn
-        addPortal(objectsGroup, gltfLoader, 11, 21, 1, Math.PI, 0, 0.85);
-
-        // Weapon rack in South-West room (row 19, col 1 against west wall)
-        addWeaponRack(objectsGroup, gltfLoader, 1, 19, -Math.PI / 2, -0.15, 0, [
-            "Vampiric Dagger", "Silver Mace", "Warden's Shield"
-        ]);
-
-        // Spell Cabinet in North-East room (row 3, col 19)
-        addSpellCabinet(objectsGroup, gltfLoader, 19, 2, 0, 0.45, -1.0, [
-            "Scroll of Sleep"
-        ]);
-
-        // Chest in North-West room (row 2, col 3)
-        addChest(objectsGroup, gltfLoader, 3, 2, 0, -1.0, [
-            "Rune Pendant",
-            "Silver Bolts",
-        ]);
-
-        // Chest in South-East room (row 18, col 19)
-        addChest(objectsGroup, gltfLoader, 19, 18, 0, -0.8, [
-            "Sun Pendant",
-            "Longsword"
-        ]);
-
-        // Exit portal (game escape) at the far end of the exit corridor
-        addPortal(objectsGroup, gltfLoader, 20, 21, -1, Math.PI, 0, 0.85);
-
-        // Ethereal Egg in the center of the minotaur room (swapped with level 1 mummy room)
-        addEtherealEgg(objectsGroup, gltfLoader, 11, 11);
-        // Trap guarding the entry corridor to the central minotaur room
-        addTrap1(objectsGroup, gltfLoader, 16, 10);
-    }
+    if (level === 1) spawnLevel1Objects(ctx);
+    else if (level === 2) spawnLevel2Objects(ctx);
+    else if (level === 3) spawnLevel3Objects(ctx);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

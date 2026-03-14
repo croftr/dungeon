@@ -1,0 +1,68 @@
+import { CELL } from '../../map.js';
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  LEVEL 2 – The Deep Passage
+//  Object/container/portal/gate placement.
+//  Called by spawnObjectsForLevel() in objects.js with a ctx containing all
+//  helper functions and level-state flags.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function spawnLevel2Objects(ctx) {
+    const {
+        group, loader,
+        addChest, addStairs, addTrap1,
+        addPortal, addPortcullis, addKeyhole,
+        createWallButton,
+        level2PortcullisOpened,
+    } = ctx;
+
+    // ── Portal back to Level 1 ────────────────────────────────────────────────
+    addPortal(group, loader, 7, 1, 1, 0, 0, -0.85);
+
+    // ── Portcullises & Keys ───────────────────────────────────────────────────
+    // Locked portcullis at the passage entrance (col 7, row 8)
+    addPortcullis(group, loader, 7, 8, 0, level2PortcullisOpened);
+
+    // Keyhole next to the portcullis on the West wall
+    addKeyhole(group, loader, 7, 8, Math.PI / 2, -0.85, -2.0);
+
+    // Portcullis on the WEST wall of the demon room (col 2, row 17)
+    addPortcullis(group, loader, 2, 17, Math.PI / 2);
+
+    // Button on the EAST face of col-2 wall, one row south of the portcullis
+    const { group: demonBtn } = createWallButton(+1, { target: 'demon_room' });
+    demonBtn.position.set(2 * CELL + 1.0, 1.25, 18 * CELL);
+    group.add(demonBtn);
+
+    // ── Chests ────────────────────────────────────────────────────────────────
+    // Two chests in the chest vault (col 1, rows 18–19)
+    addChest(group, loader, 1, 18, 0, 0.7, [
+        { name: 'Gold Coins', quantity: 300 },
+        'Life Essence', 'Mana Berry', 'Scroll of Fireball'
+    ]);;
+    addChest(group, loader, 1, 19, 0, 0.7, [
+        { name: 'Gold Coins', quantity: 200 },
+        'Ring of Strength', 'Ring of Wisdom', 'Ring of Dexterity'
+    ]);
+
+    // Chest at the end of the long passage
+    addChest(group, loader, 28, 17, -Math.PI / 2, 0.7, [
+        { name: 'Gold Coins', quantity: 500 },
+        'Ruby Ring', 'Mana Potion', 'Life Essence',
+        'Chain Shirt', 'Plate Cuirass'
+    ], '/items/chest1.glb', true, 1);
+
+    // ── Stairs ────────────────────────────────────────────────────────────────
+    addStairs(group, loader, 3, 26, Math.PI);
+
+    // ── Buttons ───────────────────────────────────────────────────────────────
+    // Button to close the hole, on the North wall of cell (17, 28) facing South
+    const { group: closeHoleBtn } = createWallButton(+1, { target: 'close_hole', gridRow: 16, gridCol: 28 });
+    closeHoleBtn.position.set(28 * CELL, 1.25, 16 * CELL + 1.0);
+    closeHoleBtn.rotation.y = -Math.PI / 2;
+    group.add(closeHoleBtn);
+
+    // ── Traps ─────────────────────────────────────────────────────────────────
+    addTrap1(group, loader, 10, 17);  // long east passage
+    addTrap1(group, loader, 17, 10);  // corridor leaving the demon room
+}

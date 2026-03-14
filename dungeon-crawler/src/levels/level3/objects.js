@@ -1,0 +1,54 @@
+// ─────────────────────────────────────────────────────────────────────────────
+//  LEVEL 3 – The Abyssal Crypts
+//  Object/container/portal/gate placement.
+//  Called by spawnObjectsForLevel() in objects.js with a ctx containing all
+//  helper functions and level-state flags.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function spawnLevel3Objects(ctx) {
+    const {
+        group, loader,
+        addChest, addWeaponRack, addSpellCabinet, addEtherealEgg,
+        addPortal, addTrap1,
+    } = ctx;
+
+    // ── Portals ───────────────────────────────────────────────────────────────
+    // Return portal to Level 1 — behind the player at spawn
+    addPortal(group, loader, 11, 21, 1, Math.PI, 0, 0.85);
+
+    // Exit portal (game end) at the far end of the exit corridor
+    addPortal(group, loader, 20, 21, -1, Math.PI, 0, 0.85);
+
+    // ── Weapon Rack ───────────────────────────────────────────────────────────
+    // South-West room (row 19, col 1 against west wall)
+    addWeaponRack(group, loader, 1, 19, -Math.PI / 2, -0.15, 0, [
+        "Vampiric Dagger", "Silver Mace", "Warden's Shield"
+    ]);
+
+    // ── Spell Cabinet ─────────────────────────────────────────────────────────
+    // North-East room (row 3, col 19)
+    addSpellCabinet(group, loader, 19, 2, 0, 0.45, -1.0, [
+        "Scroll of Sleep"
+    ]);
+
+    // ── Chests ────────────────────────────────────────────────────────────────
+    // North-West room (row 2, col 3)
+    addChest(group, loader, 3, 2, 0, -1.0, [
+        "Rune Pendant",
+        "Silver Bolts",
+    ]);
+
+    // South-East room (row 18, col 19)
+    addChest(group, loader, 19, 18, 0, -0.8, [
+        "Sun Pendant",
+        "Longsword"
+    ]);
+
+    // ── Ethereal Egg ──────────────────────────────────────────────────────────
+    // Center of the minotaur room — restoration point
+    addEtherealEgg(group, loader, 11, 11);
+
+    // ── Trap ──────────────────────────────────────────────────────────────────
+    // Guards the entry corridor to the central minotaur room
+    addTrap1(group, loader, 16, 10);
+}
