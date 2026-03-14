@@ -10,9 +10,17 @@
     { "id": "n7", "label": "+1 Vitality, +1 Strength", "type": "stat", "benefit": { "vitality": 1, "strength": 1 }, "edges": ["n8"] },
     { "id": "n8", "label": "Shield Master", "type": "skill", "benefit": { "skill": "Shield Master" }, "edges": ["n9"] },
     { "id": "n9", "label": "+2 Vitality", "type": "stat", "benefit": { "vitality": 2 }, "edges": ["n10", "n11"] },
-    { "id": "n10", "label": "Axe Tactician", "type": "skill", "benefit": { "skill": "Axe Tactician" }, "edges": ["n12"] },
+    { "id": "n10", "label": "Axe Tactician I", "type": "skill", "benefit": { "skill": "Axe Tactician" }, "edges": ["n12"] },
     { "id": "n11", "label": "+1 Strength, +1 Resilience", "type": "stat", "benefit": { "strength": 1, "resilience": 1 }, "edges": ["n12"] },
-    { "id": "n12", "label": "Axe Master", "type": "skill", "benefit": { "skill": "Axe Master" }, "edges": [] }
+    { "id": "n12", "label": "Axe Tactician II", "type": "skill", "benefit": { "skill": "Axe Tactician" }, "edges": ["n13"] },
+    { "id": "n13", "label": "+2 Strength", "type": "stat", "benefit": { "strength": 2 }, "edges": ["n14", "n15"] },
+    { "id": "n14", "label": "Axe Tactician III", "type": "skill", "benefit": { "skill": "Axe Tactician" }, "edges": ["n16"] },
+    { "id": "n15", "label": "+1 Vitality, +1 Resilience", "type": "stat", "benefit": { "vitality": 1, "resilience": 1 }, "edges": ["n16"] },
+    { "id": "n16", "label": "Axe Master I", "type": "skill", "benefit": { "skill": "Axe Master" }, "edges": ["n17"] },
+    { "id": "n17", "label": "+2 Strength", "type": "stat", "benefit": { "strength": 2 }, "edges": ["n18", "n19"] },
+    { "id": "n18", "label": "Axe Master II", "type": "skill", "benefit": { "skill": "Axe Master" }, "edges": ["n20"] },
+    { "id": "n19", "label": "+1 Vitality, +1 Resilience", "type": "stat", "benefit": { "vitality": 1, "resilience": 1 }, "edges": ["n20"] },
+    { "id": "n20", "label": "Axe Master III", "type": "skill", "benefit": { "skill": "Axe Master" }, "edges": [] }
   ],
   "positions": {
     "start": [200, 30],
@@ -27,6 +35,14 @@
     "n9":  [200, 450],
     "n10": [90,  510],
     "n11": [310, 510],
-    "n12": [200, 570]
+    "n12": [200, 570],
+    "n13": [200, 630],
+    "n14": [90,  690],
+    "n15": [310, 690],
+    "n16": [200, 750],
+    "n17": [200, 810],
+    "n18": [90,  870],
+    "n19": [310, 870],
+    "n20": [200, 930]
   }
 }
