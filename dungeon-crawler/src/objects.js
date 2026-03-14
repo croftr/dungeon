@@ -8,7 +8,7 @@ import { showMessage, drawMinimap, updateStatus } from './minimap.js';
 import { getItemDef } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refreshPartyCards, setHp, applyStatusEffect } from './party.js';
 import { addLogEntry } from './battle-log.js';
-import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound } from './audio.js';
+import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playSoundByUrl } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
 import POTIONS_DATA from './data/potions.json';
 import { triggerMummyAmbush } from './monster.js';
@@ -1113,6 +1113,7 @@ function openTrapDisarmModal(trapObj) {
 
     newAttempt.addEventListener('click', () => {
         if (!_activeTrapObj) return;
+        playSoundByUrl('/sounds/actions/disarm-trap.mp3');
         const success = Math.random() < TRAP_DISARM_CHANCE;
         const resultEl2 = document.getElementById('trap-disarm-result');
 

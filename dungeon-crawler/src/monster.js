@@ -377,11 +377,18 @@ function _spawnTreekin(parentMonster, scene, offsetRow, offsetCol) {
  */
 function _triggerTreemanAwakening(treeman, scene) {
   if (treeman._awakeningUsed) return;
-  treeman._awakeningUsed = true;
 
-  // Find the awakening variant
+  // Find the awakening variant — it's loaded asynchronously, so retry if not ready yet
   const variant = treeman.attackVariants?.find(v => v && v.name === 'treemanAwakening');
-  if (!variant || !variant.action) return;
+  if (!variant || !variant.action) {
+    treeman._awakeningRetries = (treeman._awakeningRetries ?? 0) + 1;
+    if (treeman._awakeningRetries <= 10) {
+      setTimeout(() => _triggerTreemanAwakening(treeman, scene), 300);
+    }
+    return;
+  }
+
+  treeman._awakeningUsed = true;
 
   // Force-play the cast animation
   const attackAction = variant.action;
@@ -1458,6 +1465,13 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
 
       if (m.name === 'Treeman') {
         setZoneMusic('/sounds/backing/demon-room.mp3');
+      }
+
+      if (m.name === 'Minotaur' && (m.level ?? 1) === 3 && m.id === 300) {
+        if (window._saveFlags && !window._saveFlags.hasSeenMinotaurDeathVideo) {
+          window._saveFlags.hasSeenMinotaurDeathVideo = true;
+          if (window.playMinotaurDeathVideo) window.playMinotaurDeathVideo();
+        }
       }
 
       spawnCorpse(m.gridCol, m.gridRow, droppedItems);

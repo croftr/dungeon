@@ -7,12 +7,14 @@
 /** @type {Map<string, {dealt: number, taken: number}>} */
 let _stats = new Map();
 let _panelVisible = false;
+let _sessionStart = null;
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /** Clear all accumulated stats (called by the Reset button). */
 export function resetBattleStats() {
   _stats = new Map();
+  _sessionStart = null;
   _refreshPanel();
 }
 
@@ -37,7 +39,13 @@ export function showBattleStatsIcon() {}
 
 function _getOrCreate(name) {
   if (!_stats.has(name)) _stats.set(name, { dealt: 0, taken: 0 });
+  if (!_sessionStart) _sessionStart = Date.now();
   return _stats.get(name);
+}
+
+function _elapsedMinutes() {
+  if (!_sessionStart) return 0;
+  return (Date.now() - _sessionStart) / 60000;
 }
 
 function _closePanel() {
@@ -71,21 +79,30 @@ function _renderPanel(panel) {
   if (_stats.size === 0) {
     body.innerHTML = '<div class="bsp-empty">No combat data.</div>';
   } else {
+    const mins = _elapsedMinutes();
     const rows = [..._stats.entries()]
       .sort((a, b) => b[1].dealt - a[1].dealt)
-      .map(([name, { dealt, taken }]) => `
+      .map(([name, { dealt, taken }]) => {
+        const dpm = mins > 0 ? dealt / mins : 0;
+        const dpmStr = dpm >= 10 ? Math.round(dpm).toLocaleString()
+                     : dpm >= 1  ? dpm.toFixed(1)
+                     :             dpm.toFixed(2);
+        return `
         <div class="bsp-row">
           <span class="bsp-name">${name}</span>
           <span class="bsp-dealt" title="Damage dealt">${dealt.toLocaleString()}</span>
           <span class="bsp-taken" title="Damage taken">${taken.toLocaleString()}</span>
+          <span class="bsp-dpm" title="Damage dealt per minute">${dpmStr}</span>
         </div>
-      `).join('');
+      `;
+      }).join('');
 
     body.innerHTML = `
       <div class="bsp-header-row">
         <span class="bsp-name"></span>
         <span class="bsp-col-label" title="Damage dealt">DMG OUT</span>
         <span class="bsp-col-label" title="Damage taken">DMG IN</span>
+        <span class="bsp-col-label" title="Damage dealt per minute">D/MIN</span>
       </div>
       ${rows}
     `;

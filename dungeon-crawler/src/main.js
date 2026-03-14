@@ -74,13 +74,14 @@ initPlayer(start.row, start.col, camera);
 let hasSeenOgreVideo = false;
 let hasSeenPrepVideo = false;
 let hasSeenMinotaurVideo = false;
+let hasSeenMinotaurDeathVideo = false;
 let hasSeenDemonVideo = false;
 let hasSeenAquaManVideo = false;
 window.hasSeenTreemanVideo = false;
 let prepVideoTimer = null;
 
 // Bridge video flags to save system via window._saveFlags
-window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenDemonVideo, hasSeenAquaManVideo };
+window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenMinotaurDeathVideo, hasSeenDemonVideo, hasSeenAquaManVideo };
 
 setCallbacks({
   moved() {
@@ -164,7 +165,7 @@ setCallbacks({
           flashPortraitHit(i);
         });
 
-        // Wait 2 seconds before teleporting (while still blacked out)
+        // Wait 1 second before teleporting and playing the video
         setTimeout(() => {
           // Teleport to pit arrival chamber (row 22, col 3)
           player.gridRow = 22;
@@ -178,7 +179,7 @@ setCallbacks({
           drawMinimap();
           updateStatus();
 
-          // Reveal the room only after video ends (or immediately if already seen)
+          // Reveal the room only after video ends
           function revealRoom() {
             window._cutscenePlaying = false;
             if (blackout) {
@@ -189,14 +190,13 @@ setCallbacks({
             }
           }
 
+          // Force play the video as the transition experience
           if (!hasSeenAquaManVideo) {
             hasSeenAquaManVideo = true;
             window._saveFlags.hasSeenAquaManVideo = true;
-            playAquaManVideo(revealRoom);
-          } else {
-            setTimeout(revealRoom, 200);
           }
-        }, 2000);
+          playAquaManVideo(revealRoom);
+        }, 1000);
       } else if (cell === CELL_STAIRS_UP) {
         tweenGroup.removeAll();
         player.moving = false;
@@ -638,6 +638,51 @@ if (skipMinotaurBtn) skipMinotaurBtn.addEventListener('click', finishMinotaurVid
 if (minotaurVideo) minotaurVideo.addEventListener('ended', finishMinotaurVideo);
 
 // ─────────────────────────────────────────────
+//  MINOTAUR DEATH VIDEO OVERLAY
+// ─────────────────────────────────────────────
+const minotaurDeathOverlay = document.getElementById('minotaur-death-video-overlay');
+const minotaurDeathVideo = document.getElementById('minotaur-death-video');
+const skipMinotaurDeathBtn = document.getElementById('skip-minotaur-death-btn');
+let _minotaurDeathCallback = null;
+
+window.playMinotaurDeathVideo = function (onComplete) {
+  _minotaurDeathCallback = onComplete;
+  if (!minotaurDeathOverlay || !minotaurDeathVideo) {
+    if (_minotaurDeathCallback) _minotaurDeathCallback();
+    return;
+  }
+  minotaurDeathOverlay.classList.remove('hidden');
+
+  setTimeout(() => {
+    minotaurDeathOverlay.style.opacity = '1';
+    minotaurDeathVideo.play().catch(e => {
+      console.warn("Minotaur death video play failed:", e);
+      finishMinotaurDeathVideo();
+    });
+  }, 50);
+};
+
+function finishMinotaurDeathVideo() {
+  if (!minotaurDeathOverlay) {
+    if (_minotaurDeathCallback) _minotaurDeathCallback();
+    return;
+  }
+  minotaurDeathOverlay.style.opacity = '0';
+
+  setTimeout(() => {
+    minotaurDeathVideo.pause();
+    minotaurDeathOverlay.classList.add('hidden');
+    if (_minotaurDeathCallback) {
+      _minotaurDeathCallback();
+      _minotaurDeathCallback = null;
+    }
+  }, 1500);
+}
+
+if (skipMinotaurDeathBtn) skipMinotaurDeathBtn.addEventListener('click', finishMinotaurDeathVideo);
+if (minotaurDeathVideo) minotaurDeathVideo.addEventListener('ended', finishMinotaurDeathVideo);
+
+// ─────────────────────────────────────────────
 //  DEMON VIDEO OVERLAY
 // ─────────────────────────────────────────────
 const demonOverlay = document.getElementById('demon-video-overlay');
@@ -1012,10 +1057,11 @@ console.log('Map: 0=floor 1=wall 2=start 3=exit | Controls: W/S=move  Q/E=turn  
     hasSeenOgreVideo = !!save.flags.hasSeenOgreVideo;
     hasSeenPrepVideo = !!save.flags.hasSeenPrepVideo;
     hasSeenMinotaurVideo = !!save.flags.hasSeenMinotaurVideo;
+    hasSeenMinotaurDeathVideo = !!save.flags.hasSeenMinotaurDeathVideo;
     hasSeenDemonVideo = !!save.flags.hasSeenDemonVideo;
     hasSeenAquaManVideo = !!save.flags.hasSeenAquaManVideo;
     window.hasSeenTreemanVideo = !!save.flags.hasSeenTreemanVideo;
-    window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenDemonVideo, hasSeenAquaManVideo };
+    window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenMinotaurDeathVideo, hasSeenDemonVideo, hasSeenAquaManVideo };
   }
 
   // 4. Restore auto-attack toggles

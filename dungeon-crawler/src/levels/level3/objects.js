@@ -33,7 +33,7 @@ export function spawnLevel3Objects(ctx) {
 
     // ── Chests ────────────────────────────────────────────────────────────────
     // North-West room (row 2, col 3)
-    addChest(group, loader, 3, 2, 0, -1.0, [
+    addChest(group, loader, 3, 2, 0, -0.8, [
         "Rune Pendant",
         "Silver Bolts",
     ]);

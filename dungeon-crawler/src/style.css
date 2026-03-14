@@ -5034,7 +5034,7 @@ body.cursor-interact #renderer-canvas {
 
 .bsp-header-row {
   display: grid;
-  grid-template-columns: 1fr 64px 64px;
+  grid-template-columns: 1fr 64px 64px 52px;
   gap: 4px;
   margin-bottom: 4px;
   padding-bottom: 4px;
@@ -5051,7 +5051,7 @@ body.cursor-interact #renderer-canvas {
 
 .bsp-row {
   display: grid;
-  grid-template-columns: 1fr 64px 64px;
+  grid-template-columns: 1fr 64px 64px 52px;
   gap: 4px;
   padding: 3px 0;
   border-bottom: 1px solid rgba(50, 40, 25, 0.5);
@@ -5077,6 +5077,13 @@ body.cursor-interact #renderer-canvas {
 .bsp-taken {
   color: #6090c0;
   text-align: right;
+}
+
+.bsp-dpm {
+  color: #a0c060;
+  text-align: right;
+  font-size: 0.85em;
+  opacity: 0.85;
 }
 
 .bsp-empty {

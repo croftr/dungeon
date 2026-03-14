@@ -464,13 +464,13 @@
   },
   "aqua_man": {
     "name": "Aqua Man",
-    "hp": 260,
-    "defence": 10,
+    "hp": 270,
+    "defence": 11,
     "xp": 350,
     "attackSpeed": 1.2,
     "stats": {
-      "strength": 16,
-      "dexterity": 18,
+      "strength": 18,
+      "dexterity": 20,
       "vitality": 14,
       "intelligence": 22,
       "resilience": 14
