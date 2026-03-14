@@ -109,7 +109,7 @@ function showDramaticLevelUp(levelUps) {
  * choose a skill and allocate stat points, then confirms.
  * Returns an array of { name, level } events for each level gained.
  */
-function checkLevelUp(m) {
+export function checkLevelUp(m) {
   const events = [];
   while (m.level < maxLevel) {
     const threshold = xpThresholds[m.level];

@@ -1,40 +1,264 @@
 {
   "nodes": [
-    { "id": "start", "label": "Ranger Initiate", "type": "start", "edges": ["n1"] },
-    { "id": "n1", "label": "+2 Dexterity", "type": "stat", "benefit": { "dexterity": 2 }, "edges": ["n2", "n3"] },
-    { "id": "n2", "label": "True Shot", "type": "skill", "benefit": { "skill": "True Shot" }, "edges": ["n4"] },
-    { "id": "n3", "label": "+1 Strength, +1 Vitality", "type": "stat", "benefit": { "strength": 1, "vitality": 1 }, "edges": ["n4"] },
-    { "id": "n4", "label": "Double Attack", "type": "skill", "benefit": { "skill": "Double Attack" }, "edges": ["n5"] },
-    { "id": "n5", "label": "+2 Dexterity", "type": "stat", "benefit": { "dexterity": 2 }, "edges": ["n6", "n7"] },
-    { "id": "n6", "label": "Crossbow Tactician I", "type": "skill", "benefit": { "skill": "Crossbow Tactician" }, "edges": ["n8"] },
-    { "id": "n7", "label": "+1 Resilience, +1 Vitality", "type": "stat", "benefit": { "resilience": 1, "vitality": 1 }, "edges": ["n8"] },
-    { "id": "n8", "label": "Crossbow Tactician II", "type": "skill", "benefit": { "skill": "Crossbow Tactician" }, "edges": ["n9"] },
-    { "id": "n9", "label": "+2 Dexterity", "type": "stat", "benefit": { "dexterity": 2 }, "edges": ["n10", "n11"] },
-    { "id": "n10", "label": "Crossbow Master I", "type": "skill", "benefit": { "skill": "Crossbow Master" }, "edges": ["n12"] },
-    { "id": "n11", "label": "+1 Strength, +1 Resilience", "type": "stat", "benefit": { "strength": 1, "resilience": 1 }, "edges": ["n12"] },
-    { "id": "n12", "label": "Crossbow Master II", "type": "skill", "benefit": { "skill": "Crossbow Master" }, "edges": ["n13"] },
-    { "id": "n13", "label": "+2 Dexterity", "type": "stat", "benefit": { "dexterity": 2 }, "edges": ["n14", "n15"] },
-    { "id": "n14", "label": "Crossbow Tactician III", "type": "skill", "benefit": { "skill": "Crossbow Tactician" }, "edges": ["n16"] },
-    { "id": "n15", "label": "+1 Strength, +1 Resilience", "type": "stat", "benefit": { "strength": 1, "resilience": 1 }, "edges": ["n16"] },
-    { "id": "n16", "label": "Crossbow Master III", "type": "skill", "benefit": { "skill": "Crossbow Master" }, "edges": [] }
+    {
+      "id": "start",
+      "label": "Ranger Initiate",
+      "type": "start",
+      "edges": [
+        "n1"
+      ]
+    },
+    {
+      "id": "n1",
+      "label": "+2 Dexterity",
+      "type": "stat",
+      "benefit": {
+        "dexterity": 2
+      },
+      "edges": [
+        "n2",
+        "n3"
+      ]
+    },
+    {
+      "id": "n2",
+      "label": "True Shot",
+      "type": "skill",
+      "benefit": {
+        "skill": "True Shot"
+      },
+      "edges": [
+        "n4"
+      ]
+    },
+    {
+      "id": "n3",
+      "label": "+1 Strength, +1 Vitality",
+      "type": "stat",
+      "benefit": {
+        "strength": 1,
+        "vitality": 1
+      },
+      "edges": [
+        "n4"
+      ]
+    },
+    {
+      "id": "n4",
+      "label": "Double Attack",
+      "type": "skill",
+      "benefit": {
+        "skill": "Double Attack"
+      },
+      "edges": [
+        "n5"
+      ]
+    },
+    {
+      "id": "n5",
+      "label": "+2 Dexterity",
+      "type": "stat",
+      "benefit": {
+        "dexterity": 2
+      },
+      "edges": [
+        "n6",
+        "n7"
+      ]
+    },
+    {
+      "id": "n6",
+      "label": "Crossbow Tactician I",
+      "type": "skill",
+      "benefit": {
+        "skill": "Crossbow Tactician"
+      },
+      "edges": [
+        "n8"
+      ]
+    },
+    {
+      "id": "n7",
+      "label": "+1 Resilience, +1 Vitality",
+      "type": "stat",
+      "benefit": {
+        "resilience": 1,
+        "vitality": 1
+      },
+      "edges": [
+        "n8"
+      ]
+    },
+    {
+      "id": "n8",
+      "label": "Crossbow Tactician II",
+      "type": "skill",
+      "benefit": {
+        "skill": "Crossbow Tactician"
+      },
+      "edges": [
+        "n9"
+      ]
+    },
+    {
+      "id": "n9",
+      "label": "+2 Strength",
+      "type": "stat",
+      "benefit": {
+        "strength": 2
+      },
+      "edges": [
+        "n10",
+        "n11"
+      ]
+    },
+    {
+      "id": "n10",
+      "label": "Crossbow Master I",
+      "type": "skill",
+      "benefit": {
+        "skill": "Crossbow Master"
+      },
+      "edges": [
+        "n12"
+      ]
+    },
+    {
+      "id": "n11",
+      "label": "+1 Strength, +1 Resilience",
+      "type": "stat",
+      "benefit": {
+        "strength": 1,
+        "resilience": 1
+      },
+      "edges": [
+        "n12"
+      ]
+    },
+    {
+      "id": "n12",
+      "label": "Crossbow Master II",
+      "type": "skill",
+      "benefit": {
+        "skill": "Crossbow Master"
+      },
+      "edges": [
+        "n13"
+      ]
+    },
+    {
+      "id": "n13",
+      "label": "+2 Dexterity",
+      "type": "stat",
+      "benefit": {
+        "dexterity": 2
+      },
+      "edges": [
+        "n14",
+        "n15"
+      ]
+    },
+    {
+      "id": "n14",
+      "label": "Crossbow Tactician III",
+      "type": "skill",
+      "benefit": {
+        "skill": "Crossbow Tactician"
+      },
+      "edges": [
+        "n16"
+      ]
+    },
+    {
+      "id": "n15",
+      "label": "+1 Strength, +1 Resilience",
+      "type": "stat",
+      "benefit": {
+        "strength": 1,
+        "resilience": 1
+      },
+      "edges": [
+        "n16"
+      ]
+    },
+    {
+      "id": "n16",
+      "label": "Crossbow Master III",
+      "type": "skill",
+      "benefit": {
+        "skill": "Crossbow Master"
+      },
+      "edges": []
+    }
   ],
   "positions": {
-    "start": [200, 30],
-    "n1":  [200, 90],
-    "n2":  [90,  150],
-    "n3":  [310, 150],
-    "n4":  [200, 210],
-    "n5":  [200, 270],
-    "n6":  [90,  330],
-    "n7":  [310, 330],
-    "n8":  [200, 390],
-    "n9":  [200, 450],
-    "n10": [90,  510],
-    "n11": [310, 510],
-    "n12": [200, 570],
-    "n13": [200, 630],
-    "n14": [90,  690],
-    "n15": [310, 690],
-    "n16": [200, 750]
+    "start": [
+      200,
+      30
+    ],
+    "n1": [
+      200,
+      90
+    ],
+    "n2": [
+      90,
+      150
+    ],
+    "n3": [
+      310,
+      150
+    ],
+    "n4": [
+      200,
+      210
+    ],
+    "n5": [
+      200,
+      270
+    ],
+    "n6": [
+      90,
+      330
+    ],
+    "n7": [
+      310,
+      330
+    ],
+    "n8": [
+      200,
+      390
+    ],
+    "n9": [
+      200,
+      450
+    ],
+    "n10": [
+      90,
+      510
+    ],
+    "n11": [
+      310,
+      510
+    ],
+    "n12": [
+      200,
+      570
+    ],
+    "n13": [
+      200,
+      630
+    ],
+    "n14": [
+      90,
+      690
+    ],
+    "n15": [
+      310,
+      690
+    ],
+    "n16": [
+      200,
+      750
+    ]
   }
 }

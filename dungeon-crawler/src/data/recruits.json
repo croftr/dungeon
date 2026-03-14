@@ -3,6 +3,7 @@
         "id": "recruit_1",
         "name": "Elrond",
         "skillTree": "elrond",
+        "startXp": 0,
         "job": "Ranger",
         "race": "Wood Elf",
         "stats": {
@@ -42,6 +43,7 @@
         "id": "recruit_2",
         "name": "Alaric",
         "skillTree": "alaric",
+        "startXp": 0,
         "job": "Paladin",
         "race": "Human",
         "stats": {
@@ -82,6 +84,7 @@
         "id": "recruit_3",
         "name": "Thorek",
         "skillTree": "thorek",
+        "startXp": 0,
         "job": "Warrior",
         "race": "Dwarf",
         "stats": {
@@ -123,6 +126,7 @@
         "id": "recruit_4",
         "name": "Merlin",
         "skillTree": "merlin",
+        "startXp": 0,
         "job": "Wizard",
         "race": "Human",
         "stats": {
@@ -160,6 +164,7 @@
         "id": "recruit_5",
         "name": "Korg",
         "skillTree": "korg",
+        "startXp": 0,
         "job": "Barbarian",
         "race": "Human",
         "stats": {
@@ -197,6 +202,7 @@
         "id": "recruit_6",
         "name": "Baldur",
         "skillTree": "baldur",
+        "startXp": 0,
         "job": "Ranger",
         "race": "Dwarf",
         "stats": {
@@ -234,6 +240,7 @@
         "id": "recruit_7",
         "name": "Lumni",
         "skillTree": "lumni",
+        "startXp": 0,
         "job": "War Dancer",
         "race": "High Elf",
         "stats": {

@@ -5,6 +5,7 @@ import { CELL, WALL_H, findCell } from './map.js';
 import { isInFrontOfPlayer } from './player.js';
 import { interactables } from './objects.js';
 import RECRUITS_DATA from './data/recruits.json';
+import { checkLevelUp } from './leveling.js';
 
 const _recruitRaycaster = new THREE.Raycaster();
 const _recruitMouse = new THREE.Vector2();
@@ -250,8 +251,9 @@ function recruitCharacter(r) {
         name: r.name,
         stats: { ...r.stats },
         // Leveling: characters start at level 0 with no skills
+        // startXp in recruits.json can be set to a non-zero value for testing
         level: 0,
-        xp: 0,
+        xp: r.startXp ?? 0,
         statBonuses: { strength: 0, dexterity: 0, vitality: 0, intelligence: 0, resilience: 0 },
         skillTreeId: r.skillTree ?? null,
         acquiredNodes: ['start'],
@@ -271,6 +273,9 @@ function recruitCharacter(r) {
     };
 
     extendPartyData();
+
+    // Apply startXp level-ups so pending node picks are awarded immediately
+    if (r.startXp) checkLevelUp(party[freeIndex]);
 
     if (window.onPartyChanged) window.onPartyChanged();
 }
