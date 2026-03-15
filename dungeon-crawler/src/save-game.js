@@ -158,8 +158,6 @@ export function consumePendingLoad() {
         delete m.unspentStatPoints;
         delete m.pendingSkillChoice;
         delete m.pendingSkillChoiceIndex;
-        // Clear stale skillProgression (no longer needed — tree is authoritative)
-        delete m.skillProgression;
       }
     }
     return save;

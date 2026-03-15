@@ -19,17 +19,6 @@
             "Cure Poison Potion",
             "Minor Rejuvenate Potion"
         ],
-        "skillProgression": [
-            "Entangle",
-            "Double Attack",
-            "Hunter's Eye",
-            "Bow Tactician",
-            "Bow Tactician",
-            "Bow Tactician",
-            "Bow Master",
-            "Bow Master",
-            "Bow Master"
-        ],
         "startingSkills": [],
         "image": "/heros/elf_ranger_head.jpg",
         "leftHand": "Short Bow",
@@ -55,20 +44,6 @@
             "resilience": 8
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
-        "skillProgression": [
-            "Sanctuary",
-            "Holy Radiance",
-            "Shield Master",
-            "Shield Master",
-            "Shield Master",
-            "Shield Master",
-            "Mace Tactician",
-            "Mace Tactician",
-            "Mace Tactician",
-            "Mace Master",
-            "Mace Master",
-            "Mace Master"
-        ],
         "startingSkills": [],
         "image": "/heros/human_paladin.png",
         "leftHand": "Sword",
@@ -96,21 +71,6 @@
             "resilience": 10
         },
         "bio": "A stout and hearty fighter from the mountainous deeps. Thorek believes every problem can be solved with a sharp axe and enough ale.",
-        "skillProgression": [
-            "Sunder Armor",
-            "Rampart",
-            "Miners Light",
-            "Shield Master",
-            "Shield Master",
-            "Shield Master",
-            "Shield Master",
-            "Axe Tactician",
-            "Axe Tactician",
-            "Axe Tactician",
-            "Axe Master",
-            "Axe Master",
-            "Axe Master"
-        ],
         "startingSkills": [],
         "image": "/dwarf_barbarian_head.png",
         "leftHand": "Axe",
@@ -138,18 +98,6 @@
             "resilience": 5
         },
         "bio": "An eccentric scholar weaving arcane tapestries. Merlin's thirst for forbidden knowledge is matched only by his formidable spellcraft.",
-        "skillProgression": [
-            "Arcane Lantern",
-            "Runic Scholar",
-            "Mana Tap",
-            "Staff Tactician",
-            "Staff Tactician",
-            "Staff Master",
-            "Staff Master",
-            "Pyromancer",
-            "Pyromancer",
-            "Pyromancer"
-        ],
         "startingSkills": [],
         "startingInventory": [
             "Scroll of Fireball"
@@ -176,16 +124,6 @@
             "resilience": 6
         },
         "bio": "A raging storm of muscle and steel. Korg thrives in the heat of battle, leaving devastation in his wake.",
-        "skillProgression": [
-            "Berserk",
-            "Warcry",
-            "Two-Handed Tactician",
-            "Two-Handed Tactician",
-            "Two-Handed Tactician",
-            "Two-Handed Master",
-            "Two-Handed Master",
-            "Two-Handed Master"
-        ],
         "startingSkills": [],
         "image": "/heros/human_barbarian_head.png",
         "leftHand": "Greataxe",
@@ -214,16 +152,6 @@
             "resilience": 7
         },
         "bio": "A keen-eyed marksman who traded the mines for the open hunt. Baldur's crossbow never misses its mark.",
-        "skillProgression": [
-            "True Shot",
-            "Double Attack",
-            "Crossbow Tactician",
-            "Crossbow Tactician",
-            "Crossbow Tactician",
-            "Crossbow Master",
-            "Crossbow Master",
-            "Crossbow Master"
-        ],
         "startingSkills": [],
         "image": "/heros/dwarf-ranger.png",
         "leftHand": "Crossbow",
@@ -252,16 +180,6 @@
             "resilience": 6
         },
         "bio": "A graceful tempest of flashing blades. Lumni dances through her enemies, turning battle into a bloody, beautiful art form.",
-        "skillProgression": [
-            "Whirlwind",
-            "War Dance",
-            "Dagger Tactician",
-            "Dagger Tactician",
-            "Dagger Tactician",
-            "Dagger Master",
-            "Dagger Master",
-            "Dagger Master"
-        ],
         "startingSkills": [],
         "startingInventory": [
             "Cure Poison Potion",
@@ -289,18 +207,6 @@
             "resilience": 8
         },
         "bio": "A devoted healer whose presence brings hope to the darkest depths. Seraphina draws upon pure light to mend flesh and soul.",
-        "skillProgression": [
-            "Arcane Lantern",
-            "Runic Scholar",
-            "Mana Tap",
-            "Staff Tactician",
-            "Staff Tactician",
-            "Staff Master",
-            "Staff Master",
-            "Lifewarden",
-            "Lifewarden",
-            "Lifewarden"
-        ],
         "startingSkills": [],
         "startingInventory": [
             "Scroll of Heal",

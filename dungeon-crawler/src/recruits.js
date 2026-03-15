@@ -30,7 +30,6 @@ function hydrateSkillName(skillName) {
 
 export const RECRUITS = RECRUITS_DATA.map(r => ({
     ...r,
-    skillProgression: (r.skillProgression || []).map(hydrateSkillName),
     startingSkills: (r.startingSkills || []).map(hydrateSkillName),
 }));
 
