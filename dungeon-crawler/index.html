@@ -1061,26 +1061,61 @@
     </div>
   </div>
 
-  <!-- ── ANVIL MODAL ── -->
+  <!-- ── ANVIL / FORGE MODAL ── -->
   <div id="anvil-overlay" class="chest-hidden">
     <div id="anvil-modal">
       <div id="anvil-header" class="chest-header-style">
         <div id="anvil-title-wrap">
           <img src="/icons/anvil.svg" id="anvil-header-icon" alt="Anvil">
-          <span id="anvil-title">Blacksmith's Anvil</span>
+          <span id="anvil-title">Blacksmith's Forge</span>
         </div>
-        <span id="anvil-sent-label"></span>
         <button id="anvil-close" aria-label="Close">&times;</button>
       </div>
       <div id="anvil-body">
-        <div id="anvil-grid">
-          <!-- 4 slots (2x2) for a smaller modal -->
-          <div class="chest-slot anvil-slot" data-index="0"></div>
-          <div class="chest-slot anvil-slot" data-index="1"></div>
-          <div class="chest-slot anvil-slot" data-index="2"></div>
-          <div class="chest-slot anvil-slot" data-index="3"></div>
+        <div id="anvil-container">
+          <!-- Left: Ingredients (8 slots) -->
+          <div id="anvil-ingredients">
+            <h4 class="anvil-section-title">Materials</h4>
+            <div id="anvil-ingredient-grid">
+              <div class="chest-slot anvil-slot" data-index="0"></div>
+              <div class="chest-slot anvil-slot" data-index="1"></div>
+              <div class="chest-slot anvil-slot" data-index="2"></div>
+              <div class="chest-slot anvil-slot" data-index="3"></div>
+              <div class="chest-slot anvil-slot" data-index="4"></div>
+              <div class="chest-slot anvil-slot" data-index="5"></div>
+              <div class="chest-slot anvil-slot" data-index="6"></div>
+              <div class="chest-slot anvil-slot" data-index="7"></div>
+            </div>
+          </div>
+
+          <!-- Middle: Forge Button -->
+          <div id="anvil-controls">
+            <button id="anvil-forge-btn">FORGE</button>
+            <div id="anvil-arrow">→</div>
+          </div>
+
+          <!-- Right: Result Area -->
+          <div id="anvil-result">
+            <h4 class="anvil-section-title">Result</h4>
+            <div id="anvil-result-slot" class="chest-slot anvil-slot" data-index="8"></div>
+          </div>
         </div>
       </div>
+
+      <!-- Forge message bar -->
+      <div id="anvil-message-bar">
+        <span id="anvil-message-icon">⚒</span>
+        <span id="anvil-message-text"></span>
+      </div>
+    </div>
+
+    <!-- Forge item picker (shown when clicking empty slot) -->
+    <div id="anvil-picker" class="picker-hidden">
+      <div id="anvil-picker-header">
+        <span>Select Material</span>
+        <button id="anvil-picker-close" aria-label="Close">&times;</button>
+      </div>
+      <div id="anvil-picker-grid"></div>
     </div>
   </div>
 

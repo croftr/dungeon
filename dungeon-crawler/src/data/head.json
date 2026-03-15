@@ -32,5 +32,20 @@
         "defence": 3,
         "value": 120,
         "weight": 2.5
+    },
+    {
+        "name": "Ogre Helm",
+        "slot": "head",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/ogre_helm.png",
+        "description": "A massive, terrifying helmet forged from dark iron and reinforced with ogre tusks. It exudes a primal aura of strength.",
+        "defence": 5,
+        "value": 350,
+        "weight": 4.5,
+        "statChange": "+1 Strength",
+        "statBonuses": {
+            "strength": 1
+        }
     }
 ]

@@ -97,5 +97,14 @@
         "value": 250,
         "weight": 0.3,
         "sellable": true
+    },
+    {
+        "name": "Iron Ore",
+        "slot": "loot",
+        "icon": "/icons/ingredients/iron_ore.png",
+        "description": "A heavy chunk of raw iron ore. Can be smelted and forged into powerful gear.",
+        "value": 50,
+        "weight": 2.0,
+        "sellable": true
     }
 ]

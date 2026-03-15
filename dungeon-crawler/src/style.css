@@ -2923,6 +2923,18 @@ body {
   padding-left: 6px;
 }
 
+/* ── Party buff states ──────────────────────────────────────────────────── */
+.member-card--invincible {
+  border-color: #ffd700 !important;
+  box-shadow: 0 0 8px 2px rgba(255, 215, 0, 0.5), inset 0 0 6px rgba(255, 215, 0, 0.15);
+}
+
+.member-card--unseen {
+  border-color: #9060d0 !important;
+  box-shadow: 0 0 8px 2px rgba(144, 96, 208, 0.5), inset 0 0 6px rgba(144, 96, 208, 0.15);
+  opacity: 0.75;
+}
+
 /* ── Dead party member card ─────────────────────────────────────────────── */
 .member-card--dead {
   border-color: #5a1010 !important;
@@ -3746,83 +3758,276 @@ body {
   flex-shrink: 0;
 }
 
-/* ── Anvil modal ── */
+/* ── Anvil / Forge modal ── */
 #anvil-overlay {
   position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.88);
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(5, 2, 0, 0.88);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1050;
+  z-index: 10000;
 }
 
 #anvil-modal {
-  width: 200px;
-  /* Small modal as requested */
-  background: rgba(12, 10, 8, 0.98);
-  border: 1px solid #5a4a30;
-  border-radius: 6px;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 220, 120, 0.05);
+  width: 700px;
+  background: linear-gradient(135deg, rgba(25, 15, 5, 0.98), rgba(15, 8, 3, 0.98));
+  border: 1px solid #5a3a18;
+  border-radius: 12px;
+  box-shadow: 0 0 40px rgba(255, 140, 0, 0.12), inset 0 0 20px rgba(0, 0, 0, 0.8);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  font-family: monospace;
+  position: relative;
+  font-family: 'Inter', sans-serif;
+  color: #d8c8b0;
 }
 
 #anvil-header {
+  padding: 14px 20px;
+  background: rgba(60, 35, 10, 0.3);
+  border-bottom: 1px solid #5a3a18;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
-  border-bottom: 1px solid #3a2e18;
-  background: rgba(0, 0, 0, 0.4);
 }
 
 #anvil-title-wrap {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
 #anvil-header-icon {
-  width: 20px;
-  height: 20px;
-  object-fit: contain;
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 0 5px rgba(255, 160, 40, 0.5));
 }
 
 #anvil-title {
-  font-size: 11px;
-  color: #c8a84a;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-#anvil-sent-label {
-  flex: 1;
-  text-align: right;
-  font-size: 10px;
-  color: #8a7040;
-  font-style: italic;
-  padding-right: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: #f0b060;
+  text-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
 }
 
 #anvil-close {
   background: none;
-  border: 1px solid #4a3a20;
-  color: #888;
-  font-size: 16px;
-  width: 24px;
-  height: 24px;
-  border-radius: 3px;
+  border: none;
+  color: #886644;
+  font-size: 24px;
   cursor: pointer;
+  transition: color 0.2s, transform 0.2s;
 }
 
-#anvil-grid {
+#anvil-close:hover {
+  color: #ff6666;
+  transform: rotate(90deg);
+}
+
+#anvil-body {
+  padding: 30px;
+}
+
+#anvil-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+#anvil-ingredients {
+  flex: 1;
+}
+
+.anvil-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #c89050;
+  margin: 0 0 12px 0;
+  text-align: center;
+}
+
+#anvil-ingredient-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  padding: 15px;
+  grid-template-columns: repeat(4, 60px);
+  grid-template-rows: repeat(2, 60px);
+  gap: 8px;
+  justify-content: center;
+}
+
+#anvil-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+#anvil-forge-btn {
+  background: rgba(30, 15, 5, 0.9);
+  border: 1px solid #6a4a20;
+  color: #f0a030;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: border-color 0.2s, box-shadow 0.2s, color 0.2s;
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+}
+
+#anvil-forge-btn:hover {
+  border-color: #ff8800;
+  box-shadow: 0 0 12px rgba(255, 136, 0, 0.3);
+  color: #ffc060;
+}
+
+#anvil-arrow {
+  font-size: 28px;
+  color: #8a6030;
+}
+
+#anvil-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+#anvil-result-slot {
+  width: 130px !important;
+  height: 130px !important;
+  border-radius: 10px !important;
+  border-color: #c8882a !important;
+  background: transparent !important;
+  box-shadow: 0 0 18px rgba(200, 136, 42, 0.25) !important;
+}
+
+#anvil-result-slot img {
+  width: 110px !important;
+  height: 110px !important;
+  image-rendering: auto !important;
+}
+
+/* Forge ingredient/result slots */
+.anvil-slot {
+  width: 60px;
+  height: 60px;
+  background: rgba(20, 10, 3, 0.9);
+  border: 1px solid #4a3010;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.anvil-slot:hover {
+  border-color: #c88030;
+  box-shadow: 0 0 8px rgba(200, 128, 48, 0.3);
+}
+
+.anvil-slot.occupied {
+  border-color: #6a4a20;
+}
+
+.anvil-slot.occupied:hover {
+  border-color: #f0a030;
+  box-shadow: 0 0 10px rgba(240, 160, 48, 0.35);
+}
+
+.anvil-slot img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+/* Forge message bar */
+#anvil-message-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 13px;
+  border-top: 1px solid #3a2510;
+  background: rgba(10, 5, 0, 0.5);
+  min-height: 42px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+#anvil-message-bar.anvil-msg-visible {
+  opacity: 1;
+}
+
+#anvil-message-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.anvil-msg-success #anvil-message-text { color: #f0c060; }
+.anvil-msg-fail    #anvil-message-text { color: #e07030; }
+.anvil-msg-info    #anvil-message-text { color: #a08060; }
+
+/* Forge item picker */
+#anvil-picker {
+  position: fixed;
+  background: rgba(18, 10, 4, 0.97);
+  border: 1px solid #5a3a18;
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.8);
+  z-index: 10100;
+  width: 280px;
+  max-height: 320px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#anvil-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid #4a2e10;
+  font-size: 12px;
+  color: #c89050;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+#anvil-picker-header button {
+  background: none;
+  border: none;
+  color: #886644;
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+
+#anvil-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 54px);
+  gap: 6px;
+  padding: 10px;
+  overflow-y: auto;
+  justify-content: center;
 }
 
 #corpse-title-wrap {

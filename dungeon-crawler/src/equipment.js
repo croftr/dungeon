@@ -1,4 +1,4 @@
-import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getAttackSpeedMultiplier, hasEffectFlag } from './party.js';
+import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getAttackSpeedMultiplier, hasEffectFlag, breakPartyUnseen } from './party.js';
 import { getItemDef } from './items.js';
 import { SPELLS } from './spells.js';
 import { ACTIONS } from './items.js';
@@ -827,7 +827,12 @@ function populateTooltip(obj) {
   const slotLabelEl = document.getElementById('detail-row-statchange').querySelector('span:first-child');
   slotLabelEl.textContent = isSpellbook ? 'Requires' : 'Stat Change';
 
-  slotEl.textContent = (isSpellbook || isMainSpellbook) ? 'Type: Spellbook' : ('Slot: ' + (SLOT_LABELS[def?.slot ?? obj.slot] ?? obj.slot));
+  if (def?.partyPotion) {
+    slotEl.textContent = 'Party Potion';
+    slotEl.style.color = '#ffd700';
+  } else {
+    slotEl.textContent = (isSpellbook || isMainSpellbook) ? 'Type: Spellbook' : ('Slot: ' + (SLOT_LABELS[def?.slot ?? obj.slot] ?? obj.slot));
+  }
 
   if (isSpellbook) {
     actionEl.textContent = 'Learns: ' + (def.spellName || 'None');
@@ -1165,6 +1170,11 @@ export function useQuickslotPotion(memberIndex, slotIdx) {
   const item = m.quickslots[slotIdx];
   if (!item) return;
 
+  const itemDef = getItemDef(item.name);
+  // Using a non-party potion is an action — breaks Unseen
+  if (!itemDef?.partyPotion) {
+    breakPartyUnseen(`${m.name} uses an item — the cloak of shadow disperses!`);
+  }
   if (_applyPotionEffect(m, item)) {
     m.quickslots[slotIdx] = null;
   }
@@ -1304,6 +1314,11 @@ function _applyPotionEffect(m, item) {
   const def = getItemDef(item.name);
   if (!def || def.type !== 'potion') return false;
 
+  // ── Party potions affect all members, not just the user ──────────────────
+  if (def.partyPotion) {
+    return _applyPartyPotionEffect(m, item, def);
+  }
+
   const effects = [];
   if (def.effect) effects.push(def.effect);
   if (def.effect2) effects.push(def.effect2);
@@ -1359,6 +1374,37 @@ function _applyPotionEffect(m, item) {
     : results.join(' and ');
 
   showMessage(`${m.name} drinks ${item.name} and ${msg}.`);
+  playItemSound(item.name, 'potion');
+  return true;
+}
+
+/**
+ * Applies a party-wide potion effect (e.g. Invincibility, Unseen).
+ * Applies the status effect to every alive party member simultaneously.
+ */
+function _applyPartyPotionEffect(m, item, def) {
+  const eff = def.effect;
+  if (!eff) return false;
+
+  const effectType = eff.type; // 'invincibility' | 'unseen'
+  const duration = eff.duration ?? 60;
+
+  // Apply the status effect to all alive party members
+  party.forEach(member => {
+    if (member.isEmpty || member.isDead) return;
+    applyStatusEffect(member.id, effectType, null, duration);
+  });
+
+  let message = '';
+  if (effectType === 'invincibility') {
+    message = `${m.name} raises the <b>${item.name}</b> — the entire party glows with golden light! No damage for ${duration}s!`;
+  } else if (effectType === 'unseen') {
+    message = `${m.name} uncorks the <b>${item.name}</b> — shadows swallow the party! Unseen for ${duration}s (broken by action)!`;
+  } else {
+    message = `${m.name} uses ${item.name} for the party!`;
+  }
+
+  showMessage(message);
   playItemSound(item.name, 'potion');
   return true;
 }
@@ -2625,6 +2671,9 @@ export function useHand(memberIndex, hand, silent = false) {
   lastAttackTimes[timeKey] = now;
   if (!isSpell && spCost > 0) setSp(m.id, m.sp - spCost);
   refreshPartyCards();
+
+  // Attacking breaks the Unseen buff
+  breakPartyUnseen(`${m.name} attacks — the cloak of shadow disperses!`);
 
   // Play the visual + audio animation regardless of whether a target exists
   playAction(attackType, hand);

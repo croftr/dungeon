@@ -59,7 +59,7 @@
         ],
         "effect": {
             "type": "restore-mp",
-            "value": 15
+            "value": 20
         },
         "value": 40,
         "weight": 0.3
@@ -210,6 +210,52 @@
             }
         ],
         "value": 50,
+        "weight": 0.3
+    },
+    {
+        "name": "Potion of Invincibility",
+        "icon": "/icons/potions/potion_of_invincibility.png",
+        "description": "A radiant, golden elixir imbued with divine power. For 60 seconds the entire party becomes impervious to all damage.",
+        "type": "potion",
+        "partyPotion": true,
+        "effect": {
+            "type": "invincibility",
+            "duration": 60
+        },
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 2
+            },
+            {
+                "name": "Aqua Man Flipper",
+                "quantity": 1
+            }
+        ],
+        "value": 1500,
+        "weight": 0.5
+    },
+    {
+        "name": "Potion of Unseen",
+        "icon": "/icons/potions/potion_of_unseen.png",
+        "description": "A swirling violet brew that smells like night mist. Cloaks the entire party in shadow for 60 seconds — monsters cannot see or attack them, and the party can pass through enemies. Instantly dispelled by any action other than moving.",
+        "type": "potion",
+        "partyPotion": true,
+        "effect": {
+            "type": "unseen",
+            "duration": 60
+        },
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 2
+            },
+            {
+                "name": "Demon's Eyes",
+                "quantity": 1
+            }
+        ],
+        "value": 1200,
         "weight": 0.3
     }
 ]

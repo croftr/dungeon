@@ -6,7 +6,7 @@ import { CELL, isPassable } from './map.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
-import { party, setHp, flashPortraitHit, showMemberDamage, showMemberHeal, refreshPartyCards, applyStatusEffect, getEffectiveStats, getEffectiveStatusResistances, getDefenceModifier, describeEffect } from './party.js';
+import { party, setHp, flashPortraitHit, showMemberDamage, showMemberHeal, refreshPartyCards, applyStatusEffect, getEffectiveStats, getEffectiveStatusResistances, getDefenceModifier, describeEffect, isPartyInvincible, isPartyUnseen } from './party.js';
 import { STATUS_EFFECT_DEFS } from './status-effects.js';
 import { showMessage } from './minimap.js';
 import {
@@ -1141,8 +1141,9 @@ export function updateMonsters(dt, playerCamera, scene) {
     const distCol = Math.abs(m.gridCol - player.gridCol);
     let inRange = distRow <= 1 && distCol <= 1;
 
-    // Monsters detect characters only within 1 grid square and when facing them
-    if (!isSuppressed && !m.engaged && m.name !== 'Training Dummy' && distRow <= 1 && distCol <= 1) {
+    // Monsters detect characters only within 1 grid square and when facing them.
+    // Unseen cloaks the party — monsters cannot detect or engage them.
+    if (!isSuppressed && !isPartyUnseen() && !m.engaged && m.name !== 'Training Dummy' && distRow <= 1 && distCol <= 1) {
       if (_hasLineOfSight(m.gridRow, m.gridCol, player.gridRow, player.gridCol)) {
         let seesPlayer = true;
         if (m.mesh && playerPos) {
@@ -1157,6 +1158,11 @@ export function updateMonsters(dt, playerCamera, scene) {
           setInCombat();
         }
       }
+    }
+
+    // Unseen — disengage any monster that was already chasing; they lose track of the party
+    if (isPartyUnseen() && m.engaged) {
+      m.engaged = false;
     }
 
     // Prevent attacking through walls if monster is somehow in a wall or cornered
@@ -1648,6 +1654,9 @@ export function triggerMonsterAttack(monsterId) {
   const m = monsters.find((x) => x.id === monsterId && x.alive);
   if (!m || m.name === 'Training Dummy') return;
 
+  // Unseen — monsters cannot attack the party while cloaked
+  if (isPartyUnseen()) return;
+
   setInCombat();
 
   // ── Pick attack variant (or fall back to single attack) ──
@@ -1898,6 +1907,20 @@ function _applyMonsterDamage(monster, opts = {}) {
   if (sanctuaryUp) {
     const reductionMultiplier = 1 - Math.min(skillsState.sanctuary.magnitude, 100) / 100;
     damage = Math.max(1, Math.floor(damage * reductionMultiplier));
+  }
+
+  // Invincibility — party cannot take damage
+  if (isPartyInvincible()) {
+    const memberTop = document.querySelector(`#member-${target.id} .member-top`);
+    if (memberTop) {
+      const popup = document.createElement('span');
+      popup.className = 'damage-popup damage-popup--incoming';
+      popup.style.color = '#ffd700';
+      popup.textContent = 'INVINCIBLE';
+      memberTop.appendChild(popup);
+      setTimeout(() => popup.remove(), 900);
+    }
+    return;
   }
 
   setHp(target.id, target.hp - damage);

@@ -92,5 +92,28 @@
     "color": "#c07030",
     "duration": 10,
     "preventsAction": true
+  },
+  "invincibility": {
+    "id": "invincibility",
+    "name": "Invincibility",
+    "description": "The entire party cannot take damage for 60 seconds.",
+    "type": "buff",
+    "icon": "/icons/potions/potion_of_invincibility.png",
+    "color": "#ffd700",
+    "duration": 60,
+    "invincible": true,
+    "partyEffect": true
+  },
+  "unseen": {
+    "id": "unseen",
+    "name": "Unseen",
+    "description": "The party is cloaked in shadow — monsters cannot see or attack them, and the party can pass through enemies. Breaks instantly on any action other than moving.",
+    "type": "buff",
+    "icon": "/icons/potions/potion_of_unseen.png",
+    "color": "#9060d0",
+    "duration": 60,
+    "unseen": true,
+    "breakOnAction": true,
+    "partyEffect": true
   }
 }

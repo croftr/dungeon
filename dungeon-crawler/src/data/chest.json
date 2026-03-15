@@ -45,5 +45,21 @@
         "defence": 8,
         "value": 750,
         "weight": 12
+    },
+    {
+        "name": "Minotaur Cuirass",
+        "slot": "chest",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/minotaur_cuirass.png",
+        "description": "A brutal cuirass fashioned from dark leather and reinforced with ivory minotaur horns. It grants exceptional poise and agility.",
+        "defence": 6,
+        "value": 500,
+        "weight": 8,
+        "statChange": "+1 Dexterity, +1 Resilience",
+        "statBonuses": {
+            "dexterity": 1,
+            "resilience": 1
+        }
     }
 ]

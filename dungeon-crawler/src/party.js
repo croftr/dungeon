@@ -2,6 +2,7 @@ import { getItemDef } from './items.js';
 import { renderItemIcon, attachTooltipListeners, hideTooltip, useQuickslotPotion, rotateLoadout, clearAutoAttackTimers, clearAutoRangeAttackTimers } from './equipment.js';
 import { addLogEntry } from './battle-log.js';
 import { isInCombat, playGoldSound } from './audio.js';
+import { showMessage } from './minimap.js';
 import { skillsState } from './skills-state.js';
 import { SPELLS } from './spells.js';
 import SKILLS_DATA from './data/skills.json';
@@ -329,6 +330,13 @@ function refreshMember(m) {
   }
   if (card) card.style.display = 'flex';
   if (card) card.classList.toggle('member-card--dead', !!m.isDead);
+
+  // Party buff visual states
+  const now2 = performance.now();
+  const hasInvincible = (m.activeDebuffs ?? []).some(d => now2 < d.expiresAt && STATUS_EFFECT_DEFS[d.effectId]?.invincible);
+  const hasUnseen = (m.activeDebuffs ?? []).some(d => now2 < d.expiresAt && STATUS_EFFECT_DEFS[d.effectId]?.unseen);
+  if (card) card.classList.toggle('member-card--invincible', hasInvincible && !m.isDead);
+  if (card) card.classList.toggle('member-card--unseen', hasUnseen && !m.isDead);
 
   const nameEl = document.getElementById(`name-${i}`);
   if (nameEl) nameEl.textContent = m.name;
@@ -967,6 +975,45 @@ export function hasEffectFlag(member, flagName) {
     if (now >= d.expiresAt) return false;
     return !!STATUS_EFFECT_DEFS[d.effectId]?.[flagName];
   });
+}
+
+/** Returns true if any alive party member currently has the invincibility buff active. */
+export function isPartyInvincible() {
+  const now = performance.now();
+  return party.some(m => {
+    if (m.isEmpty || m.isDead) return false;
+    return (m.activeDebuffs ?? []).some(d => now < d.expiresAt && STATUS_EFFECT_DEFS[d.effectId]?.invincible);
+  });
+}
+
+/** Returns true if any alive party member currently has the unseen buff active. */
+export function isPartyUnseen() {
+  const now = performance.now();
+  return party.some(m => {
+    if (m.isEmpty || m.isDead) return false;
+    return (m.activeDebuffs ?? []).some(d => now < d.expiresAt && STATUS_EFFECT_DEFS[d.effectId]?.unseen);
+  });
+}
+
+/**
+ * Immediately removes the unseen buff from all party members.
+ * Called whenever the party takes an action other than moving.
+ * @param {string} [reason] — optional message reason for the log
+ */
+export function breakPartyUnseen(reason = '') {
+  let broken = false;
+  party.forEach(m => {
+    if (m.isEmpty || m.isDead || !m.activeDebuffs) return;
+    const had = m.activeDebuffs.some(d => STATUS_EFFECT_DEFS[d.effectId]?.unseen);
+    if (had) {
+      m.activeDebuffs = m.activeDebuffs.filter(d => !STATUS_EFFECT_DEFS[d.effectId]?.unseen);
+      broken = true;
+      refreshMember(m);
+    }
+  });
+  if (broken) {
+    showMessage(reason || 'The cloak of shadow disperses!');
+  }
 }
 
 /** Returns the sum of defenceModifier values from all active effects. */

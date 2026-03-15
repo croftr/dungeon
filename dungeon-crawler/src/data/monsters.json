@@ -32,6 +32,10 @@
       {
         "item": "Fermented Sugar",
         "chance": 0.15
+      },
+      {
+        "item": "Iron Ore",
+        "chance": 0.10
       }
     ]
   },
@@ -68,6 +72,10 @@
       {
         "item": "Mana Berry",
         "chance": 0.1
+      },
+      {
+        "item": "Iron Ore",
+        "chance": 0.20
       }
     ]
   },
@@ -184,6 +192,10 @@
       {
         "item": "Fermented Sugar",
         "chance": 0.1
+      },
+      {
+        "item": "Iron Ore",
+        "chance": 0.3
       }
     ]
   },
@@ -406,6 +418,10 @@
       {
         "item": "Ogre's Head",
         "chance": 1
+      },
+      {
+        "item": "Iron Ore",
+        "chance": 0.50
       }
     ]
   },

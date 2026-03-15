@@ -7,16 +7,17 @@
         "job": "Ranger",
         "race": "Wood Elf",
         "stats": {
-            "strength": 106,
-            "dexterity": 110,
-            "vitality": 105,
-            "intelligence": 107,
-            "resilience": 105
+            "strength": 6,
+            "dexterity": 10,
+            "vitality": 5,
+            "intelligence": 7,
+            "resilience": 5
         },
         "bio": "A swift and silent guardian of the deep woods. Elrond's bow strikes with the fury of nature itself.",
         "startingInventory": [
             "Torch",
-            "Cure Poison Potion"
+            "Cure Poison Potion",
+            "Minor Rejuvenate Potion"
         ],
         "skillProgression": [
             "Entangle",
@@ -47,11 +48,11 @@
         "job": "Paladin",
         "race": "Human",
         "stats": {
-            "strength": 107,
-            "dexterity": 105,
-            "vitality": 109,
-            "intelligence": 106,
-            "resilience": 110
+            "strength": 7,
+            "dexterity": 10,
+            "vitality": 6,
+            "intelligence": 6,
+            "resilience": 6
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
         "skillProgression": [
@@ -73,7 +74,20 @@
         "leftHand": "Sword",
         "rightHand": "Shield",
         "startingInventory": [
-            "Cure Poison Potion"
+            "Cure Poison Potion",
+            "Aqua Man Flipper",
+            "Demon's Eyes",
+            "Life Essence",
+            "Life Essence",
+            "Life Essence",
+            "Life Essence",
+            "Ogre's Head",
+            "Minotaur Horn",
+            "Chain Shirt",
+            "Iron Ore",
+            "Iron Ore",
+            "Iron Ore",
+            "Iron Ore"
         ],
         "gridCol": 10,
         "gridRow": 8,
@@ -88,11 +102,11 @@
         "job": "Warrior",
         "race": "Dwarf",
         "stats": {
-            "strength": 108,
-            "dexterity": 106,
-            "vitality": 108,
-            "intelligence": 104,
-            "resilience": 110
+            "strength": 8,
+            "dexterity": 6,
+            "vitality": 8,
+            "intelligence": 4,
+            "resilience": 10
         },
         "bio": "A stout and hearty fighter from the mountainous deeps. Thorek believes every problem can be solved with a sharp axe and enough ale.",
         "skillProgression": [
@@ -191,7 +205,7 @@
         "rightHand": "—",
         "startingInventory": [
             "Cure Poison Potion",
-            "Healing Potion"
+            "Minor Healing Potion"
         ],
         "gridCol": 11,
         "gridRow": 8,
@@ -263,7 +277,8 @@
         ],
         "startingSkills": [],
         "startingInventory": [
-            "Cure Poison Potion"
+            "Cure Poison Potion",
+            "Minor Rejuvenate Potion"
         ],
         "image": "/heros/high-elf.png",
         "leftHand": "Dagger",
@@ -302,7 +317,8 @@
         "startingSkills": [],
         "startingInventory": [
             "Scroll of Heal",
-            "Mana Potion"
+            "Minor Mana Potion",
+            "Minor Mana Potion"
         ],
         "image": "/heros/white-mage.png",
         "leftHand": "",

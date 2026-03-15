@@ -6,7 +6,7 @@ import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES,
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
-import { initParty, updateParty, party, setPartyGold, refreshPartyCards, autoAttack, autoRangeAttack, setAutoAttack, setAutoRangeAttack, setHp, flashPortraitHit, showMemberDamage } from './party.js';
+import { initParty, updateParty, party, setPartyGold, refreshPartyCards, autoAttack, autoRangeAttack, setAutoAttack, setAutoRangeAttack, setHp, flashPortraitHit, showMemberDamage, isPartyUnseen } from './party.js';
 import { initEquipment, hideDropButton, updateEffectiveStats, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt, restoreMonsterStates } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS } from './recruits.js';
@@ -225,7 +225,8 @@ setCallbacks({
     showMessage('YOU ESCAPED!<br><small style="font-size:14px;color:#aaa">The dungeon is conquered.</small>');
   },
   blocked(r, c) {
-    return isMonsterAt(r, c) || isShopAt(r, c) || isStatueAt(r, c);
+    // Unseen cloaks the party — they can walk through monsters
+    return (isMonsterAt(r, c) && !isPartyUnseen()) || isShopAt(r, c) || isStatueAt(r, c);
   }
 });
 

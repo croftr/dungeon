@@ -26,13 +26,20 @@ export function spawnLevel1Objects(ctx) {
     // Stash in the starter room
     addChest(group, loader, 11, 13, 0, 0.7, [
         { name: 'Gold Coins', quantity: 100 },
-        'Torch'
+        'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence",
+        "Life Essence",
+        "Life Essence",
+        "Life Essence",
+        "Iron Ore",
+        "Iron Ore",
+        "Iron Ore",
+        "Iron Ore"
     ], '/items/stash.glb', true, 0, 'Stash');
 
     // Chest at the end of the long passage
     addChest(group, loader, 7, 1, 0, -0.7, [
         { name: 'Gold Coins', quantity: 50 },
-        'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Ring of Wisdom', 'Ring of Dexterity', 'Worn Boots', "Scroll of Cure Poison"
+        'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Ring of Wisdom', 'Worn Boots', "Scroll of Cure Poison"
     ]);
 
     // Chest in the Northwest room — far northeast corner

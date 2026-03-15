@@ -11,6 +11,7 @@ import { addLogEntry } from './battle-log.js';
 import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playSoundByUrl } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
 import POTIONS_DATA from './data/potions.json';
+import FORGE_DATA from './data/forge.json';
 import { triggerMummyAmbush } from './monster.js';
 import * as equip from './equipment.js';
 import { spawnLevel1Objects } from './levels/level1/objects.js';
@@ -88,6 +89,10 @@ let _merchantMode = 'buy';
 const ALCHEMY_SLOTS = 9; // 8 ingredients + 1 result
 const _alchemyContents = Array(ALCHEMY_SLOTS).fill(null);
 let _alchemyModalOpen = false;
+
+const FORGE_SLOTS = 9; // 8 materials + 1 result
+const _forgeContents = Array(FORGE_SLOTS).fill(null);
+let _forgeModalOpen = false;
 
 // ─────────────────────────────────────────────
 //  SAVE GAME — container tracking
@@ -475,8 +480,7 @@ export function initObjects(scene, camera) {
             } else if (obj.userData.isAnvil) {
                 const isOnSameSquare = (player.gridRow === obj.userData.gridRow && player.gridCol === obj.userData.gridCol);
                 if (isOnSameSquare) {
-                    playAnvilSound();
-                    openAnvilModal(obj);
+                    openAnvilModal();
                 } else {
                     showMessage("Stand by the anvil to use it.");
                 }
@@ -733,15 +737,29 @@ export function initObjects(scene, camera) {
         };
     }
 
-    // Anvil modal close
+    // Anvil / Forge modal close
     const anvilCloseBtn = document.getElementById('anvil-close');
     if (anvilCloseBtn) {
         anvilCloseBtn.onclick = (e) => {
             e.stopPropagation();
             document.getElementById('anvil-overlay').classList.add('chest-hidden');
+            _forgeModalOpen = false;
+            _hideForgeItemPicker();
             _hideChestCtxMenu();
             equip.hideTooltip();
         };
+    }
+
+    // Forge button
+    const anvilForgeBtn = document.getElementById('anvil-forge-btn');
+    if (anvilForgeBtn) {
+        anvilForgeBtn.onclick = () => _forge();
+    }
+
+    // Forge picker close
+    const anvilPickerClose = document.getElementById('anvil-picker-close');
+    if (anvilPickerClose) {
+        anvilPickerClose.onclick = () => _hideForgeItemPicker();
     }
 
     // Merchant buy button
@@ -875,7 +893,7 @@ export function initObjects(scene, camera) {
         charDevOverlayEl.addEventListener('click', (e) => e.stopPropagation());
     }
 
-    // Ditto for anvil overlay
+    // Ditto for anvil/forge overlay
     const anvilOverlayEl = document.getElementById('anvil-overlay');
     if (anvilOverlayEl) {
         anvilOverlayEl.addEventListener('click', (e) => e.stopPropagation());
@@ -1108,6 +1126,7 @@ function openTrapDisarmModal(trapObj) {
 
     const newAttempt = attemptBtn.cloneNode(true);
     const newLeave = leaveBtn.cloneNode(true);
+    newAttempt.disabled = false;
     attemptBtn.replaceWith(newAttempt);
     leaveBtn.replaceWith(newLeave);
 
@@ -2069,18 +2088,280 @@ export function openSpellCabinetModal(cabinetObj) {
     }
 }
 
-export function openAnvilModal(anvilObj) {
-    _activeSentLabelId = 'anvil-sent-label';
+export function openAnvilModal() {
+    _forgeModalOpen = true;
+    playAnvilSound();
+    _clearForgeMessage();
     const overlay = document.getElementById('anvil-overlay');
     overlay.classList.remove('chest-hidden');
-    document.getElementById('anvil-sent-label').textContent = '';
+    _renderForgeSlots();
+}
 
-    const slots = document.querySelectorAll('.anvil-slot');
-    const contents = anvilObj.userData.contents || [];
+// ── Forge message bar ──────────────────────────────────────────────────────────
+let _forgeMsgTimer = null;
 
-    {
-        _bindChestSlots(equip, slots, contents);
+function showForgeMessage(text, type = 'info') {
+    const bar = document.getElementById('anvil-message-bar');
+    const span = document.getElementById('anvil-message-text');
+    if (!bar || !span) return;
+
+    if (_forgeMsgTimer) { clearTimeout(_forgeMsgTimer); _forgeMsgTimer = null; }
+
+    span.textContent = text;
+    bar.className = `anvil-msg-visible anvil-msg-${type}`;
+
+    _forgeMsgTimer = setTimeout(() => {
+        bar.className = '';
+        _forgeMsgTimer = null;
+    }, 4000);
+}
+
+function _clearForgeMessage() {
+    if (_forgeMsgTimer) { clearTimeout(_forgeMsgTimer); _forgeMsgTimer = null; }
+    const bar = document.getElementById('anvil-message-bar');
+    if (bar) bar.className = '';
+}
+
+// ── Forge recipes from forge.json ─────────────────────────────────────────────
+function _getForgeRecipes() {
+    return FORGE_DATA.filter(r => Array.isArray(r.ingredients) && r.ingredients.length > 0);
+}
+
+function _forge() {
+    if (_forgeContents[8] !== null) {
+        showForgeMessage('Take the item from the result slot before forging again.', 'info');
+        return;
     }
+
+    const materials = _forgeContents.slice(0, 8).filter(Boolean);
+
+    if (materials.length === 0) {
+        showForgeMessage('Add materials before forging.', 'info');
+        return;
+    }
+
+    const recipes = _getForgeRecipes();
+
+    let matchedResult = null;
+    for (const recipe of recipes) {
+        const pool = [...materials];
+        let matched = true;
+        for (const needed of recipe.ingredients) {
+            let remaining = needed.quantity;
+            while (remaining > 0) {
+                const idx = pool.indexOf(needed.name);
+                if (idx === -1) { matched = false; break; }
+                pool.splice(idx, 1);
+                remaining--;
+            }
+            if (!matched) break;
+        }
+        if (matched && pool.length === 0) {
+            matchedResult = recipe.name;
+            break;
+        }
+    }
+
+    if (matchedResult) {
+        for (let i = 0; i < 8; i++) _forgeContents[i] = null;
+        _forgeContents[8] = matchedResult;
+        showForgeMessage(`Forging complete! You crafted a ${matchedResult}.`, 'success');
+        playSuccessSound();
+    } else {
+        showForgeMessage('These materials cannot be forged into anything.', 'fail');
+        playAnvilSound();
+    }
+
+    _renderForgeSlots();
+}
+
+function _renderForgeSlots() {
+    const slots = document.querySelectorAll('.anvil-slot');
+    slots.forEach((slot, i) => {
+        slot.innerHTML = '';
+        slot.classList.remove('occupied');
+        slot.onclick = null;
+        slot.oncontextmenu = null;
+
+        const itemName = _forgeContents[i];
+        if (!itemName) {
+            if (i < 8) {
+                slot.onclick = (e) => _showForgeItemPicker(e.clientX, e.clientY, i);
+                equip.attachTooltipListeners(slot, () => ({ name: "Empty Material Slot", description: "Click to select a material from your party's inventory." }));
+            }
+            return;
+        }
+
+        const itemDef = getItemDef(itemName);
+        if (!itemDef) return;
+
+        slot.classList.add('occupied');
+        const img = document.createElement('img');
+        img.src = itemDef.icon;
+        slot.appendChild(img);
+
+        // Left-click → return to first available party member
+        slot.onclick = () => {
+            const defaultIdx = party.findIndex(m => !m.isEmpty);
+            if (defaultIdx !== -1) {
+                const success = equip.addItemToInventory(defaultIdx, itemName);
+                if (success) {
+                    _forgeContents[i] = null;
+                    _renderForgeSlots();
+                    equip.hideTooltip();
+                } else {
+                    showForgeMessage(`${party[defaultIdx].name}'s inventory is full!`, 'info');
+                }
+            }
+        };
+
+        // Right-click → pick recipient
+        slot.oncontextmenu = (e) => {
+            e.preventDefault();
+            _showForgeCtxMenu(e.clientX, e.clientY, equip, i, itemDef);
+        };
+
+        if (i === 8) {
+            equip.attachTooltipListeners(slot, () => _forgeContents[8]
+                ? { name: _forgeContents[8], description: 'Click to take into your inventory. Right-click to choose who receives it.' }
+                : null);
+        } else {
+            equip.attachTooltipListeners(slot, () => _forgeContents[i]
+                ? { name: _forgeContents[i], description: 'Click to return to inventory. Right-click to choose who receives it.' }
+                : null);
+        }
+    });
+}
+
+function _showForgeCtxMenu(x, y, equip, slotIdx, itemDef) {
+    const menu = document.getElementById('chest-ctx-menu');
+    const list = document.getElementById('chest-ctx-list');
+    list.innerHTML = '';
+
+    party.filter(m => !m.isEmpty).forEach(target => {
+        const targetIdx = party.indexOf(target);
+        const row = document.createElement('div');
+        row.className = 'inv-ctx-give-item';
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 26;
+        canvas.height = 26;
+        drawPortrait(canvas, target);
+
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = target.name;
+
+        row.appendChild(canvas);
+        row.appendChild(nameSpan);
+        row.addEventListener('click', () => {
+            const success = equip.addItemToInventory(targetIdx, itemDef.name);
+            if (success) {
+                _forgeContents[slotIdx] = null;
+                _renderForgeSlots();
+                equip.hideTooltip();
+            } else {
+                showForgeMessage(`${target.name}'s inventory is full!`, 'info');
+            }
+            _hideChestCtxMenu();
+        });
+        list.appendChild(row);
+    });
+
+    menu.classList.remove('chest-ctx-hidden');
+    _chestCtxOpen = true;
+    document.addEventListener('mousedown', _outsideClickHandler);
+
+    const mw = menu.offsetWidth || 160;
+    const mh = menu.offsetHeight || 100;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    let lx = x + 6;
+    let ly = y + 4;
+    if (lx + mw > vw - 8) lx = x - mw - 6;
+    if (ly + mh > vh - 8) ly = y - mh - 4;
+    menu.style.left = lx + 'px';
+    menu.style.top = ly + 'px';
+}
+
+function _showForgeItemPicker(x, y, slotIdx) {
+    const picker = document.getElementById('anvil-picker');
+    const grid = document.getElementById('anvil-picker-grid');
+    grid.innerHTML = '';
+
+    let hasItems = false;
+
+    party.forEach((member, memberIdx) => {
+        if (member.isEmpty) return;
+
+        member.inventory.forEach((item, invIdx) => {
+            if (!item) return;
+            const itemName = item.name;
+            const def = getItemDef(itemName);
+            if (!def) return;
+
+            hasItems = true;
+            const slot = document.createElement('div');
+            slot.className = 'picker-slot';
+
+            const img = document.createElement('img');
+            img.src = def.icon;
+            slot.appendChild(img);
+
+            const owner = document.createElement('div');
+            owner.className = 'picker-slot-owner';
+            const canvas = document.createElement('canvas');
+            canvas.width = 14;
+            canvas.height = 14;
+            drawPortrait(canvas, member);
+            owner.appendChild(canvas);
+            slot.appendChild(owner);
+
+            slot.onclick = () => {
+                _forgeContents[slotIdx] = itemName;
+                member.inventory[invIdx] = null;
+                _renderForgeSlots();
+                _hideForgeItemPicker();
+                equip.hideTooltip();
+            };
+
+            equip.attachTooltipListeners(slot, () => ({ name: def.name, description: `Held by ${member.name}. Click to add to forge.` }));
+            grid.appendChild(slot);
+        });
+    });
+
+    if (!hasItems) {
+        const msg = document.createElement('div');
+        msg.className = 'picker-empty-msg';
+        msg.textContent = "No items found in party inventory.";
+        grid.appendChild(msg);
+    }
+
+    picker.classList.remove('picker-hidden');
+
+    const pw = picker.offsetWidth || 280;
+    const ph = picker.offsetHeight || 200;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    let lx = x - (pw / 2);
+    let ly = y - ph - 10;
+
+    if (lx < 10) lx = 10;
+    if (lx + pw > vw - 10) lx = vw - pw - 10;
+    if (ly < 10) ly = y + 20;
+    if (ly + ph > vh - 10) ly = vh - ph - 10;
+
+    picker.style.left = lx + 'px';
+    picker.style.top = ly + 'px';
+}
+
+function _hideForgeItemPicker() {
+    const picker = document.getElementById('anvil-picker');
+    if (picker) picker.classList.add('picker-hidden');
+}
+
+export function isForgeModalOpen() {
+    return _forgeModalOpen;
 }
 
 export function openCorpseModal(corpseObj) {
