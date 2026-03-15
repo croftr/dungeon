@@ -127,5 +127,35 @@
         ],
         "value": 50,
         "weight": 0.3
+    },
+    {
+        "name": "Potion of Enlightenment",
+        "icon": "/icons/enlightenment_potion.svg",
+        "description": "A shimmering green brew that restores 25 health and 25 mana points.",
+        "type": "potion",
+        "effect": {
+            "type": "heal",
+            "value": 25
+        },
+        "effect2": {
+            "type": "restore-mp",
+            "value": 25
+        },
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Mana Berry",
+                "quantity": 1
+            },
+            {
+                "name": "Life Berry",
+                "quantity": 1
+            }
+        ],
+        "value": 50,
+        "weight": 0.3
     }
 ]

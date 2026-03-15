@@ -1526,8 +1526,8 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
   if (dropBtn && item) {
     dropBtn.style.display = 'block';
     dropBtn.onclick = () => {
-      _hideContextMenu();
       _showDropConfirm(activeCharIndex, _ctxInvIndex, item.name);
+      _hideContextMenu();
     };
   }
 
@@ -2475,6 +2475,17 @@ function _showDamagePopup(slotEl, damage, isCrit) {
   setTimeout(() => popup.remove(), 900);
 }
 
+/** Returns the alive monster closest to the player along the forward ray, up to maxRange cells. */
+function _closestMonsterInFront(maxRange) {
+  const inFront = monsters.filter(t => t.alive && isInFrontOfPlayer(t.gridRow, t.gridCol, maxRange));
+  if (inFront.length === 0) return null;
+  return inFront.reduce((best, t) => {
+    const td = Math.abs(t.gridRow - player.gridRow) + Math.abs(t.gridCol - player.gridCol);
+    const bd = Math.abs(best.gridRow - player.gridRow) + Math.abs(best.gridCol - player.gridCol);
+    return td < bd ? t : best;
+  });
+}
+
 export function useHand(memberIndex, hand, silent = false) {
   const m = party[memberIndex];
   if (!m) return;
@@ -2578,10 +2589,8 @@ export function useHand(memberIndex, hand, silent = false) {
 
   const maxRange = isRanged ? 3 : 1;
 
-  // Find the first alive monster that is in range and directly in front
-  const target = isBuff ? null : monsters.find(
-    t => t.alive && isInFrontOfPlayer(t.gridRow, t.gridCol, maxRange)
-  );
+  // Find the alive monster closest to the player that is directly in front
+  const target = isBuff ? null : _closestMonsterInFront(maxRange);
 
   // Set the cooldown timer and force HUD re-render.
   // If `bothHands` weapon (e.g., Greatsword), set the cooldown for left hand, 
@@ -2670,9 +2679,7 @@ export function useHand(memberIndex, hand, silent = false) {
       let daResult, daTarget;
       if (!target.alive) {
         // Find a new target if the first one died
-        daTarget = monsters.find(
-          t => t.alive && isInFrontOfPlayer(t.gridRow, t.gridCol, maxRange)
-        );
+        daTarget = _closestMonsterInFront(maxRange);
         if (daTarget) {
           daResult = attackMonster(daTarget.id, m, def, attackType, ammoDef);
           playAction(attackType, hand);

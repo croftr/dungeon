@@ -22,7 +22,7 @@ export let partyGold = 0;
 export let autoAttack = true;
 export function setAutoAttack(val) { autoAttack = val; }
 
-export let autoRangeAttack = false;
+export let autoRangeAttack = true;
 export function setAutoRangeAttack(val) { autoRangeAttack = val; }
 
 export function addGold(amount) {

@@ -402,11 +402,12 @@ function _triggerTreemanAwakening(treeman, scene) {
 
   showMessage(`<b>${treeman.name}</b> channels the Awakening of the Woods!`, 3000);
 
-  // Schedule particle effect + treekin spawning at the damage timing point
+  // Schedule particle effect + treekin spawning at the damage timing point.
+  // Treekins always spawn once the cast is in motion — even if the Treeman
+  // is killed mid-animation, the summon was already initiated.
   const duration = attackAction.getClip().duration;
   const pts = (variant.damageTimings && variant.damageTimings.length > 0) ? variant.damageTimings[0] : 0.5;
   setTimeout(() => {
-    if (!treeman.alive) return;
     if (treeman.mesh) createTreemanAwakening(treeman.mesh.position);
     _spawnTreekin(treeman, scene, -1, 0);
     _spawnTreekin(treeman, scene, 1, 0);
@@ -2109,7 +2110,7 @@ export function getMonsterStates(level) {
   const result = {};
   for (const m of monsters) {
     if ((m.level ?? 1) !== level) continue;
-    result[m.id] = { alive: m.alive, hp: m.hp };
+    result[m.id] = { alive: m.alive, hp: m.hp, awakeningUsed: m._awakeningUsed ?? false };
   }
   return result;
 }
@@ -2122,5 +2123,6 @@ export function restoreMonsterStates(saved) {
     if (!s) continue;
     m.alive = s.alive;
     m.hp = s.hp;
+    if (s.awakeningUsed) m._awakeningUsed = true;
   }
 }
