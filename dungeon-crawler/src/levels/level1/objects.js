@@ -169,7 +169,7 @@ export function spawnLevel1Objects(ctx) {
     addTrap1(group, loader, 21, 10);  // long south corridor
 
     // ── Teleport Torch ───────────────────────────────────────────────────────
-    addTeleportTorch(group, loader, 12, 11);
+    addTeleportTorch(group, loader, 12, 11, Math.PI / 2);
 
     // ── Portcullises & Gates ──────────────────────────────────────────────────
     // Portcullis at col 7, row 7 (opened by wall button)
