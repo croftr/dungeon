@@ -48,11 +48,11 @@
         "job": "Paladin",
         "race": "Human",
         "stats": {
-            "strength": 7,
-            "dexterity": 10,
-            "vitality": 6,
-            "intelligence": 6,
-            "resilience": 6
+            "strength": 117,
+            "dexterity": 110,
+            "vitality": 116,
+            "intelligence": 116,
+            "resilience": 116
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
         "skillProgression": [
@@ -75,19 +75,12 @@
         "rightHand": "Shield",
         "startingInventory": [
             "Cure Poison Potion",
-            "Aqua Man Flipper",
-            "Demon's Eyes",
-            "Life Essence",
-            "Life Essence",
-            "Life Essence",
-            "Life Essence",
-            "Ogre's Head",
-            "Minotaur Horn",
-            "Chain Shirt",
-            "Iron Ore",
-            "Iron Ore",
-            "Iron Ore",
-            "Iron Ore"
+            "Potion of Unseen",
+            "Potion of Unseen",
+            "Potion of Unseen",
+            "Potion Invincibility",
+            "Potion Invincibility",
+            "Potion Invincibility"
         ],
         "gridCol": 10,
         "gridRow": 8,

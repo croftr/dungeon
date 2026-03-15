@@ -10,6 +10,7 @@ export function spawnLevel3Objects(ctx) {
         group, loader,
         addChest, addWeaponRack, addSpellCabinet, addEtherealEgg,
         addPortal, addTrap1,
+        minotaurDead,
     } = ctx;
 
     // ── Portals ───────────────────────────────────────────────────────────────
@@ -45,8 +46,8 @@ export function spawnLevel3Objects(ctx) {
     ]);
 
     // ── Ethereal Egg ──────────────────────────────────────────────────────────
-    // Center of the minotaur room — restoration point
-    addEtherealEgg(group, loader, 11, 11);
+    // Center of the minotaur room — portal to Level 4 once the minotaur is dead
+    addEtherealEgg(group, loader, 11, 11, 0, minotaurDead);
 
     // ── Trap ──────────────────────────────────────────────────────────────────
     // Guards the entry corridor to the central minotaur room

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import { buildLevel, findCell, CELL_START, changeMapArray, level1Map, level2Map, level3Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap } from './map.js';
+import { buildLevel, findCell, CELL_START, changeMapArray, level1Map, level2Map, level3Map, level4Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap } from './map.js';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles } from './particles.js';
@@ -117,15 +117,22 @@ setCallbacks({
       // Demon room: the big chamber at the south end of the passage
       const inDemonRoom = player.gridRow >= 14 && player.gridRow <= 20
         && player.gridCol >= 3 && player.gridCol <= 8;
+      const inAquaManRoom = player.gridCol === 3 && player.gridRow >= 22 && player.gridRow <= 26;
+
+      if (inAquaManRoom) {
+        setZoneMusic('/sounds/water.mp3');
+      } else {
+        const treeman = monsters.find(m => m.name === 'Treeman');
+        if (treeman && !treeman.alive) {
+          setZoneMusic('/sounds/backing/demon-room.mp3');
+        } else {
+          setZoneMusic(null);
+        }
+      }
 
       if (inDemonRoom && !hasSeenDemonVideo) {
         hasSeenDemonVideo = true; window._saveFlags.hasSeenDemonVideo = true;
         playDemonVideo();
-      }
-
-      const treeman = monsters.find(m => m.name === 'Treeman');
-      if (treeman && !treeman.alive) {
-        setZoneMusic('/sounds/backing/demon-room.mp3');
       }
     } else if (window.currentLevel === 3) {
       const inMinotaurRoom = player.gridRow >= 8 && player.gridRow <= 14
@@ -190,7 +197,9 @@ setCallbacks({
             hasSeenAquaManVideo = true;
             window._saveFlags.hasSeenAquaManVideo = true;
           }
-          playAquaManVideo(() => { window._cutscenePlaying = false; });
+          playAquaManVideo(() => {
+            window._cutscenePlaying = false;
+          });
         }, 1000);
       } else if (cell === CELL_STAIRS_UP) {
         tweenGroup.removeAll();
@@ -296,6 +305,14 @@ function animate(now) {
   lastTime = now;
 
   tweenGroup.update(now);
+
+  if (window._cutscenePlaying) {
+    updateAudio(dt);
+    renderer.render(scene, camera);
+    css2dRenderer.render(scene, camera);
+    return;
+  }
+
   updateObjects(dt);
   updateLighting(lights, camera, dt);
   updateMonsters(dt, camera, scene);
@@ -764,6 +781,7 @@ function playAquaManVideo(onComplete) {
 
   setTimeout(() => {
     aquaManOverlay.style.opacity = '1';
+    setZoneMusic('/sounds/water.mp3');
     aquaManVideo.play().catch(e => {
       console.warn("Aqua Man video play failed:", e);
       finishAquaManVideo();
@@ -816,6 +834,50 @@ function finishStairsVideo() {
 
 if (skipStairsBtn) skipStairsBtn.addEventListener('click', finishStairsVideo);
 if (stairsVideoElement) stairsVideoElement.addEventListener('ended', finishStairsVideo);
+
+// ─────────────────────────────────────────────
+//  EGG TRANSPORT VIDEO OVERLAY
+// ─────────────────────────────────────────────
+const eggVideoOverlay = document.getElementById('egg-video-overlay');
+const eggVideoElement = document.getElementById('egg-video');
+const skipEggBtn = document.getElementById('skip-egg-btn');
+let _eggVideoCallback = null;
+
+window.playEggVideo = function(onComplete) {
+  _eggVideoCallback = onComplete;
+  if (!eggVideoOverlay || !eggVideoElement) {
+    if (_eggVideoCallback) _eggVideoCallback();
+    return;
+  }
+  eggVideoOverlay.classList.remove('hidden');
+  eggVideoOverlay.style.opacity = '1';
+
+  eggVideoElement.play().catch(e => {
+    console.warn("Egg video play failed:", e);
+    finishEggVideo();
+  });
+};
+
+function finishEggVideo() {
+  if (!eggVideoOverlay) {
+    if (_eggVideoCallback) _eggVideoCallback();
+    return;
+  }
+  eggVideoOverlay.style.opacity = '0';
+
+  setTimeout(() => {
+    eggVideoElement.pause();
+    eggVideoElement.currentTime = 0;
+    eggVideoOverlay.classList.add('hidden');
+    if (_eggVideoCallback) {
+      _eggVideoCallback();
+      _eggVideoCallback = null;
+    }
+  }, 1500);
+}
+
+if (skipEggBtn) skipEggBtn.addEventListener('click', finishEggVideo);
+if (eggVideoElement) eggVideoElement.addEventListener('ended', finishEggVideo);
 
 // ─────────────────────────────────────────────
 //  PORTAL VIDEO OVERLAY
@@ -929,7 +991,7 @@ window.loadLevel = function (levelNum) {
   setAmbientLevel(levelNum);
 
   // 1. Swap Map Array
-  const maps = [null, level1Map, level2Map, level3Map];
+  const maps = [null, level1Map, level2Map, level3Map, level4Map];
   changeMapArray(maps[levelNum] || level1Map);
 
   // 2. Rebuild map meshes for walls/floors
@@ -963,6 +1025,11 @@ window.loadLevel = function (levelNum) {
   } else if (levelNum === 2) {
     // Face South to see the room and Treeman
     player.facing = 2;
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = FACING_ANGLES[player.facing];
+  } else if (levelNum === 4) {
+    // Face North into the vault
+    player.facing = 0;
     camera.rotation.order = 'YXZ';
     camera.rotation.y = FACING_ANGLES[player.facing];
   }
@@ -1005,7 +1072,7 @@ window.addEventListener('mousemove', (e) => {
   let isHoveringInteractable = false;
   for (let hit of intersects) {
     const ud = hit.object.userData;
-    if (ud && (ud.isButton || ud.isChest || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDamageTrap)) {
+    if (ud && (ud.isButton || ud.isChest || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDamageTrap || ud.isEgg)) {
       if (hit.object.visible) {
         isHoveringInteractable = true;
         break;

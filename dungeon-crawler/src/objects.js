@@ -12,11 +12,12 @@ import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, pla
 import MERCHANT_DATA from './data/merchant.json';
 import POTIONS_DATA from './data/potions.json';
 import FORGE_DATA from './data/forge.json';
-import { triggerMummyAmbush } from './monster.js';
+import { triggerMummyAmbush, monsters } from './monster.js';
 import * as equip from './equipment.js';
 import { spawnLevel1Objects } from './levels/level1/objects.js';
 import { spawnLevel2Objects } from './levels/level2/objects.js';
 import { spawnLevel3Objects } from './levels/level3/objects.js';
+import { spawnLevel4Objects } from './levels/level4/objects.js';
 
 export const objects = [];
 export const interactables = [];
@@ -279,6 +280,28 @@ export function initObjects(scene, camera) {
                     openTrapDisarmModal(obj);
                 } else {
                     showMessage("You spot what looks like a trap on the floor.");
+                }
+                break;
+            } else if (obj.userData.isEgg) {
+                const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
+                const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
+                if (distRow <= 1 && distCol <= 1) {
+                    // Check live minotaur state — works whether it died this session
+                    // or was already dead when the level loaded.
+                    const minotaur = monsters.find(m => m.id === 300);
+                    const minotaurDead = minotaur ? !minotaur.alive : true;
+                    if (minotaurDead) {
+                        playPortalSound();
+                        if (window.playEggVideo) {
+                            window.playEggVideo(() => { if (window.loadLevel) window.loadLevel(4); });
+                        } else if (window.loadLevel) {
+                            window.loadLevel(4);
+                        }
+                    } else {
+                        showMessage("The egg pulses with a faint energy, but something holds it back...");
+                    }
+                } else {
+                    showMessage("The egg radiates a strange golden light.");
                 }
                 break;
             } else if (obj.userData.isTeleportTorch) {
@@ -1304,6 +1327,10 @@ export function spawnObjectsForLevel() {
     objects.length = 0; // clear logical array
     _nextContainerId = 0; // reset container IDs for deterministic save/load
 
+    // Check if the minotaur (id 300) has been defeated — used to activate the egg portal
+    const minotaur = monsters.find(m => m.id === 300);
+    const minotaurDead = minotaur ? !minotaur.alive : false;
+
     // Build context object — passes all spawn helpers and current state flags to
     // per-level files so they stay completely decoupled from objects.js internals.
     const ctx = {
@@ -1323,6 +1350,8 @@ export function spawnObjectsForLevel() {
         // Level 2 state flags
         level2PortcullisOpened: _level2PortcullisOpened,
         level2HoleClosed: _level2HoleClosed,
+        // Level 3 state flags
+        minotaurDead,
         // State setters (values written back to objects.js module scope)
         setStarterGate: (g) => { _starterGate = g; },
         // Shared refs for custom object loading code in level files
@@ -1332,6 +1361,7 @@ export function spawnObjectsForLevel() {
     if (level === 1) spawnLevel1Objects(ctx);
     else if (level === 2) spawnLevel2Objects(ctx);
     else if (level === 3) spawnLevel3Objects(ctx);
+    else if (level === 4) spawnLevel4Objects(ctx);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1691,7 +1721,7 @@ function addCrystals(scene, loader, col, row, rotY, offsetX = 0) {
     });
 }
 
-function addEtherealEgg(scene, loader, col, row, rotY = 0) {
+function addEtherealEgg(scene, loader, col, row, rotY = 0, isActive = false) {
     _statueGridCells.add(`${row},${col}`);
     loader.load('/items/ethereal_egg.glb', (gltf) => {
         const model = gltf.scene;
@@ -1700,14 +1730,18 @@ function addEtherealEgg(scene, loader, col, row, rotY = 0) {
         model.position.set(col * CELL, 0.5, row * CELL);
         model.rotation.y = rotY;
 
-        // Give it a magical purple/white glow
-        const light = new THREE.PointLight(0xff00ff, 4, 3);
+        // Active eggs glow gold (portal to next level); inactive glow purple (restore)
+        const lightColor = isActive ? 0xffaa00 : 0xff00ff;
+        const pulseMax = isActive ? 12 : 8;
+        const emissiveColor = isActive ? 0xaa6600 : 0xaa00aa;
+
+        const light = new THREE.PointLight(lightColor, 4, 3);
         light.position.set(col * CELL, 0.8, row * CELL);
         scene.add(light);
 
         // Pulsing light effect
         new Tween({ i: 4 })
-            .to({ i: 8 }, 1500)
+            .to({ i: pulseMax }, 1500)
             .easing(Easing.Quadratic.InOut)
             .yoyo(true)
             .repeat(Infinity)
@@ -1719,9 +1753,15 @@ function addEtherealEgg(scene, loader, col, row, rotY = 0) {
                 child.castShadow = true;
                 child.receiveShadow = true;
                 if (child.material) {
-                    child.material.emissive = new THREE.Color(0xaa00aa);
+                    child.material.emissive = new THREE.Color(emissiveColor);
                     child.material.emissiveIntensity = 0.3;
                 }
+                // Always register for raycasting so hover cursor works regardless of
+                // when the minotaur dies — activation is checked at click time.
+                child.userData.isEgg = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+                interactables.push(child);
             }
         });
 

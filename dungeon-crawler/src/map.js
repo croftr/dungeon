@@ -16,7 +16,8 @@ export const CELL_BLACK_WALL = 7;
 import { level1Map } from './levels/level1/map.js';
 import { level2Map } from './levels/level2/map.js';
 import { level3Map } from './levels/level3/map.js';
-export { level1Map, level2Map, level3Map };
+import { level4Map } from './levels/level4/map.js';
+export { level1Map, level2Map, level3Map, level4Map };
 
 export let dungeonMap = level1Map;
 export let ROWS = dungeonMap.length;

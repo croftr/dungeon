@@ -27,6 +27,7 @@ import { MONSTER_DEFS as D } from './monster-defs.js';
 import { level1Monsters } from './levels/level1/monsters.js';
 import { level2Monsters } from './levels/level2/monsters.js';
 import { level3Monsters } from './levels/level3/monsters.js';
+import { level4Monsters } from './levels/level4/monsters.js';
 import { skillsState } from './skills-state.js';
 import SKILLS_DATA from './data/skills.json';
 import { awardXP } from './leveling.js';
@@ -108,6 +109,7 @@ export const monsters = [
   ...level1Monsters,
   ...level2Monsters,
   ...level3Monsters,
+  ...level4Monsters,
 ];
 
 // ── Assign Block Animations ─────────────────────────────────────────────────
