@@ -402,6 +402,10 @@
       {
         "item": "Fermented Sugar",
         "chance": 0.25
+      },
+      {
+        "item": "Ogre's Head",
+        "chance": 1
       }
     ]
   },
@@ -453,6 +457,10 @@
       {
         "item": "Fermented Sugar",
         "chance": 0.25
+      },
+      {
+        "item": "Minotaur Horn",
+        "chance": 1
       }
     ],
     "onHitEffects": [
@@ -501,6 +509,10 @@
       {
         "item": "Travelling Cloak",
         "chance": 0.10
+      },
+      {
+        "item": "Aqua Man Flipper",
+        "chance": 0.30
       }
     ]
   },
@@ -537,6 +549,10 @@
       {
         "item": "Leather Belt",
         "chance": 0.10
+      },
+      {
+        "item": "Demon's Eyes",
+        "chance": 0.30
       }
     ]
   }
