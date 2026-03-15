@@ -7,11 +7,11 @@
         "job": "Ranger",
         "race": "Wood Elf",
         "stats": {
-            "strength": 6,
-            "dexterity": 10,
-            "vitality": 5,
-            "intelligence": 7,
-            "resilience": 5
+            "strength": 106,
+            "dexterity": 110,
+            "vitality": 105,
+            "intelligence": 107,
+            "resilience": 105
         },
         "bio": "A swift and silent guardian of the deep woods. Elrond's bow strikes with the fury of nature itself.",
         "startingInventory": [
@@ -47,11 +47,11 @@
         "job": "Paladin",
         "race": "Human",
         "stats": {
-            "strength": 7,
-            "dexterity": 5,
-            "vitality": 9,
-            "intelligence": 6,
-            "resilience": 10
+            "strength": 107,
+            "dexterity": 105,
+            "vitality": 109,
+            "intelligence": 106,
+            "resilience": 110
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
         "skillProgression": [
@@ -73,7 +73,26 @@
         "leftHand": "Sword",
         "rightHand": "Shield",
         "startingInventory": [
-            "Cure Poison Potion"
+            "Cure Poison Potion",
+            "Life Essence",
+            "Life Essence",
+            "Life Essence",
+            "Life Essence",
+            "Fermented Sugar",
+            "Fermented Sugar",
+            "Fermented Sugar",
+            "Fermented Sugar",
+            "Fermented Sugar",
+            "Mana Berry",
+            "Mana Berry",
+            "Mana Berry",
+            "Mana Berry",
+            "Mana Berry",
+            "Life Berry",
+            "Life Berry",
+            "Life Berry",
+            "Life Berry",
+            "Life Berry"
         ],
         "gridCol": 10,
         "gridRow": 8,
@@ -88,11 +107,11 @@
         "job": "Warrior",
         "race": "Dwarf",
         "stats": {
-            "strength": 8,
-            "dexterity": 6,
-            "vitality": 8,
-            "intelligence": 4,
-            "resilience": 10
+            "strength": 108,
+            "dexterity": 106,
+            "vitality": 108,
+            "intelligence": 104,
+            "resilience": 110
         },
         "bio": "A stout and hearty fighter from the mountainous deeps. Thorek believes every problem can be solved with a sharp axe and enough ale.",
         "skillProgression": [
@@ -302,7 +321,7 @@
         "startingSkills": [],
         "startingInventory": [
             "Scroll of Heal",
-            "Minor Mana Potion"
+            "Mana Potion"
         ],
         "image": "/heros/white-mage.png",
         "leftHand": "",

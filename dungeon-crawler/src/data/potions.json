@@ -1,7 +1,7 @@
 [
     {
         "name": "Cure Poison Potion",
-        "icon": "/icons/cure_poison_potion.svg",
+        "icon": "/icons/potions/cure_poison_potion.svg",
         "description": "A bitter-tasting brew that neutralizes toxins and cures poison.",
         "type": "potion",
         "effect": {
@@ -21,8 +21,8 @@
         "weight": 0.3
     },
     {
-        "name": "Minor Mana Potion",
-        "icon": "/icons/mana_potion.svg",
+        "name": "Mana Potion",
+        "icon": "/icons/potions/mana_potion.svg",
         "description": "A crystalline blue liquid that restores 30 mana points.",
         "type": "potion",
         "ingredients": [
@@ -43,9 +43,53 @@
         "weight": 0.3
     },
     {
+        "name": "Minor Mana Potion",
+        "icon": "/icons/potions/minor_mana_potion.svg",
+        "description": "A crystalline blue liquid that restores 15 mana points.",
+        "type": "potion",
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Mana Berry",
+                "quantity": 1
+            }
+        ],
+        "effect": {
+            "type": "restore-mp",
+            "value": 15
+        },
+        "value": 40,
+        "weight": 0.3
+    },
+    {
+        "name": "Minor Healing Potion",
+        "icon": "/icons/potions/minor_healing_potion.svg",
+        "description": "A soothing elixir that restores 25 hit points.",
+        "type": "potion",
+        "effect": {
+            "type": "heal",
+            "value": 25
+        },
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Life Berry",
+                "quantity": 1
+            }
+        ],
+        "value": 30,
+        "weight": 0.3
+    },
+    {
         "name": "Healing Potion",
-        "icon": "/icons/healing_potion.svg",
-        "description": "A soothing elixir that restores 20 hit points.",
+        "icon": "/icons/potions/healing_potion.svg",
+        "description": "A soothing elixir that restores 50 hit points.",
         "type": "potion",
         "effect": {
             "type": "heal",
@@ -65,20 +109,8 @@
         "weight": 0.3
     },
     {
-        "name": "Mana Potion",
-        "icon": "/icons/mana_potion.svg",
-        "description": "A crystalline blue liquid that restores 30 mana points.",
-        "type": "potion",
-        "effect": {
-            "type": "restore-mp",
-            "value": 50
-        },
-        "value": 40,
-        "weight": 0.3
-    },
-    {
-        "name": "Minor Rejuvenate Potion",
-        "icon": "/icons/minor_rejuvenate_potion.svg",
+        "name": "Rejuvenate Potion",
+        "icon": "/icons/potions/rejuvenate_potion.svg",
         "description": "A glowing yellow elixir that restores 100 stamina points.",
         "type": "potion",
         "effect": {
@@ -99,8 +131,30 @@
         "weight": 0.3
     },
     {
+        "name": "Minor Rejuvenate Potion",
+        "icon": "/icons/potions/minor_rejuvenate_potion.svg",
+        "description": "A glowing yellow elixir that restores 25 stamina points.",
+        "type": "potion",
+        "effect": {
+            "type": "restore-sp",
+            "value": 25
+        },
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Fermented Sugar",
+                "quantity": 1
+            }
+        ],
+        "value": 50,
+        "weight": 0.3
+    },
+    {
         "name": "Vigor Potion",
-        "icon": "/icons/vigor_potion.svg",
+        "icon": "/icons/potions/vigor_potion.svg",
         "description": "A glowing orange elixir that restores 50 stamina and 50 health points.",
         "type": "potion",
         "effect": {
@@ -130,8 +184,8 @@
     },
     {
         "name": "Potion of Enlightenment",
-        "icon": "/icons/enlightenment_potion.svg",
-        "description": "A shimmering green brew that restores 25 health and 25 mana points.",
+        "icon": "/icons/potions/enlightenment_potion.svg",
+        "description": "A shimmering dark green brew that restores 25 health and 25 mana points.",
         "type": "potion",
         "effect": {
             "type": "heal",

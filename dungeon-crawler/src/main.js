@@ -179,15 +179,10 @@ setCallbacks({
           drawMinimap();
           updateStatus();
 
-          // Reveal the room only after video ends
-          function revealRoom() {
-            window._cutscenePlaying = false;
-            if (blackout) {
-              blackout.classList.remove('visible');
-              setTimeout(() => {
-                blackout.classList.add('hidden');
-              }, 500);
-            }
+          // Hide the blackout now — the video overlay covers the scene
+          if (blackout) {
+            blackout.classList.remove('visible');
+            setTimeout(() => blackout.classList.add('hidden'), 500);
           }
 
           // Force play the video as the transition experience
@@ -195,7 +190,7 @@ setCallbacks({
             hasSeenAquaManVideo = true;
             window._saveFlags.hasSeenAquaManVideo = true;
           }
-          playAquaManVideo(revealRoom);
+          playAquaManVideo(() => { window._cutscenePlaying = false; });
         }, 1000);
       } else if (cell === CELL_STAIRS_UP) {
         tweenGroup.removeAll();
