@@ -271,7 +271,7 @@ if (_pendingSave) {
 
   // Set container overrides before spawnObjectsForLevel
   const _wsCurrentLevel = _pendingSave.worldState?.[_pendingSave.currentLevel ?? 1];
-  if (_wsCurrentLevel?.containers) setPendingContainerOverrides(_wsCurrentLevel.containers);
+  setPendingContainerOverrides(_wsCurrentLevel?.containers ?? null);
   if (_pendingSave.worldState?.[1]?.merchantAvailable) setMerchantStock(_pendingSave.worldState[1].merchantAvailable);
 
   // Restore monster alive/hp before initMonsters loads models
@@ -941,7 +941,7 @@ window.loadLevel = function (levelNum) {
 
   // 3. Restore accumulated state for arriving level (containers + monsters)
   const ws = getAccumulatedWorldState(levelNum);
-  if (ws?.containers) setPendingContainerOverrides(ws.containers);
+  setPendingContainerOverrides(ws?.containers ?? null);
   if (ws?.monsters) restoreMonsterStates(ws.monsters);
   if (levelNum === 1 && ws?.merchantAvailable) setMerchantStock(ws.merchantAvailable);
 
