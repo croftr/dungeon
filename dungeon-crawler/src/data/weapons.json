@@ -77,7 +77,7 @@
         "damageType": "poison",
         "onHitEffects": [
             {
-                "effectId": "poison",
+                "effectId": "deadly_poison",
                 "chance": 0.5
             }
         ],

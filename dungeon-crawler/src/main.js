@@ -1005,7 +1005,7 @@ window.addEventListener('mousemove', (e) => {
   let isHoveringInteractable = false;
   for (let hit of intersects) {
     const ud = hit.object.userData;
-    if (ud && (ud.isButton || ud.isChest || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC)) {
+    if (ud && (ud.isButton || ud.isChest || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDamageTrap)) {
       if (hit.object.visible) {
         isHoveringInteractable = true;
         break;

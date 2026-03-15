@@ -35,12 +35,12 @@
         "ammoType": "arrow",
         "onHitEffects": [
             {
-                "effectId": "poison",
+                "effectId": "deadly_poison",
                 "chance": 1
             }
         ],
         "icon": "/icons/poison_arrows.png",
-        "description": "Arrows tipped with a viscous green neurotoxin. Inflicts 1 DPS for 30 seconds.",
+        "description": "Arrows tipped with a viscous green neurotoxin. Inflicts 2 DPS for 30 seconds.",
         "value": 290,
         "weight": 1
     },

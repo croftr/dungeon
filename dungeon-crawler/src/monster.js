@@ -327,15 +327,39 @@ function _pickWeightedVariant(variants) {
 let _nextSummonId = 800;
 
 /**
+ * Finds the nearest passable cell to (baseRow+dr, baseCol+dc), trying the
+ * preferred offset first then falling back to adjacent cells.
+ * Returns { row, col } or null if nothing valid is found.
+ */
+function _findTreekinSpawnCell(baseRow, baseCol, dr, dc) {
+  const candidates = [
+    [dr, dc],
+    [-dr, dc],
+    [dr, -dc],
+    [0, -1], [0, 1],
+    [-1, 0], [1, 0],
+    [-1, -1], [-1, 1], [1, -1], [1, 1],
+  ];
+  for (const [r, c] of candidates) {
+    if (r === 0 && c === 0) continue;
+    const row = baseRow + r;
+    const col = baseCol + c;
+    if (isPassable(row, col) && !_isCellReserved(row, col, -1)) return { row, col };
+  }
+  return null;
+}
+
+/**
  * Dynamically spawns a treekin next to the given monster during combat.
  * Used by the Treeman's "Awakening of the Woods" ability.
  */
 function _spawnTreekin(parentMonster, scene, offsetRow, offsetCol) {
-  const row = parentMonster.gridRow + offsetRow;
-  const col = parentMonster.gridCol + offsetCol;
+  const pos = _findTreekinSpawnCell(parentMonster.gridRow, parentMonster.gridCol, offsetRow, offsetCol);
+  if (!pos) return; // no valid cell nearby — skip this treekin
+  const { row, col } = pos;
   const id = _nextSummonId++;
 
-  const m = inst(D.treekin, id, row, col,
+  const m = inst(D.treekin, id, row, col, // row/col already validated passable
     '/monsters/treekin-animation/Meshy_AI_Animation_Walking_withSkin.glb',
     '/monsters/treekin-animation/Meshy_AI_Animation_mage_soell_cast_withSkin.glb',
     '/monsters/treekin-animation/treeKin-attack.mp3', 0.45, 0, 0,
@@ -384,6 +408,14 @@ function _triggerTreemanAwakening(treeman, scene) {
     treeman._awakeningRetries = (treeman._awakeningRetries ?? 0) + 1;
     if (treeman._awakeningRetries <= 10) {
       setTimeout(() => _triggerTreemanAwakening(treeman, scene), 300);
+    } else {
+      // Animation never loaded — mark as used and spawn treekins anyway so the
+      // mechanic still fires even without the cast animation.
+      treeman._awakeningUsed = true;
+      showMessage(`<b>${treeman.name}</b> channels the Awakening of the Woods!`, 3000);
+      if (treeman.mesh) createTreemanAwakening(treeman.mesh.position);
+      _spawnTreekin(treeman, scene, -1, 0);
+      _spawnTreekin(treeman, scene, 1, 0);
     }
     return;
   }

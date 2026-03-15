@@ -10,6 +10,17 @@
     "tickInterval": 2,
     "tickDamage": 1
   },
+  "deadly_poison": {
+    "id": "deadly_poison",
+    "name": "Deadly Poison",
+    "description": "Takes 2 damage every 2 seconds for 30 seconds.",
+    "type": "debuff",
+    "icon": "/icons/poison.svg",
+    "color": "#20c020",
+    "duration": 60,
+    "tickInterval": 2,
+    "tickDamage": 2
+  },
   "regeneration": {
     "id": "regeneration",
     "name": "Regeneration",

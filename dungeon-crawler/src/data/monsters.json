@@ -72,10 +72,6 @@
       {
         "item": "Mana Berry",
         "chance": 0.1
-      },
-      {
-        "item": "Iron Ore",
-        "chance": 0.20
       }
     ]
   },
@@ -179,7 +175,11 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.25
+        "chance": 0.5
+      },
+      {
+        "item": "Iron Ore",
+        "chance": 0.5
       },
       {
         "item": "Padded Vest",
@@ -310,6 +310,10 @@
       {
         "item": "Fermented Sugar",
         "chance": 0.25
+      },
+      {
+        "item": "Iron Ore",
+        "chance": 0.3
       }
     ]
   },
@@ -343,12 +347,12 @@
   },
   "treeman": {
     "name": "Treeman",
-    "hp": 340,
+    "hp": 330,
     "defence": 9,
     "xp": 1000,
     "attackSpeed": 1.2,
     "stats": {
-      "strength": 30,
+      "strength": 28,
       "dexterity": 18,
       "vitality": 25,
       "intelligence": 26,
@@ -386,7 +390,7 @@
     "hp": 230,
     "defence": 9,
     "xp": 255,
-    "attackSpeed": 1.2,
+    "attackSpeed": 1,
     "stats": {
       "strength": 24,
       "dexterity": 18,
@@ -445,10 +449,10 @@
     "hp": 400,
     "defence": 10,
     "xp": 1200,
-    "attackSpeed": 1.5,
+    "attackSpeed": 1.8,
     "stats": {
-      "strength": 35,
-      "dexterity": 20,
+      "strength": 38,
+      "dexterity": 30,
       "vitality": 30,
       "intelligence": 10,
       "resilience": 30
@@ -456,7 +460,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.5
+        "chance": 0.7
       },
       {
         "item": "Life Berry",
@@ -512,7 +516,7 @@
       },
       {
         "item": "Life Essence",
-        "chance": 0.40
+        "chance": 0.60
       },
       {
         "item": "Mana Berry",
@@ -535,7 +539,7 @@
   "demon": {
     "name": "Demon",
     "hp": 200,
-    "defence": 18,
+    "defence": 15,
     "xp": 220,
     "attackSpeed": 1.3,
     "stats": {
@@ -548,7 +552,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.30
+        "chance": 0.50
       },
       {
         "item": "Mana Berry",
@@ -569,6 +573,10 @@
       {
         "item": "Demon's Eyes",
         "chance": 0.30
+      },
+      {
+        "item": "Iron Ore",
+        "chance": 0.3
       }
     ]
   }
