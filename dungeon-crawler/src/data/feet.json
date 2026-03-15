@@ -46,5 +46,17 @@
         "statBonuses": {
             "dexterity": 1
         }
+    },
+    {
+        "name": "Celestial Vindicator Sabatons",
+        "slot": "feet",
+        "icon": "/icons/celestial_vindicator_feet.png",
+        "description": "Solid silver boots inlaid with glowing white runes. Each step leaves a faint trail of radiant yellow dust.",
+        "defence": 4,
+        "value": 1100,
+        "weight": 5,
+        "statBonuses": {
+            "resilience": 2
+        }
     }
 ]

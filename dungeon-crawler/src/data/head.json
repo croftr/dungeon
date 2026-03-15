@@ -62,5 +62,21 @@
         "statBonuses": {
             "dexterity": 1
         }
+    },
+    {
+        "name": "Celestial Vindicator Helm",
+        "slot": "head",
+        "icon": "/icons/celestial_vindicator_helm.png",
+        "description": "A magnificent helm forged from glowing white metal and polished silver. It radiates a warm, holy light, protecting the wearer's mind with divine yellow energy.",
+        "defence": 4,
+        "value": 1200,
+        "weight": 3.0,
+        "statBonuses": {
+            "resilience": 2,
+            "intelligence": 1
+        },
+        "skillBonuses": {
+            "Shield Master": 1
+        }
     }
 ]

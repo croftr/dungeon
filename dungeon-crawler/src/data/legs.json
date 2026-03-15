@@ -35,5 +35,17 @@
         "statBonuses": {
             "dexterity": 1
         }
+    },
+    {
+        "name": "Celestial Vindicator Leggings",
+        "slot": "legs",
+        "icon": "/icons/celestial_vindicator_legs.png",
+        "description": "Heavily plated greaves forged from white-gold alloys and silver. They feel weightless while providing impenetrable holy defense.",
+        "defence": 6,
+        "value": 1500,
+        "weight": 8,
+        "statBonuses": {
+            "vitality": 2
+        }
     }
 ]

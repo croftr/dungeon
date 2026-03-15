@@ -77,5 +77,18 @@
             "dexterity": 1,
             "resilience": 1
         }
+    },
+    {
+        "name": "Celestial Vindicator Cuirass",
+        "slot": "chest",
+        "icon": "/icons/celestial_vindicator_chest.png",
+        "description": "A heavy breastplate of radiant white and silver steel. Ornate yellow trims glow with celestial power, absorbing the darkest of blows.",
+        "defence": 10,
+        "value": 2500,
+        "weight": 15,
+        "statBonuses": {
+            "strength": 2,
+            "vitality": 2
+        }
     }
 ]

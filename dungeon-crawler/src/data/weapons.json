@@ -350,5 +350,26 @@
         "value": 1500,
         "weight": 0.2,
         "skillBonuses": {}
+    },
+    {
+        "name": "Celestial Vindicator Greatmace",
+        "slot": "hand",
+        "attackType": "bash",
+        "weaponType": "mace",
+        "staminaDrain": 1.5,
+        "baseDamage": 18,
+        "delay": 2.2,
+        "statWeights": {
+            "str": 1.0,
+            "dex": 0.0
+        },
+        "icon": "/icons/celestial_vindicator_mace.png",
+        "description": "A massive two-handed mace of radiant white metal and silver. A core of holy yellow energy pulses within the head, ready to shatter evil.",
+        "value": 2000,
+        "weight": 12,
+        "skillBonuses": {
+            "Holy Radiance": 10,
+            "Sanctuary": 5
+        }
     }
 ]

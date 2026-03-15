@@ -35,5 +35,21 @@
         "statBonuses": {
             "dexterity": 1
         }
+    },
+    {
+        "name": "Celestial Vindicator Gauntlets",
+        "slot": "hands",
+        "icon": "/icons/celestial_vindicator_hands.png",
+        "description": "Elegant silver gauntlets with glowing white plates. The fingertips and knuckles are tipped with radiant yellow essence.",
+        "defence": 4,
+        "value": 1000,
+        "weight": 3,
+        "statBonuses": {
+            "strength": 1,
+            "resilience": 1
+        },
+        "skillBonuses": {
+            "Mace Tactician": 1
+        }
     }
 ]

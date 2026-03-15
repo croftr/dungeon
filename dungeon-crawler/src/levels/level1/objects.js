@@ -29,7 +29,10 @@ export function spawnLevel1Objects(ctx) {
         'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore",
         "Amethyst Wardancer Helm", "Amethyst Wardancer Cuirass", "Amethyst Wardancer Bracers",
         "Amethyst Wardancer Leggings", "Amethyst Wardancer Sabatons",
-        "Amethyst Wardancer Dagger", "Amethyst Wardancer Cloak"
+        "Amethyst Wardancer Dagger", "Amethyst Wardancer Cloak",
+        "Celestial Vindicator Helm", "Celestial Vindicator Cuirass", "Celestial Vindicator Gauntlets",
+        "Celestial Vindicator Leggings", "Celestial Vindicator Sabatons",
+        "Celestial Vindicator Greatmace", "Celestial Vindicator Cloak"
     ], '/items/stash.glb', true, 0, 'Stash');
 
     // Chest at the end of the long passage

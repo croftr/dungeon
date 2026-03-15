@@ -34,5 +34,18 @@
         "statBonuses": {
             "dexterity": 2
         }
-    }
+    },
+    {
+        "name": "Celestial Vindicator Cloak",
+        "slot": "cloak",
+        "icon": "/icons/celestial_vindicator_cloak.png",
+        "description": "A magnificent cloak of shimmering white silk with silver embroidery. A radiant yellow seal is pinned at the shoulder, guiding the faithful.",
+        "defence": 4,
+        "value": 1500,
+        "weight": 2.0,
+        "statBonuses": {
+            "intelligence": 2,
+            "resilience": 1
+        }
+  }
 ]
