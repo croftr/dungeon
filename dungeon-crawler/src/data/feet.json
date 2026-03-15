@@ -31,5 +31,20 @@
         "defence": 1,
         "value": 45,
         "weight": 1
+    },
+    {
+        "name": "Amethyst Wardancer Sabatons",
+        "slot": "feet",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/wardancer_feet.png",
+        "description": "Ornate silver boots that allow for silent, effortless movement. The embedded amethysts glow when the wearer is in motion.",
+        "defence": 3,
+        "value": 500,
+        "weight": 1.2,
+        "statChange": "+1 Dexterity",
+        "statBonuses": {
+            "dexterity": 1
+        }
     }
 ]

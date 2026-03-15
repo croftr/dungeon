@@ -20,5 +20,20 @@
         "defence": 3,
         "value": 150,
         "weight": 2
+    },
+    {
+        "name": "Amethyst Wardancer Bracers",
+        "slot": "hands",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/wardancer_hands.png",
+        "description": "Silver gauntlets that hum with magical vibrations, aiding the wearer's blade-work and reaction speed.",
+        "defence": 3,
+        "value": 500,
+        "weight": 0.8,
+        "statChange": "+1 Dexterity",
+        "statBonuses": {
+            "dexterity": 1
+        }
     }
 ]

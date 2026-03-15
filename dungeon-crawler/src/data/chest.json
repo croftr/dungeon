@@ -61,5 +61,21 @@
             "dexterity": 1,
             "resilience": 1
         }
+    },
+    {
+        "name": "Amethyst Wardancer Cuirass",
+        "slot": "chest",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/wardancer_chest.png",
+        "description": "An exquisite silver breastplate that feels as light as silk. Pulsing with violet energy, it offers peerless protection without hindering movement.",
+        "defence": 7,
+        "value": 1200,
+        "weight": 5,
+        "statChange": "+1 Dexterity, +1 Resilience",
+        "statBonuses": {
+            "dexterity": 1,
+            "resilience": 1
+        }
     }
 ]

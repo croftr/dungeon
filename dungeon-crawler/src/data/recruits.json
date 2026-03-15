@@ -48,11 +48,11 @@
         "job": "Paladin",
         "race": "Human",
         "stats": {
-            "strength": 117,
-            "dexterity": 110,
-            "vitality": 116,
-            "intelligence": 116,
-            "resilience": 116
+            "strength": 7,
+            "dexterity": 6,
+            "vitality": 8,
+            "intelligence": 4,
+            "resilience": 8
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
         "skillProgression": [
@@ -74,13 +74,7 @@
         "leftHand": "Sword",
         "rightHand": "Shield",
         "startingInventory": [
-            "Cure Poison Potion",
-            "Potion of Unseen",
-            "Potion of Unseen",
-            "Potion of Unseen",
-            "Potion Invincibility",
-            "Potion Invincibility",
-            "Potion Invincibility"
+            "Cure Poison Potion"
         ],
         "gridCol": 10,
         "gridRow": 8,

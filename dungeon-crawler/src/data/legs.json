@@ -20,5 +20,20 @@
         "defence": 4,
         "value": 210,
         "weight": 4
+    },
+    {
+        "name": "Amethyst Wardancer Leggings",
+        "slot": "legs",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/wardancer_legs.png",
+        "description": "Form-fitting silver greaves that provide exceptional protection while feeling as light as air. Ornamented with deep purple gems.",
+        "defence": 5,
+        "value": 800,
+        "weight": 3,
+        "statChange": "+1 Dexterity",
+        "statBonuses": {
+            "dexterity": 1
+        }
     }
 ]

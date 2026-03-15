@@ -26,14 +26,10 @@ export function spawnLevel1Objects(ctx) {
     // Stash in the starter room
     addChest(group, loader, 11, 13, 0, 0.7, [
         { name: 'Gold Coins', quantity: 100 },
-        'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence",
-        "Life Essence",
-        "Life Essence",
-        "Life Essence",
-        "Iron Ore",
-        "Iron Ore",
-        "Iron Ore",
-        "Iron Ore"
+        'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore",
+        "Amethyst Wardancer Helm", "Amethyst Wardancer Cuirass", "Amethyst Wardancer Bracers",
+        "Amethyst Wardancer Leggings", "Amethyst Wardancer Sabatons",
+        "Amethyst Wardancer Dagger", "Amethyst Wardancer Cloak"
     ], '/items/stash.glb', true, 0, 'Stash');
 
     // Chest at the end of the long passage

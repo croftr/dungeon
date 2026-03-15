@@ -47,5 +47,20 @@
         "statBonuses": {
             "strength": 1
         }
+    },
+    {
+        "name": "Amethyst Wardancer Helm",
+        "slot": "head",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/wardancer_helm.png",
+        "description": "A lightweight elven helm forged from shimmering silver and inlaid with glowing amethyst. It enhances the wearer's agility and focus.",
+        "defence": 4,
+        "value": 600,
+        "weight": 1.5,
+        "statChange": "+1 Dexterity",
+        "statBonuses": {
+            "dexterity": 1
+        }
     }
 ]

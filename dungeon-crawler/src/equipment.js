@@ -3461,14 +3461,19 @@ function _useDoubleAttack(member, memberIndex) {
     return;
   }
 
-  const def = SKILLS_DATA['Double Attack'];
-  const delayMs = (def?.cooldownMs ?? 90000);
+  const skillDef = SKILLS_DATA['Double Attack'];
+  const mag = resolveSkillMagnitude('Double Attack', skillDef, member);
+  const cooldownMs = (skillDef?.cooldownMs ?? 90000);
+  
+  // Base duration is 20s. Any magnitude > 1 (e.g. from the dagger's +20 bonus) 
+  // adds directly to the duration in seconds.
+  const durationMs = (skillDef?.durationMs ?? 20000) + (mag > 1 ? (mag - 1) * 1000 : 0);
 
   skillsState.doubleAttack.active = true;
   skillsState.doubleAttack.actorName = member.name;
-  skillsState.doubleAttack.expiresAt = now + DOUBLE_ATTACK_DURATION_MS;
+  skillsState.doubleAttack.expiresAt = now + durationMs;
 
-  _doubleAttackCooldownEnds[memberIndex] = now + delayMs;
+  _doubleAttackCooldownEnds[memberIndex] = now + cooldownMs;
   lastAttackTimes[`${memberIndex}-skill-Double Attack`] = now;
 
   playSkillSound('double-attack');
@@ -3490,7 +3495,7 @@ function _useDoubleAttack(member, memberIndex) {
       showMessage(`<span style="color:#ff8080">Double Attack</span> fades — focus returns to normal.`, 2500);
     }
     _doubleAttackExpireTimers[memberIndex] = null;
-  }, DOUBLE_ATTACK_DURATION_MS);
+  }, durationMs);
 
   _startSkillCooldownUI(memberIndex, _doubleAttackCooldownEnds[memberIndex]);
 }
