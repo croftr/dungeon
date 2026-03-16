@@ -1,6 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
 //  MAIN MENU  — opened/closed with Escape key
-//  Contains sub-views: Controls, Load Game.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { listSaves, triggerLoad } from './save-game.js';
@@ -30,12 +29,6 @@ function _anyOverlayOpen() {
   });
 }
 
-function _showSavesView() {
-  document.getElementById('mm-main-view').classList.add('mm-hidden');
-  document.getElementById('mm-saves-view').classList.remove('mm-hidden');
-  _renderSavesList();
-}
-
 function _renderSavesList() {
   const list = document.getElementById('mm-saves-list');
   const saves = listSaves();
@@ -45,10 +38,11 @@ function _renderSavesList() {
   }
   list.innerHTML = saves.map(s => {
     const d = new Date(s.savedAt);
-    const stamp = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const date = d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     return `<div class="mm-save-entry" data-key="${s.key}">
       <span class="mm-save-level">${s.levelName}</span>
-      <span class="mm-save-date">${stamp}</span>
+      <span class="mm-save-meta"><span class="mm-save-date">${date}</span><span class="mm-save-time">${time}</span></span>
     </div>`;
   }).join('');
   list.querySelectorAll('.mm-save-entry').forEach(el => {
@@ -64,73 +58,66 @@ function _buildModal() {
   overlay.classList.add('mm-hidden');
   overlay.innerHTML = `
     <div id="main-menu-panel">
-
-      <!-- Main view -->
-      <div id="mm-main-view">
-        <h2 class="mm-title">Menu</h2>
-        <button class="mm-item" id="mm-load-btn">Load Game</button>
-        <button class="mm-item" id="mm-controls-btn">Controls</button>
+      <div class="mm-header">
+        <h2 class="mm-title">DUNGEON CRAWLER</h2>
+        <button class="mm-close-btn" id="mm-close-btn">✕</button>
       </div>
 
-      <!-- Saves sub-view -->
-      <div id="mm-saves-view" class="mm-hidden">
-        <div class="mm-sub-header">
-          <button class="mm-back-btn" id="mm-saves-back-btn">← Back</button>
-          <h2 class="mm-title">Load Game</h2>
-        </div>
-        <div id="mm-saves-list" class="mm-saves-list"></div>
-      </div>
+      <div class="mm-body">
 
-      <!-- Controls sub-view -->
-      <div id="mm-controls-view" class="mm-hidden">
-        <div class="mm-sub-header">
-          <button class="mm-back-btn" id="mm-back-btn">← Back</button>
-          <h2 class="mm-title">Controls</h2>
-        </div>
-        <div class="mm-key-list">
-          <div class="mm-key-row"><span class="mm-key">W / ↑</span><span class="mm-desc">Move Forward</span></div>
-          <div class="mm-key-row"><span class="mm-key">S / ↓</span><span class="mm-desc">Move Backward</span></div>
-          <div class="mm-key-row"><span class="mm-key">Q / ←</span><span class="mm-desc">Turn Left</span></div>
-          <div class="mm-key-row"><span class="mm-key">E / →</span><span class="mm-desc">Turn Right</span></div>
-          <div class="mm-key-row"><span class="mm-key">A / D</span><span class="mm-desc">Strafe Left / Right</span></div>
-          <div class="mm-key-row"><span class="mm-key">C</span><span class="mm-desc">Character Inventory</span></div>
-          <div class="mm-key-row"><span class="mm-key">P</span><span class="mm-desc">Party Tactics</span></div>
-          <div class="mm-key-row"><span class="mm-key">B</span><span class="mm-desc">Battle Log</span></div>
-          <div class="mm-key-row"><span class="mm-key">M</span><span class="mm-desc">Map</span></div>
-          <div class="mm-key-row"><span class="mm-key">Esc</span><span class="mm-desc">Menu</span></div>
-        </div>
-      </div>
+        <!-- Left column: key bindings -->
+        <div class="mm-left-col">
+          <div class="mm-controls-section">
+            <h3 class="mm-section-title">Movement</h3>
+            <div class="mm-key-list">
+              <div class="mm-key-row"><span class="mm-key">W / ↑</span><span class="mm-desc">Move forward</span></div>
+              <div class="mm-key-row"><span class="mm-key">S / ↓</span><span class="mm-desc">Move backward</span></div>
+              <div class="mm-key-row"><span class="mm-key">Q / ←</span><span class="mm-desc">Turn left</span></div>
+              <div class="mm-key-row"><span class="mm-key">E / →</span><span class="mm-desc">Turn right</span></div>
+              <div class="mm-key-row"><span class="mm-key">A / D</span><span class="mm-desc">Strafe</span></div>
+            </div>
+          </div>
 
+          <div class="mm-controls-section">
+            <h3 class="mm-section-title">Screens</h3>
+            <div class="mm-key-list">
+              <div class="mm-key-row"><span class="mm-key">I</span><span class="mm-desc">Inventory</span></div>
+              <div class="mm-key-row"><span class="mm-key">C</span><span class="mm-desc">Character development</span></div>
+              <div class="mm-key-row"><span class="mm-key">P</span><span class="mm-desc">Party tactics</span></div>
+              <div class="mm-key-row"><span class="mm-key">B</span><span class="mm-desc">Battle log</span></div>
+              <div class="mm-key-row"><span class="mm-key">M</span><span class="mm-desc">Map</span></div>
+            </div>
+          </div>
+
+          <div class="mm-controls-section">
+            <h3 class="mm-section-title">Combat &amp; Loadout</h3>
+            <div class="mm-key-list">
+              <div class="mm-key-row"><span class="mm-key">1 – 4</span><span class="mm-desc">Rotate loadout (by member)</span></div>
+              <div class="mm-key-row"><span class="mm-key">Tab</span><span class="mm-desc">Toggle HUD</span></div>
+              <div class="mm-key-row"><span class="mm-key">Esc</span><span class="mm-desc">Menu / close</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mm-col-divider"></div>
+
+        <!-- Right column: save slots -->
+        <div class="mm-right-col">
+          <h3 class="mm-section-title">Load Game</h3>
+          <div id="mm-saves-list" class="mm-saves-list"></div>
+        </div>
+
+      </div>
     </div>
   `;
   document.body.appendChild(overlay);
 
-  // Backdrop click closes
   overlay.addEventListener('click', (e) => { if (e.target === overlay) _close(); });
-
-  document.getElementById('mm-load-btn').addEventListener('click', _showSavesView);
-
-  document.getElementById('mm-saves-back-btn').addEventListener('click', () => {
-    document.getElementById('mm-saves-view').classList.add('mm-hidden');
-    document.getElementById('mm-main-view').classList.remove('mm-hidden');
-  });
-
-  document.getElementById('mm-controls-btn').addEventListener('click', () => {
-    document.getElementById('mm-main-view').classList.add('mm-hidden');
-    document.getElementById('mm-controls-view').classList.remove('mm-hidden');
-  });
-
-  document.getElementById('mm-back-btn').addEventListener('click', () => {
-    document.getElementById('mm-controls-view').classList.add('mm-hidden');
-    document.getElementById('mm-main-view').classList.remove('mm-hidden');
-  });
+  document.getElementById('mm-close-btn').addEventListener('click', _close);
 }
 
 function _openMenu() {
-  // Always start at the main view
-  document.getElementById('mm-main-view').classList.remove('mm-hidden');
-  document.getElementById('mm-saves-view').classList.add('mm-hidden');
-  document.getElementById('mm-controls-view').classList.add('mm-hidden');
+  _renderSavesList();
   document.getElementById('main-menu-overlay').classList.remove('mm-hidden');
   _isOpen = true;
 }

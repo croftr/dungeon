@@ -35,17 +35,36 @@ document.querySelectorAll('video source[src^="/"]').forEach(src => {
   src.closest('video')?.load();
 });
 
-// Disable "Start Adventure" until the intro video has buffered enough to play
+// Disable "Start Adventure" until the intro video has buffered enough to play.
+// Show a progress bar while it loads.
 {
   const _startBtn = document.getElementById('start-adventure-btn');
   const _introVid = document.getElementById('intro-video');
+  const _barFill  = document.getElementById('loading-bar-fill');
+  const _barWrap  = document.getElementById('loading-bar-wrap');
   if (_startBtn && _introVid) {
     _startBtn.disabled = true;
     _startBtn.textContent = 'Loading…';
+
+    const _setProgress = (pct) => {
+      if (_barFill) _barFill.style.width = `${Math.round(pct)}%`;
+    };
+
     const _enable = () => {
+      _setProgress(100);
       _startBtn.disabled = false;
       _startBtn.textContent = 'Start Adventure';
+      if (_barWrap) _barWrap.style.opacity = '0';
     };
+
+    _introVid.addEventListener('progress', () => {
+      if (!_introVid.duration) return;
+      try {
+        const pct = (_introVid.buffered.end(_introVid.buffered.length - 1) / _introVid.duration) * 100;
+        _setProgress(pct);
+      } catch (_) { /* buffered range not available yet */ }
+    });
+
     _introVid.addEventListener('canplaythrough', _enable, { once: true });
     _introVid.addEventListener('error', _enable, { once: true });
   }
