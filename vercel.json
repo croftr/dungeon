@@ -1,6 +1,0 @@
-{
-  "buildCommand": "cd dungeon-crawler && npm run build",
-  "outputDirectory": "dungeon-crawler/dist",
-  "installCommand": "cd dungeon-crawler && npm install",
-  "framework": null
-}

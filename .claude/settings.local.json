@@ -41,7 +41,11 @@
       "Bash(gltf-transform decompress \"/c/Users/rob/projects/dungeon/dungeon-crawler/public/items/chest1.glb\" \"/c/Users/rob/projects/dungeon/dungeon-crawler/public/items/chest1-decompressed-test.glb\")",
       "Bash(gltf-transform --help)",
       "Bash(gltf-transform draco --help)",
-      "Bash(C:/Users/rob/projects/dungeon/dungeon-crawler/src/style.css:*)"
+      "Bash(C:/Users/rob/projects/dungeon/dungeon-crawler/src/style.css:*)",
+      "Bash(npx vite:*)",
+      "Bash(grep -c '\"\"id\"\":' src/data/recruits.json)",
+      "Bash(python3 -c \":*)",
+      "Bash(find /c/Users/rob/projects/dungeon/dungeon-crawler -name .env* -o -name vite.config*)"
     ]
   }
 }
