@@ -11,7 +11,7 @@ import { initEquipment, hideDropButton, updateEffectiveStats, tickAutoAttack, cl
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition } from './objects.js';
-import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence } from './audio.js';
+import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
@@ -35,8 +35,12 @@ document.querySelectorAll('video source[src^="/"]').forEach(src => {
   src.closest('video')?.load();
 });
 
-// Disable "Start Adventure" until the intro video has buffered enough to play.
-// Show a progress bar while it loads.
+// Pre-fetch back1.mp3 raw bytes now — no AudioContext needed.
+// By the time the user clicks, the bytes are cached and decodeAudioData is near-instant.
+const _audioPreload = prefetchBuffer(asset('/sounds/back1.mp3'));
+
+// Disable "Start Adventure" until the intro video has buffered enough to play
+// AND the background music file has been pre-fetched. Show a progress bar while loading.
 {
   const _startBtn = document.getElementById('start-adventure-btn');
   const _introVid = document.getElementById('intro-video');
@@ -57,6 +61,7 @@ document.querySelectorAll('video source[src^="/"]').forEach(src => {
       if (_barWrap) _barWrap.style.opacity = '0';
     };
 
+    // Progress bar driven by video buffering
     _introVid.addEventListener('progress', () => {
       if (!_introVid.duration) return;
       try {
@@ -65,8 +70,12 @@ document.querySelectorAll('video source[src^="/"]').forEach(src => {
       } catch (_) { /* buffered range not available yet */ }
     });
 
-    _introVid.addEventListener('canplaythrough', _enable, { once: true });
-    _introVid.addEventListener('error', _enable, { once: true });
+    // Gate on both: video ready to play AND music pre-fetched
+    const _videoReady = new Promise(resolve => {
+      _introVid.addEventListener('canplaythrough', resolve, { once: true });
+      _introVid.addEventListener('error', resolve, { once: true });
+    });
+    Promise.all([_videoReady, _audioPreload]).then(_enable);
   }
 }
 
@@ -1090,7 +1099,7 @@ window.addEventListener('mousemove', (e) => {
   let isHoveringInteractable = false;
   for (let hit of intersects) {
     const ud = hit.object.userData;
-    if (ud && (ud.isButton || ud.isChest || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDamageTrap || ud.isEgg)) {
+    if (ud && (ud.isButton || ud.isChest || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDamageTrap || ud.isEgg || ud.isTeleportTorch)) {
       if (hit.object.visible) {
         isHoveringInteractable = true;
         break;

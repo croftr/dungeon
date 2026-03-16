@@ -305,38 +305,17 @@ export function initObjects(scene, camera) {
                     showMessage("The egg radiates a strange golden light.");
                 }
                 break;
+
             } else if (obj.userData.isTeleportTorch) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 1 && distCol <= 1) {
-                    showMessage("A hidden mechanism! You are being pulled through...");
-                    playPortalSound();
-
-                    if (window.loadLevel) {
-                        window.loadLevel(2);
-                        // Teleport to demon room (row 16, col 5)
-                        player.gridRow = 16;
-                        player.gridCol = 5;
-                        const w = cellToWorld(16, 5);
-                        camera.position.set(w.x, w.y, w.z);
-                        // Face the demon (demon is at 17, 5, so face South)
-                        player.facing = 2;
-                        camera.rotation.order = 'YXZ';
-                        camera.rotation.y = FACING_ANGLES[player.facing];
-
-                        // Redraw minimap and update status
-                        drawMinimap();
-                        updateStatus();
-
-                        // Trigger demon video if possible
-                        if (window.playDemonVideo && !window._saveFlags?.hasSeenDemonVideo) {
-                            window.playDemonVideo();
-                        }
-                    }
+                    playSoundByUrl(asset('/sounds/items/burn.mp3'));
                 } else {
                     showMessage("You see a flickering torch on the floor.");
                 }
                 break;
+
             } else if (obj.userData.isBonePile) {
                 // Check if player is in front of the bone pile (within 1 square)
                 if (isInFrontOfPlayer(obj.userData.gridRow, obj.userData.gridCol, 1)) {
@@ -1272,6 +1251,7 @@ function addTeleportTorch(scene, loader, col, row, rotY = 0) {
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 interactables.push(child);
+
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];
                     mats.forEach(mat => {

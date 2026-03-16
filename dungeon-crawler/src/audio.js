@@ -36,11 +36,29 @@ const ITEM_SOUNDS = {
 
 const bufferCache = new Map();
 
+// Raw-bytes cache — allows pre-fetching before AudioContext exists.
+const rawCache = new Map();
+
+/**
+ * Pre-fetch an audio file as raw bytes (no AudioContext needed).
+ * Safe to call before any user interaction.
+ * Returns a Promise that resolves when the download is complete.
+ */
+export function prefetchBuffer(url) {
+  if (rawCache.has(url)) return rawCache.get(url);
+  const p = fetch(url).then(r => r.arrayBuffer()).catch(() => null);
+  rawCache.set(url, p);
+  return p;
+}
+
 async function getBuffer(url) {
   if (bufferCache.has(url)) return bufferCache.get(url);
   try {
-    const response = await fetch(url);
-    const arrayBuffer = await response.arrayBuffer();
+    // Use pre-fetched bytes if available, otherwise fetch now
+    const arrayBuffer = rawCache.has(url)
+      ? await rawCache.get(url)
+      : await fetch(url).then(r => r.arrayBuffer());
+    if (!arrayBuffer) return null;
     const audioBuffer = await getCtx().decodeAudioData(arrayBuffer);
     bufferCache.set(url, audioBuffer);
     return audioBuffer;
