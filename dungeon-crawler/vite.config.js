@@ -40,10 +40,5 @@ export default defineConfig({
     // Native modulepreload is supported in all target browsers
     modulePreload: { polyfill: false },
 
-    // Sourcemaps for production profiling (no runtime cost)
-    sourcemap: true,
-
-    // DIAGNOSTIC: disable minification to test if it's the cause of sluggishness
-    minify: false,
   },
 });
