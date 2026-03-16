@@ -10,7 +10,7 @@ import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refr
 import { addLogEntry } from './battle-log.js';
 import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playSoundByUrl } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
-import POTIONS_DATA from './data/potions.json';
+import POTIONS_DATA from './data/items/potions.json';
 import FORGE_DATA from './data/forge.json';
 import { triggerMummyAmbush, monsters } from './monster.js';
 import * as equip from './equipment.js';
