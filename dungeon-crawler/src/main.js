@@ -17,6 +17,7 @@ import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
 import { consumePendingLoad, autoSave } from './save-game.js';
 import { initQuarks, updateQuarks } from './quarks-intro.js';
+import { asset } from './assets.js';
 
 import './style.css';
 
@@ -24,6 +25,15 @@ import './style.css';
 //  RENDERER & GLOBALS
 // ─────────────────────────────────────────────
 window.currentLevel = 1;
+
+// Patch hardcoded asset paths in index.html to use CDN base URL
+document.querySelectorAll('img[src^="/"]').forEach(img => {
+  img.src = asset(img.getAttribute('src'));
+});
+document.querySelectorAll('video source[src^="/"]').forEach(src => {
+  src.src = asset(src.getAttribute('src'));
+  src.closest('video')?.load();
+});
 
 const canvas = document.getElementById('renderer-canvas');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });

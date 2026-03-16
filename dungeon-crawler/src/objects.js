@@ -3301,7 +3301,7 @@ export function spawnDroppedItem(col, row, itemName, quantity = 1) {
         const sprite = new THREE.Sprite(spriteMat);
 
         const img = new Image();
-        img.src = '/icons/gold_coins.png';
+        img.src = asset('/icons/gold_coins.png');
         img.onload = () => {
             const canvas = document.createElement('canvas');
             canvas.width = 256;

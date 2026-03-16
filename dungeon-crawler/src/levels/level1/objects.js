@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { CELL } from '../../map.js';
+import { asset } from '../../assets.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  LEVEL 1 – The Western Dungeon
@@ -33,7 +34,7 @@ export function spawnLevel1Objects(ctx) {
         "Celestial Vindicator Helm", "Celestial Vindicator Cuirass", "Celestial Vindicator Gauntlets",
         "Celestial Vindicator Leggings", "Celestial Vindicator Sabatons",
         "Celestial Vindicator Greatmace", "Celestial Vindicator Cloak"
-    ], '/items/stash.glb', true, 0, 'Stash');
+    ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // Chest at the end of the long passage
     addChest(group, loader, 7, 1, 0, -0.7, [
@@ -105,11 +106,11 @@ export function spawnLevel1Objects(ctx) {
     addShop(group, loader, 23, 11, -Math.PI / 2, -0.2, 0);
 
     // Decorative chest beside the merchant (non-interactive)
-    addChest(group, loader, 23, 11, -Math.PI / 2, 0.7, [], '/items/chest1.glb', false);
+    addChest(group, loader, 23, 11, -Math.PI / 2, 0.7, [], asset('/items/chest1.glb'), false);
 
     // ── Torch (dropped item) ─────────────────────────────────────────────────
     // Beside the merchant, nudged north
-    loader.load('/items/torch.glb', (gltf) => {
+    loader.load(asset('/items/torch.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.35);
         model.position.set(23 * CELL + 0.8, 0.25, 11 * CELL - 0.7);

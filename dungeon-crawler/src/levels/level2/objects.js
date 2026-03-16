@@ -1,4 +1,5 @@
 import { CELL } from '../../map.js';
+import { asset } from '../../assets.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  LEVEL 2 – The Deep Passage
@@ -50,7 +51,7 @@ export function spawnLevel2Objects(ctx) {
         { name: 'Gold Coins', quantity: 500 },
         'Ruby Ring', 'Mana Potion', 'Life Essence',
         'Chain Shirt', 'Plate Cuirass'
-    ], '/items/chest1.glb', true, 1);
+    ], asset('/items/chest1.glb'), true, 1);
 
     // ── Stairs ────────────────────────────────────────────────────────────────
     addStairs(group, loader, 3, 26, Math.PI);
