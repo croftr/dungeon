@@ -103,10 +103,16 @@ body {
   text-transform: uppercase;
 }
 
-#start-adventure-btn:hover {
+#start-adventure-btn:hover:not(:disabled) {
   background: rgba(232, 200, 122, 0.1);
   box-shadow: 0 0 30px rgba(232, 200, 122, 0.3);
   border-color: #e8c87a;
+}
+
+#start-adventure-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-color: rgba(232, 200, 122, 0.2);
 }
 
 #video-container {

@@ -35,6 +35,22 @@ document.querySelectorAll('video source[src^="/"]').forEach(src => {
   src.closest('video')?.load();
 });
 
+// Disable "Start Adventure" until the intro video has buffered enough to play
+{
+  const _startBtn = document.getElementById('start-adventure-btn');
+  const _introVid = document.getElementById('intro-video');
+  if (_startBtn && _introVid) {
+    _startBtn.disabled = true;
+    _startBtn.textContent = 'Loading…';
+    const _enable = () => {
+      _startBtn.disabled = false;
+      _startBtn.textContent = 'Start Adventure';
+    };
+    _introVid.addEventListener('canplaythrough', _enable, { once: true });
+    _introVid.addEventListener('error', _enable, { once: true });
+  }
+}
+
 const canvas = document.getElementById('renderer-canvas');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
