@@ -32,6 +32,7 @@ const ITEM_SOUNDS = {
   'Gold Coins': asset('/sounds/items/gold-coins.mp3'),
   'potion': asset('/sounds/items/alchemy-bubbles.mp3'),
   'scroll': asset('/sounds/items/scroll.mp3'),
+  'Torch': asset('/sounds/items/burn.mp3'),
 };
 
 const bufferCache = new Map();

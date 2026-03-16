@@ -324,16 +324,6 @@ export function initObjects(scene, camera) {
                 }
                 break;
 
-            } else if (obj.userData.isTeleportTorch) {
-                const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
-                const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
-                if (distRow <= 1 && distCol <= 1) {
-                    playSoundByUrl(asset('/sounds/items/burn.mp3'));
-                } else {
-                    showMessage("You see a flickering torch on the floor.");
-                }
-                break;
-
             } else if (obj.userData.isBonePile) {
                 // Check if player is in front of the bone pile (within 1 square)
                 if (isInFrontOfPlayer(obj.userData.gridRow, obj.userData.gridCol, 1)) {
@@ -1267,11 +1257,11 @@ function addTrap1(scene, loader, row, col, rotY = 0, scale = 0.6) {
     });
 }
 
-function addTeleportTorch(scene, loader, col, row, rotY = 0) {
+function addDroppedTorch(container, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
     loader.load(asset('/items/torch.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.35);
-        model.position.set(col * CELL, 0.25, row * CELL);
+        model.position.set(col * CELL + offsetX, 0.25, row * CELL + offsetZ);
         model.rotation.y = rotY;
 
         const light = new THREE.PointLight(0xffaa00, 2.5, 4);
@@ -1282,9 +1272,11 @@ function addTeleportTorch(scene, loader, col, row, rotY = 0) {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
-                child.userData.isTeleportTorch = true;
+                child.userData.isDroppedItem = true;
+                child.userData.itemName = 'Torch';
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
+                child.userData.modelContainer = model;
                 interactables.push(child);
 
                 if (child.material) {
@@ -1302,7 +1294,7 @@ function addTeleportTorch(scene, loader, col, row, rotY = 0) {
             }
         });
 
-        scene.add(model);
+        container.add(model);
     });
 }
 
@@ -1357,7 +1349,7 @@ export function spawnObjectsForLevel() {
         addCrystals, addBonePile,
         addPortal, addDisabledPortal, addPortcullis, addKeyhole,
         addStatue, addPortalActivatorStatue, addPartyConfirmNPC,
-        addAnvil, addAlchemyWorkshop, addTeleportTorch, addEtherealEgg, addStairs,
+        addAnvil, addAlchemyWorkshop, addDroppedTorch, addEtherealEgg, addStairs,
         addTrap1, createWallButton, addArmourStand,
         // Level 1 state flags
         starterPortalEnabled: _starterPortalEnabled,

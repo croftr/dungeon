@@ -16,7 +16,7 @@ export function spawnLevel1Objects(ctx) {
         addCrystals, addBonePile,
         addPortal, addDisabledPortal, addPortcullis,
         addStatue, addPortalActivatorStatue, addPartyConfirmNPC,
-        addAnvil, addAlchemyWorkshop, addTeleportTorch, addTrap1,
+        addAnvil, addAlchemyWorkshop, addDroppedTorch, addTrap1,
         createWallButton, addArmourStand,
         starterPortalEnabled, starterGateOpened, mummyGateOpened,
         setStarterGate,
@@ -125,44 +125,7 @@ export function spawnLevel1Objects(ctx) {
 
     // ── Torch (dropped item) ─────────────────────────────────────────────────
     // Beside the merchant, nudged north
-    loader.load(asset('/items/torch.glb'), (gltf) => {
-        const model = gltf.scene;
-        model.scale.setScalar(0.35);
-        model.position.set(23 * CELL + 0.8, 0.25, 11 * CELL - 0.7);
-        model.rotation.y = -Math.PI / 2;
-
-        const light = new THREE.PointLight(0xffaa00, 2.5, 4);
-        light.position.set(0, 0.4, 0);
-        model.add(light);
-
-        model.traverse((child) => {
-            if (child.isMesh) {
-                child.castShadow = true;
-                child.receiveShadow = true;
-                child.userData.isDroppedItem = true;
-                child.userData.itemName = 'Torch';
-                child.userData.gridCol = 23;
-                child.userData.gridRow = 11;
-                child.userData.modelContainer = model;
-                interactables.push(child);
-
-                if (child.material) {
-                    const mats = Array.isArray(child.material) ? child.material : [child.material];
-                    mats.forEach(mat => {
-                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
-                            if (mat[mapName]) {
-                                mat[mapName].magFilter = THREE.LinearFilter;
-                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
-                                mat[mapName].anisotropy = 16;
-                            }
-                        });
-                    });
-                }
-            }
-        });
-
-        group.add(model);
-    });
+    addDroppedTorch(group, loader, 23, 11, -Math.PI / 2, 0.8, -0.7);
 
     // ── Portals ──────────────────────────────────────────────────────────────
     // Portal to Level 2 — only appears after Statue Portal Activator is used
@@ -184,7 +147,7 @@ export function spawnLevel1Objects(ctx) {
     addTrap1(group, loader, 21, 10);  // long south corridor
 
     // ── Teleport Torch ───────────────────────────────────────────────────────
-    addTeleportTorch(group, loader, 12, 11, Math.PI / 2);
+    addDroppedTorch(group, loader, 12, 11, Math.PI / 2);
 
     // ── Portcullises & Gates ──────────────────────────────────────────────────
     // Portcullis at col 7, row 7 (opened by wall button)
