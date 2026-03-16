@@ -195,6 +195,8 @@ export function isInFrontOfPlayer(targetRow, targetCol, maxSteps = 1) {
     const checkRow = player.gridRow + dir.dz * step;
     const checkCol = player.gridCol + dir.dx * step;
     if (checkRow === targetRow && checkCol === targetCol) return true;
+    // A wall in an intermediate cell blocks both detection and projectiles
+    if (!isPassable(checkRow, checkCol)) return false;
   }
   return false;
 }
