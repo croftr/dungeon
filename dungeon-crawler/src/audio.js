@@ -5,6 +5,8 @@
 //    playActionSound(action)  — plays the sound matching 'swipe' | 'bash' | 'shoot'
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { asset } from './assets.js';
+
 let audioCtx = null;
 function getCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -14,22 +16,22 @@ function getCtx() {
 
 const SOUND_MAP = {
   // Add an 'offset' value (in seconds) to skip silence at the very start of the file.
-  swipe: { url: '/sounds/actions/swipe.mp3', offset: 0.05 },
-  bash: { url: '/sounds/actions/bash.mp3', offset: 0.05 },
-  shoot: { url: '/sounds/actions/shoot.mp3', offset: 0.05 },
-  punch: { url: '/sounds/actions/bash.mp3', offset: 0.05 },
-  fireball: { url: '/sounds/actions/fireball.mp3', offset: 0.0 },
-  'shield-bash': { url: '/sounds/actions/bash.mp3', offset: 0.05 },
-  death: { url: '/sounds/actions/monster-killed-1.mp3 ', offset: 0.0 },
-  hit: { url: '/sounds/actions/hit.mp3', offset: 0.0 },
-  'gold-coins': { url: '/sounds/items/gold-coins.mp3', offset: 0.0 },
-  'shield-block': { url: '/sounds/actions/shield-block.mp3', offset: 0.0 },
+  swipe: { url: asset('/sounds/actions/swipe.mp3'), offset: 0.05 },
+  bash: { url: asset('/sounds/actions/bash.mp3'), offset: 0.05 },
+  shoot: { url: asset('/sounds/actions/shoot.mp3'), offset: 0.05 },
+  punch: { url: asset('/sounds/actions/bash.mp3'), offset: 0.05 },
+  fireball: { url: asset('/sounds/actions/fireball.mp3'), offset: 0.0 },
+  'shield-bash': { url: asset('/sounds/actions/bash.mp3'), offset: 0.05 },
+  death: { url: asset('/sounds/actions/monster-killed-1.mp3'), offset: 0.0 },
+  hit: { url: asset('/sounds/actions/hit.mp3'), offset: 0.0 },
+  'gold-coins': { url: asset('/sounds/items/gold-coins.mp3'), offset: 0.0 },
+  'shield-block': { url: asset('/sounds/actions/shield-block.mp3'), offset: 0.0 },
 };
 
 const ITEM_SOUNDS = {
-  'Gold Coins': '/sounds/items/gold-coins.mp3',
-  'potion': '/sounds/items/alchemy-bubbles.mp3',
-  'scroll': '/sounds/items/scroll.mp3',
+  'Gold Coins': asset('/sounds/items/gold-coins.mp3'),
+  'potion': asset('/sounds/items/alchemy-bubbles.mp3'),
+  'scroll': asset('/sounds/items/scroll.mp3'),
 };
 
 const bufferCache = new Map();
@@ -108,7 +110,7 @@ export async function playCritSound(attackType) {
 }
 
 export async function playHealSound() {
-  const buffer = await getBuffer('/sounds/actions/life-crystal.mp3');
+  const buffer = await getBuffer(asset('/sounds/actions/life-crystal.mp3'));
   if (!buffer) return;
 
   try {
@@ -129,7 +131,7 @@ export async function playHealSound() {
 }
 
 export async function playPortalSound() {
-  const buffer = await getBuffer('/sounds/actions/portal.mp3');
+  const buffer = await getBuffer(asset('/sounds/actions/portal.mp3'));
   if (!buffer) return;
 
   try {
@@ -150,7 +152,7 @@ export async function playPortalSound() {
 }
 
 export async function playKeyLockSound() {
-  const buffer = await getBuffer('/sounds/actions/key-lock.mp3');
+  const buffer = await getBuffer(asset('/sounds/actions/key-lock.mp3'));
   if (!buffer) return;
 
   try {
@@ -171,7 +173,7 @@ export async function playKeyLockSound() {
 }
 
 export async function playGateOpeningSound() {
-  const buffer = await getBuffer('/sounds/actions/gate-opening.mp3');
+  const buffer = await getBuffer(asset('/sounds/actions/gate-opening.mp3'));
   if (!buffer) return;
 
   try {
@@ -192,7 +194,7 @@ export async function playGateOpeningSound() {
 }
 
 export async function playHitSound() {
-  const buffer = await getBuffer('/sounds/actions/hit.mp3');
+  const buffer = await getBuffer(asset('/sounds/actions/hit.mp3'));
   if (!buffer) return;
 
   try {
@@ -213,7 +215,7 @@ export async function playHitSound() {
 }
 
 export async function playPartyHitSound() {
-  const buffer = await getBuffer('/sounds/actions/party-hit.mp3');
+  const buffer = await getBuffer(asset('/sounds/actions/party-hit.mp3'));
   if (!buffer) return;
 
   try {
@@ -234,7 +236,7 @@ export async function playPartyHitSound() {
 }
 
 export async function playShieldBlockSound() {
-  const buffer = await getBuffer('/sounds/actions/shield-block.mp3');
+  const buffer = await getBuffer(asset('/sounds/actions/shield-block.mp3'));
   if (!buffer) return;
 
   try {
@@ -255,7 +257,7 @@ export async function playShieldBlockSound() {
 }
 
 export async function playGoldSound() {
-  const buffer = await getBuffer('/sounds/items/gold-coins.mp3');
+  const buffer = await getBuffer(asset('/sounds/items/gold-coins.mp3'));
   if (!buffer) return;
 
   try {
@@ -319,18 +321,18 @@ let currentMusicIndex = 0;
 // Ambient playlists keyed by level number. Level 1 rotates two tracks;
 // level 2+ have their own dedicated track(s).
 const MUSIC_TRACKS_BY_LEVEL = {
-  1: ['/sounds/back1.mp3', '/sounds/back2.mp3'],
-  2: ['/sounds/backing/level-2.mp3'],
-  3: ['/sounds/backing/minotaur-level.mp3'],
+  1: [asset('/sounds/back1.mp3'), asset('/sounds/back2.mp3')],
+  2: [asset('/sounds/backing/level-2.mp3')],
+  3: [asset('/sounds/backing/minotaur-level.mp3')],
 };
 
 // Per-track volume overrides — default for all tracks is 0.3
 const TRACK_VOLUME = {
-  '/sounds/backing/minotaur-level.mp3': 0.6,
-  '/sounds/backing/battle.mp3': 0.15,
+  [asset('/sounds/backing/minotaur-level.mp3')]: 0.6,
+  [asset('/sounds/backing/battle.mp3')]: 0.15,
 };
 let _ambientLevel = 1;
-const BATTLE_TRACK = '/sounds/backing/battle.mp3';
+const BATTLE_TRACK = asset('/sounds/backing/battle.mp3');
 
 let musicSource = null;
 let musicGainNode = null;
@@ -398,18 +400,18 @@ export function clearCombat() {
 }
 
 const SKILL_SOUND_MAP = {
-  'berserk': { url: '/sounds/actions/skills/berserk.mp3', offset: 0.0 },
-  'cure': { url: '/sounds/actions/skills/cure.mp3', offset: 0.0 },
-  'holy': { url: '/sounds/actions/skills/holy.mp3', offset: 0.0 },
-  'hunters-eye': { url: '/sounds/actions/skills/hunters-eye.mp3', offset: 0.0 },
-  'magic': { url: '/sounds/actions/skills/magic.mp3', offset: 0.0 },
-  'render': { url: '/sounds/actions/skills/render.mp3', offset: 0.0 },
-  'war-dance': { url: '/skills/war-dance.mp3', offset: 0.0 },
-  'heal': { url: '/sounds/actions/life-crystal.mp3', offset: 0.0 },
-  'alchemy': { url: '/sounds/items/alchemy-bubbles.mp3', offset: 0.0 },
-  'double-attack': { url: '/skills/double-attack.mp3', offset: 0.0 },
-  'rampart': { url: '/sounds/actions/skills/rampart.mp3', offset: 0.0 },
-  'sleep': { url: '/sounds/sleep.mp3', offset: 0.0 },
+  'berserk': { url: asset('/sounds/actions/skills/berserk.mp3'), offset: 0.0 },
+  'cure': { url: asset('/sounds/actions/skills/cure.mp3'), offset: 0.0 },
+  'holy': { url: asset('/sounds/actions/skills/holy.mp3'), offset: 0.0 },
+  'hunters-eye': { url: asset('/sounds/actions/skills/hunters-eye.mp3'), offset: 0.0 },
+  'magic': { url: asset('/sounds/actions/skills/magic.mp3'), offset: 0.0 },
+  'render': { url: asset('/sounds/actions/skills/render.mp3'), offset: 0.0 },
+  'war-dance': { url: asset('/skills/war-dance.mp3'), offset: 0.0 },
+  'heal': { url: asset('/sounds/actions/life-crystal.mp3'), offset: 0.0 },
+  'alchemy': { url: asset('/sounds/items/alchemy-bubbles.mp3'), offset: 0.0 },
+  'double-attack': { url: asset('/skills/double-attack.mp3'), offset: 0.0 },
+  'rampart': { url: asset('/sounds/actions/skills/rampart.mp3'), offset: 0.0 },
+  'sleep': { url: asset('/sounds/sleep.mp3'), offset: 0.0 },
 };
 
 /**
@@ -524,7 +526,7 @@ export async function playSkillSound(name, volume = 0.7) {
  * Play the spell cabinet interaction sound.
  */
 export async function playSpellCabinetSound() {
-  const buffer = await getBuffer('/sounds/items/scroll.mp3');
+  const buffer = await getBuffer(asset('/sounds/items/scroll.mp3'));
   if (!buffer) return;
   try {
     const ctx = getCtx();
@@ -544,7 +546,7 @@ export async function playSpellCabinetSound() {
  * Play the chest opening sound.
  */
 export async function playChestOpenSound() {
-  const buffer = await getBuffer('/sounds/items/chest-open.mp3');
+  const buffer = await getBuffer(asset('/sounds/items/chest-open.mp3'));
   if (!buffer) return;
   try {
     const ctx = getCtx();
@@ -564,7 +566,7 @@ export async function playChestOpenSound() {
  * Play the weapon rack interaction sound.
  */
 export async function playWeaponRackSound() {
-  const buffer = await getBuffer('/sounds/items/weapon-rack.mp3');
+  const buffer = await getBuffer(asset('/sounds/items/weapon-rack.mp3'));
   if (!buffer) return;
   try {
     const ctx = getCtx();
@@ -581,7 +583,7 @@ export async function playWeaponRackSound() {
 }
 
 export async function playLevelUpSound() {
-  const buffer = await getBuffer('/sounds/actions/level-up1.mp3');
+  const buffer = await getBuffer(asset('/sounds/actions/level-up1.mp3'));
   if (!buffer) return;
   try {
     const ctx = getCtx();
@@ -598,7 +600,7 @@ export async function playLevelUpSound() {
 }
 
 export async function playLevelUpConfirmSound() {
-  const buffer = await getBuffer('/sounds/actions/level-up2.mp3');
+  const buffer = await getBuffer(asset('/sounds/actions/level-up2.mp3'));
   if (!buffer) return;
   try {
     const ctx = getCtx();
@@ -615,7 +617,7 @@ export async function playLevelUpConfirmSound() {
 }
 
 export async function playShopkeeperSound() {
-  const buffer = await getBuffer('/sounds/actions/shopkeeper.mp3');
+  const buffer = await getBuffer(asset('/sounds/actions/shopkeeper.mp3'));
   if (!buffer) return;
   try {
     const ctx = getCtx();
@@ -632,7 +634,7 @@ export async function playShopkeeperSound() {
 }
 
 export async function playAnvilSound() {
-  const buffer = await getBuffer('/sounds/actions/anvil.mp3');
+  const buffer = await getBuffer(asset('/sounds/actions/anvil.mp3'));
   if (!buffer) return;
   try {
     const ctx = getCtx();
@@ -667,10 +669,10 @@ export async function playSoundByUrl(url, volume = 0.8) {
 }
 
 export async function playFallSequence() {
-  playSoundByUrl('/sounds/fall-scream.mp3', 0.9);
+  playSoundByUrl(asset('/sounds/fall-scream.mp3'), 0.9);
   // Start the land/thud sound after 1 second of screaming
   setTimeout(() => {
-    playSoundByUrl('/sounds/fall-land.mp3', 0.9);
+    playSoundByUrl(asset('/sounds/fall-land.mp3'), 0.9);
   }, 1000);
 }
 
@@ -767,7 +769,7 @@ async function _playTrack(url, loop, gen) {
 }
 
 export async function playInventorySortSound() {
-  const buffer = await getBuffer('/sounds/actions/inventory-sort.mp3');
+  const buffer = await getBuffer(asset('/sounds/actions/inventory-sort.mp3'));
   if (!buffer) return;
   try {
     const ctx = getCtx();
@@ -811,7 +813,7 @@ export async function playButtonClickSound() {
 }
 
 export async function playTrapSound() {
-  const buffer = await getBuffer('/sounds/items/trap.mp3');
+  const buffer = await getBuffer(asset('/sounds/items/trap.mp3'));
   if (!buffer) return;
   try {
     const ctx = getCtx();
@@ -828,7 +830,7 @@ export async function playTrapSound() {
 }
 
 export async function playSuccessSound() {
-  const buffer = await getBuffer('/sounds/items/success.mp3');
+  const buffer = await getBuffer(asset('/sounds/items/success.mp3'));
   if (!buffer) return;
   try {
     const ctx = getCtx();

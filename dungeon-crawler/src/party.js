@@ -7,6 +7,7 @@ import { skillsState } from './skills-state.js';
 import { SPELLS } from './spells.js';
 import SKILLS_DATA from './data/skills.json';
 import { STATUS_EFFECT_DEFS } from './status-effects.js';
+import { asset } from './assets.js';
 
 // ─────────────────────────────────────────────
 //  PARTY DATA  — 4 members
@@ -45,7 +46,7 @@ export function setPartyGold(amount) {
 
 function updateGoldDisplay() {
   const el = document.getElementById('tactics-gold');
-  if (el) el.innerHTML = `<img src="/icons/gold_coins.png" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}`;
+  if (el) el.innerHTML = `<img src="${asset('/icons/gold_coins.png')}" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}`;
 }
 
 export const lastAttackTimes = {};
@@ -185,7 +186,7 @@ export function drawPortrait(canvas, member) {
       ctx.fillStyle = vigGrad;
       ctx.fillRect(0, 0, W, H);
     };
-    img.src = member.image;
+    img.src = asset(member.image);
     return;
   }
 
@@ -485,7 +486,7 @@ function refreshMember(m) {
       const def = getItemDef(item.name);
       const iconSrc = def?.icon ?? null;
       if (iconSrc) {
-        qsBtn.innerHTML = `<img src="${iconSrc}" draggable="false" /><span class="qs-key">${rotateKey}</span>`;
+        qsBtn.innerHTML = `<img src="${asset(iconSrc)}" draggable="false" /><span class="qs-key">${rotateKey}</span>`;
       } else {
         qsBtn.innerHTML = `<span class="qs-key" style="font-size:6px">${item.name.substring(0, 3)}</span>`;
       }
@@ -573,7 +574,7 @@ function buildTacticsOverlay() {
           <input type="checkbox" id="tactics-auto-range-attack">
           Auto Range Attack <span class="tactics-toggle-hint">(bow/crossbow users attack automatically)</span>
         </label>
-        <span id="tactics-gold" style="margin-top:10px; display:flex; justify-content:center; align-items:center; font-size:1.1em; color:#ffd700; text-shadow:1px 1px 0 #000;"><img src="/icons/gold_coins.png" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}</span>
+        <span id="tactics-gold" style="margin-top:10px; display:flex; justify-content:center; align-items:center; font-size:1.1em; color:#ffd700; text-shadow:1px 1px 0 #000;"><img src="${asset('/icons/gold_coins.png')}" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}</span>
       </div>
     </div>
   `;
@@ -1189,7 +1190,7 @@ function updateStatusBanners() {
     hideTooltip();
     defs.forEach(def => {
       const img = document.createElement('img');
-      img.src = def.icon;
+      img.src = asset(def.icon);
       img.className = 'buff-icon';
       img.alt = def.name;
       attachTooltipListeners(img, () => ({ ...def, isStatusEffect: true }), true);

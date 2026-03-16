@@ -3,6 +3,7 @@ import { getItemDef } from './items.js';
 import { SPELLS } from './spells.js';
 import { ACTIONS } from './items.js';
 import SKILLS_DATA from './data/skills.json';
+import { asset } from './assets.js';
 import { playAction } from './actions.js';
 import { attackMonster, monsters, getInRangeMonster, setHuntersEyeTarget, getHuntersEyeTargetId, applyMonsterStatusEffect } from './monster.js';
 import { showMessage } from './minimap.js';
@@ -338,7 +339,7 @@ export function renderItemIcon(item, containerEl) {
   // on the item object (used by skills such as Hunter's Eye).
   const iconSrc = def?.icon || item.icon || null;
   if (iconSrc) {
-    containerEl.innerHTML = `<img src="${iconSrc}" draggable="false" style="width: 100%; height: 100%; object-fit: contain; pointer-events: none;" />`;
+    containerEl.innerHTML = `<img src="${asset(iconSrc)}" draggable="false" style="width: 100%; height: 100%; object-fit: contain; pointer-events: none;" />`;
   } else {
     containerEl.innerHTML = `<span>${item.name}</span>`;
   }
@@ -1743,7 +1744,7 @@ function _showSkillSwitchMenu(x, y, memberIndex, mode, hand = null) {
 
     if (item.icon) {
       const img = document.createElement('img');
-      img.src = item.icon;
+      img.src = asset(item.icon);
       img.alt = item.name;
       row.appendChild(img);
     }
@@ -2098,7 +2099,7 @@ function _openSpellSelectionModal(charIndex, itemKey) {
     const isActive = inRH || inLH;
     const div = document.createElement('div');
     div.className = 'spell-sel-slot' + (isActive ? ' spell-sel-slot--active' : '');
-    div.innerHTML = `<img src="${spellDef.icon}" />`;
+    div.innerHTML = `<img src="${asset(spellDef.icon)}" />`;
     div.title = spellDef.name + (inRH ? ' (Right)' : inLH ? ' (Left)' : '');
     div.onclick = () => {
       // Place spell into right hand first (if empty or already has a spell), then left

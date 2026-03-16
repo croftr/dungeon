@@ -6,6 +6,7 @@ import { isInFrontOfPlayer } from './player.js';
 import { interactables } from './objects.js';
 import RECRUITS_DATA from './data/recruits.json';
 import { checkLevelUp } from './leveling.js';
+import { asset } from './assets.js';
 
 const _recruitRaycaster = new THREE.Raycaster();
 const _recruitMouse = new THREE.Vector2();
@@ -62,7 +63,7 @@ export function initRecruits(scene, camera) {
 
     // Draw them as embedded wall frescoes
     RECRUITS.forEach(r => {
-        const map = loader.load(r.image);
+        const map = loader.load(asset(r.image));
         map.magFilter = THREE.LinearFilter;
         map.minFilter = THREE.LinearMipmapLinearFilter;
         map.anisotropy = 16;
@@ -173,8 +174,8 @@ function openRecruitModal(recruitId) {
     const canRecruit = !!freeSlot;
 
     const mediaHtml = r.recruitVideo
-        ? `<video src="${r.recruitVideo}" autoplay loop muted playsinline style="width: 250px; height: 350px; object-fit: cover; border-radius: 4px; border: 1px solid #c8a84a; box-shadow: 0 0 15px rgba(200, 168, 74, 0.3); background: #000;"></video>`
-        : `<img src="${r.image}" style="width: 250px; height: 350px; object-fit: cover; border-radius: 4px; border: 1px solid #c8a84a; box-shadow: 0 0 15px rgba(200, 168, 74, 0.3); image-rendering: pixelated; background: #000;">`;
+        ? `<video src="${asset(r.recruitVideo)}" autoplay loop muted playsinline style="width: 250px; height: 350px; object-fit: cover; border-radius: 4px; border: 1px solid #c8a84a; box-shadow: 0 0 15px rgba(200, 168, 74, 0.3); background: #000;"></video>`
+        : `<img src="${asset(r.image)}" style="width: 250px; height: 350px; object-fit: cover; border-radius: 4px; border: 1px solid #c8a84a; box-shadow: 0 0 15px rgba(200, 168, 74, 0.3); image-rendering: pixelated; background: #000;">`;
 
     uiContainer.innerHTML = `
     <div style="display: flex; gap: 30px;">

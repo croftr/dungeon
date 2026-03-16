@@ -14,6 +14,7 @@ import POTIONS_DATA from './data/items/potions.json';
 import FORGE_DATA from './data/forge.json';
 import { triggerMummyAmbush, monsters } from './monster.js';
 import * as equip from './equipment.js';
+import { asset } from './assets.js';
 import { spawnLevel1Objects } from './levels/level1/objects.js';
 import { spawnLevel2Objects } from './levels/level2/objects.js';
 import { spawnLevel3Objects } from './levels/level3/objects.js';
@@ -111,7 +112,7 @@ let _activeTrapObj = null; // the trap mesh currently showing the disarm modal
 let objectsGroup = new THREE.Group();
 
 const _draco = new DRACOLoader();
-_draco.setDecoderPath('/draco/');
+_draco.setDecoderPath(asset('/draco/'));
 const _gltfLoader = new GLTFLoader();
 _gltfLoader.setDRACOLoader(_draco);
 
@@ -566,7 +567,7 @@ export function initObjects(scene, camera) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 2 && distCol <= 2) {
-                    const audio = new Audio('/sounds/npcs/welcome-adventure.mp3');
+                    const audio = new Audio(asset('/sounds/npcs/welcome-adventure.mp3'));
                     audio.volume = 0.7;
                     audio.play().catch(e => console.error("Audio play failed:", e));
                     showMessage("The Jester greets you with a cackle!");
@@ -625,7 +626,7 @@ export function initObjects(scene, camera) {
                         _npcIdleAction.fadeOut(0.3);
                         _npcTalkAction.reset().fadeIn(0.3).play();
                     }
-                    const npcAudio = new Audio('/sounds/npcs/party-chosen.mp3');
+                    const npcAudio = new Audio(asset('/sounds/npcs/party-chosen.mp3'));
                     npcAudio.volume = 0.8;
                     npcAudio.addEventListener('loadedmetadata', () => {
                         const delay = Math.max(0, (npcAudio.duration - 0.8) * 1000);
@@ -924,7 +925,7 @@ export function initObjects(scene, camera) {
 
 }
 
-export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = [], modelPath = '/items/Meshy_AI_Treasure_Chest_0221184131_texture.glb', interactive = true, offsetX = 0, title = 'Chest') {
+export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = [], modelPath = asset('/items/Meshy_AI_Treasure_Chest_0221184131_texture.glb'), interactive = true, offsetX = 0, title = 'Chest') {
     const cid = interactive ? _nextContainerId++ : -1;
     if (interactive && _pendingContainerOverrides && cid in _pendingContainerOverrides) {
         contents = _pendingContainerOverrides[cid];
@@ -970,7 +971,7 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
 
 function addStatue(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
     _statueGridCells.add(`${row},${col}`);
-    loader.load('/items/statue.glb', (gltf) => {
+    loader.load(asset('/items/statue.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.45);
         model.position.set(col * CELL + offsetX, 0.5, row * CELL + offsetZ);
@@ -1182,7 +1183,7 @@ function openTrapDisarmModal(trapObj) {
                 overlay.classList.add('chest-hidden');
             }, 1500);
         } else {
-            playSoundByUrl('/sounds/actions/disarm-trap.mp3');
+            playSoundByUrl(asset('/sounds/actions/disarm-trap.mp3'));
             if (resultEl2) {
                 resultEl2.textContent = 'Failed! The trap goes off!';
                 resultEl2.className = 'trap-result-fail';
@@ -1218,7 +1219,7 @@ function addTrap1(scene, loader, row, col, rotY = 0, scale = 0.6) {
     const key = `${row},${col}`;
     if (_trapDisarmedSet.has(key)) return; // already disarmed — don't spawn
 
-    loader.load('/items/trap1.glb', (gltf) => {
+    loader.load(asset('/items/trap1.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(scale);
         model.position.set(col * CELL, 0.0, row * CELL);
@@ -1253,7 +1254,7 @@ function addTrap1(scene, loader, row, col, rotY = 0, scale = 0.6) {
 }
 
 function addTeleportTorch(scene, loader, col, row, rotY = 0) {
-    loader.load('/items/torch.glb', (gltf) => {
+    loader.load(asset('/items/torch.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.35);
         model.position.set(col * CELL, 0.25, row * CELL);
@@ -1291,7 +1292,7 @@ function addTeleportTorch(scene, loader, col, row, rotY = 0) {
 }
 
 function addStairs(scene, loader, col, row, rotY = 0) {
-    loader.load('/items/stairs-up.glb', (gltf) => {
+    loader.load(asset('/items/stairs-up.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
         model.position.set(col * CELL, 0.45, row * CELL);
@@ -1398,7 +1399,7 @@ function createWallButton(protrusionDir, userData) {
 function addPortcullis(scene, loader, col, row, rotY = 0, startOpen = false) {
     const portcullis = {
         name: 'Portcullis',
-        path: '/items/Meshy_AI_Iron_Portcullis_0221184348_texture.glb',
+        path: asset('/items/Meshy_AI_Iron_Portcullis_0221184348_texture.glb'),
         gridRow: row,
         gridCol: col,
         x: col * CELL,
@@ -1422,7 +1423,7 @@ function addPortcullis(scene, loader, col, row, rotY = 0, startOpen = false) {
 }
 
 function addKeyhole(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, targetRow = null, targetCol = null) {
-    loader.load('/items/keyhole.glb', (gltf) => {
+    loader.load(asset('/items/keyhole.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.2); // half the previous size (0.4)
         model.position.set(col * CELL + offsetX, 0.95, row * CELL + offsetZ);
@@ -1460,7 +1461,7 @@ function addKeyhole(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, tar
 }
 
 function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offsetX = 0, offsetZ = 0) {
-    loader.load('/items/Meshy_AI_Blue_Portal_0222102604_texture.glb', (gltf) => {
+    loader.load(asset('/items/Meshy_AI_Blue_Portal_0222102604_texture.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
         model.position.set(col * CELL + offsetX, 0.6, row * CELL + offsetZ);
@@ -1503,7 +1504,7 @@ function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offsetX = 0, 
 }
 
 function addDisabledPortal(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
-    loader.load('/items/disabled-portal.glb', (gltf) => {
+    loader.load(asset('/items/disabled-portal.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
         model.position.set(col * CELL + offsetX, 0.6, row * CELL + offsetZ);
@@ -1526,7 +1527,7 @@ function addDisabledPortal(scene, loader, col, row, rotY = 0, offsetX = 0, offse
 }
 
 function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.45) {
-    loader.load('/items/statue1.glb', (gltf) => {
+    loader.load(asset('/items/statue1.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(scale);
         model.position.set(col * CELL, 0.5, row * CELL);
@@ -1598,7 +1599,7 @@ function addWeaponRack(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, 
     if (_pendingContainerOverrides && cid in _pendingContainerOverrides) {
         contents = _pendingContainerOverrides[cid];
     }
-    loader.load('/items/weapon-rack.glb', (gltf) => {
+    loader.load(asset('/items/weapon-rack.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.46);
         model.position.set(col * CELL + offsetX, 0.45, row * CELL + offsetZ);
@@ -1639,7 +1640,7 @@ function addSpellCabinet(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0
     if (_pendingContainerOverrides && cid in _pendingContainerOverrides) {
         contents = _pendingContainerOverrides[cid];
     }
-    loader.load('/items/spell-cabinet.glb', (gltf) => {
+    loader.load(asset('/items/spell-cabinet.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
         model.position.set(col * CELL + offsetX, 0.65, row * CELL + offsetZ);
@@ -1676,7 +1677,7 @@ function addSpellCabinet(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0
 }
 
 function addCrystals(scene, loader, col, row, rotY, offsetX = 0) {
-    loader.load('/items/Meshy_AI_Crystals_0221193313_texture.glb', (gltf) => {
+    loader.load(asset('/items/Meshy_AI_Crystals_0221193313_texture.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
         // Positioned at 0.5 to touch the floor
@@ -1723,7 +1724,7 @@ function addCrystals(scene, loader, col, row, rotY, offsetX = 0) {
 
 function addEtherealEgg(scene, loader, col, row, rotY = 0, isActive = false) {
     _statueGridCells.add(`${row},${col}`);
-    loader.load('/items/ethereal_egg.glb', (gltf) => {
+    loader.load(asset('/items/ethereal_egg.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.5);
         // Put it on the floor but slightly raised
@@ -1770,7 +1771,7 @@ function addEtherealEgg(scene, loader, col, row, rotY = 0, isActive = false) {
 }
 
 function addAlchemyWorkshop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, interactive = true) {
-    loader.load('/items/Alchemy_Workshop.glb', (gltf) => {
+    loader.load(asset('/items/Alchemy_Workshop.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
         model.position.set(col * CELL + offsetX, 0.5, row * CELL + offsetZ);
@@ -1822,7 +1823,7 @@ function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, c
     if (_pendingContainerOverrides && cid in _pendingContainerOverrides) {
         contents = _pendingContainerOverrides[cid];
     }
-    loader.load('/items/anvil.glb', (gltf) => {
+    loader.load(asset('/items/anvil.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
         model.position.set(col * CELL + offsetX, 0.5, row * CELL + offsetZ);
@@ -2043,7 +2044,7 @@ function _renderChestPartyInv() {
             const def = getItemDef(item.name);
             if (def) {
                 const img = document.createElement('img');
-                img.src = def.icon;
+                img.src = asset(def.icon);
                 slot.appendChild(img);
 
                 // Left-click → deposit into chest
@@ -2237,7 +2238,7 @@ function _renderForgeSlots() {
 
         slot.classList.add('occupied');
         const img = document.createElement('img');
-        img.src = itemDef.icon;
+        img.src = asset(itemDef.icon);
         slot.appendChild(img);
 
         // Left-click → return to first available party member
@@ -2344,7 +2345,7 @@ function _showForgeItemPicker(x, y, slotIdx) {
             slot.className = 'picker-slot';
 
             const img = document.createElement('img');
-            img.src = def.icon;
+            img.src = asset(def.icon);
             slot.appendChild(img);
 
             const owner = document.createElement('div');
@@ -2467,7 +2468,7 @@ function _renderMerchantShop() {
                 slot.className = 'merch-slot';
 
                 const img = document.createElement('img');
-                img.src = itemDef.icon;
+                img.src = asset(itemDef.icon);
                 slot.appendChild(img);
 
                 const price = document.createElement('div');
@@ -2503,7 +2504,7 @@ function _renderMerchantBasket() {
             slot.className = 'merch-slot';
 
             const img = document.createElement('img');
-            img.src = itemDef.icon;
+            img.src = asset(itemDef.icon);
             slot.appendChild(img);
 
             const price = document.createElement('div');
@@ -2629,7 +2630,7 @@ function _renderMerchantPartyItems() {
                 slot.appendChild(tag);
 
                 const img = document.createElement('img');
-                img.src = def.icon;
+                img.src = asset(def.icon);
                 slot.appendChild(img);
 
                 const price = document.createElement('div');
@@ -2668,7 +2669,7 @@ function _renderMerchantSellBasket() {
             slot.className = 'merch-slot';
 
             const img = document.createElement('img');
-            img.src = def.icon;
+            img.src = asset(def.icon);
             slot.appendChild(img);
 
             const price = document.createElement('div');
@@ -2744,7 +2745,7 @@ function _bindChestSlots(equip, slots, contents) {
             if (itemDef) {
                 slot.classList.add('occupied');
                 const img = document.createElement('img');
-                img.src = itemDef.icon;
+                img.src = asset(itemDef.icon);
                 slot.appendChild(img);
 
                 // Left-click → send to the currently selected party member tab
@@ -2995,7 +2996,7 @@ function _renderAlchemySlots() {
 
             slot.classList.add('occupied');
             const img = document.createElement('img');
-            img.src = itemDef.icon;
+            img.src = asset(itemDef.icon);
             slot.appendChild(img);
 
             // Left-click → send to first available party member (remove from academy)
@@ -3112,7 +3113,7 @@ function _showAlchemyItemPicker(x, y, slotIdx) {
                 slot.className = 'picker-slot';
 
                 const img = document.createElement('img');
-                img.src = def.icon;
+                img.src = asset(def.icon);
                 slot.appendChild(img);
 
                 // Mini portrait of owner
@@ -3205,7 +3206,7 @@ function addBonePile(scene, loader, col, row, contents = []) {
     if (_pendingContainerOverrides && cid in _pendingContainerOverrides) {
         contents = _pendingContainerOverrides[cid];
     }
-    loader.load('/items/Meshy_AI_Bone_pile_0221211647_texture.glb', (gltf) => {
+    loader.load(asset('/items/Meshy_AI_Bone_pile_0221211647_texture.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.4);
         model.position.set(col * CELL, 0.05, row * CELL);
@@ -3259,7 +3260,7 @@ export function spawnCorpse(col, row, droppedItems = []) {
         slotIdx++;
     }
 
-    _gltfLoader.load('/items/Meshy_AI_Bone_pile_0221211647_texture.glb', (gltf) => {
+    _gltfLoader.load(asset('/items/Meshy_AI_Bone_pile_0221211647_texture.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.4);
         model.position.set(col * CELL, 0.05, row * CELL);

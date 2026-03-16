@@ -31,6 +31,7 @@ import { level4Monsters } from './levels/level4/monsters.js';
 import { skillsState } from './skills-state.js';
 import SKILLS_DATA from './data/skills.json';
 import { awardXP } from './leveling.js';
+import { asset } from './assets.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  HUNTER'S EYE STATE  — tracks which monster is currently being analysed
@@ -115,7 +116,7 @@ export const monsters = [
 // ── Assign Block Animations ─────────────────────────────────────────────────
 monsters.forEach(m => {
   if (m.name.includes('Skeleton')) {
-    m.glbBlock = '/monsters/skeleton-animation/Meshy_AI_Animation_Shield_Push_Left_withSkin.glb';
+    m.glbBlock = asset('/monsters/skeleton-animation/Meshy_AI_Animation_Shield_Push_Left_withSkin.glb');
   }
 });
 
@@ -133,16 +134,16 @@ function _applyMultiAttacks(monsterName, attacks) {
 _applyMultiAttacks('Skeleton Warrior', [
   {
     name: 'tripleCombo',
-    glb: '/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    sound: '/monsters/skeleton-animation/attack.mp3',
+    glb: asset('/monsters/skeleton-animation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb'),
+    sound: asset('/monsters/skeleton-animation/attack.mp3'),
     soundTimings: [0.25, 0.75],
     damageTimings: [0.25, 0.75],
     weight: 1,
   },
   {
     name: 'leftSlash',
-    glb: '/monsters/skeleton-animation/Meshy_AI_Animation_Left_Slash_withSkin.glb',
-    sound: '/monsters/skeleton-animation/attack.mp3',
+    glb: asset('/monsters/skeleton-animation/Meshy_AI_Animation_Left_Slash_withSkin.glb'),
+    sound: asset('/monsters/skeleton-animation/attack.mp3'),
     soundTimings: [0.45],
     damageTimings: [0.45],
     weight: 1,
@@ -152,16 +153,16 @@ _applyMultiAttacks('Skeleton Warrior', [
 _applyMultiAttacks('IceMan', [
   {
     name: 'doubleCombo',
-    glb: '/monsters/iceMan-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    sound: '/monsters/iceMan-animation/iceman-attack.mp3',
+    glb: asset('/monsters/iceMan-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb'),
+    sound: asset('/monsters/iceMan-animation/iceman-attack.mp3'),
     soundTimings: [0.2, 0.6],
     damageTimings: [0.2, 0.6],
     weight: 3,
   },
   {
     name: 'iceCast',
-    glb: '/monsters/iceMan-animation/Meshy_AI_Animation_mage_soell_cast_3_withSkin.glb',
-    sound: '/monsters/iceMan-animation/ice-attack.mp3',
+    glb: asset('/monsters/iceMan-animation/Meshy_AI_Animation_mage_soell_cast_3_withSkin.glb'),
+    sound: asset('/monsters/iceMan-animation/ice-attack.mp3'),
     soundTimings: [0.5],
     damageTimings: [0.5],
     weight: 1,
@@ -173,16 +174,16 @@ _applyMultiAttacks('IceMan', [
 _applyMultiAttacks('TreeKin', [
   {
     name: 'swing',
-    glb: '/monsters/treekin-animation/attack.glb',
-    sound: '/monsters/treekin-animation/wood-hit.mp3',
+    glb: asset('/monsters/treekin-animation/attack.glb'),
+    sound: asset('/monsters/treekin-animation/wood-hit.mp3'),
     soundTimings: [0.4],
     damageTimings: [0.4],
     weight: 7,
   },
   {
     name: 'natureCast',
-    glb: '/monsters/treekin-animation/Meshy_AI_Animation_mage_soell_cast_withSkin.glb',
-    sound: '/monsters/treekin-animation/treeKin-attack.mp3',
+    glb: asset('/monsters/treekin-animation/Meshy_AI_Animation_mage_soell_cast_withSkin.glb'),
+    sound: asset('/monsters/treekin-animation/treeKin-attack.mp3'),
     soundTimings: [0.5],
     damageTimings: [0.5],
     weight: 3,
@@ -194,16 +195,16 @@ _applyMultiAttacks('TreeKin', [
 _applyMultiAttacks('Ogre', [
   {
     name: 'normalAttack',
-    glb: '/monsters/ogre/Meshy_AI_Animation_Attack_withSkin.glb',
-    sound: '/monsters/ogre/ogre.mp3',
+    glb: asset('/monsters/ogre/Meshy_AI_Animation_Attack_withSkin.glb'),
+    sound: asset('/monsters/ogre/ogre.mp3'),
     soundTimings: [0.3],
     damageTimings: [0.3],
     weight: 8,
   },
   {
     name: 'doubleCombo',
-    glb: '/monsters/ogre/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    sound: '/monsters/ogre/ogre.mp3',
+    glb: asset('/monsters/ogre/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb'),
+    sound: asset('/monsters/ogre/ogre.mp3'),
     soundTimings: [0.3, 0.7],
     damageTimings: [0.3, 0.7],
     weight: 2,
@@ -216,16 +217,16 @@ _applyMultiAttacks('Ogre', [
 _applyMultiAttacks('Treeman', [
   {
     name: 'normalAttack',
-    glb: '/monsters/treeman-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb',
-    sound: '/monsters/treeman-animation/attack-sound.mp3',
+    glb: asset('/monsters/treeman-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb'),
+    sound: asset('/monsters/treeman-animation/attack-sound.mp3'),
     soundTimings: [0.25, 0.65],
     damageTimings: [0.25, 0.65],
     weight: 1,
   },
   {
     name: 'treemanAwakening',
-    glb: '/monsters/treeman-animation/Meshy_AI_Animation_mage_soell_cast_1_withSkin.glb',
-    sound: '/monsters/treeman-animation/attack-sound.mp3',
+    glb: asset('/monsters/treeman-animation/Meshy_AI_Animation_mage_soell_cast_1_withSkin.glb'),
+    sound: asset('/monsters/treeman-animation/attack-sound.mp3'),
     soundTimings: [0.5],
     damageTimings: [0.5],
     weight: 0,              // never picked randomly — triggered by half-HP only
@@ -236,24 +237,24 @@ _applyMultiAttacks('Treeman', [
 _applyMultiAttacks('Minotaur', [
   {
     name: 'normalAttack',
-    glb: '/monsters/minotaur/Meshy_AI_Animation_Attack_withSkin.glb',
-    sound: '/monsters/minotaur/minator-attack.mp3',
+    glb: asset('/monsters/minotaur/Meshy_AI_Animation_Attack_withSkin.glb'),
+    sound: asset('/monsters/minotaur/minator-attack.mp3'),
     soundTimings: [0.4],
     damageTimings: [0.4],
     weight: 5,
   },
   {
     name: 'weaponCombo',
-    glb: '/monsters/minotaur/Meshy_AI_Animation_Weapon_Combo_withSkin.glb',
-    sound: '/monsters/minotaur/minator-attack.mp3',
+    glb: asset('/monsters/minotaur/Meshy_AI_Animation_Weapon_Combo_withSkin.glb'),
+    sound: asset('/monsters/minotaur/minator-attack.mp3'),
     soundTimings: [0.25, 0.65],
     damageTimings: [0.25, 0.65],
     weight: 3,
   },
   {
     name: 'minotaurRage',
-    glb: '/monsters/minotaur/Meshy_AI_Animation_mage_soell_cast_1_withSkin.glb',
-    sound: '/monsters/minotaur/minator-attack.mp3',
+    glb: asset('/monsters/minotaur/Meshy_AI_Animation_mage_soell_cast_1_withSkin.glb'),
+    sound: asset('/monsters/minotaur/minator-attack.mp3'),
     soundTimings: [0.5],
     damageTimings: [0.5],
     weight: 1,
@@ -265,24 +266,24 @@ _applyMultiAttacks('Minotaur', [
 _applyMultiAttacks('Demon', [
   {
     name: 'chargedSlash',
-    glb: '/monsters/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb',
-    sound: '/monsters/demon/demon-hit.mp3',
+    glb: asset('/monsters/demon/Meshy_AI_Animation_Charged_Slash_withSkin.glb'),
+    sound: asset('/monsters/demon/demon-hit.mp3'),
     soundTimings: [0.4],
     damageTimings: [0.4],
     weight: 5,
   },
   {
     name: 'tripleCombo',
-    glb: '/monsters/demon/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb',
-    sound: '/monsters/demon/demon-hit.mp3',
+    glb: asset('/monsters/demon/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb'),
+    sound: asset('/monsters/demon/demon-hit.mp3'),
     soundTimings: [0.25, 0.65],
     damageTimings: [0.25, 0.65],
     weight: 2,
   },
   {
     name: 'demonCleave',
-    glb: '/monsters/demon/special-attack.glb',
-    sound: '/monsters/demon/no-mercy.mp3',
+    glb: asset('/monsters/demon/special-attack.glb'),
+    sound: asset('/monsters/demon/no-mercy.mp3'),
     soundTimings: [0.5],
     damageTimings: [0.5],
     weight: 3,
@@ -295,16 +296,16 @@ _applyMultiAttacks('Demon', [
 _applyMultiAttacks('Aqua Man', [
   {
     name: 'punchCombo',
-    glb: '/monsters/aqua-man/Meshy_AI_Animation_Punch_Combo_withSkin.glb',
-    sound: '/monsters/aqua-man/aqua-attack.mp3',
+    glb: asset('/monsters/aqua-man/Meshy_AI_Animation_Punch_Combo_withSkin.glb'),
+    sound: asset('/monsters/aqua-man/aqua-attack.mp3'),
     soundTimings: [0.3, 0.6],
     damageTimings: [0.3, 0.6],
     weight: 7,
   },
   {
     name: 'tidalWave',
-    glb: '/monsters/aqua-man/Meshy_AI_Animation_mage_soell_cast_1_withSkin.glb',
-    sound: '/monsters/aqua-man/wave.mp3',
+    glb: asset('/monsters/aqua-man/Meshy_AI_Animation_mage_soell_cast_1_withSkin.glb'),
+    sound: asset('/monsters/aqua-man/wave.mp3'),
     soundTimings: [0.6],
     damageTimings: [0.6],
     weight: 3,
@@ -362,12 +363,12 @@ function _spawnTreekin(parentMonster, scene, offsetRow, offsetCol) {
   const id = _nextSummonId++;
 
   const m = inst(D.treekin, id, row, col, // row/col already validated passable
-    '/monsters/treekin-animation/Meshy_AI_Animation_Walking_withSkin.glb',
-    '/monsters/treekin-animation/Meshy_AI_Animation_mage_soell_cast_withSkin.glb',
-    '/monsters/treekin-animation/treeKin-attack.mp3', 0.45, 0, 0,
+    asset('/monsters/treekin-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
+    asset('/monsters/treekin-animation/Meshy_AI_Animation_mage_soell_cast_withSkin.glb'),
+    asset('/monsters/treekin-animation/treeKin-attack.mp3'), 0.45, 0, 0,
     parentMonster.level ?? 2, null,
-    '/monsters/treekin-animation/Meshy_AI_Animation_Dead_withSkin.glb',
-    '/monsters/treekin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb');
+    asset('/monsters/treekin-animation/Meshy_AI_Animation_Dead_withSkin.glb'),
+    asset('/monsters/treekin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'));
 
   m.engaged = true; // immediately hostile
   monsters.push(m);
@@ -377,16 +378,16 @@ function _spawnTreekin(parentMonster, scene, offsetRow, offsetCol) {
   _applyMultiAttacks('TreeKin', [
     {
       name: 'swing',
-      glb: '/monsters/treekin-animation/attack.glb',
-      sound: '/monsters/treekin-animation/wood-hit.mp3',
+      glb: asset('/monsters/treekin-animation/attack.glb'),
+      sound: asset('/monsters/treekin-animation/wood-hit.mp3'),
       soundTimings: [0.4],
       damageTimings: [0.4],
       weight: 7,
     },
     {
       name: 'natureCast',
-      glb: '/monsters/treekin-animation/Meshy_AI_Animation_mage_soell_cast_withSkin.glb',
-      sound: '/monsters/treekin-animation/treeKin-attack.mp3',
+      glb: asset('/monsters/treekin-animation/Meshy_AI_Animation_mage_soell_cast_withSkin.glb'),
+      sound: asset('/monsters/treekin-animation/treeKin-attack.mp3'),
       soundTimings: [0.5],
       damageTimings: [0.5],
       weight: 3,
@@ -573,7 +574,7 @@ function _updateStatsPanel(m) {
 }
 
 const _draco = new DRACOLoader();
-_draco.setDecoderPath('/draco/');
+_draco.setDecoderPath(asset('/draco/'));
 const _gltfLoader = new GLTFLoader();
 _gltfLoader.setDRACOLoader(_draco);
 
@@ -643,7 +644,7 @@ function _loadMonster(m, scene) {
         m._activeIdle = initialIdle;
         initialIdle.play();
         if (m.name === 'Minotaur' && initialIdle === m.actions.idle) {
-          playSoundByUrl('/monsters/minotaur/scream.mp3', 0.8);
+          playSoundByUrl(asset('/monsters/minotaur/scream.mp3'), 0.8);
         }
       }
 
@@ -657,10 +658,10 @@ function _loadMonster(m, scene) {
               m._activeIdle = nextIdle;
             }
             if (m.name === 'Minotaur' && nextIdle === m.actions.idle) {
-              playSoundByUrl('/monsters/minotaur/scream.mp3', 0.8);
+              playSoundByUrl(asset('/monsters/minotaur/scream.mp3'), 0.8);
             }
           } else if (m.name === 'Minotaur' && e.action === m.actions.idle) {
-            playSoundByUrl('/monsters/minotaur/scream.mp3', 0.8);
+            playSoundByUrl(asset('/monsters/minotaur/scream.mp3'), 0.8);
           }
         }
       });
@@ -758,7 +759,7 @@ function _loadMonster(m, scene) {
             toAction = m.getIdleAction ? m.getIdleAction() : m.actions.idle;
             m._activeIdle = toAction;
             if (m.name === 'Minotaur' && toAction === m.actions.idle) {
-              playSoundByUrl('/monsters/minotaur/scream.mp3', 0.8);
+              playSoundByUrl(asset('/monsters/minotaur/scream.mp3'), 0.8);
             }
           }
           toAction.reset().play();
@@ -786,7 +787,7 @@ function _loadMonster(m, scene) {
                 toAction = m.getIdleAction ? m.getIdleAction() : m.actions.idle;
                 m._activeIdle = toAction;
                 if (m.name === 'Minotaur' && toAction === m.actions.idle) {
-                  playSoundByUrl('/monsters/minotaur/scream.mp3', 0.8);
+                  playSoundByUrl(asset('/monsters/minotaur/scream.mp3'), 0.8);
                 }
               }
               toAction.reset().play();
@@ -830,7 +831,7 @@ function _loadMonster(m, scene) {
                 toAction = m.getIdleAction ? m.getIdleAction() : m.actions.idle;
                 m._activeIdle = toAction;
                 if (m.name === 'Minotaur' && toAction === m.actions.idle) {
-                  playSoundByUrl('/monsters/minotaur/scream.mp3', 0.8);
+                  playSoundByUrl(asset('/monsters/minotaur/scream.mp3'), 0.8);
                 }
               }
               toAction.reset().play();
@@ -1264,7 +1265,7 @@ export function updateMonsters(dt, playerCamera, scene) {
             m._animState = 'idle';
             m._activeIdle = nextIdle;
             if (m.name === 'Minotaur' && nextIdle === m.actions.idle) {
-              playSoundByUrl('/monsters/minotaur/scream.mp3', 0.8);
+              playSoundByUrl(asset('/monsters/minotaur/scream.mp3'), 0.8);
             }
           }
         }
@@ -1274,7 +1275,7 @@ export function updateMonsters(dt, playerCamera, scene) {
     // Demon idle growl — plays when the party is within 1 grid square
     if (m.name === 'Demon' && m.alive && inRange && !m._demonSoundCooldown) {
       m._demonSoundCooldown = true;
-      const audio = new Audio('/monsters/demon/no-mercy.mp3');
+      const audio = new Audio(asset('/monsters/demon/no-mercy.mp3'));
       audio.volume = 0.5;
       audio.play().catch(() => { });
       // Cooldown so it doesn't spam every frame — wait until the clip finishes + a pause
@@ -1505,7 +1506,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       }
 
       if (m.name === 'Treeman') {
-        setZoneMusic('/sounds/backing/demon-room.mp3');
+        setZoneMusic(asset('/sounds/backing/demon-room.mp3'));
       }
 
       if (m.name === 'Minotaur' && (m.level ?? 1) === 3 && m.id === 300) {
