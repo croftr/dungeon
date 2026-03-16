@@ -3848,6 +3848,305 @@ body {
   flex-shrink: 0;
 }
 
+/* ── Armor Stand modal ── */
+#armor-stand-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+
+#armor-stand-modal {
+  width: 500px;
+  background: rgba(10, 7, 4, 0.97);
+  border: 1px solid #5a4a30;
+  border-radius: 6px;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 220, 120, 0.07);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: monospace;
+}
+
+#armor-stand-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid #3a2e18;
+  background: rgba(0, 0, 0, 0.4);
+  flex-shrink: 0;
+}
+
+#armor-stand-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#armor-stand-header-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+#armor-stand-title {
+  font-size: 13px;
+  color: #c8a84a;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+#armor-stand-sent-label {
+  flex: 1;
+  text-align: right;
+  font-size: 11px;
+  color: #8a7040;
+  font-style: italic;
+  padding-right: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#armor-stand-close {
+  background: none;
+  border: 1px solid #4a3a20;
+  color: #888;
+  font-size: 18px;
+  width: 28px;
+  height: 28px;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+#armor-stand-close:hover {
+  border-color: #8a7040;
+  color: #c8a84a;
+}
+
+#armor-stand-body {
+  flex: 0 0 auto;
+  padding: 20px;
+  overflow: visible;
+  display: flex;
+  justify-content: center;
+}
+
+#armor-stand-paperdoll {
+  position: relative;
+  width: 160px;
+}
+
+#armor-stand-silhouette {
+  display: block;
+  width: 100%;
+  height: auto;
+  fill: #2a1e10;
+  stroke: #6a4a28;
+  stroke-width: 1;
+  opacity: 0.75;
+}
+
+/* All armor stand slots */
+.armor-stand-slot {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid #4a3a20;
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.7);
+  /* Centre box on anchor point */
+  transform: translate(-50%, -50%);
+  cursor: default;
+  user-select: none;
+  overflow: hidden;
+}
+
+.armor-stand-slot.occupied {
+  border-color: #7a5a28;
+  cursor: pointer;
+}
+
+.armor-stand-slot.occupied:hover {
+  border-color: #b08040;
+  background: rgba(50, 35, 10, 0.75);
+}
+
+.as-item {
+  font-size: 8px;
+  color: #c8a84a;
+  max-width: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.armor-stand-slot img {
+  width: 85%;
+  height: 85%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* Armor stand slot positions — same as paperdoll */
+#as-head {
+  top: 10%;
+  left: 50%;
+}
+
+#as-cloak {
+  top: 16%;
+  left: -22%;
+}
+
+#as-neck {
+  top: 16%;
+  left: 122%;
+}
+
+#as-chest {
+  top: 33%;
+  left: 50%;
+}
+
+#as-leftHand {
+  top: 44%;
+  left: -22%;
+}
+
+#as-rightHand {
+  top: 44%;
+  left: 122%;
+}
+
+#as-belt {
+  top: 62%;
+  left: -22%;
+}
+
+#as-hands {
+  top: 78%;
+  left: -22%;
+}
+
+#as-legs {
+  top: 62%;
+  left: 50%;
+}
+
+#as-feet {
+  top: 87%;
+  left: 50%;
+}
+
+/* Armor stand party inventory deposit panel */
+#armor-stand-party-inv {
+  border-top: 1px solid #3a2e18;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+#armor-stand-party-inv-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 14px 4px;
+}
+
+#armor-stand-party-inv-label {
+  font-size: 10px;
+  color: #6a5830;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+#armor-stand-party-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.armor-stand-party-tab {
+  width: 30px;
+  height: 30px;
+  border-radius: 3px;
+  border: 1px solid #3a2e18;
+  cursor: pointer;
+  overflow: hidden;
+  padding: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.armor-stand-party-tab:hover {
+  border-color: #8a7040;
+}
+
+.armor-stand-party-tab.active {
+  border-color: #c8a84a;
+  box-shadow: 0 0 6px rgba(200, 168, 74, 0.4);
+}
+
+.armor-stand-party-tab canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#armor-stand-party-inv-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+  padding: 6px 12px 10px;
+}
+
+.armor-stand-inv-slot {
+  aspect-ratio: 1;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid #1e1810;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  position: relative;
+}
+
+.armor-stand-inv-slot.occupied {
+  border-color: #3a2e18;
+  cursor: pointer;
+}
+
+.armor-stand-inv-slot.occupied:hover {
+  border-color: #c8a84a;
+  background: rgba(60, 40, 10, 0.45);
+}
+
+.armor-stand-inv-slot img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
 /* ── Anvil / Forge modal ── */
 #anvil-overlay {
   position: fixed;

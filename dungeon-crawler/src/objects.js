@@ -61,6 +61,14 @@ let _activeChestSlots = null;
 let _chestPartyMemberIdx = 0;
 
 // ─────────────────────────────────────────────
+//  ARMOR STAND SHARED STATE
+// ─────────────────────────────────────────────
+// Tracks the currently open armor stand's contents (equipment slots)
+let _activeArmorStandObj = null;
+// Which party member's inventory is shown in the armor stand deposit panel
+let _armorStandPartyMemberIdx = 0;
+
+// ─────────────────────────────────────────────
 //  SHOP GRID BLOCKING
 // ─────────────────────────────────────────────
 const _shopGridCells = new Set(); // "row,col" keys — treated as impassable
@@ -244,6 +252,16 @@ export function initObjects(scene, camera) {
                     openChestModal(obj);
                 } else {
                     showMessage("Stand on the chest to open it.");
+                }
+                break;
+            } else if (obj.userData.isArmorStand) {
+                // Check if player is standing on the same square as the armor stand
+                const isOnSameSquare = (player.gridRow === obj.userData.gridRow && player.gridCol === obj.userData.gridCol);
+
+                if (isOnSameSquare) {
+                    openArmorStandModal(obj);
+                } else {
+                    showMessage("Stand on the armor stand to use it.");
                 }
                 break;
             } else if (obj.userData.isCrystal) {
@@ -636,6 +654,17 @@ export function initObjects(scene, camera) {
         };
     }
 
+    // Armor stand modal close
+    const armorStandCloseBtn = document.getElementById('armor-stand-close');
+    if (armorStandCloseBtn) {
+        armorStandCloseBtn.onclick = (e) => {
+            e.stopPropagation();
+            document.getElementById('armor-stand-overlay').classList.add('chest-hidden');
+            _activeArmorStandObj = null;
+            equip.hideTooltip();
+        };
+    }
+
     // Merchant modal close
     const merchantCloseBtn = document.getElementById('merchant-close');
     if (merchantCloseBtn) {
@@ -900,6 +929,12 @@ export function initObjects(scene, camera) {
     const anvilOverlayEl = document.getElementById('anvil-overlay');
     if (anvilOverlayEl) {
         anvilOverlayEl.addEventListener('click', (e) => e.stopPropagation());
+    }
+
+    // Ditto for armor stand overlay
+    const armorStandOverlayEl = document.getElementById('armor-stand-overlay');
+    if (armorStandOverlayEl) {
+        armorStandOverlayEl.addEventListener('click', (e) => e.stopPropagation());
     }
 
 }
@@ -1323,7 +1358,7 @@ export function spawnObjectsForLevel() {
         addPortal, addDisabledPortal, addPortcullis, addKeyhole,
         addStatue, addPortalActivatorStatue, addPartyConfirmNPC,
         addAnvil, addAlchemyWorkshop, addTeleportTorch, addEtherealEgg, addStairs,
-        addTrap1, createWallButton,
+        addTrap1, createWallButton, addArmourStand,
         // Level 1 state flags
         starterPortalEnabled: _starterPortalEnabled,
         starterGateOpened: _starterGateOpened,
@@ -2055,6 +2090,74 @@ function _renderChestPartyInv() {
     });
 }
 
+function _renderArmorStandPartyInv() {
+    const tabsEl = document.getElementById('armor-stand-party-tabs');
+    const gridEl = document.getElementById('armor-stand-party-inv-grid');
+    if (!tabsEl || !gridEl) return;
+
+    // ── Tabs ──
+    tabsEl.innerHTML = '';
+    party.forEach((m, i) => {
+        if (m.isEmpty) return;
+        const btn = document.createElement('button');
+        btn.className = 'armor-stand-party-tab' + (i === _armorStandPartyMemberIdx ? ' active' : '');
+        btn.title = m.name;
+        const canvas = document.createElement('canvas');
+        canvas.width = 30;
+        canvas.height = 30;
+        drawPortrait(canvas, m);
+        btn.appendChild(canvas);
+        btn.addEventListener('click', () => {
+            _armorStandPartyMemberIdx = i;
+            _renderArmorStandPartyInv();
+        });
+        tabsEl.appendChild(btn);
+    });
+
+    // ── Inventory grid ──
+    gridEl.innerHTML = '';
+    const m = party[_armorStandPartyMemberIdx];
+    if (!m || m.isEmpty) return;
+
+    m.inventory.forEach((item, invIdx) => {
+        const slot = document.createElement('div');
+        slot.className = 'armor-stand-inv-slot' + (item ? ' occupied' : '');
+        if (item) {
+            const def = getItemDef(item.name);
+            if (def) {
+                const img = document.createElement('img');
+                img.src = asset(def.icon);
+                slot.appendChild(img);
+
+                // Left-click → place on armor stand if slot is available
+                slot.addEventListener('click', () => {
+                    if (!_activeArmorStandObj) return;
+                    const slotType = def.slot;
+                    if (!slotType) {
+                        showMessage(`${def.name} cannot be equipped on an armor stand.`);
+                        return;
+                    }
+                    // Check if that slot is already occupied
+                    const contents = _activeArmorStandObj.userData.contents;
+                    if (contents[slotType]) {
+                        showMessage(`The ${slotType} slot is already occupied.`);
+                        return;
+                    }
+                    contents[slotType] = item.name;
+                    m.inventory[invIdx] = null;
+                    equip.updateEffectiveStats(m);
+                    refreshPartyCards();
+                    _bindArmorStandSlots(equip, contents);
+                    _renderArmorStandPartyInv();
+                });
+
+                equip.attachTooltipListeners(slot, () => ({ name: item.name }));
+            }
+        }
+        gridEl.appendChild(slot);
+    });
+}
+
 export function openChestModal(chestObj) {
     playChestOpenSound();
     _activeSentLabelId = 'chest-sent-label';
@@ -2108,6 +2211,67 @@ export function openSpellCabinetModal(cabinetObj) {
         _bindChestSlots(equip, slots, contents);
     }
 }
+
+export function openArmorStandModal(armorStandObj) {
+    playItemSound('armor-stand');
+    _activeSentLabelId = 'armor-stand-sent-label';
+    const overlay = document.getElementById('armor-stand-overlay');
+    overlay.classList.remove('chest-hidden');
+    document.getElementById('armor-stand-sent-label').textContent = '';
+    document.getElementById('armor-stand-title').textContent = armorStandObj.userData.title || 'Armor Stand';
+
+    _activeArmorStandObj = armorStandObj;
+    const contents = armorStandObj.userData.contents || {};
+
+    // Default to first non-empty party member
+    _armorStandPartyMemberIdx = party.findIndex(m => !m.isEmpty);
+    if (_armorStandPartyMemberIdx === -1) _armorStandPartyMemberIdx = 0;
+
+    {
+        _bindArmorStandSlots(equip, contents);
+    }
+    _renderArmorStandPartyInv();
+}
+
+export function addArmorStand(scene, loader, col, row, rotY, modelPath = asset('/items/armour-stand1.glb'), scale = 0.4, offsetX = 0, offsetZ = 0, contents = {}, title = 'Armor Stand', offsetY = 0) {
+    loader.load(modelPath, (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(scale);
+        model.position.set(col * CELL + offsetX, 0.3 + offsetY, row * CELL + offsetZ);
+        model.rotation.y = rotY;
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.userData.isArmorStand = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+                child.userData.contents = contents;
+                child.userData.title = title;
+                interactables.push(child);
+
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
+            }
+        });
+
+        scene.add(model);
+    });
+}
+
+// British spelling alias for compatibility with level files
+export const addArmourStand = addArmorStand;
 
 export function openAnvilModal() {
     _forgeModalOpen = true;
@@ -2709,6 +2873,57 @@ function _sellItems() {
     _renderMerchantPartyItems();
     _renderMerchantSellBasket();
     _updateMerchantSellTotals();
+}
+
+function _bindArmorStandSlots(equip, contents) {
+    const slots = document.querySelectorAll('.armor-stand-slot');
+    slots.forEach((slot) => {
+        const slotType = slot.getAttribute('data-slot');
+        slot.innerHTML = '';
+        slot.classList.remove('occupied');
+        slot.onclick = null;
+
+        const itemName = contents[slotType];
+        if (itemName) {
+            const itemDef = getItemDef(itemName);
+            if (itemDef) {
+                slot.classList.add('occupied');
+                const img = document.createElement('img');
+                img.src = asset(itemDef.icon);
+                slot.appendChild(img);
+
+                // Left-click → remove from armor stand back to inventory
+                slot.onclick = () => {
+                    const targetIdx = _armorStandPartyMemberIdx;
+                    const target = party[targetIdx];
+                    const success = equip.addItemToInventory(targetIdx, itemName);
+                    if (success) {
+                        playItemSound(itemName);
+                        if (_activeSentLabelId) {
+                            const label = document.getElementById(_activeSentLabelId);
+                            if (label) label.textContent = `Taken by ${target.name}`;
+                        }
+                        contents[slotType] = null;
+                        equip.hideTooltip();
+                        equip.updateEffectiveStats(target);
+                        refreshPartyCards();
+                        _bindArmorStandSlots(equip, contents);
+                        _renderArmorStandPartyInv();
+                    } else {
+                        showMessage(`${target.name}'s inventory is full!`);
+                    }
+                };
+            }
+        }
+
+        // Hover tooltip
+        equip.attachTooltipListeners(slot, () => {
+            if (!contents[slotType]) return null;
+            return {
+                name: contents[slotType]
+            };
+        });
+    });
 }
 
 function _bindChestSlots(equip, slots, contents) {

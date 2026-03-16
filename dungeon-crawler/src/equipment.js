@@ -3998,7 +3998,7 @@ function attachOverlayListeners() {
     // I key — open character inventory
     if (e.key === 'i' || e.key === 'I') {
       if (activeCharIndex !== null || activeCharDevIndex !== null) return; // already open
-      const overlayOpen = ['tactics-overlay', 'chest-overlay', 'merchant-overlay', 'main-menu-overlay'].some(id => {
+      const overlayOpen = ['tactics-overlay', 'chest-overlay', 'armor-stand-overlay', 'merchant-overlay', 'main-menu-overlay'].some(id => {
         const el = document.getElementById(id);
         return el && window.getComputedStyle(el).display !== 'none';
       });
@@ -4010,7 +4010,7 @@ function attachOverlayListeners() {
     // C key — open character development
     if (e.key === 'c' || e.key === 'C') {
       if (activeCharIndex !== null || activeCharDevIndex !== null) return; // already open
-      const overlayOpen = ['tactics-overlay', 'chest-overlay', 'merchant-overlay', 'main-menu-overlay'].some(id => {
+      const overlayOpen = ['tactics-overlay', 'chest-overlay', 'armor-stand-overlay', 'merchant-overlay', 'main-menu-overlay'].some(id => {
         const el = document.getElementById(id);
         return el && window.getComputedStyle(el).display !== 'none';
       });

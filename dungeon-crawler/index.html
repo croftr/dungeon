@@ -951,6 +951,89 @@
     </div>
   </div>
 
+  <!-- ── ARMOR STAND MODAL ── -->
+  <div id="armor-stand-overlay" class="chest-hidden">
+    <div id="armor-stand-modal">
+      <div id="armor-stand-header" class="chest-header-style">
+        <div id="armor-stand-title-wrap">
+          <img src="/icons/sword.png" id="armor-stand-header-icon" alt="Armor Stand">
+          <span id="armor-stand-title">Armor Stand</span>
+        </div>
+        <span id="armor-stand-sent-label"></span>
+        <button id="armor-stand-close" aria-label="Close">&times;</button>
+      </div>
+      <div id="armor-stand-body">
+        <div id="armor-stand-paperdoll">
+          <!-- Inline SVG human silhouette -->
+          <svg id="armor-stand-silhouette" viewBox="0 0 100 220" xmlns="http://www.w3.org/2000/svg">
+            <!-- Head -->
+            <ellipse cx="50" cy="22" rx="14" ry="17" />
+            <!-- Neck -->
+            <rect x="44" y="38" width="12" height="8" rx="2" />
+            <!-- Torso -->
+            <path d="M28 46 Q22 58 22 80 L22 130 Q22 132 24 132 L76 132 Q78 132 78 130 L78 80 Q78 58 72 46 Z" />
+            <!-- Left upper arm -->
+            <rect x="10" y="48" width="14" height="42" rx="6" />
+            <!-- Right upper arm -->
+            <rect x="76" y="48" width="14" height="42" rx="6" />
+            <!-- Left forearm -->
+            <rect x="8" y="92" width="14" height="34" rx="6" />
+            <!-- Right forearm -->
+            <rect x="78" y="92" width="14" height="34" rx="6" />
+            <!-- Left leg -->
+            <rect x="28" y="132" width="18" height="56" rx="7" />
+            <!-- Right leg -->
+            <rect x="54" y="132" width="18" height="56" rx="7" />
+            <!-- Left foot -->
+            <ellipse cx="37" cy="192" rx="11" ry="6" />
+            <!-- Right foot -->
+            <ellipse cx="63" cy="192" rx="11" ry="6" />
+          </svg>
+
+          <!-- Equipment slot boxes overlaid on the silhouette -->
+          <div class="armor-stand-slot" id="as-head" data-slot="head">
+            <span class="as-item"></span>
+          </div>
+          <div class="armor-stand-slot" id="as-leftHand" data-slot="leftHand">
+            <span class="as-item"></span>
+          </div>
+          <div class="armor-stand-slot" id="as-rightHand" data-slot="rightHand">
+            <span class="as-item"></span>
+          </div>
+          <div class="armor-stand-slot" id="as-cloak" data-slot="cloak">
+            <span class="as-item"></span>
+          </div>
+          <div class="armor-stand-slot" id="as-neck" data-slot="neck">
+            <span class="as-item"></span>
+          </div>
+          <div class="armor-stand-slot" id="as-chest" data-slot="chest">
+            <span class="as-item"></span>
+          </div>
+          <div class="armor-stand-slot" id="as-belt" data-slot="belt">
+            <span class="as-item"></span>
+          </div>
+          <div class="armor-stand-slot" id="as-hands" data-slot="hands">
+            <span class="as-item"></span>
+          </div>
+          <div class="armor-stand-slot" id="as-legs" data-slot="legs">
+            <span class="as-item"></span>
+          </div>
+          <div class="armor-stand-slot" id="as-feet" data-slot="feet">
+            <span class="as-item"></span>
+          </div>
+        </div>
+      </div>
+      <!-- Party inventory deposit panel -->
+      <div id="armor-stand-party-inv">
+        <div id="armor-stand-party-inv-header">
+          <span id="armor-stand-party-inv-label">Inventory</span>
+          <div id="armor-stand-party-tabs"></div>
+        </div>
+        <div id="armor-stand-party-inv-grid"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── DROP CONFIRM MODAL ── -->
   <div id="drop-confirm-overlay" class="chest-hidden">
     <div id="drop-confirm-modal">

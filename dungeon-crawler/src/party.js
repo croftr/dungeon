@@ -717,7 +717,7 @@ export function initParty() {
     const loadoutKeyMap = { '1': 0, '2': 1, '3': 2, '4': 3 };
     if (!e.ctrlKey && !e.altKey && !e.metaKey && (loadoutKeyMap[e.key] !== undefined || e.key === ' ')) {
       const modalOpen = ['equip-overlay', 'tactics-overlay', 'chest-overlay',
-        'merchant-overlay', 'main-menu-overlay', 'char-dev-overlay'].some(id => {
+        'armor-stand-overlay', 'merchant-overlay', 'main-menu-overlay', 'char-dev-overlay'].some(id => {
           const el = document.getElementById(id);
           return el && window.getComputedStyle(el).display !== 'none';
         });
