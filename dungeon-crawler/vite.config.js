@@ -1,6 +1,15 @@
 import { defineConfig } from 'vite';
+import path from 'path';
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      // Force three.proton.js (and any other bundled lib) to use the same
+      // Three.js instance as the rest of the app, eliminating the
+      // "Multiple instances of Three.js" warning.
+      'three': path.resolve('./node_modules/three'),
+    },
+  },
   build: {
     // Modern browsers only -- skip syntax down-leveling
     target: 'esnext',
