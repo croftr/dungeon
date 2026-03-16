@@ -55,6 +55,7 @@
         "defence": 4,
         "value": 1100,
         "weight": 5,
+        "statChange": "+2 Resilience",
         "statBonuses": {
             "resilience": 2
         }

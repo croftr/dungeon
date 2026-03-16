@@ -357,7 +357,7 @@
         "attackType": "bash",
         "weaponType": "mace",
         "staminaDrain": 1.5,
-        "baseDamage": 18,
+        "baseDamage": 22,
         "delay": 2.2,
         "statWeights": {
             "str": 1.0,
