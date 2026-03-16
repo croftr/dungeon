@@ -290,22 +290,47 @@ body {
   background: none;
 }
 
-.mm-toast {
-  font-size: 12px;
-  color: #7ec87e;
-  text-align: center;
-  padding: 5px 0 2px;
+.mm-saves-list {
+  margin-top: 16px;
+  max-height: 260px;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.mm-save-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid rgba(232, 200, 122, 0.15);
+  border-radius: 3px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.mm-save-entry:hover {
+  background: rgba(232, 200, 122, 0.07);
+  border-color: rgba(232, 200, 122, 0.45);
+}
+
+.mm-save-level {
+  color: #e8c87a;
+  font-family: Georgia, serif;
+  font-size: 13px;
   letter-spacing: 0.5px;
-  min-height: 22px;
-  transition: opacity 0.3s;
 }
 
-.mm-toast--hidden {
-  opacity: 0;
+.mm-save-date {
+  color: #777;
+  font-size: 11px;
 }
 
-.mm-toast--error {
-  color: #c87e7e;
+.mm-no-saves {
+  color: #666;
+  font-size: 13px;
+  text-align: center;
+  padding: 20px 0;
 }
 
 /* Status bar — flows naturally below minimap inside #top-right */

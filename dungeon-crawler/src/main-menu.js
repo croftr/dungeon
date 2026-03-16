@@ -1,9 +1,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 //  MAIN MENU  — opened/closed with Escape key
-//  Contains sub-views; currently just "Controls" (key map).
+//  Contains sub-views: Controls, Load Game.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { saveGame, loadGame, hasSaveGame, getSaveInfo } from './save-game.js';
+import { listSaves, triggerLoad } from './save-game.js';
 
 let _isOpen = false;
 
@@ -30,32 +30,30 @@ function _anyOverlayOpen() {
   });
 }
 
-let _toastTimer = null;
-
-function _showToast(msg, isError = false) {
-  const toast = document.getElementById('mm-toast');
-  if (!toast) return;
-  toast.textContent = msg;
-  toast.className = 'mm-toast' + (isError ? ' mm-toast--error' : '');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => { toast.className = 'mm-toast mm-toast--hidden'; }, 2500);
+function _showSavesView() {
+  document.getElementById('mm-main-view').classList.add('mm-hidden');
+  document.getElementById('mm-saves-view').classList.remove('mm-hidden');
+  _renderSavesList();
 }
 
-function _refreshLoadBtn() {
-  const btn  = document.getElementById('mm-load-btn');
-  const info = getSaveInfo();
-  if (!btn) return;
-  if (info) {
-    const d = new Date(info.savedAt);
-    const stamp = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    btn.textContent = `Load Game  (${stamp})`;
-    btn.disabled = false;
-    btn.classList.remove('mm-item--disabled');
-  } else {
-    btn.textContent = 'Load Game';
-    btn.disabled = true;
-    btn.classList.add('mm-item--disabled');
+function _renderSavesList() {
+  const list = document.getElementById('mm-saves-list');
+  const saves = listSaves();
+  if (saves.length === 0) {
+    list.innerHTML = '<div class="mm-no-saves">No saved games.</div>';
+    return;
   }
+  list.innerHTML = saves.map(s => {
+    const d = new Date(s.savedAt);
+    const stamp = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return `<div class="mm-save-entry" data-key="${s.key}">
+      <span class="mm-save-level">${s.levelName}</span>
+      <span class="mm-save-date">${stamp}</span>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.mm-save-entry').forEach(el => {
+    el.addEventListener('click', () => triggerLoad(el.dataset.key));
+  });
 }
 
 // ── DOM ───────────────────────────────────────────────────────────────────────
@@ -70,10 +68,17 @@ function _buildModal() {
       <!-- Main view -->
       <div id="mm-main-view">
         <h2 class="mm-title">Menu</h2>
-        <div id="mm-toast" class="mm-toast mm-toast--hidden"></div>
-        <button class="mm-item" id="mm-save-btn">Save Game</button>
-        <button class="mm-item mm-item--disabled" id="mm-load-btn" disabled>Load Game</button>
+        <button class="mm-item" id="mm-load-btn">Load Game</button>
         <button class="mm-item" id="mm-controls-btn">Controls</button>
+      </div>
+
+      <!-- Saves sub-view -->
+      <div id="mm-saves-view" class="mm-hidden">
+        <div class="mm-sub-header">
+          <button class="mm-back-btn" id="mm-saves-back-btn">← Back</button>
+          <h2 class="mm-title">Load Game</h2>
+        </div>
+        <div id="mm-saves-list" class="mm-saves-list"></div>
       </div>
 
       <!-- Controls sub-view -->
@@ -103,15 +108,11 @@ function _buildModal() {
   // Backdrop click closes
   overlay.addEventListener('click', (e) => { if (e.target === overlay) _close(); });
 
-  document.getElementById('mm-save-btn').addEventListener('click', () => {
-    saveGame();
-    _showToast('Game saved.');
-    _refreshLoadBtn();
-  });
+  document.getElementById('mm-load-btn').addEventListener('click', _showSavesView);
 
-  document.getElementById('mm-load-btn').addEventListener('click', () => {
-    if (!hasSaveGame()) return;
-    loadGame(); // reloads the page
+  document.getElementById('mm-saves-back-btn').addEventListener('click', () => {
+    document.getElementById('mm-saves-view').classList.add('mm-hidden');
+    document.getElementById('mm-main-view').classList.remove('mm-hidden');
   });
 
   document.getElementById('mm-controls-btn').addEventListener('click', () => {
@@ -128,9 +129,9 @@ function _buildModal() {
 function _openMenu() {
   // Always start at the main view
   document.getElementById('mm-main-view').classList.remove('mm-hidden');
+  document.getElementById('mm-saves-view').classList.add('mm-hidden');
   document.getElementById('mm-controls-view').classList.add('mm-hidden');
   document.getElementById('main-menu-overlay').classList.remove('mm-hidden');
-  _refreshLoadBtn();
   _isOpen = true;
 }
 

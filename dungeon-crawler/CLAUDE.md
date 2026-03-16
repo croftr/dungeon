@@ -1,42 +1,29 @@
 # Dungeon Crawler — Development Guidelines
 
-## Save Game System (v2)
+## Save Game System (v4)
 
-The save system persists full world state to `localStorage`. Any new feature that introduces **mutable game state** must be wired into the save/load system.
+Auto-saves on every level transition. World state is **not** persisted — it always spawns fresh on load. Only party state is saved.
 
-### Checklist for new features
+### Save schema
+```js
+{ version: 4, savedAt, targetLevel, levelName, partyGold, party[], recruits{}, autoAttack, autoRangeAttack }
+```
 
-**New global flag** (e.g. a new gate, cutscene seen, quest progression):
-1. Add the flag variable in `objects.js` (or wherever it lives)
-2. Add it to `getWorldFlags()` / `setWorldFlags()` in `objects.js`
-3. Add it to the `flags` section of the save schema in `save-game.js` → `saveGame()`
-4. If it affects object spawning, use it in `spawnObjectsForLevel()` (e.g. portcullis `startOpen` param)
+### How it works
+- `autoSave(levelNum)` is called in `loadLevel()` (guarded by `!window._isRestoring`)
+- Saves are stored in `localStorage` with keys `dungeon-save-<level>-<timestamp>`
+- Esc → Load Game lists all saves newest-first; clicking one reloads the page into that save
+- On load: party/gold/recruits/auto-attack restored, target level loaded fresh (monsters alive, chests full)
 
-**New monster type**:
-- Automatic — `getMonsterStates()` iterates the `monsters[]` array by level
+### Adding new persistent party state
+If a new field is added to party members, it will be saved automatically via `_serializeMember`. No checklist needed — party is deep-cloned.
 
-**New container** (chest, rack, cabinet, anvil, bone pile):
-1. Call `_nextContainerId++` at the top of your `add*()` function
-2. Check `_pendingContainerOverrides` for saved contents override
-3. Assign `child.userData.containerId = cid` on interactive meshes
-4. Follow the existing pattern in `addChest`, `addWeaponRack`, etc.
-
-**New per-level state** (e.g. new shop, new interactive system):
-1. Add getter/setter exports in the relevant module
-2. Update `snapshotCurrentLevel()` in `save-game.js` to capture it
-3. Update `loadLevel()` in `main.js` to restore it from accumulated state
-4. Update `_checkPendingLoad()` in `main.js` to restore it on load
-
-**Breaking schema changes**: Bump the `version` number in `saveGame()` and add migration logic in `consumePendingLoad()`.
+### Adding new non-party persistent state (e.g. a global quest flag)
+Add it explicitly to the save object in `autoSave()` and restore it in `_applyPendingLoad()` in `main.js`.
 
 ### Key files
-- `src/save-game.js` — Central save/load orchestration, accumulated world state
-- `src/objects.js` — Gate flags, container state, merchant stock serialization
-- `src/monster.js` — Monster alive/hp serialization
-- `src/main.js` — Restore orchestration in `_checkPendingLoad()`, level transition hooks
-
-### Video flags bridge
-Video-seen flags in `main.js` are bridged to the save system via `window._saveFlags`. When adding a new video flag, update `window._saveFlags` when setting it to true, and restore it in `_checkPendingLoad()`.
+- `src/save-game.js` — `autoSave`, `listSaves`, `triggerLoad`, `consumePendingLoad`
+- `src/main.js` — `_applyPendingLoad` (post-init restore), pre-init recruit restore
 
 ## Architecture Quick Reference
 
