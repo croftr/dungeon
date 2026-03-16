@@ -42,7 +42,6 @@
         "defence": 3,
         "value": 500,
         "weight": 1.2,
-        "statChange": "+1 Dexterity",
         "statBonuses": {
             "dexterity": 1
         }
@@ -55,7 +54,6 @@
         "defence": 4,
         "value": 1100,
         "weight": 5,
-        "statChange": "+2 Resilience",
         "statBonuses": {
             "resilience": 2
         }

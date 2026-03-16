@@ -174,16 +174,6 @@ export function updateEffectiveStats(m) {
             newStats[stat] += delta;
           }
         });
-      } else if (def.statChange) {
-        // Legacy fallback: parse a human-readable string like "+1 Vitality"
-        const match = def.statChange.match(/([+-]?\d+)\s+([a-zA-Z]+)/);
-        if (match) {
-          const val = parseInt(match[1], 10);
-          const statName = match[2].toLowerCase();
-          if (newStats[statName] !== undefined) {
-            newStats[statName] += val;
-          }
-        }
       }
 
       // skillBonuses: flat additions to formula-resolved skill magnitudes.
@@ -809,7 +799,7 @@ function populateTooltip(obj) {
   const hasDefence = !isAmmo && !isMainSpellbook && def?.defence != null && def.defence > 0;
   const hasBlock = !isAmmo && !isMainSpellbook && def?.blockChance != null && def.blockChance > 0;
   const hasScaling = !isAmmo && !isMainSpellbook && def?.statWeights != null && def?.attackType != null;
-  const hasStatChange = def?.statChange != null || (isSpellbook && def?.requiredInt);
+  const hasStatChange = (def?.statBonuses && Object.values(def.statBonuses).some(v => v !== 0)) || (isSpellbook && def?.requiredInt);
   const hasSkillBonus = def?.skillBonuses && Object.keys(def.skillBonuses).length > 0;
 
   // Hide/show rows based on item type and available stats
@@ -868,7 +858,11 @@ function populateTooltip(obj) {
       document.getElementById('item-detail-statchange').textContent = def.requiredInt + ' Intelligence';
       document.getElementById('item-detail-statchange').style.color = '#ff8080';
     } else if (hasStatChange) {
-      document.getElementById('item-detail-statchange').textContent = def.statChange;
+      const bonusText = Object.entries(def.statBonuses)
+        .filter(([, v]) => v !== 0)
+        .map(([stat, v]) => `${v > 0 ? '+' : ''}${v} ${stat.charAt(0).toUpperCase() + stat.slice(1)}`)
+        .join(', ');
+      document.getElementById('item-detail-statchange').textContent = bonusText;
       document.getElementById('item-detail-statchange').style.color = '#60c060';
     }
 

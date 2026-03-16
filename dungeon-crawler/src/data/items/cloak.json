@@ -30,7 +30,6 @@
         "defence": 3,
         "value": 1000,
         "weight": 0.5,
-        "statChange": "+2 Dexterity",
         "statBonuses": {
             "dexterity": 2
         }
