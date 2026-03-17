@@ -1072,7 +1072,7 @@ window.loadLevel = function (levelNum) {
   // Lazily load videos needed for this level
   loadVideosForLevel(levelNum);
 
-  // First-ever entry into level 1: show a black loading screen for 5 seconds
+  // First-ever entry into level 1: show a black loading screen for 10 seconds
   // so the GLB assets have time to stream in before the player sees anything.
   if (levelNum === 1 && _level1FirstLoad) {
     _level1FirstLoad = false;
@@ -1082,10 +1082,10 @@ window.loadLevel = function (levelNum) {
     overlay.classList.add('visible');
     // Kick off progress bar on next frame so the transition triggers properly
     requestAnimationFrame(() => {
-      fill.style.transition = 'width 5s linear';
+      fill.style.transition = 'width 10s linear';
       fill.style.width = '100%';
     });
-    // After 5 s fade out and release pointer events
+    // After 10 s fade out and release pointer events
     setTimeout(() => {
       overlay.classList.remove('visible');
       // Reset bar after the fade-out completes so it's clean if ever reused
@@ -1093,7 +1093,7 @@ window.loadLevel = function (levelNum) {
         fill.style.transition = 'none';
         fill.style.width = '0%';
       }, 400);
-    }, 5000);
+    }, 10000);
   }
 
   const oldLevel = window.currentLevel;
