@@ -115,6 +115,33 @@ body {
   border-color: rgba(232, 200, 122, 0.2);
 }
 
+#easy-mode-btn {
+  background: none;
+  border: 1px solid rgba(150, 180, 220, 0.4);
+  color: rgba(150, 180, 220, 0.75);
+  padding: 8px 28px;
+  font-family: Georgia, serif;
+  font-size: 13px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 4px;
+  text-transform: uppercase;
+  display: block;
+  margin: 10px auto 0;
+}
+
+#easy-mode-btn:hover:not(:disabled) {
+  background: rgba(150, 180, 220, 0.08);
+  border-color: rgba(150, 180, 220, 0.7);
+  color: rgba(150, 180, 220, 1);
+}
+
+#easy-mode-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 #loading-bar-wrap {
   width: 220px;
   height: 2px;

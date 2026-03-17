@@ -902,6 +902,11 @@ export function loadMonstersForLevel(scene, level) {
   monsters.forEach((m) => {
     if (!m.alive || m.mesh) return; // skip dead or already loaded
     if ((m.level ?? 1) !== level) return;
+    if (window.easyMode && !m._easyModeApplied) {
+      m.hp = Math.ceil(m.hp * 0.5);
+      m.hpMax = Math.ceil(m.hpMax * 0.5);
+      m._easyModeApplied = true;
+    }
     _loadMonster(m, scene);
   });
 }

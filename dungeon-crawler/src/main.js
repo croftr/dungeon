@@ -76,12 +76,14 @@ const _audioPreload = prefetchBuffer(asset('/sounds/back1.mp3'));
 // AND the background music file has been pre-fetched. Show a progress bar while loading.
 {
   const _startBtn = document.getElementById('start-adventure-btn');
+  const _easyBtn  = document.getElementById('easy-mode-btn');
   const _introVid = document.getElementById('intro-video');
   const _barFill  = document.getElementById('loading-bar-fill');
   const _barWrap  = document.getElementById('loading-bar-wrap');
   if (_startBtn && _introVid) {
     _startBtn.disabled = true;
     _startBtn.textContent = 'Loading…';
+    if (_easyBtn) _easyBtn.disabled = true;
 
     const _setProgress = (pct) => {
       if (_barFill) _barFill.style.width = `${Math.round(pct)}%`;
@@ -91,6 +93,7 @@ const _audioPreload = prefetchBuffer(asset('/sounds/back1.mp3'));
       _setProgress(100);
       _startBtn.disabled = false;
       _startBtn.textContent = 'Start Adventure';
+      if (_easyBtn) _easyBtn.disabled = false;
       if (_barWrap) _barWrap.style.opacity = '0';
     };
 
@@ -470,6 +473,8 @@ const splashScreen = document.getElementById('splash-screen');
 const videoContainer = document.getElementById('video-container');
 const introVideo = document.getElementById('intro-video');
 const startBtn = document.getElementById('start-adventure-btn');
+const easyModeBtn = document.getElementById('easy-mode-btn');
+window.easyMode = false;
 const skipBtn = document.getElementById('skip-intro-btn');
 
 function finishIntro() {
@@ -484,6 +489,7 @@ function finishIntro() {
 
 if (startBtn) {
   startBtn.addEventListener('click', () => {
+    window.easyMode = false;
     splashScreen.classList.add('hidden');
     videoContainer.classList.remove('hidden');
     introVideo.play().catch(e => {
@@ -491,6 +497,19 @@ if (startBtn) {
       finishIntro();
     });
     // Trigger music/audio context via the same click
+    handleFirstInteraction();
+  });
+}
+
+if (easyModeBtn) {
+  easyModeBtn.addEventListener('click', () => {
+    window.easyMode = true;
+    splashScreen.classList.add('hidden');
+    videoContainer.classList.remove('hidden');
+    introVideo.play().catch(e => {
+      console.warn("Video play failed:", e);
+      finishIntro();
+    });
     handleFirstInteraction();
   });
 }

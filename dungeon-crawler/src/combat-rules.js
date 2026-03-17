@@ -207,7 +207,8 @@ export function calcMonsterDamage(monster, character, characterDefence = 0) {
   const mitigation = Math.floor(
     ((character.stats?.resilience ?? 0) + (character.stats?.vitality ?? 0)) * RESILIENCE_DAMAGE_FACTOR / 2
   );
-  return Math.max(1, raw - mitigation - characterDefence);
+  const dmg = Math.max(1, raw - mitigation - characterDefence);
+  return window.easyMode ? Math.max(1, Math.floor(dmg * 0.5)) : dmg;
 }
 
 // ── On-hit effect chance ──────────────────────────────────────────────────────
