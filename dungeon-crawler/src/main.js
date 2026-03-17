@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import { buildLevel, findCell, CELL_START, changeMapArray, level1Map, level2Map, level3Map, level4Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap } from './map.js';
+import { buildLevel, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap } from './map.js';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles } from './particles.js';
@@ -24,7 +24,7 @@ import './style.css';
 // ─────────────────────────────────────────────
 //  RENDERER & GLOBALS
 // ─────────────────────────────────────────────
-window.currentLevel = 1;
+window.currentLevel = 0;
 
 // Patch hardcoded asset paths in index.html to use CDN base URL
 document.querySelectorAll('img[src^="/"]').forEach(img => {
@@ -141,18 +141,35 @@ setCallbacks({
   moved() {
     drawMinimap();
     updateStatus();
-    // East room (merchant/large room) zone: cols 16-23, rows 7-15, level 1 only
-    if (window.currentLevel === 1) {
+    // ── Level 0/1 walk-through transitions ───────────────────────────────────
+    // Level 0 → Level 1: stepping west to (row 13, col 7) after gate is open
+    if (window.currentLevel === 0 && player.gridRow === 13 && player.gridCol === 7) {
+      window.loadLevel(1);
+      return;
+    }
+    // Level 1 → Level 0: stepping east to (row 13, col 8) — the return threshold
+    if (window.currentLevel === 1 && player.gridRow === 13 && player.gridCol === 8) {
+      window.loadLevel(0);
+      return;
+    }
+
+    // East room (merchant/large room) zone: cols 16-23, rows 7-15
+    // Present in both level 0 and level 1 (level 1 check retained for edge cases).
+    if (window.currentLevel === 0) {
       const inEastRoom = player.gridCol >= 16 && player.gridCol <= 23
         && player.gridRow >= 7 && player.gridRow <= 15;
+      if (inEastRoom) {
+        setZoneMusic('/sounds/level2-music.mp3');
+      } else {
+        setZoneMusic(null);
+      }
+    } else if (window.currentLevel === 1) {
       const inOgreRoom = player.gridCol >= 1 && player.gridCol <= 6
         && player.gridRow >= 1 && player.gridRow <= 9;
       const inMummyRoom = player.gridCol >= 11 && player.gridCol <= 15
         && player.gridRow >= 1 && player.gridRow <= 5;
 
-      if (inEastRoom) {
-        setZoneMusic('/sounds/level2-music.mp3');
-      } else if (inOgreRoom && hasSeenOgreVideo) {
+      if (inOgreRoom && hasSeenOgreVideo) {
         setZoneMusic('/sounds/backing/ogre-room.mp3');
       } else if (inMummyRoom) {
         setZoneMusic('/sounds/backing/mummy-room.mp3');
@@ -358,7 +375,7 @@ function animate(now) {
 
   // Auto-attack: front row members attack automatically when a monster is in melee range
   if (autoAttack) {
-    const currentLevel = window.currentLevel || 1;
+    const currentLevel = window.currentLevel ?? 0;
     const hasTarget = monsters.some(t =>
       t.alive &&
       (t.level ?? 1) === currentLevel &&
@@ -383,7 +400,7 @@ function animate(now) {
   // when a monster is within ranged range (3 cells).  The 1-second human-feel delay
   // is baked into tickAutoRangeAttack via AUTO_EXTRA_DELAY_MS.
   if (autoRangeAttack) {
-    const currentLevel = window.currentLevel || 1;
+    const currentLevel = window.currentLevel ?? 0;
     const hasRangedTarget = monsters.some(t =>
       t.alive &&
       (t.level ?? 1) === currentLevel &&
@@ -1014,8 +1031,34 @@ window.addEventListener('keydown', handleFirstInteraction);
 // ─────────────────────────────────────────────
 //  LEVEL LOADING
 // ─────────────────────────────────────────────
+let _level1FirstLoad = true; // shows loading screen on first entry to level 1
+
 window.loadLevel = function (levelNum) {
   if (!window._isRestoring) autoSave(levelNum);
+
+  // First-ever entry into level 1: show a black loading screen for 5 seconds
+  // so the GLB assets have time to stream in before the player sees anything.
+  if (levelNum === 1 && _level1FirstLoad) {
+    _level1FirstLoad = false;
+    const overlay = document.getElementById('level-load-overlay');
+    const fill    = document.getElementById('level-load-bar-fill');
+    // Show overlay immediately
+    overlay.classList.add('visible');
+    // Kick off progress bar on next frame so the transition triggers properly
+    requestAnimationFrame(() => {
+      fill.style.transition = 'width 5s linear';
+      fill.style.width = '100%';
+    });
+    // After 5 s fade out and release pointer events
+    setTimeout(() => {
+      overlay.classList.remove('visible');
+      // Reset bar after the fade-out completes so it's clean if ever reused
+      setTimeout(() => {
+        fill.style.transition = 'none';
+        fill.style.width = '0%';
+      }, 400);
+    }, 5000);
+  }
 
   const oldLevel = window.currentLevel;
   window.currentLevel = levelNum;
@@ -1024,8 +1067,8 @@ window.loadLevel = function (levelNum) {
   setAmbientLevel(levelNum);
 
   // 1. Swap Map Array
-  const maps = [null, level1Map, level2Map, level3Map, level4Map];
-  changeMapArray(maps[levelNum] || level1Map);
+  const maps = [level0Map, level1Map, level2Map, level3Map, level4Map];
+  changeMapArray(maps[levelNum] ?? level0Map);
 
   // 2. Rebuild map meshes for walls/floors
   buildLevel(scene);
@@ -1045,7 +1088,21 @@ window.loadLevel = function (levelNum) {
   const w = cellToWorld(start.row, start.col);
   camera.position.set(w.x, w.y, w.z);
 
-  if (levelNum === 3 && oldLevel === 1) {
+  if (levelNum === 1 && oldLevel === 0) {
+    // Entering the dungeon from the starter room — face west into the corridor
+    player.facing = 3; // West
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = FACING_ANGLES[player.facing];
+  } else if (levelNum === 0 && oldLevel === 1) {
+    // Returning to the starter room — place just inside the gate, face east into the room
+    player.gridRow = 13;
+    player.gridCol = 9;
+    const wRet = cellToWorld(13, 9);
+    camera.position.set(wRet.x, wRet.y, wRet.z);
+    player.facing = 1; // East
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = FACING_ANGLES[player.facing];
+  } else if (levelNum === 3 && oldLevel === 1) {
     player.facing = (player.facing + 2) % 4; // Turn 180 degrees
     camera.rotation.order = 'YXZ';
     camera.rotation.y = FACING_ANGLES[player.facing];
@@ -1147,7 +1204,7 @@ console.log('Map: 0=floor 1=wall 2=start 3=exit | Controls: W/S=move  Q/E=turn  
   if (save.autoRangeAttack !== undefined) setAutoRangeAttack(save.autoRangeAttack);
 
   // 4. Load target level (world spawns fresh, player placed at CELL_START)
-  const targetLevel = save.targetLevel ?? 1;
+  const targetLevel = save.targetLevel ?? 0;
   window._isRestoring = true;
   if (targetLevel !== window.currentLevel) {
     window.loadLevel(targetLevel);

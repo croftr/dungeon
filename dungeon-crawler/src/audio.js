@@ -350,7 +350,7 @@ const TRACK_VOLUME = {
   [asset('/sounds/backing/minotaur-level.mp3')]: 0.6,
   [asset('/sounds/backing/battle.mp3')]: 0.15,
 };
-let _ambientLevel = 1;
+let _ambientLevel = 0;
 const BATTLE_TRACK = asset('/sounds/backing/battle.mp3');
 
 let musicSource = null;

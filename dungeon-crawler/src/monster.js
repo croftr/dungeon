@@ -24,6 +24,7 @@ import { resetBattleStats, recordDamageDealt, recordDamageTaken, showBattleStats
 import { getItemDef } from './items.js';
 import { spawnDroppedItem, isStatueAt, spawnCorpse } from './objects.js';
 import { MONSTER_DEFS as D } from './monster-defs.js';
+import { level0Monsters } from './levels/level0/monsters.js';
 import { level1Monsters } from './levels/level1/monsters.js';
 import { level2Monsters } from './levels/level2/monsters.js';
 import { level3Monsters } from './levels/level3/monsters.js';
@@ -67,7 +68,7 @@ const _FACING_DC = [0, 1, 0, -1];
  * wins (stable, deterministic).
  */
 export function getInRangeMonster() {
-  const currentLevel = window.currentLevel || 1;
+  const currentLevel = window.currentLevel ?? 0;
   // Collect all passable-reachable adjacent monsters
   const candidates = monsters.filter((m) => {
     if (!m.alive) return false;
@@ -107,6 +108,7 @@ export function getInRangeMonster() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const monsters = [
+  ...level0Monsters,
   ...level1Monsters,
   ...level2Monsters,
   ...level3Monsters,
@@ -457,7 +459,7 @@ function _triggerTreemanAwakening(treeman, scene) {
 
 /** Triggers the mummies to start chasing the player immediately. */
 export function triggerMummyAmbush() {
-  const currentLevel = window.currentLevel || 1;
+  const currentLevel = window.currentLevel ?? 0;
   monsters.forEach(m => {
     if (m.name === 'Mummy' && m.alive && (m.level ?? 1) === currentLevel) {
       m.engaged = true;
@@ -466,7 +468,7 @@ export function triggerMummyAmbush() {
 }
 
 export function isMonsterAt(row, col) {
-  const currentLevel = window.currentLevel || 1;
+  const currentLevel = window.currentLevel ?? 0;
   return monsters.some(m => m.alive && (m.level ?? 1) === currentLevel && m.gridRow === row && m.gridCol === col);
 }
 
@@ -478,7 +480,7 @@ export function isMonsterAt(row, col) {
  * that are mid-step.
  */
 function _isCellReserved(row, col, excludeId) {
-  const currentLevel = window.currentLevel || 1;
+  const currentLevel = window.currentLevel ?? 0;
   return monsters.some(m => {
     if (!m.alive || m.id === excludeId) return false;
     if ((m.level ?? 1) !== currentLevel) return false;
@@ -888,7 +890,7 @@ let _sceneRef = null;
 
 export function initMonsters(scene) {
   _sceneRef = scene;
-  const currentLevel = window.currentLevel || 1;
+  const currentLevel = window.currentLevel ?? 0;
   monsters.forEach((m) => {
     if (!m.alive) return;
     if ((m.level ?? 1) !== currentLevel) return; // defer other levels
@@ -1097,7 +1099,7 @@ function _hasLineOfSight(r1, c1, r2, c2) {
 }
 
 export function updateMonsters(dt, playerCamera, scene) {
-  const currentLevel = window.currentLevel || 1;
+  const currentLevel = window.currentLevel ?? 0;
   const playerPos = playerCamera ? playerCamera.position : null;
   monsters.forEach((m) => {
     if (currentLevel !== (m.level ?? 1)) {

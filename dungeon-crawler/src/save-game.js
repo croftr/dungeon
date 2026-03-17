@@ -9,6 +9,7 @@ const LOAD_KEY = 'dungeon-pending-load';
 const SAVE_PREFIX = 'dungeon-save-';
 
 const LEVEL_NAMES = {
+  0: 'Starter Room',
   1: 'Western Dungeon',
   2: 'Deep Passage',
   3: 'Abyssal Crypts',

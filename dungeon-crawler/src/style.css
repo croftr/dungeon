@@ -190,6 +190,55 @@ body {
   opacity: 1;
 }
 
+/* ── Level load overlay (first entry into level 1) ────────────────────── */
+#level-load-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 10006;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+#level-load-overlay.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+#level-load-content {
+  text-align: center;
+}
+
+#level-load-text {
+  color: #e8c87a;
+  font-family: Georgia, serif;
+  font-size: 16px;
+  letter-spacing: 4px;
+  margin-bottom: 18px;
+  text-shadow: 0 0 12px rgba(232, 200, 122, 0.4);
+  text-transform: uppercase;
+}
+
+#level-load-bar-wrap {
+  width: 220px;
+  height: 2px;
+  margin: 0 auto;
+  background: rgba(232, 200, 122, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+#level-load-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: rgba(232, 200, 122, 0.7);
+  border-radius: 2px;
+}
+
 /* ── Main Menu modal ────────────────────────────────────────────────────── */
 #main-menu-overlay {
   position: fixed;

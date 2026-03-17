@@ -13,13 +13,14 @@ export const CELL_HOLE = 5;
 export const CELL_STAIRS_UP = 6;
 export const CELL_BLACK_WALL = 7;
 
+import { level0Map } from './levels/level0/map.js';
 import { level1Map } from './levels/level1/map.js';
 import { level2Map } from './levels/level2/map.js';
 import { level3Map } from './levels/level3/map.js';
 import { level4Map } from './levels/level4/map.js';
-export { level1Map, level2Map, level3Map, level4Map };
+export { level0Map, level1Map, level2Map, level3Map, level4Map };
 
-export let dungeonMap = level1Map;
+export let dungeonMap = level0Map;
 export let ROWS = dungeonMap.length;
 export let COLS = dungeonMap[0].length;
 

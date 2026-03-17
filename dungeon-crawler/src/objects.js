@@ -15,6 +15,7 @@ import FORGE_DATA from './data/forge.json';
 import { triggerMummyAmbush, monsters } from './monster.js';
 import * as equip from './equipment.js';
 import { asset } from './assets.js';
+import { spawnLevel0Objects } from './levels/level0/objects.js';
 import { spawnLevel1Objects } from './levels/level1/objects.js';
 import { spawnLevel2Objects } from './levels/level2/objects.js';
 import { spawnLevel3Objects } from './levels/level3/objects.js';
@@ -348,9 +349,32 @@ export function initObjects(scene, camera) {
                     if (!_starterPortalEnabled) {
                         _starterPortalEnabled = true;
 
+                        // The portal is in Level 0 (starter room). If we're in Level 1 (mummy area),
+                        // just set the flag — the portal will appear when the player returns to Level 0.
+                        const inLevel0 = window.currentLevel === 0;
+
                         if (window.playStatuePortalVideo) {
                             window.playStatuePortalVideo(() => {
-                                // Swap out the portal model after video finishes
+                                if (inLevel0) {
+                                    // Swap out the disabled portal model
+                                    if (_disabledPortalMesh) {
+                                        _disabledPortalMesh.traverse((child) => {
+                                            const idx = interactables.indexOf(child);
+                                            if (idx !== -1) interactables.splice(idx, 1);
+                                        });
+                                        if (_disabledPortalMesh.parent) {
+                                            _disabledPortalMesh.parent.remove(_disabledPortalMesh);
+                                        }
+                                        _disabledPortalMesh = null;
+                                    }
+                                    addPortal(objectsGroup, _gltfLoader, 13, 13, 2, Math.PI / 2, 0.85, 0);
+                                } else {
+                                    showMessage("A portal has opened in the starting chamber!");
+                                }
+                            });
+                        } else {
+                            // Fallback if video isn't available
+                            if (inLevel0) {
                                 if (_disabledPortalMesh) {
                                     _disabledPortalMesh.traverse((child) => {
                                         const idx = interactables.indexOf(child);
@@ -361,23 +385,10 @@ export function initObjects(scene, camera) {
                                     }
                                     _disabledPortalMesh = null;
                                 }
-                                // Add the enabled portal in the same spot (Level 1 Starter Room)
                                 addPortal(objectsGroup, _gltfLoader, 13, 13, 2, Math.PI / 2, 0.85, 0);
-                            });
-                        } else {
-                            // Fallback if video isn't available
-                            showMessage("A portal has been opened somewhere!");
-                            if (_disabledPortalMesh) {
-                                _disabledPortalMesh.traverse((child) => {
-                                    const idx = interactables.indexOf(child);
-                                    if (idx !== -1) interactables.splice(idx, 1);
-                                });
-                                if (_disabledPortalMesh.parent) {
-                                    _disabledPortalMesh.parent.remove(_disabledPortalMesh);
-                                }
-                                _disabledPortalMesh = null;
+                            } else {
+                                showMessage("A portal has opened in the starting chamber!");
                             }
-                            addPortal(objectsGroup, _gltfLoader, 13, 13, 2, Math.PI / 2, 0.85, 0);
                         }
                     } else {
                         showMessage("The statue emits a faint glow.");
@@ -396,7 +407,7 @@ export function initObjects(scene, camera) {
                         return;
                     }
 
-                    const isTreemanTransition = (targetLevel === 2 && window.currentLevel === 1);
+                    const isTreemanTransition = (targetLevel === 2 && window.currentLevel === 0);
 
                     showMessage("You step into the swirling blue portal...");
                     playPortalSound();
@@ -1071,7 +1082,7 @@ function _fireTrap(trapObj) {
 
     playTrapSound();
 
-    const level = window.currentLevel || 1;
+    const level = window.currentLevel ?? 0;
     const dmgRange = TRAP_DAMAGE[level] ?? TRAP_DAMAGE[1];
 
     let damageMessage = 'The trap springs! ';
@@ -1331,7 +1342,7 @@ function addStairs(scene, loader, col, row, rotY = 0) {
 
 
 export function spawnObjectsForLevel() {
-    const level = window.currentLevel || 1;
+    const level = window.currentLevel ?? 0;
     objects.length = 0; // clear logical array
     _nextContainerId = 0; // reset container IDs for deterministic save/load
 
@@ -1366,7 +1377,8 @@ export function spawnObjectsForLevel() {
         interactables,
     };
 
-    if (level === 1) spawnLevel1Objects(ctx);
+    if (level === 0) spawnLevel0Objects(ctx);
+    else if (level === 1) spawnLevel1Objects(ctx);
     else if (level === 2) spawnLevel2Objects(ctx);
     else if (level === 3) spawnLevel3Objects(ctx);
     else if (level === 4) spawnLevel4Objects(ctx);
