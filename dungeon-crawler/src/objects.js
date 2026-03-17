@@ -624,16 +624,23 @@ export function initObjects(scene, camera) {
                         _npcIdleAction.fadeOut(0.3);
                         _npcTalkAction.reset().fadeIn(0.3).play();
                     }
-                    const npcAudio = new Audio(asset('/sounds/npcs/party-chosen.mp3'));
-                    npcAudio.volume = 0.8;
-                    npcAudio.addEventListener('loadedmetadata', () => {
-                        const delay = Math.max(0, (npcAudio.duration - 0.8) * 1000);
-                        setTimeout(() => {
-                            const overlay = document.getElementById('party-confirm-overlay');
-                            if (overlay) overlay.classList.remove('chest-hidden');
-                        }, delay);
-                    });
-                    npcAudio.play().catch(e => console.warn("NPC audio failed:", e));
+                    const partyFull = party.every(m => !m.isEmpty);
+                    if (partyFull) {
+                        const npcAudio = new Audio(asset('/sounds/npcs/party-chosen.mp3'));
+                        npcAudio.volume = 0.8;
+                        npcAudio.addEventListener('loadedmetadata', () => {
+                            const delay = Math.max(0, (npcAudio.duration - 0.8) * 1000);
+                            setTimeout(() => {
+                                const overlay = document.getElementById('party-confirm-overlay');
+                                if (overlay) overlay.classList.remove('chest-hidden');
+                            }, delay);
+                        });
+                        npcAudio.play().catch(e => console.warn("NPC audio failed:", e));
+                    } else {
+                        const npcAudio = new Audio(asset('/sounds/npcs/incomplete-party.mp3'));
+                        npcAudio.volume = 0.8;
+                        npcAudio.play().catch(e => console.warn("NPC audio failed:", e));
+                    }
                 } else {
                     showMessage("The mysterious figure beckons you from afar.");
                 }

@@ -15,14 +15,13 @@
         },
         "bio": "A swift and silent guardian of the deep woods. Elrond's bow strikes with the fury of nature itself.",
         "startingInventory": [
-            "Torch",
             "Cure Poison Potion",
             "Minor Rejuvenate Potion"
         ],
         "startingSkills": [],
         "image": "/heros/elf_ranger_head.jpg",
         "leftHand": "Short Bow",
-        "rightHand": "—",
+        "rightHand": "Torch",
         "ammo": "Wooden Arrows",
         "gridCol": 9,
         "gridRow": 8,

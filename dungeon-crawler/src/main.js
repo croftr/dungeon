@@ -30,10 +30,43 @@ window.currentLevel = 0;
 document.querySelectorAll('img[src^="/"]').forEach(img => {
   img.src = asset(img.getAttribute('src'));
 });
-document.querySelectorAll('video source[src^="/"]').forEach(src => {
-  src.src = asset(src.getAttribute('src'));
-  src.closest('video')?.load();
-});
+
+// Only patch+load the intro video immediately (needed during the splash screen progress bar).
+// All other videos are loaded lazily per-level via loadVideosForLevel().
+{
+  const introSrc = document.querySelector('#intro-video source');
+  if (introSrc) {
+    introSrc.src = asset(introSrc.getAttribute('src'));
+    document.getElementById('intro-video')?.load();
+  }
+}
+
+// Map of level number → video element IDs to preload when entering that level
+const _VIDEO_LEVELS = {
+  0: ['battle-prep-video'],
+  1: ['ogre-video', 'mummy-video', 'demon-video', 'aqua-man-video', 'portal-video'],
+  2: ['treeman-video'],
+  3: ['minotaur-video', 'minotaur-death-video', 'statue-portal-video', 'egg-video'],
+  4: ['stairs-video'],
+};
+const _loadedVideoIds = new Set();
+
+function loadVideosForLevel(levelNum) {
+  const ids = _VIDEO_LEVELS[levelNum] ?? [];
+  ids.forEach(id => {
+    if (_loadedVideoIds.has(id)) return;
+    _loadedVideoIds.add(id);
+    const video = document.getElementById(id);
+    if (!video) return;
+    const source = video.querySelector('source');
+    if (!source) return;
+    source.src = asset(source.getAttribute('src'));
+    video.load();
+  });
+}
+
+// Preload level 0 videos (starter room / NPC party confirm)
+loadVideosForLevel(0);
 
 // Pre-fetch back1.mp3 raw bytes now — no AudioContext needed.
 // By the time the user clicks, the bytes are cached and decodeAudioData is near-instant.
@@ -1035,6 +1068,9 @@ let _level1FirstLoad = true; // shows loading screen on first entry to level 1
 
 window.loadLevel = function (levelNum) {
   if (!window._isRestoring) autoSave(levelNum);
+
+  // Lazily load videos needed for this level
+  loadVideosForLevel(levelNum);
 
   // First-ever entry into level 1: show a black loading screen for 5 seconds
   // so the GLB assets have time to stream in before the player sees anything.
