@@ -15,7 +15,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.25
+        "chance": 1
       },
       {
         "item": "Poison Vial",

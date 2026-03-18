@@ -1870,6 +1870,7 @@ function closeModal() {
   activeCharIndex = null;
   // Sync party card HUD to reflect any equipment changes (weapons, torch, etc.)
   refreshPartyCards();
+
 }
 
 // ─────────────────────────────────────────────

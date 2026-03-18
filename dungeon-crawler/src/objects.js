@@ -497,11 +497,6 @@ export function initObjects(scene, camera) {
                                         text: 'To learn a scroll, open the inventory (<strong>I</strong>), then <strong>right click</strong> the scroll and select <strong>Learn</strong>.'
                                       });
                                     }
-                                    if (obj.userData.itemName === 'Life Essence') {
-                                      showInlineHelp('first-life-essence', {
-                                        text: '<strong>Life Essence</strong> is a valuable crafting ingredient. Potions, weapons and items can be crafted using the equipment found in the starting areas of the dungeon.'
-                                      });
-                                    }
                                     break;
                                 }
                             }

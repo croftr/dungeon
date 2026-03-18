@@ -23,7 +23,7 @@ export function spawnLevel0Objects(ctx) {
     // ── Stash in the starter room ─────────────────────────────────────────────
     addChest(group, loader, 11, 13, 0, 0.7, [
         { name: 'Gold Coins', quantity: 100 },
-        'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore",
+        'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore", "Life Essence"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in starter room ──────────────────────────────────────────────
