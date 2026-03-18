@@ -119,7 +119,7 @@ export function spawnLevel0Objects(ctx) {
         leftHand: 'Storm-Reaver Greataxe',
         cloak: 'Storm-Reaver Pelt'
     }, 'Barbarian Armor Stand', 0.35);
-    addArmourStand(group, loader, 23, 15, -Math.PI / 2, asset('/items/wizard-statue.glb'), 0.7, 1, 0, {
+    addArmourStand(group, loader, 23, 7, -Math.PI / 2, asset('/items/wizard-statue.glb'), 0.7, 1, 0, {
         head: 'Aethelgard Archmage Hood',
         chest: 'Aethelgard Archmage Robe',
         hands: 'Aethelgard Archmage Cuffs',
@@ -128,7 +128,7 @@ export function spawnLevel0Objects(ctx) {
         leftHand: 'Aethelgard Grand Staff',
         cloak: 'Aethelgard Archmage Mantle'
     }, 'Wizard Armour Stand', 0.35);
-    addArmourStand(group, loader, 23, 16, -Math.PI / 2, asset('/items/mage-statue.glb'), 0.7, 1, 0, {
+    addArmourStand(group, loader, 22, 7, -Math.PI / 2, asset('/items/mage-statue.glb'), 0.7, 1, 0, {
         head: 'Seraphic Grace Cowl',
         chest: 'Seraphic Grace Gown',
         hands: 'Seraphic Grace Mitts',
