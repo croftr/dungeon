@@ -98,10 +98,14 @@
         },
         "bio": "An eccentric scholar weaving arcane tapestries. Merlin's thirst for forbidden knowledge is matched only by his formidable spellcraft.",
         "startingSkills": [],
-        "startingInventory": [
-            "Scroll of Fireball"
+        "startingSpells": [
+            "Fireball",
+            "Heal"
         ],
+        "startingInventory": [],
         "image": "/heros/human_wizard_head.png",
+        "leftHand": "Fireball",
+        "rightHand": "Heal",
         "ammo": "Spellbook",
         "gridCol": 13,
         "gridRow": 8,
@@ -207,13 +211,15 @@
         },
         "bio": "A devoted healer whose presence brings hope to the darkest depths. Seraphina draws upon pure light to mend flesh and soul.",
         "startingSkills": [],
+        "startingSpells": [
+            "Heal"
+        ],
         "startingInventory": [
-            "Scroll of Heal",
             "Minor Mana Potion",
             "Minor Mana Potion"
         ],
         "image": "/heros/white-mage.png",
-        "leftHand": "",
+        "leftHand": "Heal",
         "rightHand": "—",
         "ammo": "Spellbook",
         "gridCol": 8,

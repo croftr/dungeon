@@ -32,6 +32,7 @@ function hydrateSkillName(skillName) {
 export const RECRUITS = RECRUITS_DATA.map(r => ({
     ...r,
     startingSkills: (r.startingSkills || []).map(hydrateSkillName),
+    startingSpells: r.startingSpells || [],
 }));
 
 let uiContainer = null;
@@ -260,6 +261,7 @@ function recruitCharacter(r) {
         pendingNodePicks: 0,
         pendingNodeChoice: null,
         skills: r.startingSkills ? JSON.parse(JSON.stringify(r.startingSkills)) : [],
+        spells: r.startingSpells ? r.startingSpells.map(name => ({name})) : [],
         leftHand: r.leftHand,
         rightHand: r.rightHand,
         ammo: r.ammo,
