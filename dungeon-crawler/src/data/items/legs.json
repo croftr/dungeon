@@ -46,5 +46,66 @@
         "statBonuses": {
             "vitality": 2
         }
+    },
+    {
+        "name": "Ironpeak Dwarf Greaves",
+        "slot": "legs",
+        "icon": "/icons/dwarf_greaves.png",
+        "description": "Heavy iron greaves designed to protect a dwarf warrior in the thickest of melee.",
+        "defence": 4,
+        "value": 1100,
+        "weight": 4.0
+    },
+    {
+        "name": "Sylvan Elderwood Leggings",
+        "slot": "legs",
+        "icon": "/icons/sylvan_leggings.png",
+        "description": "Flexible and sturdy leggings imbued with the agility of the deep forest.",
+        "defence": 5,
+        "value": 1100,
+        "weight": 2.0
+    },
+    {
+        "name": "Mountain Stalker Trousers",
+        "slot": "legs",
+        "icon": "/icons/mountain_leggings.png",
+        "description": "Heary leather trousers with integrated iron plates on the thighs.",
+        "defence": 5,
+        "value": 1100,
+        "weight": 4.5
+    },
+    {
+        "name": "Aethelgard Archmage Leggings",
+        "slot": "legs",
+        "icon": "/icons/archmage_leggings.png",
+        "description": "Star-silk leggings that feel like moonlight against the skin.",
+        "defence": 3,
+        "value": 1100,
+        "weight": 0.8,
+        "statBonuses": {
+            "intelligence": 1,
+            "resilience": 1
+        }
+    },
+    {
+        "name": "Storm-Reaver Greaves",
+        "slot": "legs",
+        "icon": "/icons/stormreaver_leggings.png",
+        "description": "Thick iron greaves designed for stomping through the blood of fallen foes.",
+        "defence": 6,
+        "value": 1100,
+        "weight": 6.0
+    },
+    {
+        "name": "Seraphic Grace Skirt",
+        "slot": "legs",
+        "icon": "/icons/seraphic_leggings.png",
+        "description": "A long, pleated skirt made of blessed linen.",
+        "defence": 4,
+        "value": 1100,
+        "weight": 1.0,
+        "statBonuses": {
+            "resilience": 2
+        }
     }
 ]

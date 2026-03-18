@@ -41,7 +41,7 @@
         "attackType": null,
         "baseDamage": null,
         "icon": "/icons/plate_cuirass.png",
-        "description": "Heavy forged steel chest plate. Near impenetrable — if you can move in it.",
+        "description": "Heavy forged steel chest plate. Near impenetrable \u2014 if you can move in it.",
         "defence": 8,
         "value": 750,
         "weight": 12
@@ -87,6 +87,70 @@
         "statBonuses": {
             "strength": 2,
             "vitality": 2
+        }
+    },
+    {
+        "name": "Ironpeak Dwarf Cuirass",
+        "slot": "chest",
+        "icon": "/icons/dwarf_cuirass.png",
+        "description": "A powerful dwarf warrior cuirass adorned with ornate gold trim over impenetrable iron plates.",
+        "defence": 8,
+        "value": 1800,
+        "weight": 8.0,
+        "statBonuses": {}
+    },
+    {
+        "name": "Sylvan Elderwood Tunic",
+        "slot": "chest",
+        "icon": "/icons/sylvan_tunic.png",
+        "description": "An exquisite woodelf tunic glowing with inner vibrant energy, offering peerless agility.",
+        "defence": 8,
+        "value": 1800,
+        "weight": 4.0
+    },
+    {
+        "name": "Mountain Stalker Trenchcoat",
+        "slot": "chest",
+        "icon": "/icons/mountain_tunic.png",
+        "description": "A heavy leather coat reinforced with iron studs and lined with bear fur.",
+        "defence": 9,
+        "value": 1800,
+        "weight": 8.0
+    },
+    {
+        "name": "Aethelgard Archmage Robe",
+        "slot": "chest",
+        "icon": "/icons/archmage_tunic.png",
+        "description": "Ornate silk robes woven with protective runes and star-metal thread.",
+        "defence": 5,
+        "value": 1800,
+        "weight": 2.0,
+        "statBonuses": {
+            "intelligence": 3,
+            "vitality": 1
+        }
+    },
+    {
+        "name": "Storm-Reaver Harness",
+        "slot": "chest",
+        "icon": "/icons/stormreaver_tunic.png",
+        "description": "A brutal chestplate of overlapping iron plates, showing the scars of many battles.",
+        "defence": 8,
+        "value": 1800,
+        "weight": 10.0
+    },
+    {
+        "name": "Seraphic Grace Gown",
+        "slot": "chest",
+        "icon": "/icons/seraphic_tunic.png",
+        "description": "A flowing white gown embroidered with golden thread, protecting the pure of heart.",
+        "defence": 6,
+        "value": 1800,
+        "weight": 2.5,
+        "statBonuses": {
+            "intelligence": 2,
+            "resilience": 2,
+            "vitality": 1
         }
     }
 ]

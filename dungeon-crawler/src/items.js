@@ -41,6 +41,7 @@ import SHIELDS from './data/items/shields.json';
 import AMMO from './data/items/ammo.json';
 import SKILLS from './data/items/skill-items.json';
 import SPELLBOOKS from './data/items/spellbooks.json';
+import PARCHMENTS from './data/items/parchments.json';
 
 export const ACTIONS = Object.freeze({
   SWIPE: 'swipe',
@@ -75,6 +76,7 @@ export const ITEMS = [
   ...AMMO,
   ...SKILLS,
   ...SPELLBOOKS,
+  ...PARCHMENTS,
   ...SPELLS,
 ];
 

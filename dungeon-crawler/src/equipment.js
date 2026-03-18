@@ -3,6 +3,7 @@ import { showInlineHelp } from './help.js';
 import { getItemDef } from './items.js';
 import { SPELLS } from './spells.js';
 import { ACTIONS } from './items.js';
+import POTIONS from './data/items/potions.json';
 import SKILLS_DATA from './data/skills.json';
 import { asset } from './assets.js';
 import { playAction } from './actions.js';
@@ -1527,6 +1528,7 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
   const useBtn = document.getElementById('inv-ctx-use');
   const equipBtn = document.getElementById('inv-ctx-equip');
   const learnBtn = document.getElementById('inv-ctx-learn');
+  const readBtn = document.getElementById('inv-ctx-read');
   const m = party[activeCharIndex];
   const item = m.inventory[invIndex];
   const def = item ? getItemDef(item.name) : null;
@@ -1539,6 +1541,7 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
   if (useBtn) useBtn.style.display = 'none';
   equipBtn.style.display = 'none';
   learnBtn.style.display = 'none';
+  if (readBtn) readBtn.style.display = 'none';
   if (dropBtn) dropBtn.style.display = 'none';
 
   // ── Loadout B equip buttons ──
@@ -1565,6 +1568,14 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
       useBtn.style.display = 'block';
       useBtn.onclick = () => {
         _usePotion(activeCharIndex, _ctxInvIndex);
+        _hideContextMenu();
+      };
+    }
+  } else if (def?.type === 'parchment') {
+    if (readBtn) {
+      readBtn.style.display = 'block';
+      readBtn.onclick = () => {
+        _readParchment(activeCharIndex, _ctxInvIndex, def);
         _hideContextMenu();
       };
     }
@@ -4169,4 +4180,52 @@ function attachCharDevListeners() {
       }
     });
   }
+}
+
+// ─────────────────────────────────────────────
+//  PARCHMENT READING
+// ─────────────────────────────────────────────
+
+function _readParchment(memberIndex, invIndex, def) {
+  const overlay = document.getElementById('parchment-overlay');
+  const body = document.getElementById('parchment-body');
+  const title = document.getElementById('parchment-title');
+  
+  if (!overlay || !body) return;
+  
+  title.textContent = def.name || 'Parchment';
+  body.innerHTML = '';
+  
+  if (def.parchmentType === 'minor-potions') {
+    let html = '<p style="margin-bottom: 20px;"><em>The following recipes for alchemical concoctions have been inscribed:</em></p>';
+    
+    POTIONS.forEach(p => {
+      // exclude potions with partyPotion=true as instructed
+      if (p.partyPotion) return;
+      
+      html += `<div style="margin-bottom: 15px;">`;
+      html += `<strong style="font-size: 1.1em; color: #5a2a1a;">${p.name}</strong><br/>`;
+      if (p.ingredients && p.ingredients.length > 0) {
+        html += `<div style="margin: 5px 0;">`;
+        p.ingredients.forEach(ing => {
+          html += `• ${ing.quantity}x ${ing.name}<br/>`;
+        });
+        html += `</div>`;
+      } else {
+        html += `• Unknown ingredients<br/>`;
+      }
+      html += `</div>`;
+    });
+    body.innerHTML = html;
+  } else {
+    body.innerHTML = `<p>${def.description || 'The parchment is blank.'}</p>`;
+  }
+  
+  overlay.style.display = 'flex';
+  
+  const closeBtn = document.getElementById('parchment-close');
+  const closeBtn2 = document.getElementById('parchment-close-btn');
+  const hideFn = () => { overlay.style.display = 'none'; };
+  if (closeBtn) closeBtn.onclick = hideFn;
+  if (closeBtn2) closeBtn2.onclick = hideFn;
 }

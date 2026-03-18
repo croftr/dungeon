@@ -50,5 +50,66 @@
         "skillBonuses": {
             "Mace Tactician": 1
         }
+    },
+    {
+        "name": "Ironpeak Dwarf Gauntlets",
+        "slot": "hands",
+        "icon": "/icons/dwarf_gauntlets.png",
+        "description": "Thick iron gauntlets that reinforce a dwarf's grip and shield against mighty blows.",
+        "defence": 3,
+        "value": 850,
+        "weight": 2.5
+    },
+    {
+        "name": "Sylvan Elderwood Bracers",
+        "slot": "hands",
+        "icon": "/icons/sylvan_bracers.png",
+        "description": "Durable and elegant bracers carved from elderwood, quickening the wearer's aim.",
+        "defence": 3,
+        "value": 850,
+        "weight": 1.0
+    },
+    {
+        "name": "Mountain Stalker Gloves",
+        "slot": "hands",
+        "icon": "/icons/mountain_bracers.png",
+        "description": "Thick leather gloves with reinforced knuckles, providing excellent grip and protection.",
+        "defence": 3,
+        "value": 850,
+        "weight": 2.0
+    },
+    {
+        "name": "Aethelgard Archmage Cuffs",
+        "slot": "hands",
+        "icon": "/icons/archmage_bracers.png",
+        "description": "Silk and gold gloves that channel the flow of magic into the fingertips.",
+        "defence": 1,
+        "value": 850,
+        "weight": 0.3,
+        "statBonuses": {
+            "intelligence": 2
+        }
+    },
+    {
+        "name": "Storm-Reaver Bracers",
+        "slot": "hands",
+        "icon": "/icons/stormreaver_bracers.png",
+        "description": "Heavy iron bracers that add weight and power to every swing.",
+        "defence": 4,
+        "value": 850,
+        "weight": 3.0
+    },
+    {
+        "name": "Seraphic Grace Mitts",
+        "slot": "hands",
+        "icon": "/icons/seraphic_bracers.png",
+        "description": "Soft silk gloves that glow when a healing spell is cast.",
+        "defence": 1,
+        "value": 850,
+        "weight": 0.2,
+        "statBonuses": {
+            "intelligence": 1,
+            "resilience": 1
+        }
     }
 ]

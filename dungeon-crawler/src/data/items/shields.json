@@ -70,5 +70,21 @@
         "defence": 4,
         "value": 300,
         "weight": 4.0
+    },
+    {
+        "name": "Ironpeak Round Shield",
+        "slot": "hand",
+        "type": "weapon",
+        "attackType": "shield-bash",
+        "baseDamage": 5,
+        "icon": "/icons/dwarf_shield.png",
+        "description": "A powerful dwarf round shield tightly bound in iron, featuring a heavy steel boss capable of crushing skulls.",
+        "defence": 5,
+        "blockChance": 0.15,
+        "value": 1400,
+        "weight": 4.0,
+        "statBonuses": {
+            "resilience": 2
+        }
     }
 ]

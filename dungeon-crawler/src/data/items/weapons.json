@@ -371,5 +371,114 @@
             "Holy Radiance": 10,
             "Sanctuary": 5
         }
+    },
+    {
+        "name": "Ironpeak Battleaxe",
+        "slot": "hand",
+        "type": "weapon",
+        "attackType": "swipe",
+        "baseDamage": 14,
+        "icon": "/icons/dwarf_battleaxe.png",
+        "description": "A heavy, double-bladed dwarf battleaxe inscribed with glowing iron runes of power.",
+        "value": 2200,
+        "weight": 6.0,
+        "scaling": {
+            "strength": 0.8
+        }
+    },
+    {
+        "name": "Sylvan Elderwood Bow",
+        "slot": "hand",
+        "type": "weapon",
+        "attackType": "shoot",
+        "weaponType": "bow",
+        "staminaDrain": 2,
+        "baseDamage": 26,
+        "delay": 3.8,
+        "statWeights": {
+            "str": 0.2,
+            "dex": 0.8
+        },
+        "icon": "/icons/sylvan_bow.png",
+        "description": "A legendary longbow carved from the heartwood of an ancient magical tree. It hums with immense power.",
+        "value": 2200,
+        "weight": 1.5
+    },
+    {
+        "name": "Mountain Stalker Crossbow",
+        "slot": "hand",
+        "type": "weapon",
+        "attackType": "shoot",
+        "weaponType": "crossbow",
+        "staminaDrain": 2,
+        "baseDamage": 30,
+        "delay": 5.2,
+        "statWeights": {
+            "str": 0.5,
+            "dex": 0.5
+        },
+        "icon": "/icons/mountain_crossbow.png",
+        "description": "A high-tension crossbow made of reinforced steel and dark oak, capable of piercing dragon scales.",
+        "value": 2400,
+        "weight": 5.0
+    },
+    {
+        "name": "Aethelgard Grand Staff",
+        "slot": "hand",
+        "type": "weapon",
+        "attackType": "bash",
+        "weaponType": "staff",
+        "staminaDrain": 1,
+        "baseDamage": 15,
+        "delay": 3.0,
+        "statWeights": {
+            "intelligence": 1.0
+        },
+        "icon": "/icons/archmage_staff.png",
+        "description": "A staff made of pure crystal and solidified mana, crackling with arcane force.",
+        "value": 2400,
+        "weight": 2.0,
+        "statBonuses": {
+            "intelligence": 4
+        }
+    },
+    {
+        "name": "Storm-Reaver Greataxe",
+        "slot": "bothHands",
+        "type": "weapon",
+        "attackType": "swipe",
+        "weaponType": "twoHanded",
+        "staminaDrain": 3,
+        "baseDamage": 35,
+        "delay": 6.0,
+        "statWeights": {
+            "str": 1.0
+        },
+        "icon": "/icons/stormreaver_axe.png",
+        "description": "A massive two-handed axe of serrated iron, capable of cleaving an ogre in twain.",
+        "value": 2600,
+        "weight": 12.0
+    },
+    {
+        "name": "Seraphic Grace Scepter",
+        "slot": "hand",
+        "type": "weapon",
+        "attackType": "bash",
+        "weaponType": "staff",
+        "staminaDrain": 1,
+        "baseDamage": 10,
+        "delay": 2.5,
+        "statWeights": {
+            "intelligence": 0.5,
+            "resilience": 0.5
+        },
+        "icon": "/icons/seraphic_staff.png",
+        "description": "A holy scepter of gold and ivory, humming with powerful restorative energy.",
+        "value": 2400,
+        "weight": 1.5,
+        "statBonuses": {
+            "intelligence": 2,
+            "resilience": 3
+        }
     }
 ]

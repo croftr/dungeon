@@ -57,5 +57,67 @@
         "statBonuses": {
             "resilience": 2
         }
+    },
+    {
+        "name": "Ironpeak Dwarf Sabatons",
+        "slot": "feet",
+        "icon": "/icons/dwarf_sabatons.png",
+        "description": "Thick iron sabatons, grounding a dwarf so strongly that they are almost impossible to knock over.",
+        "defence": 3,
+        "value": 850,
+        "weight": 2.5
+    },
+    {
+        "name": "Sylvan Elderwood Boots",
+        "slot": "feet",
+        "icon": "/icons/sylvan_boots.png",
+        "description": "Silent boots that tread softly upon any surface, leaving no trace behind.",
+        "defence": 3,
+        "value": 850,
+        "weight": 1.2
+    },
+    {
+        "name": "Mountain Stalker Boots",
+        "slot": "feet",
+        "icon": "/icons/mountain_boots.png",
+        "description": "Heavy-duty boots with iron crampons for climbing the steepest peaks.",
+        "defence": 4,
+        "value": 850,
+        "weight": 3.0
+    },
+    {
+        "name": "Aethelgard Archmage Slippers",
+        "slot": "feet",
+        "icon": "/icons/archmage_boots.png",
+        "description": "Enchanted slippers that never touch the ground, allowing for a near-silent stride.",
+        "defence": 1,
+        "value": 850,
+        "weight": 0.2,
+        "statBonuses": {
+            "intelligence": 1,
+            "resilience": 1
+        }
+    },
+    {
+        "name": "Storm-Reaver Sabatons",
+        "slot": "feet",
+        "icon": "/icons/stormreaver_boots.png",
+        "description": "Spiked iron boots that leave a trail of destruction with every step.",
+        "defence": 4,
+        "value": 850,
+        "weight": 4.0
+    },
+    {
+        "name": "Seraphic Grace Sandals",
+        "slot": "feet",
+        "icon": "/icons/seraphic_boots.png",
+        "description": "Lightweight sandals that make the wearer feel as if they are walking on clouds.",
+        "defence": 1,
+        "value": 850,
+        "weight": 0.3,
+        "statBonuses": {
+            "intelligence": 1,
+            "resilience": 1
+        }
     }
 ]

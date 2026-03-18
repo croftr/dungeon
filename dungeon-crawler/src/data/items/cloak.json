@@ -46,5 +46,66 @@
             "intelligence": 2,
             "resilience": 1
         }
-  }
+    },
+    {
+        "name": "Ironpeak Bear Cloak",
+        "slot": "cloak",
+        "icon": "/icons/dwarf_cloak.png",
+        "description": "A heavy cloak woven from the fur of a dire bear, bound with large iron clasps. Provides warmth and protection.",
+        "defence": 2,
+        "value": 750,
+        "weight": 1.5
+    },
+    {
+        "name": "Sylvan Elderwood Cloak",
+        "slot": "cloak",
+        "icon": "/icons/sylvan_cloak.png",
+        "description": "A flowing silken cloak interwoven with silver thread and enchanted leaves.",
+        "defence": 3,
+        "value": 1000,
+        "weight": 0.5
+    },
+    {
+        "name": "Mountain Stalker Heavy Cloak",
+        "slot": "cloak",
+        "icon": "/icons/mountain_cloak.png",
+        "description": "A thick, weather-beaten cloak made from the hide of a crag-cat.",
+        "defence": 4,
+        "value": 1000,
+        "weight": 2.5
+    },
+    {
+        "name": "Aethelgard Archmage Mantle",
+        "slot": "cloak",
+        "icon": "/icons/archmage_cloak.png",
+        "description": "A long, flowing mantle embroidered with constellation maps.",
+        "defence": 2,
+        "value": 1100,
+        "weight": 1.0,
+        "statBonuses": {
+            "intelligence": 2
+        }
+    },
+    {
+        "name": "Storm-Reaver Pelt",
+        "slot": "cloak",
+        "icon": "/icons/stormreaver_cloak.png",
+        "description": "A massive bear pelt bound with iron chains, stinking of sweat and victory.",
+        "defence": 3,
+        "value": 1100,
+        "weight": 3.0
+    },
+    {
+        "name": "Seraphic Grace Stole",
+        "slot": "cloak",
+        "icon": "/icons/seraphic_cloak.png",
+        "description": "A long, narrow stole draped over the shoulders, symbolising life and light.",
+        "defence": 2,
+        "value": 1100,
+        "weight": 0.5,
+        "statBonuses": {
+            "intelligence": 1,
+            "resilience": 2
+        }
+    }
 ]
