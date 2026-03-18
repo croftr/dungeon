@@ -285,4 +285,10 @@ function recruitCharacter(r) {
     showInlineHelp('first-recruit', {
       text: 'Press <strong>I</strong> or click a character\'s portrait to open their inventory and manage equipment.'
     });
+
+    if (party.every(m => !m.isEmpty)) {
+      showInlineHelp('party-full', {
+        text: 'Your party is complete! Press <strong>P</strong> to open the Party Tactics screen and manage your team.'
+      });
+    }
 }
