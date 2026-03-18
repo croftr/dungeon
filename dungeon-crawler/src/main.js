@@ -77,10 +77,10 @@ const _audioPreload = prefetchBuffer(asset('/sounds/back1.mp3'));
 // AND the background music file has been pre-fetched. Show a progress bar while loading.
 {
   const _startBtn = document.getElementById('start-adventure-btn');
-  const _easyBtn  = document.getElementById('easy-mode-btn');
+  const _easyBtn = document.getElementById('easy-mode-btn');
   const _introVid = document.getElementById('intro-video');
-  const _barFill  = document.getElementById('loading-bar-fill');
-  const _barWrap  = document.getElementById('loading-bar-wrap');
+  const _barFill = document.getElementById('loading-bar-fill');
+  const _barWrap = document.getElementById('loading-bar-wrap');
   if (_startBtn && _introVid) {
     _startBtn.disabled = true;
     _startBtn.textContent = 'Loading…';
@@ -258,7 +258,7 @@ setCallbacks({
       if (cell === CELL_HOLE) {
         tweenGroup.removeAll();
         player.moving = false;
-        
+
         const blackout = document.getElementById('fall-blackout');
         if (blackout) {
           blackout.classList.remove('hidden');
@@ -490,7 +490,10 @@ function finishIntro() {
 
     if (!hasSeenMovementHelp) {
       hasSeenMovementHelp = true;
-      showHelpDialog("Pray thee, weary traveler:<br><br>Use the keys <b>W, S, A, D</b> to traverse this forsaken place, and <b>Q, E</b> to turn thy gaze.");
+      showHelpDialog({
+        text: "Use the keys to move and turn.",
+        image: asset("/icons/wasd_qe_keys.png")
+      });
     }
   }, 1500);
 }
@@ -910,7 +913,7 @@ const stairsVideoElement = document.getElementById('stairs-video');
 const skipStairsBtn = document.getElementById('skip-stairs-btn');
 let _stairsVideoCallback = null;
 
-window.playStairsVideo = function(onComplete) {
+window.playStairsVideo = function (onComplete) {
   _stairsVideoCallback = onComplete;
   if (!stairsOverlay || !stairsVideoElement) {
     if (_stairsVideoCallback) _stairsVideoCallback();
@@ -955,7 +958,7 @@ const eggVideoElement = document.getElementById('egg-video');
 const skipEggBtn = document.getElementById('skip-egg-btn');
 let _eggVideoCallback = null;
 
-window.playEggVideo = function(onComplete) {
+window.playEggVideo = function (onComplete) {
   _eggVideoCallback = onComplete;
   if (!eggVideoOverlay || !eggVideoElement) {
     if (_eggVideoCallback) _eggVideoCallback();
@@ -1104,7 +1107,7 @@ window.loadLevel = function (levelNum) {
   if (levelNum === 1 && _level1FirstLoad) {
     _level1FirstLoad = false;
     const overlay = document.getElementById('level-load-overlay');
-    const fill    = document.getElementById('level-load-bar-fill');
+    const fill = document.getElementById('level-load-bar-fill');
     // Show overlay immediately
     overlay.classList.add('visible');
     // Kick off progress bar on next frame so the transition triggers properly
