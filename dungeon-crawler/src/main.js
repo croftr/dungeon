@@ -1230,7 +1230,7 @@ window.addEventListener('mousemove', (e) => {
   let isHoveringInteractable = false;
   for (let hit of intersects) {
     const ud = hit.object.userData;
-    if (ud && (ud.isButton || ud.isChest || ud.isArmorStand || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDamageTrap || ud.isEgg || ud.isTeleportTorch)) {
+    if (ud && (ud.isButton || ud.isChest || ud.isArmorStand || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDamageTrap || ud.isEgg || ud.isTeleportTorch || ud.isAlchemyWorkshop || ud.isAnvil || ud.isShop || ud.isDroppedItem)) {
       if (hit.object.visible) {
         isHoveringInteractable = true;
         break;
