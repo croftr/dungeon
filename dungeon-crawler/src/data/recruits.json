@@ -102,7 +102,10 @@
             "Fireball",
             "Heal"
         ],
-        "startingInventory": [],
+        "startingInventory": [
+            "Minor Mana Potion",
+            "Minor Mana Potion"
+        ],
         "image": "/heros/human_wizard_head.png",
         "leftHand": "Fireball",
         "rightHand": "Heal",

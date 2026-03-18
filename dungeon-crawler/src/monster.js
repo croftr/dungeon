@@ -1532,7 +1532,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       showBattleStatsIcon(m.name);
 
       showInlineHelp('first-kill', {
-        text: 'Click the <strong>battle summary</strong> icon (top left) to monitor your party\'s performance. Press <strong>B</strong> to open the battle log for in-depth details.'
+        text: 'Well done on your first kill! Click the <strong>battle summary</strong> icon (top left) to monitor your party\'s performance. Press <strong>B</strong> to open the battle log for in-depth details.'
       });
 
       // ── Award XP to living party members ──────────────────────────────────
