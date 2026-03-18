@@ -6341,3 +6341,92 @@ body.cursor-interact #renderer-canvas {
 }
 
 #trap-disarm-leave:hover { background: #3a3028; }
+
+/* ── HELP DIALOG PARCHMENT ── */
+#help-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 10010;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+#help-dialog-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#help-dialog-parchment {
+  width: 500px;
+  max-width: 90vw;
+  min-height: 250px;
+  padding: 50px 40px;
+  background-color: #f4e8c1;
+  background-image: 
+    radial-gradient(ellipse at center, transparent 30%, rgba(139, 69, 19, 0.15) 100%),
+    linear-gradient(to right, rgba(200, 160, 100, 0.1) 0%, transparent 10%, transparent 90%, rgba(200, 160, 100, 0.1) 100%);
+  border: 4px solid #8b5a2b;
+  border-radius: 4px 15px 4px 15px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 0 40px rgba(139, 69, 19, 0.35);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+}
+
+#help-dialog-parchment::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px dashed rgba(139, 69, 19, 0.45);
+  pointer-events: none;
+}
+
+#help-dialog-content {
+  color: #3e2723;
+  font-size: 20px;
+  line-height: 1.6;
+  font-style: italic;
+  font-weight: bold;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.5);
+  margin-bottom: 35px;
+  letter-spacing: 1.5px;
+}
+
+#help-dialog-content b {
+  color: #8b3a00;
+  font-weight: 900;
+  font-size: 22px;
+}
+
+#help-dialog-dismiss {
+  background: rgba(139, 69, 19, 0.1);
+  border: 2px solid #5d4037;
+  color: #5d4037;
+  padding: 10px 24px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  box-shadow: 2px 2px 0px rgba(93, 64, 55, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: auto;
+}
+
+#help-dialog-dismiss:hover {
+  background: #5d4037;
+  color: #f4e8c1;
+  box-shadow: none;
+  transform: translate(2px, 2px);
+}

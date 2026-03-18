@@ -17,6 +17,7 @@ import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
 import { consumePendingLoad, autoSave } from './save-game.js';
 import { initQuarks, updateQuarks } from './quarks-intro.js';
+import { showHelpDialog } from './help.js';
 import { asset } from './assets.js';
 
 import './style.css';
@@ -477,6 +478,8 @@ const easyModeBtn = document.getElementById('easy-mode-btn');
 window.easyMode = false;
 const skipBtn = document.getElementById('skip-intro-btn');
 
+let hasSeenMovementHelp = false;
+
 function finishIntro() {
   if (!introOverlay) return;
   introOverlay.style.transition = 'opacity 1.5s ease';
@@ -484,6 +487,11 @@ function finishIntro() {
   setTimeout(() => {
     introVideo.pause();
     introOverlay.remove();
+
+    if (!hasSeenMovementHelp) {
+      hasSeenMovementHelp = true;
+      showHelpDialog("Pray thee, weary traveler:<br><br>Use the keys <b>W, S, A, D</b> to traverse this forsaken place, and <b>Q, E</b> to turn thy gaze.");
+    }
   }, 1500);
 }
 
