@@ -27,9 +27,10 @@ import './style.css';
 // ─────────────────────────────────────────────
 window.currentLevel = 0;
 
-// Patch hardcoded asset paths in index.html to use CDN base URL
-document.querySelectorAll('img[src^="/"]').forEach(img => {
-  img.src = asset(img.getAttribute('src'));
+// Patch hardcoded asset paths in index.html to use CDN base URL.
+// Uses data-src (no src) so the browser preloader never fetches from localhost.
+document.querySelectorAll('img[data-src]').forEach(img => {
+  img.src = asset(img.getAttribute('data-src'));
 });
 
 // Only patch+load the intro video immediately (needed during the splash screen progress bar).
