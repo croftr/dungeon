@@ -1586,7 +1586,7 @@ function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.4
 
 function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
     _shopGridCells.add(`${row},${col}`); // block player movement through this cell
-    loader.load('/npcs/merchant1/merchant-idle.glb', (gltf) => {
+    loader.load(asset('/npcs/merchant1/merchant-idle.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.5);
         model.position.set(col * CELL + offsetX, 0, row * CELL + offsetZ);
@@ -1896,7 +1896,7 @@ function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, c
 }
 
 function addJester(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
-    const path = '/npcs/otter/Meshy_AI_Animation_Idle_withSkin.glb';
+    const path = asset('/npcs/otter/Meshy_AI_Animation_Idle_withSkin.glb');
     loader.load(path, (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
@@ -1937,7 +1937,7 @@ function addJester(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) 
             _mixers.push(mixer);
 
             // Preload talking animation on the same mixer
-            loader.load('/npcs/otter/talking.glb', (talkGltf) => {
+            loader.load(asset('/npcs/otter/talking.glb'), (talkGltf) => {
                 if (talkGltf.animations && talkGltf.animations.length > 0) {
                     const talkAction = mixer.clipAction(talkGltf.animations[0]);
                     talkAction.setLoop(THREE.LoopRepeat);
@@ -1951,7 +1951,7 @@ function addJester(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) 
 }
 
 function addPartyConfirmNPC(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
-    const path = '/npcs/otter/Meshy_AI_Animation_Idle_withSkin.glb';
+    const path = asset('/npcs/otter/Meshy_AI_Animation_Idle_withSkin.glb');
     loader.load(path, (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.55);
@@ -1991,7 +1991,7 @@ function addPartyConfirmNPC(scene, loader, col, row, rotY = 0, offsetX = 0, offs
             _mixers.push(mixer);
 
             // Preload talking animation from separate GLB, registered on the same mixer
-            loader.load('/npcs/otter/talking.glb', (talkGltf) => {
+            loader.load(asset('/npcs/otter/talking.glb'), (talkGltf) => {
                 if (talkGltf.animations && talkGltf.animations.length > 0) {
                     const talkAction = mixer.clipAction(talkGltf.animations[0]);
                     talkAction.setLoop(THREE.LoopRepeat);
