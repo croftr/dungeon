@@ -102,6 +102,7 @@ const TYPE_ABBR = {
   punch: 'punch',
   shoot: 'shoot',
   fireball: 'fire',
+  banishment: 'light',
   attack: 'atk',
   special: 'spell',
 };
@@ -157,8 +158,8 @@ function _formula(e) {
   }
 
   if (e.actor === 'player') {
-    const stat = e.attackType === 'fireball' ? 'INT' : (e.statLabel ?? 'STR');
-    const mit = e.attackType === 'fireball' ? 'RES' : 'DEF';
+    const stat = ['fireball', 'banishment'].includes(e.attackType) ? 'INT' : (e.statLabel ?? 'STR');
+    const mit = ['fireball', 'banishment'].includes(e.attackType) ? 'RES' : 'DEF';
     const ammoLine = e.ammoModifier && e.ammoModifier !== 1 ? ` ×${e.ammoModifier}ammo` : '';
     const raw = e.statBonus + e.weaponBase - e.mitigation;
     const crit = e.crit ? ` ×${e.critMultiplier}` : '';

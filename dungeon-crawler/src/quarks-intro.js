@@ -590,6 +590,57 @@ export function triggerFireballEffect() {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
+//  BANISHMENT — Seraphina (White Mage)
+//  A dangerous beam of pure yellow/white magical light firing forward
+// ══════════════════════════════════════════════════════════════════════════
+export function triggerBanishmentEffect() {
+    if (!batchRenderer || !sceneRef || !cameraRef) return;
+    const tex = createGlowTexture();
+    const dir = new THREE.Vector3();
+    cameraRef.getWorldDirection(dir);
+
+    // Core light stream — tight narrow cone aimed forward
+    const core = new ParticleSystem({
+        duration: 0.7, looping: false,
+        startLife: new IntervalValue(0.3, 0.8),
+        startSpeed: new IntervalValue(5.0, 14.0),
+        startSize: new IntervalValue(0.08, 0.30),
+        startColor: new ConstantColor(new Vector4(1.0, 1.0, 0.8, 1)),
+        worldSpace: true, maxParticle: 160,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(120), cycle: 1, interval: 0.005, probability: 1 }],
+        shape: new ConeEmitter({ radius: 0.08, thickness: 1, arc: Math.PI * 2, angle: Math.PI / 10 }),
+        material: _mat(tex), startTileIndex: new ConstantValue(0),
+        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    core.addBehavior(new ColorOverLife(new ColorRange(
+        new Vector4(1.0, 1.0, 0.5, 1),
+        new Vector4(1.0, 0.8, 0.0, 0),
+    )));
+    core.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 1, 0.6, 0), 0]])));
+    core.emitter.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+    _spawn(core, cameraRef.position, 1.5);
+
+    // Wide light bloom at impact zone — spawned further forward
+    const bloom = new ParticleSystem({
+        duration: 0.6, looping: false,
+        startLife: new IntervalValue(0.2, 0.6),
+        startSpeed: new IntervalValue(2.0, 7.0),
+        startSize: new IntervalValue(0.06, 0.22),
+        startColor: new ConstantColor(new Vector4(1.0, 0.9, 0.4, 1)),
+        worldSpace: true, maxParticle: 100,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(70), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.2, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex), startTileIndex: new ConstantValue(0),
+        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    bloom.addBehavior(new ColorOverLife(new ColorRange(new Vector4(1.0, 1.0, 0.5, 1), new Vector4(1.0, 0.8, 0.0, 0))));
+    bloom.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(0.4, 1.0, 0.8, 0), 0]])));
+    _spawn(bloom, _frontPos(2.5), 1.5);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
 //  REGENERATION — Merlin (Wizard)
 //  Soft green pulse rippling outward, gentle and sustained  (healing)
 // ══════════════════════════════════════════════════════════════════════════

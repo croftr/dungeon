@@ -14,6 +14,7 @@ import POTIONS_DATA from './data/items/potions.json';
 import FORGE_DATA from './data/forge.json';
 import { triggerMummyAmbush, monsters } from './monster.js';
 import * as equip from './equipment.js';
+import { showInlineHelp } from './help.js';
 import { asset } from './assets.js';
 import { spawnLevel0Objects } from './levels/level0/objects.js';
 import { spawnLevel1Objects } from './levels/level1/objects.js';
@@ -486,6 +487,15 @@ export function initObjects(scene, camera) {
                                         obj.userData.modelContainer.parent.remove(obj.userData.modelContainer);
                                     } else {
                                         obj.parent.remove(obj);
+                                    }
+                                    showInlineHelp('first-item-pickup', {
+                                      text: 'Items are picked up by the first available party member. To move an item to another member, open the inventory (<strong>I</strong>), then <strong>right click</strong> the item and select the target party member.'
+                                    });
+                                    const pickedDef = getItemDef(obj.userData.itemName);
+                                    if (pickedDef?.type === 'spellbook') {
+                                      showInlineHelp('first-scroll-pickup', {
+                                        text: 'To learn a scroll, open the inventory (<strong>I</strong>), then <strong>right click</strong> the scroll and select <strong>Learn</strong>.'
+                                      });
                                     }
                                     break;
                                 }

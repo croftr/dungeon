@@ -1,4 +1,5 @@
 import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getAttackSpeedMultiplier, hasEffectFlag, breakPartyUnseen } from './party.js';
+import { showInlineHelp } from './help.js';
 import { getItemDef } from './items.js';
 import { SPELLS } from './spells.js';
 import { ACTIONS } from './items.js';
@@ -39,6 +40,7 @@ import {
   triggerDefaultSpellEffect,
   triggerDefaultSkillEffect,
   triggerSleepEffect,
+  triggerBanishmentEffect,
 } from './quarks-intro.js';
 
 // Maps spell attackType → VFX + sound. Add new entries here as spells grow.
@@ -47,6 +49,10 @@ function _dispatchSpellVFX(attackType) {
     case 'fireball':
       triggerFireballEffect();
       // fireball audio already handled by playActionSound inside playAction
+      break;
+    case 'banishment':
+      triggerBanishmentEffect();
+      // audio already handled
       break;
     case 'regenerate':
       playSkillSound('cure');
@@ -1129,6 +1135,10 @@ function _learnSpell(memberIndex, invIndex) {
 
   renderModal(memberIndex);
   refreshPartyCards();
+
+  showInlineHelp('first-spell-learned', {
+    text: 'Right click your character\'s <strong>Spellbook</strong> in the equipment panel to manage equipped spells.'
+  });
 }
 
 /**
@@ -1531,12 +1541,6 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
   learnBtn.style.display = 'none';
   if (dropBtn) dropBtn.style.display = 'none';
 
-  // ── Quick-slot assignment buttons ──
-  const qs1Btn = document.getElementById('inv-ctx-qs1');
-  const qs2Btn = document.getElementById('inv-ctx-qs2');
-  if (qs1Btn) qs1Btn.style.display = 'none';
-  if (qs2Btn) qs2Btn.style.display = 'none';
-
   // ── Loadout B equip buttons ──
   const lbLeftBtn = document.getElementById('inv-ctx-equip-lb-left');
   const lbRightBtn = document.getElementById('inv-ctx-equip-lb-right');
@@ -1545,23 +1549,7 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
   if (lbRightBtn) lbRightBtn.style.display = 'none';
   if (lbSkillBtn) lbSkillBtn.style.display = 'none';
 
-  if (def?.type && QUICKSLOT_TYPES.includes(def.type)) {
-    if (qs1Btn) {
-      qs1Btn.style.display = 'block';
-      qs1Btn.onclick = () => {
-        _assignQuickslot(activeCharIndex, 0, _ctxInvIndex);
-        _hideContextMenu();
-      };
-    }
-    // Potion B slot assignment
-    if (qs2Btn) {
-      qs2Btn.style.display = 'block';
-      qs2Btn.onclick = () => {
-        _assignLoadoutBPotion(activeCharIndex, _ctxInvIndex);
-        _hideContextMenu();
-      };
-    }
-  }
+
 
   // ── Drop button — available for all inventory items ──
   if (dropBtn && item) {
@@ -1869,6 +1857,10 @@ function openModal(memberIndex) {
   hideTooltip();
   document.getElementById('equip-overlay').classList.remove('equip-hidden');
   renderModal(memberIndex);
+
+  showInlineHelp('first-inventory-open', {
+    text: '<strong>Left click</strong> items to equip or unequip them. <strong>Right click</strong> items for further actions such as drink or learn.'
+  });
 }
 
 function closeModal() {
@@ -2601,7 +2593,7 @@ export function useHand(memberIndex, hand, silent = false) {
     return;
   }
 
-  const isRanged = attackType === ACTIONS.SHOOT || attackType === ACTIONS.FIREBALL;
+  const isRanged = attackType === ACTIONS.SHOOT || attackType === ACTIONS.FIREBALL || attackType === ACTIONS.BANISHMENT;
   const isBuff = attackType === ACTIONS.REGENERATE;
 
   // Back-row members can only melee if their front partner is dead (stepped up).

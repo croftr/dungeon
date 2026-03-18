@@ -476,9 +476,12 @@ const introVideo = document.getElementById('intro-video');
 const startBtn = document.getElementById('start-adventure-btn');
 const easyModeBtn = document.getElementById('easy-mode-btn');
 window.easyMode = false;
+window.helpEnabled = false;
 const skipBtn = document.getElementById('skip-intro-btn');
 
-let hasSeenMovementHelp = false;
+function _readStartOptions() {
+  window.helpEnabled = document.getElementById('help-toggle')?.checked ?? false;
+}
 
 function finishIntro() {
   if (!introOverlay) return;
@@ -488,11 +491,13 @@ function finishIntro() {
     introVideo.pause();
     introOverlay.remove();
 
-    if (!hasSeenMovementHelp) {
-      hasSeenMovementHelp = true;
+    if (window.helpEnabled) {
       showHelpDialog({
         text: "Use the keys to move and turn.",
-        image: asset("/icons/wasd_qe_keys.png")
+        image: asset("/source/wasd_qe_keys.png"),
+        onDismiss: () => showHelpDialog({
+          text: "Left click items in the world to interact with them."
+        })
       });
     }
   }, 1500);
@@ -501,6 +506,7 @@ function finishIntro() {
 if (startBtn) {
   startBtn.addEventListener('click', () => {
     window.easyMode = false;
+    _readStartOptions();
     splashScreen.classList.add('hidden');
     videoContainer.classList.remove('hidden');
     introVideo.play().catch(e => {
@@ -515,6 +521,7 @@ if (startBtn) {
 if (easyModeBtn) {
   easyModeBtn.addEventListener('click', () => {
     window.easyMode = true;
+    _readStartOptions();
     splashScreen.classList.add('hidden');
     videoContainer.classList.remove('hidden');
     introVideo.play().catch(e => {

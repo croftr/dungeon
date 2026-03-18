@@ -182,6 +182,7 @@ const ACTION_SVG = {
 
   // Fireball now uses 3D particles instead of a 2D SVG overlay.
   [ACTIONS.FIREBALL]: null,
+  [ACTIONS.BANISHMENT]: null,
   [ACTIONS.REGENERATE]: null,
 
   // Shield slam — a broad round shield rises from below, impact and dust

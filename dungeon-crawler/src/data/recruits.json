@@ -212,7 +212,8 @@
         "bio": "A devoted healer whose presence brings hope to the darkest depths. Seraphina draws upon pure light to mend flesh and soul.",
         "startingSkills": [],
         "startingSpells": [
-            "Heal"
+            "Heal",
+            "Banishment"
         ],
         "startingInventory": [
             "Minor Mana Potion",
@@ -220,7 +221,7 @@
         ],
         "image": "/heros/white-mage.png",
         "leftHand": "Heal",
-        "rightHand": "—",
+        "rightHand": "Banishment",
         "ammo": "Spellbook",
         "gridCol": 8,
         "gridRow": 10,

@@ -48,6 +48,7 @@ export const ACTIONS = Object.freeze({
   SHOOT: 'shoot',
   PUNCH: 'punch',
   FIREBALL: 'fireball',
+  BANISHMENT: 'banishment',
   SHIELD_BASH: 'shield-bash',
   REGENERATE: 'regenerate',
   CURE_POISON: 'cure-poison',

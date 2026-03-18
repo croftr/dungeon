@@ -1,3 +1,13 @@
+// Show a one-time contextual help dialog. Does nothing if help is disabled or the key
+// has already been shown this session.
+export function showInlineHelp(key, options = {}) {
+  if (!window.helpEnabled) return;
+  if (!window._helpSeen) window._helpSeen = new Set();
+  if (window._helpSeen.has(key)) return;
+  window._helpSeen.add(key);
+  showHelpDialog(options);
+}
+
 export function showHelpDialog({ text = '', image = null, onDismiss = null } = {}) {
   let overlay = document.getElementById('help-dialog-overlay');
 

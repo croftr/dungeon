@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { party } from './party.js';
 import { extendPartyData } from './equipment.js';
+import { showInlineHelp } from './help.js';
 import { CELL, WALL_H, findCell } from './map.js';
 import { isInFrontOfPlayer } from './player.js';
 import { interactables } from './objects.js';
@@ -280,4 +281,8 @@ function recruitCharacter(r) {
     if (r.startXp) checkLevelUp(party[freeIndex]);
 
     if (window.onPartyChanged) window.onPartyChanged();
+
+    showInlineHelp('first-recruit', {
+      text: 'Press <strong>I</strong> or click a character\'s portrait to open their inventory and manage equipment.'
+    });
 }

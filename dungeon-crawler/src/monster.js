@@ -32,6 +32,7 @@ import { level4Monsters } from './levels/level4/monsters.js';
 import { skillsState } from './skills-state.js';
 import SKILLS_DATA from './data/skills.json';
 import { awardXP } from './leveling.js';
+import { showInlineHelp } from './help.js';
 import { asset } from './assets.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1400,7 +1401,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
   // Stats are now cumulative — no auto-reset on new fight.
 
   // ── Skeleton Shield Block ──────────────────────────────────────────────────
-  if (m.name.includes('Skeleton') && attackType !== 'poison-dot' && attackType !== 'fireball') {
+  if (m.name.includes('Skeleton') && attackType !== 'poison-dot' && attackType !== 'fireball' && attackType !== 'banishment') {
     if (Math.random() <= 0.10) {
       addLogEntry({
         time: Date.now(), actor: 'player',
@@ -1530,6 +1531,10 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       // Show battle summary icon now that the fight is over
       showBattleStatsIcon(m.name);
 
+      showInlineHelp('first-kill', {
+        text: 'Click the <strong>battle summary</strong> icon (top left) to monitor your party\'s performance. Press <strong>B</strong> to open the battle log for in-depth details.'
+      });
+
       // ── Award XP to living party members ──────────────────────────────────
       if (m.xp > 0) awardXP(m.xp);
 
@@ -1563,8 +1568,8 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     return { hit: false, damage: 0, killed: false, monsterHp: m.hp, crit: false, hitChance, formula: null, monsterName: m.name };
   }
 
-  // Fireball uses INT + monster magic resilience; all other attacks use STR + monster defence
-  const isMagic = attackType === 'fireball';
+  // Fireball/Banishment uses INT + monster magic resilience; all other attacks use STR + monster defence
+  const isMagic = attackType === 'fireball' || attackType === 'banishment';
 
   // Apply Sunder Armor penalty
   const isSundered = skillsState.sunderArmor?.active && skillsState.sunderArmor?.targetId === m.id;
@@ -2070,7 +2075,7 @@ function _playHitAnimation(m, attackType, killer) {
     return; // Skip standard red flash/knockback for dummy
   }
 
-  if (attackType === 'fireball') {
+  if (attackType === 'fireball' || attackType === 'banishment') {
     createHitSpark(mesh.position);
   }
 

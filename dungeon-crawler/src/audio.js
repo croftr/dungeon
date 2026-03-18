@@ -21,6 +21,7 @@ const SOUND_MAP = {
   shoot: { url: asset('/sounds/actions/shoot.mp3'), offset: 0.05 },
   punch: { url: asset('/sounds/actions/bash.mp3'), offset: 0.05 },
   fireball: { url: asset('/sounds/actions/fireball.mp3'), offset: 0.0 },
+  banishment: { url: asset('/sounds/banishment.mp3'), offset: 0.0 },
   'shield-bash': { url: asset('/sounds/actions/bash.mp3'), offset: 0.05 },
   death: { url: asset('/sounds/actions/monster-killed-1.mp3'), offset: 0.0 },
   hit: { url: asset('/sounds/actions/hit.mp3'), offset: 0.0 },
