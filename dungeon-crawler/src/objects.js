@@ -429,7 +429,11 @@ export function initObjects(scene, camera) {
                 if (distRow <= 1 && distCol <= 1) {
                     showMessage("You push open the great hero's door...");
                     playPortalSound();
-                    if (window.loadLevel) window.loadLevel(5);
+                    if (window.playHeroDoorVideo) {
+                        window.playHeroDoorVideo(() => { if (window.loadLevel) window.loadLevel(5); });
+                    } else {
+                        if (window.loadLevel) window.loadLevel(5);
+                    }
                 } else {
                     showMessage("An ornate door stands before you. Approach to enter.");
                 }

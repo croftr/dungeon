@@ -45,7 +45,7 @@ document.querySelectorAll('img[data-src]').forEach(img => {
 
 // Map of level number → video element IDs to preload when entering that level
 const _VIDEO_LEVELS = {
-  0: ['battle-prep-video'],
+  0: ['battle-prep-video', 'hero-door-video'],
   1: ['ogre-video', 'mummy-video', 'demon-video', 'aqua-man-video', 'portal-video'],
   2: ['treeman-video'],
   3: ['minotaur-video', 'minotaur-death-video', 'statue-portal-video', 'egg-video'],
@@ -780,6 +780,7 @@ const minotaurDeathOverlay = document.getElementById('minotaur-death-video-overl
 const minotaurDeathVideo = document.getElementById('minotaur-death-video');
 const skipMinotaurDeathBtn = document.getElementById('skip-minotaur-death-btn');
 let _minotaurDeathCallback = null;
+let _minotaurDeathSafetyTimer = null;
 
 window.playMinotaurDeathVideo = function (onComplete) {
   _minotaurDeathCallback = onComplete;
@@ -788,6 +789,13 @@ window.playMinotaurDeathVideo = function (onComplete) {
     return;
   }
   minotaurDeathOverlay.classList.remove('hidden');
+
+  // Safety fallback: if the video never fires 'ended' (e.g. stalls mid-play),
+  // force-close the overlay after 60 s so the game is never permanently blacked out.
+  _minotaurDeathSafetyTimer = setTimeout(() => {
+    console.warn("Minotaur death video safety timeout — forcing finish");
+    finishMinotaurDeathVideo();
+  }, 60000);
 
   setTimeout(() => {
     minotaurDeathOverlay.style.opacity = '1';
@@ -799,6 +807,10 @@ window.playMinotaurDeathVideo = function (onComplete) {
 };
 
 function finishMinotaurDeathVideo() {
+  if (_minotaurDeathSafetyTimer) {
+    clearTimeout(_minotaurDeathSafetyTimer);
+    _minotaurDeathSafetyTimer = null;
+  }
   if (!minotaurDeathOverlay) {
     if (_minotaurDeathCallback) _minotaurDeathCallback();
     return;
@@ -807,6 +819,7 @@ function finishMinotaurDeathVideo() {
 
   setTimeout(() => {
     minotaurDeathVideo.pause();
+    minotaurDeathVideo.currentTime = 0;
     minotaurDeathOverlay.classList.add('hidden');
     if (_minotaurDeathCallback) {
       _minotaurDeathCallback();
@@ -816,7 +829,13 @@ function finishMinotaurDeathVideo() {
 }
 
 if (skipMinotaurDeathBtn) skipMinotaurDeathBtn.addEventListener('click', finishMinotaurDeathVideo);
-if (minotaurDeathVideo) minotaurDeathVideo.addEventListener('ended', finishMinotaurDeathVideo);
+if (minotaurDeathVideo) {
+  minotaurDeathVideo.addEventListener('ended', finishMinotaurDeathVideo);
+  minotaurDeathVideo.addEventListener('error', () => {
+    console.warn("Minotaur death video error — forcing finish");
+    finishMinotaurDeathVideo();
+  });
+}
 
 // ─────────────────────────────────────────────
 //  DEMON VIDEO OVERLAY
@@ -1001,6 +1020,50 @@ function finishEggVideo() {
 
 if (skipEggBtn) skipEggBtn.addEventListener('click', finishEggVideo);
 if (eggVideoElement) eggVideoElement.addEventListener('ended', finishEggVideo);
+
+// ─────────────────────────────────────────────
+//  HALL OF HEROES VIDEO OVERLAY
+// ─────────────────────────────────────────────
+const heroDoorVideoOverlay = document.getElementById('hero-door-video-overlay');
+const heroDoorVideoElement = document.getElementById('hero-door-video');
+const skipHeroDoorBtn = document.getElementById('skip-hero-door-btn');
+let _heroDoorVideoCallback = null;
+
+window.playHeroDoorVideo = function (onComplete) {
+  _heroDoorVideoCallback = onComplete;
+  if (!heroDoorVideoOverlay || !heroDoorVideoElement) {
+    if (_heroDoorVideoCallback) _heroDoorVideoCallback();
+    return;
+  }
+  heroDoorVideoOverlay.classList.remove('hidden');
+  heroDoorVideoOverlay.style.opacity = '1';
+
+  heroDoorVideoElement.play().catch(e => {
+    console.warn("Hero door video play failed:", e);
+    finishHeroDoorVideo();
+  });
+};
+
+function finishHeroDoorVideo() {
+  if (!heroDoorVideoOverlay) {
+    if (_heroDoorVideoCallback) _heroDoorVideoCallback();
+    return;
+  }
+  heroDoorVideoOverlay.style.opacity = '0';
+
+  setTimeout(() => {
+    heroDoorVideoElement.pause();
+    heroDoorVideoElement.currentTime = 0;
+    heroDoorVideoOverlay.classList.add('hidden');
+    if (_heroDoorVideoCallback) {
+      _heroDoorVideoCallback();
+      _heroDoorVideoCallback = null;
+    }
+  }, 1500);
+}
+
+if (skipHeroDoorBtn) skipHeroDoorBtn.addEventListener('click', finishHeroDoorVideo);
+if (heroDoorVideoElement) heroDoorVideoElement.addEventListener('ended', finishHeroDoorVideo);
 
 // ─────────────────────────────────────────────
 //  PORTAL VIDEO OVERLAY

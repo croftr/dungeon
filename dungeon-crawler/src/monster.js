@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
-import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave } from './particles.js';
+import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit } from './particles.js';
 import { CELL, isPassable } from './map.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
@@ -315,6 +315,36 @@ _applyMultiAttacks('Aqua Man', [
     damageMultiplier: 0.8,
     specialAttack: true,
     specialOnHitEffects: [{ effectId: 'slow', chance: 0.60, durationSec: 8 }, { effectId: 'poison', chance: 0.20 }],
+  },
+]);
+
+_applyMultiAttacks('Lizard Man', [
+  {
+    name: 'clawSlash',
+    glb: asset('/monsters/lizard-man/standard-attack1.glb'),
+    sound: asset('/monsters/lizard-man/lizard-normal-attack.mp3'),
+    soundTimings: [0.4],
+    damageTimings: [0.4],
+    weight: 4,
+  },
+  {
+    name: 'tailSwipe',
+    glb: asset('/monsters/lizard-man/standard-attack2.glb'),
+    sound: asset('/monsters/lizard-man/lizard-normal-attack.mp3'),
+    soundTimings: [0.3, 0.65],
+    damageTimings: [0.3, 0.65],
+    weight: 3,
+  },
+  {
+    name: 'venomSpit',
+    glb: asset('/monsters/lizard-man/special-attack.glb'),
+    sound: asset('/monsters/lizard-man/special-attack.mp3'),
+    soundTimings: [0.45],
+    damageTimings: [0.45],
+    weight: 2,
+    damageMultiplier: 0.8,
+    specialAttack: true,
+    specialOnHitEffects: [{ effectId: 'poison', chance: 0.70 }],
   },
 ]);
 
@@ -1753,6 +1783,12 @@ export function triggerMonsterAttack(monsterId) {
         const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.6;
         setTimeout(() => { if (m.alive) createTidalWave(m.mesh.position); }, duration * pts * 1000);
         showMessage(`<b>${m.name}</b> unleashes a devastating Tidal Wave!`, 2000);
+      }
+      if (variant.name === 'venomSpit' && m.mesh) {
+        const duration = attackAction.getClip().duration;
+        const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.45;
+        setTimeout(() => { if (m.alive) createLizardVenomSpit(m.mesh.position); }, duration * pts * 1000);
+        showMessage(`<b>${m.name}</b> spews a torrent of corrosive venom!`, 2000);
       }
     }
   }

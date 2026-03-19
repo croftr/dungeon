@@ -16,4 +16,14 @@ export const level4Monsters = [
     asset('/monsters/skeleton-animation/Meshy_AI_Animation_Dead_withSkin.glb'),
     asset('/monsters/skeleton-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
     asset('/monsters/skeleton-animation/Meshy_AI_Animation_Walking_withSkin.glb')),
+
+  // Lizard Man patrols the southern half of the vault
+  inst(D.lizardMan, 401, 6, 5,
+    asset('/monsters/lizard-man/Meshy_AI_Galactic_Entity_Adven_biped_Animation_Walking_withSkin.glb'),
+    asset('/monsters/lizard-man/standard-attack1.glb'),
+    asset('/monsters/lizard-man/lizard-normal-attack.mp3'), 0.6, 0, 0, 4,
+    { bounds: { minRow: 4, maxRow: 8, minCol: 1, maxCol: 9 }, speed: 0.6, waitTime: 1.5 },
+    asset('/monsters/lizard-man/Meshy_AI_Galactic_Entity_Adven_biped_Animation_Dead_withSkin.glb'),
+    asset('/monsters/lizard-man/Meshy_AI_Galactic_Entity_Adven_biped_Animation_Face_Punch_Reaction_withSkin.glb'),
+    asset('/monsters/lizard-man/Meshy_AI_Galactic_Entity_Adven_biped_Animation_Walking_withSkin.glb')),
 ];

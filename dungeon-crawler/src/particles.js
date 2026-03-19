@@ -450,3 +450,46 @@ export function createTidalWave(position) {
         setTimeout(() => { proton.removeEmitter(emitter); }, 2000);
     }, 500);
 }
+
+export function createLizardVenomSpit(position) {
+    if (!proton) return;
+
+    const emitter = new Proton.Emitter();
+
+    // Toxic venom spray — acid green burst with downward drip bias
+    emitter.rate = new Proton.Rate(new Proton.Span(18, 28), new Proton.Span(0.02));
+
+    emitter.addInitialize(new Proton.Mass(1));
+    emitter.addInitialize(new Proton.Radius(0.3, 0.9));
+    emitter.addInitialize(new Proton.Life(0.7, 1.4));
+
+    // Wide outward spray with slight downward arc
+    emitter.addInitialize(new Proton.V(2.0, new Proton.Vector3D(0, -0.3, 0), 180));
+
+    const material = new THREE.SpriteMaterial({
+        map: sparkTexture,
+        color: 0xffffff,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        depthWrite: false,
+    });
+    emitter.addInitialize(new Proton.Body(new THREE.Sprite(material)));
+
+    if (position) {
+        emitter.addInitialize(new Proton.Position(new Proton.PointZone(position.x, position.y + 1.0, position.z)));
+    }
+
+    emitter.addBehaviour(new Proton.Alpha(0.85, 0.0));
+    emitter.addBehaviour(new Proton.Scale(1.3, 0.15));
+    // Bright acid green to dark bile green
+    emitter.addBehaviour(new Proton.Color('#aaff22', '#335500'));
+    emitter.addBehaviour(new Proton.RandomDrift(0.8, 0.5, 0.8, 0.04));
+
+    emitter.emit();
+    proton.addEmitter(emitter);
+
+    setTimeout(() => {
+        emitter.stopEmit();
+        setTimeout(() => { proton.removeEmitter(emitter); }, 2000);
+    }, 400);
+}

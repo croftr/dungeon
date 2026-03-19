@@ -536,6 +536,52 @@
       }
     ]
   },
+  "lizardMan": {
+    "name": "Lizard Man",
+    "hp": 380,
+    "defence": 12,
+    "xp": 1100,
+    "attackSpeed": 1.6,
+    "stats": {
+      "strength": 35,
+      "dexterity": 28,
+      "vitality": 28,
+      "intelligence": 12,
+      "resilience": 25
+    },
+    "onHitEffects": [
+      {
+        "effectId": "poison",
+        "chance": 0.30
+      }
+    ],
+    "drops": [
+      {
+        "item": "Life Essence",
+        "chance": 0.70
+      },
+      {
+        "item": "Life Berry",
+        "chance": 1
+      },
+      {
+        "item": "Leather Belt",
+        "chance": 0.40
+      },
+      {
+        "item": "Fermented Sugar",
+        "chance": 0.25
+      },
+      {
+        "item": "Iron Ore",
+        "chance": 0.40
+      },
+      {
+        "item": "Lizard Scale",
+        "chance": 1
+      }
+    ]
+  },
   "demon": {
     "name": "Demon",
     "hp": 200,
