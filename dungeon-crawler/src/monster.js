@@ -1710,14 +1710,19 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
       }
     });
 
-    // Vampiric Dagger effect
-    if (weaponDef?.name === 'Vampiric Dagger') {
+    // Lifesteal on-hit effects
+    const lifestealEffects = [
+      ...(weaponDef?.onHitEffects ?? []),
+      ...(ammoDef?.onHitEffects ?? []),
+    ].filter(e => e.effectId === 'lifesteal');
+    if (lifestealEffects.length > 0) {
       const pIndex = party.findIndex(p => p.name === character.name);
       if (pIndex !== -1) {
         const p = party[pIndex];
         if (p && !p.isDead && p.hp < p.hpMax) {
-          setHp(pIndex, p.hp + 1);
-          showMemberHeal(pIndex, 1);
+          const heal = lifestealEffects.reduce((sum, e) => sum + (e.amount ?? 1), 0);
+          setHp(pIndex, p.hp + heal);
+          showMemberHeal(pIndex, heal);
         }
       }
     }

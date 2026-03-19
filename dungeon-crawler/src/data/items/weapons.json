@@ -57,6 +57,13 @@
         "weaponType": "dagger",
         "staminaDrain": 1,
         "baseDamage": 6,
+        "onHitEffects": [
+            {
+                "effectId": "lifesteal",
+                "amount": 1,
+                "chance": 1
+            }
+        ],
         "delay": 2,
         "statWeights": {
             "str": 0.1,
@@ -458,27 +465,5 @@
         "description": "A massive two-handed axe of serrated iron, capable of cleaving an ogre in twain.",
         "value": 2600,
         "weight": 12.0
-    },
-    {
-        "name": "Seraphic Grace Scepter",
-        "slot": "hand",
-        "type": "weapon",
-        "attackType": "bash",
-        "weaponType": "staff",
-        "staminaDrain": 1,
-        "baseDamage": 10,
-        "delay": 2.5,
-        "statWeights": {
-            "intelligence": 0.5,
-            "resilience": 0.5
-        },
-        "icon": "/icons/seraphic_staff.png",
-        "description": "A holy scepter of gold and ivory, humming with powerful restorative energy.",
-        "value": 2400,
-        "weight": 1.5,
-        "statBonuses": {
-            "intelligence": 2,
-            "resilience": 3
-        }
     }
 ]

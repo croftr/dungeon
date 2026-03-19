@@ -2,6 +2,7 @@ import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPor
 import { showInlineHelp } from './help.js';
 import { getItemDef } from './items.js';
 import { SPELLS } from './spells.js';
+import { STATUS_EFFECT_DEFS } from './status-effects.js';
 import { ACTIONS } from './items.js';
 import POTIONS from './data/items/potions.json';
 import SKILLS_DATA from './data/skills.json';
@@ -764,10 +765,6 @@ function populateTooltip(obj) {
             <span>Stat Change</span>
             <span id="item-detail-statchange">—</span>
         </div>
-        <div class="detail-stat-row" id="detail-row-skillbonus">
-            <span style="font-size:8px">Skill Bonuses</span>
-            <span id="item-detail-skillbonus" style="font-size:8px; text-align:right">—</span>
-        </div>
         <div class="detail-stat-row" id="detail-row-scaling">
             <span>Stat Scaling</span>
             <span id="item-detail-scaling">—</span>
@@ -788,6 +785,8 @@ function populateTooltip(obj) {
             <span>Market Value</span>
             <span id="item-detail-value">—</span>
         </div>
+        <div id="detail-row-skillbonus" class="detail-skillbonus-list"></div>
+        <div id="detail-row-onhit" class="detail-onhit-list"></div>
     `;
 
   if (isCustom) {
@@ -801,14 +800,41 @@ function populateTooltip(obj) {
   statsEl.style.display = 'flex';
   const def = getItemDef(obj.name);
 
+  // ── Potions & loot: simplified tooltip (description + value + weight only) ──
+  const isConsumable = def?.type === 'potion' || def?.slot === 'loot';
+  if (isConsumable) {
+    slotEl.textContent = '';
+    actionEl.textContent = '';
+    // Show description with live effect value substituted in for potions
+    let descText = def.description ?? '';
+    if (def.type === 'potion' && def.effect?.value) {
+      descText = descText.replace(/\d+/, def.effect.value);
+    }
+    descEl.textContent = descText;
+    statsEl.innerHTML = `
+      <div class="detail-stat-row" id="detail-row-weight">
+          <span>Weight</span>
+          <span id="item-detail-weight">${def.weight} kg</span>
+      </div>
+      <div class="detail-stat-row" id="detail-row-value">
+          <span>Market Value</span>
+          <span id="item-detail-value">${def.value} gp</span>
+      </div>
+    `;
+    return;
+  }
+
   const isMainSpellbook = def?.isSpellBook === true;
   const isAmmo = (def?.slot === 'ammo') && !isMainSpellbook;
   const isSpellbook = (def?.type === 'spellbook');
   const hasDefence = !isAmmo && !isMainSpellbook && def?.defence != null && def.defence > 0;
   const hasBlock = !isAmmo && !isMainSpellbook && def?.blockChance != null && def.blockChance > 0;
   const hasScaling = !isAmmo && !isMainSpellbook && def?.statWeights != null && def?.attackType != null;
-  const hasStatChange = (def?.statBonuses && Object.values(def.statBonuses).some(v => v !== 0)) || (isSpellbook && def?.requiredInt);
+  const hasStatChange = isSpellbook && def?.requiredInt;
+  const hasStatBonus = !isSpellbook && def?.statBonuses && Object.values(def.statBonuses).some(v => v !== 0);
   const hasSkillBonus = def?.skillBonuses && Object.keys(def.skillBonuses).length > 0;
+  const hasOnHitEffects = def?.onHitEffects && def.onHitEffects.length > 0;
+  const hasBonusList = hasStatBonus || hasSkillBonus;
 
   // Hide/show rows based on item type and available stats
   document.getElementById('detail-row-damage').style.display = (isAmmo || isSpellbook || isMainSpellbook) ? 'none' : 'flex';
@@ -817,7 +843,8 @@ function populateTooltip(obj) {
   document.getElementById('detail-row-value').style.display = (isAmmo || isMainSpellbook) ? 'none' : 'flex';
   document.getElementById('detail-row-weight').style.display = (isAmmo || isMainSpellbook) ? 'none' : 'flex';
   document.getElementById('detail-row-statchange').style.display = hasStatChange ? 'flex' : 'none';
-  document.getElementById('detail-row-skillbonus').style.display = hasSkillBonus ? 'flex' : 'none';
+  document.getElementById('detail-row-skillbonus').style.display = hasBonusList ? 'flex' : 'none';
+  document.getElementById('detail-row-onhit').style.display = hasOnHitEffects ? 'flex' : 'none';
   document.getElementById('detail-row-scaling').style.display = hasScaling ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-mod').style.display = isAmmo ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-type').style.display = isAmmo ? 'flex' : 'none';
@@ -840,11 +867,7 @@ function populateTooltip(obj) {
     actionEl.textContent = def?.attackType ? 'Attack: ' + def.attackType.charAt(0).toUpperCase() + def.attackType.slice(1) : '';
   }
 
-  let descText = def?.description ?? '—';
-  if (def?.type === 'potion' && def?.effect?.value) {
-    descText = descText.replace(/\d+/, def.effect.value);
-  }
-  descEl.textContent = descText;
+  descEl.textContent = '';
 
   if (isAmmo) {
     document.getElementById('item-detail-ammo-mod').textContent = '×' + (def?.damageModifier ?? 1.0);
@@ -865,23 +888,34 @@ function populateTooltip(obj) {
     if (isSpellbook) {
       document.getElementById('item-detail-statchange').textContent = def.requiredInt + ' Intelligence';
       document.getElementById('item-detail-statchange').style.color = '#ff8080';
-    } else if (hasStatChange) {
-      const bonusText = Object.entries(def.statBonuses)
-        .filter(([, v]) => v !== 0)
-        .map(([stat, v]) => `${v > 0 ? '+' : ''}${v} ${stat.charAt(0).toUpperCase() + stat.slice(1)}`)
-        .join(', ');
-      document.getElementById('item-detail-statchange').textContent = bonusText;
-      document.getElementById('item-detail-statchange').style.color = '#60c060';
     }
 
-    if (hasSkillBonus) {
-      // Format each bonus entry: type keys get a readable label, named skills show as-is
+    if (hasBonusList) {
       const BONUS_LABELS = { all: 'All Skills', healing: 'Healing', buff: 'Buff', debuff: 'Debuff' };
-      const parts = Object.entries(def.skillBonuses).map(([key, val]) => {
-        const label = BONUS_LABELS[key] ?? key;
-        return `${label} +${val}`;
-      });
-      document.getElementById('item-detail-skillbonus').textContent = parts.join(' · ');
+      const listEl = document.getElementById('detail-row-skillbonus');
+      let html = '';
+
+      // Stat bonuses first (green/red)
+      if (hasStatBonus) {
+        html += Object.entries(def.statBonuses)
+          .filter(([, v]) => v !== 0)
+          .map(([stat, v]) => {
+            const label = stat.charAt(0).toUpperCase() + stat.slice(1);
+            const color = v > 0 ? '#70c870' : '#c87070';
+            const sign = v > 0 ? '+' : '';
+            return `<div class="detail-skillbonus-item" style="--sb-color:${color}"><span>${label}</span><span>${sign}${v}</span></div>`;
+          }).join('');
+      }
+
+      // Skill bonuses after
+      if (hasSkillBonus) {
+        html += Object.entries(def.skillBonuses).map(([key, val]) => {
+          const label = BONUS_LABELS[key] ?? key;
+          return `<div class="detail-skillbonus-item"><span>${label}</span><span>+${val}</span></div>`;
+        }).join('');
+      }
+
+      listEl.innerHTML = html;
     }
 
     if (hasScaling) {
@@ -894,6 +928,26 @@ function populateTooltip(obj) {
       if (weights.resilience > 0) parts.push(`RES ${Math.round(weights.resilience * 100)}%`);
       document.getElementById('item-detail-scaling').textContent = parts.join(' · ');
     }
+  }
+
+  // On-hit effects apply to both weapons AND ammo
+  if (hasOnHitEffects) {
+    const ONHIT_OVERRIDES = {
+      lifesteal: { name: 'Lifesteal', color: '#c03040' }
+    };
+    const listEl = document.getElementById('detail-row-onhit');
+    listEl.innerHTML = def.onHitEffects.map(({ effectId, chance, amount }) => {
+      const override = ONHIT_OVERRIDES[effectId];
+      const effectDef = STATUS_EFFECT_DEFS[effectId];
+      const name = override?.name ?? effectDef?.name ?? effectId;
+      const color = override?.color ?? effectDef?.color ?? '#c8b080';
+      const pct = chance != null ? Math.round(chance * 100) + '%' : '100%';
+      const suffix = amount != null ? ` (${amount})` : '';
+      return `<div class="detail-onhit-item" style="--onhit-color:${color}">
+        <span>${name}${suffix}</span>
+        <span>${pct} chance</span>
+      </div>`;
+    }).join('');
   }
 }
 

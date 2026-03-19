@@ -2875,7 +2875,7 @@ body {
 ───────────────────────────────────────────────────────────────────────────── */
 #item-detail-panel {
   position: fixed;
-  width: 190px;
+  width: 220px;
   background: rgba(8, 6, 3, 0.97);
   border: 1px solid #6a5030;
   border-radius: 4px;
@@ -2901,7 +2901,7 @@ body {
 }
 
 #item-detail-name {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: bold;
   color: #e8c87a;
   letter-spacing: 0.5px;
@@ -2911,21 +2911,21 @@ body {
 }
 
 #item-detail-slot {
-  font-size: 9px;
+  font-size: 11px;
   color: #8a7040;
   text-transform: uppercase;
   letter-spacing: 0.8px;
 }
 
 #item-detail-action {
-  font-size: 9px;
+  font-size: 11px;
   color: #c87040;
   text-transform: uppercase;
   letter-spacing: 0.8px;
 }
 
 #item-detail-desc {
-  font-size: 9px;
+  font-size: 11px;
   color: #a09070;
   line-height: 1.5;
   font-style: italic;
@@ -2942,12 +2942,56 @@ body {
 .detail-stat-row {
   display: flex;
   justify-content: space-between;
-  font-size: 9px;
+  font-size: 11px;
   color: #7a6a50;
 }
 
 .detail-stat-row span:last-child {
   color: #c8a84a;
+}
+
+/* Skill bonus list — sits at the bottom of the tooltip, one entry per line */
+.detail-skillbonus-list {
+  display: none; /* shown via JS when hasSkillBonus */
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid #3a2a10;
+  padding-top: 5px;
+  margin-top: 1px;
+}
+
+.detail-skillbonus-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--sb-color, #9080b8);
+}
+
+.detail-skillbonus-item span:last-child {
+  color: var(--sb-color, #b8a0e8);
+  font-weight: 600;
+}
+
+/* On-hit effect list — sits at the bottom of the tooltip, one effect per line */
+.detail-onhit-list {
+  display: none; /* shown via JS when hasOnHitEffects */
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid #3a2a10;
+  padding-top: 5px;
+  margin-top: 1px;
+}
+
+.detail-onhit-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--onhit-color, #c8a060);
+}
+
+.detail-onhit-item span:last-child {
+  opacity: 0.75;
+  font-size: 10px;
 }
 
 /* Stat-scaling bar (STR / DEX split under the Scales With row) */
@@ -4153,6 +4197,11 @@ body {
 #as-feet {
   top: 87%;
   left: 50%;
+}
+
+#as-ammo {
+  top: 78%;
+  left: 122%;
 }
 
 /* Armor stand party inventory deposit panel */

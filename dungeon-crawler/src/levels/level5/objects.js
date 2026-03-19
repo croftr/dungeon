@@ -123,6 +123,7 @@ export function spawnLevel5Objects(ctx) {
             feet: 'Seraphic Grace Sandals',
             leftHand: 'Seraphic Grace Scepter',
             cloak: 'Seraphic Grace Stole',
+            ammo: 'Seraphic Spellbook',
         }, 'Mage Armor Stand', 0.35);
 
     // South passages: row 19, facing north (rotY = π), pushed against south wall

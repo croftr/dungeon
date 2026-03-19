@@ -94,5 +94,19 @@
         "value": 360,
         "weight": 1,
         "isSpellBook": true
+    },
+    {
+        "name": "Seraphic Spellbook",
+        "slot": "ammo",
+        "attackType": null,
+        "baseDamage": null,
+        "delay": 4,
+        "icon": "/icons/seraphic_spellbook.png",
+        "description": "A majestic tome of divine light. Equip it in the ammo slot, then Right-Click it in the paperdoll to select a spell for your hands. Bestows the insight of the divine upon its bearer.",
+        "value": 2600,
+        "weight": 1.2,
+        "isSpellBook": true,
+        "statBonuses": { "intelligence": 2 },
+        "skillBonuses": { "Heal": 2 }
     }
 ]
