@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import { buildLevel, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap } from './map.js';
+import { buildLevel, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap } from './map.js';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles } from './particles.js';
@@ -1141,7 +1141,7 @@ window.loadLevel = function (levelNum) {
   setAmbientLevel(levelNum);
 
   // 1. Swap Map Array
-  const maps = [level0Map, level1Map, level2Map, level3Map, level4Map];
+  const maps = [level0Map, level1Map, level2Map, level3Map, level4Map, level5Map];
   changeMapArray(maps[levelNum] ?? level0Map);
 
   // 2. Rebuild map meshes for walls/floors
@@ -1190,6 +1190,20 @@ window.loadLevel = function (levelNum) {
     player.facing = 0;
     camera.rotation.order = 'YXZ';
     camera.rotation.y = FACING_ANGLES[player.facing];
+  } else if (levelNum === 5) {
+    // Entering the Hall of Heroes — face north into the hall
+    player.facing = 0;
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = FACING_ANGLES[player.facing];
+  } else if (levelNum === 0 && oldLevel === 5) {
+    // Returning from Hall of Heroes — place near the hero door, face west into the room
+    player.gridRow = 14;
+    player.gridCol = 20;
+    const wRet = cellToWorld(14, 20);
+    camera.position.set(wRet.x, wRet.y, wRet.z);
+    player.facing = 3; // West (toward the hero door at col 21)
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = FACING_ANGLES[player.facing];
   }
 
   // 5. Update Minimap bounds
@@ -1230,7 +1244,7 @@ window.addEventListener('mousemove', (e) => {
   let isHoveringInteractable = false;
   for (let hit of intersects) {
     const ud = hit.object.userData;
-    if (ud && (ud.isButton || ud.isChest || ud.isArmorStand || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDamageTrap || ud.isEgg || ud.isTeleportTorch || ud.isAlchemyWorkshop || ud.isAnvil || ud.isShop || ud.isDroppedItem)) {
+    if (ud && (ud.isButton || ud.isChest || ud.isArmorStand || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDamageTrap || ud.isEgg || ud.isTeleportTorch || ud.isAlchemyWorkshop || ud.isAnvil || ud.isShop || ud.isDroppedItem || ud.isHeroDoor)) {
       if (hit.object.visible) {
         isHoveringInteractable = true;
         break;

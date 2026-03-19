@@ -18,7 +18,8 @@ import { level1Map } from './levels/level1/map.js';
 import { level2Map } from './levels/level2/map.js';
 import { level3Map } from './levels/level3/map.js';
 import { level4Map } from './levels/level4/map.js';
-export { level0Map, level1Map, level2Map, level3Map, level4Map };
+import { level5Map } from './levels/level5/map.js';
+export { level0Map, level1Map, level2Map, level3Map, level4Map, level5Map };
 
 export let dungeonMap = level0Map;
 export let ROWS = dungeonMap.length;

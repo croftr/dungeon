@@ -1,4 +1,5 @@
 import { CELL } from '../../map.js';
+import { asset } from '../../assets.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  LEVEL 1 – The Western Dungeon
@@ -10,7 +11,7 @@ export function spawnLevel1Objects(ctx) {
     const {
         group, loader,
         addChest, addWeaponRack, addSpellCabinet,
-        addBonePile,
+        addBonePile, addDecoration,
         addPortal, addPortcullis,
         addStatue, addPortalActivatorStatue,
         addTrap1,
@@ -108,4 +109,5 @@ export function spawnLevel1Objects(ctx) {
 
     // Portal Activator Statue in the mummy room — unlocks the level-2 portal in Level 0
     addPortalActivatorStatue(group, loader, 19, 2, 0);
+
 }

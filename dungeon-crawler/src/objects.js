@@ -21,6 +21,7 @@ import { spawnLevel1Objects } from './levels/level1/objects.js';
 import { spawnLevel2Objects } from './levels/level2/objects.js';
 import { spawnLevel3Objects } from './levels/level3/objects.js';
 import { spawnLevel4Objects } from './levels/level4/objects.js';
+import { spawnLevel5Objects } from './levels/level5/objects.js';
 
 export const objects = [];
 export const interactables = [];
@@ -228,6 +229,30 @@ export function initObjects(scene, camera) {
                     } else {
                         showMessage("You can't reach that from here.");
                     }
+                } else if (obj.userData.portcullisRow !== undefined) {
+                    // Generic portcullis button — used by Hall of Heroes and any future levels.
+                    // wallRow/wallCol: the wall cell the player must face (1 step away).
+                    // portcullisRow/Col: the portcullis object to open.
+                    // animAxis ('x'|'z') and animDir (+1|-1) control the press animation.
+                    if (isInFrontOfPlayer(obj.userData.wallRow, obj.userData.wallCol, 1)) {
+                        playButtonClickSound();
+                        const ax = obj.userData.animAxis ?? 'x';
+                        const dir = obj.userData.animDir ?? 1;
+                        const pressedPos = ax === 'x' ? { x: dir * 0.01 } : { z: dir * 0.01 };
+                        const restPos    = ax === 'x' ? { x: dir * 0.04 } : { z: dir * 0.04 };
+                        new Tween(obj.position)
+                            .to(pressedPos, 100)
+                            .easing(Easing.Quadratic.Out)
+                            .chain(new Tween(obj.position).to(restPos, 100).easing(Easing.Quadratic.In))
+                            .start();
+                        const p = objects.find(o =>
+                            o.name === 'Portcullis' &&
+                            o.gridRow === obj.userData.portcullisRow &&
+                            o.gridCol === obj.userData.portcullisCol);
+                        if (p) openPortcullis(p);
+                    } else {
+                        showMessage("You can't reach that from here.");
+                    }
                 } else {
                     // Check if player is facing the wall at (8, 8) from (8, 7)
                     if (isInFrontOfPlayer(8, 8, 1)) {
@@ -396,6 +421,17 @@ export function initObjects(scene, camera) {
                     }
                 } else {
                     showMessage("The ancient statue watches you.");
+                }
+                break;
+            } else if (obj.userData.isHeroDoor) {
+                const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
+                const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
+                if (distRow <= 1 && distCol <= 1) {
+                    showMessage("You push open the great hero's door...");
+                    playPortalSound();
+                    if (window.loadLevel) window.loadLevel(5);
+                } else {
+                    showMessage("An ornate door stands before you. Approach to enter.");
                 }
                 break;
             } else if (obj.userData.isPortal) {
@@ -1037,17 +1073,49 @@ function addStatue(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) 
     });
 }
 
-function addDecoration(scene, loader, col, row, rotY = 0, modelPath, scale = 0.5, blockCell = true) {
+export function addDecoration(scene, loader, col, row, rotY = 0, modelPath, scale = 0.5, blockCell = true, offsetX = 0, offsetZ = 0, offsetY = 0.5) {
     if (blockCell) _statueGridCells.add(`${row},${col}`);
     loader.load(modelPath, (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(scale);
-        model.position.set(col * CELL, 0.5, row * CELL);
+        model.position.set(col * CELL + offsetX, offsetY, row * CELL + offsetZ);
         model.rotation.y = rotY;
         model.traverse((child) => {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
+            }
+        });
+        scene.add(model);
+    });
+}
+
+function addHeroDoor(scene, loader, col, row) {
+    loader.load(asset('/items/hero-door.glb'), (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(0.7);
+        model.position.set(col * CELL, 0.7, row * CELL + 0.65);
+        model.rotation.y = 0;
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.userData.isHeroDoor = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+                interactables.push(child);
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];
                     mats.forEach(mat => {
@@ -1374,7 +1442,7 @@ export function spawnObjectsForLevel() {
         loader: _gltfLoader,
         // Spawn helpers
         addChest, addWeaponRack, addSpellCabinet, addShop,
-        addCrystals, addBonePile,
+        addCrystals, addBonePile, addDecoration, addHeroDoor,
         addPortal, addDisabledPortal, addPortcullis, addKeyhole,
         addStatue, addPortalActivatorStatue, addPartyConfirmNPC,
         addAnvil, addAlchemyWorkshop, addDroppedTorch, addEtherealEgg, addStairs,
@@ -1399,6 +1467,7 @@ export function spawnObjectsForLevel() {
     else if (level === 2) spawnLevel2Objects(ctx);
     else if (level === 3) spawnLevel3Objects(ctx);
     else if (level === 4) spawnLevel4Objects(ctx);
+    else if (level === 5) spawnLevel5Objects(ctx);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1406,25 +1475,29 @@ export function spawnObjectsForLevel() {
 //  Single source of truth for every portcullis button in the dungeon.
 //  To restyle all buttons at once, edit only this function.
 //
-//  protrusionDir  +1 = button face points east  (+X)
-//                 -1 = button face points west  (-X)
+//  protrusionDir  +1 = button face points east  (+X) or south (+Z)
+//                 -1 = button face points west  (-X) or north (-Z)
 //  userData       merged onto the interactive sphere (must include `target`)
+//  axis           'x' (default, east/west wall) or 'z' (north/south wall)
 // ─────────────────────────────────────────────────────────────────────────────
-function createWallButton(protrusionDir, userData) {
+function createWallButton(protrusionDir, userData, axis = 'x') {
     const group = new THREE.Group();
 
     // Round backing plate — thin disc mounted flush on the wall face
     const plateGeo = new THREE.CylinderGeometry(0.09, 0.09, 0.018, 28);
     const plateMat = new THREE.MeshLambertMaterial({ color: 0x1e1008 });
     const plate = new THREE.Mesh(plateGeo, plateMat);
-    plate.rotation.z = Math.PI / 2; // rotate so the circular face is perpendicular to X
+    // Orient disc perpendicular to the protrusion axis
+    if (axis === 'z') plate.rotation.x = Math.PI / 2;
+    else              plate.rotation.z = Math.PI / 2;
     group.add(plate);
 
     // Dome button — sphere protruding from the plate centre
     const btnGeo = new THREE.SphereGeometry(0.055, 20, 14);
     const btnMat = new THREE.MeshLambertMaterial({ color: 0xbb2020 });
     const btn = new THREE.Mesh(btnGeo, btnMat);
-    btn.position.x = protrusionDir * 0.04;
+    if (axis === 'z') btn.position.z = protrusionDir * 0.04;
+    else              btn.position.x = protrusionDir * 0.04;
     btn.userData = { isButton: true, ...userData };
     interactables.push(btn);
     group.add(btn);

@@ -14,6 +14,7 @@ const LEVEL_NAMES = {
   2: 'Deep Passage',
   3: 'Abyssal Crypts',
   4: 'Forgotten Vault',
+  5: 'Hall of Heroes',
 };
 
 function _serializeMember(m) {
