@@ -57,5 +57,47 @@
                 "quantity": 1
             }
         ]
+    },
+    {
+        "name": "Lizard Scale Cloak",
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Travelling Cloak",
+                "quantity": 1
+            },
+            {
+                "name": "Lizard Scale",
+                "quantity": 1
+            }
+        ]
+    },
+    {
+        "name": "Crocodilian Boots",
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Leather Boots",
+                "quantity": 1
+            },
+            {
+                "name": "Crocodile Hide",
+                "quantity": 1
+            }
+        ]
     }
 ]

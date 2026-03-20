@@ -26,7 +26,8 @@ export function spawnLevel0Objects(ctx) {
         { name: 'Gold Coins', quantity: 100 },
         'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore", "Life Essence", "Minor Potions Parchment",
         "Ironpeak Dwarf Helm", "Ironpeak Dwarf Cuirass", "Ironpeak Dwarf Gauntlets", "Ironpeak Dwarf Greaves",
-        "Ironpeak Dwarf Sabatons", "Ironpeak Battleaxe", "Ironpeak Round Shield", "Ironpeak Bear Cloak"
+        "Ironpeak Dwarf Sabatons", "Ironpeak Battleaxe", "Ironpeak Round Shield", "Ironpeak Bear Cloak",
+        "Lizard Scale", "Crocodile Hide", "Lizard Scale Cloak", "Crocodilian Boots"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in starter room ──────────────────────────────────────────────

@@ -107,5 +107,18 @@
             "intelligence": 1,
             "resilience": 2
         }
+    },
+    {
+        "name": "Lizard Scale Cloak",
+        "slot": "cloak",
+        "icon": "/icons/lizard_scale_cloak.png",
+        "description": "A powerful cloak crafted from the iridescent scales of a lizard warrior. It glimmers with an otherworldly light, offering superior protection.",
+        "defence": 5,
+        "value": 1300,
+        "weight": 1.5,
+        "statBonuses": {
+            "resilience": 2,
+            "dexterity": 1
+        }
     }
 ]

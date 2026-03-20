@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
-import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud } from './particles.js';
+import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createCrocodileSparkle } from './particles.js';
 import { CELL, isPassable } from './map.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
@@ -134,6 +134,35 @@ function _applyMultiAttacks(monsterName, attacks) {
     }
   });
 }
+
+_applyMultiAttacks('Crocodile Warrior', [
+  {
+    name: 'crocAttack',
+    glb: asset('/monsters/crocodile-warrior/double-attack.glb'),
+    sound: asset('/monsters/crocodile-warrior/attack.mp3'),
+    soundTimings: [0.3, 0.65],
+    damageTimings: [0.3, 0.65],
+    weight: 4,
+  },
+  {
+    name: 'crocJump',
+    glb: asset('/monsters/crocodile-warrior/jump-attack.glb'),
+    sound: asset('/monsters/crocodile-warrior/attack.mp3'),
+    soundTimings: [0.5],
+    damageTimings: [0.5],
+    weight: 3,
+  },
+  {
+    name: 'crocSpecial',
+    glb: asset('/monsters/crocodile-warrior/special-attack.glb'),
+    sound: asset('/monsters/crocodile-warrior/special-attack.mp3'),
+    soundTimings: [0.45],
+    damageTimings: [0.45],
+    weight: 2,
+    damageMultiplier: 1.3,
+    specialAttack: true,
+  },
+]);
 
 _applyMultiAttacks('Skeleton Warrior', [
   {
@@ -316,6 +345,25 @@ _applyMultiAttacks('Aqua Man', [
     damageMultiplier: 0.8,
     specialAttack: true,
     specialOnHitEffects: [{ effectId: 'slow', chance: 0.60, durationSec: 8 }, { effectId: 'poison', chance: 0.20 }],
+  },
+]);
+
+_applyMultiAttacks('Orc Warrior', [
+  {
+    name: 'attack1',
+    glb: asset('/monsters/orc-warrior/attack1.glb'),
+    sound: asset('/monsters/orc-warrior/attack1.mp3'),
+    soundTimings: [0.4],
+    damageTimings: [0.4],
+    weight: 1,
+  },
+  {
+    name: 'attack2',
+    glb: asset('/monsters/orc-warrior/attack2.glb'),
+    sound: asset('/monsters/orc-warrior/attack2.mp3'),
+    soundTimings: [0.4],
+    damageTimings: [0.4],
+    weight: 1,
   },
 ]);
 
@@ -1840,6 +1888,12 @@ export function triggerMonsterAttack(monsterId) {
         setTimeout(() => { if (m.alive) createLizardVenomSpit(m.mesh.position); }, duration * pts * 1000);
         showMessage(`<b>${m.name}</b> spews a torrent of corrosive venom!`, 2000);
       }
+      if (variant.name === 'crocSpecial' && m.mesh) {
+        const duration = attackAction.getClip().duration;
+        const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.45;
+        setTimeout(() => { if (m.alive) createCrocodileSparkle(m.mesh.position); }, duration * pts * 1000);
+        showMessage(`<b>${m.name}</b> unleashes a savage arcane strike!`, 2000);
+      }
       if (variant.name === 'poisonCloud' && m.mesh) {
         const duration = attackAction.getClip().duration;
         const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
@@ -2166,7 +2220,7 @@ function _playBlockAnimation(m) {
     if (m.actions.hit && m.actions.hit.isRunning()) m.actions.hit.stop();
     if (m.actions.attack && m.actions.attack.isRunning()) m.actions.attack.stop();
 
-    const currentAction = (m.actions.walk && m._animState === 'walk') ? m.actions.walk : m.actions.idle;
+    const currentAction = (m.actions.walk && m._animState === 'walk') ? m.actions.walk : (m._activeIdle || m.actions.idle);
     if (currentAction && currentAction.isRunning()) {
       m.actions.block.reset().play();
       currentAction.crossFadeTo(m.actions.block, 0.1, true);
@@ -2210,7 +2264,7 @@ function _playHitAnimation(m, attackType, killer) {
 
   if (m.mixer && m.actions.hit) {
     // If there are moving/idle animations, crossfade from the current one to hit
-    const currentAction = (m.actions.walk && m._animState === 'walk') ? m.actions.walk : m.actions.idle;
+    const currentAction = (m.actions.walk && m._animState === 'walk') ? m.actions.walk : (m._activeIdle || m.actions.idle);
     if (currentAction) {
       m.actions.hit.reset().play();
       currentAction.crossFadeTo(m.actions.hit, 0.1, true);

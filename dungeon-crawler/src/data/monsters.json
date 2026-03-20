@@ -159,6 +159,78 @@
       }
     ]
   },
+  "crocodile_warrior": {
+    "name": "Crocodile Warrior",
+    "hp": 180,
+    "defence": 5,
+    "xp": 150,
+    "attackSpeed": 1.1,
+    "stats": {
+      "strength": 18,
+      "dexterity": 12,
+      "vitality": 14,
+      "intelligence": 8,
+      "resilience": 10
+    },
+    "drops": [
+      {
+        "item": "Life Essence",
+        "chance": 0.4
+      },
+      {
+        "item": "Iron Ore",
+        "chance": 0.3
+      },
+      {
+        "item": "Fermented Sugar",
+        "chance": 0.2
+      },
+      {
+        "item": "Crocodile Hide",
+        "chance": 1
+      }
+    ]
+  },
+  "orc_warrior": {
+    "name": "Orc Warrior",
+    "hp": 200,
+    "defence": 6,
+    "xp": 160,
+    "attackSpeed": 1,
+    "stats": {
+      "strength": 20,
+      "dexterity": 8,
+      "vitality": 15,
+      "intelligence": 6,
+      "resilience": 12
+    },
+    "drops": [
+      {
+        "item": "Life Essence",
+        "chance": 0.5
+      },
+      {
+        "item": "Iron Ore",
+        "chance": 0.5
+      },
+      {
+        "item": "Padded Vest",
+        "chance": 0.1
+      },
+      {
+        "item": "Leather Boots",
+        "chance": 0.1
+      },
+      {
+        "item": "Fermented Sugar",
+        "chance": 0.1
+      },
+      {
+        "item": "Iron Ore",
+        "chance": 0.3
+      }
+    ]
+  },
   "orc": {
     "name": "Orc",
     "hp": 200,

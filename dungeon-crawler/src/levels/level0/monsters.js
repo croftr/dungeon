@@ -14,16 +14,16 @@ export const level0Monsters = [
     asset('/monsters/dummy-annimation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
     null, 0.5, 0, 0, 0), // level = 0
 
-  // Night Goblin — big east room
-  inst(D.night_goblin, 11, 9, 20,
-    asset('/monsters/night-goblin/idle.glb'),
-    asset('/monsters/night-goblin/single-attack.glb'),
-    asset('/monsters/night-goblin/goblin-attack.wav'),
-    0.45, 0, 0, 0,   // level = 0
+  // Crocodile Warrior — big east room
+  inst(D.crocodile_warrior, 11, 9, 20,
+    asset('/monsters/crocodile-warrior/idle.glb'),
+    asset('/monsters/crocodile-warrior/double-attack.glb'),
+    asset('/monsters/crocodile-warrior/attack.mp3'),
+    0.5, 0, 0, 0,   // level = 0
     null,
-    asset('/monsters/night-goblin/dead.glb'),
+    asset('/monsters/crocodile-warrior/dead.glb'),
+    asset('/monsters/crocodile-warrior/getting-hit.glb'),
+    asset('/monsters/crocodile-warrior/walking.glb'),
     null,
-    asset('/monsters/night-goblin/walking.glb'),
-    null,
-    asset('/monsters/night-goblin/cobat-idle.glb')),
+    asset('/monsters/crocodile-warrior/combat-idle.glb')),
 ];

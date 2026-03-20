@@ -35,17 +35,6 @@ export const level1Monsters = [
     null,
     asset('/monsters/night-goblin/cobat-idle.glb')),
 
-  // Upper maze — second night goblin lurking in the mid corridor
-  inst(D.night_goblin, 300, 13, 8,
-    asset('/monsters/night-goblin/idle.glb'),
-    asset('/monsters/night-goblin/single-attack.glb'),
-    asset('/monsters/night-goblin/goblin-attack.wav'), 0.45, 0, 0, 1, null,
-    asset('/monsters/night-goblin/dead.glb'),
-    null,
-    asset('/monsters/night-goblin/walking.glb'),
-    null,
-    asset('/monsters/night-goblin/cobat-idle.glb')),
-
   // Lower maze — zombie lurks in the far lower-right section, well past the row-14 barrier
   inst(D.zombie, 3, 17, 12,
     asset('/monsters/zombie-animation/Meshy_AI_Animation_Idle_3_withSkin.glb'),
@@ -62,12 +51,16 @@ export const level1Monsters = [
     asset('/monsters/ghoul-aimation/Meshy_AI_Animation_Dead_withSkin (1).glb')),
 
   // Deeper south passage
-  inst(D.orc, 7, 19, 8,
-    asset('/monsters/orc-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
-    asset('/monsters/orc-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb'),
-    asset('/monsters/orc-animation/orc-attack.mp3'), 0.5, 0, 0, 1, null,
-    asset('/monsters/orc-animation/Meshy_AI_Animation_Dead_withSkin.glb'),
-    asset('/monsters/orc-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb')),
+  inst(D.orc_warrior, 7, 19, 8,
+    asset('/monsters/orc-warrior/idle-normal.glb'),
+    asset('/monsters/orc-warrior/attack1.glb'),
+    asset('/monsters/orc-warrior/attack1.mp3'),
+    0.5, 0, 0, 1, null,
+    asset('/monsters/orc-warrior/getting-killed.glb'),
+    asset('/monsters/orc-warrior/getting-hit.glb'),
+    asset('/monsters/orc-warrior/walking.glb'),
+    null,
+    asset('/monsters/orc-warrior/idle-combat.glb')),
 
   // Bottom long corridor
   inst(D.iceman, 5, 21, 5,

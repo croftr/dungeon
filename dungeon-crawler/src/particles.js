@@ -495,6 +495,65 @@ export function createPoisonCloud(position) {
     }, 800);
 }
 
+export function createCrocodileSparkle(position) {
+    if (!proton) return;
+
+    // Two-wave sparkle: a fast outward burst of bright gold stars, then
+    // a slower lingering shimmer of white glints rising upward.
+
+    // Wave 1 — explosive outward gold burst
+    const emitter1 = new Proton.Emitter();
+    emitter1.rate = new Proton.Rate(new Proton.Span(25, 35), new Proton.Span(0.01));
+    emitter1.addInitialize(new Proton.Mass(1));
+    emitter1.addInitialize(new Proton.Radius(0.3, 1.0));
+    emitter1.addInitialize(new Proton.Life(0.4, 0.8));
+    emitter1.addInitialize(new Proton.V(4.0, new Proton.Vector3D(0, 1, 0), 180));
+    const mat1 = new THREE.SpriteMaterial({
+        map: sparkTexture, color: 0xffffff,
+        blending: THREE.AdditiveBlending, transparent: true, depthWrite: false,
+    });
+    emitter1.addInitialize(new Proton.Body(new THREE.Sprite(mat1)));
+    if (position) {
+        emitter1.addInitialize(new Proton.Position(new Proton.PointZone(position.x, position.y + 0.8, position.z)));
+    }
+    emitter1.addBehaviour(new Proton.Alpha(1.0, 0.0));
+    emitter1.addBehaviour(new Proton.Scale(1.4, 0.1));
+    emitter1.addBehaviour(new Proton.Color('#ffffff', '#ffdd00')); // white → gold
+    emitter1.addBehaviour(new Proton.RandomDrift(1.0, 0.8, 1.0, 0.04));
+    emitter1.emit();
+    proton.addEmitter(emitter1);
+    setTimeout(() => {
+        emitter1.stopEmit();
+        setTimeout(() => { proton.removeEmitter(emitter1); }, 1000);
+    }, 80);
+
+    // Wave 2 — slow rising white glints
+    const emitter2 = new Proton.Emitter();
+    emitter2.rate = new Proton.Rate(new Proton.Span(10, 16), new Proton.Span(0.04));
+    emitter2.addInitialize(new Proton.Mass(1));
+    emitter2.addInitialize(new Proton.Radius(0.2, 0.5));
+    emitter2.addInitialize(new Proton.Life(0.8, 1.5));
+    emitter2.addInitialize(new Proton.V(0.8, new Proton.Vector3D(0, 1, 0), 160));
+    const mat2 = new THREE.SpriteMaterial({
+        map: sparkTexture, color: 0xffffff,
+        blending: THREE.AdditiveBlending, transparent: true, depthWrite: false,
+    });
+    emitter2.addInitialize(new Proton.Body(new THREE.Sprite(mat2)));
+    if (position) {
+        emitter2.addInitialize(new Proton.Position(new Proton.PointZone(position.x, position.y + 0.6, position.z)));
+    }
+    emitter2.addBehaviour(new Proton.Alpha(0.8, 0.0));
+    emitter2.addBehaviour(new Proton.Scale(0.8, 0.05));
+    emitter2.addBehaviour(new Proton.Color('#ffffcc', '#ffaa00')); // pale yellow → amber
+    emitter2.addBehaviour(new Proton.RandomDrift(1.5, 1.2, 1.5, 0.05));
+    emitter2.emit();
+    proton.addEmitter(emitter2);
+    setTimeout(() => {
+        emitter2.stopEmit();
+        setTimeout(() => { proton.removeEmitter(emitter2); }, 2000);
+    }, 500);
+}
+
 export function createLizardVenomSpit(position) {
     if (!proton) return;
 

@@ -106,5 +106,23 @@
         "value": 50,
         "weight": 2.0,
         "sellable": true
+    },
+    {
+        "name": "Lizard Scale",
+        "slot": "loot",
+        "icon": "/icons/ingredients/lizard_scale.png",
+        "description": "A tough, shimmering scale from a lizard warrior. Excellent for reinforcing leather armor.",
+        "value": 180,
+        "weight": 0.2,
+        "sellable": true
+    },
+    {
+        "name": "Crocodile Hide",
+        "slot": "loot",
+        "icon": "/icons/ingredients/crocodile_hide.png",
+        "description": "A thick, durable piece of crocodile hide covering. Its tough ridges are perfect for crafting heavy-duty leather armor.",
+        "value": 120,
+        "weight": 0.5,
+        "sellable": true
     }
 ]

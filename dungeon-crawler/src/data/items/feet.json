@@ -119,5 +119,18 @@
             "intelligence": 1,
             "resilience": 1
         }
+    },
+    {
+        "name": "Crocodilian Boots",
+        "slot": "feet",
+        "icon": "/icons/crocodilian_boots.png",
+        "description": "Heavy-duty boots crafted from the thick hide of a crocodile. They pulse with a faint, eerie green magical glow, matching the style of a lizard scale cloak.",
+        "defence": 4,
+        "value": 950,
+        "weight": 1.5,
+        "statBonuses": {
+            "resilience": 1,
+            "vitality": 1
+        }
     }
 ]
