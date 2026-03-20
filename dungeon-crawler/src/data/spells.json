@@ -88,7 +88,7 @@
         "magnitudeScale": 2.0,
         "magnitudeBonusMode": "flat",
         "delay": 5,
-        "mpCost": 8,
+        "mpCost": 5,
         "icon": "/icons/rejuvenate.png",
         "description": "A surge of golden light that banishes fatigue. Restores SP equal to double the caster's Intelligence to one party member.",
         "value": 0,

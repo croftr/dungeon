@@ -166,4 +166,24 @@ export const level3Monsters = [
     asset('/monsters/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb'),
     asset('/monsters/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb'),
     asset('/monsters/demon/Meshy_AI_Animation_Walking_withSkin.glb')),
+
+  // ── Corridor Patrols (2 Crocodile Warriors) ─────────────────────────────
+  // West vertical corridor, mid-section
+  inst(D.crocodile_warrior, 350, 10, 3,
+    asset('/monsters/crocodile-warrior/idle.glb'),
+    asset('/monsters/crocodile-warrior/double-attack.glb'),
+    asset('/monsters/crocodile-warrior/attack.mp3'), 0.65, 0, 0, 3, null,
+    asset('/monsters/crocodile-warrior/dead.glb'),
+    asset('/monsters/crocodile-warrior/getting-hit.glb'),
+    asset('/monsters/crocodile-warrior/walking.glb'), null,
+    asset('/monsters/crocodile-warrior/combat-idle.glb')),
+  // East vertical corridor, northern section
+  inst(D.crocodile_warrior, 351, 6, 18,
+    asset('/monsters/crocodile-warrior/idle.glb'),
+    asset('/monsters/crocodile-warrior/double-attack.glb'),
+    asset('/monsters/crocodile-warrior/attack.mp3'), 0.65, 0, 0, 3, null,
+    asset('/monsters/crocodile-warrior/dead.glb'),
+    asset('/monsters/crocodile-warrior/getting-hit.glb'),
+    asset('/monsters/crocodile-warrior/walking.glb'), null,
+    asset('/monsters/crocodile-warrior/combat-idle.glb')),
 ];

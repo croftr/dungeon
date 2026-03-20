@@ -26,4 +26,22 @@ export const level4Monsters = [
     asset('/monsters/lizard-man/Meshy_AI_Galactic_Entity_Adven_biped_Animation_Dead_withSkin.glb'),
     asset('/monsters/lizard-man/Meshy_AI_Galactic_Entity_Adven_biped_Animation_Face_Punch_Reaction_withSkin.glb'),
     asset('/monsters/lizard-man/Meshy_AI_Galactic_Entity_Adven_biped_Animation_Walking_withSkin.glb')),
+
+  // ── Crocodile Warriors — opposite corners of the vault ───────────────────
+  inst(D.crocodile_warrior, 402, 2, 2,
+    asset('/monsters/crocodile-warrior/idle.glb'),
+    asset('/monsters/crocodile-warrior/double-attack.glb'),
+    asset('/monsters/crocodile-warrior/attack.mp3'), 0.65, 0, 0, 4, null,
+    asset('/monsters/crocodile-warrior/dead.glb'),
+    asset('/monsters/crocodile-warrior/getting-hit.glb'),
+    asset('/monsters/crocodile-warrior/walking.glb'), null,
+    asset('/monsters/crocodile-warrior/combat-idle.glb')),
+  inst(D.crocodile_warrior, 403, 7, 8,
+    asset('/monsters/crocodile-warrior/idle.glb'),
+    asset('/monsters/crocodile-warrior/double-attack.glb'),
+    asset('/monsters/crocodile-warrior/attack.mp3'), 0.65, 0, 0, 4, null,
+    asset('/monsters/crocodile-warrior/dead.glb'),
+    asset('/monsters/crocodile-warrior/getting-hit.glb'),
+    asset('/monsters/crocodile-warrior/walking.glb'), null,
+    asset('/monsters/crocodile-warrior/combat-idle.glb')),
 ];

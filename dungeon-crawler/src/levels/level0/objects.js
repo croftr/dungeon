@@ -9,7 +9,7 @@ import { asset } from '../../assets.js';
 export function spawnLevel0Objects(ctx) {
     const {
         group, loader,
-        addChest, addWeaponRack, addShop,
+        addChest, addWeaponRack, addSpellCabinet, addShop,
         addCrystals,
         addPortal, addDisabledPortal, addPortcullis,
         addPartyConfirmNPC,
@@ -25,13 +25,21 @@ export function spawnLevel0Objects(ctx) {
     addChest(group, loader, 11, 13, 0, 0.7, [
         { name: 'Gold Coins', quantity: 100 },
         'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore", "Life Essence", "Minor Potions Parchment",
-        "Ironpeak Dwarf Helm", "Ironpeak Dwarf Cuirass", "Ironpeak Dwarf Gauntlets", "Ironpeak Dwarf Greaves",
-        "Ironpeak Dwarf Sabatons", "Ironpeak Battleaxe", "Ironpeak Round Shield", "Ironpeak Bear Cloak",
         "Lizard Scale", "Crocodile Hide", "Lizard Scale Cloak", "Crocodilian Boots"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in starter room ──────────────────────────────────────────────
     addCrystals(group, loader, 9, 11, 0, -0.7);
+
+    // ── Spell Cabinet in starter room ─────────────────────────────────────────
+    addSpellCabinet(group, loader, 12, 13, Math.PI, 0, 0.6, [
+        'Scroll of Fireball',
+        'Scroll of Heal',
+        'Scroll of Regeneration',
+        'Scroll of Cure Poison',
+        'Scroll of Resist Poison',
+        'Scroll of Sleep',
+    ]);
 
     // ── Teleport Torch in starter room ────────────────────────────────────────
     addDroppedTorch(group, loader, 12, 11, Math.PI / 2);
