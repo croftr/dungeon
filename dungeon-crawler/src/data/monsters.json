@@ -582,6 +582,42 @@
       }
     ]
   },
+  "night_goblin": {
+    "name": "Night Goblin",
+    "hp": 120,
+    "defence": 4,
+    "xp": 120,
+    "attackSpeed": 1,
+    "stats": {
+      "strength": 14,
+      "dexterity": 18,
+      "vitality": 10,
+      "intelligence": 5,
+      "resilience": 6
+    },
+    "drops": [
+      {
+        "item": "Life Essence",
+        "chance": 0.25
+      },
+      {
+        "item": "Poison Vial",
+        "chance": 0.40
+      },
+      {
+        "item": "Leather Cap",
+        "chance": 0.08
+      },
+      {
+        "item": "Leather Gloves",
+        "chance": 0.08
+      },
+      {
+        "item": "Fermented Sugar",
+        "chance": 0.2
+      }
+    ]
+  },
   "demon": {
     "name": "Demon",
     "hp": 200,

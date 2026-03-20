@@ -25,13 +25,26 @@ export const level1Monsters = [
     asset('/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb')),
 
   // Southern section
-  inst(D.albino_goblin, 2, 15, 5,
-    asset('/monsters/albino_goblin-aimation/Meshy_AI_Animation_Agree_Gesture_withSkin.glb'),
-    asset('/monsters/albino_goblin-aimation/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb'),
-    asset('/monsters/albino_goblin-aimation/albino-goblin-attack.mp3'), 0.45, 0, 0, 1, null,
-    asset('/monsters/albino_goblin-aimation/Meshy_AI_Animation_Dead_withSkin.glb'),
-    asset('/monsters/albino_goblin-aimation/Meshy_AI_Animation_Walking_withSkin.glb'),
-    asset('/monsters/albino_goblin-aimation/Meshy_AI_Animation_Walking_withSkin.glb')),
+  inst(D.night_goblin, 2, 15, 5,
+    asset('/monsters/night-goblin/idle.glb'),
+    asset('/monsters/night-goblin/single-attack.glb'),
+    asset('/monsters/night-goblin/goblin-attack.wav'), 0.45, 0, 0, 1, null,
+    asset('/monsters/night-goblin/dead.glb'),
+    null,
+    asset('/monsters/night-goblin/walking.glb'),
+    null,
+    asset('/monsters/night-goblin/cobat-idle.glb')),
+
+  // Upper maze — second night goblin lurking in the mid corridor
+  inst(D.night_goblin, 300, 13, 8,
+    asset('/monsters/night-goblin/idle.glb'),
+    asset('/monsters/night-goblin/single-attack.glb'),
+    asset('/monsters/night-goblin/goblin-attack.wav'), 0.45, 0, 0, 1, null,
+    asset('/monsters/night-goblin/dead.glb'),
+    null,
+    asset('/monsters/night-goblin/walking.glb'),
+    null,
+    asset('/monsters/night-goblin/cobat-idle.glb')),
 
   // Lower maze — zombie lurks in the far lower-right section, well past the row-14 barrier
   inst(D.zombie, 3, 17, 12,

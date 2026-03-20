@@ -451,6 +451,50 @@ export function createTidalWave(position) {
     }, 500);
 }
 
+export function createPoisonCloud(position) {
+    if (!proton) return;
+
+    const emitter = new Proton.Emitter();
+
+    // Slow billowing toxic cloud — large, lingering, murky green
+    emitter.rate = new Proton.Rate(new Proton.Span(20, 30), new Proton.Span(0.04));
+
+    emitter.addInitialize(new Proton.Mass(1));
+    emitter.addInitialize(new Proton.Radius(0.6, 1.4));
+    emitter.addInitialize(new Proton.Life(1.5, 3.0));
+
+    // Slow outward drift upward — cloud rising
+    emitter.addInitialize(new Proton.V(0.6, new Proton.Vector3D(0, 1, 0), 180));
+
+    const material = new THREE.SpriteMaterial({
+        map: sparkTexture,
+        color: 0xffffff,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        depthWrite: false,
+    });
+    emitter.addInitialize(new Proton.Body(new THREE.Sprite(material)));
+
+    if (position) {
+        emitter.addInitialize(new Proton.Position(new Proton.PointZone(position.x, position.y + 0.5, position.z)));
+    }
+
+    // Dark toxic green — starts murky, fades out
+    emitter.addBehaviour(new Proton.Alpha(0.7, 0.0));
+    emitter.addBehaviour(new Proton.Scale(1.5, 0.3));
+    emitter.addBehaviour(new Proton.Color('#22cc44', '#005500'));
+    emitter.addBehaviour(new Proton.RandomDrift(1.5, 1.0, 1.5, 0.05));
+
+    emitter.emit();
+    proton.addEmitter(emitter);
+
+    // Keep emitting for longer to sell the "cloud" feel
+    setTimeout(() => {
+        emitter.stopEmit();
+        setTimeout(() => { proton.removeEmitter(emitter); }, 3500);
+    }, 800);
+}
+
 export function createLizardVenomSpit(position) {
     if (!proton) return;
 

@@ -39,7 +39,7 @@
         "attackType": "swipe",
         "weaponType": "dagger",
         "staminaDrain": 1,
-        "baseDamage": 6,
+        "baseDamage": 7,
         "delay": 2,
         "statWeights": {
             "str": 0.1,

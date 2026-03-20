@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
-import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit } from './particles.js';
+import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud } from './particles.js';
 import { CELL, isPassable } from './map.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
@@ -212,7 +212,7 @@ _applyMultiAttacks('Ogre', [
     damageTimings: [0.3, 0.7],
     weight: 2,
     specialAttack: true,
-    damageMultiplier: 1.5,
+    damageMultiplier: 0.75,
     specialOnHitEffects: [{ effectId: 'fear', chance: 0.75 }],
   },
 ]);
@@ -345,6 +345,36 @@ _applyMultiAttacks('Lizard Man', [
     damageMultiplier: 0.8,
     specialAttack: true,
     specialOnHitEffects: [{ effectId: 'poison', chance: 0.70 }],
+  },
+]);
+
+_applyMultiAttacks('Night Goblin', [
+  {
+    name: 'singleSlash',
+    glb: asset('/monsters/night-goblin/single-attack.glb'),
+    sound: asset('/monsters/night-goblin/goblin-attack.wav'),
+    soundTimings: [0.45],
+    damageTimings: [0.45],
+    weight: 4,
+  },
+  {
+    name: 'doubleSlash',
+    glb: asset('/monsters/night-goblin/double-attack.glb'),
+    sound: asset('/monsters/night-goblin/goblin-attack.wav'),
+    soundTimings: [0.3, 0.65],
+    damageTimings: [0.3, 0.65],
+    weight: 3,
+  },
+  {
+    name: 'poisonCloud',
+    glb: asset('/monsters/night-goblin/special-attack.glb'),
+    sound: asset('/monsters/night-goblin/special-attack.mp3'),
+    soundTimings: [0.5],
+    damageTimings: [0.5],
+    weight: 2,
+    damageMultiplier: 0,  // no damage — pure status
+    specialAttack: true,
+    specialOnHitEffects: [{ effectId: 'poison', chance: 0.20 }],
   },
 ]);
 
@@ -704,6 +734,20 @@ function _loadMonster(m, scene) {
       _gltfLoader.load(m.glbIdleAlt, (altGltf) => {
         if (altGltf.animations && altGltf.animations.length > 0) {
           m.actions.idleAlt = m.mixer.clipAction(altGltf.animations[0]);
+        }
+      });
+    }
+
+    if (m.glbCombatIdle) {
+      _gltfLoader.load(m.glbCombatIdle, (combatGltf) => {
+        if (combatGltf.animations && combatGltf.animations.length > 0) {
+          m.actions.combatIdle = m.mixer.clipAction(combatGltf.animations[0]);
+          // Override getIdleAction: use combatIdle when in combat, normal idle otherwise
+          m.getIdleAction = function () {
+            if (isInCombat() && m.actions.combatIdle) return m.actions.combatIdle;
+            if (!m.actions.idleAlt) return m.actions.idle;
+            return (Math.random() < 0.25) ? m.actions.idle : m.actions.idleAlt;
+          };
         }
       });
     }
@@ -1795,6 +1839,12 @@ export function triggerMonsterAttack(monsterId) {
         setTimeout(() => { if (m.alive) createLizardVenomSpit(m.mesh.position); }, duration * pts * 1000);
         showMessage(`<b>${m.name}</b> spews a torrent of corrosive venom!`, 2000);
       }
+      if (variant.name === 'poisonCloud' && m.mesh) {
+        const duration = attackAction.getClip().duration;
+        const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
+        setTimeout(() => { if (m.alive) createPoisonCloud(m.mesh.position); }, duration * pts * 1000);
+        showMessage(`<b>${m.name}</b> releases a toxic poison cloud!`, 2000);
+      }
     }
   }
   // Legacy fallback
@@ -1811,7 +1861,7 @@ export function triggerMonsterAttack(monsterId) {
     attackAction.setEffectiveTimeScale(1);
     attackAction.setEffectiveWeight(1);
     attackAction.play();
-    const fromAction = (m.actions.walk && m._animState === 'walk') ? m.actions.walk : m.actions.idle;
+    const fromAction = (m.actions.walk && m._animState === 'walk') ? m.actions.walk : (m._activeIdle || m.actions.idle);
     fromAction.crossFadeTo(attackAction, 0.2, true);
 
     // ── Sound scheduling ──
@@ -1862,6 +1912,37 @@ function _applyMonsterSpecialAttack(monster, variant) {
 
   const effectsOverride = variant.specialOnHitEffects ?? null;
 
+  // Pure-status attacks (damageMultiplier === 0) bypass hit/miss and deal no damage.
+  // Each alive member rolls the effect chance independently.
+  if (variant.damageMultiplier === 0) {
+    aliveMembers.forEach(target => {
+      (effectsOverride ?? []).forEach(effect => {
+        const effectiveChance = calcOnHitChance(
+          effect.chance,
+          target.stats?.resilience ?? 0,
+          getEffectiveStatusResistances(target),
+          effect.effectId,
+        );
+        if (Math.random() < effectiveChance) {
+          applyStatusEffect(target.id, effect.effectId, null, effect.durationSec);
+          const def = STATUS_EFFECT_DEFS[effect.effectId];
+          showMessage(`<b>${target.name}</b> is afflicted with <b>${def?.name ?? effect.effectId}</b>!`, 2500);
+          addLogEntry({
+            time: Date.now(),
+            type: 'status-effect',
+            actor: 'monster',
+            attacker: monster.name,
+            target: target.name,
+            effectId: effect.effectId,
+            effectName: def?.name ?? effect.effectId,
+            effectColor: def?.color ?? null,
+          });
+        }
+      });
+    });
+    return;
+  }
+
   if (variant.specialAttackType === 'randomAny') {
     // Pick one random alive party member (ignoring formation rules)
     const target = aliveMembers[Math.floor(Math.random() * aliveMembers.length)];
@@ -1873,7 +1954,11 @@ function _applyMonsterSpecialAttack(monster, variant) {
   } else {
     // Default AoE: hit all alive members
     aliveMembers.forEach(target => {
-      _applyMonsterDamage(monster, { forceTarget: target, onHitEffectsOverride: effectsOverride });
+      _applyMonsterDamage(monster, {
+        forceTarget: target,
+        onHitEffectsOverride: effectsOverride,
+        damageMultiplier: variant.damageMultiplier ?? 1,
+      });
     });
   }
 }

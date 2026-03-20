@@ -13,7 +13,8 @@ export function inst(
   def, id, gridRow, gridCol,
   glbIdle, glbAttack, attackSound,
   scale = 0.45, offsetX = 0, offsetZ = 0, level = 1,
-  patrol = null, glbDeath = null, glbHit = null, glbWalk = null, glbIdleAlt = null
+  patrol = null, glbDeath = null, glbHit = null, glbWalk = null, glbIdleAlt = null,
+  glbCombatIdle = null
 ) {
   return {
     id, type: 'glb',
@@ -26,5 +27,6 @@ export function inst(
     level,
     patrol,
     glbIdleAlt,
+    glbCombatIdle,
   };
 }
