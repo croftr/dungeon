@@ -69,6 +69,11 @@ export function spawnLevel1Objects(ctx) {
     ]);
 
     // ── Spell Cabinet ────────────────────────────────────────────────────────
+    // Secret room north of the zombie room — moved here from Level 0
+    addSpellCabinet(group, loader, 17, 11, 0, 0, -0.7, [
+        'Minor Potions Parchment',
+    ]);
+
     // Dead-end passage near the zombie room
     addSpellCabinet(group, loader, 21, 16, -Math.PI / 2, 0.7, 0, [
         'Scroll of Regeneration',

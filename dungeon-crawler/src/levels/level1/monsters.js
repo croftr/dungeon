@@ -157,6 +157,27 @@ export const level1Monsters = [
     null,
     asset('/monsters/mummy-annimation/Meshy_AI_Animation_Walking_withSkin.glb')),
 
+  // Night Goblins in the secret room north of the zombie room (Rows 11-13, Cols 15-19)
+  inst(D.night_goblin, 300, 12, 16,
+    asset('/monsters/night-goblin/idle.glb'),
+    asset('/monsters/night-goblin/single-attack.glb'),
+    asset('/monsters/night-goblin/goblin-attack.wav'), 0.45, 0, 0, 1, null,
+    asset('/monsters/night-goblin/dead.glb'),
+    null,
+    asset('/monsters/night-goblin/walking.glb'),
+    null,
+    asset('/monsters/night-goblin/cobat-idle.glb')),
+
+  inst(D.night_goblin, 301, 12, 18,
+    asset('/monsters/night-goblin/idle.glb'),
+    asset('/monsters/night-goblin/single-attack.glb'),
+    asset('/monsters/night-goblin/goblin-attack.wav'), 0.45, 0, 0, 1, null,
+    asset('/monsters/night-goblin/dead.glb'),
+    null,
+    asset('/monsters/night-goblin/walking.glb'),
+    null,
+    asset('/monsters/night-goblin/cobat-idle.glb')),
+
   // Zombies in the hidden room (Rows 17-20, Cols 16-19)
   inst(D.zombie, 201, 18, 17,
     asset('/monsters/zombie-animation/Meshy_AI_Animation_Idle_3_withSkin.glb'),
