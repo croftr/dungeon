@@ -99,5 +99,47 @@
                 "quantity": 1
             }
         ]
+    },
+    {
+        "name": "Seers Shawl",
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Shawl",
+                "quantity": 1
+            },
+            {
+                "name": "Demon's Eyes",
+                "quantity": 1
+            }
+        ]
+    },
+    {
+        "name": "Trickster's Hood",
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Leather Cap",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Aqua Man Flipper",
+                "quantity": 1
+            }
+        ]
     }
 ]

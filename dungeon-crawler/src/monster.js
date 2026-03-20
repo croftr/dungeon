@@ -1282,7 +1282,7 @@ export function updateMonsters(dt, playerCamera, scene) {
         if (d.tickAccum >= def.tickInterval) {
           d.tickAccum -= def.tickInterval;
           const dmg = def.tickDamage || 0;
-          if (dmg > 0) hitMonster(m.id, dmg, 'dot', false, d.caster ?? null);
+          if (dmg > 0) hitMonster(m.id, dmg, d.effectId + '-dot', false, d.caster ?? null);
           if (dmg < 0) m.hp = Math.min(m.hpMax, m.hp - dmg); // heal
           panelDirty = true;
         }
@@ -1482,18 +1482,19 @@ export function applyMonsterStatusEffect(monsterId, effectId, caster = null, dur
 //  HIT / DAMAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function showMonsterDamage(monsterId, damage, isCrit) {
+export function showMonsterDamage(monsterId, damage, isCrit, attackType = '') {
   const m = monsters.find(x => x.id === monsterId);
   if (!m || !m.mesh) return;
 
   // We use a wrapper div because CSS2DObject takes control of the element's transform.
-  // If we animate 'transform' on the same element, they fight and the world-position 
+  // If we animate 'transform' on the same element, they fight and the world-position
   // following breaks. By animating only the inner div, we keep the follow-logic.
   const wrapper = document.createElement('div');
   wrapper.className = 'monster-damage-wrapper';
 
   const inner = document.createElement('div');
   inner.className = 'monster-damage-popup' + (isCrit ? ' damage-popup--crit' : '');
+  if (attackType.includes('poison')) inner.style.color = '#4dff91';
   inner.textContent = damage;
   wrapper.appendChild(inner);
 
@@ -1519,7 +1520,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
   // Stats are now cumulative — no auto-reset on new fight.
 
   // ── Skeleton Shield Block ──────────────────────────────────────────────────
-  if (m.name.includes('Skeleton') && attackType !== 'poison-dot' && attackType !== 'fireball' && attackType !== 'banishment') {
+  if (m.name.includes('Skeleton') && !attackType.includes('poison') && attackType !== 'fireball' && attackType !== 'banishment') {
     if (Math.random() <= 0.10) {
       addLogEntry({
         time: Date.now(), actor: 'player',
@@ -1594,7 +1595,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
   setTimeout(() => {
     if (!m.mesh) return; // Safeguard if level changed or monster destroyed
 
-    if (attackType !== 'poison-dot') {
+    if (!attackType.includes('poison')) {
       playHitSound();
     }
 
@@ -1602,7 +1603,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       playCritSound(attackType);
     }
 
-    showMonsterDamage(monsterId, damage, isCrit);
+    showMonsterDamage(monsterId, damage, isCrit, attackType);
 
     // Update the HP bar above the monster's head
     if (m.hpBarFill) {

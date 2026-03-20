@@ -137,5 +137,32 @@
             "intelligence": 2,
             "resilience": 2
         }
+    },
+    {
+        "name": "Seers Shawl",
+        "slot": "head",
+        "icon": "/icons/seers_shawl.png",
+        "description": "A mystical shawl woven from ancient sylvan leaves and strong magical threads.",
+        "defence": 3,
+        "value": 1100,
+        "weight": 1.5,
+        "statBonuses": {
+            "intelligence": 1,
+            "resilience": 1
+        }
+    },
+    {
+        "name": "Trickster's Hood",
+        "slot": "head",
+        "icon": "/icons/trickster_hood.png",
+        "description": "A cunning hood worn by dungeon rogues. Its subtle enchantments sharpen the wearer's eye for hidden mechanisms.",
+        "defence": 3,
+        "value": 1100,
+        "weight": 1.5,
+        "statBonuses": {
+            "dexterity": 1,
+            "resilience": 1
+        },
+        "trapDisarmBonus": 0.5
     }
 ]

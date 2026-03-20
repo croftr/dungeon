@@ -166,6 +166,7 @@ export function updateEffectiveStats(m) {
   // Keys: "all" (every skill), or a skill type string e.g. "healing", "buff", "debuff".
   const newSkillBonuses = {};
   const newStatusResistances = {};
+  let newSkillDurationBonusMs = 0;
   const countedItems = new Set();
 
   Object.values(m.equipment || {}).forEach(item => {
@@ -193,6 +194,11 @@ export function updateEffectiveStats(m) {
         });
       }
 
+      // skillDurationBonusMs: adds milliseconds to the active duration of all timed skills.
+      if (def.skillDurationBonusMs) {
+        newSkillDurationBonusMs += def.skillDurationBonusMs;
+      }
+
       // statusResistances: reduce the chance of specific on-hit effects landing.
       // Values are additive across items, capped at 0.9 (90%) per effect.
       // e.g. { "poison": 0.5 } halves the chance that poison takes hold.
@@ -207,6 +213,7 @@ export function updateEffectiveStats(m) {
   m.stats = newStats;
   m.skillBonuses = newSkillBonuses;
   m.statusResistances = newStatusResistances;
+  m.skillDurationBonusMs = newSkillDurationBonusMs;
 
   // Recalculate hpMax/mpMax/spMax from the (now equipment-boosted) stats
   const derived = calcDerivedMaxStats(newStats);
@@ -833,8 +840,10 @@ function populateTooltip(obj) {
   const hasStatChange = isSpellbook && def?.requiredInt;
   const hasStatBonus = !isSpellbook && def?.statBonuses && Object.values(def.statBonuses).some(v => v !== 0);
   const hasSkillBonus = def?.skillBonuses && Object.keys(def.skillBonuses).length > 0;
+  const hasSkillDurationBonus = def?.skillDurationBonusMs != null && def.skillDurationBonusMs !== 0;
+  const hasTrapDisarmBonus = def?.trapDisarmBonus != null && def.trapDisarmBonus !== 0;
   const hasOnHitEffects = def?.onHitEffects && def.onHitEffects.length > 0;
-  const hasBonusList = hasStatBonus || hasSkillBonus;
+  const hasBonusList = hasStatBonus || hasSkillBonus || hasSkillDurationBonus || hasTrapDisarmBonus;
 
   // Hide/show rows based on item type and available stats
   document.getElementById('detail-row-damage').style.display = (isAmmo || isSpellbook || isMainSpellbook) ? 'none' : 'flex';
@@ -913,6 +922,17 @@ function populateTooltip(obj) {
           const label = BONUS_LABELS[key] ?? key;
           return `<div class="detail-skillbonus-item"><span>${label}</span><span>+${val}</span></div>`;
         }).join('');
+      }
+
+      // Skill duration bonus
+      if (hasSkillDurationBonus) {
+        const secs = def.skillDurationBonusMs / 1000;
+        html += `<div class="detail-skillbonus-item"><span>Skill Duration</span><span>+${secs}s</span></div>`;
+      }
+
+      // Trap disarm bonus
+      if (hasTrapDisarmBonus) {
+        html += `<div class="detail-skillbonus-item"><span>Disarm Trap</span><span>+${Math.round(def.trapDisarmBonus * 100)}%</span></div>`;
       }
 
       listEl.innerHTML = html;
@@ -3100,9 +3120,10 @@ function _useEntangle(member, memberIndex) {
 
   const def = getItemDef(member.equipment.skill.name);
   const delayMs = (def?.delay ?? 60) * 1000;
+  const entangleDurationMs = ENTANGLE_DURATION_MS + (member.skillDurationBonusMs ?? 0);
   skillsState.entangle.active = true;
   skillsState.entangle.targetId = target.id;
-  skillsState.entangle.expiresAt = now + ENTANGLE_DURATION_MS;
+  skillsState.entangle.expiresAt = now + entangleDurationMs;
   skillsState.entangle.magnitude = resolveSkillMagnitude('Entangle', SKILLS_DATA['Entangle'], member);
   _entangleCooldownEnd = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill-Entangle`] = now;
@@ -3122,7 +3143,7 @@ function _useEntangle(member, memberIndex) {
     skillsState.entangle.targetId = null;
     showMessage(`<span style="color:#80ff80">Entangle</span> fades — the roots wither away.`, 2500);
     _entangleExpireTimer = null;
-  }, ENTANGLE_DURATION_MS);
+  }, entangleDurationMs);
 
   _startSkillCooldownUI(memberIndex, _entangleCooldownEnd);
 }
@@ -3144,9 +3165,10 @@ function _useSunderArmor(member, memberIndex) {
 
   const def = getItemDef(member.equipment.skill.name);
   const delayMs = (def?.delay ?? 60) * 1000;
+  const sunderArmorDurationMs = SUNDER_ARMOR_DURATION_MS + (member.skillDurationBonusMs ?? 0);
   skillsState.sunderArmor.active = true;
   skillsState.sunderArmor.targetId = target.id;
-  skillsState.sunderArmor.expiresAt = now + SUNDER_ARMOR_DURATION_MS;
+  skillsState.sunderArmor.expiresAt = now + sunderArmorDurationMs;
   skillsState.sunderArmor.magnitude = resolveSkillMagnitude('Sunder Armor', SKILLS_DATA['Sunder Armor'], member);
   _sunderArmorCooldownEnd = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill-Sunder Armor`] = now;
@@ -3166,7 +3188,7 @@ function _useSunderArmor(member, memberIndex) {
     skillsState.sunderArmor.targetId = null;
     showMessage(`<span style="color:#ff8080">Sunder Armor</span> fades — the armor naturally mends.`, 2500);
     _sunderArmorExpireTimer = null;
-  }, SUNDER_ARMOR_DURATION_MS);
+  }, sunderArmorDurationMs);
 
   _startSkillCooldownUI(memberIndex, _sunderArmorCooldownEnd);
 }
@@ -3187,9 +3209,10 @@ function _useBerserk(member, memberIndex) {
 
   const def = getItemDef(member.equipment.skill.name);
   const delayMs = (def?.delay ?? 60) * 1000;
+  const berserkDurationMs = BERSERK_DURATION_MS + (member.skillDurationBonusMs ?? 0);
   skillsState.berserk.active = true;
   skillsState.berserk.actorName = member.name;
-  skillsState.berserk.expiresAt = now + BERSERK_DURATION_MS;
+  skillsState.berserk.expiresAt = now + berserkDurationMs;
   skillsState.berserk.magnitude = resolveSkillMagnitude('Berserk', SKILLS_DATA['Berserk'], member);
   _berserkCooldownEnd = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill-Berserk`] = now;
@@ -3209,7 +3232,7 @@ function _useBerserk(member, memberIndex) {
     skillsState.berserk.actorName = null;
     showMessage(`<span style="color:#ff5050">Berserk</span> fades — the rage subsides.`, 2500);
     _berserkExpireTimer = null;
-  }, BERSERK_DURATION_MS);
+  }, berserkDurationMs);
 
   _startSkillCooldownUI(memberIndex, _berserkCooldownEnd);
 }
@@ -3230,8 +3253,9 @@ function _useWarcry(member, memberIndex) {
 
   const def = getItemDef(member.equipment.skill.name);
   const delayMs = (def?.delay ?? 60) * 1000;
+  const warcryDurationMs = WARCRY_DURATION_MS + (member.skillDurationBonusMs ?? 0);
   skillsState.warcry.active = true;
-  skillsState.warcry.expiresAt = now + WARCRY_DURATION_MS;
+  skillsState.warcry.expiresAt = now + warcryDurationMs;
   skillsState.warcry.magnitude = resolveSkillMagnitude('Warcry', SKILLS_DATA['Warcry'], member);
   _warcryCooldownEnd = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill-Warcry`] = now;
@@ -3251,7 +3275,7 @@ function _useWarcry(member, memberIndex) {
     showMessage(`<span style="color:#ffcc00">Warcry</span> fades — the inspiration passes.`, 2500);
     addLogEntry({ type: 'skill', actor: 'System', skillName: 'Warcry fades' });
     _warcryExpireTimer = null;
-  }, WARCRY_DURATION_MS);
+  }, warcryDurationMs);
 
   _startSkillCooldownUI(memberIndex, _warcryCooldownEnd);
 }
@@ -3267,9 +3291,10 @@ function _useSanctuary(member, memberIndex) {
 
   const def = getItemDef(member.equipment.skill.name);
   const delayMs = (def?.delay ?? 120) * 1000;
+  const sanctuaryDurationMs = SANCTUARY_DURATION_MS + (member.skillDurationBonusMs ?? 0);
   // Activate the buff — magnitude resolved from the caster's current stats
   skillsState.sanctuary.active = true;
-  skillsState.sanctuary.expiresAt = now + SANCTUARY_DURATION_MS;
+  skillsState.sanctuary.expiresAt = now + sanctuaryDurationMs;
   skillsState.sanctuary.magnitude = resolveSkillMagnitude('Sanctuary', SKILLS_DATA['Sanctuary'], member);
   _sanctuaryCooldownEnd = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill-Sanctuary`] = now;
@@ -3289,7 +3314,7 @@ function _useSanctuary(member, memberIndex) {
     skillsState.sanctuary.active = false;
     showMessage(`<span style="color:#f0d080">Sanctuary</span> fades — the shield dissipates.`, 2500);
     _sanctuaryExpireTimer = null;
-  }, SANCTUARY_DURATION_MS);
+  }, sanctuaryDurationMs);
 
   _startSkillCooldownUI(memberIndex, _sanctuaryCooldownEnd);
 }
@@ -3348,8 +3373,9 @@ function _useArcaneLantern(member, memberIndex) {
 
   const def = getItemDef(member.equipment.skill.name);
   const delayMs = (def?.delay ?? 60) * 1000;
+  const arcaneLanternDurationMs = ARCANE_LANTERN_DURATION_MS + (member.skillDurationBonusMs ?? 0);
   skillsState.arcaneLight.active = true;
-  skillsState.arcaneLight.expiresAt = now + ARCANE_LANTERN_DURATION_MS;
+  skillsState.arcaneLight.expiresAt = now + arcaneLanternDurationMs;
   _arcaneLanternCooldownEnd = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill-Arcane Lantern`] = now;
 
@@ -3366,7 +3392,7 @@ function _useArcaneLantern(member, memberIndex) {
     skillsState.arcaneLight.active = false;
     showMessage(`<span style="color:#a0d8ff">Arcane Lantern</span> fades — darkness returns.`, 2500);
     _arcaneLanternExpireTimer = null;
-  }, ARCANE_LANTERN_DURATION_MS);
+  }, arcaneLanternDurationMs);
 
   _startSkillCooldownUI(memberIndex, _arcaneLanternCooldownEnd);
 }
@@ -3385,9 +3411,10 @@ function _useMinersLight(member, memberIndex) {
 
   const def = getItemDef(member.equipment.skill.name);
   const delayMs = (def?.delay ?? 60) * 1000;
+  const minersLightDurationMs = ARCANE_LANTERN_DURATION_MS + (member.skillDurationBonusMs ?? 0);
   // Same duration and effect as Arcane Lantern
   skillsState.arcaneLight.active = true;
-  skillsState.arcaneLight.expiresAt = now + ARCANE_LANTERN_DURATION_MS;
+  skillsState.arcaneLight.expiresAt = now + minersLightDurationMs;
   _minersLightCooldownEnd = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill-Miners Light`] = now;
 
@@ -3405,7 +3432,7 @@ function _useMinersLight(member, memberIndex) {
     skillsState.arcaneLight.active = false;
     showMessage(`<span style="color:#d8d8ff">Miners Light</span> fades — darkness returns.`, 2500);
     _minersLightExpireTimer = null;
-  }, ARCANE_LANTERN_DURATION_MS);
+  }, minersLightDurationMs);
 
   _startSkillCooldownUI(memberIndex, _minersLightCooldownEnd);
 }
@@ -3426,8 +3453,9 @@ function _useWarDance(member, memberIndex) {
 
   const def = getItemDef(member.equipment.skill.name);
   const delayMs = (def?.delay ?? 60) * 1000;
+  const warDanceDurationMs = WAR_DANCE_DURATION_MS + (member.skillDurationBonusMs ?? 0);
   skillsState.warDance.active = true;
-  skillsState.warDance.expiresAt = now + WAR_DANCE_DURATION_MS;
+  skillsState.warDance.expiresAt = now + warDanceDurationMs;
   skillsState.warDance.magnitude = resolveSkillMagnitude('War Dance', SKILLS_DATA['War Dance'], member);
   _warDanceCooldownEnd = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill-War Dance`] = now;
@@ -3447,7 +3475,7 @@ function _useWarDance(member, memberIndex) {
     showMessage(`<span style="color:#ff80c0">War Dance</span> fades — the rhythm ends.`, 2500);
     addLogEntry({ type: 'skill', actor: 'System', skillName: 'War Dance fades' });
     _warDanceExpireTimer = null;
-  }, WAR_DANCE_DURATION_MS);
+  }, warDanceDurationMs);
 
   _startSkillCooldownUI(memberIndex, _warDanceCooldownEnd);
 }
@@ -3468,9 +3496,10 @@ function _useWhirlwind(member, memberIndex) {
 
   const def = getItemDef(member.equipment.skill.name);
   const delayMs = (def?.delay ?? 60) * 1000;
+  const whirlwindDurationMs = WHIRLWIND_DURATION_MS + (member.skillDurationBonusMs ?? 0);
   skillsState.whirlwind.active = true;
   skillsState.whirlwind.actorName = member.name;
-  skillsState.whirlwind.expiresAt = now + WHIRLWIND_DURATION_MS;
+  skillsState.whirlwind.expiresAt = now + whirlwindDurationMs;
   skillsState.whirlwind.magnitude = resolveSkillMagnitude('Whirlwind', SKILLS_DATA['Whirlwind'], member);
   _whirlwindCooldownEnds[memberIndex] = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill-Whirlwind`] = now;
@@ -3490,7 +3519,7 @@ function _useWhirlwind(member, memberIndex) {
     skillsState.whirlwind.actorName = null;
     showMessage(`<span style="color:#a0f0ff">Whirlwind</span> fades — movement returns to normal.`, 2500);
     _whirlwindExpireTimers[memberIndex] = null;
-  }, WHIRLWIND_DURATION_MS);
+  }, whirlwindDurationMs);
 
   _startSkillCooldownUI(memberIndex, _whirlwindCooldownEnds[memberIndex]);
 }
@@ -3518,9 +3547,9 @@ function _useDoubleAttack(member, memberIndex) {
   const mag = resolveSkillMagnitude('Double Attack', skillDef, member);
   const cooldownMs = (skillDef?.cooldownMs ?? 90000);
   
-  // Base duration is 20s. Any magnitude > 1 (e.g. from the dagger's +20 bonus) 
-  // adds directly to the duration in seconds.
-  const durationMs = (skillDef?.durationMs ?? 20000) + (mag > 1 ? (mag - 1) * 1000 : 0);
+  // Base duration is 20s. Any magnitude > 1 (e.g. from the dagger's +20 bonus)
+  // adds directly to the duration in seconds. Also apply any item duration bonus.
+  const durationMs = (skillDef?.durationMs ?? 20000) + (mag > 1 ? (mag - 1) * 1000 : 0) + (member.skillDurationBonusMs ?? 0);
 
   skillsState.doubleAttack.active = true;
   skillsState.doubleAttack.actorName = member.name;
@@ -3563,9 +3592,10 @@ function _useTrueShot(member, memberIndex) {
 
   const def = getItemDef(member.equipment.skill.name);
   const delayMs = (def?.delay ?? 60) * 1000;
+  const trueShotDurationMs = TRUE_SHOT_DURATION_MS + (member.skillDurationBonusMs ?? 0);
   skillsState.trueShot.active = true;
   skillsState.trueShot.actorName = member.name;
-  skillsState.trueShot.expiresAt = now + TRUE_SHOT_DURATION_MS;
+  skillsState.trueShot.expiresAt = now + trueShotDurationMs;
   _trueShotCooldownEnds[memberIndex] = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill-True Shot`] = now;
 
@@ -3583,7 +3613,7 @@ function _useTrueShot(member, memberIndex) {
     skillsState.trueShot.actorName = null;
     showMessage(`<span style="color:#ffe080">True Shot</span> fades — focus returns to normal.`, 2500);
     _trueShotExpireTimers[memberIndex] = null;
-  }, TRUE_SHOT_DURATION_MS);
+  }, trueShotDurationMs);
 
   _startSkillCooldownUI(memberIndex, _trueShotCooldownEnds[memberIndex]);
 }
@@ -3605,9 +3635,10 @@ function _useRampart(member, memberIndex) {
   const mag = resolveSkillMagnitude('Rampart', skillDef, member);
   const cooldownMs = (skillDef.cooldownMs ?? 120000);
 
+  const rampartDurationMs = RAMPART_DURATION_MS + (member.skillDurationBonusMs ?? 0);
   skillsState.rampart.active = true;
   skillsState.rampart.actorName = member.name;
-  skillsState.rampart.expiresAt = now + RAMPART_DURATION_MS;
+  skillsState.rampart.expiresAt = now + rampartDurationMs;
   skillsState.rampart.magnitude = mag;
 
   _rampartCooldownEnds[memberIndex] = now + cooldownMs;
@@ -3629,7 +3660,7 @@ function _useRampart(member, memberIndex) {
       showMessage(`<span style="color:#ffd700">Rampart</span> fades — the character lowers their guard.`, 2500);
     }
     _rampartExpireTimers[memberIndex] = null;
-  }, RAMPART_DURATION_MS);
+  }, rampartDurationMs);
 
   _startSkillCooldownUI(memberIndex, _rampartCooldownEnds[memberIndex]);
 }

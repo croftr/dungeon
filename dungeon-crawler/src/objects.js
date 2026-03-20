@@ -1235,8 +1235,25 @@ function openTrapDisarmModal(trapObj) {
     const overlay = document.getElementById('trap-disarm-overlay');
     if (!overlay) return;
 
+    // Sum trapDisarmBonus from all living party members' equipped items
+    const partyTrapBonus = party.reduce((total, m) => {
+        if (m.isEmpty || m.isDead) return total;
+        let bonus = 0;
+        Object.values(m.equipment || {}).forEach(item => {
+            if (item) bonus += getItemDef(item.name)?.trapDisarmBonus ?? 0;
+        });
+        return total + bonus;
+    }, 0);
+    const effectiveChance = Math.min(TRAP_DISARM_CHANCE + partyTrapBonus, 1);
+
     const chanceEl = document.getElementById('trap-disarm-chance');
-    if (chanceEl) chanceEl.textContent = `${Math.round(TRAP_DISARM_CHANCE * 100)}%`;
+    if (chanceEl) {
+        if (partyTrapBonus > 0) {
+            chanceEl.innerHTML = `<span style="color:#ffd700">${Math.round(effectiveChance * 100)}%</span> <span style="color:#aaa;font-size:0.85em">(${Math.round(TRAP_DISARM_CHANCE * 100)}% + ${Math.round(partyTrapBonus * 100)}% bonus)</span>`;
+        } else {
+            chanceEl.textContent = `${Math.round(effectiveChance * 100)}%`;
+        }
+    }
 
     const resultEl = document.getElementById('trap-disarm-result');
     if (resultEl) { resultEl.textContent = ''; resultEl.className = ''; }
@@ -1255,7 +1272,7 @@ function openTrapDisarmModal(trapObj) {
 
     newAttempt.addEventListener('click', () => {
         if (!_activeTrapObj) return;
-        const success = Math.random() < TRAP_DISARM_CHANCE;
+        const success = Math.random() < effectiveChance;
         const resultEl2 = document.getElementById('trap-disarm-result');
 
         if (success) {
