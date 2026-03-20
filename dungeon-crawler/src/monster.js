@@ -24,6 +24,7 @@ import { resetBattleStats, recordDamageDealt, recordDamageTaken, showBattleStats
 import { getItemDef } from './items.js';
 import { spawnDroppedItem, isStatueAt, spawnCorpse } from './objects.js';
 import { MONSTER_DEFS as D } from './monster-defs.js';
+import { inst } from './monster-factory.js';
 import { level0Monsters } from './levels/level0/monsters.js';
 import { level1Monsters } from './levels/level1/monsters.js';
 import { level2Monsters } from './levels/level2/monsters.js';
