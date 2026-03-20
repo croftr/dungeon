@@ -419,7 +419,7 @@
   },
   "treeman": {
     "name": "Treeman",
-    "hp": 330,
+    "hp": 350,
     "defence": 9,
     "xp": 1000,
     "attackSpeed": 1.2,

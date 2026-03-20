@@ -121,7 +121,7 @@
         "magnitudeScale": 0.5,
         "magnitudeBonusMode": "flat",
         "delay": 4,
-        "mpCost": 12,
+        "mpCost": 6,
         "icon": "/icons/banishment.png",
         "description": "A dangerous beam of magical light that strikes with pure energy.",
         "value": 0,

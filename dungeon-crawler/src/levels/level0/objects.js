@@ -31,16 +31,6 @@ export function spawnLevel0Objects(ctx) {
     // ── Crystals in starter room ──────────────────────────────────────────────
     addCrystals(group, loader, 9, 11, 0, -0.7);
 
-    // ── Spell Cabinet in starter room ─────────────────────────────────────────
-    addSpellCabinet(group, loader, 12, 13, Math.PI, 0, 0.6, [
-        'Scroll of Fireball',
-        'Scroll of Heal',
-        'Scroll of Regeneration',
-        'Scroll of Cure Poison',
-        'Scroll of Resist Poison',
-        'Scroll of Sleep',
-    ]);
-
     // ── Teleport Torch in starter room ────────────────────────────────────────
     addDroppedTorch(group, loader, 12, 11, Math.PI / 2);
 

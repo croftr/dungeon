@@ -42,8 +42,7 @@
         "baseDamage": 7,
         "delay": 2,
         "statWeights": {
-            "str": 0.1,
-            "dex": 0.9
+            "dex": 1
         },
         "icon": "/icons/elven-dagger.png",
         "description": "A short, double-edged blade. Quick and easy to slip past armour.",

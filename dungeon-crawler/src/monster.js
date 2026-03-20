@@ -3,8 +3,7 @@ import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
 import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createCrocodileSparkle } from './particles.js';
 import { CELL, isPassable } from './map.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { gltfLoader as _gltfLoader } from './gltf-loader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { party, setHp, flashPortraitHit, showMemberDamage, showMemberHeal, refreshPartyCards, applyStatusEffect, getEffectiveStats, getEffectiveStatusResistances, getDefenceModifier, describeEffect, isPartyInvincible, isPartyUnseen } from './party.js';
 import { STATUS_EFFECT_DEFS } from './status-effects.js';
@@ -685,10 +684,6 @@ function _updateStatsPanel(m) {
     debuffsHtml;
 }
 
-const _draco = new DRACOLoader();
-_draco.setDecoderPath(asset('/draco/'));
-const _gltfLoader = new GLTFLoader();
-_gltfLoader.setDRACOLoader(_draco);
 
 function _loadMonster(m, scene) {
   // Load the idle/walking GLB as the base mesh
@@ -1797,8 +1792,10 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     allOnHit.forEach(effect => {
       if (Math.random() < calcOnHitChance(effect.chance, m.stats?.resilience ?? 0, null, effect.effectId)) {
         applyMonsterStatusEffect(monsterId, effect.effectId, character.name);
-        const def = STATUS_EFFECT_DEFS[effect.effectId];
-        showMessage(`${m.name} is afflicted with <b>${def?.name ?? effect.effectId}</b>!`);
+        if (effect.effectId !== 'lifesteal') {
+          const def = STATUS_EFFECT_DEFS[effect.effectId];
+          showMessage(`${m.name} is afflicted with <b>${def?.name ?? effect.effectId}</b>!`);
+        }
         appliedEffects.push(effect.effectId);
       }
     });

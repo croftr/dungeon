@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import { buildLevel, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap } from './map.js';
+import { buildLevel, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures } from './map.js';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles } from './particles.js';
@@ -122,6 +122,12 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
+
+// When the GPU evicts the WebGL context (common during video decoding under memory pressure),
+// Three.js restores the context but CanvasTextures don't auto-reupload — force them here.
+canvas.addEventListener('webglcontextrestored', () => {
+  invalidateWallTextures();
+});
 
 // CSS2D renderer — renders HTML labels (monster HP bars) anchored in 3D space
 const css2dRenderer = new CSS2DRenderer();

@@ -1,6 +1,5 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { gltfLoader as _gltfLoader } from './gltf-loader.js';
 import { CELL, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld, buildLevel, level2Map } from './map.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, isInFrontOfPlayer, player, FACING_ANGLES, setPlayerFrozen } from './player.js';
@@ -122,10 +121,6 @@ let _activeTrapObj = null; // the trap mesh currently showing the disarm modal
 
 let objectsGroup = new THREE.Group();
 
-const _draco = new DRACOLoader();
-_draco.setDecoderPath(asset('/draco/'));
-const _gltfLoader = new GLTFLoader();
-_gltfLoader.setDRACOLoader(_draco);
 
 export function clearObjects(scene) {
     scene.remove(objectsGroup);

@@ -168,6 +168,12 @@ function makeFloorTexture() {
 const brickTex = makeBrickTexture();
 const floorTex = makeFloorTexture();
 
+/** Call after a WebGL context restore to force texture re-upload on next frame. */
+export function invalidateWallTextures() {
+  brickTex.needsUpdate = true;
+  floorTex.needsUpdate = true;
+}
+
 // ─────────────────────────────────────────────
 //  MATERIALS
 // ─────────────────────────────────────────────
