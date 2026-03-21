@@ -497,7 +497,7 @@ const skipBtn = document.getElementById('skip-intro-btn');
 
 function _readStartOptions() {
   const diffRadio = document.querySelector('input[name="difficulty"]:checked');
-  window.easyMode = diffRadio ? diffRadio.value === 'easy' : false;
+  window.easyMode = diffRadio ? diffRadio.value === 'normal' : true;
   window.helpEnabled = document.getElementById('help-toggle')?.checked ?? true;
 }
 

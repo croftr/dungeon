@@ -132,7 +132,7 @@ function _openMenu() {
 
   // Difficulty (read-only — cannot change after game starts)
   const diffEl = document.getElementById('mm-difficulty-display');
-  if (diffEl) diffEl.textContent = window.easyMode ? 'Easy' : 'Normal';
+  if (diffEl) diffEl.textContent = window.easyMode ? 'Normal' : 'Hard';
 
   // Sync help toggle checkbox to current state
   const helpChk = document.getElementById('mm-help-toggle');
