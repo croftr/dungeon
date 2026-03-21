@@ -203,7 +203,7 @@ setCallbacks({
       const inEastRoom = player.gridCol >= 16 && player.gridCol <= 23
         && player.gridRow >= 7 && player.gridRow <= 15;
       if (inEastRoom) {
-        setZoneMusic('/sounds/backing/town-music.mp3');
+        setZoneMusic(asset('/sounds/backing/town-music.mp3'));
       } else {
         setZoneMusic(null);
       }
