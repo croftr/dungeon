@@ -6235,14 +6235,37 @@ body.cursor-interact #renderer-canvas {
   background: transparent;
 }
 
+.dramatic-levelup-close {
+  pointer-events: all;
+  background: rgba(10, 5, 0, 0.85);
+  border: 1px solid #e8c87a;
+  color: #e8c87a;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  padding: 6px 28px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.dramatic-levelup-close:hover {
+  background: rgba(232, 200, 122, 0.15);
+}
+
 .dramatic-levelup-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  opacity: 0;
+  transform: scale(0.8) translateY(20px);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.dramatic-levelup-cards-row {
   display: flex;
   gap: 40px;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  transform: scale(0.8) translateY(20px);
-  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .dramatic-levelup-group.dl-show {
@@ -6254,6 +6277,7 @@ body.cursor-interact #renderer-canvas {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 180px;
   background: rgba(10, 5, 0, 0.85);
   border: 2px solid #e8c87a;
   border-radius: 8px;

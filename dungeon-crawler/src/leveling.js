@@ -63,6 +63,10 @@ function showDramaticLevelUp(levelUps) {
   const container = document.createElement('div');
   container.className = 'dramatic-levelup-group';
 
+  const cardsRow = document.createElement('div');
+  cardsRow.className = 'dramatic-levelup-cards-row';
+  container.appendChild(cardsRow);
+
   for (const { member, level } of levelUps) {
     const card = document.createElement('div');
     card.className = 'dramatic-levelup-card';
@@ -83,10 +87,31 @@ function showDramaticLevelUp(levelUps) {
 
     card.appendChild(canvas);
     card.appendChild(text);
-    container.appendChild(card);
+    cardsRow.appendChild(card);
   }
 
+  function makeCloseBtn() {
+    const btn = document.createElement('button');
+    btn.className = 'dramatic-levelup-close';
+    btn.textContent = 'Dismiss';
+    return btn;
+  }
+
+  const closeBtnTop = makeCloseBtn();
+  const closeBtnBottom = makeCloseBtn();
+  container.insertBefore(closeBtnTop, cardsRow);
+  container.appendChild(closeBtnBottom);
+
   overlay.appendChild(container);
+
+  function dismiss() {
+    container.classList.remove('dl-show');
+    clearTimeout(autoTimer);
+    setTimeout(() => container.remove(), 600);
+  }
+
+  closeBtnTop.addEventListener('click', dismiss);
+  closeBtnBottom.addEventListener('click', dismiss);
 
   // Trigger animation
   requestAnimationFrame(() => {
@@ -94,12 +119,7 @@ function showDramaticLevelUp(levelUps) {
   });
 
   // Remove after a few seconds
-  setTimeout(() => {
-    container.classList.remove('dl-show');
-    setTimeout(() => {
-      container.remove();
-    }, 1000); // Wait for fade out transition
-  }, 6000);
+  const autoTimer = setTimeout(dismiss, 10000);
 }
 
 /**
