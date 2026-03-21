@@ -481,13 +481,14 @@ const splashScreen = document.getElementById('splash-screen');
 const videoContainer = document.getElementById('video-container');
 const introVideo = document.getElementById('intro-video');
 const startBtn = document.getElementById('start-adventure-btn');
-const easyModeBtn = document.getElementById('easy-mode-btn');
 window.easyMode = false;
-window.helpEnabled = false;
+window.helpEnabled = true;
 const skipBtn = document.getElementById('skip-intro-btn');
 
 function _readStartOptions() {
-  window.helpEnabled = document.getElementById('help-toggle')?.checked ?? false;
+  const diffRadio = document.querySelector('input[name="difficulty"]:checked');
+  window.easyMode = diffRadio ? diffRadio.value === 'easy' : false;
+  window.helpEnabled = document.getElementById('help-toggle')?.checked ?? true;
 }
 
 function finishIntro() {
@@ -512,7 +513,6 @@ function finishIntro() {
 
 if (startBtn) {
   startBtn.addEventListener('click', () => {
-    window.easyMode = false;
     _readStartOptions();
     splashScreen.classList.add('hidden');
     videoContainer.classList.remove('hidden');
@@ -521,20 +521,6 @@ if (startBtn) {
       finishIntro();
     });
     // Trigger music/audio context via the same click
-    handleFirstInteraction();
-  });
-}
-
-if (easyModeBtn) {
-  easyModeBtn.addEventListener('click', () => {
-    window.easyMode = true;
-    _readStartOptions();
-    splashScreen.classList.add('hidden');
-    videoContainer.classList.remove('hidden');
-    introVideo.play().catch(e => {
-      console.warn("Video play failed:", e);
-      finishIntro();
-    });
     handleFirstInteraction();
   });
 }

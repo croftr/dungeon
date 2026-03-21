@@ -101,9 +101,20 @@ function _buildModal() {
 
         <div class="mm-col-divider"></div>
 
-        <!-- Right column: save slots -->
+        <!-- Right column: settings + save slots -->
         <div class="mm-right-col">
-          <h3 class="mm-section-title">Load Game</h3>
+          <h3 class="mm-section-title">Settings</h3>
+          <div class="mm-settings-section">
+            <div class="mm-setting-row">
+              <span class="mm-setting-label">Difficulty</span>
+              <span id="mm-difficulty-display" class="mm-setting-value"></span>
+            </div>
+            <div class="mm-setting-row">
+              <label class="mm-setting-label" for="mm-help-toggle">Inline Help</label>
+              <input type="checkbox" id="mm-help-toggle" class="mm-setting-checkbox">
+            </div>
+          </div>
+          <h3 class="mm-section-title" style="margin-top:1rem">Load Game</h3>
           <div id="mm-saves-list" class="mm-saves-list"></div>
         </div>
 
@@ -118,6 +129,18 @@ function _buildModal() {
 
 function _openMenu() {
   _renderSavesList();
+
+  // Difficulty (read-only — cannot change after game starts)
+  const diffEl = document.getElementById('mm-difficulty-display');
+  if (diffEl) diffEl.textContent = window.easyMode ? 'Easy' : 'Normal';
+
+  // Sync help toggle checkbox to current state
+  const helpChk = document.getElementById('mm-help-toggle');
+  if (helpChk) {
+    helpChk.checked = !!window.helpEnabled;
+    helpChk.onchange = () => { window.helpEnabled = helpChk.checked; };
+  }
+
   document.getElementById('main-menu-overlay').classList.remove('mm-hidden');
   _isOpen = true;
 }
