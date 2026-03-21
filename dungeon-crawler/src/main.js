@@ -203,7 +203,7 @@ setCallbacks({
       const inEastRoom = player.gridCol >= 16 && player.gridCol <= 23
         && player.gridRow >= 7 && player.gridRow <= 15;
       if (inEastRoom) {
-        setZoneMusic('/sounds/level2-music.mp3');
+        setZoneMusic('/sounds/backing/town-music.mp3');
       } else {
         setZoneMusic(null);
       }
@@ -1232,17 +1232,15 @@ window.loadLevel = function (levelNum) {
   camera.position.set(w.x, w.y, w.z);
 
   if (levelNum === 1 && oldLevel === 0) {
-    // Entering the dungeon from the starter room — face west into the corridor
-    player.facing = 3; // West
+    // Preserve facing direction from level 0
     camera.rotation.order = 'YXZ';
     camera.rotation.y = FACING_ANGLES[player.facing];
   } else if (levelNum === 0 && oldLevel === 1) {
-    // Returning to the starter room — place just inside the gate, face east into the room
+    // Returning to the starter room — place just inside the gate, preserve facing
     player.gridRow = 13;
     player.gridCol = 9;
     const wRet = cellToWorld(13, 9);
     camera.position.set(wRet.x, wRet.y, wRet.z);
-    player.facing = 1; // East
     camera.rotation.order = 'YXZ';
     camera.rotation.y = FACING_ANGLES[player.facing];
   } else if (levelNum === 3 && oldLevel === 1) {

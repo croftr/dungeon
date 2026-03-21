@@ -79,7 +79,7 @@
         "attackType": "swipe",
         "weaponType": "dagger",
         "staminaDrain": 1,
-        "baseDamage": 5,
+        "baseDamage": 6,
         "damageType": "poison",
         "onHitEffects": [
             {

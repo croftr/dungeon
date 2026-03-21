@@ -459,8 +459,11 @@ export function initObjects(scene, camera) {
                             window.playPortalVideo();
                         }
                     } else {
-                        // Play the normal portal animation for other portals
-                        if (window.playPortalVideo) window.playPortalVideo();
+                        // Play the normal portal animation only for level 1 -> level 3
+                        const isMinotaurTransition = (targetLevel === 3 && window.currentLevel === 1);
+                        if (isMinotaurTransition && window.playPortalVideo) {
+                            window.playPortalVideo();
+                        }
                     }
                 } else {
                     showMessage("Step closer to the portal to enter.");

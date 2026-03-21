@@ -44,10 +44,10 @@
     "hp": 120,
     "defence": 12,
     "xp": 100,
-    "attackSpeed": 1.5,
+    "attackSpeed": 2,
     "stats": {
-      "strength": 16,
-      "dexterity": 16,
+      "strength": 18,
+      "dexterity": 18,
       "vitality": 9,
       "intelligence": 6,
       "resilience": 8
@@ -161,16 +161,16 @@
   },
   "crocodile_warrior": {
     "name": "Crocodile Warrior",
-    "hp": 180,
-    "defence": 5,
+    "hp": 250,
+    "defence": 8,
     "xp": 150,
-    "attackSpeed": 1.1,
+    "attackSpeed": 1.2,
     "stats": {
-      "strength": 18,
+      "strength": 20,
       "dexterity": 12,
-      "vitality": 14,
+      "vitality": 18,
       "intelligence": 8,
-      "resilience": 10
+      "resilience": 12
     },
     "drops": [
       {
@@ -187,7 +187,7 @@
       },
       {
         "item": "Crocodile Hide",
-        "chance": 1
+        "chance": 0.7
       }
     ]
   },
@@ -565,11 +565,11 @@
   "aqua_man": {
     "name": "Aqua Man",
     "hp": 270,
-    "defence": 11,
+    "defence": 12,
     "xp": 350,
-    "attackSpeed": 1.2,
+    "attackSpeed": 1.5,
     "stats": {
-      "strength": 18,
+      "strength": 20,
       "dexterity": 20,
       "vitality": 14,
       "intelligence": 22,
