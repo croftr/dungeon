@@ -38,6 +38,10 @@ export function initParticles(scene, camera) {
     sparkTexture = createSparkTexture();
 }
 
+export function invalidateParticleTextures() {
+    if (sparkTexture) sparkTexture.needsUpdate = true;
+}
+
 export function updateParticles(dt) {
     if (proton) {
         proton.update(); // three.proton handles internal dt or we could pass it if required by specific version.

@@ -25,11 +25,11 @@ function _serializeMember(m) {
 }
 
 /** Auto-save triggered on every level transition. */
-export function autoSave(targetLevel) {
+export function autoSave(targetLevel, worldState) {
   const levelName = LEVEL_NAMES[targetLevel] ?? `Level ${targetLevel}`;
   const key = `${SAVE_PREFIX}${targetLevel}-${Date.now()}`;
   const save = {
-    version: 4,
+    version: 5,
     savedAt: new Date().toISOString(),
     targetLevel,
     levelName,
@@ -38,6 +38,7 @@ export function autoSave(targetLevel) {
     recruits: Object.fromEntries(RECRUITS.map(r => [r.id, !!r.isRecruited])),
     autoAttack,
     autoRangeAttack,
+    worldState: worldState ?? null,
   };
   localStorage.setItem(key, JSON.stringify(save));
 }
@@ -50,7 +51,7 @@ export function listSaves() {
     if (!key || !key.startsWith(SAVE_PREFIX)) continue;
     try {
       const { version, savedAt, levelName, targetLevel } = JSON.parse(localStorage.getItem(key));
-      if (version !== 4) continue;
+      if (version !== 4 && version !== 5) continue;
       results.push({ key, savedAt, levelName, targetLevel });
     } catch { /* skip corrupt entries */ }
   }
@@ -80,7 +81,7 @@ export function consumePendingLoad() {
   sessionStorage.removeItem(LOAD_KEY);
   try {
     const save = JSON.parse(raw);
-    if (!save.version || save.version < 4) return null;
+    if (!save.version || save.version < 4) return null; // v4 loads fine, just lacks worldState
     return save;
   } catch {
     return null;

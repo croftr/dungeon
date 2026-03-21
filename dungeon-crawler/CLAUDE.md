@@ -1,19 +1,22 @@
 # Dungeon Crawler — Development Guidelines
 
-## Save Game System (v4)
+## Save Game System (v5)
 
-Auto-saves on every level transition. World state is **not** persisted — it always spawns fresh on load. Only party state is saved.
+Auto-saves on every level transition. Party state and world state (looted chests, world flags) are persisted.
 
 ### Save schema
 ```js
-{ version: 4, savedAt, targetLevel, levelName, partyGold, party[], recruits{}, autoAttack, autoRangeAttack }
+{ version: 5, savedAt, targetLevel, levelName, partyGold, party[], recruits{}, autoAttack, autoRangeAttack,
+  worldState: { containers: { levelNum: { containerId: contents[] } }, flags: {...} } }
 ```
 
 ### How it works
-- `autoSave(levelNum)` is called in `loadLevel()` (guarded by `!window._isRestoring`)
+- `autoSave(levelNum, worldState)` is called in `loadLevel()` (guarded by `!window._isRestoring`)
 - Saves are stored in `localStorage` with keys `dungeon-save-<level>-<timestamp>`
 - Esc → Load Game lists all saves newest-first; clicking one reloads the page into that save
-- On load: party/gold/recruits/auto-attack restored, target level loaded fresh (monsters alive, chests full)
+- On load: party/gold/recruits/auto-attack restored, container states and world flags restored per level
+- `_visitedLevelContainers` in `main.js` tracks looted state across level transitions within a session
+- v4 saves still load (party/gold/recruits restored, containers spawn fresh)
 
 ### Adding new persistent party state
 If a new field is added to party members, it will be saved automatically via `_serializeMember`. No checklist needed — party is deep-cloned.

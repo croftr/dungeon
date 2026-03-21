@@ -4,13 +4,13 @@ import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { buildLevel, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures } from './map.js';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
 import { initLighting, updateLighting } from './lighting.js';
-import { initParticles, updateParticles } from './particles.js';
+import { initParticles, updateParticles, invalidateParticleTextures } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
 import { initParty, updateParty, party, setPartyGold, refreshPartyCards, autoAttack, autoRangeAttack, setAutoAttack, setAutoRangeAttack, setHp, flashPortraitHit, showMemberDamage, isPartyUnseen } from './party.js';
 import { initEquipment, hideDropButton, updateEffectiveStats, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS } from './recruits.js';
-import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition } from './objects.js';
+import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, getContainerStates, setPendingContainerOverrides, getWorldFlags, setWorldFlags } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
@@ -124,9 +124,19 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
 
 // When the GPU evicts the WebGL context (common during video decoding under memory pressure),
-// Three.js restores the context but CanvasTextures don't auto-reupload — force them here.
+// Three.js restores the context but textures don't auto-reupload — force them all here.
 canvas.addEventListener('webglcontextrestored', () => {
   invalidateWallTextures();
+  invalidateParticleTextures();
+  // Also mark any GLTF/sprite materials currently in the scene
+  scene.traverse(obj => {
+    const mats = obj.material ? (Array.isArray(obj.material) ? obj.material : [obj.material]) : [];
+    for (const mat of mats) {
+      for (const key of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'emissiveMap', 'aoMap', 'alphaMap']) {
+        if (mat[key]) mat[key].needsUpdate = true;
+      }
+    }
+  });
 });
 
 // CSS2D renderer — renders HTML labels (monster HP bars) anchored in 3D space
@@ -1159,8 +1169,15 @@ window.addEventListener('keydown', handleFirstInteraction);
 // ─────────────────────────────────────────────
 let _level1FirstLoad = true; // shows loading screen on first entry to level 1
 
+// Container states keyed by level number — persists looted state across level transitions
+let _visitedLevelContainers = {};
+
 window.loadLevel = function (levelNum) {
-  if (!window._isRestoring) autoSave(levelNum);
+  // Capture current level's container states before leaving (skip during save restore)
+  if (!window._isRestoring) {
+    _visitedLevelContainers[window.currentLevel] = getContainerStates();
+    autoSave(levelNum, { containers: { ..._visitedLevelContainers }, flags: getWorldFlags() });
+  }
 
   // Lazily load videos needed for this level
   loadVideosForLevel(levelNum);
@@ -1204,6 +1221,7 @@ window.loadLevel = function (levelNum) {
 
   // 3. Clear and respawn level objects
   clearObjects(scene);
+  setPendingContainerOverrides(_visitedLevelContainers[levelNum] ?? null);
   spawnObjectsForLevel();
   updateRecruitsMeshState();
 
@@ -1344,12 +1362,16 @@ console.log('Map: 0=floor 1=wall 2=start 3=exit | Controls: W/S=move  Q/E=turn  
   if (save.autoAttack !== undefined) setAutoAttack(save.autoAttack);
   if (save.autoRangeAttack !== undefined) setAutoRangeAttack(save.autoRangeAttack);
 
-  // 4. Load target level (world spawns fresh, player placed at CELL_START)
+  // 4. Restore world state (container contents, world flags) then load target level
+  if (save.worldState) {
+    _visitedLevelContainers = save.worldState.containers ?? {};
+    setWorldFlags(save.worldState.flags ?? null);
+  } else {
+    _visitedLevelContainers = {};
+  }
   const targetLevel = save.targetLevel ?? 0;
   window._isRestoring = true;
-  if (targetLevel !== window.currentLevel) {
-    window.loadLevel(targetLevel);
-  }
+  window.loadLevel(targetLevel);
   window._isRestoring = false;
 
   // 5. Refresh HUD
