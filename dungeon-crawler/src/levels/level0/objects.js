@@ -25,8 +25,8 @@ export function spawnLevel0Objects(ctx) {
     // ── Stash in the starter room ─────────────────────────────────────────────
     addChest(group, loader, 11, 13, 0, 0.7, [
         { name: 'Gold Coins', quantity: 100 },
-        'Bone Key', 'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore", "Life Essence", "Minor Potions Parchment",
-        "Lizard Scale", "Crocodile Hide", "Iron Ore", "Aqua Man Flipper", "Demon's Eyes"
+        'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore", "Life Essence", "Minor Potions Parchment",
+        "Lizard Scale", "Crocodile Hide", "Iron Ore", "Aqua Man Flipper", "Demon's Eyes", "Iron Ore", "Mace", "Cloth Trousers"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in the east room (center) ────────────────────────────────────
@@ -71,6 +71,7 @@ export function spawnLevel0Objects(ctx) {
                 asset('/npcs/potion-merchant/greting1.mp3'),
                 asset('/npcs/potion-merchant/greeting2.mp3'),
             ],
+            questNpcId: 'potion-merchant',
         });
 
     // ── Alchemy workshop and anvil (east room) ────────────────────────────────

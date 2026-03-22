@@ -610,7 +610,7 @@
   },
   "giant": {
     "name": "Giant",
-    "hp": 500,
+    "hp": 1,
     "defence": 12,
     "xp": 1500,
     "attackSpeed": 1.3,
@@ -636,7 +636,15 @@
       },
       {
         "item": "Fermented Sugar",
-        "chance": 0.3
+        "chance": 0.5
+      },
+      {
+        "item": "Giant's Club",
+        "chance": 1
+      },
+      {
+        "item": "Giant's Loin Cloth",
+        "chance": 1
       }
     ]
   },

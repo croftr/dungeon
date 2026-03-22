@@ -107,5 +107,18 @@
         "statBonuses": {
             "resilience": 2
         }
+    },
+    {
+        "name": "Barbarian's Loin Cloth",
+        "slot": "legs",
+        "icon": "/icons/barbarians_loin_cloth.png",
+        "description": "A rugged loincloth made of thick fur and reinforced with heavy iron. Perfect for a warrior who respects no master but the blade.",
+        "defence": 5,
+        "value": 1200,
+        "weight": 3.0,
+        "statBonuses": {
+            "vitality": 1,
+            "resilience": 1
+        }
     }
 ]

@@ -63,6 +63,12 @@ export function spawnLevel2Objects(ctx) {
         'Chain Shirt', 'Plate Cuirass'
     ], asset('/items/chest1.glb'), true, 1);
 
+    // Chest in the NE corner of the giant room
+    addChest(group, loader, 24, 2, -Math.PI / 2, 0.7, [
+        { name: 'Gold Coins', quantity: 450 },
+        'Starlight Nectar'
+    ], asset('/items/chest1.glb'), true, -0.5);
+
     // ── Stairs ────────────────────────────────────────────────────────────────
     addStairs(group, loader, 3, 26, Math.PI);
 

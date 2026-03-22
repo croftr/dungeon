@@ -19,6 +19,7 @@ import { consumePendingLoad, autoSave } from './save-game.js';
 import { initQuarks, updateQuarks } from './quarks-intro.js';
 import { showHelpDialog } from './help.js';
 import { asset } from './assets.js';
+import { initQuests, setQuestLog } from './quest.js';
 
 import './style.css';
 
@@ -382,6 +383,7 @@ initEquipment();
 initBattleLog();
 initBattleStats();
 initMainMenu();
+initQuests();
 
 // ─────────────────────────────────────────────
 //  SAVE RESTORE — PRE-INIT PHASE
@@ -1411,7 +1413,10 @@ console.log('Map: 0=floor 1=wall 2=start 3=exit | Controls: W/S=move  Q/E=turn  
   if (save.autoAttack !== undefined) setAutoAttack(save.autoAttack);
   if (save.autoRangeAttack !== undefined) setAutoRangeAttack(save.autoRangeAttack);
 
-  // 4. Restore world state (container contents, world flags) then load target level
+  // 4. Restore quest log
+  if (save.questLog) setQuestLog(save.questLog);
+
+  // 5. Restore world state (container contents, world flags) then load target level
   if (save.worldState) {
     _visitedLevelContainers = save.worldState.containers ?? {};
     setWorldFlags(save.worldState.flags ?? null);

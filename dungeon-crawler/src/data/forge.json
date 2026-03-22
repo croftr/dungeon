@@ -141,5 +141,47 @@
                 "quantity": 1
             }
         ]
+    },
+    {
+        "name": "Barbarian's Loin Cloth",
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Cloth Trousers",
+                "quantity": 1
+            },
+            {
+                "name": "Giant's Loin Cloth",
+                "quantity": 1
+            }
+        ]
+    },
+    {
+        "name": "Barbarian's Club",
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Mace",
+                "quantity": 1
+            },
+            {
+                "name": "Giant's Club",
+                "quantity": 1
+            }
+        ]
     }
 ]

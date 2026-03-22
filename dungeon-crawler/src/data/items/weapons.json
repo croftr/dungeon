@@ -464,5 +464,25 @@
         "description": "A massive two-handed axe of serrated iron, capable of cleaving an ogre in twain.",
         "value": 2600,
         "weight": 12.0
+    },
+    {
+        "name": "Barbarian's Club",
+        "slot": "bothHands",
+        "attackType": "bash",
+        "weaponType": "twoHanded",
+        "staminaDrain": 2,
+        "baseDamage": 26,
+        "delay": 5.0,
+        "statWeights": {
+            "str": 1.0,
+            "dex": 0.0
+        },
+        "statBonuses": {
+            "strength": 2
+        },
+        "icon": "/icons/barbarians_club.png",
+        "description": "A devastating war club crafted from giant timber and reinforced with crude iron bands.",
+        "value": 1500,
+        "weight": 15.0
     }
 ]

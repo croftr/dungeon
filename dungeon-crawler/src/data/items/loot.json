@@ -45,6 +45,15 @@
         "sellable": true
     },
     {
+        "name": "Starlight Nectar",
+        "slot": "loot",
+        "icon": "/icons/ingredients/starlight_nectar.png",
+        "description": "A luminous, glowing silver-blue liquid that pulses with magical aura. Extremely rare.",
+        "value": 150,
+        "weight": 0.1,
+        "sellable": true
+    },
+    {
         "name": "Bronze Key",
         "slot": "loot",
         "icon": "/icons/bronze_key.png",
@@ -132,6 +141,24 @@
         "description": "A thick, durable piece of crocodile hide covering. Its tough ridges are perfect for crafting heavy-duty leather armor.",
         "value": 120,
         "weight": 0.5,
+        "sellable": true
+    },
+    {
+        "name": "Giant's Loin Cloth",
+        "slot": "loot",
+        "icon": "/icons/ingredients/giants_loin_cloth.png",
+        "description": "A massive, tattered piece of crude cloth and fur from a giant's attire. Smells of ozone and mountain air.",
+        "value": 200,
+        "weight": 3.0,
+        "sellable": true
+    },
+    {
+        "name": "Giant's Club",
+        "slot": "loot",
+        "icon": "/icons/ingredients/giants_club.png",
+        "description": "A crudely fashioned tree trunk, too heavy for mortals but a formidable weapon in a giant's hands.",
+        "value": 250,
+        "weight": 15.0,
         "sellable": true
     }
 ]

@@ -6569,3 +6569,303 @@ body.cursor-interact #renderer-canvas {
   box-shadow: none;
   transform: translate(2px, 2px);
 }
+
+/* ── NPC Choice Panel (Talk / Trade) ──────────────────────────────────────── */
+#npc-choice-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+#npc-choice-modal {
+  display: flex;
+  gap: 18px;
+  padding: 28px 36px;
+  background: rgba(10, 7, 4, 0.97);
+  border: 2px solid #5d4037;
+  border-radius: 8px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+}
+
+#npc-choice-modal button {
+  padding: 14px 32px;
+  font-family: monospace;
+  font-size: 16px;
+  color: #f4e8c1;
+  background: rgba(40, 28, 18, 0.9);
+  border: 1px solid #5d4037;
+  border-radius: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+#npc-choice-modal button:hover {
+  background: #5d4037;
+  border-color: #d4a574;
+}
+
+/* ── Quest Dialog ─────────────────────────────────────────────────────────── */
+#quest-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+#quest-dialog-modal {
+  width: 520px;
+  max-height: 80vh;
+  background: rgba(10, 7, 4, 0.97);
+  border: 2px solid #5d4037;
+  border-radius: 8px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  font-family: monospace;
+  overflow: hidden;
+}
+
+#quest-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(40, 28, 18, 0.95);
+  border-bottom: 1px solid #5d4037;
+}
+
+#quest-dialog-title {
+  font-size: 16px;
+  color: #d4a574;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+#quest-dialog-close {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 22px;
+  cursor: pointer;
+  line-height: 1;
+}
+#quest-dialog-close:hover { color: #f4e8c1; }
+
+#quest-dialog-body {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Quest list */
+.quest-list-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  margin-bottom: 4px;
+  color: #f4e8c1;
+  background: rgba(30, 22, 14, 0.6);
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.quest-list-item:hover {
+  background: rgba(60, 44, 28, 0.7);
+  border-color: #5d4037;
+}
+
+.quest-list-name {
+  flex: 1;
+  font-size: 14px;
+}
+
+.quest-list-badge {
+  font-size: 12px;
+  margin-left: 8px;
+}
+
+.quest-accepted-badge {
+  color: #a8d08d;
+}
+
+.quest-completed-badge {
+  color: #888;
+}
+
+/* Quest detail */
+.quest-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.quest-detail-title {
+  color: #d4a574;
+  font-size: 16px;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.quest-detail-text {
+  color: #c8b89a;
+  font-size: 13px;
+  line-height: 1.7;
+  font-style: italic;
+  margin: 0;
+  padding: 12px;
+  background: rgba(20, 14, 8, 0.6);
+  border-left: 3px solid #5d4037;
+  border-radius: 2px;
+}
+
+.quest-detail-note {
+  color: #a8d08d;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.quest-detail-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.quest-btn {
+  padding: 10px 24px;
+  font-family: monospace;
+  font-size: 13px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: 1px solid #5d4037;
+  transition: background 0.15s;
+}
+
+.quest-btn-accept {
+  color: #f4e8c1;
+  background: rgba(45, 80, 40, 0.8);
+  border-color: #6a9e5c;
+}
+.quest-btn-accept:hover {
+  background: rgba(60, 100, 50, 0.9);
+}
+
+.quest-btn-decline {
+  color: #c8b89a;
+  background: rgba(40, 28, 18, 0.8);
+}
+.quest-btn-decline:hover {
+  background: rgba(60, 44, 28, 0.9);
+}
+
+/* ── Quest Log Modal ──────────────────────────────────────────────────────── */
+#quest-log-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+#quest-log-modal {
+  width: 560px;
+  max-height: 80vh;
+  background: rgba(10, 7, 4, 0.97);
+  border: 2px solid #5d4037;
+  border-radius: 8px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  font-family: monospace;
+  overflow: hidden;
+}
+
+#quest-log-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(40, 28, 18, 0.95);
+  border-bottom: 1px solid #5d4037;
+}
+
+#quest-log-title {
+  font-size: 16px;
+  color: #d4a574;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+#quest-log-close {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 22px;
+  cursor: pointer;
+  line-height: 1;
+}
+#quest-log-close:hover { color: #f4e8c1; }
+
+#quest-log-body {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.quest-log-empty {
+  color: #888;
+  font-size: 14px;
+  text-align: center;
+  padding: 30px 0;
+  font-style: italic;
+}
+
+.quest-log-section-header {
+  color: #d4a574;
+  font-size: 14px;
+  margin: 0 0 10px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid #3a2a1a;
+  padding-bottom: 6px;
+}
+
+.quest-log-entry {
+  padding: 12px;
+  margin-bottom: 10px;
+  background: rgba(30, 22, 14, 0.6);
+  border: 1px solid #3a2a1a;
+  border-radius: 4px;
+}
+
+.quest-log-entry-name {
+  color: #f4e8c1;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.quest-log-entry-text {
+  color: #c8b89a;
+  font-size: 12px;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+.quest-log-completed {
+  opacity: 0.5;
+}

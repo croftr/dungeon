@@ -22,6 +22,7 @@ import { spawnLevel2Objects } from './levels/level2/objects.js';
 import { spawnLevel3Objects } from './levels/level3/objects.js';
 import { spawnLevel4Objects } from './levels/level4/objects.js';
 import { spawnLevel5Objects } from './levels/level5/objects.js';
+import { showNpcChoice, openQuestDialog } from './quest.js';
 
 export const objects = [];
 export const interactables = [];
@@ -506,12 +507,25 @@ export function initObjects(scene, camera) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 1 && distCol <= 1) {
-                    if (obj.userData.greetingCallback) {
-                        obj.userData.greetingCallback();
+                    if (obj.userData.questNpcId) {
+                        // NPC has quests — show Talk/Trade choice
+                        const shopType = obj.userData.shopType || 'weapons';
+                        const greetCb = obj.userData.greetingCallback;
+                        showNpcChoice(
+                            () => openQuestDialog(obj.userData.questNpcId),
+                            () => {
+                                if (greetCb) greetCb(); else playShopkeeperSound();
+                                openMerchantModal(shopType);
+                            }
+                        );
                     } else {
-                        playShopkeeperSound();
+                        if (obj.userData.greetingCallback) {
+                            obj.userData.greetingCallback();
+                        } else {
+                            playShopkeeperSound();
+                        }
+                        openMerchantModal(obj.userData.shopType || 'weapons');
                     }
-                    openMerchantModal(obj.userData.shopType || 'weapons');
                 } else {
                     showMessage("The merchant watches you from behind the counter.");
                 }
@@ -1805,6 +1819,7 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, sh
                 child.userData.shopType = shopType;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
+                if (options.questNpcId) child.userData.questNpcId = options.questNpcId;
                 if (greetingCallback) child.userData.greetingCallback = greetingCallback;
                 interactables.push(child);
 

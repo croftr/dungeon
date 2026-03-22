@@ -4,6 +4,7 @@
 
 import { party, partyGold, autoAttack, autoRangeAttack } from './party.js';
 import { RECRUITS } from './recruits.js';
+import { getQuestLog } from './quest.js';
 
 const LOAD_KEY = 'dungeon-pending-load';
 const SAVE_PREFIX = 'dungeon-save-';
@@ -39,6 +40,7 @@ export function autoSave(targetLevel, worldState) {
     autoAttack,
     autoRangeAttack,
     worldState: worldState ?? null,
+    questLog: getQuestLog(),
   };
   localStorage.setItem(key, JSON.stringify(save));
 }
