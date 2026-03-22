@@ -1,32 +1,36 @@
 # Dungeon Crawler — Development Guidelines
 
-## Save Game System (v5)
+## Save Game System (v6 — Registry Pattern)
 
-Auto-saves on every level transition. Party state and world state (looted chests, world flags) are persisted.
-
-### Save schema
-```js
-{ version: 5, savedAt, targetLevel, levelName, partyGold, party[], recruits{}, autoAttack, autoRangeAttack,
-  worldState: { containers: { levelNum: { containerId: contents[] } }, flags: {...} } }
-```
+Each module registers its own `serialize`/`restore` callbacks with `src/save-registry.js`. Auto-saves on level transitions, manual save via Esc menu.
 
 ### How it works
-- `autoSave(levelNum, worldState)` is called in `loadLevel()` (guarded by `!window._isRestoring`)
-- Saves are stored in `localStorage` with keys `dungeon-save-<level>-<timestamp>`
-- Esc → Load Game lists all saves newest-first; clicking one reloads the page into that save
-- On load: party/gold/recruits/auto-attack restored, container states and world flags restored per level
-- `_visitedLevelContainers` in `main.js` tracks looted state across level transitions within a session
-- v4 saves still load (party/gold/recruits restored, containers spawn fresh)
+- `src/save-registry.js` — `registerSaveHandler(key, { serialize, restore })`, `serializeAll()`, `restoreAll(data)`
+- Each module registers a handler at the bottom of its file (party.js, player.js, objects.js, quest.js, recruits.js, main.js)
+- `autoSave(levelNum)` in `loadLevel()` calls `serializeAll()` to capture all state
+- Esc → Save Game creates a manual save; Esc → Load Game lists saves newest-first
+- On load: `restoreAll(save)` calls every registered restore, then `loadLevel(targetLevel)` re-spawns the level
 
-### Adding new persistent party state
-If a new field is added to party members, it will be saved automatically via `_serializeMember`. No checklist needed — party is deep-cloned.
+### Registered handlers
+| Key | Module | What it saves |
+|-----|--------|---------------|
+| `party` | `party.js` | members[], gold, autoAttack, autoRangeAttack |
+| `player` | `player.js` | gridRow, gridCol, facing |
+| `world` | `objects.js` | world flags, merchant stock, potion merchant stock |
+| `quests` | `quest.js` | quest log |
+| `recruits` | `recruits.js` | recruit isRecruited map |
+| `video` | `main.js` | cutscene seen flags |
+| `level` | `main.js` | currentLevel, visited container states |
 
-### Adding new non-party persistent state (e.g. a global quest flag)
-Add it explicitly to the save object in `autoSave()` and restore it in `_applyPendingLoad()` in `main.js`.
+### Adding new persistent state
+1. If it's a **party member field** — it's saved automatically (party is deep-cloned)
+2. If it's **new module state** — add `registerSaveHandler` at the bottom of your module with `serialize`/`restore`
+3. If it's **new state in an existing module** — update that module's existing handler
 
 ### Key files
-- `src/save-game.js` — `autoSave`, `listSaves`, `triggerLoad`, `consumePendingLoad`
-- `src/main.js` — `_applyPendingLoad` (post-init restore), pre-init recruit restore
+- `src/save-registry.js` — the registry
+- `src/save-game.js` — `autoSave`, `manualSave`, `listSaves`, `triggerLoad`, `consumePendingLoad`
+- `src/main.js` — `_applyPendingLoad` (calls `restoreAll`), pre-init recruit restore
 
 ## Architecture Quick Reference
 

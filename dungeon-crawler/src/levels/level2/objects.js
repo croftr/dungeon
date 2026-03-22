@@ -15,6 +15,7 @@ export function spawnLevel2Objects(ctx) {
         addPortal, addPortcullis, addKeyhole,
         createWallButton,
         level2PortcullisOpened,
+        level2GiantPortcullisOpened,
     } = ctx;
 
     // ── Portal back to Level 1 ────────────────────────────────────────────────
@@ -39,7 +40,7 @@ export function spawnLevel2Objects(ctx) {
     // Bone-key portcullis on the east wall of the main room (col 9, row 15).
     // The passage beyond goes east to col 22, turns north to row 4, then opens
     // into the large giant room (rows 1–3, cols 14–27).
-    addPortcullis(group, loader, 9, 15, Math.PI / 2);
+    addPortcullis(group, loader, 9, 15, Math.PI / 2, level2GiantPortcullisOpened);
 
     // Keyhole on the west face of the portcullis — visible from the main room.
     // targetRow/targetCol tell it to open the portcullis at (row 15, col 9).

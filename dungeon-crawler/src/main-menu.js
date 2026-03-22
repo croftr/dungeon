@@ -2,7 +2,7 @@
 //  MAIN MENU  — opened/closed with Escape key
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { listSaves, triggerLoad } from './save-game.js';
+import { listSaves, triggerLoad, manualSave } from './save-game.js';
 
 let _isOpen = false;
 
@@ -114,6 +114,7 @@ function _buildModal() {
               <input type="checkbox" id="mm-help-toggle" class="mm-setting-checkbox">
             </div>
           </div>
+          <button id="mm-save-btn" class="mm-save-btn">Save Game</button>
           <h3 class="mm-section-title" style="margin-top:1rem">Load Game</h3>
           <div id="mm-saves-list" class="mm-saves-list"></div>
         </div>
@@ -129,6 +130,15 @@ function _buildModal() {
 
 function _openMenu() {
   _renderSavesList();
+
+  // Save button
+  const saveBtn = document.getElementById('mm-save-btn');
+  saveBtn.onclick = () => {
+    manualSave();
+    saveBtn.textContent = 'Saved!';
+    setTimeout(() => { saveBtn.textContent = 'Save Game'; }, 1500);
+    _renderSavesList();
+  };
 
   // Difficulty (read-only — cannot change after game starts)
   const diffEl = document.getElementById('mm-difficulty-display');

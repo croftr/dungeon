@@ -1,5 +1,5 @@
 import { getItemDef } from './items.js';
-import { renderItemIcon, attachTooltipListeners, hideTooltip, useQuickslotPotion, rotateLoadout, clearAutoAttackTimers, clearAutoRangeAttackTimers } from './equipment.js';
+import { renderItemIcon, attachTooltipListeners, hideTooltip, useQuickslotPotion, rotateLoadout, clearAutoAttackTimers, clearAutoRangeAttackTimers, updateEffectiveStats } from './equipment.js';
 import { addLogEntry } from './battle-log.js';
 import { isInCombat, playGoldSound } from './audio.js';
 import { showMessage } from './minimap.js';
@@ -1198,3 +1198,33 @@ function updateStatusBanners() {
     });
   });
 }
+
+// ─────────────────────────────────────────────
+//  SAVE REGISTRY
+// ─────────────────────────────────────────────
+import { registerSaveHandler } from './save-registry.js';
+
+registerSaveHandler('party', {
+  serialize() {
+    return {
+      members: party.map(m => JSON.parse(JSON.stringify(m, (k, v) =>
+        k === 'cooldownTimers' ? undefined : v))),
+      gold: partyGold,
+      autoAttack,
+      autoRangeAttack,
+    };
+  },
+  restore(data) {
+    for (let i = 0; i < 4; i++) {
+      const src = data.members[i];
+      const dest = party[i];
+      for (const k of Object.keys(dest)) delete dest[k];
+      Object.assign(dest, JSON.parse(JSON.stringify(src)));
+      dest.cooldownTimers = {};
+      if (!dest.isEmpty) updateEffectiveStats(dest);
+    }
+    setPartyGold(data.gold ?? 0);
+    if (data.autoAttack !== undefined) setAutoAttack(data.autoAttack);
+    if (data.autoRangeAttack !== undefined) setAutoRangeAttack(data.autoRangeAttack);
+  },
+});

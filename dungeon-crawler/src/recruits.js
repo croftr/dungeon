@@ -292,3 +292,20 @@ function recruitCharacter(r) {
       });
     }
 }
+
+// ─────────────────────────────────────────────
+//  SAVE REGISTRY
+// ─────────────────────────────────────────────
+import { registerSaveHandler } from './save-registry.js';
+
+registerSaveHandler('recruits', {
+  serialize() {
+    return Object.fromEntries(RECRUITS.map(r => [r.id, !!r.isRecruited]));
+  },
+  restore(data) {
+    if (!data) return;
+    for (const r of RECRUITS) {
+      if (r.id in data) r.isRecruited = data[r.id];
+    }
+  },
+});

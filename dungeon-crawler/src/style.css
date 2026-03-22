@@ -441,6 +441,25 @@ body {
 }
 
 /* Saves list */
+.mm-save-btn {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  background: rgba(232, 200, 122, 0.1);
+  border: 1px solid rgba(232, 200, 122, 0.25);
+  border-radius: 4px;
+  color: rgba(232, 200, 122, 0.85);
+  font-family: Georgia, serif;
+  font-size: 13px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.mm-save-btn:hover {
+  background: rgba(232, 200, 122, 0.18);
+  border-color: rgba(232, 200, 122, 0.4);
+}
+
 .mm-saves-list {
   flex: 1;
   overflow-y: auto;
@@ -6769,6 +6788,78 @@ body.cursor-interact #renderer-canvas {
 }
 .quest-btn-decline:hover {
   background: rgba(60, 44, 28, 0.9);
+}
+
+/* ── Quest Complete Modal ────────────────────────────────────────────────── */
+#quest-complete-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#quest-complete-modal {
+  background: linear-gradient(160deg, #1a1208 0%, #2a1e0e 100%);
+  border: 2px solid #a07840;
+  border-radius: 8px;
+  padding: 32px 40px;
+  min-width: 320px;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  box-shadow: 0 0 40px rgba(180, 120, 20, 0.4);
+}
+#quest-complete-header {
+  font-size: 22px;
+  font-family: monospace;
+  color: #f4d070;
+  text-shadow: 0 0 12px rgba(244, 180, 30, 0.7);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+#quest-complete-items {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+.quest-complete-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(160,120,64,0.3);
+  border-radius: 6px;
+  padding: 10px 14px;
+}
+.quest-complete-item img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.quest-complete-item-name {
+  color: #e8d8a8;
+  font-family: monospace;
+  font-size: 14px;
+}
+#quest-complete-ok {
+  padding: 10px 36px;
+  font-family: monospace;
+  font-size: 14px;
+  background: rgba(45, 80, 40, 0.8);
+  color: #f4e8c1;
+  border: 1px solid #6a9e5c;
+  border-radius: 4px;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+#quest-complete-ok:hover {
+  background: rgba(60, 100, 50, 0.9);
 }
 
 /* ── Quest Log Modal ──────────────────────────────────────────────────────── */

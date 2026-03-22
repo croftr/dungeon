@@ -17,6 +17,7 @@ let _questDialogOpen = false;
 let _questLogOpen = false;
 let _npcChoiceOpen = false;
 let _pendingNpcChoiceCallback = null; // { talk, trade }
+let _completionAudioEndPromise = Promise.resolve(); // resolves when completion audio finishes
 
 // ── Public getters / setters (for save/restore) ─────────────────────────────
 
@@ -30,7 +31,8 @@ export function setQuestLog(data) {
 }
 
 export function isQuestModalOpen() {
-    return _questDialogOpen || _questLogOpen || _npcChoiceOpen;
+    const completeOpen = !document.getElementById('quest-complete-overlay')?.classList.contains('chest-hidden');
+    return _questDialogOpen || _questLogOpen || _npcChoiceOpen || completeOpen;
 }
 
 // ── Reward items ─────────────────────────────────────────────────────────────
@@ -127,10 +129,20 @@ function _renderQuestList(body, npcQuests) {
 
 function _showQuestDetail(body, npcQuests, quest) {
     const status = _questLog[quest.id] || 'available';
+    const met = status === 'accepted' && _checkQuestRequirements(quest);
+    const useCompletion = met || status === 'completed';
 
-    // Play quest audio
-    if (quest.audio) {
-        playSoundByUrl(asset(quest.audio), 0.8);
+    // Play completion audio if requirements met or already completed, otherwise quest audio
+    const audioPath = useCompletion && quest.completionAudio ? quest.completionAudio : quest.audio;
+    if (audioPath) {
+        if (useCompletion && quest.completionAudio) {
+            _completionAudioEndPromise = playSoundByUrl(asset(audioPath), 0.8).then(src => {
+                if (!src) return;
+                return new Promise(resolve => { src.onended = resolve; });
+            });
+        } else {
+            playSoundByUrl(asset(audioPath), 0.8);
+        }
     }
 
     body.innerHTML = '';
@@ -145,11 +157,14 @@ function _showQuestDetail(body, npcQuests, quest) {
 
     const text = document.createElement('p');
     text.className = 'quest-detail-text';
-    text.textContent = quest.text;
+    text.textContent = useCompletion && quest.completionText ? quest.completionText : quest.text;
     detail.appendChild(text);
 
+    // Buttons row — declared before status checks so Complete button can append to it
+    const btnRow = document.createElement('div');
+    btnRow.className = 'quest-detail-buttons';
+
     if (status === 'accepted') {
-        const met = _checkQuestRequirements(quest);
         const note = document.createElement('div');
         note.className = 'quest-detail-note';
         note.textContent = met ? 'You have everything I need!' : 'Quest accepted — check your Quest Log (L) for details.';
@@ -171,16 +186,13 @@ function _showQuestDetail(body, npcQuests, quest) {
         detail.appendChild(note);
     }
 
-    // Buttons
-    const btnRow = document.createElement('div');
-    btnRow.className = 'quest-detail-buttons';
-
     if (status === 'available') {
         const acceptBtn = document.createElement('button');
         acceptBtn.className = 'quest-btn quest-btn-accept';
         acceptBtn.textContent = 'Accept';
         acceptBtn.addEventListener('click', () => {
             _questLog[quest.id] = 'accepted';
+            playSoundByUrl(asset('/sounds/quest-accepted.mp3'), 0.8);
             // Give reward items to first party member with space
             if (quest.rewardItems?.length) {
                 _giveRewardItems(quest.rewardItems);
@@ -247,28 +259,73 @@ function _completeQuest(body, npcQuests, quest) {
     // 2. Set status
     _questLog[quest.id] = 'completed';
 
-    // 3. Give rewards
-    if (quest.completionRewards) {
+    // 3. Close the quest dialog immediately
+    _closeQuestDialog();
+
+    // 4. Wait for the completion audio to finish, then give rewards and show modal
+    const audioEnd = _completionAudioEndPromise;
+    _completionAudioEndPromise = Promise.resolve();
+    audioEnd.then(() => {
         const itemNames = [];
         let gold = 0;
-        quest.completionRewards.forEach(reward => {
-            if (typeof reward === 'string') {
-                itemNames.push(reward);
-            } else if (reward.name === 'Gold Coins') {
-                gold += (reward.quantity || 0);
-            } else {
-                itemNames.push(reward.name);
-            }
-        });
-
+        if (quest.completionRewards) {
+            quest.completionRewards.forEach(reward => {
+                if (typeof reward === 'string') {
+                    itemNames.push(reward);
+                } else if (reward.name === 'Gold Coins') {
+                    gold += (reward.quantity || 0);
+                } else {
+                    itemNames.push(reward.name);
+                }
+            });
+        }
         if (itemNames.length > 0) _giveRewardItems(itemNames);
         if (gold > 0) addGold(gold);
+        _showQuestCompleteModal(itemNames, gold);
+    });
+}
+
+function _showQuestCompleteModal(itemNames, gold) {
+    const overlay = document.getElementById('quest-complete-overlay');
+    const itemsEl = document.getElementById('quest-complete-items');
+    itemsEl.innerHTML = '';
+
+    for (const name of itemNames) {
+        const def = getItemDef(name);
+        const row = document.createElement('div');
+        row.className = 'quest-complete-item';
+        if (def?.icon) {
+            const img = document.createElement('img');
+            img.src = asset(def.icon);
+            img.alt = name;
+            row.appendChild(img);
+        }
+        const label = document.createElement('span');
+        label.className = 'quest-complete-item-name';
+        label.textContent = name;
+        row.appendChild(label);
+        itemsEl.appendChild(row);
+    }
+    if (gold > 0) {
+        const row = document.createElement('div');
+        row.className = 'quest-complete-item';
+        const img = document.createElement('img');
+        img.src = asset('/icons/gold_coins.png');
+        img.alt = 'Gold';
+        row.appendChild(img);
+        const label = document.createElement('span');
+        label.className = 'quest-complete-item-name';
+        label.textContent = `${gold} Gold`;
+        row.appendChild(label);
+        itemsEl.appendChild(row);
     }
 
-    playSuccessSound();
+    overlay.classList.remove('chest-hidden');
+    playSoundByUrl(asset('/sounds/quest-complete.mp3'), 0.8);
 
-    // 4. Return to list
-    _renderQuestList(body, npcQuests);
+    document.getElementById('quest-complete-ok').onclick = () => {
+        overlay.classList.add('chest-hidden');
+    };
 }
 
 // ── Quest Log Modal (L key) ─────────────────────────────────────────────────
@@ -371,6 +428,11 @@ export function initQuests() {
     // Keyboard
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
+            const completeOverlay = document.getElementById('quest-complete-overlay');
+            if (completeOverlay && !completeOverlay.classList.contains('chest-hidden')) {
+                completeOverlay.classList.add('chest-hidden');
+                return;
+            }
             if (_npcChoiceOpen) { _closeNpcChoice(); return; }
             if (_questDialogOpen) { _closeQuestDialog(); return; }
             if (_questLogOpen) { _closeQuestLogModal(); return; }
@@ -388,3 +450,13 @@ export function initQuests() {
         }
     });
 }
+
+// ─────────────────────────────────────────────
+//  SAVE REGISTRY
+// ─────────────────────────────────────────────
+import { registerSaveHandler } from './save-registry.js';
+
+registerSaveHandler('quests', {
+  serialize() { return getQuestLog(); },
+  restore(data) { setQuestLog(data); },
+});

@@ -1,13 +1,12 @@
 // ─────────────────────────────────────────────────────────────────────────────
-//  SAVE GAME  — auto-save on level transitions (v4)
+//  SAVE GAME  — registry-based save/load (v6)
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { party, partyGold, autoAttack, autoRangeAttack } from './party.js';
-import { RECRUITS } from './recruits.js';
-import { getQuestLog } from './quest.js';
+import { serializeAll } from './save-registry.js';
 
 const LOAD_KEY = 'dungeon-pending-load';
 const SAVE_PREFIX = 'dungeon-save-';
+const SAVE_VERSION = 6;
 
 const LEVEL_NAMES = {
   0: 'Starter Room',
@@ -18,34 +17,45 @@ const LEVEL_NAMES = {
   5: 'Hall of Heroes',
 };
 
-function _serializeMember(m) {
-  return JSON.parse(JSON.stringify(m, (key, val) => {
-    if (key === 'cooldownTimers') return undefined;
-    return val;
-  }));
-}
+// Wipe all pre-v6 saves on first load
+(function _purgeOldSaves() {
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key || !key.startsWith(SAVE_PREFIX)) continue;
+    try {
+      const { version } = JSON.parse(localStorage.getItem(key));
+      if (version < SAVE_VERSION) keys.push(key);
+    } catch { keys.push(key); }
+  }
+  keys.forEach(k => localStorage.removeItem(k));
+})();
 
-/** Auto-save triggered on every level transition. */
-export function autoSave(targetLevel, worldState) {
+/** Core save — used by both autoSave and manualSave. */
+function _save(targetLevel) {
   const levelName = LEVEL_NAMES[targetLevel] ?? `Level ${targetLevel}`;
   const key = `${SAVE_PREFIX}${targetLevel}-${Date.now()}`;
   const save = {
-    version: 5,
+    version: SAVE_VERSION,
     savedAt: new Date().toISOString(),
     targetLevel,
     levelName,
-    partyGold,
-    party: party.map(_serializeMember),
-    recruits: Object.fromEntries(RECRUITS.map(r => [r.id, !!r.isRecruited])),
-    autoAttack,
-    autoRangeAttack,
-    worldState: worldState ?? null,
-    questLog: getQuestLog(),
+    ...serializeAll(),
   };
   localStorage.setItem(key, JSON.stringify(save));
 }
 
-/** Returns all v4 saves sorted newest-first. */
+/** Auto-save triggered on every level transition. */
+export function autoSave(targetLevel) {
+  _save(targetLevel);
+}
+
+/** Manual save from the Esc menu. */
+export function manualSave() {
+  _save(window.currentLevel);
+}
+
+/** Returns all v6 saves sorted newest-first. */
 export function listSaves() {
   const results = [];
   for (let i = 0; i < localStorage.length; i++) {
@@ -53,7 +63,7 @@ export function listSaves() {
     if (!key || !key.startsWith(SAVE_PREFIX)) continue;
     try {
       const { version, savedAt, levelName, targetLevel } = JSON.parse(localStorage.getItem(key));
-      if (version !== 4 && version !== 5) continue;
+      if (version !== SAVE_VERSION) continue;
       results.push({ key, savedAt, levelName, targetLevel });
     } catch { /* skip corrupt entries */ }
   }
@@ -75,7 +85,6 @@ export function triggerLoad(key) {
 
 /**
  * Called once on startup. Returns parsed save or null.
- * Discards saves with version < 4.
  */
 export function consumePendingLoad() {
   const raw = sessionStorage.getItem(LOAD_KEY);
@@ -83,7 +92,7 @@ export function consumePendingLoad() {
   sessionStorage.removeItem(LOAD_KEY);
   try {
     const save = JSON.parse(raw);
-    if (!save.version || save.version < 4) return null; // v4 loads fine, just lacks worldState
+    if (!save.version || save.version !== SAVE_VERSION) return null;
     return save;
   } catch {
     return null;

@@ -7,5 +7,14 @@
     "parchmentType": "minor-potions",
     "value": 5,
     "weight": 0.1
+  },
+  {
+    "name": "Party Potions Parchment",
+    "icon": "/icons/party_potions_parchment.png",
+    "description": "An ancient looking piece of parchment. It documents alchemical recipes for creating party potions.",
+    "type": "parchment",
+    "parchmentType": "party-potions",
+    "value": 15,
+    "weight": 0.1
   }
 ]

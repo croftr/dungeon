@@ -33,6 +33,18 @@ export const level2Monsters = [
     asset('/monsters/aqua-man/Meshy_AI_Animation_Face_Punch_Reaction_1_withSkin.glb'),
     asset('/monsters/aqua-man/Meshy_AI_Animation_Walking_withSkin.glb')), { faceNorth: true }),
 
+  // Giant patrols the big main room (rows 14–19, cols 3–8) around pos 18,4
+  inst(D.giant, 72, 18, 4,
+    asset('/monsters/giant/Meshy_AI_Bare_Chested_Berserke_biped_Animation_Idle_03_withSkin.glb'),
+    asset('/monsters/giant/Meshy_AI_Bare_Chested_Berserke_biped_Animation_Simple_Kick_withSkin.glb'),
+    asset('/monsters/giant/giant-attack.mp3'), 0.80, 0, 0, 2,
+    { bounds: { minRow: 14, maxRow: 19, minCol: 3, maxCol: 8 }, speed: 0.6, waitTime: 3.0 },
+    asset('/monsters/giant/Meshy_AI_Bare_Chested_Berserke_biped_Animation_Dead_withSkin.glb'),
+    asset('/monsters/giant/Meshy_AI_Bare_Chested_Berserke_biped_Animation_Hit_Reaction_1_withSkin.glb'),
+    asset('/monsters/giant/Meshy_AI_Bare_Chested_Berserke_biped_Animation_Walking_withSkin.glb'),
+    asset('/monsters/giant/Meshy_AI_Bare_Chested_Berserke_biped_Animation_Idle_11_withSkin.glb')
+  ),
+
   // Giant stomps around the NE giant room (rows 1–3, cols 14–27)
   inst(D.giant, 71, 3, 18,
     asset('/monsters/giant/Meshy_AI_Bare_Chested_Berserke_biped_Animation_Idle_03_withSkin.glb'),

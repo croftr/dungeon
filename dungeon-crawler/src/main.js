@@ -6,20 +6,21 @@ import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES,
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles, invalidateParticleTextures } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
-import { initParty, updateParty, party, setPartyGold, refreshPartyCards, autoAttack, autoRangeAttack, setAutoAttack, setAutoRangeAttack, setHp, flashPortraitHit, showMemberDamage, isPartyUnseen } from './party.js';
-import { initEquipment, hideDropButton, updateEffectiveStats, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
+import { initParty, updateParty, party, refreshPartyCards, autoAttack, autoRangeAttack, setHp, flashPortraitHit, showMemberDamage, isPartyUnseen } from './party.js';
+import { initEquipment, hideDropButton, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS } from './recruits.js';
-import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, getContainerStates, setPendingContainerOverrides, getWorldFlags, setWorldFlags } from './objects.js';
+import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, getContainerStates, setPendingContainerOverrides } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
 import { consumePendingLoad, autoSave } from './save-game.js';
+import { registerSaveHandler, restoreAll } from './save-registry.js';
 import { initQuarks, updateQuarks } from './quarks-intro.js';
 import { showHelpDialog } from './help.js';
 import { asset } from './assets.js';
-import { initQuests, setQuestLog } from './quest.js';
+import { initQuests } from './quest.js';
 
 import './style.css';
 
@@ -191,6 +192,27 @@ let prepVideoTimer = null;
 
 // Bridge video flags to save system via window._saveFlags
 window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenMinotaurDeathVideo, hasSeenDemonVideo, hasSeenAquaManVideo };
+
+registerSaveHandler('video', {
+  serialize() {
+    return {
+      hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo,
+      hasSeenMinotaurDeathVideo, hasSeenDemonVideo, hasSeenAquaManVideo,
+      hasSeenTreemanVideo: window.hasSeenTreemanVideo,
+    };
+  },
+  restore(data) {
+    if (!data) return;
+    hasSeenOgreVideo = data.hasSeenOgreVideo ?? false;
+    hasSeenPrepVideo = data.hasSeenPrepVideo ?? false;
+    hasSeenMinotaurVideo = data.hasSeenMinotaurVideo ?? false;
+    hasSeenMinotaurDeathVideo = data.hasSeenMinotaurDeathVideo ?? false;
+    hasSeenDemonVideo = data.hasSeenDemonVideo ?? false;
+    hasSeenAquaManVideo = data.hasSeenAquaManVideo ?? false;
+    window.hasSeenTreemanVideo = data.hasSeenTreemanVideo ?? false;
+    window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenMinotaurDeathVideo, hasSeenDemonVideo, hasSeenAquaManVideo };
+  },
+});
 
 setCallbacks({
   moved() {
@@ -1223,11 +1245,24 @@ let _level1FirstLoad = true; // shows loading screen on first entry to level 1
 // Container states keyed by level number — persists looted state across level transitions
 let _visitedLevelContainers = {};
 
-window.loadLevel = function (levelNum) {
-  // Capture current level's container states before leaving (skip during save restore)
-  if (!window._isRestoring) {
+registerSaveHandler('level', {
+  serialize() {
+    // Capture current level's container state before serializing
     _visitedLevelContainers[window.currentLevel] = getContainerStates();
-    autoSave(levelNum, { containers: { ..._visitedLevelContainers }, flags: getWorldFlags() });
+    return {
+      currentLevel: window.currentLevel,
+      visitedLevelContainers: JSON.parse(JSON.stringify(_visitedLevelContainers)),
+    };
+  },
+  restore(data) {
+    _visitedLevelContainers = data.visitedLevelContainers ?? {};
+  },
+});
+
+window.loadLevel = function (levelNum) {
+  // Auto-save before leaving (skip during save restore)
+  if (!window._isRestoring) {
+    autoSave(levelNum);
   }
 
   // Lazily load videos needed for this level
@@ -1396,39 +1431,22 @@ console.log('Map: 0=floor 1=wall 2=start 3=exit | Controls: W/S=move  Q/E=turn  
   const save = _pendingSave;
   if (!save) return;
 
-  // 1. Restore party members
-  for (let i = 0; i < 4; i++) {
-    const src = save.party[i];
-    const dest = party[i];
-    for (const k of Object.keys(dest)) delete dest[k];
-    Object.assign(dest, JSON.parse(JSON.stringify(src)));
-    dest.cooldownTimers = {};
-    if (!dest.isEmpty) updateEffectiveStats(dest);
-  }
+  // Restore all registered state via the save registry
+  restoreAll(save);
 
-  // 2. Restore gold
-  setPartyGold(save.partyGold ?? 0);
+  // Sync camera to restored player position
+  const w = cellToWorld(player.gridRow, player.gridCol);
+  camera.position.set(w.x, w.y, w.z);
+  camera.rotation.order = 'YXZ';
+  camera.rotation.y = FACING_ANGLES[player.facing];
 
-  // 3. Restore auto-attack toggles
-  if (save.autoAttack !== undefined) setAutoAttack(save.autoAttack);
-  if (save.autoRangeAttack !== undefined) setAutoRangeAttack(save.autoRangeAttack);
-
-  // 4. Restore quest log
-  if (save.questLog) setQuestLog(save.questLog);
-
-  // 5. Restore world state (container contents, world flags) then load target level
-  if (save.worldState) {
-    _visitedLevelContainers = save.worldState.containers ?? {};
-    setWorldFlags(save.worldState.flags ?? null);
-  } else {
-    _visitedLevelContainers = {};
-  }
+  // Load the target level
   const targetLevel = save.targetLevel ?? 0;
   window._isRestoring = true;
   window.loadLevel(targetLevel);
   window._isRestoring = false;
 
-  // 5. Refresh HUD
+  // Refresh HUD
   refreshPartyCards();
   drawMinimap();
   updateStatus();

@@ -610,7 +610,7 @@
   },
   "giant": {
     "name": "Giant",
-    "hp": 1,
+    "hp": 500,
     "defence": 12,
     "xp": 1500,
     "attackSpeed": 1.3,

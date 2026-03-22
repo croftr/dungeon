@@ -47,6 +47,7 @@ let _disabledPortalMesh = null;
 let _partyConfirmNPCModel = null; // true once the player confirms — prevents re-triggering
 let _starterGate = null; // portcullis behind the party-confirm NPC; opens only via dialogue
 let _level2PortcullisOpened = false;
+let _level2GiantPortcullisOpened = false;
 let _level2HoleClosed = false;
 let _npcMixer = null;
 let _npcIdleAction = null;
@@ -638,6 +639,7 @@ export function initObjects(scene, camera) {
                                     playKeyLockSound();
                                     setTimeout(() => {
                                         openPortcullis(p);
+                                        _level2GiantPortcullisOpened = true;
                                         if (window.playGiantVideo) {
                                             window.playGiantVideo();
                                         }
@@ -1559,6 +1561,7 @@ export function spawnObjectsForLevel() {
         mummyGateOpened: _mummyGateOpened,
         // Level 2 state flags
         level2PortcullisOpened: _level2PortcullisOpened,
+        level2GiantPortcullisOpened: _level2GiantPortcullisOpened,
         level2HoleClosed: _level2HoleClosed,
         // Level 3 state flags
         minotaurDead,
@@ -3871,6 +3874,7 @@ export function getWorldFlags() {
         starterGateOpened: _starterGateOpened,
         starterPortalEnabled: _starterPortalEnabled,
         level2PortcullisOpened: _level2PortcullisOpened,
+        level2GiantPortcullisOpened: _level2GiantPortcullisOpened,
         level2HoleClosed: _level2HoleClosed,
         disarmedTraps: [..._trapDisarmedSet],
     };
@@ -3883,6 +3887,7 @@ export function setWorldFlags(flags) {
     _starterGateOpened = flags.starterGateOpened ?? false;
     _starterPortalEnabled = flags.starterPortalEnabled ?? false;
     _level2PortcullisOpened = flags.level2PortcullisOpened ?? false;
+    _level2GiantPortcullisOpened = flags.level2GiantPortcullisOpened ?? false;
     _level2HoleClosed = flags.level2HoleClosed ?? false;
     if (_level2HoleClosed) level2Map[17][23] = CELL_FLOOR;
     _trapDisarmedSet.clear();
@@ -3896,6 +3901,12 @@ export function getMerchantStock() { return [..._merchantAvailable]; }
 
 /** Restores merchant stock. */
 export function setMerchantStock(stock) { if (stock) _merchantAvailable = [...stock]; }
+
+/** Returns a snapshot of potion merchant stock. */
+export function getPotionMerchantStock() { return [..._potionMerchantAvailable]; }
+
+/** Restores potion merchant stock. */
+export function setPotionMerchantStock(stock) { if (stock) _potionMerchantAvailable = [...stock]; }
 
 /** Returns container contents keyed by containerId. */
 export function getContainerStates() {
@@ -3915,3 +3926,23 @@ export function getContainerStates() {
 export function setPendingContainerOverrides(overrides) {
     _pendingContainerOverrides = overrides ?? null;
 }
+
+// ─────────────────────────────────────────────
+//  SAVE REGISTRY
+// ─────────────────────────────────────────────
+import { registerSaveHandler } from './save-registry.js';
+
+registerSaveHandler('world', {
+  serialize() {
+    return {
+      flags: getWorldFlags(),
+      merchantStock: getMerchantStock(),
+      potionMerchantStock: getPotionMerchantStock(),
+    };
+  },
+  restore(data) {
+    setWorldFlags(data.flags ?? null);
+    if (data.merchantStock) setMerchantStock(data.merchantStock);
+    if (data.potionMerchantStock) setPotionMerchantStock(data.potionMerchantStock);
+  },
+});

@@ -4281,12 +4281,14 @@ function _readParchment(memberIndex, invIndex, def) {
   title.textContent = def.name || 'Parchment';
   body.innerHTML = '';
   
-  if (def.parchmentType === 'minor-potions') {
-    let html = '<p style="margin-bottom: 20px;"><em>The following recipes for alchemical concoctions have been inscribed:</em></p>';
+  if (def.parchmentType === 'minor-potions' || def.parchmentType === 'party-potions') {
+    const isParty = def.parchmentType === 'party-potions';
+    let html = `<p style="margin-bottom: 20px;"><em>The following recipes for alchemical ${isParty ? 'party ' : ''}concoctions have been inscribed:</em></p>`;
     
     POTIONS.forEach(p => {
-      // exclude potions with partyPotion=true as instructed
-      if (p.partyPotion) return;
+      // Filter based on parchment type
+      if (isParty && !p.partyPotion) return;
+      if (!isParty && p.partyPotion) return;
       
       html += `<div style="margin-bottom: 15px;">`;
       html += `<strong style="font-size: 1.1em; color: #5a2a1a;">${p.name}</strong><br/>`;

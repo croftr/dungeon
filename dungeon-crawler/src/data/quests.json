@@ -7,6 +7,8 @@
     "audio": "/npcs/potion-merchant/necter-quest.mp3",
     "rewardItems": ["Bone Key"],
     "requiredItems": ["Starlight Nectar"],
-    "completionRewards": ["Potion of Healing", "Potion of Mana", { "name": "Gold Coins", "quantity": 500 }]
+    "completionText": "Look at that. Pure, cold starlight. It hasn't touched the earth in a thousand years. Kargen always did have a better eye for beauty than a giant deserves. Did he wake? No... don't tell me. If you're standing here, you were either silent or very, very lucky.",
+    "completionAudio": "/npcs/potion-merchant/necter-quest-complete.mp3",
+    "completionRewards": ["Party Potions Parchment", "Potion of Unseen"]
   }
 ]
