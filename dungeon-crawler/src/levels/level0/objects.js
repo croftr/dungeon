@@ -50,15 +50,17 @@ export function spawnLevel0Objects(ctx) {
         addPartyConfirmNPC(group, loader, 9, 13, Math.PI, -1, 0);
     }
 
-    // ── Shop (east room) ──────────────────────────────────────────────────────
-    addShop(group, loader, 23, 11, -Math.PI / 2, -0.2, 0);
+    // ── Weapons & Armour merchant (east wall, centre) ─────────────────────────
+    addShop(group, loader, 23, 11, -Math.PI / 2, -0.2, 0, 'weapons');
 
-
-    // ── Decorative chest beside the merchant ──────────────────────────────────
+    // ── Decorative chest beside the weapons merchant ───────────────────────────
     addChest(group, loader, 23, 11, -Math.PI / 2, 0.7, [], asset('/items/chest1.glb'), false);
 
-    // ── Dropped torch beside the merchant ─────────────────────────────────────
+    // ── Dropped torch beside the weapons merchant ──────────────────────────────
     addDroppedTorch(group, loader, 23, 11, -Math.PI / 2, 0.8, -0.7);
+
+    // ── Apothecary (SW corner of east room) — potions, scrolls & ingredients ──
+    addShop(group, loader, 16, 14, Math.PI, 0, 0, 'potions', asset('/npcs/potion-merchant/potion-merchant.glb'));
 
     // ── Alchemy workshop and anvil (east room) ────────────────────────────────
     addAlchemyWorkshop(group, loader, 19, 14, 0, 0, 0.85);
@@ -67,6 +69,6 @@ export function spawnLevel0Objects(ctx) {
     addHeroDoor(group, loader, 21, 14);
     addAnvil(group, loader, 19, 7, 0, 0, -0.85, ['Life Essence', 'Life Essence']);
 
-    // ── Trap in east room ─────────────────────────────────────────────────────
-    addTrap1(group, loader, 9, 18);
+    // ── Practice trap — NW corner of east room ────────────────────────────────
+    addTrap1(group, loader, 7, 17);
 }

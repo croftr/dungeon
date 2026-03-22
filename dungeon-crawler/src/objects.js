@@ -9,6 +9,7 @@ import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refr
 import { addLogEntry } from './battle-log.js';
 import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playSoundByUrl } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
+import POTION_MERCHANT_DATA from './data/potion-merchant.json';
 import POTIONS_DATA from './data/items/potions.json';
 import FORGE_DATA from './data/forge.json';
 import { triggerMummyAmbush, monsters } from './monster.js';
@@ -88,9 +89,14 @@ export function isStatueAt(r, c) {
 //  MERCHANT STOCK & PRICES
 // ─────────────────────────────────────────────
 const MERCHANT_STOCK = MERCHANT_DATA.stock;
+const POTION_MERCHANT_STOCK = POTION_MERCHANT_DATA.stock;
 
 // Items still available for sale (items bought are removed permanently)
 let _merchantAvailable = [...MERCHANT_STOCK];
+let _potionMerchantAvailable = [...POTION_MERCHANT_STOCK];
+
+// Points to whichever stock array is active for the currently open merchant
+let _activeMerchantAvailable = _merchantAvailable;
 // Items the player has added to the basket this session (cleared on close without buying)
 let _merchantBasket = [];
 // Items the player has selected to sell { charIndex, invIndex, name }
@@ -474,9 +480,16 @@ export function initObjects(scene, camera) {
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 1 && distCol <= 1) {
                     playShopkeeperSound();
-                    openMerchantModal();
+                    openMerchantModal(obj.userData.shopType || 'weapons');
                 } else {
                     showMessage("The merchant watches you from behind the counter.");
+                }
+                break;
+            } else if (obj.userData.isDialogueNPC) {
+                const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
+                const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
+                if (distRow <= 3 && distCol <= 3) {
+                    showMessage(obj.userData.dialogue || '...');
                 }
                 break;
             } else if (obj.userData.isWeaponRack) {
@@ -1463,7 +1476,7 @@ export function spawnObjectsForLevel() {
         addChest, addWeaponRack, addSpellCabinet, addShop,
         addCrystals, addBonePile, addDecoration, addHeroDoor,
         addPortal, addDisabledPortal, addPortcullis, addKeyhole,
-        addStatue, addPortalActivatorStatue, addPartyConfirmNPC,
+        addStatue, addPortalActivatorStatue, addPartyConfirmNPC, addDialogueNPC,
         addAnvil, addAlchemyWorkshop, addDroppedTorch, addEtherealEgg, addStairs,
         addTrap1, createWallButton, addArmourStand,
         // Level 1 state flags
@@ -1676,9 +1689,9 @@ function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.4
     });
 }
 
-function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
+function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, shopType = 'weapons', modelPath = null) {
     _shopGridCells.add(`${row},${col}`); // block player movement through this cell
-    loader.load(asset('/npcs/merchant1/merchant-idle.glb'), (gltf) => {
+    loader.load(modelPath ?? asset('/npcs/merchant1/merchant-idle.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.5);
         model.position.set(col * CELL + offsetX, 0, row * CELL + offsetZ);
@@ -1689,6 +1702,7 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
                 child.castShadow = true;
                 child.receiveShadow = true;
                 child.userData.isShop = true;
+                child.userData.shopType = shopType;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 interactables.push(child);
@@ -2094,6 +2108,47 @@ function addPartyConfirmNPC(scene, loader, col, row, rotY = 0, offsetX = 0, offs
 
         model.name = 'PartyConfirmNPCModel';
         _partyConfirmNPCModel = model;
+        scene.add(model);
+    });
+}
+
+function addDialogueNPC(scene, loader, col, row, dialogue, rotY = 0, offsetX = 0, offsetZ = 0) {
+    loader.load(asset('/npcs/otter/Meshy_AI_Animation_Idle_withSkin.glb'), (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(0.55);
+        model.position.set(col * CELL + offsetX, 0, row * CELL + offsetZ);
+        model.rotation.y = rotY;
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.userData.isDialogueNPC = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+                child.userData.dialogue = dialogue;
+                interactables.push(child);
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
+            }
+        });
+
+        if (gltf.animations && gltf.animations.length > 0) {
+            const mixer = new THREE.AnimationMixer(model);
+            mixer.clipAction(gltf.animations[0]).setLoop(THREE.LoopRepeat).play();
+            _mixers.push(mixer);
+        }
+
         scene.add(model);
     });
 }
@@ -2676,10 +2731,13 @@ export function openCorpseModal(corpseObj) {
     }
 }
 
-export function openMerchantModal() {
+export function openMerchantModal(shopType = 'weapons') {
     _merchantBasket = [];
     _merchantSellBasket = [];
     _merchantMode = 'buy';
+    _activeMerchantAvailable = shopType === 'potions' ? _potionMerchantAvailable : _merchantAvailable;
+    const title = shopType === 'potions' ? 'Apothecary' : 'Merchant';
+    document.getElementById('merchant-title').textContent = title;
     document.getElementById('merchant-overlay').classList.remove('merchant-hidden');
     _switchMerchantTab('buy');
 }
@@ -2715,7 +2773,7 @@ function _renderMerchantShop() {
     grid.innerHTML = '';
 
     {
-        _merchantAvailable
+        _activeMerchantAvailable
             .filter(name => !_merchantBasket.includes(name))
             .forEach(name => {
                 const itemDef = getItemDef(name);
@@ -2834,8 +2892,8 @@ function _buyItems() {
 
         // Remove bought items from available stock
         for (const item of boughtItems) {
-            const stockIdx = _merchantAvailable.indexOf(item);
-            if (stockIdx > -1) _merchantAvailable.splice(stockIdx, 1);
+            const stockIdx = _activeMerchantAvailable.indexOf(item);
+            if (stockIdx > -1) _activeMerchantAvailable.splice(stockIdx, 1);
         }
 
         // Basket should now only contain failed items
@@ -2853,7 +2911,7 @@ function _getMerchantSellPrice(name) {
     const def = getItemDef(name);
     if (!def) return 0;
     // Offer 50% of merchant buy price if stocked; otherwise use item base value
-    if (MERCHANT_STOCK.includes(name)) return Math.floor((def.value ?? 0) * 0.5);
+    if (MERCHANT_STOCK.includes(name) || POTION_MERCHANT_STOCK.includes(name)) return Math.floor((def.value ?? 0) * 0.5);
     return def.value ?? 0;
 }
 
