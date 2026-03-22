@@ -21,10 +21,10 @@ export function spawnLevel2Objects(ctx) {
     addPortal(group, loader, 7, 1, 1, 0, 0, -0.85);
 
     // ── Portcullises & Keys ───────────────────────────────────────────────────
-    // Locked portcullis at the passage entrance (col 7, row 8)
+    // Locked portcullis at the passage entrance (col 7, row 8) — requires Bronze Key
     addPortcullis(group, loader, 7, 8, 0, level2PortcullisOpened);
 
-    // Keyhole next to the portcullis on the West wall
+    // Keyhole next to the main-entrance portcullis (north wall, west side)
     addKeyhole(group, loader, 7, 8, Math.PI / 2, -0.85, -2.0);
 
     // Portcullis on the WEST wall of the demon room (col 2, row 17)
@@ -34,6 +34,16 @@ export function spawnLevel2Objects(ctx) {
     const { group: demonBtn } = createWallButton(+1, { target: 'demon_room' });
     demonBtn.position.set(2 * CELL + 1.0, 1.25, 18 * CELL);
     group.add(demonBtn);
+
+    // ── Giant Room ────────────────────────────────────────────────────────────
+    // Bone-key portcullis on the east wall of the main room (col 9, row 15).
+    // The passage beyond goes east to col 22, turns north to row 4, then opens
+    // into the large giant room (rows 1–3, cols 14–27).
+    addPortcullis(group, loader, 9, 15, Math.PI / 2);
+
+    // Keyhole on the west face of the portcullis — visible from the main room.
+    // targetRow/targetCol tell it to open the portcullis at (row 15, col 9).
+    addKeyhole(group, loader, 9, 15, -Math.PI / 2, -1.1, -1.3, 15, 9);
 
     // ── Chests ────────────────────────────────────────────────────────────────
     // Two chests in the chest vault (col 1, rows 18–19)

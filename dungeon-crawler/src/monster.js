@@ -325,6 +325,35 @@ _applyMultiAttacks('Demon', [
   },
 ]);
 
+_applyMultiAttacks('Giant', [
+  {
+    name: 'singleAttack',
+    glb: asset('/monsters/giant/Meshy_AI_Bare_Chested_Berserke_biped_Animation_Simple_Kick_withSkin.glb'),
+    sound: asset('/monsters/giant/giant-attack.mp3'),
+    soundTimings: [0.4],
+    damageTimings: [0.4],
+    weight: 8,
+  },
+  {
+    name: 'doubleCombo',
+    glb: asset('/monsters/giant/Meshy_AI_Bare_Chested_Berserke_biped_Animation_Double_Combo_Attack_withSkin.glb'),
+    sound: asset('/monsters/giant/giant-attack.mp3'),
+    soundTimings: [0.3, 0.7],
+    damageTimings: [0.3, 0.7],
+    weight: 1,
+  },
+  {
+    name: 'giantsRoar',
+    glb: asset('/monsters/giant/giants-roar.glb'),
+    sound: asset('/monsters/giant/giant-roar.mp3'),
+    soundTimings: [0.5],
+    damageTimings: [0.5],
+    weight: 1,
+    specialAttack: true,   // AoE — hits all party members including back row
+    specialOnHitEffects: [{ effectId: 'fear', chance: 0.20 }],
+  },
+]);
+
 _applyMultiAttacks('Aqua Man', [
   {
     name: 'punchCombo',

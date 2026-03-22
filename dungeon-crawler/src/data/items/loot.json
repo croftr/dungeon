@@ -54,6 +54,15 @@
         "sellable": false
     },
     {
+        "name": "Bone Key",
+        "slot": "loot",
+        "icon": "/icons/bone_key.png",
+        "description": "A heavy, bone key. Looks like it fits a large lock.",
+        "value": 0,
+        "weight": 0.5,
+        "sellable": false
+    },
+    {
         "name": "Gold Coins",
         "slot": "loot",
         "icon": "/icons/gold_coins.png",

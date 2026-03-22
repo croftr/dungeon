@@ -47,7 +47,7 @@ document.querySelectorAll('img[data-src]').forEach(img => {
 const _VIDEO_LEVELS = {
   0: ['battle-prep-video', 'hero-door-video'],
   1: ['ogre-video', 'mummy-video', 'demon-video', 'aqua-man-video', 'portal-video'],
-  2: ['treeman-video'],
+  2: ['treeman-video', 'giant-video'],
   3: ['minotaur-video', 'minotaur-death-video', 'statue-portal-video', 'egg-video'],
   4: ['stairs-video'],
 };
@@ -933,6 +933,55 @@ function playAquaManVideo(onComplete) {
   }, 50);
 }
 window.playAquaManVideo = playAquaManVideo;
+
+// ─────────────────────────────────────────────
+//  GIANT VIDEO OVERLAY
+// ─────────────────────────────────────────────
+const giantOverlay = document.getElementById('giant-video-overlay');
+const giantVideo = document.getElementById('giant-video');
+const skipGiantBtn = document.getElementById('skip-giant-btn');
+
+function playGiantVideo(onComplete) {
+  if (!giantOverlay || !giantVideo) {
+    if (onComplete) onComplete();
+    return;
+  }
+  let _cb = onComplete;
+  giantOverlay.classList.remove('hidden');
+
+  function finishGiantVideo() {
+    giantOverlay.style.opacity = '0';
+    const startVol = giantVideo.volume;
+    const fadeInterval = setInterval(() => {
+      if (giantVideo.volume > 0.05) {
+        giantVideo.volume -= 0.05;
+      } else {
+        giantVideo.volume = 0;
+        clearInterval(fadeInterval);
+      }
+    }, 50);
+    setTimeout(() => {
+      giantVideo.pause();
+      clearInterval(fadeInterval);
+      giantVideo.volume = startVol;
+      giantOverlay.classList.add('hidden');
+      if (_cb) { _cb(); _cb = null; }
+    }, 1500);
+  }
+
+  if (skipGiantBtn) skipGiantBtn.onclick = finishGiantVideo;
+  if (giantVideo) giantVideo.onended = finishGiantVideo;
+
+  setTimeout(() => {
+    giantOverlay.style.opacity = '1';
+    giantVideo.play().catch(e => {
+      console.warn("Giant video play failed:", e);
+      finishGiantVideo();
+    });
+  }, 50);
+}
+window.playGiantVideo = playGiantVideo;
+
 
 // ─────────────────────────────────────────────
 //  STAIRS VIDEO OVERLAY

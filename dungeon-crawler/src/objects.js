@@ -230,6 +230,34 @@ export function initObjects(scene, camera) {
                     } else {
                         showMessage("You can't reach that from here.");
                     }
+                } else if (obj.userData.target === 'teleport_giant') {
+                    if (isInFrontOfPlayer(11, 11, 1)) {
+                        playButtonClickSound();
+                        
+                        // Small button press animation
+                        new Tween(obj.position)
+                            .to({ x: -0.01 }, 100)
+                            .easing(Easing.Quadratic.Out)
+                            .chain(new Tween(obj.position).to({ x: -0.04 }, 100).easing(Easing.Quadratic.In))
+                            .start();
+
+                        if (window.loadLevel) {
+                            window.loadLevel(2);
+                            // Delay position overwrite to happen after loadLevel resets the player.
+                            setTimeout(() => {
+                                player.gridRow = 19;
+                                player.gridCol = 6;
+                                player.facing = 2; // South
+                                const w = cellToWorld(19, 6);
+                                camera.position.set(w.x, w.y, w.z);
+                                camera.rotation.order = 'YXZ';
+                                camera.rotation.y = FACING_ANGLES[player.facing];
+                                showMessage("Teleported to the Giant's Room!");
+                            }, 50);
+                        }
+                    } else {
+                        showMessage("You can't reach that from here.");
+                    }
                 } else if (obj.userData.portcullisRow !== undefined) {
                     // Generic portcullis button — used by Hall of Heroes and any future levels.
                     // wallRow/wallCol: the wall cell the player must face (1 step away).
@@ -578,6 +606,35 @@ export function initObjects(scene, camera) {
                     const p = objects.find(o => o.name === 'Portcullis' && o.gridRow === obj.userData.targetRow && o.gridCol === obj.userData.targetCol);
                     if (p) {
                         if (!p.isOpen) {
+                            if (p.gridRow === 15 && p.gridCol === 9) {
+                                let keyFound = false;
+                                for (let i = 0; i < party.length; i++) {
+                                    if (party[i] && !party[i].isEmpty && party[i].inventory) {
+                                        const invIndex = party[i].inventory.findIndex(item => item && item.name === 'Bone Key');
+                                        if (invIndex !== -1) {
+                                            keyFound = true;
+                                            party[i].inventory[invIndex] = null; // Consume the key
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if (keyFound) {
+                                    showMessage("You insert the Bone Key into the strange keyhole. Internal mechanisms shift and the portcullis grinds open.");
+                                    playKeyLockSound();
+                                    setTimeout(() => {
+                                        openPortcullis(p);
+                                        if (window.playGiantVideo) {
+                                            window.playGiantVideo();
+                                        }
+                                    }, 400);
+                                } else {
+                                    showMessage("This gate requires a Bone Key to open!");
+                                    playKeyLockSound(); // Play a clunk or locked sound, reusing keyLock sound is fine or skip it
+                                }
+                                break; // Skip the normal bronze key search
+                            }
+
                             let keyFound = false;
                             for (let i = 0; i < party.length; i++) {
                                 if (party[i] && !party[i].isEmpty && party[i].inventory) {

@@ -1,4 +1,5 @@
 import { asset } from '../../assets.js';
+import { CELL } from '../../map.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  LEVEL 0 – The Starter Room
@@ -24,7 +25,7 @@ export function spawnLevel0Objects(ctx) {
     // ── Stash in the starter room ─────────────────────────────────────────────
     addChest(group, loader, 11, 13, 0, 0.7, [
         { name: 'Gold Coins', quantity: 100 },
-        'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore", "Life Essence", "Minor Potions Parchment",
+        'Bone Key', 'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore", "Life Essence", "Minor Potions Parchment",
         "Lizard Scale", "Crocodile Hide", "Iron Ore", "Aqua Man Flipper", "Demon's Eyes"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
@@ -82,4 +83,9 @@ export function spawnLevel0Objects(ctx) {
 
     // ── Practice trap — NW corner of east room ────────────────────────────────
     addTrap1(group, loader, 7, 17);
+
+    // ── Teleport to Giant Room Button ─────────────────────────────────────────
+    const { group: giantBtn } = createWallButton(-1, { target: 'teleport_giant' });
+    giantBtn.position.set(11 * CELL - 1.0, 1.25, 11 * CELL); // West face of col 11, row 11
+    group.add(giantBtn);
 }
