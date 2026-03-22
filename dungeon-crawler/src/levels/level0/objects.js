@@ -28,8 +28,8 @@ export function spawnLevel0Objects(ctx) {
         "Lizard Scale", "Crocodile Hide", "Iron Ore", "Aqua Man Flipper", "Demon's Eyes"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
-    // ── Crystals in starter room ──────────────────────────────────────────────
-    addCrystals(group, loader, 9, 11, 0, -0.7);
+    // ── Crystals in the east room (center) ────────────────────────────────────
+    addCrystals(group, loader, 19, 11, 0);
 
     // ── Teleport Torch in starter room ────────────────────────────────────────
     addDroppedTorch(group, loader, 12, 11, Math.PI / 2);
@@ -59,14 +59,25 @@ export function spawnLevel0Objects(ctx) {
     // ── Dropped torch beside the weapons merchant ──────────────────────────────
     addDroppedTorch(group, loader, 23, 11, -Math.PI / 2, 0.8, -0.7);
 
+    // ── Magic chest beside the apothecary ─────────────────────────────────────
+    addChest(group, loader, 16, 14, 0, 0, [], asset('/items/magic-chest.glb'), true, 1.5, 'Chest', 0.22);
+
     // ── Apothecary (SW corner of east room) — potions, scrolls & ingredients ──
-    addShop(group, loader, 16, 14, Math.PI, 0, 0, 'potions', asset('/npcs/potion-merchant/potion-merchant.glb'));
+    addShop(group, loader, 17, 14, Math.PI, 0, 0, 'potions',
+        asset('/npcs/potion-merchant/Meshy_AI_Verdant_Veil_Enchantr_biped_Animation_Idle_9_withSkin.glb'),
+        {
+            greetingAudio: [
+                asset('/npcs/potion-merchant/greting1.mp3'),
+                asset('/npcs/potion-merchant/greeting2.mp3'),
+            ],
+        });
 
     // ── Alchemy workshop and anvil (east room) ────────────────────────────────
     addAlchemyWorkshop(group, loader, 19, 14, 0, 0, 0.85);
 
     // ── Hero door — south wall of east room, leads to Hall of Heroes (level 5) ─
     addHeroDoor(group, loader, 21, 14);
+    addDroppedTorch(group, loader, 22, 14, 0, 0, 1.0);
     addAnvil(group, loader, 19, 7, 0, 0, -0.85, ['Life Essence', 'Life Essence']);
 
     // ── Practice trap — NW corner of east room ────────────────────────────────

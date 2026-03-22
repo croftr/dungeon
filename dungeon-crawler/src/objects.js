@@ -293,10 +293,9 @@ export function initObjects(scene, camera) {
                 }
                 break;
             } else if (obj.userData.isCrystal) {
-                // Check if player is standing on the same square as the crystal
-                const isOnSameSquare = (player.gridRow === obj.userData.gridRow && player.gridCol === obj.userData.gridCol);
-
-                if (isOnSameSquare) {
+                const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
+                const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
+                if (distRow <= 1 && distCol <= 1) {
                     resurrectAll();
                     playHealSound();
                     showMessage("The glowing crystals pulse with life-giving energy!");
@@ -317,7 +316,7 @@ export function initObjects(scene, camera) {
                             .start();
                     }
                 } else {
-                    showMessage("Stand on the crystals to feel their power.");
+                    showMessage("The crystals pulse with a faint glow.");
                 }
                 break;
             } else if (obj.userData.isDamageTrap) {
@@ -479,7 +478,11 @@ export function initObjects(scene, camera) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 1 && distCol <= 1) {
-                    playShopkeeperSound();
+                    if (obj.userData.greetingCallback) {
+                        obj.userData.greetingCallback();
+                    } else {
+                        playShopkeeperSound();
+                    }
                     openMerchantModal(obj.userData.shopType || 'weapons');
                 } else {
                     showMessage("The merchant watches you from behind the counter.");
@@ -1008,14 +1011,14 @@ export function initObjects(scene, camera) {
 
 }
 
-export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = [], modelPath = asset('/items/Meshy_AI_Treasure_Chest_0221184131_texture.glb'), interactive = true, offsetX = 0, title = 'Chest') {
+export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = [], modelPath = asset('/items/Meshy_AI_Treasure_Chest_0221184131_texture.glb'), interactive = true, offsetX = 0, title = 'Chest', scale = 0.3) {
     const cid = interactive ? _nextContainerId++ : -1;
     if (interactive && _pendingContainerOverrides && cid in _pendingContainerOverrides) {
         contents = _pendingContainerOverrides[cid];
     }
     loader.load(modelPath, (gltf) => {
         const model = gltf.scene;
-        model.scale.setScalar(0.3);
+        model.scale.setScalar(scale);
         model.position.set(col * CELL + offsetX, 0.23, row * CELL + offsetZ);
         model.rotation.y = rotY;
 
@@ -1668,6 +1671,7 @@ function addDisabledPortal(scene, loader, col, row, rotY = 0, offsetX = 0, offse
 }
 
 function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.45) {
+    _statueGridCells.add(`${row},${col}`); // block player movement through this cell
     loader.load(asset('/items/statue1.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(scale);
@@ -1689,13 +1693,52 @@ function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.4
     });
 }
 
-function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, shopType = 'weapons', modelPath = null) {
+function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, shopType = 'weapons', modelPath = null, options = {}) {
     _shopGridCells.add(`${row},${col}`); // block player movement through this cell
     loader.load(modelPath ?? asset('/npcs/merchant1/merchant-idle.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.5);
         model.position.set(col * CELL + offsetX, 0, row * CELL + offsetZ);
         model.rotation.y = rotY;
+
+        let mixer = null;
+        let idleAction = null;
+        let greetingAction = null;
+        let audioIndex = 0;
+
+        if (gltf.animations && gltf.animations.length > 0) {
+            mixer = new THREE.AnimationMixer(model);
+            idleAction = mixer.clipAction(gltf.animations[0]);
+            idleAction.play();
+            _mixers.push(mixer);
+        }
+
+        if (options.greetingModel && mixer) {
+            loader.load(options.greetingModel, (greetGltf) => {
+                if (greetGltf.animations && greetGltf.animations.length > 0) {
+                    greetingAction = mixer.clipAction(greetGltf.animations[0]);
+                    greetingAction.setLoop(THREE.LoopOnce, 1);
+                    greetingAction.clampWhenFinished = true;
+                    mixer.addEventListener('finished', (e) => {
+                        if (e.action === greetingAction) {
+                            greetingAction.stop();
+                            if (idleAction) idleAction.reset().play();
+                        }
+                    });
+                }
+            });
+        }
+
+        const greetingCallback = (options.greetingAudio?.length || options.greetingModel) ? () => {
+            if (options.greetingAudio?.length) {
+                playSoundByUrl(options.greetingAudio[audioIndex % options.greetingAudio.length]);
+                audioIndex++;
+            }
+            if (mixer && idleAction && greetingAction) {
+                idleAction.stop();
+                greetingAction.reset().play();
+            }
+        } : null;
 
         model.traverse((child) => {
             if (child.isMesh) {
@@ -1705,6 +1748,7 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, sh
                 child.userData.shopType = shopType;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
+                if (greetingCallback) child.userData.greetingCallback = greetingCallback;
                 interactables.push(child);
 
                 if (child.material) {
@@ -1721,12 +1765,6 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, sh
                 }
             }
         });
-
-        if (gltf.animations && gltf.animations.length > 0) {
-            const mixer = new THREE.AnimationMixer(model);
-            mixer.clipAction(gltf.animations[0]).play();
-            _mixers.push(mixer);
-        }
 
         scene.add(model);
     });
@@ -1819,6 +1857,7 @@ function addSpellCabinet(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0
 }
 
 function addCrystals(scene, loader, col, row, rotY, offsetX = 0) {
+    _statueGridCells.add(`${row},${col}`);
     loader.load(asset('/items/Meshy_AI_Crystals_0221193313_texture.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
