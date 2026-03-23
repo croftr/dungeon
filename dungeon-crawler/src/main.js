@@ -48,7 +48,7 @@ document.querySelectorAll('img[data-src]').forEach(img => {
 
 // Map of level number → video element IDs to preload when entering that level
 const _VIDEO_LEVELS = {
-  0: ['battle-prep-video', 'hero-door-video'],
+  0: ['battle-prep-video', 'hero-door-video', 'nectar-quest-video'],
   1: ['ogre-video', 'mummy-video', 'demon-video', 'aqua-man-video', 'portal-video'],
   2: ['treeman-video', 'giant-video'],
   3: ['minotaur-video', 'minotaur-death-video', 'statue-portal-video', 'egg-video'],
@@ -249,9 +249,9 @@ setCallbacks({
         && player.gridRow >= 1 && player.gridRow <= 5;
 
       if (inOgreRoom && hasSeenOgreVideo) {
-        setZoneMusic('/sounds/backing/ogre-room.mp3');
+        setZoneMusic(asset('/sounds/backing/ogre-room.mp3'));
       } else if (inMummyRoom) {
-        setZoneMusic('/sounds/backing/mummy-room.mp3');
+        setZoneMusic(asset('/sounds/backing/mummy-room.mp3'));
       } else {
         setZoneMusic(null);
       }
@@ -270,11 +270,11 @@ setCallbacks({
       const inAquaManRoom = player.gridCol === 3 && player.gridRow >= 22 && player.gridRow <= 26;
 
       if (inAquaManRoom) {
-        setZoneMusic('/sounds/water.mp3');
+        setZoneMusic(asset('/sounds/water.mp3'));
       } else {
         const treeman = monsters.find(m => m.name === 'Treeman');
         if (treeman && !treeman.alive) {
-          setZoneMusic('/sounds/backing/demon-room.mp3');
+          setZoneMusic(asset('/sounds/backing/demon-room.mp3'));
         } else {
           setZoneMusic(null);
         }
@@ -595,7 +595,7 @@ function finishOgreVideo() {
   ogreOverlay.style.opacity = '0';
 
   // Start the Ogre Room music as the video fades out
-  setZoneMusic('/sounds/backing/ogre-room.mp3');
+  setZoneMusic(asset('/sounds/backing/ogre-room.mp3'));
 
   setTimeout(() => {
     ogreVideo.pause();
@@ -1005,7 +1005,7 @@ function playAquaManVideo(onComplete) {
 
   setTimeout(() => {
     aquaManOverlay.style.opacity = '1';
-    setZoneMusic('/sounds/water.mp3');
+    setZoneMusic(asset('/sounds/water.mp3'));
     aquaManVideo.play().catch(e => {
       console.warn("Aqua Man video play failed:", e);
       finishAquaManVideo();
@@ -1427,7 +1427,7 @@ window.loadLevel = function (levelNum) {
   if (levelNum === 2) {
     const treeman = monsters.find(m => m.name === 'Treeman');
     if (treeman && !treeman.alive) {
-      setZoneMusic('/sounds/backing/demon-room.mp3');
+      setZoneMusic(asset('/sounds/backing/demon-room.mp3'));
     }
   }
 };
