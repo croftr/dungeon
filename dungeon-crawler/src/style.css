@@ -2893,43 +2893,6 @@ label.mm-setting-label {
   animation: fireball-fly 0.5s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
 }
 
-/* ── SHIELD BASH ── shield rises powerfully from bottom to top ── */
-@keyframes shield-bash {
-  0% {
-    transform: translateY(120%) scale(0.3) rotate(-5deg);
-    opacity: 0;
-    filter: blur(5px);
-  }
-
-  25% {
-    opacity: 1;
-    filter: blur(0px);
-  }
-
-  45% {
-    transform: translateY(5%) scale(0.55) rotate(0deg);
-    opacity: 1;
-  }
-
-  70% {
-    transform: translateY(-5%) scale(0.525) rotate(2deg);
-    opacity: 0.9;
-  }
-
-  100% {
-    transform: translateY(-15%) scale(0.25) rotate(5deg);
-    opacity: 0;
-    filter: blur(4px);
-  }
-}
-
-.anim-shield-bash svg {
-  width: min(10vw, 10vh);
-  height: min(10vw, 10vh);
-  animation: shield-bash 0.6s cubic-bezier(0.15, 0.85, 0.35, 1) forwards;
-  filter: drop-shadow(0 0 10px rgba(240, 190, 40, 0.6));
-}
-
 /* ─────────────────────────────────────────────────────────────────────────────
    ITEM TOOLTIP
    Fixed floating panel positioned near the cursor by JS.

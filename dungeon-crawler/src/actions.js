@@ -11,6 +11,7 @@
 
 import { ACTIONS } from './items.js';
 import { playActionSound } from './audio.js';
+import { playSlashTrail, playShieldTrail } from './slash-trail.js';
 
 const ACTION_SVG = {
 
@@ -185,54 +186,6 @@ const ACTION_SVG = {
   [ACTIONS.BANISHMENT]: null,
   [ACTIONS.REGENERATE]: null,
 
-  // Shield slam — a broad round shield rises from below, impact and dust
-  [ACTIONS.SHIELD_BASH]: `
-    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"
-         fill="none" stroke-linecap="round" stroke-linejoin="round">
-      <defs>
-        <filter id="glowShield" x="-25%" y="-25%" width="150%" height="150%">
-          <feGaussianBlur stdDeviation="3" result="blur" />
-          <feComposite in="SourceGraphic" in2="blur" operator="over" />
-        </filter>
-        <radialGradient id="shieldFace" cx="50%" cy="50%" r="50%">
-          <stop offset="0%"  stop-color="#e8c87a" stop-opacity="1"/>
-          <stop offset="60%" stop-color="#8a7040" stop-opacity="0.95"/>
-          <stop offset="100%" stop-color="#3a2a10" stop-opacity="0.9"/>
-        </radialGradient>
-      </defs>
-      <g filter="url(#glowShield)">
-        <!-- Outer Rim -->
-        <circle cx="60" cy="60" r="50" fill="#2a1a0a" stroke="#d0b060" stroke-width="4"/>
-        
-        <!-- Main Shield Body -->
-        <circle cx="60" cy="60" r="44" fill="url(#shieldFace)" />
-        
-        <!-- Decorative Studs/Rivets around the rim -->
-        <circle cx="60" cy="16" r="2.5" fill="#f0e0b0" />
-        <circle cx="60" cy="104" r="2.5" fill="#f0e0b0" />
-        <circle cx="16" cy="60" r="2.5" fill="#f0e0b0" />
-        <circle cx="104" cy="60" r="2.5" fill="#f0e0b0" />
-        <circle cx="28" cy="28" r="2" fill="#f0e0b0" />
-        <circle cx="92" cy="28" r="2" fill="#f0e0b0" />
-        <circle cx="28" cy="92" r="2" fill="#f0e0b0" />
-        <circle cx="92" cy="92" r="2" fill="#f0e0b0" />
-
-        <!-- Central Boss (spiked iron protrusion) -->
-        <circle cx="60" cy="60" r="14" fill="#1a1005" stroke="#e8c87a" stroke-width="2"/>
-        <circle cx="60" cy="60" r="6" fill="#e8c87a" opacity="0.8" />
-        
-        <!-- Horizontal/Vertical bracing -->
-        <line x1="16" y1="60" x2="104" y2="60" stroke="#5a4018" stroke-width="1.5" opacity="0.5"/>
-        <line x1="60" y1="16" x2="60" y2="104" stroke="#5a4018" stroke-width="1.5" opacity="0.5"/>
-
-        <!-- Impact Shockwave -->
-        <circle cx="60" cy="60" r="55" stroke="#f0c040" stroke-width="3" opacity="0.4">
-          <animate attributeName="r" from="40" to="70" dur="0.4s" repeatCount="1" />
-          <animate attributeName="opacity" from="0.6" to="0" dur="0.4s" repeatCount="1" />
-        </circle>
-      </g>
-    </svg>`,
-
 };
 
 /**
@@ -246,13 +199,29 @@ export function playAction(attackType, hand = 'left') {
   // Play the matching sound simultaneously
   playActionSound(attackType);
 
+  // Spells with no visual overlay (use 3D particles instead) — stop here
+  if (attackType === ACTIONS.FIREBALL || attackType === ACTIONS.BANISHMENT || attackType === ACTIONS.REGENERATE) {
+    return;
+  }
+
+  // Shield bash — chunky bottom-up trail
+  if (attackType === ACTIONS.SHIELD_BASH) {
+    playShieldTrail(hand);
+    return;
+  }
+
+  // Other melee attacks use the diagonal slash trail
+  if (attackType === ACTIONS.SWIPE || attackType === ACTIONS.BASH || attackType === ACTIONS.PUNCH) {
+    playSlashTrail(hand);
+    return;
+  }
+
+  // SHOOT and other types fall through to the original SVG overlay
   const visualType = attackType;
 
-  // Remove any existing animation that hasn't finished yet
   const existing = document.getElementById('action-anim');
   if (existing) existing.remove();
 
-  // If there's no defined SVG (like Fireball, which uses 3D particles), we stop here
   if (!ACTION_SVG[visualType]) return;
 
   const el = document.createElement('div');
@@ -260,18 +229,13 @@ export function playAction(attackType, hand = 'left') {
   el.classList.add(`anim-${visualType}`);
   el.innerHTML = ACTION_SVG[visualType];
 
-  // Mirror the graphic for right-hand attacks
-  if (hand === 'right' && (attackType === ACTIONS.SWIPE || attackType === ACTIONS.SHOOT || attackType === ACTIONS.PUNCH)) {
+  if (hand === 'right' && attackType === ACTIONS.SHOOT) {
     el.querySelector('svg').style.transform = 'scaleX(-1)';
   }
 
-  // Delay the animation display slightly so the audio can start and lead it
   setTimeout(() => {
     document.body.appendChild(el);
-
-    // Remove after animation ends
     el.addEventListener('animationend', () => el.remove(), { once: true });
-    // Safety fallback in case animationend never fires
     setTimeout(() => { if (el.parentNode) el.remove(); }, 900);
   }, 100);
 }

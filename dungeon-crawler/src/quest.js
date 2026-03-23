@@ -142,6 +142,9 @@ function _showQuestDetail(body, npcQuests, quest) {
             });
         } else {
             playSoundByUrl(asset(audioPath), 0.8);
+            if (status === 'available' && quest.video) {
+                window.playNectarQuestVideo?.();
+            }
         }
     }
 
@@ -259,13 +262,12 @@ function _completeQuest(body, npcQuests, quest) {
     // 2. Set status
     _questLog[quest.id] = 'completed';
 
-    // 3. Close the quest dialog immediately
+    // 3. Close the quest dialog immediately and discard any pending audio wait
     _closeQuestDialog();
-
-    // 4. Wait for the completion audio to finish, then give rewards and show modal
-    const audioEnd = _completionAudioEndPromise;
     _completionAudioEndPromise = Promise.resolve();
-    audioEnd.then(() => {
+
+    // 4. Give rewards and show modal immediately
+    {
         const itemNames = [];
         let gold = 0;
         if (quest.completionRewards) {
@@ -282,7 +284,7 @@ function _completeQuest(body, npcQuests, quest) {
         if (itemNames.length > 0) _giveRewardItems(itemNames);
         if (gold > 0) addGold(gold);
         _showQuestCompleteModal(itemNames, gold);
-    });
+    }
 }
 
 function _showQuestCompleteModal(itemNames, gold) {

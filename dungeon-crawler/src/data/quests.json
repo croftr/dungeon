@@ -5,6 +5,7 @@
     "giver": "potion-merchant",
     "text": "Bring me a single vial of Starlight Nectar. It is a liquid light that falls only during the solstice, and it is rarer than dragon's blood. I know where it is kept, but I am too old to get there. This key will recognize the lock and part the stone. But be warned: the Vault is the private larder of Kargen the Cloud-Walker. He is a giant of the old peaks, and he does not take kindly to thieves.",
     "audio": "/npcs/potion-merchant/necter-quest.mp3",
+    "video": true,
     "rewardItems": ["Bone Key"],
     "requiredItems": ["Starlight Nectar"],
     "completionText": "Look at that. Pure, cold starlight. It hasn't touched the earth in a thousand years. Kargen always did have a better eye for beauty than a giant deserves. Did he wake? No... don't tell me. If you're standing here, you were either silent or very, very lucky.",

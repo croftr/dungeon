@@ -21,6 +21,7 @@ import { initQuarks, updateQuarks } from './quarks-intro.js';
 import { showHelpDialog } from './help.js';
 import { asset } from './assets.js';
 import { initQuests } from './quest.js';
+import { initSlashTrail } from './slash-trail.js';
 
 import './style.css';
 
@@ -154,6 +155,7 @@ scene.background = new THREE.Color(0x050505);
 scene.fog = new THREE.Fog(0x050505, 2, 12);
 
 const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 100);
+scene.add(camera);  // Camera must be in scene graph so its children (e.g. sword) render
 
 function onResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -418,6 +420,7 @@ if (_pendingSave?.recruits) {
 
 initRecruits(scene, camera);
 initObjects(scene, camera);
+initSlashTrail(camera);
 
 // ─────────────────────────────────────────────
 //  MONSTERS
@@ -602,6 +605,59 @@ function finishOgreVideo() {
 
 if (skipOgreBtn) skipOgreBtn.addEventListener('click', finishOgreVideo);
 if (ogreVideo) ogreVideo.addEventListener('ended', finishOgreVideo);
+
+// ─────────────────────────────────────────────
+//  NECTAR QUEST VIDEO OVERLAY
+// ─────────────────────────────────────────────
+const nectarQuestOverlay = document.getElementById('nectar-quest-video-overlay');
+const nectarQuestVideo = document.getElementById('nectar-quest-video');
+const skipNectarQuestBtn = document.getElementById('skip-nectar-quest-btn');
+let _nectarQuestFading = false;
+
+window.playNectarQuestVideo = function () {
+  _nectarQuestFading = false;
+  if (!nectarQuestOverlay || !nectarQuestVideo) return;
+  nectarQuestVideo.currentTime = 0;
+  nectarQuestVideo.volume = 1;
+  nectarQuestOverlay.classList.remove('hidden');
+  setTimeout(() => {
+    nectarQuestOverlay.style.opacity = '1';
+    nectarQuestVideo.play().catch(e => {
+      console.warn('Nectar quest video play failed:', e);
+      finishNectarQuestVideo();
+    });
+  }, 50);
+};
+
+function finishNectarQuestVideo() {
+  if (!nectarQuestOverlay) return;
+  _nectarQuestFading = true;
+  nectarQuestOverlay.style.opacity = '0';
+  const fadeInterval = setInterval(() => {
+    if (nectarQuestVideo.volume > 0.05) {
+      nectarQuestVideo.volume -= 0.05;
+    } else {
+      nectarQuestVideo.volume = 0;
+      clearInterval(fadeInterval);
+    }
+  }, 50);
+  setTimeout(() => {
+    nectarQuestVideo.pause();
+    clearInterval(fadeInterval);
+    nectarQuestVideo.volume = 1;
+    nectarQuestOverlay.classList.add('hidden');
+    _nectarQuestFading = false;
+  }, 1500);
+}
+
+if (skipNectarQuestBtn) skipNectarQuestBtn.addEventListener('click', finishNectarQuestVideo);
+if (nectarQuestVideo) {
+  nectarQuestVideo.addEventListener('timeupdate', () => {
+    if (!_nectarQuestFading && nectarQuestVideo.duration && nectarQuestVideo.currentTime >= nectarQuestVideo.duration - 2.5) {
+      finishNectarQuestVideo();
+    }
+  });
+}
 
 // ─────────────────────────────────────────────
 //  TREEMAN VIDEO OVERLAY

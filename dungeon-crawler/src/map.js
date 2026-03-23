@@ -164,21 +164,28 @@ function makeFloorTexture() {
   return tex;
 }
 
-// Build textures once
-const brickTex = makeBrickTexture();
-const floorTex = makeFloorTexture();
+// Load external textures
+const textureLoader = new THREE.TextureLoader();
+
+const stoneWallTex = textureLoader.load('/textures/wall8/textures/rock_wall_08_diff_4k.jpg');
+stoneWallTex.wrapS = stoneWallTex.wrapT = THREE.RepeatWrapping;
+stoneWallTex.anisotropy = 16;
+
+const floorPatternTex = textureLoader.load('/textures/floor2/textures/coast_sand_rocks_02_diff_4k.jpg');
+floorPatternTex.wrapS = floorPatternTex.wrapT = THREE.RepeatWrapping;
+floorPatternTex.anisotropy = 16;
 
 /** Call after a WebGL context restore to force texture re-upload on next frame. */
 export function invalidateWallTextures() {
-  brickTex.needsUpdate = true;
-  floorTex.needsUpdate = true;
+  stoneWallTex.needsUpdate = true;
+  floorPatternTex.needsUpdate = true;
 }
 
 // ─────────────────────────────────────────────
 //  MATERIALS
 // ─────────────────────────────────────────────
-const wallMat = new THREE.MeshLambertMaterial({ map: brickTex });
-const floorMat = new THREE.MeshLambertMaterial({ map: floorTex });
+const wallMat = new THREE.MeshLambertMaterial({ map: stoneWallTex });
+const floorMat = new THREE.MeshLambertMaterial({ map: floorPatternTex });
 const ceilMat = new THREE.MeshLambertMaterial({ color: 0x111008 });
 const exitMat = new THREE.MeshLambertMaterial({ color: 0x226622, emissive: 0x113311 });
 const blackWallMat = new THREE.MeshLambertMaterial({ color: 0x000000 });
