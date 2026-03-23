@@ -440,6 +440,7 @@ const SKILL_SOUND_MAP = {
  * @param {string} slot - used to identify if it's a potion
  */
 export async function playItemSound(itemName, slot = '') {
+  if (!itemName) return;
   let url = ITEM_SOUNDS[itemName];
   if (!url && (itemName.toLowerCase().includes('potion') || slot === 'potion')) {
     url = ITEM_SOUNDS['potion'];

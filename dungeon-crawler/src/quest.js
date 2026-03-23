@@ -51,7 +51,7 @@ function _giveRewardItems(itemNames) {
             }
         }
         if (placed) {
-            playItemSound();
+            playItemSound(name);
             showMessage(`Received: ${name}`);
         } else {
             showMessage(`No room for ${name}!`);
