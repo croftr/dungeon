@@ -186,6 +186,31 @@ export function invalidateWallTextures() {
 //  MATERIALS
 // ─────────────────────────────────────────────
 const wallMat = new THREE.MeshLambertMaterial({ map: stoneWallTex });
+wallMat.onBeforeCompile = (shader) => {
+  // Per-instance UV variation: vec3(offsetU, offsetV, rotation0-3)
+  shader.vertexShader = shader.vertexShader
+    .replace(
+      'void main() {',
+      'attribute vec3 aUvVariation;\nvarying vec3 vUvVariation;\nvoid main() {\n  vUvVariation = aUvVariation;'
+    );
+  shader.fragmentShader = shader.fragmentShader
+    .replace(
+      '#include <map_fragment>',
+      [
+        '#ifdef USE_MAP',
+        '  {',
+        '    vec2 uv = fract(vMapUv + vUvVariation.xy);',
+        '    vec4 sampledDiffuseColor = texture2D(map, uv);',
+        '    #ifdef DECODE_VIDEO_TEXTURE',
+        '      sampledDiffuseColor = sRGBTransferEOTF(sampledDiffuseColor);',
+        '    #endif',
+        '    diffuseColor *= sampledDiffuseColor;',
+        '  }',
+        '#endif',
+      ].join('\n')
+    );
+  shader.fragmentShader = 'varying vec3 vUvVariation;\n' + shader.fragmentShader;
+};
 const floorMat = new THREE.MeshLambertMaterial({ map: floorPatternTex });
 const ceilMat = new THREE.MeshLambertMaterial({ color: 0x111008 });
 const exitMat = new THREE.MeshLambertMaterial({ color: 0x226622, emissive: 0x113311 });
@@ -261,9 +286,21 @@ export function buildLevel(scene) {
   }
 
   // 2. Create Instanced Meshes
-  const wallIM = new THREE.InstancedMesh(wallGeo, wallMat, wallCount);
+  const wallIMGeo = wallGeo.clone();
+  const wallIM = new THREE.InstancedMesh(wallIMGeo, wallMat, wallCount);
   wallIM.castShadow = true;
   wallIM.receiveShadow = true;
+
+  // Per-instance UV variation (offsetU, offsetV, rotation 0-3)
+  const uvVar = new Float32Array(wallCount * 3);
+  const rng = mulberry32(0xa117e45);
+  for (let i = 0; i < wallCount; i++) {
+    uvVar[i * 3]     = rng();           // offsetU
+    uvVar[i * 3 + 1] = rng();           // offsetV
+    uvVar[i * 3 + 2] = Math.floor(rng() * 4); // rotation 0-3
+  }
+  wallIMGeo.setAttribute('aUvVariation',
+    new THREE.InstancedBufferAttribute(uvVar, 3));
 
   const blackWallIM = new THREE.InstancedMesh(wallGeo, blackWallMat, blackWallCount);
   blackWallIM.castShadow = true;
