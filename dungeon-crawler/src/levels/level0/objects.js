@@ -23,7 +23,7 @@ export function spawnLevel0Objects(ctx) {
     } = ctx;
 
     // ── Stash in the starter room ─────────────────────────────────────────────
-    addChest(group, loader, 11, 13, 0, 0.7, [
+    addChest(group, loader, 11, 13, 0, 0.6, [
         { name: 'Gold Coins', quantity: 100 },
         'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore", "Life Essence", "Minor Potions Parchment",
         "Lizard Scale", "Crocodile Hide", "Iron Ore", "Aqua Man Flipper", "Demon's Eyes", "Iron Ore", "Mace", "Cloth Trousers", "Starlight Nectar"
@@ -61,7 +61,7 @@ export function spawnLevel0Objects(ctx) {
     addDroppedTorch(group, loader, 23, 11, -Math.PI / 2, 0.8, -0.7);
 
     // ── Magic chest beside the apothecary ─────────────────────────────────────
-    addChest(group, loader, 16, 14, 0, 0, [], asset('/items/magic-chest.glb'), true, 1.5, 'Chest', 0.22);
+    addChest(group, loader, 16, 14, Math.PI, -0.1, [], asset('/items/magic-chest.glb'), true, 1.5, 'Chest', 0.22);
 
     // ── Apothecary (SW corner of east room) — potions, scrolls & ingredients ──
     addShop(group, loader, 17, 14, Math.PI, 0, 0, 'potions',
@@ -79,7 +79,7 @@ export function spawnLevel0Objects(ctx) {
 
     // ── Hero door — south wall of east room, leads to Hall of Heroes (level 5) ─
     addHeroDoor(group, loader, 21, 14);
-    addDroppedTorch(group, loader, 22, 14, 0, 0, 1.0);
+    addDroppedTorch(group, loader, 22, 14, Math.PI, 0, 0.8);
     addAnvil(group, loader, 19, 7, 0, 0, -0.85, ['Life Essence', 'Life Essence']);
 
     // ── Practice trap — NW corner of east room ────────────────────────────────

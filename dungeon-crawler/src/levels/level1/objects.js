@@ -28,13 +28,13 @@ export function spawnLevel1Objects(ctx) {
     ]);
 
     // Chest in the Northwest room — far northeast corner
-    addChest(group, loader, 5, 1, Math.PI, -0.65, [
+    addChest(group, loader, 5, 1, 0, -0.65, [
         "Ring of Dexterity", "Steel Arrows", "Poison Dagger", "Leather Belt", "Adventurer's Belt",
         "Dwarf Crossbow"
     ], undefined, true, -0.35);
 
     // 2nd Chest in the Northwest room
-    addChest(group, loader, 5, 1, Math.PI, -0.65, [
+    addChest(group, loader, 5, 1, 0, -0.65, [
         { name: 'Gold Coins', quantity: 100 },
         "Ring of Vigour", "Travelling Cloak", "Iron Helm"
     ], undefined, true, 0.35);
@@ -50,7 +50,7 @@ export function spawnLevel1Objects(ctx) {
     ]);
 
     // Chest in the alcove east of (row 15, col 13)
-    addChest(group, loader, 14, 15, Math.PI / 2, 0, [
+    addChest(group, loader, 14, 15, -Math.PI / 2, 0, [
         "Travelling Cloak", "Travelling Cloak"
     ], undefined, true, 0.7);
 

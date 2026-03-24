@@ -611,7 +611,7 @@ export function initObjects(scene, camera) {
                 if (isOnSameSquare) {
                     openAnvilModal();
                 } else {
-                    showMessage("Stand by the anvil to use it.");
+                    showMessage("Stand by the forge to use it.");
                 }
                 break;
             } else if (obj.userData.isKeyhole) {
@@ -1092,7 +1092,7 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
     loader.load(modelPath, (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(scale);
-        model.position.set(col * CELL + offsetX, 0.23, row * CELL + offsetZ);
+        model.position.set(col * CELL + offsetX, 0.0, row * CELL + offsetZ);
         model.rotation.y = rotY;
 
         model.traverse((child) => {
@@ -1133,7 +1133,7 @@ function addStatue(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) 
     loader.load(asset('/items/statue.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.45);
-        model.position.set(col * CELL + offsetX, 0.5, row * CELL + offsetZ);
+        model.position.set(col * CELL + offsetX, 0.0, row * CELL + offsetZ);
         model.rotation.y = rotY;
 
         model.traverse((child) => {
@@ -1193,12 +1193,12 @@ export function addDecoration(scene, loader, col, row, rotY = 0, modelPath, scal
     });
 }
 
-function addHeroDoor(scene, loader, col, row) {
+function addHeroDoor(scene, loader, col, row, rotY = Math.PI) {
     loader.load(asset('/items/hero-door.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
-        model.position.set(col * CELL, 0.7, row * CELL + 0.65);
-        model.rotation.y = 0;
+        model.position.set(col * CELL, 0.0, row * CELL + 0.95);
+        model.rotation.y = rotY;
         model.traverse((child) => {
             if (child.isMesh) {
                 child.castShadow = true;
@@ -1749,7 +1749,7 @@ function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.4
     loader.load(asset('/items/statue1.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(scale);
-        model.position.set(col * CELL, 0.5, row * CELL);
+        model.position.set(col * CELL, 0.02, row * CELL);
         model.rotation.y = rotY;
 
         model.traverse((child) => {
@@ -1857,7 +1857,7 @@ function addWeaponRack(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, 
     loader.load(asset('/items/weapon-rack.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.46);
-        model.position.set(col * CELL + offsetX, 0.45, row * CELL + offsetZ);
+        model.position.set(col * CELL + offsetX, 0.02, row * CELL + offsetZ);
         model.rotation.y = rotY;
 
         model.traverse((child) => {
@@ -1898,7 +1898,7 @@ function addSpellCabinet(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0
     loader.load(asset('/items/spell-cabinet.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
-        model.position.set(col * CELL + offsetX, 0.65, row * CELL + offsetZ);
+        model.position.set(col * CELL + offsetX, 0.0, row * CELL + offsetZ);
         model.rotation.y = rotY;
 
         model.traverse((child) => {
@@ -1936,13 +1936,13 @@ function addCrystals(scene, loader, col, row, rotY, offsetX = 0) {
     loader.load(asset('/items/Meshy_AI_Crystals_0221193313_texture.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
-        // Positioned at 0.5 to touch the floor
-        model.position.set(col * CELL + offsetX, 0.5, row * CELL);
+        // Positioned at 0.0 to touch the floor
+        model.position.set(col * CELL + offsetX, 0.0, row * CELL);
         model.rotation.y = rotY;
 
         // Add a mystical light source at the crystals
         const light = new THREE.PointLight(0x00ffff, 5, 3);
-        light.position.set(col * CELL + offsetX, 0.8, row * CELL);
+        light.position.set(col * CELL + offsetX, 0.3, row * CELL);
         scene.add(light);
 
         model.traverse((child) => {
@@ -2030,7 +2030,7 @@ function addAlchemyWorkshop(scene, loader, col, row, rotY = 0, offsetX = 0, offs
     loader.load(asset('/items/Alchemy_Workshop.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
-        model.position.set(col * CELL + offsetX, 0.5, row * CELL + offsetZ);
+        model.position.set(col * CELL + offsetX, 0.0, row * CELL + offsetZ);
         model.rotation.y = rotY;
 
         model.traverse((child) => {
@@ -2079,10 +2079,10 @@ function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, c
     if (_pendingContainerOverrides && cid in _pendingContainerOverrides) {
         contents = _pendingContainerOverrides[cid];
     }
-    loader.load(asset('/items/anvil.glb'), (gltf) => {
+    loader.load(asset('/items/forge.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
-        model.position.set(col * CELL + offsetX, 0.5, row * CELL + offsetZ);
+        model.position.set(col * CELL + offsetX, 0.0, row * CELL + offsetZ);
         model.rotation.y = rotY;
 
         model.traverse((child) => {
