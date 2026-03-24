@@ -1362,6 +1362,11 @@ function openTrapDisarmModal(trapObj) {
     attemptBtn.replaceWith(newAttempt);
     leaveBtn.replaceWith(newLeave);
 
+    const closeOverlay = () => {
+        _activeTrapObj = null;
+        overlay.classList.add('chest-hidden');
+    };
+
     newAttempt.addEventListener('click', () => {
         if (!_activeTrapObj) return;
         const success = Math.random() < effectiveChance;
@@ -1387,9 +1392,7 @@ function openTrapDisarmModal(trapObj) {
             }
             _activeTrapObj = null;
 
-            setTimeout(() => {
-                overlay.classList.add('chest-hidden');
-            }, 1500);
+            setTimeout(closeOverlay, 1500);
         } else {
             playSoundByUrl(asset('/sounds/actions/disarm-trap.mp3'));
             if (resultEl2) {
@@ -1399,7 +1402,7 @@ function openTrapDisarmModal(trapObj) {
             const trapToFire = _activeTrapObj;
             _activeTrapObj = null;
             setTimeout(() => {
-                overlay.classList.add('chest-hidden');
+                closeOverlay();
                 _fireTrap(trapToFire);
             }, 1200);
         }
@@ -1407,19 +1410,13 @@ function openTrapDisarmModal(trapObj) {
         newAttempt.disabled = true;
     });
 
-    newLeave.addEventListener('click', () => {
-        _activeTrapObj = null;
-        overlay.classList.add('chest-hidden');
-    });
+    newLeave.addEventListener('click', closeOverlay);
 
     const closeBtn = document.getElementById('trap-disarm-close');
     if (closeBtn) {
         const newClose = closeBtn.cloneNode(true);
         closeBtn.replaceWith(newClose);
-        newClose.addEventListener('click', () => {
-            _activeTrapObj = null;
-            overlay.classList.add('chest-hidden');
-        });
+        newClose.addEventListener('click', closeOverlay);
     }
 }
 
@@ -1506,7 +1503,7 @@ function addStairs(scene, loader, col, row, rotY = 0) {
     loader.load(asset('/items/stairs-up.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
-        model.position.set(col * CELL, 0.45, row * CELL);
+        model.position.set(col * CELL, 0.0, row * CELL);
         model.rotation.y = rotY;
 
         model.traverse((child) => {
@@ -1983,8 +1980,8 @@ function addEtherealEgg(scene, loader, col, row, rotY = 0, isActive = false) {
     loader.load(asset('/items/ethereal_egg.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.5);
-        // Put it on the floor but slightly raised
-        model.position.set(col * CELL, 0.5, row * CELL);
+        // Put it on the floor
+        model.position.set(col * CELL, 0.0, row * CELL);
         model.rotation.y = rotY;
 
         // Active eggs glow gold (portal to next level); inactive glow purple (restore)
@@ -1993,7 +1990,7 @@ function addEtherealEgg(scene, loader, col, row, rotY = 0, isActive = false) {
         const emissiveColor = isActive ? 0xaa6600 : 0xaa00aa;
 
         const light = new THREE.PointLight(lightColor, 4, 3);
-        light.position.set(col * CELL, 0.8, row * CELL);
+        light.position.set(col * CELL, 0.3, row * CELL);
         scene.add(light);
 
         // Pulsing light effect

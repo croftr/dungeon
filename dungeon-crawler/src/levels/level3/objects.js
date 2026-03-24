@@ -22,7 +22,7 @@ export function spawnLevel3Objects(ctx) {
 
     // ── Weapon Rack ───────────────────────────────────────────────────────────
     // South-West room (row 19, col 1 against west wall)
-    addWeaponRack(group, loader, 1, 19, -Math.PI / 2, -0.15, 0, [
+    addWeaponRack(group, loader, 1, 19, -Math.PI / 2, -0.75, 0, [
         "Vampiric Dagger", "Silver Mace", "Warden's Shield"
     ]);
 

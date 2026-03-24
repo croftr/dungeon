@@ -136,7 +136,7 @@ export function spawnLevel5Objects(ctx) {
             feet: 'Mountain Stalker Boots',
             leftHand: 'Mountain Stalker Crossbow',
             cloak: 'Mountain Stalker Heavy Cloak',
-        }, 'Dwarf Ranger Armor Stand', 0.35);
+        }, 'Dwarf Ranger Armor Stand', -0.4);
 
     addArmourStand(group, loader, 15, 19, Math.PI,
         asset('/items/woodelf-statue.glb'), 0.7, 0, 0.7, {

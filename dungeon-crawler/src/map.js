@@ -168,11 +168,11 @@ function makeFloorTexture() {
 // Load external textures
 const textureLoader = new THREE.TextureLoader();
 
-const stoneWallTex = textureLoader.load(asset('/textures/wall8/textures/rock_wall_08_diff_4k.jpg'));
+const stoneWallTex = textureLoader.load(asset('/textures/wall1.jpg'));
 stoneWallTex.wrapS = stoneWallTex.wrapT = THREE.RepeatWrapping;
 stoneWallTex.anisotropy = 16;
 
-const floorPatternTex = textureLoader.load(asset('/textures/floor2/textures/coast_sand_rocks_02_diff_4k.jpg'));
+const floorPatternTex = textureLoader.load(asset('/textures/floor1.jpg'));
 floorPatternTex.wrapS = floorPatternTex.wrapT = THREE.RepeatWrapping;
 floorPatternTex.anisotropy = 16;
 

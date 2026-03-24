@@ -48,11 +48,11 @@ export function spawnLevel2Objects(ctx) {
 
     // ── Chests ────────────────────────────────────────────────────────────────
     // Two chests in the chest vault (col 1, rows 18–19)
-    addChest(group, loader, 1, 18, 0, 0.7, [
+    addChest(group, loader, 1, 18, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 300 },
         'Life Essence', 'Mana Berry', 'Scroll of Fireball'
     ]);;
-    addChest(group, loader, 1, 19, 0, 0.7, [
+    addChest(group, loader, 1, 19, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 200 },
         'Ring of Strength', 'Ring of Wisdom', 'Ring of Dexterity'
     ]);
