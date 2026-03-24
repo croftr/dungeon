@@ -3,13 +3,20 @@
     "id": "oracles-marrow",
     "name": "The Oracle's Marrow",
     "giver": "potion-merchant",
-    "text": "Bring me a single vial of Starlight Nectar. It is a liquid light that falls only during the solstice, and it is rarer than dragon's blood. I know where it is kept, but I am too old to get there. This key will recognize the lock and part the stone. But be warned: the Vault is the private larder of Kargen the Cloud-Walker. He is a giant of the old peaks, and he does not take kindly to thieves.",
+    "text": "Bring me a single vial of Starlight Nectar. It is liquid radiance, gathered only on the solstice and rarer than a dragon’s heart-blood. I know its resting place, but my bones are too brittle for the climb.Take this key; it will recognize the lock and part the stone for you. But heed my warning: the Vault is the private larder of Kargen the Cloud-Walker. He is a giant of the ancient peaks, and he has a short temper for thieves.",
     "audio": "/npcs/potion-merchant/necter-quest.mp3",
     "video": true,
-    "rewardItems": ["Bone Key"],
-    "requiredItems": ["Starlight Nectar"],
+    "rewardItems": [
+      "Bone Key"
+    ],
+    "requiredItems": [
+      "Starlight Nectar"
+    ],
     "completionText": "Look at that. Pure, cold starlight. It hasn't touched the earth in a thousand years. Kargen always did have a better eye for beauty than a giant deserves. Did he wake? No... don't tell me. If you're standing here, you were either silent or very, very lucky.",
     "completionAudio": "/npcs/potion-merchant/necter-quest-complete.mp3",
-    "completionRewards": ["Party Potions Parchment", "Potion of Unseen"]
+    "completionRewards": [
+      "Party Potions Parchment",
+      "Potion of Unseen"
+    ]
   }
 ]
