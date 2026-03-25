@@ -152,6 +152,21 @@ export function clearObjects(scene) {
     _crystalShrineMesh = null;
 }
 
+// Animates a wall button press relative to its current rest position,
+// so it works regardless of where the model was centered on the wall.
+function _animateButtonPress(obj) {
+    const pt = obj.userData.pressTarget ?? obj;
+    const ax = obj.userData.animAxis ?? 'x';
+    const dir = obj.userData.animDir ?? 1;
+    const rest = pt.position[ax];
+    const pressed = rest - dir * 0.04;
+    new Tween(pt.position)
+        .to({ [ax]: pressed }, 100)
+        .easing(Easing.Quadratic.Out)
+        .chain(new Tween(pt.position).to({ [ax]: rest }, 100).easing(Easing.Quadratic.In))
+        .start();
+}
+
 export function initObjects(scene, camera) {
     scene.add(objectsGroup);
 
@@ -197,11 +212,7 @@ export function initObjects(scene, camera) {
                     // Check if player is facing the wall at (3, 21) from (3, 20)
                     if (isInFrontOfPlayer(3, 21, 1)) {
                         playButtonClickSound();
-                        new Tween(obj.position)
-                            .to({ x: -0.01 }, 100)
-                            .easing(Easing.Quadratic.Out)
-                            .chain(new Tween(obj.position).to({ x: -0.04 }, 100).easing(Easing.Quadratic.In))
-                            .start();
+                        _animateButtonPress(obj);
                         const trapDoor = objects.find(o => o.name === 'Portcullis' && o.gridRow === 1 && o.gridCol === 10);
                         if (trapDoor) openPortcullis(trapDoor);
                     } else {
@@ -211,11 +222,7 @@ export function initObjects(scene, camera) {
                     // Player at (18, 3) facing west presses button on east face of col-2 wall
                     if (isInFrontOfPlayer(18, 2, 1)) {
                         playButtonClickSound();
-                        new Tween(obj.position)
-                            .to({ x: 0.01 }, 100)
-                            .easing(Easing.Quadratic.Out)
-                            .chain(new Tween(obj.position).to({ x: 0.04 }, 100).easing(Easing.Quadratic.In))
-                            .start();
+                        _animateButtonPress(obj);
                         const vaultDoor = objects.find(o => o.name === 'Portcullis' && o.gridRow === 17 && o.gridCol === 2);
                         if (vaultDoor) openPortcullis(vaultDoor);
                     } else {
@@ -225,11 +232,7 @@ export function initObjects(scene, camera) {
                     if (isInFrontOfPlayer(16, 28, 1)) {
                         playButtonClickSound();
                         if (!_level2HoleClosed) {
-                            new Tween(obj.position)
-                                .to({ x: 0.01 }, 100)
-                                .easing(Easing.Quadratic.Out)
-                                .chain(new Tween(obj.position).to({ x: 0.04 }, 100).easing(Easing.Quadratic.In))
-                                .start();
+                            _animateButtonPress(obj);
                             _level2HoleClosed = true;
                             dungeonMap[17][23] = CELL_FLOOR;
                             level2Map[17][23] = CELL_FLOOR;
@@ -244,13 +247,7 @@ export function initObjects(scene, camera) {
                 } else if (obj.userData.target === 'teleport_giant') {
                     if (isInFrontOfPlayer(11, 11, 1)) {
                         playButtonClickSound();
-                        
-                        // Small button press animation
-                        new Tween(obj.position)
-                            .to({ x: -0.01 }, 100)
-                            .easing(Easing.Quadratic.Out)
-                            .chain(new Tween(obj.position).to({ x: -0.04 }, 100).easing(Easing.Quadratic.In))
-                            .start();
+                        _animateButtonPress(obj);
 
                         if (window.loadLevel) {
                             window.loadLevel(2);
@@ -276,15 +273,7 @@ export function initObjects(scene, camera) {
                     // animAxis ('x'|'z') and animDir (+1|-1) control the press animation.
                     if (isInFrontOfPlayer(obj.userData.wallRow, obj.userData.wallCol, 1)) {
                         playButtonClickSound();
-                        const ax = obj.userData.animAxis ?? 'x';
-                        const dir = obj.userData.animDir ?? 1;
-                        const pressedPos = ax === 'x' ? { x: dir * 0.01 } : { z: dir * 0.01 };
-                        const restPos    = ax === 'x' ? { x: dir * 0.04 } : { z: dir * 0.04 };
-                        new Tween(obj.position)
-                            .to(pressedPos, 100)
-                            .easing(Easing.Quadratic.Out)
-                            .chain(new Tween(obj.position).to(restPos, 100).easing(Easing.Quadratic.In))
-                            .start();
+                        _animateButtonPress(obj);
                         const p = objects.find(o =>
                             o.name === 'Portcullis' &&
                             o.gridRow === obj.userData.portcullisRow &&
@@ -297,12 +286,7 @@ export function initObjects(scene, camera) {
                     // Check if player is facing the wall at (8, 8) from (8, 7)
                     if (isInFrontOfPlayer(8, 8, 1)) {
                         playButtonClickSound();
-                        // Small button press animation
-                        new Tween(obj.position)
-                            .to({ x: 0.01 }, 100)
-                            .easing(Easing.Quadratic.Out)
-                            .chain(new Tween(obj.position).to({ x: 0.04 }, 100).easing(Easing.Quadratic.In))
-                            .start();
+                        _animateButtonPress(obj);
                         // Hardcoded portcullis open
                         const p = objects.find(o => o.name === 'Portcullis' && o.gridRow === 7 && o.gridCol === 7);
                         if (p) openPortcullis(p);
@@ -549,13 +533,13 @@ export function initObjects(scene, camera) {
                                         obj.parent.remove(obj);
                                     }
                                     showInlineHelp('first-item-pickup', {
-                                      text: 'Items are picked up by the first available party member. To move an item to another member, open the inventory (<strong>I</strong>), then <strong>right click</strong> the item and select the target party member.'
+                                        text: 'Items are picked up by the first available party member. To move an item to another member, open the inventory (<strong>I</strong>), then <strong>right click</strong> the item and select the target party member.'
                                     });
                                     const pickedDef = getItemDef(obj.userData.itemName);
                                     if (pickedDef?.type === 'spellbook') {
-                                      showInlineHelp('first-scroll-pickup', {
-                                        text: 'To learn a scroll, open the inventory (<strong>I</strong>), then <strong>right click</strong> the scroll and select <strong>Learn</strong>.'
-                                      });
+                                        showInlineHelp('first-scroll-pickup', {
+                                            text: 'To learn a scroll, open the inventory (<strong>I</strong>), then <strong>right click</strong> the scroll and select <strong>Learn</strong>.'
+                                        });
                                     }
                                     break;
                                 }
@@ -703,7 +687,7 @@ export function initObjects(scene, camera) {
                             _crystalShrineState = 1;
                             _swapCrystalShrine();
                             if (window.playCrystalShrineRedVideo) {
-                                window.playCrystalShrineRedVideo(() => {});
+                                window.playCrystalShrineRedVideo(() => { });
                             }
                         } else {
                             showMessage("It looks like it needs some crystals to activate it.");
@@ -1703,24 +1687,84 @@ export function spawnObjectsForLevel() {
 function createWallButton(protrusionDir, userData, axis = 'x') {
     const group = new THREE.Group();
 
-    // Round backing plate — thin disc mounted flush on the wall face
-    const plateGeo = new THREE.CylinderGeometry(0.09, 0.09, 0.018, 28);
-    const plateMat = new THREE.MeshLambertMaterial({ color: 0x1e1008 });
-    const plate = new THREE.Mesh(plateGeo, plateMat);
-    // Orient disc perpendicular to the protrusion axis
-    if (axis === 'z') plate.rotation.x = Math.PI / 2;
-    else              plate.rotation.z = Math.PI / 2;
-    group.add(plate);
-
-    // Dome button — sphere protruding from the plate centre
-    const btnGeo = new THREE.SphereGeometry(0.055, 20, 14);
-    const btnMat = new THREE.MeshLambertMaterial({ color: 0xbb2020 });
-    const btn = new THREE.Mesh(btnGeo, btnMat);
-    if (axis === 'z') btn.position.z = protrusionDir * 0.04;
-    else              btn.position.x = protrusionDir * 0.04;
-    btn.userData = { isButton: true, ...userData };
+    // Invisible sphere used purely for raycasting — opacity 0 keeps it invisible
+    // but visible=true means the raycaster can still hit it
+    const hitGeo = new THREE.SphereGeometry(0.12, 8, 6);
+    const hitMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });
+    const btn = new THREE.Mesh(hitGeo, hitMat);
+    // animAxis/animDir stored so _animateButtonPress can work without hardcoding;
+    // passed userData may override animAxis/animDir for specific buttons (level5)
+    btn.userData = { isButton: true, animAxis: axis, animDir: protrusionDir, ...userData, pressTarget: btn, glowMeshes: [] };
     interactables.push(btn);
     group.add(btn);
+
+    // Load button.glb as the visual — async, added to group when ready
+    _gltfLoader.load(asset('/items/button.glb'), (gltf) => {
+        const model = gltf.scene;
+
+        // Face the button outward from the wall, then roll 90° so the face
+        // points correctly rather than upward.  rotation.z acts as the
+        // outermost (world-space) rotation and doesn't disturb the
+        // back-against-wall bounding-box centering.
+        if (axis === 'x') {
+            model.rotation.y = protrusionDir > 0 ? Math.PI / 2 : -Math.PI / 2;
+        } else {
+            model.rotation.y = protrusionDir > 0 ? 0 : Math.PI;
+        }
+        // 1. Tilt the model so its face (originally +Y) points forward (-Z) 
+        // and its bottom plate (originally -Y) points back (+Z).
+        model.rotation.set(-Math.PI / 2, 0, 0);
+
+        // 2. Rotate to face the correct wall normal.
+        if (axis === 'x') {
+            model.rotation.y = protrusionDir > 0 ? Math.PI / 2 : -Math.PI / 2;
+        } else {
+            model.rotation.y = protrusionDir > 0 ? 0 : Math.PI;
+        }
+
+        // 3. Normalize scale (0.25 units max dimension)
+        const box0 = new THREE.Box3().setFromObject(model);
+        const size0 = box0.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size0.x, size0.y, size0.z);
+        model.scale.setScalar(0.25 / maxDim);
+
+        // 4. Centering: Use world bounds to place the model's back edge at X=0 or Z=0
+        const box = new THREE.Box3().setFromObject(model);
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+
+        if (axis === 'x') {
+            model.position.x = protrusionDir * (size.x / 2) - center.x;
+            model.position.y = -center.y;
+            model.position.z = -center.z;
+        } else {
+            model.position.x = -center.x;
+            model.position.y = -center.y;
+            model.position.z = protrusionDir * (size.z / 2) - center.z;
+        }
+
+        // 5. Align hit sphere to model center
+        if (axis === 'x') btn.position.x = model.position.x;
+        else btn.position.z = model.position.z;
+
+        model.traverse(child => {
+            if (!child.isMesh) return;
+            child.castShadow = true;
+            // Clone material so emissive changes don't bleed across all buttons
+            if (child.material) {
+                const mats = Array.isArray(child.material) ? child.material : [child.material];
+                child.material = mats.length === 1
+                    ? mats[0].clone()
+                    : mats.map(m => m.clone());
+            }
+            btn.userData.glowMeshes.push(child);
+        });
+
+        // Swap press animation target from hit sphere to the GLB model
+        btn.userData.pressTarget = model;
+
+        group.add(model);
+    });
 
     return { group, btn };
 }
@@ -4053,16 +4097,16 @@ export function setPendingContainerOverrides(overrides) {
 import { registerSaveHandler } from './save-registry.js';
 
 registerSaveHandler('world', {
-  serialize() {
-    return {
-      flags: getWorldFlags(),
-      merchantStock: getMerchantStock(),
-      potionMerchantStock: getPotionMerchantStock(),
-    };
-  },
-  restore(data) {
-    setWorldFlags(data.flags ?? null);
-    if (data.merchantStock) setMerchantStock(data.merchantStock);
-    if (data.potionMerchantStock) setPotionMerchantStock(data.potionMerchantStock);
-  },
+    serialize() {
+        return {
+            flags: getWorldFlags(),
+            merchantStock: getMerchantStock(),
+            potionMerchantStock: getPotionMerchantStock(),
+        };
+    },
+    restore(data) {
+        setWorldFlags(data.flags ?? null);
+        if (data.merchantStock) setMerchantStock(data.merchantStock);
+        if (data.potionMerchantStock) setPotionMerchantStock(data.potionMerchantStock);
+    },
 });

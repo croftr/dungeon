@@ -112,7 +112,7 @@ export function spawnLevel5Objects(ctx) {
             feet: 'Aethelgard Archmage Slippers',
             leftHand: 'Aethelgard Grand Staff',
             cloak: 'Aethelgard Archmage Mantle',
-        }, 'Wizard Armour Stand', 0.35);
+        }, 'Wizard Armour Stand', -0.3);
 
     addArmourStand(group, loader, 15, 5, 0,
         asset('/items/mage-statue.glb'), 0.7, 0, -0.7, {
@@ -124,7 +124,7 @@ export function spawnLevel5Objects(ctx) {
             leftHand: 'Seraphic Grace Scepter',
             cloak: 'Seraphic Grace Stole',
             ammo: 'Seraphic Spellbook',
-        }, 'Mage Armor Stand', 0.35);
+        }, 'Mage Armor Stand', -0.3);
 
     // South passages: row 19, facing north (rotY = π), pushed against south wall
     addArmourStand(group, loader, 10, 19, Math.PI,
@@ -147,7 +147,7 @@ export function spawnLevel5Objects(ctx) {
             feet: 'Sylvan Elderwood Boots',
             leftHand: 'Sylvan Elderwood Bow',
             cloak: 'Sylvan Elderwood Cloak',
-        }, 'Woodelf Armor Stand', 0.35);
+        }, 'Woodelf Armor Stand', -0.3);
 
     // West passages: col 5, facing east (rotY = π/2), pushed against west wall
     addArmourStand(group, loader, 5, 10, Math.PI / 2,
@@ -159,7 +159,7 @@ export function spawnLevel5Objects(ctx) {
             feet: 'Celestial Vindicator Sabatons',
             leftHand: 'Celestial Vindicator Greatmace',
             cloak: 'Celestial Vindicator Cloak',
-        }, 'Paladin Armor Stand', 0.35);
+        }, 'Paladin Armor Stand', -0.3);
 
     addArmourStand(group, loader, 5, 14, Math.PI / 2,
         asset('/items/dwarf-warrior-statue.glb'), 0.7, -0.7, 0, {
@@ -171,7 +171,7 @@ export function spawnLevel5Objects(ctx) {
             leftHand: 'Ironpeak Battleaxe',
             rightHand: 'Ironpeak Round Shield',
             cloak: 'Ironpeak Bear Cloak',
-        }, 'Warrior Armor Stand', 0.35);
+        }, 'Warrior Armor Stand', -0.3);
 
     // East passages: col 20, facing west (rotY = -π/2), pushed against east wall
     addArmourStand(group, loader, 20, 10, -Math.PI / 2,
@@ -183,7 +183,7 @@ export function spawnLevel5Objects(ctx) {
             feet: 'Amethyst Wardancer Sabatons',
             leftHand: 'Amethyst Wardancer Dagger',
             cloak: 'Amethyst Wardancer Cloak',
-        }, 'Wardancer Armor Stand', 0.35);
+        }, 'Wardancer Armor Stand', -0.3);
 
     addArmourStand(group, loader, 20, 14, -Math.PI / 2,
         asset('/items/barbarian-statue.glb'), 0.7, 0.7, 0, {
@@ -194,5 +194,5 @@ export function spawnLevel5Objects(ctx) {
             feet: 'Storm-Reaver Sabatons',
             leftHand: 'Storm-Reaver Greataxe',
             cloak: 'Storm-Reaver Pelt',
-        }, 'Barbarian Armor Stand', 0.35);
+        }, 'Barbarian Armor Stand', -0.3);
 }

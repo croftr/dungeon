@@ -809,30 +809,10 @@ export async function playInventorySortSound() {
 }
 
 /**
- * Synthesizes a mechanical button click sound.
+ * Plays the wall button press sound.
  */
-export async function playButtonClickSound() {
-  try {
-    const ctx = getCtx();
-    const now = ctx.currentTime;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(800, now);
-    osc.frequency.exponentialRampToValueAtTime(150, now + 0.04);
-
-    gain.gain.setValueAtTime(0.3, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.start(now);
-    osc.stop(now + 0.04);
-  } catch (err) {
-    console.warn('[audio] playButtonClickSound failed:', err);
-  }
+export function playButtonClickSound() {
+  playSoundByUrl(asset('/sounds/actions/button-press.mp3'), 0.8);
 }
 
 export async function playTrapSound() {

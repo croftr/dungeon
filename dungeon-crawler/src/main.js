@@ -1520,6 +1520,21 @@ const raycaster = new THREE.Raycaster();
 raycaster.far = 6;
 const mouse = new THREE.Vector2();
 let _lastRayTime = 0;
+let _hoveredButtonSphere = null; // tracks which button is currently glowing
+
+function _setButtonGlow(sphere, on) {
+  const meshes = sphere?.userData?.glowMeshes;
+  if (!meshes?.length) return;
+  for (const m of meshes) {
+    const mats = Array.isArray(m.material) ? m.material : [m.material];
+    for (const mat of mats) {
+      if (mat.emissive !== undefined) {
+        mat.emissive.setHex(on ? 0xe8c87a : 0x000000);
+        mat.emissiveIntensity = on ? 0.6 : 0;
+      }
+    }
+  }
+}
 
 window.addEventListener('mousemove', (e) => {
   // Only apply 3D world raycasting if interacting with the canvas directly
@@ -1539,14 +1554,23 @@ window.addEventListener('mousemove', (e) => {
   const intersects = raycaster.intersectObjects(interactables, false);
 
   let isHoveringInteractable = false;
+  let hoveredBtn = null;
   for (let hit of intersects) {
     const ud = hit.object.userData;
     if (ud && (ud.isButton || ud.isChest || ud.isArmorStand || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDialogueNPC || ud.isDamageTrap || ud.isEgg || ud.isTeleportTorch || ud.isAlchemyWorkshop || ud.isAnvil || ud.isShop || ud.isDroppedItem || ud.isHeroDoor || ud.isCrystalShrine || ud.isPortalActivatorStatue)) {
       if (hit.object.visible) {
         isHoveringInteractable = true;
+        if (ud.isButton) hoveredBtn = hit.object;
         break;
       }
     }
+  }
+
+  // Update button glow — turn off previous, turn on current
+  if (hoveredBtn !== _hoveredButtonSphere) {
+    _setButtonGlow(_hoveredButtonSphere, false);
+    _setButtonGlow(hoveredBtn, true);
+    _hoveredButtonSphere = hoveredBtn;
   }
 
   if (isHoveringInteractable) {
