@@ -223,6 +223,30 @@
       Video</button>
   </div>
 
+  <!-- ── CRYSTAL SHRINE RED VIDEO OVERLAY ── -->
+  <div id="crystal-shrine-red-video-overlay" class="hidden"
+    style="position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 1.5s ease;">
+    <video id="crystal-shrine-red-video" preload="none"
+      style="width: 100%; height: 100%; object-fit: contain; box-shadow: 0 0 100px rgba(0, 0, 0, 1);">
+      <source src="/videos/crysta-shrine-red.mp4" type="video/mp4">
+    </video>
+    <button id="skip-crystal-shrine-red-btn"
+      style="position: absolute; bottom: 40px; right: 40px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(232, 200, 122, 0.3); color: #aaa; padding: 10px 24px; font-family: monospace; font-size: 12px; cursor: pointer; border-radius: 4px;">Skip
+      Video</button>
+  </div>
+
+  <!-- ── CRYSTAL SHRINE RED+BLUE VIDEO OVERLAY ── -->
+  <div id="crystal-shrine-red-blue-video-overlay" class="hidden"
+    style="position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 1.5s ease;">
+    <video id="crystal-shrine-red-blue-video" preload="none"
+      style="width: 100%; height: 100%; object-fit: contain; box-shadow: 0 0 100px rgba(0, 0, 0, 1);">
+      <source src="/videos/crystal-shrine-red-and-blue.mp4" type="video/mp4">
+    </video>
+    <button id="skip-crystal-shrine-red-blue-btn"
+      style="position: absolute; bottom: 40px; right: 40px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(232, 200, 122, 0.3); color: #aaa; padding: 10px 24px; font-family: monospace; font-size: 12px; cursor: pointer; border-radius: 4px;">Skip
+      Video</button>
+  </div>
+
   <!-- ── FALL BLACKOUT OVERLAY ── -->
   <div id="fall-blackout" class="hidden"></div>
 
@@ -850,6 +874,19 @@
       <!-- Confirm footer — only shown during a pending level-up -->
       <div id="char-dev-footer" style="display:none;">
         <button id="char-dev-confirm" disabled>Confirm Level Up</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SHRINE LOOT MODAL ── -->
+  <div id="shrine-loot-overlay" class="chest-hidden">
+    <div id="shrine-loot-modal">
+      <div id="shrine-loot-header">
+        <span id="shrine-loot-title">Ancient Shrine</span>
+        <button id="shrine-loot-close">✕</button>
+      </div>
+      <div id="shrine-loot-body">
+        <div class="chest-slot shrine-loot-slot" data-index="0"></div>
       </div>
     </div>
   </div>

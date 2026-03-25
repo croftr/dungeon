@@ -17,13 +17,18 @@ let _shieldAnimating = false;
 
 const TRAIL_DURATION = 250;   // ms — quick slash
 const TRAIL_SEGMENTS = 16;    // ribbon subdivisions
-const TRAIL_WIDTH = 0.012;    // half-width — thin like a claw mark
+const TRAIL_WIDTH = 0.007;    // half-width — thin like a claw mark
 
 // Slash arc control points (camera-local space)
 // Tight arc across the centre of the screen, Grimrock-style
-const ARC_START = new THREE.Vector3(-0.18, 0.14, -0.45);
-const ARC_MID   = new THREE.Vector3(0.02, 0.0, -0.4);
-const ARC_END   = new THREE.Vector3(0.2, -0.16, -0.45);
+// 'left' party column (indices 0,2) — slash from upper-left to lower-right
+const ARC_START_L = new THREE.Vector3(-0.18, 0.14, -0.45);
+const ARC_MID_L   = new THREE.Vector3(0.02, 0.0, -0.4);
+const ARC_END_L   = new THREE.Vector3(0.2, -0.16, -0.45);
+// 'right' party column (indices 1,3) — slash from upper-right to lower-left
+const ARC_START_R = new THREE.Vector3(0.18, 0.14, -0.45);
+const ARC_MID_R   = new THREE.Vector3(-0.02, 0.0, -0.4);
+const ARC_END_R   = new THREE.Vector3(-0.2, -0.16, -0.45);
 
 // Shield bash arc — short vertical travel so the wide ribbon reads as round
 const SHIELD_START = new THREE.Vector3(0.0, -0.18, -0.45);
@@ -110,18 +115,25 @@ export function initSlashTrail(camera) {
 /**
  * Play the slash trail effect.
  * @param {'left'|'right'} hand — mirrors the arc for right-hand attacks
+ * @param {number} memberIndex — party member index (0-3), used to pick arc direction
  */
-export function playSlashTrail(hand = 'left') {
+export function playSlashTrail(hand = 'left', memberIndex = 0) {
   if (!_trailMesh || _animating) return;
   _animating = true;
+
+  // Party column: indices 0,2 = left column, 1,3 = right column
+  const rightColumn = memberIndex % 2 === 1;
+  const arcStart = rightColumn ? ARC_START_R : ARC_START_L;
+  const arcMid   = rightColumn ? ARC_MID_R   : ARC_MID_L;
+  const arcEnd   = rightColumn ? ARC_END_R   : ARC_END_L;
 
   const mirror = hand === 'right' ? -1 : 1;
   _trailMesh.visible = true;
 
   // Pre-compute the full arc path (mirrored for hand)
-  const start = new THREE.Vector3(ARC_START.x * mirror, ARC_START.y, ARC_START.z);
-  const mid   = new THREE.Vector3(ARC_MID.x * mirror, ARC_MID.y, ARC_MID.z);
-  const end   = new THREE.Vector3(ARC_END.x * mirror, ARC_END.y, ARC_END.z);
+  const start = new THREE.Vector3(arcStart.x * mirror, arcStart.y, arcStart.z);
+  const mid   = new THREE.Vector3(arcMid.x * mirror, arcMid.y, arcMid.z);
+  const end   = new THREE.Vector3(arcEnd.x * mirror, arcEnd.y, arcEnd.z);
 
   // Direction perpendicular to the arc for ribbon width
   const up = new THREE.Vector3(0, 0, 1);
@@ -177,6 +189,7 @@ export function playSlashTrail(hand = 'left') {
 /**
  * Play a chunky shield bash trail — rises from bottom to mid-screen.
  * @param {'left'|'right'} hand
+ * @param {number} memberIndex — party member index (0-3), used to pick arc direction
  */
 export function playShieldTrail(hand = 'left') {
   if (!_shieldMesh || _shieldAnimating) return;

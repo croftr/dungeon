@@ -15,18 +15,22 @@ export function spawnLevel0Objects(ctx) {
         addPortal, addDisabledPortal, addPortcullis,
         addPartyConfirmNPC,
         addAnvil, addAlchemyWorkshop, addDroppedTorch, addTrap1,
-        addDecoration, addHeroDoor,
+        addDecoration, addCrystalShrine, addHeroDoor,
         createWallButton,
         starterPortalEnabled, starterGateOpened,
         setStarterGate,
         interactables,
     } = ctx;
 
+    // ── Crystal Temple decoration against south wall, next to the stash ─────
+    addCrystalShrine(group, loader, 13, 12, -Math.PI / 2, 0.5, 0.9, 0, 0);
+
     // ── Stash in the starter room ─────────────────────────────────────────────
-    addChest(group, loader, 11, 13, 0, 0.6, [
+    addChest(group, loader, 11, 13, 0, 0.9, [
         { name: 'Gold Coins', quantity: 100 },
         'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore", "Life Essence", "Minor Potions Parchment",
-        "Lizard Scale", "Crocodile Hide", "Iron Ore", "Aqua Man Flipper", "Demon's Eyes", "Iron Ore", "Mace", "Cloth Trousers", "Starlight Nectar"
+        "Lizard Scale", "Crocodile Hide", "Iron Ore", "Aqua Man Flipper", "Demon's Eyes", "Iron Ore", "Mace", "Cloth Trousers", "Starlight Nectar",
+        "Blue Crystal", "Red Crystal"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in the east room (center) ────────────────────────────────────

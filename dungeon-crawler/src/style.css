@@ -3597,6 +3597,68 @@ label.mm-setting-label {
 }
 
 /* ═══════════════════════════════════════════════
+   SHRINE LOOT MODAL
+═══════════════════════════════════════════════ */
+
+#shrine-loot-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+#shrine-loot-modal {
+  width: 180px;
+  background: rgba(10, 7, 4, 0.97);
+  border: 1px solid #5a4a30;
+  border-radius: 6px;
+  padding: 14px 16px 18px;
+  font-family: monospace;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+#shrine-loot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#shrine-loot-title {
+  color: #e8c87a;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+#shrine-loot-close {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+#shrine-loot-close:hover { color: #e8c87a; }
+
+#shrine-loot-body {
+  display: flex;
+  justify-content: center;
+  padding: 4px 0;
+}
+
+.shrine-loot-slot {
+  width: 64px !important;
+  height: 64px !important;
+  aspect-ratio: unset !important;
+}
+
+/* ═══════════════════════════════════════════════
    CHEST MODAL
 ═══════════════════════════════════════════════ */
 

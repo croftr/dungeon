@@ -160,5 +160,23 @@
         "value": 250,
         "weight": 15.0,
         "sellable": true
+    },
+    {
+        "name": "Blue Crystal",
+        "slot": "loot",
+        "icon": "/icons/key/blue_crystal.png",
+        "description": "A powerful blue crystal pulsing with mystical energy. It looks like it might be part of a larger mechanism.",
+        "value": 500,
+        "weight": 0.5,
+        "sellable": false
+    },
+    {
+        "name": "Red Crystal",
+        "slot": "loot",
+        "icon": "/icons/key/red_crystal.png",
+        "description": "A powerful red crystal glowing with intense fiery energy. It feels warm to the touch.",
+        "value": 500,
+        "weight": 0.5,
+        "sellable": false
     }
 ]

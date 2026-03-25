@@ -34,6 +34,8 @@ const ITEM_SOUNDS = {
   'potion': asset('/sounds/items/alchemy-bubbles.mp3'),
   'scroll': asset('/sounds/items/scroll.mp3'),
   'Torch': asset('/sounds/items/burn.mp3'),
+  'Red Crystal': asset('/sounds/items/crystal.mp3'),
+  'Blue Crystal': asset('/sounds/items/crystal.mp3'),
 };
 
 const bufferCache = new Map();

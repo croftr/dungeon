@@ -17,6 +17,7 @@ export function spawnLevel1Objects(ctx) {
         addTrap1,
         createWallButton,
         mummyGateOpened,
+        crystalShrineState,
         interactables,
     } = ctx;
 
@@ -69,8 +70,8 @@ export function spawnLevel1Objects(ctx) {
     ]);
 
     // ── Spell Cabinet ────────────────────────────────────────────────────────
-    // Secret room north of the zombie room — moved here from Level 0
-    addSpellCabinet(group, loader, 17, 11, 0, 0, -0.7, [
+    // Goblin room — moved west away from the passage at col 17
+    addSpellCabinet(group, loader, 15, 11, 0, 0, -0.7, [
         'Minor Potions Parchment',
     ]);
 
@@ -108,11 +109,19 @@ export function spawnLevel1Objects(ctx) {
     mummyBtn.position.set(21 * CELL - 1.0, 1.25, 3 * CELL);
     group.add(mummyBtn);
 
+    // ── Shrine passage portcullis ─────────────────────────────────────────────
+    // Blocks the passage north of the goblin room until the Red Crystal is placed
+    // in the crystal shrine on Level 0 (crystalShrineState >= 1)
+    addPortcullis(group, loader, 17, 10, 0, crystalShrineState >= 1);
+
     // ── Statues ───────────────────────────────────────────────────────────────
     // Statue in the center of the 5x5 room
     addStatue(group, loader, 13, 3);
 
-    // Portal Activator Statue in the mummy room — unlocks the level-2 portal in Level 0
+    // Portal Activator Statue in the mummy room — contains Red Crystal
     addPortalActivatorStatue(group, loader, 19, 2, 0);
+
+    // Portal Activator Statue in the alcove north of the goblin room — contains Blue Crystal
+    addPortalActivatorStatue(group, loader, 17, 7, Math.PI, 0.45, ['Blue Crystal']);
 
 }

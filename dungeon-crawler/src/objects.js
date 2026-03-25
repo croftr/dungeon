@@ -43,6 +43,12 @@ export function updateObjects(dt) {
 let _mummyGateOpened = false;
 let _starterGateOpened = false; // persists across level reloads — once open, never re-closes
 let _starterPortalEnabled = false;
+// Crystal shrine state: 0=empty, 1=red crystal placed, 2=red+blue placed
+let _crystalShrineState = 0;
+let _crystalShrineMesh = null;
+let _crystalShrineScene = null;
+let _crystalShrineLoader = null;
+let _crystalShrineParams = null;
 let _disabledPortalMesh = null;
 let _partyConfirmNPCModel = null; // true once the player confirms — prevents re-triggering
 let _starterGate = null; // portcullis behind the party-confirm NPC; opens only via dialogue
@@ -143,6 +149,7 @@ export function clearObjects(scene) {
     _shopGridCells.clear();
     _statueGridCells.clear();
     interactables.length = 0;
+    _crystalShrineMesh = null;
 }
 
 export function initObjects(scene, camera) {
@@ -162,6 +169,7 @@ export function initObjects(scene, camera) {
         const charDevOverlay = document.getElementById('char-dev-overlay');
         const partyConfirmOverlay = document.getElementById('party-confirm-overlay');
         const trapDisarmOverlay = document.getElementById('trap-disarm-overlay');
+        const shrineLootOverlay = document.getElementById('shrine-loot-overlay');
         if (
             (weaponRackOverlay && !weaponRackOverlay.classList.contains('chest-hidden')) ||
             (cabinetOverlay && !cabinetOverlay.classList.contains('chest-hidden')) ||
@@ -172,7 +180,8 @@ export function initObjects(scene, camera) {
             (trapDisarmOverlay && !trapDisarmOverlay.classList.contains('chest-hidden')) ||
             (alchemyOverlay && !alchemyOverlay.classList.contains('chest-hidden')) ||
             (charDevOverlay && !charDevOverlay.classList.contains('char-dev-hidden')) ||
-            (partyConfirmOverlay && !partyConfirmOverlay.classList.contains('chest-hidden'))
+            (partyConfirmOverlay && !partyConfirmOverlay.classList.contains('chest-hidden')) ||
+            (shrineLootOverlay && !shrineLootOverlay.classList.contains('chest-hidden'))
         ) return;
 
         // Raycast
@@ -402,53 +411,7 @@ export function initObjects(scene, camera) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 2 && distCol <= 2) {
-                    if (!_starterPortalEnabled) {
-                        _starterPortalEnabled = true;
-
-                        // The portal is in Level 0 (starter room). If we're in Level 1 (mummy area),
-                        // just set the flag — the portal will appear when the player returns to Level 0.
-                        const inLevel0 = window.currentLevel === 0;
-
-                        if (window.playStatuePortalVideo) {
-                            window.playStatuePortalVideo(() => {
-                                if (inLevel0) {
-                                    // Swap out the disabled portal model
-                                    if (_disabledPortalMesh) {
-                                        _disabledPortalMesh.traverse((child) => {
-                                            const idx = interactables.indexOf(child);
-                                            if (idx !== -1) interactables.splice(idx, 1);
-                                        });
-                                        if (_disabledPortalMesh.parent) {
-                                            _disabledPortalMesh.parent.remove(_disabledPortalMesh);
-                                        }
-                                        _disabledPortalMesh = null;
-                                    }
-                                    addPortal(objectsGroup, _gltfLoader, 13, 13, 2, Math.PI / 2, 0.85, 0);
-                                } else {
-                                    showMessage("A portal has opened in the starting chamber!");
-                                }
-                            });
-                        } else {
-                            // Fallback if video isn't available
-                            if (inLevel0) {
-                                if (_disabledPortalMesh) {
-                                    _disabledPortalMesh.traverse((child) => {
-                                        const idx = interactables.indexOf(child);
-                                        if (idx !== -1) interactables.splice(idx, 1);
-                                    });
-                                    if (_disabledPortalMesh.parent) {
-                                        _disabledPortalMesh.parent.remove(_disabledPortalMesh);
-                                    }
-                                    _disabledPortalMesh = null;
-                                }
-                                addPortal(objectsGroup, _gltfLoader, 13, 13, 2, Math.PI / 2, 0.85, 0);
-                            } else {
-                                showMessage("A portal has opened in the starting chamber!");
-                            }
-                        }
-                    } else {
-                        showMessage("The statue emits a faint glow.");
-                    }
+                    openShrineLootModal(obj);
                 } else {
                     showMessage("The ancient statue watches you.");
                 }
@@ -698,6 +661,58 @@ export function initObjects(scene, camera) {
                     showMessage("The sarcophagus looms silently across the room.");
                 }
                 break;
+            } else if (obj.userData.isCrystalShrine) {
+                const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
+                const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
+                if (distRow <= 2 && distCol <= 2) {
+                    if (_crystalShrineState === 2) {
+                        showMessage("The shrine radiates with brilliant red and blue energy.");
+                    } else if (_crystalShrineState === 1) {
+                        // Red placed — look for blue crystal
+                        let blueIdx = -1, blueMember = null;
+                        for (let i = 0; i < party.length; i++) {
+                            if (party[i] && !party[i].isEmpty && party[i].inventory) {
+                                const idx = party[i].inventory.findIndex(item => item && item.name === 'Blue Crystal');
+                                if (idx !== -1) { blueIdx = idx; blueMember = party[i]; break; }
+                            }
+                        }
+                        if (blueMember) {
+                            blueMember.inventory[blueIdx] = null;
+                            _crystalShrineState = 2;
+                            _swapCrystalShrine();
+                            showMessage("The portal opens!");
+                            if (window.playCrystalShrineRedBlueVideo) {
+                                window.playCrystalShrineRedBlueVideo(() => _activateStarterPortal());
+                            } else {
+                                _activateStarterPortal();
+                            }
+                        } else {
+                            showMessage("The shrine pulses with red energy. It seems to need a Blue Crystal.");
+                        }
+                    } else {
+                        // State 0 — look for red crystal
+                        let redIdx = -1, redMember = null;
+                        for (let i = 0; i < party.length; i++) {
+                            if (party[i] && !party[i].isEmpty && party[i].inventory) {
+                                const idx = party[i].inventory.findIndex(item => item && item.name === 'Red Crystal');
+                                if (idx !== -1) { redIdx = idx; redMember = party[i]; break; }
+                            }
+                        }
+                        if (redMember) {
+                            redMember.inventory[redIdx] = null;
+                            _crystalShrineState = 1;
+                            _swapCrystalShrine();
+                            if (window.playCrystalShrineRedVideo) {
+                                window.playCrystalShrineRedVideo(() => {});
+                            }
+                        } else {
+                            showMessage("It looks like it needs some crystals to activate it.");
+                        }
+                    }
+                } else {
+                    showMessage("It looks like it needs some crystals to activate it.");
+                }
+                break;
             } else if (obj.userData.isJester) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
@@ -785,6 +800,17 @@ export function initObjects(scene, camera) {
             }
         }
     });
+
+    // Shrine loot modal close
+    const shrineLootCloseBtn = document.getElementById('shrine-loot-close');
+    if (shrineLootCloseBtn) {
+        shrineLootCloseBtn.onclick = (e) => {
+            e.stopPropagation();
+            document.getElementById('shrine-loot-overlay').classList.add('chest-hidden');
+            _activeShrineLootObj = null;
+            equip.hideTooltip();
+        };
+    }
 
     // Modal Close Logic
     const closeBtn = document.getElementById('chest-close');
@@ -1193,6 +1219,93 @@ export function addDecoration(scene, loader, col, row, rotY = 0, modelPath, scal
     });
 }
 
+function addCrystalShrine(scene, loader, col, row, rotY, scale, offsetX, offsetZ, offsetY) {
+    const modelPath = _crystalShrineState === 2
+        ? asset('/items/crystal-shrine/crysta-temple-red-and-blue.glb')
+        : _crystalShrineState === 1
+            ? asset('/items/crystal-shrine/crysta-temple-red.glb')
+            : asset('/items/crystal-shrine/crystal-temple-empty.glb');
+
+    _crystalShrineScene = scene;
+    _crystalShrineLoader = loader;
+    _crystalShrineParams = { col, row, rotY, scale, offsetX, offsetZ, offsetY };
+
+    loader.load(modelPath, (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(scale);
+        model.position.set(col * CELL + offsetX, offsetY, row * CELL + offsetZ);
+        model.rotation.y = rotY;
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.userData.isCrystalShrine = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
+                interactables.push(child);
+            }
+        });
+        scene.add(model);
+        _crystalShrineMesh = model;
+    });
+}
+
+function _swapCrystalShrine() {
+    if (_crystalShrineMesh) {
+        _crystalShrineMesh.traverse((child) => {
+            const idx = interactables.indexOf(child);
+            if (idx !== -1) interactables.splice(idx, 1);
+        });
+        if (_crystalShrineMesh.parent) _crystalShrineMesh.parent.remove(_crystalShrineMesh);
+        _crystalShrineMesh = null;
+    }
+    const p = _crystalShrineParams;
+    if (p) addCrystalShrine(_crystalShrineScene, _crystalShrineLoader, p.col, p.row, p.rotY, p.scale, p.offsetX, p.offsetZ, p.offsetY);
+}
+
+function _activateStarterPortal() {
+    _starterPortalEnabled = true;
+    if (_disabledPortalMesh) {
+        _disabledPortalMesh.traverse((child) => {
+            const idx = interactables.indexOf(child);
+            if (idx !== -1) interactables.splice(idx, 1);
+        });
+        if (_disabledPortalMesh.parent) _disabledPortalMesh.parent.remove(_disabledPortalMesh);
+        _disabledPortalMesh = null;
+    }
+    addPortal(objectsGroup, _gltfLoader, 13, 13, 2, Math.PI / 2, 0.85, 0);
+    showMessage("The crystal shrine blazes with power — a portal has opened!");
+}
+
+let _activeShrineLootObj = null;
+
+function openShrineLootModal(shrineObj) {
+    _activeShrineLootObj = shrineObj;
+    _activeSentLabelId = null;
+    _chestPartyMemberIdx = party.findIndex(m => !m.isEmpty);
+    if (_chestPartyMemberIdx === -1) _chestPartyMemberIdx = 0;
+
+    const overlay = document.getElementById('shrine-loot-overlay');
+    if (!overlay) return;
+    overlay.classList.remove('chest-hidden');
+
+    const contents = shrineObj.userData.contents || [];
+    const slot = document.querySelector('.shrine-loot-slot');
+    if (slot) _bindChestSlots(equip, [slot], contents);
+}
+
 function addHeroDoor(scene, loader, col, row, rotY = Math.PI) {
     loader.load(asset('/items/hero-door.glb'), (gltf) => {
         const model = gltf.scene;
@@ -1547,7 +1660,7 @@ export function spawnObjectsForLevel() {
         loader: _gltfLoader,
         // Spawn helpers
         addChest, addWeaponRack, addSpellCabinet, addShop,
-        addCrystals, addBonePile, addDecoration, addHeroDoor,
+        addCrystals, addBonePile, addDecoration, addCrystalShrine, addHeroDoor,
         addPortal, addDisabledPortal, addPortcullis, addKeyhole,
         addStatue, addPortalActivatorStatue, addPartyConfirmNPC, addDialogueNPC,
         addAnvil, addAlchemyWorkshop, addDroppedTorch, addEtherealEgg, addStairs,
@@ -1562,6 +1675,7 @@ export function spawnObjectsForLevel() {
         level2HoleClosed: _level2HoleClosed,
         // Level 3 state flags
         minotaurDead,
+        crystalShrineState: _crystalShrineState,
         // State setters (values written back to objects.js module scope)
         setStarterGate: (g) => { _starterGate = g; },
         // Shared refs for custom object loading code in level files
@@ -1741,8 +1855,13 @@ function addDisabledPortal(scene, loader, col, row, rotY = 0, offsetX = 0, offse
     });
 }
 
-function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.45) {
+function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.45, initialContents = ['Red Crystal']) {
     _statueGridCells.add(`${row},${col}`); // block player movement through this cell
+    const cid = _nextContainerId++;
+    let contents = [...initialContents];
+    if (_pendingContainerOverrides && cid in _pendingContainerOverrides) {
+        contents = _pendingContainerOverrides[cid];
+    }
     loader.load(asset('/items/statue1.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(scale);
@@ -1756,6 +1875,8 @@ function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.4
                 child.userData.isPortalActivatorStatue = true;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
+                child.userData.containerId = cid;
+                child.userData.contents = contents;
                 interactables.push(child);
             }
         });
@@ -3874,6 +3995,7 @@ export function getWorldFlags() {
         level2GiantPortcullisOpened: _level2GiantPortcullisOpened,
         level2HoleClosed: _level2HoleClosed,
         disarmedTraps: [..._trapDisarmedSet],
+        crystalShrineState: _crystalShrineState,
     };
 }
 
@@ -3886,6 +4008,7 @@ export function setWorldFlags(flags) {
     _level2PortcullisOpened = flags.level2PortcullisOpened ?? false;
     _level2GiantPortcullisOpened = flags.level2GiantPortcullisOpened ?? false;
     _level2HoleClosed = flags.level2HoleClosed ?? false;
+    _crystalShrineState = flags.crystalShrineState ?? 0;
     if (_level2HoleClosed) level2Map[17][23] = CELL_FLOOR;
     _trapDisarmedSet.clear();
     if (Array.isArray(flags.disarmedTraps)) {

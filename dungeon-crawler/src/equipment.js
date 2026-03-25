@@ -2336,7 +2336,7 @@ function _executePartySpell(caster, casterIndex, hand, spellDef) {
   }
 
   refreshPartyCards();
-  playAction(spellDef.attackType, hand);
+  playAction(spellDef.attackType, hand, casterIndex);
   _dispatchSpellVFX(spellDef.attackType);
 
   if (spellDef.attackType === ACTIONS.RESIST_POISON) {
@@ -2382,7 +2382,7 @@ function _executeAoEDebuffSpell(caster, casterIndex, hand, spellDef) {
   lastAttackTimes[timeKey] = performance.now();
 
   refreshPartyCards();
-  playAction(spellDef.attackType, hand);
+  playAction(spellDef.attackType, hand, casterIndex);
   _dispatchSpellVFX(spellDef.attackType);
 
   // Determine the status effect to apply (same as the spell's attackType, e.g. 'sleep')
@@ -2454,7 +2454,7 @@ function _executePartyMemberSpell(caster, casterIndex, hand, spellDef, target) {
   refreshPartyCards();
 
   // Play the spell animation
-  playAction(spellDef.attackType, hand);
+  playAction(spellDef.attackType, hand, casterIndex);
   _dispatchSpellVFX(spellDef.attackType);
 
   if (spellDef.attackType === ACTIONS.CURE_POISON) {
@@ -2749,7 +2749,7 @@ export function useHand(memberIndex, hand, silent = false) {
   breakPartyUnseen(`${m.name} attacks — the cloak of shadow disperses!`);
 
   // Play the visual + audio animation regardless of whether a target exists
-  playAction(attackType, hand);
+  playAction(attackType, hand, memberIndex);
   if (isSpell || isBuff) _dispatchSpellVFX(attackType);
 
   if (isBuff) {
@@ -2804,13 +2804,13 @@ export function useHand(memberIndex, hand, silent = false) {
         daTarget = _closestMonsterInFront(maxRange);
         if (daTarget) {
           daResult = attackMonster(daTarget.id, m, def, attackType, ammoDef);
-          playAction(attackType, hand);
+          playAction(attackType, hand, memberIndex);
           if (isSpell || isBuff) _dispatchSpellVFX(attackType);
         }
       } else {
         daTarget = target;
         daResult = attackMonster(target.id, m, def, attackType, ammoDef);
-        playAction(attackType, hand);
+        playAction(attackType, hand, memberIndex);
         if (isSpell || isBuff) _dispatchSpellVFX(attackType);
       }
       if (daResult) {

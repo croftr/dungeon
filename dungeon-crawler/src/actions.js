@@ -192,8 +192,9 @@ const ACTION_SVG = {
  * Play the weapon action animation overlay on the dungeon view.
  * @param {string|null} attackType  — one of ACTIONS values, or null (no-op)
  * @param {string}      hand        — 'left' | 'right'  (mirrors swipe/shoot/punch for right hand)
+ * @param {number}      memberIndex — party member index (0-3), controls arc direction
  */
-export function playAction(attackType, hand = 'left') {
+export function playAction(attackType, hand = 'left', memberIndex = 0) {
   if (!attackType) return;
 
   // Play the matching sound simultaneously
@@ -212,7 +213,7 @@ export function playAction(attackType, hand = 'left') {
 
   // Other melee attacks use the diagonal slash trail
   if (attackType === ACTIONS.SWIPE || attackType === ACTIONS.BASH || attackType === ACTIONS.PUNCH) {
-    playSlashTrail(hand);
+    playSlashTrail(hand, memberIndex);
     return;
   }
 

@@ -48,7 +48,7 @@ document.querySelectorAll('img[data-src]').forEach(img => {
 
 // Map of level number → video element IDs to preload when entering that level
 const _VIDEO_LEVELS = {
-  0: ['battle-prep-video', 'hero-door-video', 'nectar-quest-video'],
+  0: ['battle-prep-video', 'hero-door-video', 'nectar-quest-video', 'crystal-shrine-red-video', 'crystal-shrine-red-blue-video'],
   1: ['ogre-video', 'mummy-video', 'demon-video', 'aqua-man-video', 'portal-video'],
   2: ['treeman-video', 'giant-video'],
   3: ['minotaur-video', 'minotaur-death-video', 'statue-portal-video', 'egg-video'],
@@ -1285,6 +1285,90 @@ function finishStatuePortalVideo() {
 
 if (skipStatuePortalBtn) skipStatuePortalBtn.addEventListener('click', finishStatuePortalVideo);
 if (statuePortalVideo) statuePortalVideo.addEventListener('ended', finishStatuePortalVideo);
+
+// ─────────────────────────────────────────────
+//  CRYSTAL SHRINE VIDEO OVERLAYS
+// ─────────────────────────────────────────────
+const crystalShrineRedOverlay = document.getElementById('crystal-shrine-red-video-overlay');
+const crystalShrineRedVideo = document.getElementById('crystal-shrine-red-video');
+const skipCrystalShrineRedBtn = document.getElementById('skip-crystal-shrine-red-btn');
+let _crystalShrineRedCallback = null;
+
+window.playCrystalShrineRedVideo = function (onComplete) {
+  _crystalShrineRedCallback = onComplete;
+  if (!crystalShrineRedOverlay || !crystalShrineRedVideo) {
+    if (_crystalShrineRedCallback) _crystalShrineRedCallback();
+    return;
+  }
+  crystalShrineRedOverlay.classList.remove('hidden');
+  setTimeout(() => {
+    crystalShrineRedOverlay.style.opacity = '1';
+    crystalShrineRedVideo.play().catch(e => {
+      console.warn("Crystal shrine red video play failed:", e);
+      finishCrystalShrineRedVideo();
+    });
+  }, 50);
+};
+
+function finishCrystalShrineRedVideo() {
+  if (!crystalShrineRedOverlay) {
+    if (_crystalShrineRedCallback) _crystalShrineRedCallback();
+    return;
+  }
+  crystalShrineRedOverlay.style.opacity = '0';
+  setTimeout(() => {
+    crystalShrineRedVideo.pause();
+    crystalShrineRedOverlay.classList.add('hidden');
+    if (_crystalShrineRedCallback) {
+      _crystalShrineRedCallback();
+      _crystalShrineRedCallback = null;
+    }
+  }, 1500);
+}
+
+if (skipCrystalShrineRedBtn) skipCrystalShrineRedBtn.addEventListener('click', finishCrystalShrineRedVideo);
+if (crystalShrineRedVideo) crystalShrineRedVideo.addEventListener('ended', finishCrystalShrineRedVideo);
+
+const crystalShrineRedBlueOverlay = document.getElementById('crystal-shrine-red-blue-video-overlay');
+const crystalShrineRedBlueVideo = document.getElementById('crystal-shrine-red-blue-video');
+const skipCrystalShrineRedBlueBtn = document.getElementById('skip-crystal-shrine-red-blue-btn');
+let _crystalShrineRedBlueCallback = null;
+
+window.playCrystalShrineRedBlueVideo = function (onComplete) {
+  _crystalShrineRedBlueCallback = onComplete;
+  if (!crystalShrineRedBlueOverlay || !crystalShrineRedBlueVideo) {
+    if (_crystalShrineRedBlueCallback) _crystalShrineRedBlueCallback();
+    return;
+  }
+  crystalShrineRedBlueOverlay.classList.remove('hidden');
+  setTimeout(() => {
+    crystalShrineRedBlueOverlay.style.opacity = '1';
+    crystalShrineRedBlueVideo.play().catch(e => {
+      console.warn("Crystal shrine red+blue video play failed:", e);
+      finishCrystalShrineRedBlueVideo();
+    });
+  }, 50);
+};
+
+function finishCrystalShrineRedBlueVideo() {
+  if (!crystalShrineRedBlueOverlay) {
+    if (_crystalShrineRedBlueCallback) _crystalShrineRedBlueCallback();
+    return;
+  }
+  crystalShrineRedBlueOverlay.style.opacity = '0';
+  setTimeout(() => {
+    crystalShrineRedBlueVideo.pause();
+    crystalShrineRedBlueOverlay.classList.add('hidden');
+    if (_crystalShrineRedBlueCallback) {
+      _crystalShrineRedBlueCallback();
+      _crystalShrineRedBlueCallback = null;
+    }
+  }, 1500);
+}
+
+if (skipCrystalShrineRedBlueBtn) skipCrystalShrineRedBlueBtn.addEventListener('click', finishCrystalShrineRedBlueVideo);
+if (crystalShrineRedBlueVideo) crystalShrineRedBlueVideo.addEventListener('ended', finishCrystalShrineRedBlueVideo);
+
 function handleFirstInteraction() {
   startMusic();
   window.removeEventListener('click', handleFirstInteraction);
@@ -1457,7 +1541,7 @@ window.addEventListener('mousemove', (e) => {
   let isHoveringInteractable = false;
   for (let hit of intersects) {
     const ud = hit.object.userData;
-    if (ud && (ud.isButton || ud.isChest || ud.isArmorStand || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDialogueNPC || ud.isDamageTrap || ud.isEgg || ud.isTeleportTorch || ud.isAlchemyWorkshop || ud.isAnvil || ud.isShop || ud.isDroppedItem || ud.isHeroDoor)) {
+    if (ud && (ud.isButton || ud.isChest || ud.isArmorStand || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDialogueNPC || ud.isDamageTrap || ud.isEgg || ud.isTeleportTorch || ud.isAlchemyWorkshop || ud.isAnvil || ud.isShop || ud.isDroppedItem || ud.isHeroDoor || ud.isCrystalShrine || ud.isPortalActivatorStatue)) {
       if (hit.object.visible) {
         isHoveringInteractable = true;
         break;
