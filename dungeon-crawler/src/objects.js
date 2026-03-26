@@ -2968,11 +2968,14 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
     const title = shopType === 'potions' ? 'Apothecary' : 'Merchant';
     document.getElementById('merchant-title').textContent = title;
 
+    const modal = document.getElementById('merchant-modal');
     const questPanel = document.getElementById('merchant-quest-panel');
     if (questNpcId) {
+        modal.classList.add('merchant-has-quests');
         questPanel.classList.remove('merchant-hidden');
         renderMerchantQuestPanel(questNpcId);
     } else {
+        modal.classList.remove('merchant-has-quests');
         questPanel.classList.add('merchant-hidden');
     }
 

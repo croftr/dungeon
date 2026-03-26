@@ -169,6 +169,7 @@ function makeFloorTexture() {
 const textureLoader = new THREE.TextureLoader();
 
 const stoneWallTex = textureLoader.load(asset('/textures/wall1.jpg'));
+
 stoneWallTex.wrapS = stoneWallTex.wrapT = THREE.RepeatWrapping;
 stoneWallTex.anisotropy = 16;
 
@@ -295,7 +296,7 @@ export function buildLevel(scene) {
   const uvVar = new Float32Array(wallCount * 3);
   const rng = mulberry32(0xa117e45);
   for (let i = 0; i < wallCount; i++) {
-    uvVar[i * 3]     = rng();           // offsetU
+    uvVar[i * 3] = rng();           // offsetU
     uvVar[i * 3 + 1] = rng();           // offsetV
     uvVar[i * 3 + 2] = Math.floor(rng() * 4); // rotation 0-3
   }
@@ -360,4 +361,48 @@ export function buildLevel(scene) {
   scene.add(ceilIM); currentMapMeshes.push(ceilIM);
 
   return null;
+}
+
+/**
+ * Overlays specific cells with custom wall/floor textures (individual meshes
+ * placed on top of the instanced ones). Tracked in currentMapMeshes so they
+ * are removed automatically on the next buildLevel call.
+ *
+ * @param {THREE.Scene} scene
+ * @param {[number,number][]} wallCells  - [row,col] pairs to override with wall texture
+ * @param {[number,number][]} floorCells - [row,col] pairs to override with floor texture
+ * @param {string} wallTexPath  - asset path for the wall texture
+ * @param {string} floorTexPath - asset path for the floor texture
+ */
+export function buildTextureZone(scene, wallCells, floorCells, wallTexPath, floorTexPath) {
+  const loader = new THREE.TextureLoader();
+
+  const wTex = loader.load(wallTexPath);
+  wTex.wrapS = wTex.wrapT = THREE.RepeatWrapping;
+  wTex.anisotropy = 16;
+
+  const fTex = loader.load(floorTexPath);
+  fTex.wrapS = fTex.wrapT = THREE.RepeatWrapping;
+  fTex.anisotropy = 16;
+
+  const wMat = new THREE.MeshLambertMaterial({ map: wTex });
+  const fMat = new THREE.MeshLambertMaterial({ map: fTex });
+
+  for (const [row, col] of wallCells) {
+    const mesh = new THREE.Mesh(wallGeo, wMat);
+    mesh.position.set(col * CELL, WALL_H / 2, row * CELL);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    scene.add(mesh);
+    currentMapMeshes.push(mesh);
+  }
+
+  for (const [row, col] of floorCells) {
+    const mesh = new THREE.Mesh(tileGeo, fMat);
+    mesh.rotation.set(-Math.PI / 2, 0, 0);
+    mesh.position.set(col * CELL, 0.002, row * CELL); // tiny offset prevents z-fighting
+    mesh.receiveShadow = true;
+    scene.add(mesh);
+    currentMapMeshes.push(mesh);
+  }
 }

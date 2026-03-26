@@ -56,7 +56,7 @@ export function spawnLevel0Objects(ctx) {
     }
 
     // ── Weapons & Armour merchant (east wall, centre) ─────────────────────────
-    addShop(group, loader, 23, 11, -Math.PI / 2, -0.2, 0, 'weapons');
+    addShop(group, loader, 23, 11, -Math.PI / 2, -0.2, 0, 'weapons', null, { questNpcId: 'weapons-merchant' });
 
     // ── Decorative chest beside the weapons merchant ───────────────────────────
     addChest(group, loader, 23, 11, -Math.PI / 2, 0.7, [], asset('/items/chest1.glb'), false);

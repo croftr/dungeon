@@ -28,10 +28,13 @@ export const level2Monsters = [
   Object.assign(inst(D.aqua_man, 70, 24, 3,
     asset('/monsters/aqua-man/Meshy_AI_Animation_Idle_withSkin.glb'),
     asset('/monsters/aqua-man/Meshy_AI_Animation_Punch_Combo_withSkin.glb'),
-    asset('/monsters/aqua-man/aqua-attack.mp3'), 0.60, 0, 0, 2, null,
+    asset('/monsters/aqua-man/aqua-attack.mp3'), 0.60, 0, 0, 2,
+    null,
     asset('/monsters/aqua-man/Meshy_AI_Animation_Dead_withSkin.glb'),
     asset('/monsters/aqua-man/Meshy_AI_Animation_Face_Punch_Reaction_1_withSkin.glb'),
-    asset('/monsters/aqua-man/Meshy_AI_Animation_Walking_withSkin.glb')), { faceNorth: true }),
+    asset('/monsters/aqua-man/Meshy_AI_Animation_Walking_withSkin.glb'),
+    null,
+    asset('/monsters/aqua-man/cobat-idle.glb')), { faceNorth: true }),
 
   // Giant stomps around the NE giant room (rows 1–3, cols 14–27)
   inst(D.giant, 71, 3, 18,

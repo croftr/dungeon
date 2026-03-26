@@ -79,7 +79,10 @@ export function renderMerchantQuestPanel(npcId) {
     const container = document.getElementById('merchant-quest-body');
     if (!container) return;
     const npcQuests = QUESTS.filter(q => q.giver === npcId);
-    if (!npcQuests.length) return;
+    if (!npcQuests.length) {
+        container.innerHTML = '<div class="merchant-quest-empty">No quests available.</div>';
+        return;
+    }
     _renderQuestList(container, npcQuests);
 }
 

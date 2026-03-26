@@ -27,6 +27,41 @@ function createSparkTexture() {
     return new THREE.CanvasTexture(canvas);
 }
 
+// Pure white-to-transparent glow — no warm tones, so Color behaviours tint cleanly
+let waterDropTexture;
+let waterFoamTexture;
+
+function createWaterDropTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0,   'rgba(255, 255, 255, 1.0)');
+    g.addColorStop(0.25,'rgba(200, 240, 255, 0.85)');
+    g.addColorStop(0.6, 'rgba(100, 180, 255, 0.4)');
+    g.addColorStop(1,   'rgba(0,   80, 200, 0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 64, 64);
+    return new THREE.CanvasTexture(canvas);
+}
+
+function createWaterFoamTexture() {
+    // Slightly irregular blob — suggests frothy foam rather than a clean glow
+    const canvas = document.createElement('canvas');
+    canvas.width = 32;
+    canvas.height = 32;
+    const ctx = canvas.getContext('2d');
+    const g = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+    g.addColorStop(0,   'rgba(255, 255, 255, 1.0)');
+    g.addColorStop(0.45,'rgba(220, 245, 255, 0.7)');
+    g.addColorStop(0.8, 'rgba(160, 220, 255, 0.2)');
+    g.addColorStop(1,   'rgba(100, 180, 255, 0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 32, 32);
+    return new THREE.CanvasTexture(canvas);
+}
+
 export function initParticles(scene, camera) {
     proton = new Proton();
     sceneRef = scene;
@@ -36,10 +71,14 @@ export function initParticles(scene, camera) {
     proton.addRender(new Proton.SpriteRender(scene));
 
     sparkTexture = createSparkTexture();
+    waterDropTexture = createWaterDropTexture();
+    waterFoamTexture = createWaterFoamTexture();
 }
 
 export function invalidateParticleTextures() {
     if (sparkTexture) sparkTexture.needsUpdate = true;
+    if (waterDropTexture) waterDropTexture.needsUpdate = true;
+    if (waterFoamTexture) waterFoamTexture.needsUpdate = true;
 }
 
 export function updateParticles(dt) {
@@ -415,44 +454,78 @@ export function createDemonCleave(position) {
 export function createTidalWave(position) {
     if (!proton) return;
 
-    const emitter = new Proton.Emitter();
+    const px = position ? position.x : 0;
+    const py = position ? position.y : 0;
+    const pz = position ? position.z : 0;
 
-    // Sustained cascading blue burst — wider and longer than demonCleave
-    emitter.rate = new Proton.Rate(new Proton.Span(20, 35), new Proton.Span(0.02));
+    // ── Layer 1: Deep surge — heavy dark-blue water bursting outward at low height ──
+    const surgeEmitter = new Proton.Emitter();
+    surgeEmitter.rate = new Proton.Rate(new Proton.Span(14, 22), new Proton.Span(0.025));
+    surgeEmitter.addInitialize(new Proton.Mass(1));
+    surgeEmitter.addInitialize(new Proton.Radius(0.6, 1.2));
+    // Wide life variance → particles die at very different distances, no hard circular edge
+    surgeEmitter.addInitialize(new Proton.Life(0.3, 1.4));
+    // Lower speed so particles don't reliably reach the corridor walls
+    surgeEmitter.addInitialize(new Proton.V(2.2, new Proton.Vector3D(0, 0.25, 1), 180));
+    surgeEmitter.addInitialize(new Proton.Body(new THREE.Sprite(
+        new THREE.SpriteMaterial({ map: waterDropTexture, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })
+    )));
+    surgeEmitter.addInitialize(new Proton.Position(new Proton.PointZone(px, py + 0.2, pz)));
+    surgeEmitter.addBehaviour(new Proton.Alpha(0.85, 0.0));
+    surgeEmitter.addBehaviour(new Proton.Scale(2.4, 0.4));
+    surgeEmitter.addBehaviour(new Proton.Color('#0055bb', '#003399'));
+    // Strong drift makes paths curve and wander — prevents straight lines to walls
+    surgeEmitter.addBehaviour(new Proton.RandomDrift(1.2, 0.6, 1.2, 0.05));
 
-    emitter.addInitialize(new Proton.Mass(1));
-    emitter.addInitialize(new Proton.Radius(0.4, 1.0));
-    emitter.addInitialize(new Proton.Life(0.6, 1.2));
+    // ── Layer 2: Wave crest — bright cyan/white mid-height burst ──────────────────
+    const crestEmitter = new Proton.Emitter();
+    crestEmitter.rate = new Proton.Rate(new Proton.Span(16, 26), new Proton.Span(0.02));
+    crestEmitter.addInitialize(new Proton.Mass(1));
+    crestEmitter.addInitialize(new Proton.Radius(0.3, 0.75));
+    crestEmitter.addInitialize(new Proton.Life(0.25, 1.1));
+    crestEmitter.addInitialize(new Proton.V(2.0, new Proton.Vector3D(0, 0.7, 1), 180));
+    crestEmitter.addInitialize(new Proton.Body(new THREE.Sprite(
+        new THREE.SpriteMaterial({ map: waterDropTexture, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })
+    )));
+    crestEmitter.addInitialize(new Proton.Position(new Proton.PointZone(px, py + 0.6, pz)));
+    crestEmitter.addBehaviour(new Proton.Alpha(1.0, 0.0));
+    crestEmitter.addBehaviour(new Proton.Scale(1.4, 0.1));
+    crestEmitter.addBehaviour(new Proton.Color('#88ddff', '#0077cc'));
+    crestEmitter.addBehaviour(new Proton.RandomDrift(1.3, 0.8, 1.3, 0.055));
 
-    // Outward spray with upward bias — wave-like
-    emitter.addInitialize(new Proton.V(2.0, new Proton.Vector3D(0, 1.0, 0), 180));
+    // ── Layer 3: Foam & mist — small white particles that scatter and linger ──────
+    const foamEmitter = new Proton.Emitter();
+    foamEmitter.rate = new Proton.Rate(new Proton.Span(10, 16), new Proton.Span(0.03));
+    foamEmitter.addInitialize(new Proton.Mass(1));
+    foamEmitter.addInitialize(new Proton.Radius(0.1, 0.3));
+    foamEmitter.addInitialize(new Proton.Life(0.4, 1.5));
+    foamEmitter.addInitialize(new Proton.V(1.6, new Proton.Vector3D(0, 1, 0.4), 130));
+    foamEmitter.addInitialize(new Proton.Body(new THREE.Sprite(
+        new THREE.SpriteMaterial({ map: waterFoamTexture, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })
+    )));
+    foamEmitter.addInitialize(new Proton.Position(new Proton.PointZone(px, py + 1.0, pz)));
+    foamEmitter.addBehaviour(new Proton.Alpha(0.9, 0.0));
+    foamEmitter.addBehaviour(new Proton.Scale(0.8, 0.05));
+    foamEmitter.addBehaviour(new Proton.Color('#ddf6ff', '#aaddff'));
+    // High drift makes foam feel chaotic — also breaks uniform radial boundary
+    foamEmitter.addBehaviour(new Proton.RandomDrift(1.8, 1.1, 1.8, 0.08));
 
-    const material = new THREE.SpriteMaterial({
-        map: sparkTexture,
-        color: 0xffffff,
-        blending: THREE.AdditiveBlending,
-        transparent: true,
-        depthWrite: false,
-    });
-    emitter.addInitialize(new Proton.Body(new THREE.Sprite(material)));
+    // Kick off all three layers
+    surgeEmitter.emit();  proton.addEmitter(surgeEmitter);
+    crestEmitter.emit();  proton.addEmitter(crestEmitter);
+    foamEmitter.emit();   proton.addEmitter(foamEmitter);
 
-    if (position) {
-        emitter.addInitialize(new Proton.Position(new Proton.PointZone(position.x, position.y + 0.8, position.z)));
-    }
-
-    emitter.addBehaviour(new Proton.Alpha(0.9, 0.0));
-    emitter.addBehaviour(new Proton.Scale(1.8, 0.1));
-    // Bright cyan-white to deep blue fade
-    emitter.addBehaviour(new Proton.Color('#aaeeff', '#0044cc'));
-    emitter.addBehaviour(new Proton.RandomDrift(1.2, 0.8, 1.2, 0.04));
-
-    emitter.emit();
-    proton.addEmitter(emitter);
-
+    // Surge fades first, then crest, foam lingers longest
+    setTimeout(() => { surgeEmitter.stopEmit(); }, 350);
+    setTimeout(() => { crestEmitter.stopEmit(); }, 500);
     setTimeout(() => {
-        emitter.stopEmit();
-        setTimeout(() => { proton.removeEmitter(emitter); }, 2000);
-    }, 500);
+        foamEmitter.stopEmit();
+        setTimeout(() => {
+            proton.removeEmitter(surgeEmitter);
+            proton.removeEmitter(crestEmitter);
+            proton.removeEmitter(foamEmitter);
+        }, 2500);
+    }, 650);
 }
 
 export function createPoisonCloud(position) {

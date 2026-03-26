@@ -4784,7 +4784,8 @@ label.mm-setting-label {
 }
 
 #merchant-modal {
-  width: 700px;
+  width: 760px;
+  height: 540px;
   max-height: 85vh;
   background: rgba(10, 7, 4, 0.97);
   border: 1px solid #5a4a30;
@@ -4794,6 +4795,10 @@ label.mm-setting-label {
   flex-direction: column;
   overflow: hidden;
   font-family: monospace;
+}
+
+#merchant-modal.merchant-has-quests {
+  width: 1020px;
 }
 
 #merchant-header {
@@ -4848,11 +4853,11 @@ label.mm-setting-label {
 }
 
 #merchant-quest-panel {
-  width: 220px;
+  width: 260px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  border-left: 1px solid #3a2e18;
+  border-right: 1px solid #3a2e18;
   overflow: hidden;
 }
 
@@ -4874,7 +4879,7 @@ label.mm-setting-label {
 }
 
 #merchant-quest-body .quest-list-item {
-  padding: 8px 10px;
+  padding: 7px 10px;
 }
 
 #merchant-quest-body .quest-list-name {
@@ -4882,7 +4887,7 @@ label.mm-setting-label {
 }
 
 #merchant-quest-body .quest-detail {
-  padding: 0;
+  padding: 4px 0;
 }
 
 #merchant-quest-body .quest-detail-title {
@@ -4893,11 +4898,19 @@ label.mm-setting-label {
   font-size: 11px;
 }
 
+.merchant-quest-empty {
+  font-size: 11px;
+  color: #5a4a30;
+  padding: 10px 4px;
+  font-style: italic;
+}
+
 #merchant-body {
   display: flex;
   gap: 0;
   flex: 1;
-  min-height: 340px;
+  min-height: 0;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -5056,10 +5069,12 @@ label.mm-setting-label {
   border-bottom: 1px solid #3a2e18;
   background: rgba(0, 0, 0, 0.3);
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .merchant-tab {
   flex: 1;
+  min-width: 0;
   padding: 8px 0;
   background: none;
   border: none;
@@ -5085,9 +5100,9 @@ label.mm-setting-label {
 /* ── Merchant sell panels ────────────────────────────────────────────── */
 #merchant-sell-body {
   display: flex;
-  gap: 0;
   flex: 1;
-  min-height: 340px;
+  min-height: 0;
+  height: 100%;
   overflow: hidden;
 }
 

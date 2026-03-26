@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import { buildLevel, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures } from './map.js';
+import { buildLevel, buildTextureZone, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures } from './map.js';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles, invalidateParticleTextures } from './particles.js';
@@ -1444,6 +1444,23 @@ window.loadLevel = function (levelNum) {
 
   // 2. Rebuild map meshes for walls/floors
   buildLevel(scene);
+
+  // Level 2: overlay pit-corridor (rows 22–26, col 3) with wet-wall / black-stone textures
+  if (levelNum === 2) {
+    buildTextureZone(
+      scene,
+      // Wall cells: left col (2) and right col (4) flanking the corridor, plus north cap
+      [
+        [21, 2], [22, 2], [23, 2], [24, 2], [25, 2], [26, 2],
+        [21, 4], [22, 4], [23, 4], [24, 4], [25, 4], [26, 4],
+        [21, 3],
+      ],
+      // Floor cells: the walkable corridor column
+      [[22, 3], [23, 3], [24, 3], [25, 3], [26, 3]],
+      asset('/textures/wet-wall.png'),
+      asset('/textures/black-stone2.png')
+    );
+  }
 
   // 3. Clear and respawn level objects
   clearObjects(scene);

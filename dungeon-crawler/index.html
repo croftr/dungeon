@@ -1491,6 +1491,11 @@
         <button id="merchant-close" aria-label="Close">&times;</button>
       </div>
       <div id="merchant-content-row">
+        <!-- Quest panel (shown only for quest-givers) -->
+        <div id="merchant-quest-panel" class="merchant-hidden">
+          <div class="merchant-quest-panel-label">Quests</div>
+          <div id="merchant-quest-body"></div>
+        </div>
         <div id="merchant-main-col">
           <!-- Tab bar -->
           <div id="merchant-tabs">
@@ -1533,11 +1538,6 @@
               <button id="merchant-sell-btn" disabled>Sell Items</button>
             </div>
           </div>
-        </div>
-        <!-- Quest sidebar (shown only for quest-givers) -->
-        <div id="merchant-quest-panel" class="merchant-hidden">
-          <div class="merchant-quest-panel-label">Quests</div>
-          <div id="merchant-quest-body"></div>
         </div>
       </div>
     </div>
