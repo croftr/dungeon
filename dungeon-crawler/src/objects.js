@@ -1687,84 +1687,41 @@ export function spawnObjectsForLevel() {
 function createWallButton(protrusionDir, userData, axis = 'x') {
     const group = new THREE.Group();
 
-    // Invisible sphere used purely for raycasting — opacity 0 keeps it invisible
-    // but visible=true means the raycaster can still hit it
-    const hitGeo = new THREE.SphereGeometry(0.12, 8, 6);
-    const hitMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });
-    const btn = new THREE.Mesh(hitGeo, hitMat);
-    // animAxis/animDir stored so _animateButtonPress can work without hardcoding;
-    // passed userData may override animAxis/animDir for specific buttons (level5)
-    btn.userData = { isButton: true, animAxis: axis, animDir: protrusionDir, ...userData, pressTarget: btn, glowMeshes: [] };
+    // ── Backing plate — dark stone disc centered on the wall face ──
+    const plateGeo = new THREE.CylinderGeometry(0.10, 0.10, 0.02, 32);
+    const plateMat = new THREE.MeshStandardMaterial({ color: 0x1a0e06, roughness: 0.8, metalness: 0.3 });
+    const plate = new THREE.Mesh(plateGeo, plateMat);
+    plate.castShadow = true;
+    if (axis === 'z') plate.rotation.x = Math.PI / 2;
+    else              plate.rotation.z = Math.PI / 2;
+    group.add(plate);
+
+    // ── Outer ring — aged bronze trim, centered on wall face ──
+    const ringGeo = new THREE.TorusGeometry(0.085, 0.012, 12, 32);
+    const ringMat = new THREE.MeshStandardMaterial({ color: 0x8b6914, roughness: 0.6, metalness: 0.7 });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.castShadow = true;
+    // Torus default: XY plane, hole faces Z — correct for north/south walls (axis='z').
+    // For east/west walls (axis='x'), rotate so hole faces X.
+    if (axis === 'x') ring.rotation.y = Math.PI / 2;
+    group.add(ring);
+
+    // ── Dome button — red gem ──
+    // Small offset in protrusionDir so it pokes through the wall surface,
+    // but well within the sphere radius so it's visible from either side.
+    const btnGeo = new THREE.SphereGeometry(0.05, 24, 16);
+    const btnMat = new THREE.MeshStandardMaterial({
+        color: 0xcc2222, roughness: 0.25, metalness: 0.4,
+        emissive: 0x330808, emissiveIntensity: 0.4
+    });
+    const btn = new THREE.Mesh(btnGeo, btnMat);
+    btn.castShadow = true;
+    if (axis === 'z') btn.position.z = protrusionDir * 0.04;
+    else              btn.position.x = protrusionDir * 0.04;
+    btn.userData = { isButton: true, animAxis: axis, animDir: protrusionDir, ...userData,
+                     pressTarget: btn, glowMeshes: [btn, ring] };
     interactables.push(btn);
     group.add(btn);
-
-    // Load button.glb as the visual — async, added to group when ready
-    _gltfLoader.load(asset('/items/button.glb'), (gltf) => {
-        const model = gltf.scene;
-
-        // Face the button outward from the wall, then roll 90° so the face
-        // points correctly rather than upward.  rotation.z acts as the
-        // outermost (world-space) rotation and doesn't disturb the
-        // back-against-wall bounding-box centering.
-        if (axis === 'x') {
-            model.rotation.y = protrusionDir > 0 ? Math.PI / 2 : -Math.PI / 2;
-        } else {
-            model.rotation.y = protrusionDir > 0 ? 0 : Math.PI;
-        }
-        // 1. Tilt the model so its face (originally +Y) points forward (-Z) 
-        // and its bottom plate (originally -Y) points back (+Z).
-        model.rotation.set(-Math.PI / 2, 0, 0);
-
-        // 2. Rotate to face the correct wall normal.
-        if (axis === 'x') {
-            model.rotation.y = protrusionDir > 0 ? Math.PI / 2 : -Math.PI / 2;
-        } else {
-            model.rotation.y = protrusionDir > 0 ? 0 : Math.PI;
-        }
-
-        // 3. Normalize scale (0.25 units max dimension)
-        const box0 = new THREE.Box3().setFromObject(model);
-        const size0 = box0.getSize(new THREE.Vector3());
-        const maxDim = Math.max(size0.x, size0.y, size0.z);
-        model.scale.setScalar(0.25 / maxDim);
-
-        // 4. Centering: Use world bounds to place the model's back edge at X=0 or Z=0
-        const box = new THREE.Box3().setFromObject(model);
-        const center = box.getCenter(new THREE.Vector3());
-        const size = box.getSize(new THREE.Vector3());
-
-        if (axis === 'x') {
-            model.position.x = protrusionDir * (size.x / 2) - center.x;
-            model.position.y = -center.y;
-            model.position.z = -center.z;
-        } else {
-            model.position.x = -center.x;
-            model.position.y = -center.y;
-            model.position.z = protrusionDir * (size.z / 2) - center.z;
-        }
-
-        // 5. Align hit sphere to model center
-        if (axis === 'x') btn.position.x = model.position.x;
-        else btn.position.z = model.position.z;
-
-        model.traverse(child => {
-            if (!child.isMesh) return;
-            child.castShadow = true;
-            // Clone material so emissive changes don't bleed across all buttons
-            if (child.material) {
-                const mats = Array.isArray(child.material) ? child.material : [child.material];
-                child.material = mats.length === 1
-                    ? mats[0].clone()
-                    : mats.map(m => m.clone());
-            }
-            btn.userData.glowMeshes.push(child);
-        });
-
-        // Swap press animation target from hit sphere to the GLB model
-        btn.userData.pressTarget = model;
-
-        group.add(model);
-    });
 
     return { group, btn };
 }
