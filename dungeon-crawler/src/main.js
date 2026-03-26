@@ -355,13 +355,13 @@ setCallbacks({
         tweenGroup.removeAll();
         player.moving = false;
 
-        // Teleport to far end of original passage (row 17, col 28) immediately
+        // Teleport to far end of original passage (row 17, col 24) immediately
         player.gridRow = 17;
-        player.gridCol = 28;
-        const w = cellToWorld(17, 28);
+        player.gridCol = 24;
+        const w = cellToWorld(17, 24);
         camera.position.set(w.x, w.y, w.z);
-        // Face West (3) back towards the demon room
-        player.facing = 3;
+        // Face East (1) back towards the demon room
+        player.facing = 1;
         camera.rotation.order = 'YXZ';
         camera.rotation.y = FACING_ANGLES[player.facing];
         drawMinimap();
@@ -1488,17 +1488,22 @@ window.loadLevel = function (levelNum) {
     camera.rotation.order = 'YXZ';
     camera.rotation.y = FACING_ANGLES[player.facing];
   } else if (levelNum === 5) {
-    // Entering the Hall of Heroes — face north into the hall
-    player.facing = 0;
+    // Spawn directly in front of the return hero-door (south wall, row 16),
+    // facing south so the player sees the door and can walk back through it.
+    player.gridRow = 15;
+    player.gridCol = 12;
+    const wHero = cellToWorld(15, 12);
+    camera.position.set(wHero.x, wHero.y, wHero.z);
+    player.facing = 0; // North — door is behind them to the south
     camera.rotation.order = 'YXZ';
     camera.rotation.y = FACING_ANGLES[player.facing];
   } else if (levelNum === 0 && oldLevel === 5) {
-    // Returning from Hall of Heroes — place near the hero door, face west into the room
+    // Returning from Hall of Heroes — place near the hero door, face north
     player.gridRow = 14;
     player.gridCol = 20;
     const wRet = cellToWorld(14, 20);
     camera.position.set(wRet.x, wRet.y, wRet.z);
-    player.facing = 3; // West (toward the hero door at col 21)
+    player.facing = 0; // North — door is behind them to the east
     camera.rotation.order = 'YXZ';
     camera.rotation.y = FACING_ANGLES[player.facing];
   }

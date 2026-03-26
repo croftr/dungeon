@@ -296,13 +296,12 @@ export function initObjects(scene, camera) {
                 }
                 break;
             } else if (obj.userData.isChest) {
-                // Check if player is standing on the same square as the chest
-                const isOnSameSquare = (player.gridRow === obj.userData.gridRow && player.gridCol === obj.userData.gridCol);
-
-                if (isOnSameSquare) {
+                const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
+                const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
+                if (distRow <= 1 && distCol <= 1) {
                     openChestModal(obj);
                 } else {
-                    showMessage("Stand on the chest to open it.");
+                    showMessage("Stand near the chest to open it.");
                 }
                 break;
             } else if (obj.userData.isArmorStand) {
@@ -404,12 +403,16 @@ export function initObjects(scene, camera) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 1 && distCol <= 1) {
-                    showMessage("You push open the great hero's door...");
+                    const doorTarget = obj.userData.targetLevel ?? 5;
+                    const doorMsg = doorTarget === 0
+                        ? "You step back through the hero's door..."
+                        : "You push open the great hero's door...";
+                    showMessage(doorMsg);
                     playPortalSound();
-                    if (window.playHeroDoorVideo) {
-                        window.playHeroDoorVideo(() => { if (window.loadLevel) window.loadLevel(5); });
+                    if (doorTarget === 5 && window.playHeroDoorVideo) {
+                        window.playHeroDoorVideo(() => { if (window.loadLevel) window.loadLevel(doorTarget); });
                     } else {
-                        if (window.loadLevel) window.loadLevel(5);
+                        if (window.loadLevel) window.loadLevel(doorTarget);
                     }
                 } else {
                     showMessage("An ornate door stands before you. Approach to enter.");
@@ -1290,7 +1293,7 @@ function openShrineLootModal(shrineObj) {
     if (slot) _bindChestSlots(equip, [slot], contents);
 }
 
-function addHeroDoor(scene, loader, col, row, rotY = Math.PI) {
+function addHeroDoor(scene, loader, col, row, rotY = Math.PI, targetLevel = 5) {
     loader.load(asset('/items/hero-door.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
@@ -1301,6 +1304,7 @@ function addHeroDoor(scene, loader, col, row, rotY = Math.PI) {
                 child.castShadow = true;
                 child.receiveShadow = true;
                 child.userData.isHeroDoor = true;
+                child.userData.targetLevel = targetLevel;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 interactables.push(child);
@@ -1596,11 +1600,15 @@ function addDroppedTorch(container, loader, col, row, rotY = 0, offsetX = 0, off
     });
 }
 
-function addStairs(scene, loader, col, row, rotY = 0) {
+function addStairs(scene, loader, col, row, rotY = 0, scale = 0.7, offsetX = 0, offsetZ = 0) {
     loader.load(asset('/items/stairs-up.glb'), (gltf) => {
         const model = gltf.scene;
-        model.scale.setScalar(0.7);
-        model.position.set(col * CELL, 0.0, row * CELL);
+        if (typeof scale === 'number') {
+            model.scale.setScalar(scale);
+        } else {
+            model.scale.set(scale.x ?? 0.7, scale.y ?? 0.7, scale.z ?? 0.7);
+        }
+        model.position.set(col * CELL + offsetX, 0.0, row * CELL + offsetZ);
         model.rotation.y = rotY;
 
         model.traverse((child) => {
@@ -1625,6 +1633,7 @@ function addStairs(scene, loader, col, row, rotY = 0) {
         scene.add(model);
     });
 }
+
 
 
 
@@ -1687,41 +1696,43 @@ export function spawnObjectsForLevel() {
 function createWallButton(protrusionDir, userData, axis = 'x') {
     const group = new THREE.Group();
 
-    // ── Backing plate — dark stone disc centered on the wall face ──
-    const plateGeo = new THREE.CylinderGeometry(0.10, 0.10, 0.02, 32);
-    const plateMat = new THREE.MeshStandardMaterial({ color: 0x1a0e06, roughness: 0.8, metalness: 0.3 });
-    const plate = new THREE.Mesh(plateGeo, plateMat);
-    plate.castShadow = true;
-    if (axis === 'z') plate.rotation.x = Math.PI / 2;
-    else              plate.rotation.z = Math.PI / 2;
-    group.add(plate);
-
-    // ── Outer ring — aged bronze trim, centered on wall face ──
-    const ringGeo = new THREE.TorusGeometry(0.085, 0.012, 12, 32);
-    const ringMat = new THREE.MeshStandardMaterial({ color: 0x8b6914, roughness: 0.6, metalness: 0.7 });
-    const ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.castShadow = true;
-    // Torus default: XY plane, hole faces Z — correct for north/south walls (axis='z').
-    // For east/west walls (axis='x'), rotate so hole faces X.
-    if (axis === 'x') ring.rotation.y = Math.PI / 2;
-    group.add(ring);
-
-    // ── Dome button — red gem ──
-    // Small offset in protrusionDir so it pokes through the wall surface,
-    // but well within the sphere radius so it's visible from either side.
-    const btnGeo = new THREE.SphereGeometry(0.05, 24, 16);
-    const btnMat = new THREE.MeshStandardMaterial({
-        color: 0xcc2222, roughness: 0.25, metalness: 0.4,
-        emissive: 0x330808, emissiveIntensity: 0.4
-    });
-    const btn = new THREE.Mesh(btnGeo, btnMat);
-    btn.castShadow = true;
+    // ── Invisible interaction hitbox (available immediately for raycasting) ──
+    const hitGeo = new THREE.SphereGeometry(0.10, 8, 6);
+    const hitMat = new THREE.MeshBasicMaterial({ visible: false });
+    const btn = new THREE.Mesh(hitGeo, hitMat);
     if (axis === 'z') btn.position.z = protrusionDir * 0.04;
     else              btn.position.x = protrusionDir * 0.04;
     btn.userData = { isButton: true, animAxis: axis, animDir: protrusionDir, ...userData,
-                     pressTarget: btn, glowMeshes: [btn, ring] };
+                     pressTarget: btn, glowMeshes: [] };
     interactables.push(btn);
     group.add(btn);
+
+    // ── Load GLB model asynchronously ──
+    _gltfLoader.load(asset('/items/button.glb'), (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(0.12);
+
+        // Rotate model so the button face points in protrusionDir along the correct axis.
+        // GLB default: assume button face points +Z.
+        if (axis === 'z' && protrusionDir === +1) { /* default — faces south (+Z) */ }
+        else if (axis === 'z' && protrusionDir === -1) model.rotation.y = Math.PI;
+        else if (axis === 'x' && protrusionDir === +1) model.rotation.y = -Math.PI / 2;
+        else if (axis === 'x' && protrusionDir === -1) model.rotation.y = Math.PI / 2;
+
+        const glowMeshes = [];
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                glowMeshes.push(child);
+            }
+        });
+
+        // Update hitbox userData with loaded glow meshes
+        btn.userData.glowMeshes = glowMeshes;
+
+        group.add(model);
+    });
 
     return { group, btn };
 }

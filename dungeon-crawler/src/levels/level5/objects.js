@@ -10,7 +10,7 @@ import { asset } from '../../assets.js';
 export function spawnLevel5Objects(ctx) {
     const {
         group, loader,
-        addPortal,
+        addHeroDoor,
         addPortcullis,
         createWallButton,
         addArmourStand,
@@ -94,9 +94,9 @@ export function spawnLevel5Objects(ctx) {
     btnEB.group.position.set(18 * C - 1.0, 1.25, 13 * C);
     group.add(btnEB.group);
 
-    // ── Return portal ─────────────────────────────────────────────────────────
-    // (col 12, row 16) — south end of the hall. Returns the party to Level 0.
-    addPortal(group, loader, 12, 16, 0, 0, 0, 0);
+    // ── Return hero-door ──────────────────────────────────────────────────────
+    // South wall of the hall — flush against the wall, leads back to Level 0.
+    addHeroDoor(group, loader, 12, 16, Math.PI, 0);
 
     // ── Armour stands — one behind each portcullis ────────────────────────────
     // Statues face inward (toward the portcullis / player).

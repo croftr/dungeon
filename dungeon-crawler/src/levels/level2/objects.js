@@ -48,21 +48,21 @@ export function spawnLevel2Objects(ctx) {
 
     // ── Chests ────────────────────────────────────────────────────────────────
     // Two chests in the chest vault (col 1, rows 18–19)
-    addChest(group, loader, 1, 18, Math.PI, 0.7, [
+    addChest(group, loader, 0.7, 19, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 300 },
         'Life Essence', 'Mana Berry', 'Scroll of Fireball'
-    ]);;
-    addChest(group, loader, 1, 19, Math.PI, 0.7, [
+    ]);
+    addChest(group, loader, 1.3, 19, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 200 },
         'Ring of Strength', 'Ring of Wisdom', 'Ring of Dexterity'
     ]);
 
     // Chest at the end of the long passage
-    addChest(group, loader, 28, 17, -Math.PI / 2, 0.7, [
+    addChest(group, loader, 28, 17, -Math.PI / 2, 0.0, [
         { name: 'Gold Coins', quantity: 500 },
         'Ruby Ring', 'Mana Potion', 'Life Essence',
         'Chain Shirt', 'Plate Cuirass'
-    ], asset('/items/chest1.glb'), true, 1);
+    ], asset('/items/chest1.glb'), true, 0.5);
 
     // Chest in the NE corner of the giant room
     addChest(group, loader, 24, 2, -Math.PI / 2, 0.7, [
@@ -71,7 +71,7 @@ export function spawnLevel2Objects(ctx) {
     ], asset('/items/chest1.glb'), true, -0.5);
 
     // ── Stairs ────────────────────────────────────────────────────────────────
-    addStairs(group, loader, 3, 26, Math.PI);
+    addStairs(group, loader, 3, 26, Math.PI, { x: 1.25, y: 0.7, z: 0.7 }, 0, 0.25);
 
     // ── Buttons ───────────────────────────────────────────────────────────────
     // Button to close the hole, on the North wall of cell (17, 28) facing South
