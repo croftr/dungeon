@@ -12,6 +12,7 @@ import { attackMonster, monsters, getInRangeMonster, setHuntersEyeTarget, getHun
 import { showMessage } from './minimap.js';
 import { dropMember } from './recruits.js';
 import RECRUITS_DATA from './data/recruits.json';
+import SPELL_TYPE_ICONS from './data/spell-type-icons.json';
 import { isInFrontOfPlayer, player } from './player.js';
 import { isAlchemyModalOpen, addItemToAlchemy } from './objects.js';
 import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude, calcOnHitChance } from './combat-rules.js';
@@ -706,7 +707,7 @@ function positionTooltip(mouseX, mouseY, preferAbove = false) {
   panel.style.top = y + 'px';
 }
 
-function populateTooltip(obj) {
+function populateTooltip(obj, showBuyPrice = false) {
   if (!obj) return;
   const isSkill = !!obj.isSkill;
   const isCustom = !!obj.isCustom;
@@ -754,6 +755,25 @@ function populateTooltip(obj) {
     return;
   }
 
+  // ── Spells ──
+  if (obj.slot === 'spell') {
+    const spellDef = SPELLS.find(s => s.name === obj.name);
+    const spellType = spellDef?.type ?? obj.type ?? '';
+    const typeIcon = SPELL_TYPE_ICONS[spellType];
+    slotEl.innerHTML = typeIcon
+      ? `<span style="color:${typeIcon.color};margin-right:5px;font-size:13px">${typeIcon.symbol}</span>${spellType}`
+      : spellType;
+    actionEl.textContent = 'Target: ' + (spellDef?.target ?? '');
+    descEl.textContent = spellDef?.description ?? obj.description ?? '';
+    const rows = [];
+    if (spellDef?.magnitudeFormula) rows.push(`<div class="detail-stat-row"><span>Magnitude</span><span>${spellDef.magnitudeFormula}${spellDef.magnitudeScale != null ? ' × ' + spellDef.magnitudeScale : ''}</span></div>`);
+    rows.push(`<div class="detail-stat-row"><span>MP Cost</span><span>${spellDef?.mpCost ?? '?'}</span></div>`);
+    statsEl.innerHTML = rows.join('');
+    statsEl.style.display = 'flex';
+    statsEl.style.flexDirection = 'column';
+    return;
+  }
+
   // Reset statsEl for items (since skills might have changed its innerHTML)
   statsEl.innerHTML = `
         <div class="detail-stat-row" id="detail-row-damage">
@@ -789,7 +809,7 @@ function populateTooltip(obj) {
             <span id="item-detail-weight">—</span>
         </div>
         <div class="detail-stat-row" id="detail-row-value">
-            <span>Market Value</span>
+            <span>${showBuyPrice ? 'Buy Price' : 'Sell Value'}</span>
             <span id="item-detail-value">—</span>
         </div>
         <div id="detail-row-skillbonus" class="detail-skillbonus-list"></div>
@@ -824,8 +844,8 @@ function populateTooltip(obj) {
           <span id="item-detail-weight">${def.weight} kg</span>
       </div>
       <div class="detail-stat-row" id="detail-row-value">
-          <span>Market Value</span>
-          <span id="item-detail-value">${def.value} gp</span>
+          <span>${showBuyPrice ? 'Buy Price' : 'Sell Value'}</span>
+          <span id="item-detail-value">${showBuyPrice ? def.value : Math.max(1, Math.ceil(def.value / 5))} gp</span>
       </div>
     `;
     return;
@@ -849,8 +869,8 @@ function populateTooltip(obj) {
   document.getElementById('detail-row-damage').style.display = (isAmmo || isSpellbook || isMainSpellbook) ? 'none' : 'flex';
   document.getElementById('detail-row-defence').style.display = hasDefence ? 'flex' : 'none';
   document.getElementById('detail-row-block').style.display = hasBlock ? 'flex' : 'none';
-  document.getElementById('detail-row-value').style.display = (isAmmo || isMainSpellbook) ? 'none' : 'flex';
-  document.getElementById('detail-row-weight').style.display = (isAmmo || isMainSpellbook) ? 'none' : 'flex';
+  document.getElementById('detail-row-value').style.display = isMainSpellbook ? 'none' : 'flex';
+  document.getElementById('detail-row-weight').style.display = isMainSpellbook ? 'none' : 'flex';
   document.getElementById('detail-row-statchange').style.display = hasStatChange ? 'flex' : 'none';
   document.getElementById('detail-row-skillbonus').style.display = hasBonusList ? 'flex' : 'none';
   document.getElementById('detail-row-onhit').style.display = hasOnHitEffects ? 'flex' : 'none';
@@ -878,6 +898,11 @@ function populateTooltip(obj) {
 
   descEl.textContent = '';
 
+  document.getElementById('item-detail-value').textContent =
+    def != null ? (showBuyPrice ? def.value : Math.max(1, Math.ceil(def.value / 5))) + ' gp' : '—';
+  document.getElementById('item-detail-weight').textContent =
+    def != null ? def.weight + ' kg' : '—';
+
   if (isAmmo) {
     document.getElementById('item-detail-ammo-mod').textContent = '×' + (def?.damageModifier ?? 1.0);
     document.getElementById('item-detail-ammo-type').textContent = (def?.damageType ?? 'normal').toUpperCase();
@@ -890,10 +915,6 @@ function populateTooltip(obj) {
     if (hasBlock) {
       document.getElementById('item-detail-block').textContent = def.blockChance + '%';
     }
-    document.getElementById('item-detail-value').textContent =
-      def != null ? def.value + ' gp' : '—';
-    document.getElementById('item-detail-weight').textContent =
-      def != null ? def.weight + ' kg' : '—';
     if (isSpellbook) {
       document.getElementById('item-detail-statchange').textContent = def.requiredInt + ' Intelligence';
       document.getElementById('item-detail-statchange').style.color = '#ff8080';
@@ -971,9 +992,9 @@ function populateTooltip(obj) {
   }
 }
 
-export function showTooltip(item, mouseX, mouseY, preferAbove = false) {
+export function showTooltip(item, mouseX, mouseY, preferAbove = false, showBuyPrice = false) {
   if (!item) { hideTooltip(); return; }
-  populateTooltip(item);
+  populateTooltip(item, showBuyPrice);
   const panel = document.getElementById('item-detail-panel');
   panel.classList.remove('detail-hidden');
   positionTooltip(mouseX, mouseY, preferAbove);
@@ -985,7 +1006,7 @@ export function hideTooltip() {
 
 /** Attach hover tooltip listeners to any hoverable item element.
  *  getItem() is called each time to get the current item (may change). */
-export function attachTooltipListeners(el, getItem, preferAbove = false) {
+export function attachTooltipListeners(el, getItem, preferAbove = false, showBuyPrice = false) {
   // Remove any existing listeners first
   if (el._tooltipCleanup) {
     el._tooltipCleanup();
@@ -994,14 +1015,14 @@ export function attachTooltipListeners(el, getItem, preferAbove = false) {
 
   const onEnter = (e) => {
     const item = getItem();
-    if (item) showTooltip(item, e.clientX, e.clientY, preferAbove);
+    if (item) showTooltip(item, e.clientX, e.clientY, preferAbove, showBuyPrice);
   };
 
   const onMove = (e) => {
     const item = getItem();
     if (item) {
       // Keep tooltip populated and repositioned as cursor moves
-      populateTooltip(item);
+      populateTooltip(item, showBuyPrice);
       const panel = document.getElementById('item-detail-panel');
       panel.classList.remove('detail-hidden');
       positionTooltip(e.clientX, e.clientY, preferAbove);

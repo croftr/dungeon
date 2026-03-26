@@ -1,21 +1,11 @@
 {
     "stock": [
         "Torch",
-        "Minor Healing Potion",
-        "Minor Healing Potion",
-        "Healing Potion",
-        "Healing Potion",
-        "Minor Mana Potion",
-        "Mana Potion",
-        "Mana Potion",
-        "Cure Poison Potion",
-        "Cure Poison Potion",
         "Minor Rejuvenate Potion",
-        "Rejuvenate Potion",
-        "Vigor Potion",
-        "Potion of Enlightenment",
-        "Minor Potions Parchment",
-        "Life Berry",
+        "Minor Healing Potion",
+        "Minor Mana Potion",
+        "Cure Poison Potion",
+        "Cure Poison Potion",
         "Life Berry",
         "Life Berry",
         "Mana Berry",
@@ -25,7 +15,6 @@
         "Poison Vial",
         "Poison Vial",
         "Iron Ore",
-        "Lizard Scale",
-        "Crocodile Hide"
+        "Iron Ore"
     ]
 }

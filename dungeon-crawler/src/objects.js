@@ -3040,7 +3040,7 @@ function _renderMerchantShop() {
                     _updateMerchantTotals();
                 });
 
-                equip.attachTooltipListeners(slot, () => ({ name }));
+                equip.attachTooltipListeners(slot, () => ({ name }), false, true);
 
                 grid.appendChild(slot);
             });
@@ -3077,7 +3077,7 @@ function _renderMerchantBasket() {
                 _updateMerchantTotals();
             });
 
-            equip.attachTooltipListeners(slot, () => ({ name }));
+            equip.attachTooltipListeners(slot, () => ({ name }), false, true);
 
             grid.appendChild(slot);
         });
@@ -3151,9 +3151,7 @@ function _buyItems() {
 function _getMerchantSellPrice(name) {
     const def = getItemDef(name);
     if (!def) return 0;
-    // Offer 50% of merchant buy price if stocked; otherwise use item base value
-    if (MERCHANT_STOCK.includes(name) || POTION_MERCHANT_STOCK.includes(name)) return Math.floor((def.value ?? 0) * 0.5);
-    return def.value ?? 0;
+    return Math.ceil((def.value ?? 0) / 5);
 }
 
 function _renderMerchantPartyItems() {

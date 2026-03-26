@@ -38,9 +38,9 @@
         "stats": {
             "strength": 7,
             "dexterity": 6,
-            "vitality": 108,
+            "vitality": 8,
             "intelligence": 4,
-            "resilience": 108
+            "resilience": 8
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
         "startingSkills": [],
@@ -48,8 +48,7 @@
         "leftHand": "Sword",
         "rightHand": "Shield",
         "startingInventory": [
-            "Cure Poison Potion",
-            "Trickster's Hood"
+            "Cure Poison Potion"
         ],
         "gridCol": 10,
         "gridRow": 8,
