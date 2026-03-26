@@ -92,7 +92,7 @@ export function spawnLevel1Objects(ctx) {
     addPortcullis(group, loader, 7, 7);
 
     // Button for that portcullis
-    const { group: portcullisBtn } = createWallButton(+1, { target: 'portcullis' });
+    const { group: portcullisBtn } = createWallButton(-1, { target: 'portcullis' });
     portcullisBtn.position.set(8 * CELL - 1.0, 1.25, 8 * CELL);
     group.add(portcullisBtn);
 

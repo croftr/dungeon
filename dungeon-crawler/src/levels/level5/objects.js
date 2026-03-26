@@ -42,56 +42,56 @@ export function spawnLevel5Objects(ctx) {
     const btnNA = createWallButton(+1,
         { portcullisRow: 7, portcullisCol: 10, wallRow: 7, wallCol: 9, animAxis: 'z', animDir: 1 },
         'z');
-    btnNA.group.position.set(9 * C, 1.25, 7 * C + 0.95);
+    btnNA.group.position.set(9 * C, 1.25, 7 * C + 1.0);
     group.add(btnNA.group);
 
     // North B — wall cell (7,14) south face, player at (8,14) faces north
     const btnNB = createWallButton(+1,
         { portcullisRow: 7, portcullisCol: 15, wallRow: 7, wallCol: 14, animAxis: 'z', animDir: 1 },
         'z');
-    btnNB.group.position.set(14 * C, 1.25, 7 * C + 0.95);
+    btnNB.group.position.set(14 * C, 1.25, 7 * C + 1.0);
     group.add(btnNB.group);
 
     // South A — wall cell (17,9) north face, player at (16,9) faces south
     const btnSA = createWallButton(-1,
         { portcullisRow: 17, portcullisCol: 10, wallRow: 17, wallCol: 9, animAxis: 'z', animDir: -1 },
         'z');
-    btnSA.group.position.set(9 * C, 1.25, 17 * C - 0.95);
+    btnSA.group.position.set(9 * C, 1.25, 17 * C - 1.0);
     group.add(btnSA.group);
 
     // South B — wall cell (17,14) north face, player at (16,14) faces south
     const btnSB = createWallButton(-1,
         { portcullisRow: 17, portcullisCol: 15, wallRow: 17, wallCol: 14, animAxis: 'z', animDir: -1 },
         'z');
-    btnSB.group.position.set(14 * C, 1.25, 17 * C - 0.95);
+    btnSB.group.position.set(14 * C, 1.25, 17 * C - 1.0);
     group.add(btnSB.group);
 
     // West A — wall cell (9,7) east face, player at (9,8) faces west
     const btnWA = createWallButton(+1,
         { portcullisRow: 10, portcullisCol: 7, wallRow: 9, wallCol: 7, animAxis: 'x', animDir: 1 },
         'x');
-    btnWA.group.position.set(7 * C + 0.95, 1.25, 9 * C);
+    btnWA.group.position.set(7 * C + 1.0, 1.25, 9 * C);
     group.add(btnWA.group);
 
     // West B — wall cell (13,7) east face, player at (13,8) faces west
     const btnWB = createWallButton(+1,
         { portcullisRow: 14, portcullisCol: 7, wallRow: 13, wallCol: 7, animAxis: 'x', animDir: 1 },
         'x');
-    btnWB.group.position.set(7 * C + 0.95, 1.25, 13 * C);
+    btnWB.group.position.set(7 * C + 1.0, 1.25, 13 * C);
     group.add(btnWB.group);
 
     // East A — wall cell (9,18) west face, player at (9,17) faces east
     const btnEA = createWallButton(-1,
         { portcullisRow: 10, portcullisCol: 18, wallRow: 9, wallCol: 18, animAxis: 'x', animDir: -1 },
         'x');
-    btnEA.group.position.set(18 * C - 0.95, 1.25, 9 * C);
+    btnEA.group.position.set(18 * C - 1.0, 1.25, 9 * C);
     group.add(btnEA.group);
 
     // East B — wall cell (13,18) west face, player at (13,17) faces east
     const btnEB = createWallButton(-1,
         { portcullisRow: 14, portcullisCol: 18, wallRow: 13, wallCol: 18, animAxis: 'x', animDir: -1 },
         'x');
-    btnEB.group.position.set(18 * C - 0.95, 1.25, 13 * C);
+    btnEB.group.position.set(18 * C - 1.0, 1.25, 13 * C);
     group.add(btnEB.group);
 
     // ── Return portal ─────────────────────────────────────────────────────────
