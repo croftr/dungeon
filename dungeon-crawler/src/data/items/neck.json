@@ -6,7 +6,7 @@
         "baseDamage": null,
         "icon": "/icons/rune_pendant.png",
         "description": "A silver amulet engraved with runes.",
-        "defence": 1,
+        "defence": 0,
         "value": 780,
         "weight": 0.1,
         "skillBonuses": {
@@ -21,7 +21,7 @@
         "baseDamage": null,
         "icon": "/icons/sun_pendant.png",
         "description": "A crystal pendant that sharpens the mind and aids concentration.",
-        "defence": 1,
+        "defence": 0,
         "value": 825,
         "weight": 0.1,
         "skillDurationBonusMs": 10000

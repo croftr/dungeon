@@ -1490,45 +1490,54 @@
         <span id="merchant-title">Merchant</span>
         <button id="merchant-close" aria-label="Close">&times;</button>
       </div>
-      <!-- Tab bar -->
-      <div id="merchant-tabs">
-        <button id="merchant-tab-buy" class="merchant-tab merchant-tab-active">Buy</button>
-        <button id="merchant-tab-sell" class="merchant-tab">Sell</button>
-      </div>
-      <!-- Buy body -->
-      <div id="merchant-body">
-        <!-- Left: items for sale -->
-        <div id="merchant-shop-panel">
-          <div class="merchant-panel-label">For Sale</div>
-          <div id="merchant-grid"></div>
-        </div>
-        <!-- Right: basket -->
-        <div id="merchant-basket-panel">
-          <div id="merchant-basket-header">
-            <span id="merchant-total-label">Total: <span id="merchant-total-val">0</span>g</span>
-            <span id="merchant-gold-label">Party Gold: <span id="merchant-gold-val">0</span>g</span>
+      <div id="merchant-content-row">
+        <div id="merchant-main-col">
+          <!-- Tab bar -->
+          <div id="merchant-tabs">
+            <button id="merchant-tab-buy" class="merchant-tab merchant-tab-active">Buy</button>
+            <button id="merchant-tab-sell" class="merchant-tab">Sell</button>
           </div>
-          <div class="merchant-panel-label">Selected</div>
-          <div id="merchant-basket-grid"></div>
-          <button id="merchant-buy-btn" disabled>Buy Items</button>
-        </div>
-      </div>
-      <!-- Sell body -->
-      <div id="merchant-sell-body" style="display:none;">
-        <!-- Left: party inventory -->
-        <div id="merchant-party-panel">
-          <div class="merchant-panel-label">Party Items</div>
-          <div id="merchant-party-grid"></div>
-        </div>
-        <!-- Right: sell basket -->
-        <div id="merchant-sell-basket-panel">
-          <div id="merchant-sell-header">
-            <span id="merchant-sell-total-label">Earn: <span id="merchant-sell-total-val">0</span>g</span>
-            <span id="merchant-sell-gold-label">Party Gold: <span id="merchant-sell-gold-val">0</span>g</span>
+          <!-- Buy body -->
+          <div id="merchant-body">
+            <!-- Left: items for sale -->
+            <div id="merchant-shop-panel">
+              <div class="merchant-panel-label">For Sale</div>
+              <div id="merchant-grid"></div>
+            </div>
+            <!-- Right: basket -->
+            <div id="merchant-basket-panel">
+              <div id="merchant-basket-header">
+                <span id="merchant-total-label">Total: <span id="merchant-total-val">0</span>g</span>
+                <span id="merchant-gold-label">Party Gold: <span id="merchant-gold-val">0</span>g</span>
+              </div>
+              <div class="merchant-panel-label">Selected</div>
+              <div id="merchant-basket-grid"></div>
+              <button id="merchant-buy-btn" disabled>Buy Items</button>
+            </div>
           </div>
-          <div class="merchant-panel-label">To Sell</div>
-          <div id="merchant-sell-basket-grid"></div>
-          <button id="merchant-sell-btn" disabled>Sell Items</button>
+          <!-- Sell body -->
+          <div id="merchant-sell-body" style="display:none;">
+            <!-- Left: party inventory -->
+            <div id="merchant-party-panel">
+              <div class="merchant-panel-label">Party Items</div>
+              <div id="merchant-party-grid"></div>
+            </div>
+            <!-- Right: sell basket -->
+            <div id="merchant-sell-basket-panel">
+              <div id="merchant-sell-header">
+                <span id="merchant-sell-total-label">Earn: <span id="merchant-sell-total-val">0</span>g</span>
+                <span id="merchant-sell-gold-label">Party Gold: <span id="merchant-sell-gold-val">0</span>g</span>
+              </div>
+              <div class="merchant-panel-label">To Sell</div>
+              <div id="merchant-sell-basket-grid"></div>
+              <button id="merchant-sell-btn" disabled>Sell Items</button>
+            </div>
+          </div>
+        </div>
+        <!-- Quest sidebar (shown only for quest-givers) -->
+        <div id="merchant-quest-panel" class="merchant-hidden">
+          <div class="merchant-quest-panel-label">Quests</div>
+          <div id="merchant-quest-body"></div>
         </div>
       </div>
     </div>

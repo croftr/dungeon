@@ -18,7 +18,7 @@
         "baseDamage": null,
         "icon": "/icons/leather_cap.png",
         "description": "A simple cap of boiled leather. Better than nothing.",
-        "defence": 2,
+        "defence": 1,
         "value": 36,
         "weight": 0.5
     },
@@ -29,7 +29,7 @@
         "baseDamage": null,
         "icon": "/icons/iron_helm.png",
         "description": "A sturdy iron helmet that covers the skull and cheeks.",
-        "defence": 3,
+        "defence": 2,
         "value": 120,
         "weight": 2.5
     },
@@ -40,7 +40,7 @@
         "baseDamage": null,
         "icon": "/icons/ogre_helm.png",
         "description": "A massive, terrifying helmet forged from dark iron and reinforced with ogre tusks. It exudes a primal aura of strength.",
-        "defence": 5,
+        "defence": 3,
         "value": 350,
         "weight": 4.5,
         "statBonuses": {

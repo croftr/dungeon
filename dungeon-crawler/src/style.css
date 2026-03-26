@@ -4833,6 +4833,66 @@ label.mm-setting-label {
   color: #c8a84a;
 }
 
+#merchant-content-row {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  overflow: hidden;
+}
+
+#merchant-main-col {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+#merchant-quest-panel {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #3a2e18;
+  overflow: hidden;
+}
+
+.merchant-quest-panel-label {
+  font-size: 11px;
+  color: #c8a84a;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px 12px;
+  border-bottom: 1px solid #3a2e18;
+  background: rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+#merchant-quest-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+#merchant-quest-body .quest-list-item {
+  padding: 8px 10px;
+}
+
+#merchant-quest-body .quest-list-name {
+  font-size: 12px;
+}
+
+#merchant-quest-body .quest-detail {
+  padding: 0;
+}
+
+#merchant-quest-body .quest-detail-title {
+  font-size: 12px;
+}
+
+#merchant-quest-body .quest-detail-text {
+  font-size: 11px;
+}
+
 #merchant-body {
   display: flex;
   gap: 0;

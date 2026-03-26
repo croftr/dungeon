@@ -17,7 +17,7 @@
         "baseDamage": null,
         "icon": "/icons/chainmail_leggings.png",
         "description": "Riveted chain leggings that protect the thighs and shins.",
-        "defence": 4,
+        "defence": 2,
         "value": 210,
         "weight": 4
     },

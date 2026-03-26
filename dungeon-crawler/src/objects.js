@@ -22,7 +22,7 @@ import { spawnLevel2Objects } from './levels/level2/objects.js';
 import { spawnLevel3Objects } from './levels/level3/objects.js';
 import { spawnLevel4Objects } from './levels/level4/objects.js';
 import { spawnLevel5Objects } from './levels/level5/objects.js';
-import { showNpcChoice, openQuestDialog } from './quest.js';
+import { showNpcChoice, openQuestDialog, renderMerchantQuestPanel } from './quest.js';
 
 export const objects = [];
 export const interactables = [];
@@ -454,25 +454,12 @@ export function initObjects(scene, camera) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 1 && distCol <= 1) {
-                    if (obj.userData.questNpcId) {
-                        // NPC has quests — show Talk/Trade choice
-                        const shopType = obj.userData.shopType || 'weapons';
-                        const greetCb = obj.userData.greetingCallback;
-                        showNpcChoice(
-                            () => openQuestDialog(obj.userData.questNpcId),
-                            () => {
-                                if (greetCb) greetCb(); else playShopkeeperSound();
-                                openMerchantModal(shopType);
-                            }
-                        );
+                    if (obj.userData.greetingCallback) {
+                        obj.userData.greetingCallback();
                     } else {
-                        if (obj.userData.greetingCallback) {
-                            obj.userData.greetingCallback();
-                        } else {
-                            playShopkeeperSound();
-                        }
-                        openMerchantModal(obj.userData.shopType || 'weapons');
+                        playShopkeeperSound();
                     }
+                    openMerchantModal(obj.userData.shopType || 'weapons', obj.userData.questNpcId || null);
                 } else {
                     showMessage("The merchant watches you from behind the counter.");
                 }
@@ -2973,13 +2960,22 @@ export function openCorpseModal(corpseObj) {
     }
 }
 
-export function openMerchantModal(shopType = 'weapons') {
+export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
     _merchantBasket = [];
     _merchantSellBasket = [];
     _merchantMode = 'buy';
     _activeMerchantAvailable = shopType === 'potions' ? _potionMerchantAvailable : _merchantAvailable;
     const title = shopType === 'potions' ? 'Apothecary' : 'Merchant';
     document.getElementById('merchant-title').textContent = title;
+
+    const questPanel = document.getElementById('merchant-quest-panel');
+    if (questNpcId) {
+        questPanel.classList.remove('merchant-hidden');
+        renderMerchantQuestPanel(questNpcId);
+    } else {
+        questPanel.classList.add('merchant-hidden');
+    }
+
     document.getElementById('merchant-overlay').classList.remove('merchant-hidden');
     _switchMerchantTab('buy');
 }

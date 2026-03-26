@@ -17,7 +17,7 @@
         "baseDamage": null,
         "icon": "/icons/iron_gauntlets.png",
         "description": "Articulated iron gauntlets. Protect the hands from blade and fire.",
-        "defence": 3,
+        "defence": 2,
         "value": 150,
         "weight": 2
     },

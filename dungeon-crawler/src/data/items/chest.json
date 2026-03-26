@@ -20,7 +20,7 @@
         "baseDamage": null,
         "icon": "/icons/padded_vest.png",
         "description": "Thick quilted padding stitched into a vest. Absorbs blows.",
-        "defence": 3,
+        "defence": 2,
         "value": 45,
         "weight": 2
     },
@@ -31,7 +31,7 @@
         "baseDamage": null,
         "icon": "/icons/chain_shirt.png",
         "description": "Interlocking iron rings form a flexible shirt of armour.",
-        "defence": 5,
+        "defence": 3,
         "value": 270,
         "weight": 5
     },
@@ -42,7 +42,7 @@
         "baseDamage": null,
         "icon": "/icons/plate_cuirass.png",
         "description": "Heavy forged steel chest plate. Near impenetrable \u2014 if you can move in it.",
-        "defence": 8,
+        "defence": 4,
         "value": 750,
         "weight": 12
     },
@@ -53,7 +53,7 @@
         "baseDamage": null,
         "icon": "/icons/minotaur_cuirass.png",
         "description": "A brutal cuirass fashioned from dark leather and reinforced with ivory minotaur horns. It grants exceptional poise and agility.",
-        "defence": 6,
+        "defence": 5,
         "value": 500,
         "weight": 8,
         "statBonuses": {

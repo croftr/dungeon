@@ -75,6 +75,14 @@ function _closeNpcChoice() {
 
 // ── Quest Dialog (NPC quest panel) ──────────────────────────────────────────
 
+export function renderMerchantQuestPanel(npcId) {
+    const container = document.getElementById('merchant-quest-body');
+    if (!container) return;
+    const npcQuests = QUESTS.filter(q => q.giver === npcId);
+    if (!npcQuests.length) return;
+    _renderQuestList(container, npcQuests);
+}
+
 export function openQuestDialog(npcId) {
     const npcQuests = QUESTS.filter(q => q.giver === npcId);
     if (!npcQuests.length) return;

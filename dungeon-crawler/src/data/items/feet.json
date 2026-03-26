@@ -17,7 +17,7 @@
         "baseDamage": null,
         "icon": "/icons/iron_shod_boots.png",
         "description": "Reinforced leather boots with iron toe-caps. Sturdy and intimidating.",
-        "defence": 3,
+        "defence": 2,
         "value": 105,
         "weight": 2
     },
