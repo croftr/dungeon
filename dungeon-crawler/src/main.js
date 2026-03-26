@@ -1497,6 +1497,15 @@ window.loadLevel = function (levelNum) {
     player.facing = 0; // North — door is behind them to the south
     camera.rotation.order = 'YXZ';
     camera.rotation.y = FACING_ANGLES[player.facing];
+  } else if (levelNum === 0 && oldLevel === 2) {
+    // Returning from Level 2 via blue portal — place in starter room, facing west
+    player.gridRow = 13;
+    player.gridCol = 13;
+    const wRet2 = cellToWorld(13, 13);
+    camera.position.set(wRet2.x, wRet2.y, wRet2.z);
+    player.facing = 3; // West
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = FACING_ANGLES[player.facing];
   } else if (levelNum === 0 && oldLevel === 5) {
     // Returning from Hall of Heroes — place near the hero door, face north
     player.gridRow = 14;

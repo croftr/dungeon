@@ -36,11 +36,11 @@
         "job": "Paladin",
         "race": "Human",
         "stats": {
-            "strength": 107,
-            "dexterity": 106,
-            "vitality": 108,
-            "intelligence": 104,
-            "resilience": 108
+            "strength": 7,
+            "dexterity": 6,
+            "vitality": 8,
+            "intelligence": 4,
+            "resilience": 8
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
         "startingSkills": [],

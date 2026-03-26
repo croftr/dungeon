@@ -379,7 +379,7 @@
     "name": "Ogre",
     "hp": 230,
     "defence": 9,
-    "xp": 255,
+    "xp": 500,
     "attackSpeed": 1,
     "stats": {
       "strength": 24,

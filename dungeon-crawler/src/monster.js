@@ -873,6 +873,22 @@ function _loadMonster(m, scene) {
     model.add(sleepLabel);
     m.sleepLabel = sleepLabel;
 
+    // ── Stun indicator (three orbiting stars) ─────────────────────────
+    const stunDiv = document.createElement('div');
+    stunDiv.className = 'monster-stun-indicator';
+    ['★', '★', '★'].forEach((star, i) => {
+      const s = document.createElement('span');
+      s.className = `stun-star stun-star--${i}`;
+      s.textContent = star;
+      stunDiv.appendChild(s);
+    });
+
+    const stunLabel = new CSS2DObject(stunDiv);
+    stunLabel.position.set(0, 2.2, 0);
+    stunLabel.visible = false;
+    model.add(stunLabel);
+    m.stunLabel = stunLabel;
+
     // Load attack animation(s)
     if (m.attacks && m.attacks.length > 0) {
       // ── Multiple attack variants ──
@@ -1259,6 +1275,7 @@ export function updateMonsters(dt, playerCamera, scene) {
       if (m.hpLabel) m.hpLabel.visible = false;
       if (m.statsLabel) m.statsLabel.visible = false;
       if (m.sleepLabel) m.sleepLabel.visible = false;
+      if (m.stunLabel) m.stunLabel.visible = false;
       if (_huntersEyeTargetId === m.id) _huntersEyeTargetId = null;
       if (m.mesh) m.mesh.visible = false;
       return;
@@ -1276,6 +1293,7 @@ export function updateMonsters(dt, playerCamera, scene) {
         if (m.hpLabel) m.hpLabel.visible = false;
         if (m.statsLabel) m.statsLabel.visible = false;
         if (m.sleepLabel) m.sleepLabel.visible = false;
+        if (m.stunLabel) m.stunLabel.visible = false;
         m.mesh.visible = false;
         return;
       }
@@ -1293,6 +1311,7 @@ export function updateMonsters(dt, playerCamera, scene) {
       if (m.hpLabel) m.hpLabel.visible = false;
       if (m.statsLabel) m.statsLabel.visible = false;
       if (m.sleepLabel) m.sleepLabel.visible = false;
+      if (m.stunLabel) m.stunLabel.visible = false;
       if (_huntersEyeTargetId === m.id) _huntersEyeTargetId = null;
       return;
     }
@@ -1320,6 +1339,7 @@ export function updateMonsters(dt, playerCamera, scene) {
     }
 
     if (m.sleepLabel) m.sleepLabel.visible = isAsleep;
+    if (m.stunLabel) m.stunLabel.visible = !isAsleep && !!(m.stunUntil && performance.now() < m.stunUntil);
 
     // Check if monster is suppressed by an action-preventing debuff (sleep, frozen, fear, etc.)
     // Expired debuffs have already been filtered above, so no extra time check needed here.

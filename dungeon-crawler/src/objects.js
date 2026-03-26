@@ -429,6 +429,7 @@ export function initObjects(scene, camera) {
                     }
 
                     const isTreemanTransition = (targetLevel === 2 && window.currentLevel === 0);
+                    const isMinotaurTransition = (targetLevel === 3 && window.currentLevel === 1);
 
                     showMessage("You step into the swirling blue portal...");
                     playPortalSound();
@@ -437,18 +438,13 @@ export function initObjects(scene, camera) {
                     if (window.loadLevel) window.loadLevel(targetLevel);
 
                     if (isTreemanTransition) {
-                        // Skip the generic portal transport video, go straight to Treeman
+                        // Go straight to Treeman cutscene — no portal video for the starter room portal
                         if (window.playTreemanVideo && !window.hasSeenTreemanVideo) {
                             window.playTreemanVideo();
-                        } else if (window.playPortalVideo) {
-                            window.playPortalVideo();
                         }
-                    } else {
-                        // Play the normal portal animation only for level 1 -> level 3
-                        const isMinotaurTransition = (targetLevel === 3 && window.currentLevel === 1);
-                        if (isMinotaurTransition && window.playPortalVideo) {
-                            window.playPortalVideo();
-                        }
+                    } else if (isMinotaurTransition && window.playPortalVideo) {
+                        // Play the portal animation when leaving level 1 for level 3
+                        window.playPortalVideo();
                     }
                 } else {
                     showMessage("Step closer to the portal to enter.");
@@ -1702,6 +1698,7 @@ function createWallButton(protrusionDir, userData, axis = 'x') {
     const btn = new THREE.Mesh(hitGeo, hitMat);
     if (axis === 'z') btn.position.z = protrusionDir * 0.04;
     else              btn.position.x = protrusionDir * 0.04;
+    btn.position.y = -0.2;
     btn.userData = { isButton: true, animAxis: axis, animDir: protrusionDir, ...userData,
                      pressTarget: btn, glowMeshes: [] };
     interactables.push(btn);
@@ -1731,6 +1728,7 @@ function createWallButton(protrusionDir, userData, axis = 'x') {
         // Update hitbox userData with loaded glow meshes
         btn.userData.glowMeshes = glowMeshes;
 
+        model.position.y = -0.2;
         group.add(model);
     });
 

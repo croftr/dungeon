@@ -35,11 +35,11 @@
     },
     {
       "id": "n3",
-      "label": "+1 Dexterity, +1 Intelligence",
+      "label": "+1 Dexterity, +1 Vitality",
       "type": "stat",
       "benefit": {
         "dexterity": 1,
-        "intelligence": 1
+        "vitality": 1
       },
       "edges": [
         "n5",
@@ -127,7 +127,7 @@
       "label": "+1 Resilience, +1 Vitality",
       "type": "stat",
       "benefit": {
-        "intelligence": 1,
+        "resilience": 1,
         "vitality": 1
       },
       "edges": [
@@ -149,11 +149,11 @@
     },
     {
       "id": "n12",
-      "label": "+1 Dexterity, +1 Resilience",
+      "label": "+1 Dexterity, +1 Vitality",
       "type": "stat",
       "benefit": {
         "dexterity": 1,
-        "intelligence": 1
+        "vitality": 1
       },
       "edges": [
         "n14",

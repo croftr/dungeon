@@ -18,8 +18,8 @@ export function spawnLevel2Objects(ctx) {
         level2GiantPortcullisOpened,
     } = ctx;
 
-    // ── Portal back to Level 1 ────────────────────────────────────────────────
-    addPortal(group, loader, 7, 1, 1, 0, 0, -0.85);
+    // ── Portal back to Level 0 ────────────────────────────────────────────────
+    addPortal(group, loader, 7, 1, 0, 0, 0, -0.85);
 
     // ── Portcullises & Keys ───────────────────────────────────────────────────
     // Locked portcullis at the passage entrance (col 7, row 8) — requires Bronze Key
