@@ -2631,6 +2631,24 @@ label.mm-setting-label {
   }
 }
 
+/* ── Dead character banner in inventory modal ── */
+#equip-dead-banner {
+  background: rgba(80, 0, 0, 0.75);
+  border-bottom: 1px solid #c04040;
+  color: #ff8080;
+  font-family: monospace;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  padding: 6px 12px;
+  text-align: center;
+}
+
+/* Dim inventory / paperdoll area for dead characters */
+.equip-modal--dead #equip-body {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
 /* ── Level Up! button pulse in inventory header ── */
 #equip-char-dev.level-up-pending {
   background: rgba(200, 168, 74, 0.3);

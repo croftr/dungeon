@@ -376,15 +376,37 @@ function renderModal(memberIndex) {
     }
   }
 
+  // ── Dead banner ──
+  const modal = document.getElementById('equip-modal');
+  let deadBanner = document.getElementById('equip-dead-banner');
+  if (m.isDead) {
+    if (!deadBanner) {
+      deadBanner = document.createElement('div');
+      deadBanner.id = 'equip-dead-banner';
+      deadBanner.textContent = '☠ Fallen — Revive this character to manage their equipment';
+      modal.insertBefore(deadBanner, modal.firstChild);
+    }
+    modal.classList.add('equip-modal--dead');
+  } else {
+    if (deadBanner) deadBanner.remove();
+    modal.classList.remove('equip-modal--dead');
+  }
+
   // ── Development / Level Up! button ──
   const devBtn = document.getElementById('equip-char-dev');
   if (devBtn) {
-    if (m.pendingLevelUp) {
+    if (m.isDead) {
+      devBtn.textContent = 'Development';
+      devBtn.classList.remove('level-up-pending');
+      devBtn.disabled = true;
+    } else if (m.pendingLevelUp) {
       devBtn.textContent = '⬆ Level Up!';
       devBtn.classList.add('level-up-pending');
+      devBtn.disabled = false;
     } else {
       devBtn.textContent = 'Development';
       devBtn.classList.remove('level-up-pending');
+      devBtn.disabled = false;
     }
   }
 
@@ -548,6 +570,7 @@ function renderModal(memberIndex) {
 
         // Click to equip — clicking the already-equipped skill unequips it
         card.addEventListener('click', () => {
+          if (m.isDead) return;
           m.equipment.skill = isEquipped ? null : { name: skill.name, slot: 'skill', icon: skill.icon ?? null };
           renderModal(memberIndex);
           refreshPartyCards();
@@ -1594,6 +1617,7 @@ function onInventoryCellClick(e) {
   if (activeCharIndex === null) return;
   const invIndex = Number(e.currentTarget.dataset.index);
   const m = party[activeCharIndex];
+  if (m.isDead) return;
   const item = m.inventory[invIndex];
   if (!item) return;
 
@@ -1659,6 +1683,7 @@ function onInventoryCellContextMenu(e) {
   if (activeCharIndex === null) return;
   const invIndex = Number(e.currentTarget.dataset.index);
   const m = party[activeCharIndex];
+  if (m.isDead) return;
   if (!m.inventory[invIndex]) return;   // empty cell — no menu
 
   e.preventDefault();
@@ -1951,6 +1976,7 @@ function onPaperdollSlotClick(e) {
   if (activeCharIndex === null) return;
   const key = e.currentTarget.dataset.slot;
   const m = party[activeCharIndex];
+  if (m.isDead) return;
   const item = m.equipment[key];
   if (!item) return; // empty slot — nothing to do
 
@@ -4027,6 +4053,7 @@ function attachPaperdollListeners() {
     el.addEventListener('click', () => {
       if (activeCharIndex === null) return;
       const m = party[activeCharIndex];
+      if (m.isDead) return;
       if (!m.quickslots) return;
       const prev = m.quickslots[qsi];
       if (!prev) return;
@@ -4158,6 +4185,7 @@ function attachOverlayListeners() {
   if (rotateBtn) {
     rotateBtn.addEventListener('click', () => {
       if (activeCharIndex !== null) {
+        if (party[activeCharIndex].isDead) return;
         rotateLoadout(activeCharIndex);
         renderModal(activeCharIndex);
       }
@@ -4172,6 +4200,7 @@ function attachOverlayListeners() {
       if (activeCharIndex === null) return;
       const m = party[activeCharIndex];
       if (!m || !m.loadoutB) return;
+      if (m.isDead) return;
       const lb = el.dataset.lb;
       let item = null;
       if (lb === 'leftHand') {
@@ -4281,6 +4310,7 @@ function attachOverlayListeners() {
 // Development button — close inventory and open char-dev for same member
 document.getElementById('equip-char-dev').addEventListener('click', () => {
   if (activeCharIndex !== null) {
+    if (party[activeCharIndex].isDead) return;
     const idx = activeCharIndex;
     closeModal();
     openCharDevModal(idx);

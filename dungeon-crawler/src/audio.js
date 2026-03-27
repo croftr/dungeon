@@ -380,6 +380,8 @@ export async function startMusic() {
 export function setAmbientLevel(level) {
   _ambientLevel = level;
   _zoneTrack = null;          // clear any room override when changing levels
+  _zonePlaylist = null;
+  _zonePlaylistIndex = 0;
   currentMusicIndex = 0;
 
   // Level 3 never plays combat music, so if we are switching to level 3,
@@ -395,14 +397,27 @@ export function setAmbientLevel(level) {
 }
 
 /**
- * Override the ambient track with a specific URL for a room/zone.
+ * Override the ambient track with a specific URL (or array of URLs) for a room/zone.
+ * Pass an array to rotate through tracks in order (playlist mode).
  * Pass null to leave the zone and revert to the level's normal ambient pool.
- * @param {string|null} url
+ * @param {string|string[]|null} urlOrArray
  */
 let _zoneTrack = null;
-export function setZoneMusic(url) {
-  if (_zoneTrack === url) return;   // no change
-  _zoneTrack = url;
+let _zonePlaylist = null;
+let _zonePlaylistIndex = 0;
+export function setZoneMusic(urlOrArray) {
+  if (Array.isArray(urlOrArray)) {
+    const key = urlOrArray.join('|');
+    if (_zonePlaylist && _zonePlaylist.join('|') === key) return; // no change
+    _zonePlaylist = urlOrArray;
+    _zonePlaylistIndex = 0;
+    _zoneTrack = null;
+  } else {
+    if (_zoneTrack === urlOrArray && !_zonePlaylist) return; // no change
+    _zoneTrack = urlOrArray;
+    _zonePlaylist = null;
+    _zonePlaylistIndex = 0;
+  }
   if (!isCombatMusicPlaying) {
     _musicGen++;
     _stopCurrent();
@@ -691,6 +706,65 @@ export async function playSoundByUrl(url, volume = 0.8) {
   }
 }
 
+// ── Quest / NPC speech audio ─────────────────────────────────────────────────
+let _questAudioSource = null;
+let _questAudioGain   = null;
+
+/**
+ * Play NPC quest speech audio. Replaces any currently playing quest audio.
+ * Returns the source so callers can attach onended.
+ */
+export async function playQuestAudio(url, volume = 0.8) {
+  // Stop any previous quest audio immediately
+  if (_questAudioSource) {
+    try { _questAudioSource.stop(); } catch (_) {}
+    _questAudioSource = null;
+    _questAudioGain   = null;
+  }
+
+  const buffer = await getBuffer(url);
+  if (!buffer) return;
+  try {
+    const ctx = getCtx();
+    const source   = ctx.createBufferSource();
+    source.buffer  = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = volume;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.onended = () => {
+      if (_questAudioSource === source) {
+        _questAudioSource = null;
+        _questAudioGain   = null;
+      }
+    };
+    source.start(0);
+    _questAudioSource = source;
+    _questAudioGain   = gainNode;
+    return source;
+  } catch (err) {
+    console.warn(`[audio] playQuestAudio failed for ${url}:`, err);
+  }
+}
+
+/**
+ * Fade out and stop any currently playing quest audio.
+ * @param {number} durationSec  Fade duration in seconds (default 0.6s)
+ */
+export function fadeOutQuestAudio(durationSec = 0.6) {
+  if (!_questAudioSource || !_questAudioGain) return;
+  const source   = _questAudioSource;
+  const gainNode = _questAudioGain;
+  _questAudioSource = null;
+  _questAudioGain   = null;
+
+  const ctx = getCtx();
+  const now = ctx.currentTime;
+  gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+  gainNode.gain.linearRampToValueAtTime(0, now + durationSec);
+  try { source.stop(now + durationSec); } catch (_) {}
+}
+
 export async function playFallSequence() {
   playSoundByUrl(asset('/sounds/fall-scream.mp3'), 0.9);
   // Start the land/thud sound after 1 second of screaming
@@ -744,6 +818,11 @@ function _switchToNormalMusic() {
 
 function _playNextTrack() {
   if (isCombatMusicPlaying) return;
+  // Zone playlist: rotate through tracks without looping
+  if (_zonePlaylist) {
+    _playTrack(_zonePlaylist[_zonePlaylistIndex], false, _musicGen);
+    return;
+  }
   // Zone music takes priority over the level ambient pool
   if (_zoneTrack) {
     _playTrack(_zoneTrack, true, _musicGen);
@@ -777,11 +856,15 @@ async function _playTrack(url, loop, gen) {
   gainNode.connect(ctx.destination);
 
   source.onended = () => {
-    // Only advance to the next ambient track if we are still the active generation
+    // Only advance to the next track if we are still the active generation
     if (gen !== _musicGen) return;
     if (!isCombatMusicPlaying && !loop) {
-      const tracks = MUSIC_TRACKS_BY_LEVEL[_ambientLevel] ?? MUSIC_TRACKS_BY_LEVEL[1];
-      currentMusicIndex = (currentMusicIndex + 1) % tracks.length;
+      if (_zonePlaylist) {
+        _zonePlaylistIndex = (_zonePlaylistIndex + 1) % _zonePlaylist.length;
+      } else {
+        const tracks = MUSIC_TRACKS_BY_LEVEL[_ambientLevel] ?? MUSIC_TRACKS_BY_LEVEL[1];
+        currentMusicIndex = (currentMusicIndex + 1) % tracks.length;
+      }
       _playNextTrack();
     }
   };

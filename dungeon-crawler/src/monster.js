@@ -319,9 +319,9 @@ _applyMultiAttacks('Demon', [
     soundTimings: [0.5],
     damageTimings: [0.5],
     weight: 3,
-    damageMultiplier: 0.7,
+    damageMultiplier: 0.5,
     specialAttack: true,
-    specialOnHitEffects: [{ effectId: 'fear', chance: 0.50, durationSec: 10 }],
+    specialOnHitEffects: [{ effectId: 'fear', chance: 0.25, durationSec: 10 }],
   },
 ]);
 

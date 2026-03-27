@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { asset } from './assets.js';
-import { playSoundByUrl, playItemSound, playSuccessSound } from './audio.js';
+import { playSoundByUrl, playQuestAudio, playItemSound, playSuccessSound } from './audio.js';
 import { party, addGold } from './party.js';
 import { getItemDef } from './items.js';
 import { showMessage } from './minimap.js';
@@ -147,12 +147,12 @@ function _showQuestDetail(body, npcQuests, quest) {
     const audioPath = useCompletion && quest.completionAudio ? quest.completionAudio : quest.audio;
     if (audioPath) {
         if (useCompletion && quest.completionAudio) {
-            _completionAudioEndPromise = playSoundByUrl(asset(audioPath), 0.8).then(src => {
+            _completionAudioEndPromise = playQuestAudio(asset(audioPath), 0.8).then(src => {
                 if (!src) return;
                 return new Promise(resolve => { src.onended = resolve; });
             });
         } else {
-            playSoundByUrl(asset(audioPath), 0.8);
+            playQuestAudio(asset(audioPath), 0.8);
             if (status === 'available' && quest.video) {
                 window.playNectarQuestVideo?.();
             }

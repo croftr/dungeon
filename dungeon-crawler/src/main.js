@@ -11,7 +11,7 @@ import { initEquipment, hideDropButton, tickAutoAttack, clearAutoAttackTimers, t
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, getContainerStates, setPendingContainerOverrides } from './objects.js';
-import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer } from './audio.js';
+import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
@@ -238,9 +238,13 @@ setCallbacks({
       const inEastRoom = player.gridCol >= 16 && player.gridCol <= 23
         && player.gridRow >= 7 && player.gridRow <= 15;
       if (inEastRoom) {
-        setZoneMusic(asset('/sounds/backing/town-music.mp3'));
+        setZoneMusic([
+          asset('/sounds/backing/crafting-room.mp3'),
+          asset('/sounds/backing/town-music.mp3'),
+        ]);
       } else {
         setZoneMusic(null);
+        fadeOutQuestAudio();
       }
     } else if (window.currentLevel === 1) {
       const inOgreRoom = player.gridCol >= 1 && player.gridCol <= 6
@@ -292,6 +296,8 @@ setCallbacks({
         hasSeenMinotaurVideo = true; window._saveFlags.hasSeenMinotaurVideo = true;
         if (window.playMinotaurVideo) window.playMinotaurVideo();
       }
+    } else if (window.currentLevel === 5) {
+      setZoneMusic(asset('/sounds/backing/hall-of-heroes.mp3'));
     }
 
     // --- Special Grid Logic (Teleports) ---
@@ -1544,6 +1550,11 @@ window.loadLevel = function (levelNum) {
     if (treeman && !treeman.alive) {
       setZoneMusic(asset('/sounds/backing/demon-room.mp3'));
     }
+  }
+
+  // Hall of Heroes — always plays its theme
+  if (levelNum === 5) {
+    setZoneMusic(asset('/sounds/backing/hall-of-heroes.mp3'));
   }
 };
 
