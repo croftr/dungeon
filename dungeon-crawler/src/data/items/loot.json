@@ -13,7 +13,7 @@
         "slot": "loot",
         "icon": "/icons/ingredients/poison_vial.png",
         "description": "A small vial of concentrated poison harvested from slain creatures.",
-        "value": 30,
+        "value": 20,
         "weight": 0.2,
         "sellable": true
     },

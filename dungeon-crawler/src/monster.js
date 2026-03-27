@@ -241,8 +241,8 @@ _applyMultiAttacks('Ogre', [
     damageTimings: [0.3, 0.7],
     weight: 2,
     specialAttack: true,
-    damageMultiplier: 0.75,
-    specialOnHitEffects: [{ effectId: 'fear', chance: 0.75 }],
+    damageMultiplier: 0.375,
+    specialOnHitEffects: [{ effectId: 'fear', chance: 0.75, durationSec: 10 }],
   },
 ]);
 

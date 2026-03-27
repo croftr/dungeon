@@ -81,8 +81,9 @@ export function applyNodeBenefit(m, node) {
 }
 
 /**
- * Render a skill tree graph into a container element.
- * Draws SVG edges beneath absolutely-positioned node divs.
+ * Render a skill tree graph into a container element with zoom + pan support.
+ * Mouse wheel zooms (around cursor), drag pans. Auto-fits on first render.
+ * Zoom/pan state is preserved across re-renders (e.g. node selection clicks).
  *
  * @param {object} m - party member
  * @param {HTMLElement} container - target element (will be cleared)
@@ -100,21 +101,33 @@ export function renderSkillTree(m, container, onNodeClick) {
   const availableIds = new Set(availableNodes.map(n => n.id));
   const isPending = (m.pendingNodePicks ?? 0) > 0;
 
-  // Compute SVG canvas size
+  // Compute canvas bounds from positions
   const positions = tree.positions;
   const xs = Object.values(positions).map(([x]) => x);
   const ys = Object.values(positions).map(([, y]) => y);
-  const canvasW = Math.max(...xs) + 60;
-  const canvasH = Math.max(...ys) + 50;
+  const PAD = 60;
+  const canvasW = Math.max(...xs) + PAD;
+  const canvasH = Math.max(...ys) + PAD;
+
+  // Preserve pan/zoom from previous render (re-renders happen on node clicks)
+  const prevViewport = container.querySelector('.tree-viewport');
+  const savedTX  = prevViewport?._tx  ?? null;
+  const savedTY  = prevViewport?._ty  ?? null;
+  const savedScale = prevViewport?._scale ?? null;
 
   container.innerHTML = '';
 
-  // Inner canvas wrapper — naturally sized by tree content; container scrolls it
-  const canvas = document.createElement('div');
-  canvas.style.cssText = `position:relative; width:${canvasW}px; min-height:${canvasH}px;`;
-  container.appendChild(canvas);
+  // ── Viewport: fills container, clips content ──
+  const viewport = document.createElement('div');
+  viewport.className = 'tree-viewport';
+  container.appendChild(viewport);
 
-  // SVG for edges
+  // ── Canvas: the transformable layer ──
+  const canvas = document.createElement('div');
+  canvas.style.cssText = `position:absolute;width:${canvasW}px;height:${canvasH}px;transform-origin:0 0;`;
+  viewport.appendChild(canvas);
+
+  // ── SVG edges ──
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('width', canvasW);
   svg.setAttribute('height', canvasH);
@@ -127,10 +140,8 @@ export function renderSkillTree(m, container, onNodeClick) {
       if (!pos2) continue;
       const [x2, y2] = pos2;
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', x1);
-      line.setAttribute('y1', y1);
-      line.setAttribute('x2', x2);
-      line.setAttribute('y2', y2);
+      line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+      line.setAttribute('x2', x2); line.setAttribute('y2', y2);
       const bothAcquired = acquired.has(node.id) && acquired.has(edgeId);
       const fromAcquiredToAvail = acquired.has(node.id) && availableIds.has(edgeId);
       line.setAttribute('stroke', bothAcquired ? '#c8a84a' : fromAcquiredToAvail ? '#4a8a4a' : '#333');
@@ -139,10 +150,9 @@ export function renderSkillTree(m, container, onNodeClick) {
       svg.appendChild(line);
     }
   }
-
   canvas.appendChild(svg);
 
-  // Node elements
+  // ── Node elements ──
   for (const node of tree.nodes) {
     const [x, y] = positions[node.id];
     const isAcquired = acquired.has(node.id);
@@ -154,39 +164,189 @@ export function renderSkillTree(m, container, onNodeClick) {
     div.style.left = x + 'px';
     div.style.top = y + 'px';
 
-    if (isAcquired) {
-      div.classList.add('tree-node--acquired');
-    } else if (isSelected) {
-      div.classList.add('tree-node--selected');
-    } else if (isAvailable) {
-      div.classList.add('tree-node--available');
-    } else {
-      div.classList.add('tree-node--locked');
-    }
+    if (isAcquired)         div.classList.add('tree-node--acquired');
+    else if (isSelected)    div.classList.add('tree-node--selected');
+    else if (isAvailable)   div.classList.add('tree-node--available');
+    else                    div.classList.add('tree-node--locked');
 
-    // Icon symbol
-    const icon = document.createElement('span');
+    const icon = document.createElement('div');
     icon.className = 'tree-node-icon';
-    if (node.type === 'start') icon.textContent = '★';
-    else if (node.type === 'skill') icon.textContent = '⚔';
-    else icon.textContent = '⬆';
+
+    if (node.type === 'start') {
+      icon.textContent = '★';
+    } else if (node.icon) {
+      // Explicit icon in tree JSON takes precedence over all auto-derived icons
+      const img = document.createElement('img');
+      img.src = node.icon;
+      icon.appendChild(img);
+    } else if (node.type === 'stat') {
+      // Fallback: auto-derive stat icon from benefit keys
+      const stats = Object.keys(node.benefit);
+      const iconPath = stats.length > 1
+        ? '/skills/stats-increase/mixed_stat_increase.png'
+        : `/skills/stats-increase/${stats[0]}_increase.png`;
+      const img = document.createElement('img');
+      img.src = iconPath;
+      icon.appendChild(img);
+    } else if (node.type === 'skill') {
+      // Fallback: auto-derive from skills.json
+      const skillDef = SKILLS_DATA[node.benefit.skill];
+      if (skillDef?.icon) {
+        const img = document.createElement('img');
+        img.src = skillDef.icon;
+        icon.appendChild(img);
+      } else {
+        icon.textContent = '⚔';
+      }
+    }
     div.appendChild(icon);
 
-    // Label below the node
     const label = document.createElement('div');
     label.className = 'tree-node-label';
     label.textContent = node.label;
     div.appendChild(label);
 
-    // Click handler
-    div.addEventListener('click', () => {
+    div.addEventListener('click', (e) => {
+      // Ignore click if it was part of a drag gesture
+      if (viewport._didDrag) return;
       if (isPending && isAvailable && !isAcquired) {
         m.pendingNodeChoice = node.id;
-        renderSkillTree(m, container, onNodeClick); // re-render selection state
+        renderSkillTree(m, container, onNodeClick);
       }
       if (onNodeClick) onNodeClick(node);
     });
 
     canvas.appendChild(div);
   }
+
+  // ── Transform helpers (declared first so button handlers can reference them) ──
+  const applyTransform = () => {
+    canvas.style.transform = `translate(${viewport._tx}px,${viewport._ty}px) scale(${viewport._scale})`;
+  };
+
+  const zoomBy = (factor, cx, cy) => {
+    const vw = viewport.offsetWidth;
+    const vh = viewport.offsetHeight;
+    const mx = cx ?? vw / 2;
+    const my = cy ?? vh / 2;
+    const newScale = Math.min(Math.max((viewport._scale ?? 1) * factor, 0.2), 4.0);
+    const ratio = newScale / viewport._scale;
+    viewport._tx = mx - (mx - viewport._tx) * ratio;
+    viewport._ty = my - (my - viewport._ty) * ratio;
+    viewport._scale = newScale;
+    applyTransform();
+  };
+
+  const fitToView = (animate = false) => {
+    const vw = viewport.offsetWidth;
+    const vh = viewport.offsetHeight;
+    if (!vw || !vh) return;
+    const fitScale = Math.min(vw / canvasW, vh / canvasH, 1.0);
+    viewport._scale = fitScale;
+    viewport._tx = (vw - canvasW * fitScale) / 2;
+    viewport._ty = (vh - canvasH * fitScale) / 2;
+    if (animate) {
+      canvas.style.transition = 'transform 0.25s ease';
+      applyTransform();
+      setTimeout(() => { canvas.style.transition = ''; }, 260);
+    } else {
+      applyTransform();
+    }
+  };
+
+  const initTransform = () => {
+    if (savedScale !== null) {
+      viewport._tx = savedTX;
+      viewport._ty = savedTY;
+      viewport._scale = savedScale;
+      applyTransform();
+    } else {
+      fitToView(false);
+    }
+  };
+
+  // Wait one frame so viewport has been laid out and offsetWidth/Height are valid
+  requestAnimationFrame(initTransform);
+
+  // ── Controls toolbar (zoom in / zoom out / fit) ──
+  const toolbar = document.createElement('div');
+  toolbar.className = 'tree-toolbar';
+  toolbar.innerHTML =
+    '<button class="tree-ctrl-btn" data-action="zoomin"  title="Zoom in">+</button>' +
+    '<button class="tree-ctrl-btn" data-action="zoomout" title="Zoom out">−</button>' +
+    '<button class="tree-ctrl-btn tree-ctrl-fit" data-action="fit" title="Fit to view">⊡</button>';
+  toolbar.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    if (btn.dataset.action === 'zoomin')  zoomBy(1.25);
+    if (btn.dataset.action === 'zoomout') zoomBy(1 / 1.25);
+    if (btn.dataset.action === 'fit')     fitToView(true);
+  });
+  viewport.appendChild(toolbar);
+
+  // ── Zoom (mouse wheel) ──
+  viewport.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const rect = viewport.getBoundingClientRect();
+    zoomBy(e.deltaY < 0 ? 1.15 : 1 / 1.15, e.clientX - rect.left, e.clientY - rect.top);
+  }, { passive: false });
+
+  // ── Pan (pointer drag with capture — skip if clicking a button) ──
+  let dragStartX = 0, dragStartY = 0, dragStartTX = 0, dragStartTY = 0;
+
+  viewport.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    if (e.target.closest('button')) return; // let button clicks through
+    viewport.setPointerCapture(e.pointerId);
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    dragStartTX = viewport._tx ?? 0;
+    dragStartTY = viewport._ty ?? 0;
+    viewport._didDrag = false;
+    viewport.classList.add('dragging');
+    e.preventDefault();
+  });
+
+  viewport.addEventListener('pointermove', (e) => {
+    if (!viewport.hasPointerCapture(e.pointerId)) return;
+    const dx = e.clientX - dragStartX;
+    const dy = e.clientY - dragStartY;
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) viewport._didDrag = true;
+    viewport._tx = dragStartTX + dx;
+    viewport._ty = dragStartTY + dy;
+    applyTransform();
+  });
+
+  viewport.addEventListener('pointerup', (e) => {
+    if (!viewport.hasPointerCapture(e.pointerId)) return;
+    viewport.releasePointerCapture(e.pointerId);
+    viewport.classList.remove('dragging');
+  });
+
+  viewport.addEventListener('pointercancel', () => {
+    viewport.classList.remove('dragging');
+  });
+
+  // ── Arrow-key pan (active while this tree is in the DOM) ──
+  const PAN_STEP = 40;
+  const onKeyDown = (e) => {
+    if (!viewport.isConnected) { document.removeEventListener('keydown', onKeyDown); return; }
+    // Only handle arrows when the char-dev modal is open and no text input is focused
+    if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
+    let dx = 0, dy = 0;
+    if (e.key === 'ArrowLeft')  dx =  PAN_STEP;
+    if (e.key === 'ArrowRight') dx = -PAN_STEP;
+    if (e.key === 'ArrowUp')    dy =  PAN_STEP;
+    if (e.key === 'ArrowDown')  dy = -PAN_STEP;
+    if (!dx && !dy) return;
+    // Only consume arrows when the skill tree section is visible
+    const overlay = document.getElementById('char-dev-overlay');
+    if (!overlay || overlay.classList.contains('char-dev-hidden')) return;
+    e.preventDefault();
+    viewport._tx = (viewport._tx ?? 0) + dx;
+    viewport._ty = (viewport._ty ?? 0) + dy;
+    applyTransform();
+  };
+  document.addEventListener('keydown', onKeyDown);
 }

@@ -17,7 +17,7 @@
                 "quantity": 2
             }
         ],
-        "value": 25,
+        "value": 30,
         "weight": 0.3
     },
     {
@@ -37,7 +37,7 @@
         ],
         "effect": {
             "type": "restore-mp",
-            "value": 30
+            "value": 100
         },
         "value": 40,
         "weight": 0.3
@@ -59,7 +59,7 @@
         ],
         "effect": {
             "type": "restore-mp",
-            "value": 20
+            "value": 80
         },
         "value": 40,
         "weight": 0.3
@@ -83,7 +83,7 @@
                 "quantity": 1
             }
         ],
-        "value": 30,
+        "value": 80,
         "weight": 0.3
     },
     {
@@ -105,7 +105,7 @@
                 "quantity": 2
             }
         ],
-        "value": 30,
+        "value": 100,
         "weight": 0.3
     },
     {
@@ -127,7 +127,7 @@
                 "quantity": 2
             }
         ],
-        "value": 50,
+        "value": 100,
         "weight": 0.3
     },
     {
@@ -149,7 +149,7 @@
                 "quantity": 1
             }
         ],
-        "value": 50,
+        "value": 80,
         "weight": 0.3
     },
     {
@@ -179,7 +179,7 @@
                 "quantity": 1
             }
         ],
-        "value": 50,
+        "value": 150,
         "weight": 0.3
     },
     {
@@ -209,7 +209,7 @@
                 "quantity": 1
             }
         ],
-        "value": 50,
+        "value": 150,
         "weight": 0.3
     },
     {

@@ -1,294 +1,42 @@
 {
   "nodes": [
-    {
-      "id": "start",
-      "label": "War Dancer Initiate",
-      "type": "start",
-      "edges": [
-        "n1"
-      ]
-    },
-    {
-      "id": "n1",
-      "label": "+2 Dexterity",
-      "type": "stat",
-      "benefit": {
-        "dexterity": 2
-      },
-      "edges": [
-        "n2",
-        "n3",
-        "n4"
-      ]
-    },
-    {
-      "id": "n2",
-      "label": "War Dance",
-      "type": "skill",
-      "benefit": {
-        "skill": "War Dance"
-      },
-      "edges": [
-        "n5",
-        "n6"
-      ]
-    },
-    {
-      "id": "n3",
-      "label": "+1 Dexterity, +1 Vitality",
-      "type": "stat",
-      "benefit": {
-        "dexterity": 1,
-        "vitality": 1
-      },
-      "edges": [
-        "n5",
-        "n6",
-        "n7"
-      ]
-    },
-    {
-      "id": "n4",
-      "label": "Dagger Master",
-      "type": "skill",
-      "benefit": {
-        "skill": "Dagger Master"
-      },
-      "edges": [
-        "n6",
-        "n7"
-      ]
-    },
-    {
-      "id": "n5",
-      "label": "Dagger Tactician",
-      "type": "skill",
-      "benefit": {
-        "skill": "Dagger Tactician"
-      },
-      "edges": [
-        "n8",
-        "n9"
-      ]
-    },
-    {
-      "id": "n6",
-      "label": "+2 Dexterity",
-      "type": "stat",
-      "benefit": {
-        "dexterity": 2
-      },
-      "edges": [
-        "n8",
-        "n9",
-        "n10"
-      ]
-    },
-    {
-      "id": "n7",
-      "label": "+1 Dexterity, +1 Resilience",
-      "type": "stat",
-      "benefit": {
-        "dexterity": 1,
-        "resilience": 1
-      },
-      "edges": [
-        "n9",
-        "n10"
-      ]
-    },
-    {
-      "id": "n8",
-      "label": "Whirlwind",
-      "type": "skill",
-      "benefit": {
-        "skill": "Whirlwind"
-      },
-      "edges": [
-        "n11",
-        "n12"
-      ]
-    },
-    {
-      "id": "n9",
-      "label": "+2 Dexterity",
-      "type": "stat",
-      "benefit": {
-        "dexterity": 2
-      },
-      "edges": [
-        "n11",
-        "n12",
-        "n13"
-      ]
-    },
-    {
-      "id": "n10",
-      "label": "+1 Resilience, +1 Vitality",
-      "type": "stat",
-      "benefit": {
-        "resilience": 1,
-        "vitality": 1
-      },
-      "edges": [
-        "n12",
-        "n13"
-      ]
-    },
-    {
-      "id": "n11",
-      "label": "Dagger Tactician",
-      "type": "skill",
-      "benefit": {
-        "skill": "Dagger Tactician"
-      },
-      "edges": [
-        "n14",
-        "n15"
-      ]
-    },
-    {
-      "id": "n12",
-      "label": "+1 Dexterity, +1 Vitality",
-      "type": "stat",
-      "benefit": {
-        "dexterity": 1,
-        "vitality": 1
-      },
-      "edges": [
-        "n14",
-        "n15",
-        "n16"
-      ]
-    },
-    {
-      "id": "n13",
-      "label": "Dagger Master",
-      "type": "skill",
-      "benefit": {
-        "skill": "Dagger Master"
-      },
-      "edges": [
-        "n15",
-        "n16"
-      ]
-    },
-    {
-      "id": "n14",
-      "label": "+1 Vitality, +1 Resilience",
-      "type": "stat",
-      "benefit": {
-        "vitality": 1,
-        "resilience": 1
-      },
-      "edges": [
-        "n17"
-      ]
-    },
-    {
-      "id": "n15",
-      "label": "Dagger Tactician",
-      "type": "skill",
-      "benefit": {
-        "skill": "Dagger Tactician"
-      },
-      "edges": [
-        "n17"
-      ]
-    },
-    {
-      "id": "n16",
-      "label": "Dagger Master",
-      "type": "skill",
-      "benefit": {
-        "skill": "Dagger Master"
-      },
-      "edges": [
-        "n17"
-      ]
-    },
-    {
-      "id": "n17",
-      "label": "+2 Dexterity",
-      "type": "stat",
-      "benefit": {
-        "dexterity": 2
-      },
-      "edges": []
-    }
+    { "id": "start", "label": "War Dancer Initiate",          "type": "start", "edges": ["n1"] },
+    { "id": "n1",    "label": "+2 Dexterity",                 "type": "stat",  "benefit": { "dexterity": 2 },                    "icon": "/skills/stats-increase/dexterity_increase.png",     "edges": ["n2","n3","n4"] },
+    { "id": "n2",    "label": "War Dance",                    "type": "skill", "benefit": { "skill": "War Dance" },              "icon": "/skills/wardance.png",                              "edges": ["n5","n6"] },
+    { "id": "n3",    "label": "+1 Dexterity, +1 Vitality",    "type": "stat",  "benefit": { "dexterity": 1, "vitality": 1 },     "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n5","n6","n7"] },
+    { "id": "n4",    "label": "Dagger Master",                "type": "skill", "benefit": { "skill": "Dagger Master" },          "icon": "/skills/dagger-master.png",                         "edges": ["n6","n7"] },
+    { "id": "n5",    "label": "Dagger Tactician",             "type": "skill", "benefit": { "skill": "Dagger Tactician" },       "icon": "/skills/dagger-tactician.png",                      "edges": ["n8","n9"] },
+    { "id": "n6",    "label": "+2 Dexterity",                 "type": "stat",  "benefit": { "dexterity": 2 },                    "icon": "/skills/stats-increase/dexterity_increase.png",     "edges": ["n8","n9","n10"] },
+    { "id": "n7",    "label": "+1 Dexterity, +1 Resilience",  "type": "stat",  "benefit": { "dexterity": 1, "resilience": 1 },   "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n9","n10"] },
+    { "id": "n8",    "label": "Whirlwind",                    "type": "skill", "benefit": { "skill": "Whirlwind" },              "icon": "/skills/whirlwind.png",                             "edges": ["n11","n12"] },
+    { "id": "n9",    "label": "+2 Dexterity",                 "type": "stat",  "benefit": { "dexterity": 2 },                    "icon": "/skills/stats-increase/dexterity_increase.png",     "edges": ["n11","n12","n13"] },
+    { "id": "n10",   "label": "+1 Resilience, +1 Vitality",   "type": "stat",  "benefit": { "resilience": 1, "vitality": 1 },    "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n12","n13"] },
+    { "id": "n11",   "label": "Dagger Tactician",             "type": "skill", "benefit": { "skill": "Dagger Tactician" },       "icon": "/skills/dagger-tactician.png",                      "edges": ["n14","n15"] },
+    { "id": "n12",   "label": "+1 Dexterity, +1 Vitality",    "type": "stat",  "benefit": { "dexterity": 1, "vitality": 1 },     "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n14","n15","n16"] },
+    { "id": "n13",   "label": "Dagger Master",                "type": "skill", "benefit": { "skill": "Dagger Master" },          "icon": "/skills/dagger-master.png",                         "edges": ["n15","n16"] },
+    { "id": "n14",   "label": "+1 Vitality, +1 Resilience",   "type": "stat",  "benefit": { "vitality": 1, "resilience": 1 },    "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n17"] },
+    { "id": "n15",   "label": "Dagger Tactician",             "type": "skill", "benefit": { "skill": "Dagger Tactician" },       "icon": "/skills/dagger-tactician.png",                      "edges": ["n17"] },
+    { "id": "n16",   "label": "Dagger Master",                "type": "skill", "benefit": { "skill": "Dagger Master" },          "icon": "/skills/dagger-master.png",                         "edges": ["n17"] },
+    { "id": "n17",   "label": "+2 Dexterity",                 "type": "stat",  "benefit": { "dexterity": 2 },                    "icon": "/skills/stats-increase/dexterity_increase.png",     "edges": [] }
   ],
   "positions": {
-    "start": [
-      350,
-      40
-    ],
-    "n1": [
-      350,
-      130
-    ],
-    "n2": [
-      110,
-      220
-    ],
-    "n3": [
-      350,
-      220
-    ],
-    "n4": [
-      590,
-      220
-    ],
-    "n5": [
-      110,
-      310
-    ],
-    "n6": [
-      350,
-      310
-    ],
-    "n7": [
-      590,
-      310
-    ],
-    "n8": [
-      110,
-      400
-    ],
-    "n9": [
-      350,
-      400
-    ],
-    "n10": [
-      590,
-      400
-    ],
-    "n11": [
-      110,
-      490
-    ],
-    "n12": [
-      350,
-      490
-    ],
-    "n13": [
-      590,
-      490
-    ],
-    "n14": [
-      110,
-      580
-    ],
-    "n15": [
-      350,
-      580
-    ],
-    "n16": [
-      590,
-      580
-    ],
-    "n17": [
-      350,
-      660
-    ]
+    "start": [350,  40],
+    "n1":   [350, 130],
+    "n2":   [110, 220],
+    "n3":   [350, 220],
+    "n4":   [590, 220],
+    "n5":   [110, 310],
+    "n6":   [350, 310],
+    "n7":   [590, 310],
+    "n8":   [110, 400],
+    "n9":   [350, 400],
+    "n10":  [590, 400],
+    "n11":  [110, 490],
+    "n12":  [350, 490],
+    "n13":  [590, 490],
+    "n14":  [110, 580],
+    "n15":  [350, 580],
+    "n16":  [590, 580],
+    "n17":  [350, 660]
   }
 }

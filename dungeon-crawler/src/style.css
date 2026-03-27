@@ -2269,20 +2269,67 @@ label.mm-setting-label {
 
 /* ── Skill Tree Container ── */
 #cd-skill-tree-container {
-  flex: 1;          /* grow to fill all available height in the skills section */
-  overflow-x: auto;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #4a3a20 #0d0a06;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Viewport layer — fills the container, clips zoomed/panned canvas */
+.tree-viewport {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+}
+
+.tree-viewport.dragging {
+  cursor: grabbing;
+}
+
+/* Zoom/pan toolbar */
+.tree-toolbar {
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  z-index: 20;
   display: flex;
-  justify-content: center;  /* centre the tree canvas horizontally */
-  align-items: flex-start;
+  gap: 4px;
+}
+
+.tree-ctrl-btn {
+  background: rgba(20, 16, 10, 0.9);
+  border: 1px solid #4a3a20;
+  color: #b0a080;
+  font-family: monospace;
+  font-size: 16px;
+  line-height: 1;
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+
+.tree-ctrl-btn:hover {
+  color: #c8a84a;
+  border-color: #c8a84a;
+  background: rgba(40, 30, 10, 0.95);
+}
+
+.tree-ctrl-fit {
+  font-size: 14px;
 }
 
 .tree-node {
   position: absolute;
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   transform: translate(-50%, -50%);
   display: flex;
@@ -2321,10 +2368,23 @@ label.mm-setting-label {
 }
 
 .tree-node-icon {
-  font-size: 13px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
   line-height: 1;
   pointer-events: none;
   color: inherit;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.tree-node-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .tree-node--acquired .tree-node-icon { color: #c8a84a; }
@@ -2334,7 +2394,7 @@ label.mm-setting-label {
 
 .tree-node-label {
   position: absolute;
-  top: calc(100% + 3px);
+  top: calc(100% + 4px);
   left: 50%;
   transform: translateX(-50%);
   font-size: 9px;
@@ -2342,9 +2402,6 @@ label.mm-setting-label {
   white-space: nowrap;
   text-align: center;
   pointer-events: none;
-  max-width: 90px;
-  overflow: hidden;
-  text-overflow: ellipsis;
   line-height: 1.2;
 }
 
