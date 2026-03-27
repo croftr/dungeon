@@ -1,5 +1,20 @@
 [
   {
+    "id": "hall-of-heroes",
+    "name": "The Hall of Heroes",
+    "giver": "weapons-merchant",
+    "text": "Beyond that iron door lies the Hall of Heroes — a proving ground where legends are forged or forgotten. I've seen a hundred warriors pass through it. Few earned the name. The door will open for any who carry the will to fight, but what waits inside... that's another matter. If you're half as capable as you look, I'd say go.",
+    "audio": "/npcs/merchant1/hall-of-heros-quest.mp3",
+    "requiredItems": [
+      "Aether-Glass Silt"
+    ],
+    "keepRequiredItems": true,
+    "completionAudio": "/npcs/merchant1/quest-complete.mp3",
+    "completionRewards": [
+      "Broken Sun-Forged Key"
+    ]
+  },
+  {
     "id": "oracles-marrow",
     "name": "The Oracle's Marrow",
     "giver": "potion-merchant",

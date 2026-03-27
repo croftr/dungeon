@@ -178,5 +178,32 @@
         "value": 500,
         "weight": 0.5,
         "sellable": false
+    },
+    {
+        "name": "Broken Sun-Forged Key",
+        "slot": "loot",
+        "icon": "/icons/ingredients/sun_forged_key_broken.png",
+        "description": "A shattered key of solar gold. Though broken, its fragments still thrum with the heat of a dying star.",
+        "value": 50,
+        "weight": 0.3,
+        "sellable": true
+    },
+    {
+        "name": "Sun-Forged Key",
+        "slot": "loot",
+        "icon": "/icons/ingredients/sun_forged_key.png",
+        "description": "A majestic key forged in the heart of a celestial forge. It radiates a blinding solar brilliance.",
+        "value": 500,
+        "weight": 0.5,
+        "sellable": true
+    },
+    {
+        "name": "Aether-Glass Silt",
+        "slot": "loot",
+        "icon": "/icons/ingredients/aether_glass_silt.png",
+        "description": "Finely ground crystalline particles that shimmer with iridescent Aether energy. Used in the most advanced crafting.",
+        "value": 100,
+        "weight": 0.1,
+        "sellable": true
     }
 ]

@@ -183,5 +183,26 @@
                 "quantity": 1
             }
         ]
+    },
+    {
+        "name": "Sun-Forged Key",
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Broken Sun-Forged Key",
+                "quantity": 1
+            },
+            {
+                "name": "Aether-Glass Silt",
+                "quantity": 1
+            }
+        ]
     }
 ]

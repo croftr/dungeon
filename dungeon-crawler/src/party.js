@@ -1106,7 +1106,18 @@ export function updateParty(dt) {
         const hpAmount = (d.customTickValue !== undefined && d.customTickValue !== null)
           ? d.customTickValue
           : (def.tickDamage || 0);
-        if (hpAmount !== 0) setHp(m.id, m.hp - hpAmount);
+        if (hpAmount !== 0) {
+          setHp(m.id, m.hp - hpAmount);
+          addLogEntry({
+            time: Date.now(),
+            type: 'tick',
+            target: m.name,
+            effectId: d.effectId,
+            effectName: def.name ?? d.effectId,
+            amount: hpAmount, // positive = damage, negative = heal
+            effectColor: def.color ?? null,
+          });
+        }
         // MP drain
         if (def.tickManaDrain) setMp(m.id, m.mp - def.tickManaDrain);
         // SP drain

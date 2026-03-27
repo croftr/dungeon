@@ -3,7 +3,7 @@
     "name": "Goblin",
     "hp": 100,
     "defence": 5,
-    "xp": 400,
+    "xp": 110,
     "attackSpeed": 1,
     "stats": {
       "strength": 12,

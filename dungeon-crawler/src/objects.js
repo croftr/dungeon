@@ -2563,7 +2563,7 @@ export function openChestModal(chestObj) {
     document.getElementById('chest-sent-label').textContent = '';
     document.getElementById('chest-title').textContent = chestObj.userData.title || 'Chest';
 
-    const slots = document.querySelectorAll('.chest-slot');
+    const slots = document.querySelectorAll('#chest-grid .chest-slot');
     const contents = chestObj.userData.contents || [];
     _activeChestContents = contents;
     _activeChestSlots = slots;
@@ -3014,9 +3014,14 @@ function _renderMerchantShop() {
     grid.innerHTML = '';
 
     {
-        _activeMerchantAvailable
-            .filter(name => !_merchantBasket.includes(name))
-            .forEach(name => {
+        // Build display list: remove one entry per basket item (not all copies)
+        const displayAvailable = [..._activeMerchantAvailable];
+        for (const basketItem of _merchantBasket) {
+            const idx = displayAvailable.indexOf(basketItem);
+            if (idx > -1) displayAvailable.splice(idx, 1);
+        }
+
+        displayAvailable.forEach(name => {
                 const itemDef = getItemDef(name);
                 if (!itemDef) return;
 

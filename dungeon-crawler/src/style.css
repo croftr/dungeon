@@ -3396,7 +3396,8 @@ label.mm-setting-label {
 }
 
 .inv-ctx-equip,
-.inv-ctx-use {
+.inv-ctx-use,
+.inv-ctx-learn {
   font-weight: 600;
   letter-spacing: 0.02em;
 }
@@ -5595,29 +5596,65 @@ label.mm-setting-label {
 }
 
 .bl-header {
-  padding: 8px 14px;
+  padding: 7px 12px;
   background: rgba(232, 200, 122, 0.08);
   border-bottom: 1px solid rgba(232, 200, 122, 0.25);
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   color: #e8c87a;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: bold;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
+.bl-title {
+  flex: 1;
+}
+
+.bl-count {
+  font-size: 10px;
+  font-weight: normal;
+  opacity: 0.55;
+}
+
+.bl-header-btns {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+/* Clear button */
+.bl-icon-btn {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 10px;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+  transition: all 0.15s;
+}
+
+.bl-icon-btn:hover {
+  color: #fff;
+  border-color: rgba(255, 80, 80, 0.55);
+  background: rgba(255, 60, 60, 0.15);
+}
+
 .bl-expand-btn {
-  margin-left: auto;
   background: rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(232, 200, 122, 0.35);
   color: rgba(232, 200, 122, 0.8);
   font-size: 14px;
   line-height: 1;
-  padding: 3px 8px;
+  padding: 2px 7px;
   border-radius: 3px;
   cursor: pointer;
   pointer-events: auto;
@@ -5630,6 +5667,48 @@ label.mm-setting-label {
   border-color: #e8c87a;
   background: rgba(232, 200, 122, 0.15);
 }
+
+/* Filter bar */
+.bl-filter-bar {
+  display: flex;
+  gap: 4px;
+  padding: 5px 10px;
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+  pointer-events: auto;
+}
+
+.bl-filter-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #666;
+  font-size: 9px;
+  font-family: inherit;
+  padding: 2px 7px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+  pointer-events: auto;
+  user-select: none;
+}
+
+.bl-filter-btn:hover {
+  color: #aaa;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.bl-filter-btn--active {
+  background: rgba(232, 200, 122, 0.12);
+  border-color: rgba(232, 200, 122, 0.45);
+  color: #e8c87a;
+}
+
+/* Filter — CSS hides non-matching rows when data-filter is set */
+#battle-log-panel[data-filter="attack"] .bl-row:not([data-cat="attack"]) { display: none; }
+#battle-log-panel[data-filter="magic"]  .bl-row:not([data-cat="magic"])  { display: none; }
+#battle-log-panel[data-filter="skill"]  .bl-row:not([data-cat="skill"])  { display: none; }
+#battle-log-panel[data-filter="effect"] .bl-row:not([data-cat="effect"]) { display: none; }
 
 .bl-entries {
   flex: 1;
@@ -5747,6 +5826,71 @@ label.mm-setting-label {
 .bl--status-effect .bl-badge {
   color: #d0c090;
   text-shadow: 0 0 4px rgba(208, 192, 144, 0.4);
+}
+
+/* Spell heal / rejuvenate — green */
+.bl--heal {
+  color: #80e880;
+}
+
+.bl--heal .bl-badge {
+  color: #44bb44;
+  text-shadow: 0 0 4px rgba(68, 187, 68, 0.5);
+}
+
+.bl-heal-amt {
+  color: #80e880;
+  font-weight: bold;
+}
+
+/* Potion use */
+.bl--potion {
+  color: #90ee90;
+}
+
+.bl--potion .bl-badge {
+  color: #55cc55;
+  text-shadow: 0 0 4px rgba(85, 204, 85, 0.5);
+}
+
+/* Status tick — damage (poison etc) — subtle */
+.bl--tick-dmg {
+  color: #88bb60;
+  font-size: 10px;
+  opacity: 0.75;
+}
+
+.bl--tick-dmg .bl-badge {
+  color: #66aa40;
+}
+
+/* Status tick — heal (regen) — subtle */
+.bl--tick-heal {
+  color: #60bb88;
+  font-size: 10px;
+  opacity: 0.75;
+}
+
+.bl--tick-heal .bl-badge {
+  color: #40aa66;
+}
+
+/* Level up — gold */
+.bl--levelup {
+  color: #ffd700;
+  background: rgba(255, 215, 0, 0.06);
+  font-weight: bold;
+  border-bottom: 1px solid rgba(255, 215, 0, 0.12) !important;
+}
+
+.bl--levelup .bl-badge {
+  color: #ffd700;
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.7);
+}
+
+/* Incoming attack from monsters — subtle red left border */
+.bl--incoming {
+  border-left: 2px solid rgba(255, 70, 70, 0.35);
 }
 
 .bl-badge {

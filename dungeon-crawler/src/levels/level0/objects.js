@@ -30,7 +30,7 @@ export function spawnLevel0Objects(ctx) {
         { name: 'Gold Coins', quantity: 100 },
         'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore", "Life Essence", "Minor Potions Parchment",
         "Lizard Scale", "Crocodile Hide", "Iron Ore", "Aqua Man Flipper", "Demon's Eyes", "Iron Ore", "Mace", "Cloth Trousers", "Starlight Nectar",
-        "Blue Crystal", "Red Crystal"
+        "Aether-Glass Silt"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in the east room (center) ────────────────────────────────────
@@ -56,7 +56,14 @@ export function spawnLevel0Objects(ctx) {
     }
 
     // ── Weapons & Armour merchant (east wall, centre) ─────────────────────────
-    addShop(group, loader, 23, 11, -Math.PI / 2, -0.2, 0, 'weapons', null, { questNpcId: 'weapons-merchant' });
+    addShop(group, loader, 23, 11, -Math.PI / 2, -0.2, 0, 'weapons', null, {
+        greetingAudio: [
+            asset('/npcs/merchant1/quality-steel.mp3'),
+            asset('/npcs/merchant1/shield-dents.mp3'),
+            asset('/npcs/merchant1/what-can-i-do-for-you.mp3'),
+        ],
+        questNpcId: 'weapons-merchant',
+    });
 
     // ── Decorative chest beside the weapons merchant ───────────────────────────
     addChest(group, loader, 23, 11, -Math.PI / 2, 0.7, [], asset('/items/chest1.glb'), false);

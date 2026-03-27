@@ -256,8 +256,8 @@ function _checkQuestRequirements(quest) {
 }
 
 function _completeQuest(body, npcQuests, quest) {
-    // 1. Remove required items
-    if (quest.requiredItems) {
+    // 1. Remove required items (unless quest flags them as kept)
+    if (quest.requiredItems && !quest.keepRequiredItems) {
         for (const reqItemName of quest.requiredItems) {
             for (const m of party) {
                 if (m.isEmpty) continue;

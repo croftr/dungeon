@@ -1135,14 +1135,15 @@ function _equipItem(memberIndex, invIndex) {
     // ── Either-hand items: prefer right hand, fall back to left ─────────
     const rhItem = m.equipment.rightHand;
     const lhItem = m.equipment.leftHand;
+    const rightOnly = getItemDef(item.name)?.rightHandOnly ?? false;
 
     let targetSlot;
     if (!rhItem || rhItem.slot === 'spell') {
       targetSlot = 'rightHand';
-    } else if (!lhItem || lhItem.slot === 'spell') {
+    } else if (!rightOnly && (!lhItem || lhItem.slot === 'spell')) {
       targetSlot = 'leftHand';
     } else {
-      // Both hands occupied with physical items — displace right hand
+      // Both hands occupied, or right-hand-only item — displace right hand
       targetSlot = 'rightHand';
     }
 
@@ -1381,7 +1382,7 @@ function _assignLoadoutBLeft(memberIndex, invIndex) {
   if (!item) return;
   const def = getItemDef(item.name);
   const slot = def?.slot ?? 'hand';
-  if (slot === 'hand' || slot === 'bothHands') {
+  if ((slot === 'hand' && !def?.rightHandOnly) || slot === 'bothHands') {
     const displaced = m.loadoutB.leftHand;
     const itemObj = { name: item.name, slot };
     // For bothHands items also clear B rightHand since mirror will be set on rotate
@@ -1517,6 +1518,13 @@ function _applyPotionEffect(m, item) {
     : results.join(' and ');
 
   showMessage(`${m.name} drinks ${item.name} and ${msg}.`);
+  addLogEntry({
+    time: Date.now(),
+    type: 'potion',
+    actor: m.name,
+    itemName: item.name,
+    description: msg,
+  });
   playItemSound(item.name, 'potion');
   return true;
 }
@@ -1548,6 +1556,13 @@ function _applyPartyPotionEffect(m, item, def) {
   }
 
   showMessage(message);
+  addLogEntry({
+    time: Date.now(),
+    type: 'potion',
+    actor: m.name,
+    itemName: item.name,
+    description: effectType,
+  });
   playItemSound(item.name, 'potion');
   return true;
 }
@@ -1609,6 +1624,7 @@ function onInventoryCellClick(e) {
   }
 
   const def = getItemDef(item.name);
+
   if (def?.type && QUICKSLOT_TYPES.includes(def.type)) {
     // Left-click moves into the first empty quickslot (like equipping).
     // To drink, use right-click → Drink, a shortcut key, or the party panel button.
@@ -1744,7 +1760,7 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
     // Show B-slot options for hand items
     const handSlots = ['hand', 'bothHands'];
     if (handSlots.includes(def.slot)) {
-      if (lbLeftBtn) {
+      if (lbLeftBtn && !def.rightHandOnly) {
         lbLeftBtn.style.display = 'block';
         lbLeftBtn.onclick = () => {
           _assignLoadoutBLeft(activeCharIndex, _ctxInvIndex);
@@ -2706,6 +2722,39 @@ function _closestMonsterInFront(maxRange) {
   });
 }
 
+/**
+ * Logs separate status-effect entries for effects applied to a monster by an
+ * attack (stun from shield-bash, poison from weapon on-hit, etc.).
+ * These go to the Effects tab in the battle log.
+ */
+function _logAppliedEffects(attackerName, targetName, stunned, appliedEffects) {
+  if (stunned) {
+    addLogEntry({
+      time: Date.now(),
+      type: 'status-effect',
+      actor: 'player',
+      attacker: attackerName,
+      target: targetName,
+      effectId: 'stunned',
+      effectName: 'Stun',
+    });
+  }
+  (appliedEffects ?? []).forEach(effectId => {
+    if (effectId === 'lifesteal') return; // lifesteal is not a debuff to show
+    const def = STATUS_EFFECT_DEFS[effectId];
+    addLogEntry({
+      time: Date.now(),
+      type: 'status-effect',
+      actor: 'player',
+      attacker: attackerName,
+      target: targetName,
+      effectId,
+      effectName: def?.name ?? effectId,
+      effectColor: def?.color ?? null,
+    });
+  });
+}
+
 export function useHand(memberIndex, hand, silent = false) {
   const m = party[memberIndex];
   if (!m) return;
@@ -2889,8 +2938,12 @@ export function useHand(memberIndex, hand, silent = false) {
     poisoned: result.poisoned ?? false,
     sundered: result.sundered ?? false,
     ammoModifier: result.formula?.ammoModifier ?? null,
+    berserkMultiplier: result.formula?.berserkMultiplier ?? 1.0,
     warcryMultiplier: result.formula?.warcryMultiplier ?? 1.0,
   });
+
+  // Log any status effects applied to the monster as separate entries → Effects tab
+  _logAppliedEffects(m.name, result.monsterName || target.name, result.stunned, result.appliedEffects);
 
   // Double Attack Effect
   const da = skillsState.doubleAttack;
@@ -2935,8 +2988,10 @@ export function useHand(memberIndex, hand, silent = false) {
           poisoned: daResult.poisoned ?? false,
           sundered: daResult.sundered ?? false,
           ammoModifier: daResult.formula?.ammoModifier ?? null,
+          berserkMultiplier: daResult.formula?.berserkMultiplier ?? 1.0,
           warcryMultiplier: daResult.formula?.warcryMultiplier ?? 1.0,
         });
+        _logAppliedEffects(m.name, daResult.monsterName || daTarget.name, daResult.stunned, daResult.appliedEffects);
       }
     }, daDelay);
   }
