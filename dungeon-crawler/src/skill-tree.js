@@ -206,15 +206,10 @@ export function renderSkillTree(m, container, onNodeClick) {
     label.textContent = node.label;
     div.appendChild(label);
 
-    div.addEventListener('click', (e) => {
-      // Ignore click if it was part of a drag gesture
-      if (viewport._didDrag) return;
-      if (isPending && isAvailable && !isAcquired) {
-        m.pendingNodeChoice = node.id;
-        renderSkillTree(m, container, onNodeClick);
-      }
-      if (onNodeClick) onNodeClick(node);
-    });
+    // Node selection is handled via pointerup (see viewport pointerup below)
+    // because pointerdown calls setPointerCapture + preventDefault which
+    // suppresses the 'click' event entirely.
+    div.dataset.nodeId = node.id;
 
     canvas.appendChild(div);
   }
@@ -293,11 +288,15 @@ export function renderSkillTree(m, container, onNodeClick) {
   }, { passive: false });
 
   // ── Pan (pointer drag with capture — skip if clicking a button) ──
+  // NOTE: pointerdown calls preventDefault() which suppresses 'click' events.
+  // Node selection is therefore handled here in pointerup when no drag occurred.
   let dragStartX = 0, dragStartY = 0, dragStartTX = 0, dragStartTY = 0;
+  let dragOriginNode = null; // the .tree-node element where the pointer went down
 
   viewport.addEventListener('pointerdown', (e) => {
     if (e.button !== 0) return;
     if (e.target.closest('button')) return; // let button clicks through
+    dragOriginNode = e.target.closest('.tree-node'); // remember node under pointer
     viewport.setPointerCapture(e.pointerId);
     dragStartX = e.clientX;
     dragStartY = e.clientY;
@@ -322,10 +321,27 @@ export function renderSkillTree(m, container, onNodeClick) {
     if (!viewport.hasPointerCapture(e.pointerId)) return;
     viewport.releasePointerCapture(e.pointerId);
     viewport.classList.remove('dragging');
+
+    // If the pointer didn't move (not a drag), treat as a node click
+    if (!viewport._didDrag && dragOriginNode) {
+      const nodeId = dragOriginNode.dataset.nodeId;
+      const node = tree.nodes.find(n => n.id === nodeId);
+      if (node) {
+        const isAcq = acquired.has(nodeId);
+        const isAvail = isPending && availableIds.has(nodeId);
+        if (isAvail && !isAcq) {
+          m.pendingNodeChoice = nodeId;
+          renderSkillTree(m, container, onNodeClick);
+        }
+        if (onNodeClick) onNodeClick(node);
+      }
+    }
+    dragOriginNode = null;
   });
 
   viewport.addEventListener('pointercancel', () => {
     viewport.classList.remove('dragging');
+    dragOriginNode = null;
   });
 
   // ── Arrow-key pan (active while this tree is in the DOM) ──
