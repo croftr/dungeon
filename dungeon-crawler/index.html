@@ -789,17 +789,9 @@
   <div id="char-dev-overlay" class="char-dev-hidden">
     <div id="char-dev-modal">
 
-      <!-- Header: prev | XP bar | next | close -->
-      <div id="char-dev-header">
+      <!-- Floating nav buttons (top-left, outside flow) -->
+      <div id="char-dev-nav">
         <button id="char-dev-prev" aria-label="Previous member">&#8249;</button>
-        <div id="char-dev-xp-wrap">
-          <div id="cd-header-xp-row">
-            <div id="cd-xp-bar-bg">
-              <div id="cd-xp-bar-fill"></div>
-            </div>
-            <span id="cd-xp-label">0 / 100 XP</span>
-          </div>
-        </div>
         <button id="char-dev-next" aria-label="Next member">&#8250;</button>
         <button id="char-dev-close" aria-label="Close">&times;</button>
       </div>
@@ -866,10 +858,6 @@
 
         <!-- MAIN: skill tree fills all height, learned skills bar at bottom -->
         <section id="char-dev-skills-section">
-          <div id="cd-tree-heading-area">
-            <h3 id="cd-tree-heading">Skill Tree</h3>
-            <div id="cd-tree-subtitle"></div>
-          </div>
           <div id="cd-skill-tree-container">
             <!-- tree nodes + SVG edges rendered here -->
           </div>

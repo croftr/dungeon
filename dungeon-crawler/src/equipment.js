@@ -569,6 +569,9 @@ function updatePartyBar(activeIndex) {
   if (!bar) return;
   bar.innerHTML = '';
 
+  // ── Portrait cluster (left) ──
+  const portraits = document.createElement('div');
+  portraits.id = 'equip-party-portraits';
   party.forEach((m, i) => {
     const memEl = document.createElement('div');
     memEl.className = 'equip-party-member';
@@ -583,14 +586,12 @@ function updatePartyBar(activeIndex) {
       drawPortrait(canvas, m);
       memEl.appendChild(canvas);
 
-      // Switch character on click
       memEl.onclick = () => {
         if (i !== activeIndex) openModal(i);
       };
 
-      // Drag and Drop targets (for transferring items)
       memEl.addEventListener('dragover', (e) => {
-        if (i === activeIndex) return; // Can't drop on yourself
+        if (i === activeIndex) return;
         e.preventDefault();
         memEl.classList.add('transfer-target');
       });
@@ -601,14 +602,55 @@ function updatePartyBar(activeIndex) {
         e.preventDefault();
         memEl.classList.remove('transfer-target');
         const data = JSON.parse(e.dataTransfer.getData('application/json'));
-        if (data.fromChar === i) return; // safety
+        if (data.fromChar === i) return;
         transferItem(data.fromChar, i, data.invIndex);
       });
     }
 
-    bar.appendChild(memEl);
+    portraits.appendChild(memEl);
   });
+  bar.appendChild(portraits);
+
+  // ── XP bar (right) ──
+  const m = party[activeIndex];
+  if (m && !m.isEmpty) {
+    const xpWrap = document.createElement('div');
+    xpWrap.id = 'equip-xp-wrap';
+
+    const labelRow = document.createElement('div');
+    labelRow.id = 'equip-xp-label-row';
+
+    const nameLevel = document.createElement('span');
+    nameLevel.id = 'equip-xp-name';
+    const nextXP = getNextLevelXP(m);
+    nameLevel.textContent = `${m.name}  ·  Lv.${m.level ?? 0}`;
+
+    const xpText = document.createElement('span');
+    xpText.id = 'equip-xp-text';
+    if (nextXP !== null) {
+      xpText.textContent = `${m.xp ?? 0} / ${nextXP} XP`;
+    } else {
+      xpText.textContent = `${m.xp ?? 0} XP  ·  MAX LEVEL`;
+    }
+
+    labelRow.appendChild(nameLevel);
+    labelRow.appendChild(xpText);
+
+    const track = document.createElement('div');
+    track.id = 'equip-xp-bar-track';
+
+    const fill = document.createElement('div');
+    fill.id = 'equip-xp-bar-fill';
+    const pct = nextXP ? Math.min(100, ((m.xp ?? 0) / nextXP) * 100) : 100;
+    fill.style.width = pct + '%';
+
+    track.appendChild(fill);
+    xpWrap.appendChild(labelRow);
+    xpWrap.appendChild(track);
+    bar.appendChild(xpWrap);
+  }
 }
+
 
 /**
  * Moves an item from one character's inventory to another's.
@@ -2047,13 +2089,6 @@ function renderCharDevModal(memberIndex) {
   const portraitCanvas = document.getElementById('cd-char-portrait');
   if (portraitCanvas) drawPortrait(portraitCanvas, m);
 
-  // Tree subtitle — show the start node label (e.g. "Paladin Initiate")
-  const treeSubtitleEl = document.getElementById('cd-tree-subtitle');
-  if (treeSubtitleEl) {
-    const tree = getSkillTree(m.skillTreeId);
-    const startNode = tree?.nodes.find(n => n.type === 'start');
-    treeSubtitleEl.textContent = startNode?.label ?? '';
-  }
 
   const nameEl = document.getElementById('char-dev-char-name');
   if (nameEl) nameEl.textContent = m.name;
@@ -2065,21 +2100,10 @@ function renderCharDevModal(memberIndex) {
   if (prevBtn) prevBtn.disabled = nonEmpty <= 1;
   if (nextBtn) nextBtn.disabled = nonEmpty <= 1;
 
-  // ── Level & XP bar ──
+  // ── Level label (left panel identity card) ──
   const levelLabel = document.getElementById('cd-level-label');
-  const xpLabel = document.getElementById('cd-xp-label');
-  const xpFill = document.getElementById('cd-xp-bar-fill');
   if (levelLabel) levelLabel.textContent = `Level ${m.level ?? 0}`;
-  const nextXP = getNextLevelXP(m);
-  if (xpLabel && xpFill) {
-    if (nextXP !== null) {
-      xpLabel.textContent = `${m.xp ?? 0} / ${nextXP} XP`;
-      xpFill.style.width = `${Math.min(100, ((m.xp ?? 0) / nextXP) * 100)}%`;
-    } else {
-      xpLabel.textContent = `${m.xp ?? 0} XP (MAX)`;
-      xpFill.style.width = '100%';
-    }
-  }
+
 
   const pending = (m.pendingNodePicks ?? 0) > 0;
 

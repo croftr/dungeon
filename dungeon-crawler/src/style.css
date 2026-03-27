@@ -1249,11 +1249,18 @@ label.mm-setting-label {
 #equip-party-bar {
   grid-column: 1 / span 3;
   display: flex;
-  justify-content: center;
-  gap: 15px;
-  padding: 8px;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 14px;
   background: rgba(0, 0, 0, 0.4);
   border-bottom: 2px solid #3a2e18;
+}
+
+#equip-party-portraits {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+  align-items: center;
 }
 
 .equip-party-member {
@@ -1311,6 +1318,111 @@ label.mm-setting-label {
   border-color: #40c040;
   background: rgba(64, 192, 64, 0.1);
   animation: target-pulse 1s infinite;
+}
+
+/* ── Inventory-screen XP bar ── */
+#equip-xp-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+#equip-xp-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+#equip-xp-name {
+  font-size: 11px;
+  color: #c8a84a;
+  font-family: monospace;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+#equip-xp-text {
+  font-size: 10px;
+  color: #52a852;
+  font-family: monospace;
+  letter-spacing: 1px;
+}
+
+#equip-xp-bar-track {
+  width: 100%;
+  height: 16px;
+  background: #060e06;
+  border: 1px solid #1a3a1a;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.8), 0 0 8px rgba(30,120,30,0.15);
+  position: relative;
+}
+
+#equip-xp-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg,
+    #0d5c0d 0%,
+    #1a8c1a 30%,
+    #22a822 50%,
+    #1a8c1a 70%,
+    #0d5c0d 100%);
+  background-size: 200% 100%;
+  border-radius: 8px;
+  transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(34, 168, 34, 0.5), inset 0 1px 0 rgba(100, 255, 100, 0.25);
+  animation: xp-bar-shimmer 2.5s ease-in-out infinite;
+}
+
+/* Undulating liquid highlight wave on top */
+#equip-xp-bar-fill::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 45%;
+  background: linear-gradient(90deg, transparent, rgba(160,255,160,0.3), transparent);
+  border-radius: 50%;
+  animation: xp-wave 2s ease-in-out infinite;
+}
+
+/* Second undulation layer, phase-offset */
+#equip-xp-bar-fill::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: -100%;
+  width: 50%;
+  height: 40%;
+  background: linear-gradient(90deg, transparent, rgba(80,200,80,0.2), transparent);
+  border-radius: 50%;
+  animation: xp-wave-2 3s ease-in-out infinite;
+}
+
+@keyframes xp-bar-shimmer {
+  0%, 100% { background-position: 0% 50%; box-shadow: 0 0 8px rgba(34,168,34,0.4), inset 0 1px 0 rgba(100,255,100,0.2); }
+  50%        { background-position: 100% 50%; box-shadow: 0 0 18px rgba(34,200,34,0.7), inset 0 1px 0 rgba(140,255,140,0.35); }
+}
+
+@keyframes xp-wave {
+  0%   { left: -100%; opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 0.8; }
+  100% { left: 150%; opacity: 0; }
+}
+
+@keyframes xp-wave-2 {
+  0%   { right: -100%; opacity: 0; }
+  25%  { opacity: 0.7; }
+  75%  { opacity: 0.5; }
+  100% { right: 150%; opacity: 0; }
 }
 
 @keyframes target-pulse {
@@ -1887,118 +1999,46 @@ label.mm-setting-label {
   flex-direction: column;
   font-family: monospace;
   overflow: hidden;
+  position: relative;
 }
 
-/* ── Header: slim XP bar strip ── */
-#char-dev-header {
+/* ── Floating nav cluster (top-left, over the modal) ── */
+#char-dev-nav {
+  position: absolute;
+  top: 6px;
+  right: 16px;
+  z-index: 30;
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 12px;
-  background: linear-gradient(180deg, #2a2010, #14100c);
-  border-bottom: 2px solid #3a2a10;
-  flex-shrink: 0;
-}
-
-#char-dev-xp-wrap {
-  flex: 1;
-  min-width: 0;
-}
-
-#cd-header-xp-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* ── Left panel identity card ── */
-#cd-char-identity {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 12px 12px;
-  background: linear-gradient(180deg, rgba(40,28,10,0.6), rgba(14,10,4,0.4));
-  border-bottom: 1px solid #3a2a10;
-}
-
-#cd-char-portrait {
-  width: 90px;
-  height: 90px;
-  border: 1px solid #6a5030;
-  border-radius: 4px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.8), 0 0 4px rgba(200,168,74,0.15);
-  display: block;
-  image-rendering: pixelated;
-}
-
-#cd-identity-text {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-#char-dev-char-name {
-  font-size: 13px;
-  color: #e8d090;
-  font-weight: bold;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  line-height: 1.2;
-}
-
-#cd-level-label {
-  font-size: 11px;
-  color: #c8a84a;
-  font-weight: bold;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-#cd-xp-bar-bg {
-  flex: 1;
-  height: 7px;
-  background: #1a1408;
-  border: 1px solid #3a2a10;
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-#cd-xp-bar-fill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #8a6020, #c8a84a);
-  border-radius: 2px;
-  transition: width 0.4s ease;
-}
-
-#cd-xp-label {
-  font-size: 10px;
-  color: #8a7850;
-  white-space: nowrap;
-  flex-shrink: 0;
+  gap: 4px;
 }
 
 #char-dev-prev,
-#char-dev-next {
-  background: none;
+#char-dev-next,
+#char-dev-close {
+  background: rgba(20, 16, 10, 0.90);
   border: 1px solid #4a3a20;
-  color: #c8a84a;
-  font-size: 22px;
+  color: #b0a080;
+  font-family: monospace;
+  font-size: 16px;
   line-height: 1;
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
   cursor: pointer;
-  padding: 4px 12px;
-  border-radius: 3px;
-  transition: background 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  user-select: none;
   flex-shrink: 0;
+  padding: 0;
 }
 
 #char-dev-prev:hover,
 #char-dev-next:hover {
-  background: rgba(200, 168, 74, 0.15);
-  color: #e8d090;
+  color: #c8a84a;
+  border-color: #c8a84a;
+  background: rgba(40, 30, 10, 0.95);
 }
 
 #char-dev-prev:disabled,
@@ -2008,17 +2048,16 @@ label.mm-setting-label {
 }
 
 #char-dev-close {
-  background: none;
-  border: none;
-  color: #c04040;
-  font-size: 24px;
-  line-height: 1;
-  cursor: pointer;
-  flex-shrink: 0;
+  background: rgba(140, 20, 20, 0.90);
+  border-color: #8a2020;
+  color: #c8a84a;
+  font-size: 20px;
 }
 
 #char-dev-close:hover {
-  color: #ff4040;
+  color: #f0d070;
+  border-color: #c04040;
+  background: rgba(180, 30, 30, 0.95);
 }
 
 /* ── Body: 2-column layout ── */
@@ -2054,70 +2093,74 @@ label.mm-setting-label {
   overflow-y: auto;
 }
 
+/* ── Left panel identity card ── */
+#cd-char-identity {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 8px;
+  padding: 14px 12px 12px;
+  background: linear-gradient(180deg, rgba(40,28,10,0.6), rgba(14,10,4,0.4));
+  border-bottom: 1px solid #3a2a10;
+  box-sizing: border-box;
+}
+
+#cd-char-portrait {
+  display: block;
+  width: 90px;
+  height: 90px;
+  border: 1px solid #6a5030;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.8), 0 0 4px rgba(200,168,74,0.15);
+  image-rendering: pixelated;
+}
+
+#cd-identity-text {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+#char-dev-char-name {
+  font-size: 13px;
+  color: #e8d090;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+#cd-level-label {
+  font-size: 11px;
+  color: #c8a84a;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+
 /* ── Main skills section: tree grows, learned skills at bottom ── */
 #char-dev-skills-section {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('/skills/skill-tree-background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
-/* ── Skill tree heading area ── */
-#cd-tree-heading-area {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px 16px 6px;
-}
 
-#cd-tree-heading {
-  /* Block spanning the full panel width so centering is relative to the skills panel */
-  display: block;
-  width: 100%;
-  text-align: center;
-  font-size: 17px;
-  font-family: monospace;
-  color: #e8d090;
-  font-weight: bold;
-  letter-spacing: 5px;
-  text-transform: uppercase;
-  margin: 0;
-  position: relative;
-}
-
-/* Decorative ruled lines from panel edges inward to the text */
-#cd-tree-heading::before,
-#cd-tree-heading::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: 18%;
-  height: 1px;
-}
-#cd-tree-heading::before {
-  left: 0;
-  background: linear-gradient(to right, transparent, #6a5030);
-}
-#cd-tree-heading::after {
-  right: 0;
-  background: linear-gradient(to left, transparent, #6a5030);
-}
-
-#cd-tree-subtitle {
-  font-size: 10px;
-  color: #7a6840;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-top: 2px;
-  font-family: monospace;
-}
 
 /* ── Learned skills bar pinned to bottom ── */
 #cd-learned-skills-bar {
-  flex-shrink: 0;
-  border-top: 1px solid #2a2010;
-  background: rgba(0, 0, 0, 0.2);
+  display: none;
 }
 
 #cd-learned-skills-header {
@@ -2154,7 +2197,6 @@ label.mm-setting-label {
   color: #fff;
 }
 
-/* XP bar elements are now inside #char-dev-header — see header block above */
 
 /* ── Node picks available banner ── */
 #cd-stat-points-row {
@@ -2405,9 +2447,10 @@ label.mm-setting-label {
 }
 
 .tree-node--acquired {
-  border-color: #c8a84a;
-  background: rgba(200, 168, 74, 0.25);
+  border-color: #ff7800;
+  background: radial-gradient(circle at 50% 60%, rgba(255, 100, 0, 0.35), rgba(180, 40, 0, 0.15));
   cursor: default;
+  animation: node-fire 1.6s ease-in-out infinite;
 }
 
 .tree-node--available {
@@ -2416,17 +2459,50 @@ label.mm-setting-label {
   animation: tree-node-pulse 1.8s ease-in-out infinite;
 }
 
+/* Currently pending selection — even more intense fire */
 .tree-node--selected {
-  border-color: #ffffff;
-  background: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+  border-color: #ffcc00;
+  background: radial-gradient(circle at 50% 60%, rgba(255, 180, 0, 0.45), rgba(220, 60, 0, 0.25));
+  animation: node-fire-intense 1.0s ease-in-out infinite;
 }
 
 .tree-node--locked {
   border-color: #333;
   background: rgba(20, 16, 10, 0.7);
   opacity: 0.45;
-  cursor: default;
+  cursor: pointer;
+  transition: box-shadow 0.2s, border-color 0.2s, opacity 0.2s;
+}
+
+.tree-node--locked:hover {
+  opacity: 0.7;
+  border-color: #665544;
+  box-shadow: 0 0 8px rgba(180, 140, 80, 0.2);
+}
+
+.tree-node--available:hover {
+  box-shadow: 0 0 16px rgba(82, 220, 82, 0.9), 0 0 28px rgba(82, 192, 82, 0.5);
+  border-color: #80e080;
+}
+
+/* Detail-focus ring: clicked locked/non-activatable node — thin white glow */
+.tree-node--detail-view {
+  border-color: rgba(255, 255, 255, 0.8) !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.3),
+    0 0 8px rgba(255, 255, 255, 0.4),
+    0 0 16px rgba(200, 200, 255, 0.2);
+  opacity: 0.85 !important;
+}
+
+/* Detail-focus ring: clicked available-in-tree node (can be activated) — fire outline */
+.tree-node--detail-view-available {
+  border-color: #ff7700 !important;
+  box-shadow:
+    0 0 4px 1px  rgba(255, 80, 0, 0.8),
+    0 0 12px 3px rgba(255, 140, 0, 0.6),
+    0 0 22px 5px rgba(200, 60, 0, 0.35);
+  animation: node-fire 1.6s ease-in-out infinite;
 }
 
 .tree-node-icon {
@@ -2449,9 +2525,9 @@ label.mm-setting-label {
   object-fit: cover;
 }
 
-.tree-node--acquired .tree-node-icon { color: #c8a84a; }
+.tree-node--acquired .tree-node-icon { color: #ffb060; }
 .tree-node--available .tree-node-icon { color: #80e080; }
-.tree-node--selected .tree-node-icon { color: #fff; }
+.tree-node--selected .tree-node-icon { color: #ffe080; }
 .tree-node--locked .tree-node-icon { color: #555; }
 
 .tree-node-label {
@@ -2467,13 +2543,63 @@ label.mm-setting-label {
   line-height: 1.2;
 }
 
-.tree-node--acquired .tree-node-label { color: #c8a84a; }
+.tree-node--acquired .tree-node-label { color: #ffaa50; }
 .tree-node--available .tree-node-label { color: #80e080; }
-.tree-node--selected .tree-node-label { color: #fff; }
+.tree-node--selected .tree-node-label { color: #ffee88; }
 
 @keyframes tree-node-pulse {
   0%, 100% { box-shadow: 0 0 4px rgba(82, 192, 82, 0.4); }
   50% { box-shadow: 0 0 12px rgba(82, 192, 82, 0.8), 0 0 20px rgba(82, 192, 82, 0.3); }
+}
+
+/* Fire glow for acquired nodes */
+@keyframes node-fire {
+  0%, 100% {
+    box-shadow:
+      0 0 4px 1px  rgba(255, 80,  0,  0.7),
+      0 0 10px 2px rgba(255, 140, 0,  0.5),
+      0 0 20px 4px rgba(200, 60,  0,  0.3),
+      inset 0 0 6px rgba(255, 160, 0,  0.2);
+    border-color: #ff6600;
+  }
+  40% {
+    box-shadow:
+      0 0 8px 2px  rgba(255, 40,  0,  0.9),
+      0 0 18px 5px rgba(255, 100, 0,  0.65),
+      0 0 32px 8px rgba(180, 40,  0,  0.4),
+      inset 0 0 10px rgba(255, 200, 0, 0.3);
+    border-color: #ff9900;
+  }
+  70% {
+    box-shadow:
+      0 0 5px 1px  rgba(255, 120, 0,  0.8),
+      0 0 14px 3px rgba(255, 60,  0,  0.55),
+      0 0 24px 6px rgba(160, 30,  0,  0.35),
+      inset 0 0 8px rgba(255, 180, 0,  0.25);
+    border-color: #ff7700;
+  }
+}
+
+/* Intense fire for the pending-selection node */
+@keyframes node-fire-intense {
+  0%, 100% {
+    box-shadow:
+      0 0 6px 2px  rgba(255, 200, 0,  0.9),
+      0 0 14px 4px rgba(255, 100, 0,  0.75),
+      0 0 28px 8px rgba(220, 40,  0,  0.5),
+      0 0 42px 12px rgba(150, 20, 0, 0.25),
+      inset 0 0 10px rgba(255, 230, 100, 0.4);
+    border-color: #ffdd00;
+  }
+  50% {
+    box-shadow:
+      0 0 10px 3px rgba(255, 240, 80,  1.0),
+      0 0 22px 6px rgba(255, 140, 0,  0.85),
+      0 0 40px 12px rgba(200, 50, 0,  0.55),
+      0 0 60px 16px rgba(120, 10, 0, 0.3),
+      inset 0 0 14px rgba(255, 255, 180, 0.5);
+    border-color: #ffe566;
+  }
 }
 
 /* ── Level Up! button pulse in inventory header ── */

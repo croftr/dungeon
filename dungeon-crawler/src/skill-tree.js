@@ -8,6 +8,7 @@
 
 import SKILLS_DATA from './data/skills.json';
 import { hydrateSkill } from './leveling.js';
+import { playSoundByUrl } from './audio.js';
 
 import elrondTree from './data/skill-trees/elrond.json';
 import alaricTree from './data/skill-trees/alaric.json';
@@ -169,6 +170,17 @@ export function renderSkillTree(m, container, onNodeClick) {
     else if (isAvailable)   div.classList.add('tree-node--available');
     else                    div.classList.add('tree-node--locked');
 
+    // Detail-focus highlight: node was clicked to inspect but isn't the pending choice
+    const isFocused = m.detailFocusNodeId === node.id;
+    if (isFocused && !isAcquired && !isSelected && isAvailable) {
+      // Available node focused — it already shows fire via --selected once chosen;
+      // while just browsing (no pending choice yet set) mark it detail-view-available
+      div.classList.add('tree-node--detail-view-available');
+    } else if (isFocused && !isAcquired && !isSelected && !isAvailable) {
+      // Locked or available-without-picks: thin white focus ring
+      div.classList.add('tree-node--detail-view');
+    }
+
     const icon = document.createElement('div');
     icon.className = 'tree-node-icon';
 
@@ -329,10 +341,14 @@ export function renderSkillTree(m, container, onNodeClick) {
       if (node) {
         const isAcq = acquired.has(nodeId);
         const isAvail = isPending && availableIds.has(nodeId);
+        // Track which node is being detail-viewed (for highlight ring)
+        m.detailFocusNodeId = nodeId;
         if (isAvail && !isAcq) {
           m.pendingNodeChoice = nodeId;
-          renderSkillTree(m, container, onNodeClick);
+          playSoundByUrl('/sounds/actions/skills/skill-choose.mp3', 0.8);
         }
+        // Always re-render so detail-focus and pending classes update
+        renderSkillTree(m, container, onNodeClick);
         if (onNodeClick) onNodeClick(node);
       }
     }
