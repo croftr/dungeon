@@ -134,21 +134,48 @@ export function renderSkillTree(m, container, onNodeClick) {
   svg.setAttribute('height', canvasH);
   svg.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;';
 
+  // Lava glow filter for acquired edges
+  const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+  defs.innerHTML = `
+    <filter id="lava-glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>`;
+  svg.appendChild(defs);
+
+  const mkLine = (x1, y1, x2, y2, stroke, width, dash, filter) => {
+    const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    l.setAttribute('x1', x1); l.setAttribute('y1', y1);
+    l.setAttribute('x2', x2); l.setAttribute('y2', y2);
+    l.setAttribute('stroke', stroke);
+    l.setAttribute('stroke-width', width);
+    l.setAttribute('stroke-linecap', 'round');
+    if (dash) l.setAttribute('stroke-dasharray', dash);
+    if (filter) l.setAttribute('filter', filter);
+    return l;
+  };
+
   for (const node of tree.nodes) {
     const [x1, y1] = positions[node.id];
     for (const edgeId of node.edges) {
       const pos2 = positions[edgeId];
       if (!pos2) continue;
       const [x2, y2] = pos2;
-      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', x1); line.setAttribute('y1', y1);
-      line.setAttribute('x2', x2); line.setAttribute('y2', y2);
-      const bothAcquired = acquired.has(node.id) && acquired.has(edgeId);
+      const pendingId = m.pendingNodeChoice;
+      const bothAcquired = (acquired.has(node.id) && acquired.has(edgeId))
+        || (pendingId && ((node.id === pendingId && acquired.has(edgeId))
+                       || (edgeId === pendingId && acquired.has(node.id))));
       const fromAcquiredToAvail = acquired.has(node.id) && availableIds.has(edgeId);
-      line.setAttribute('stroke', bothAcquired ? '#c8a84a' : fromAcquiredToAvail ? '#4a8a4a' : '#333');
-      line.setAttribute('stroke-width', bothAcquired ? '2' : '1');
-      line.setAttribute('stroke-dasharray', bothAcquired ? '' : '3 3');
-      svg.appendChild(line);
+
+      if (bothAcquired) {
+        // Three-layer lava: dark base → orange glow → bright core
+        svg.appendChild(mkLine(x1, y1, x2, y2, '#6b1a00', 6));
+        svg.appendChild(mkLine(x1, y1, x2, y2, '#e84800', 3.5, null, 'url(#lava-glow)'));
+        svg.appendChild(mkLine(x1, y1, x2, y2, '#ffd060', 1.2));
+      } else {
+        svg.appendChild(mkLine(x1, y1, x2, y2,
+          fromAcquiredToAvail ? '#4a8a4a' : '#333', 1, '3 3'));
+      }
     }
   }
   canvas.appendChild(svg);
@@ -163,7 +190,7 @@ export function renderSkillTree(m, container, onNodeClick) {
     const div = document.createElement('div');
     div.className = 'tree-node';
     div.style.left = x + 'px';
-    div.style.top = y + 'px';
+    div.style.top  = y + 'px';
 
     if (isAcquired)         div.classList.add('tree-node--acquired');
     else if (isSelected)    div.classList.add('tree-node--selected');
@@ -268,7 +295,17 @@ export function renderSkillTree(m, container, onNodeClick) {
       viewport._scale = savedScale;
       applyTransform();
     } else {
-      fitToView(false);
+      // Start zoomed in ~5 zoom-in button presses past the fit scale (1.25^5 ≈ 3.05×),
+      // with the start node at top-centre of the viewport
+      const vw = viewport.offsetWidth;
+      const vh = viewport.offsetHeight;
+      const fitScale = Math.min(vw / canvasW, vh / canvasH, 1.0);
+      const initScale = Math.min(fitScale * Math.pow(1.25, 5), 4.0);
+      const [startX, startY] = positions['start'] ?? [canvasW / 2, 0];
+      viewport._scale = initScale;
+      viewport._tx = vw / 2 - startX * initScale;
+      viewport._ty = 130 - startY * initScale;
+      applyTransform();
     }
   };
 
