@@ -789,15 +789,10 @@
   <div id="char-dev-overlay" class="char-dev-hidden">
     <div id="char-dev-modal">
 
-      <!-- Header: prev | name + inline XP bar | next | close -->
+      <!-- Header: prev | XP bar | next | close -->
       <div id="char-dev-header">
         <button id="char-dev-prev" aria-label="Previous member">&#8249;</button>
-        <div id="char-dev-title-wrap">
-          <div id="cd-header-name-row">
-            <span id="char-dev-char-name"></span>
-            <span class="cd-header-sub">(Development)</span>
-            <span id="cd-level-label">Level 0</span>
-          </div>
+        <div id="char-dev-xp-wrap">
           <div id="cd-header-xp-row">
             <div id="cd-xp-bar-bg">
               <div id="cd-xp-bar-fill"></div>
@@ -809,11 +804,21 @@
         <button id="char-dev-close" aria-label="Close">&times;</button>
       </div>
 
-      <!-- Body: left panel (stats + node detail) | main (tree grows + learned skills) -->
+      <!-- Body: left panel (identity + stats + node detail) | main (tree + learned skills) -->
       <div id="char-dev-body">
 
-        <!-- LEFT PANEL: compact stats then node detail stacked -->
+        <!-- LEFT PANEL: identity card, stats, node detail -->
         <div id="char-dev-left-panel">
+
+          <!-- Character identity: portrait + name + level -->
+          <div id="cd-char-identity">
+            <canvas id="cd-char-portrait" width="90" height="90"></canvas>
+            <div id="cd-identity-text">
+              <div id="char-dev-char-name"></div>
+              <div id="cd-level-label">Level 0</div>
+            </div>
+          </div>
+
           <section id="char-dev-stats-section">
             <div id="cd-stat-points-row" style="display:none;">
               <span id="cd-stat-points-remaining"></span>
@@ -845,8 +850,14 @@
           <section id="char-dev-detail-section">
             <h4 class="equip-section-title">Node Detail</h4>
             <div id="cd-detail-panel">
-              <div id="cd-detail-name">Select a node</div>
-              <div id="cd-detail-action"></div>
+              <div id="cd-detail-header">
+                <div id="cd-detail-icon"></div>
+                <div id="cd-detail-header-text">
+                  <div id="cd-detail-name">Select a node</div>
+                  <div id="cd-detail-action"></div>
+                </div>
+              </div>
+              <div id="cd-detail-sep"></div>
               <div id="cd-detail-desc"></div>
               <div id="cd-detail-potency"></div>
             </div>
@@ -855,7 +866,10 @@
 
         <!-- MAIN: skill tree fills all height, learned skills bar at bottom -->
         <section id="char-dev-skills-section">
-          <h4 class="equip-section-title cd-tree-heading">Skill Tree</h4>
+          <div id="cd-tree-heading-area">
+            <h3 id="cd-tree-heading">Skill Tree</h3>
+            <div id="cd-tree-subtitle"></div>
+          </div>
           <div id="cd-skill-tree-container">
             <!-- tree nodes + SVG edges rendered here -->
           </div>

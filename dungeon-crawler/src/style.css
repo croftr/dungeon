@@ -1889,57 +1889,72 @@ label.mm-setting-label {
   overflow: hidden;
 }
 
-/* ── Header with inline XP bar ── */
+/* ── Header: slim XP bar strip ── */
 #char-dev-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 14px;
+  gap: 10px;
+  padding: 6px 12px;
   background: linear-gradient(180deg, #2a2010, #14100c);
   border-bottom: 2px solid #3a2a10;
   flex-shrink: 0;
 }
 
-#char-dev-title-wrap {
+#char-dev-xp-wrap {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
   min-width: 0;
-}
-
-#cd-header-name-row {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-}
-
-#char-dev-char-name {
-  font-size: 16px;
-  color: #e8d090;
-  font-weight: bold;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-
-.cd-header-sub {
-  font-size: 12px;
-  color: #666;
-}
-
-#cd-level-label {
-  font-size: 12px;
-  color: #c8a84a;
-  font-weight: bold;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-left: auto;
 }
 
 #cd-header-xp-row {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* ── Left panel identity card ── */
+#cd-char-identity {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 12px 12px;
+  background: linear-gradient(180deg, rgba(40,28,10,0.6), rgba(14,10,4,0.4));
+  border-bottom: 1px solid #3a2a10;
+}
+
+#cd-char-portrait {
+  width: 90px;
+  height: 90px;
+  border: 1px solid #6a5030;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.8), 0 0 4px rgba(200,168,74,0.15);
+  display: block;
+  image-rendering: pixelated;
+}
+
+#cd-identity-text {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+#char-dev-char-name {
+  font-size: 13px;
+  color: #e8d090;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+#cd-level-label {
+  font-size: 11px;
+  color: #c8a84a;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 #cd-xp-bar-bg {
@@ -2047,8 +2062,55 @@ label.mm-setting-label {
   overflow: hidden;
 }
 
-.cd-tree-heading {
+/* ── Skill tree heading area ── */
+#cd-tree-heading-area {
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 16px 6px;
+}
+
+#cd-tree-heading {
+  /* Block spanning the full panel width so centering is relative to the skills panel */
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: 17px;
+  font-family: monospace;
+  color: #e8d090;
+  font-weight: bold;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  margin: 0;
+  position: relative;
+}
+
+/* Decorative ruled lines from panel edges inward to the text */
+#cd-tree-heading::before,
+#cd-tree-heading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 18%;
+  height: 1px;
+}
+#cd-tree-heading::before {
+  left: 0;
+  background: linear-gradient(to right, transparent, #6a5030);
+}
+#cd-tree-heading::after {
+  right: 0;
+  background: linear-gradient(to left, transparent, #6a5030);
+}
+
+#cd-tree-subtitle {
+  font-size: 10px;
+  color: #7a6840;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 2px;
+  font-family: monospace;
 }
 
 /* ── Learned skills bar pinned to bottom ── */
@@ -2446,10 +2508,55 @@ label.mm-setting-label {
 }
 
 #cd-detail-panel {
-  padding: 12px;
+  padding: 10px 12px 12px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+}
+
+/* ── Header row: icon left, title+type right ── */
+#cd-detail-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+#cd-detail-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border: 1px solid #5a4a1a;
+  border-radius: 6px;
+  background: linear-gradient(145deg, #1e180c, #120e06);
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.6), 0 0 4px rgba(200,168,74,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-size: 22px;
+  color: #c8a84a;
+  /* hidden by default; JS sets display when there's content */
+  display: none;
+}
+
+#cd-detail-icon.has-icon {
+  display: flex;
+}
+
+#cd-detail-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+#cd-detail-header-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-top: 3px;
 }
 
 #cd-detail-name {
@@ -2464,6 +2571,17 @@ label.mm-setting-label {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+/* ── Separator ── */
+#cd-detail-sep {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #3a2e1a 20%, #3a2e1a 80%, transparent);
+  margin: 0;
+}
+
+#cd-detail-sep.hidden {
+  display: none;
 }
 
 #cd-detail-desc {

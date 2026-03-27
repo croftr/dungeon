@@ -2032,6 +2032,29 @@ function renderCharDevModal(memberIndex) {
   const m = party[memberIndex];
   if (!m || m.isEmpty) return;
 
+  // Reset detail panel to blank state when switching members
+  const detailName = document.getElementById('cd-detail-name');
+  const detailAction = document.getElementById('cd-detail-action');
+  const detailDesc = document.getElementById('cd-detail-desc');
+  const detailPotency = document.getElementById('cd-detail-potency');
+  if (detailName) detailName.textContent = 'Select a node';
+  if (detailAction) detailAction.textContent = '';
+  if (detailDesc) detailDesc.textContent = '';
+  if (detailPotency) detailPotency.textContent = '';
+  _setDetailIcon(null);
+
+  // Portrait in the identity card
+  const portraitCanvas = document.getElementById('cd-char-portrait');
+  if (portraitCanvas) drawPortrait(portraitCanvas, m);
+
+  // Tree subtitle — show the start node label (e.g. "Paladin Initiate")
+  const treeSubtitleEl = document.getElementById('cd-tree-subtitle');
+  if (treeSubtitleEl) {
+    const tree = getSkillTree(m.skillTreeId);
+    const startNode = tree?.nodes.find(n => n.type === 'start');
+    treeSubtitleEl.textContent = startNode?.label ?? '';
+  }
+
   const nameEl = document.getElementById('char-dev-char-name');
   if (nameEl) nameEl.textContent = m.name;
 
@@ -2130,6 +2153,28 @@ function renderCharDevModal(memberIndex) {
   }
 }
 
+function _setDetailIcon(iconPath, textFallback = '') {
+  const el = document.getElementById('cd-detail-icon');
+  if (!el) return;
+  el.innerHTML = '';
+  if (iconPath) {
+    const img = document.createElement('img');
+    img.src = iconPath;
+    img.alt = '';
+    el.appendChild(img);
+    el.classList.add('has-icon');
+  } else if (textFallback) {
+    el.textContent = textFallback;
+    el.classList.add('has-icon');
+  } else {
+    el.classList.remove('has-icon');
+  }
+  // Show/hide the separator based on whether there will be body text
+  // (caller updates desc/potency after this, so just ensure sep is visible when icon shown)
+  const sep = document.getElementById('cd-detail-sep');
+  if (sep) sep.classList.toggle('hidden', !iconPath && !textFallback);
+}
+
 function _showSkillDetail(skill, m, cardEl = null) {
   document.getElementById('cd-detail-name').textContent = skill.name;
   const def = getItemDef(skill.name) || SKILLS_DATA[skill.name];
@@ -2138,6 +2183,8 @@ function _showSkillDetail(skill, m, cardEl = null) {
 
   const pot = _formatSkillPotency(skill.name, m);
   document.getElementById('cd-detail-potency').innerHTML = pot ? (Array.isArray(pot) ? pot.join('<br>') : pot) : '';
+
+  _setDetailIcon(def?.icon ?? null);
 
   document.querySelectorAll('#cd-char-skills .skill-card, #cd-available-skills .skill-card').forEach(c => c.classList.remove('skill-card--detail-selected'));
   if (cardEl) cardEl.classList.add('skill-card--detail-selected');
@@ -2149,6 +2196,7 @@ function _showNodeDetail(node, m) {
     document.getElementById('cd-detail-action').textContent = 'Starting Node';
     document.getElementById('cd-detail-desc').textContent = 'Your journey begins here.';
     document.getElementById('cd-detail-potency').textContent = '';
+    _setDetailIcon(null, '★');
   } else if (node.type === 'stat') {
     document.getElementById('cd-detail-action').textContent = 'Stat Bonus';
     const desc = Object.entries(node.benefit)
@@ -2156,6 +2204,13 @@ function _showNodeDetail(node, m) {
       .join(', ');
     document.getElementById('cd-detail-desc').textContent = desc;
     document.getElementById('cd-detail-potency').textContent = '';
+    // Icon: use explicit node.icon, or derive from benefit stats
+    const statKeys = Object.keys(node.benefit);
+    const derivedIcon = node.icon
+      ?? (statKeys.length > 1
+        ? '/skills/stats-increase/mixed_stat_increase.png'
+        : `/skills/stats-increase/${statKeys[0]}_increase.png`);
+    _setDetailIcon(derivedIcon);
   } else if (node.type === 'skill') {
     const skillName = node.benefit.skill;
     const def = SKILLS_DATA[skillName];
@@ -2163,6 +2218,7 @@ function _showNodeDetail(node, m) {
     document.getElementById('cd-detail-desc').textContent = def?.description || '';
     const pot = _formatSkillPotency(skillName, m);
     document.getElementById('cd-detail-potency').innerHTML = pot ? (Array.isArray(pot) ? pot.join('<br>') : pot) : '';
+    _setDetailIcon(node.icon ?? def?.icon ?? null);
   }
 }
 
