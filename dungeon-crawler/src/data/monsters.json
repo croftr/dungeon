@@ -151,7 +151,7 @@
   },
   "orc_warrior": {
     "name": "Orc Warrior",
-    "hp": 200,
+    "hp": 170,
     "defence": 6,
     "xp": 160,
     "attackSpeed": 1,
@@ -482,13 +482,13 @@
   },
   "aqua_man": {
     "name": "Aqua Man",
-    "hp": 270,
+    "hp": 290,
     "defence": 12,
     "xp": 350,
     "attackSpeed": 1.5,
     "stats": {
-      "strength": 20,
-      "dexterity": 20,
+      "strength": 21,
+      "dexterity": 21,
       "vitality": 14,
       "intelligence": 22,
       "resilience": 14

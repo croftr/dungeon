@@ -6468,7 +6468,7 @@ body.cursor-interact #renderer-canvas {
   position: fixed;
   top: 54px;
   left: 14px;
-  min-width: 240px;
+  min-width: 340px;
   background: rgba(10, 7, 4, 0.97);
   border: 1px solid #5a4a30;
   border-radius: 6px;
@@ -6562,7 +6562,7 @@ body.cursor-interact #renderer-canvas {
 
 .bsp-header-row {
   display: grid;
-  grid-template-columns: 1fr 64px 64px 52px;
+  grid-template-columns: 1fr 56px 52px 44px 40px 50px;
   gap: 4px;
   margin-bottom: 4px;
   padding-bottom: 4px;
@@ -6579,7 +6579,7 @@ body.cursor-interact #renderer-canvas {
 
 .bsp-row {
   display: grid;
-  grid-template-columns: 1fr 64px 64px 52px;
+  grid-template-columns: 1fr 56px 52px 44px 40px 50px;
   gap: 4px;
   padding: 3px 0;
   border-bottom: 1px solid rgba(50, 40, 25, 0.5);
@@ -6609,6 +6609,19 @@ body.cursor-interact #renderer-canvas {
 
 .bsp-dpm {
   color: #a0c060;
+  text-align: right;
+  font-size: 0.85em;
+  opacity: 0.85;
+}
+
+.bsp-acc {
+  color: #c8a84a;
+  text-align: right;
+  font-size: 0.85em;
+}
+
+.bsp-avghit {
+  color: #e07050;
   text-align: right;
   font-size: 0.85em;
   opacity: 0.85;

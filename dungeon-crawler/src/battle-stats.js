@@ -4,7 +4,7 @@
 //  until the user manually resets them with the Reset button in the panel.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** @type {Map<string, {dealt: number, taken: number}>} */
+/** @type {Map<string, {dealt: number, taken: number, attacks: number, hits: number}>} */
 let _stats = new Map();
 let _panelVisible = false;
 let _sessionStart = null;
@@ -32,13 +32,22 @@ export function recordDamageTaken(memberName, amount) {
   _refreshPanel();
 }
 
+/** Record a player attack attempt (hit or miss) for accuracy tracking. */
+export function recordAttack(characterName, didHit) {
+  if (!characterName) return;
+  const s = _getOrCreate(characterName);
+  s.attacks += 1;
+  if (didHit) s.hits += 1;
+  _refreshPanel();
+}
+
 /** No-op kept for call-site compatibility — icon is now always visible. */
 export function showBattleStatsIcon() {}
 
 // ── Internals ─────────────────────────────────────────────────────────────────
 
 function _getOrCreate(name) {
-  if (!_stats.has(name)) _stats.set(name, { dealt: 0, taken: 0 });
+  if (!_stats.has(name)) _stats.set(name, { dealt: 0, taken: 0, attacks: 0, hits: 0 });
   if (!_sessionStart) _sessionStart = Date.now();
   return _stats.get(name);
 }
@@ -82,17 +91,21 @@ function _renderPanel(panel) {
     const mins = _elapsedMinutes();
     const rows = [..._stats.entries()]
       .sort((a, b) => b[1].dealt - a[1].dealt)
-      .map(([name, { dealt, taken }]) => {
+      .map(([name, { dealt, taken, attacks, hits }]) => {
         const dpm = mins > 0 ? dealt / mins : 0;
         const dpmStr = dpm >= 10 ? Math.round(dpm).toLocaleString()
                      : dpm >= 1  ? dpm.toFixed(1)
                      :             dpm.toFixed(2);
+        const accStr = attacks > 0 ? Math.round(hits / attacks * 100) + '%' : '—';
+        const avgStr = hits > 0 ? (dealt / hits).toFixed(1) : '—';
         return `
         <div class="bsp-row">
           <span class="bsp-name">${name}</span>
           <span class="bsp-dealt" title="Damage dealt">${dealt.toLocaleString()}</span>
           <span class="bsp-taken" title="Damage taken">${taken.toLocaleString()}</span>
           <span class="bsp-dpm" title="Damage dealt per minute">${dpmStr}</span>
+          <span class="bsp-acc" title="Hit accuracy">${accStr}</span>
+          <span class="bsp-avghit" title="Average damage per hit">${avgStr}</span>
         </div>
       `;
       }).join('');
@@ -103,6 +116,8 @@ function _renderPanel(panel) {
         <span class="bsp-col-label" title="Damage dealt">DMG OUT</span>
         <span class="bsp-col-label" title="Damage taken">DMG IN</span>
         <span class="bsp-col-label" title="Damage dealt per minute">D/MIN</span>
+        <span class="bsp-col-label" title="Hit accuracy">ACC%</span>
+        <span class="bsp-col-label" title="Average damage per hit">AVG/HIT</span>
       </div>
       ${rows}
     `;

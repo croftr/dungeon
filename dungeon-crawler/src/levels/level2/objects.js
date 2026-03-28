@@ -49,24 +49,24 @@ export function spawnLevel2Objects(ctx) {
     // ── Chests ────────────────────────────────────────────────────────────────
     // Two chests in the chest vault (col 1, rows 18–19)
     addChest(group, loader, 0.7, 19, Math.PI, 0.7, [
-        { name: 'Gold Coins', quantity: 300 },
+        { name: 'Gold Coins', quantity: 10 },
         'Life Essence', 'Mana Berry', 'Scroll of Fireball'
     ]);
     addChest(group, loader, 1.3, 19, Math.PI, 0.7, [
-        { name: 'Gold Coins', quantity: 200 },
+        { name: 'Gold Coins', quantity: 10 },
         'Ring of Strength', 'Ring of Wisdom', 'Ring of Dexterity'
     ]);
 
     // Chest at the end of the long passage
     addChest(group, loader, 28, 17, -Math.PI / 2, 0.0, [
-        { name: 'Gold Coins', quantity: 500 },
+        { name: 'Gold Coins', quantity: 10 },
         'Ruby Ring', 'Mana Potion', 'Life Essence',
         'Chain Shirt', 'Plate Cuirass'
     ], asset('/items/chest1.glb'), true, 0.5);
 
     // Chest in the NE corner of the giant room
     addChest(group, loader, 24, 2, -Math.PI / 2, 0.7, [
-        { name: 'Gold Coins', quantity: 450 },
+        { name: 'Gold Coins', quantity: 20 },
         'Starlight Nectar'
     ], asset('/items/chest1.glb'), true, -0.5);
 

@@ -187,73 +187,73 @@
         "isPassive": true,
         "type": "passive",
         "icon": "/skills/mace-master.png",
-        "description": "Increases base damage with maces by 1.",
+        "description": "Increases base damage with maces by 2.",
         "effectType": "weaponDamageBonus",
         "weaponType": "mace",
-        "magnitude": 1
+        "magnitude": 2
     },
     "Sword Master": {
         "isPassive": true,
         "type": "passive",
         "icon": "/skills/sword-master.png",
-        "description": "Increases base damage with swords by 1.",
+        "description": "Increases base damage with swords by 2.",
         "effectType": "weaponDamageBonus",
         "weaponType": "sword",
-        "magnitude": 1
+        "magnitude": 2
     },
     "Axe Master": {
         "isPassive": true,
         "type": "passive",
         "icon": "/skills/axe-master.png",
-        "description": "Increases base damage with axes by 1.",
+        "description": "Increases base damage with axes by 2.",
         "effectType": "weaponDamageBonus",
         "weaponType": "axe",
-        "magnitude": 1
+        "magnitude": 2
     },
     "Staff Master": {
         "isPassive": true,
         "type": "passive",
         "icon": "/skills/staff-master.png",
-        "description": "Increases base damage with staffs by 1.",
+        "description": "Increases base damage with staffs by 2.",
         "effectType": "weaponDamageBonus",
         "weaponType": "staff",
-        "magnitude": 1
+        "magnitude": 2
     },
     "Two-Handed Master": {
         "isPassive": true,
         "type": "passive",
         "icon": "/skills/two-handed-master.png",
-        "description": "Increases base damage with two-handed weapons by 1.",
+        "description": "Increases base damage with two-handed weapons by 2.",
         "effectType": "weaponDamageBonus",
         "weaponType": "twoHanded",
-        "magnitude": 1
+        "magnitude": 2
     },
     "Crossbow Master": {
         "isPassive": true,
         "type": "passive",
         "icon": "/skills/crossbow-master.png",
-        "description": "Increases base damage with crossbows by 1.",
+        "description": "Increases base damage with crossbows by 2.",
         "effectType": "weaponDamageBonus",
         "weaponType": "crossbow",
-        "magnitude": 1
+        "magnitude": 2
     },
     "Dagger Master": {
         "isPassive": true,
         "type": "passive",
         "icon": "/skills/dagger-master.png",
-        "description": "Increases base damage with daggers by 1.",
+        "description": "Increases base damage with daggers by 2.",
         "effectType": "weaponDamageBonus",
         "weaponType": "dagger",
-        "magnitude": 1
+        "magnitude": 2
     },
     "Bow Master": {
         "isPassive": true,
         "type": "passive",
         "icon": "/skills/bow-master.png",
-        "description": "Increases base damage with bows by 1.",
+        "description": "Increases base damage with bows by 2.",
         "effectType": "weaponDamageBonus",
         "weaponType": "bow",
-        "magnitude": 1
+        "magnitude": 2
     },
     "Mace Tactician": {
         "isPassive": true,

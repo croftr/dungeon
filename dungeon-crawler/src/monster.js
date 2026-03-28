@@ -19,7 +19,7 @@ import {
 } from './combat-rules.js';
 import { setInCombat, clearCombat, playCritSound, playActionSound, playHitSound, playPartyHitSound, playShieldBlockSound, isInCombat, playSoundByUrl, setZoneMusic } from './audio.js';
 import { addLogEntry } from './battle-log.js';
-import { resetBattleStats, recordDamageDealt, recordDamageTaken, showBattleStatsIcon } from './battle-stats.js';
+import { resetBattleStats, recordDamageDealt, recordDamageTaken, recordAttack, showBattleStatsIcon } from './battle-stats.js';
 import { getItemDef } from './items.js';
 import { spawnDroppedItem, isStatueAt, spawnCorpse } from './objects.js';
 import { MONSTER_DEFS as D } from './monster-defs.js';
@@ -1732,6 +1732,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
 
   // DEX-based hit chance — higher DEX advantage means more reliable hits
   if (Math.random() >= hitChance) {
+    recordAttack(character.name, false);
     return { hit: false, damage: 0, killed: false, monsterHp: m.hp, crit: false, hitChance, formula: null, monsterName: m.name };
   }
 
@@ -1868,6 +1869,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   }
   const poisoned = appliedEffects.includes('poison');
 
+  recordAttack(character.name, true);
   return { ...result, crit: isCrit, hitChance, formula, monsterName: m.name, stunned, poisoned, sundered: isSundered, appliedEffects };
 }
 
