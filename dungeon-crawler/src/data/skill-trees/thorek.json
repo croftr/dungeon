@@ -1,10 +1,10 @@
 {
   "nodes": [
     { "id": "start", "label": "Warrior Initiate",            "type": "start", "edges": ["n1"] },
-    { "id": "n1",    "label": "+2 Strength",                 "type": "stat",  "benefit": { "strength": 2 },                     "icon": "/skills/stats-increase/strength_increase.png",     "edges": ["n3","n21","n24","n27"] },
+    { "id": "n1",    "label": "+2 Strength",                 "type": "stat",  "benefit": { "strength": 2 },                     "icon": "/skills/stats-increase/strength_increase.png",     "edges": ["n3","n18","n21","n24","n27"] },
     { "id": "n3",    "label": "Rampart",                     "type": "skill", "benefit": { "skill": "Rampart" },                "icon": "/skills/rampart.png",                               "edges": ["n5","n6","n7"] },
     { "id": "n5",    "label": "+1 Vitality, +1 Resilience",  "type": "stat",  "benefit": { "vitality": 1, "resilience": 1 },    "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n8"] },
-    { "id": "n6",    "label": "Miners Light",                "type": "skill", "benefit": { "skill": "Miners Light" },           "icon": "/skills/arcane-lantern.png",                        "edges": ["n8","n10","n18"] },
+    { "id": "n6",    "label": "Miners Light",                "type": "skill", "benefit": { "skill": "Miners Light" },           "icon": "/skills/arcane-lantern.png",                        "edges": ["n8","n10"] },
     { "id": "n7",    "label": "+1 Strength, +1 Resilience",  "type": "stat",  "benefit": { "strength": 1, "resilience": 1 },    "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n10"] },
     { "id": "n8",    "label": "Sunder Armor",                "type": "skill", "benefit": { "skill": "Sunder Armor" },           "icon": "/skills/sunder-armor.png",                          "edges": ["n12"] },
     { "id": "n10",   "label": "+1 Strength, +1 Vitality",    "type": "stat",  "benefit": { "strength": 1, "vitality": 1 },      "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n12"] },
@@ -12,9 +12,9 @@
     { "id": "n14",   "label": "+1 Vitality, +1 Resilience",  "type": "stat",  "benefit": { "vitality": 1, "resilience": 1 },    "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n17"] },
     { "id": "n17",   "label": "+2 Strength",                 "type": "stat",  "benefit": { "strength": 2 },                     "icon": "/skills/stats-increase/strength_increase.png",     "edges": [] },
 
-    { "id": "n18",   "label": "Shield Master",               "type": "skill", "benefit": { "skill": "Shield Master" },          "icon": "/skills/shield-master.png",                         "edges": ["n19"] },
-    { "id": "n19",   "label": "Shield Master",               "type": "skill", "benefit": { "skill": "Shield Master" },          "icon": "/skills/shield-master.png",                         "edges": ["n20"] },
-    { "id": "n20",   "label": "Shield Master",               "type": "skill", "benefit": { "skill": "Shield Master" },          "icon": "/skills/shield-master.png",                         "edges": ["n17"] },
+    { "id": "n18",   "label": "Shield Master I",             "type": "skill", "benefit": { "skill": "Shield Master" },          "icon": "/skills/shield-master.png",                         "edges": ["n19"] },
+    { "id": "n19",   "label": "Shield Master II",            "type": "skill", "benefit": { "skill": "Shield Master" },          "icon": "/skills/shield-master.png",                         "edges": ["n20"] },
+    { "id": "n20",   "label": "Shield Master III",           "type": "skill", "benefit": { "skill": "Shield Master" },          "icon": "/skills/shield-master.png",                         "edges": [] },
 
     { "id": "n21",   "label": "Axe Tactician I",             "type": "skill", "benefit": { "skill": "Axe Tactician" },          "icon": "/skills/axe-tactician.png",                         "edges": ["n22"] },
     { "id": "n22",   "label": "Axe Tactician II",            "type": "skill", "benefit": { "skill": "Axe Tactician" },          "icon": "/skills/axe-tactician.png",                         "edges": ["n23"] },
@@ -40,8 +40,8 @@
     "n12":   [ 350, 490],
     "n14":   [ 350, 580],
     "n17":   [ 350, 660],
-    "n18":   [ 830, 400],
-    "n19":   [ 830, 490],
+    "n18":   [ 830, 220],
+    "n19":   [ 830, 400],
     "n20":   [ 830, 580],
     "n21":   [1070, 220],
     "n22":   [1070, 400],

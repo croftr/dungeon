@@ -1,23 +1,32 @@
 {
   "nodes": [
     { "id": "start", "label": "Wizard Initiate",              "type": "start", "edges": ["n1"] },
-    { "id": "n1",    "label": "+2 Intelligence",              "type": "stat",  "benefit": { "intelligence": 2 },                  "icon": "/skills/stats-increase/intelligence_increase.png", "edges": ["n2","n3","n4"] },
+    { "id": "n1",    "label": "+2 Intelligence",              "type": "stat",  "benefit": { "intelligence": 2 },                  "icon": "/skills/stats-increase/intelligence_increase.png", "edges": ["n2","n3","n4","n18","n21","n24"] },
     { "id": "n2",    "label": "Arcane Lantern",               "type": "skill", "benefit": { "skill": "Arcane Lantern" },          "icon": "/skills/arcane-lantern.png",                        "edges": ["n5","n6"] },
     { "id": "n3",    "label": "+1 Intelligence, +1 Resilience","type": "stat", "benefit": { "intelligence": 1, "resilience": 1 }, "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n5","n6","n7"] },
     { "id": "n4",    "label": "Mana Tap",                     "type": "skill", "benefit": { "skill": "Mana Tap" },                "icon": "/skills/mana-tap.png",                              "edges": ["n6","n7"] },
     { "id": "n5",    "label": "+1 Intelligence, +1 Dexterity","type": "stat",  "benefit": { "intelligence": 1, "dexterity": 1 },  "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n8","n9"] },
-    { "id": "n6",    "label": "Runic Scholar",                "type": "skill", "benefit": { "skill": "Runic Scholar" },           "icon": "/skills/runic-scholar.png",                         "edges": ["n8","n9","n10"] },
-    { "id": "n7",    "label": "+1 Vitality, +1 Resilience",   "type": "stat",  "benefit": { "vitality": 1, "resilience": 1 },     "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n9","n10"] },
+    { "id": "n6",    "label": "Runic Scholar",                "type": "skill", "benefit": { "skill": "Runic Scholar" },           "icon": "/skills/runic-scholar.png",                         "edges": ["n8","n9"] },
+    { "id": "n7",    "label": "+1 Vitality, +1 Resilience",   "type": "stat",  "benefit": { "vitality": 1, "resilience": 1 },     "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n9"] },
     { "id": "n8",    "label": "+1 Intelligence, +1 Vitality", "type": "stat",  "benefit": { "intelligence": 1, "vitality": 1 },   "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n11","n12"] },
-    { "id": "n9",    "label": "+2 Intelligence",              "type": "stat",  "benefit": { "intelligence": 2 },                  "icon": "/skills/stats-increase/intelligence_increase.png", "edges": ["n11","n12","n13"] },
-    { "id": "n10",   "label": "Pyromancer I",                 "type": "skill", "benefit": { "skill": "Pyromancer" },              "icon": "/skills/pyromancer.png",                            "edges": ["n12","n13"] },
+    { "id": "n9",    "label": "+2 Intelligence",              "type": "stat",  "benefit": { "intelligence": 2 },                  "icon": "/skills/stats-increase/intelligence_increase.png", "edges": ["n11","n12"] },
     { "id": "n11",   "label": "+2 Intelligence",              "type": "stat",  "benefit": { "intelligence": 2 },                  "icon": "/skills/stats-increase/intelligence_increase.png", "edges": ["n14","n15"] },
-    { "id": "n12",   "label": "+1 Intelligence, +1 Resilience","type": "stat", "benefit": { "intelligence": 1, "resilience": 1 }, "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n14","n15","n16"] },
-    { "id": "n13",   "label": "Pyromancer II",                "type": "skill", "benefit": { "skill": "Pyromancer" },              "icon": "/skills/pyromancer.png",                            "edges": ["n15","n16"] },
+    { "id": "n12",   "label": "+1 Intelligence, +1 Resilience","type": "stat", "benefit": { "intelligence": 1, "resilience": 1 }, "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n14","n15"] },
     { "id": "n14",   "label": "+1 Intelligence, +1 Vitality", "type": "stat",  "benefit": { "intelligence": 1, "vitality": 1 },   "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n17"] },
     { "id": "n15",   "label": "+2 Intelligence",              "type": "stat",  "benefit": { "intelligence": 2 },                  "icon": "/skills/stats-increase/intelligence_increase.png", "edges": ["n17"] },
-    { "id": "n16",   "label": "Pyromancer III",               "type": "skill", "benefit": { "skill": "Pyromancer" },              "icon": "/skills/pyromancer.png",                            "edges": ["n17"] },
-    { "id": "n17",   "label": "+2 Resilience",                "type": "stat",  "benefit": { "resilience": 2 },                    "icon": "/skills/stats-increase/resilience_increase.png",   "edges": [] }
+    { "id": "n17",   "label": "+2 Resilience",                "type": "stat",  "benefit": { "resilience": 2 },                    "icon": "/skills/stats-increase/resilience_increase.png",   "edges": [] },
+
+    { "id": "n18",   "label": "Pyromancer I",                 "type": "skill", "benefit": { "skill": "Pyromancer" },              "icon": "/skills/pyromancer.png",                            "edges": ["n19"] },
+    { "id": "n19",   "label": "Pyromancer II",                "type": "skill", "benefit": { "skill": "Pyromancer" },              "icon": "/skills/pyromancer.png",                            "edges": ["n20"] },
+    { "id": "n20",   "label": "Pyromancer III",               "type": "skill", "benefit": { "skill": "Pyromancer" },              "icon": "/skills/pyromancer.png",                            "edges": [] },
+
+    { "id": "n21",   "label": "Battle Mage I",               "type": "skill", "benefit": { "skill": "Battle Mage" },             "icon": "/skills/battle-mage.png",                           "edges": ["n22"] },
+    { "id": "n22",   "label": "Battle Mage II",              "type": "skill", "benefit": { "skill": "Battle Mage" },             "icon": "/skills/battle-mage.png",                           "edges": ["n23"] },
+    { "id": "n23",   "label": "Battle Mage III",             "type": "skill", "benefit": { "skill": "Battle Mage" },             "icon": "/skills/battle-mage.png",                           "edges": [] },
+
+    { "id": "n24",   "label": "Arcane Reservoir I",          "type": "skill", "benefit": { "skill": "Arcane Reservoir" },        "icon": "/skills/arcane-reservoir.png",                      "edges": ["n25"] },
+    { "id": "n25",   "label": "Arcane Reservoir II",         "type": "skill", "benefit": { "skill": "Arcane Reservoir" },        "icon": "/skills/arcane-reservoir.png",                      "edges": ["n26"] },
+    { "id": "n26",   "label": "Arcane Reservoir III",        "type": "skill", "benefit": { "skill": "Arcane Reservoir" },        "icon": "/skills/arcane-reservoir.png",                      "edges": [] }
   ],
   "positions": {
     "start": [350,  40],
@@ -30,13 +39,19 @@
     "n7":   [590, 310],
     "n8":   [110, 400],
     "n9":   [350, 400],
-    "n10":  [590, 400],
     "n11":  [110, 490],
     "n12":  [350, 490],
-    "n13":  [590, 490],
     "n14":  [110, 580],
     "n15":  [350, 580],
-    "n16":  [590, 580],
-    "n17":  [350, 660]
+    "n17":  [350, 660],
+    "n18":  [830, 220],
+    "n19":  [830, 400],
+    "n20":  [830, 580],
+    "n21":  [1070, 220],
+    "n22":  [1070, 400],
+    "n23":  [1070, 580],
+    "n24":  [1310, 220],
+    "n25":  [1310, 400],
+    "n26":  [1310, 580]
   }
 }

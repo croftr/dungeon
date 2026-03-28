@@ -412,7 +412,14 @@
         "isPassive": true,
         "type": "passive",
         "icon": "/skills/battle-mage.png",
-        "description": "Allows a wizard to slowly regenerate mana during combat.",
+        "description": "Regenerates MP during combat. 1 node = 1 MP/3s, 2 nodes = 1 MP/2s, 3 nodes = 1 MP/s.",
         "effectType": "combatManaRegen"
+    },
+    "Arcane Reservoir": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/arcane-reservoir.png",
+        "description": "Speeds up out-of-combat MP regeneration. 1 node = 20% faster, 2 nodes = 40% faster, 3 nodes = double speed.",
+        "effectType": "fieldManaRegen"
     }
 }

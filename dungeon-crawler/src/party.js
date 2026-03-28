@@ -862,7 +862,8 @@ export function resurrectAll() {
   if (el) el.classList.remove('active');
 }
 
-let mpRegenTimer = 0;
+let mpRegenTimers = {};    // out-of-combat MP regen: per-member accumulators
+let battleMageTimers = {}; // in-combat MP regen (Battle Mage passive): per-member accumulators
 let spRegenAccum = 0;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1071,21 +1072,40 @@ export function updateParty(dt) {
     });
   }
 
-  // MP only regenerates out of combat — 1 MP per second
+  // MP regen — out of combat (base 1 MP/s, boosted by Arcane Reservoir),
+  //           in combat (Battle Mage passive only)
   if (isInCombat()) {
-    mpRegenTimer = 0;
+    mpRegenTimers = {};  // reset out-of-combat timers so they don't burst when combat ends
+
+    // Battle Mage passive: per-member in-combat MP regen
+    party.forEach(m => {
+      if (m.isEmpty || m.isDead || !m.skills?.length) return;
+      if (hasEffectFlag(m, 'preventsMpRegen')) return;
+      const count = m.skills.filter(s => (typeof s === 'string' ? s : s.name) === 'Battle Mage').length;
+      if (!count) return;
+      const interval = count >= 3 ? 1.0 : count === 2 ? 2.0 : 3.0;
+      battleMageTimers[m.id] = (battleMageTimers[m.id] ?? 0) + dt;
+      if (battleMageTimers[m.id] >= interval) {
+        battleMageTimers[m.id] -= interval;
+        if (m.mp < m.mpMax) setMp(m.id, m.mp + 1);
+      }
+    });
   } else {
-    mpRegenTimer += dt;
-    if (mpRegenTimer >= 1.0) {
-      mpRegenTimer -= 1.0;
-      party.forEach((m) => {
-        if (!m.isEmpty && !m.isDead && m.mp < m.mpMax) {
-          if (!hasEffectFlag(m, 'preventsMpRegen')) {
-            setMp(m.id, m.mp + 1);
-          }
-        }
-      });
-    }
+    battleMageTimers = {};  // reset in-combat timers
+
+    // Per-member out-of-combat regen: 1 MP/s base, faster with Arcane Reservoir
+    party.forEach(m => {
+      if (m.isEmpty || m.isDead || m.mp >= m.mpMax) return;
+      if (hasEffectFlag(m, 'preventsMpRegen')) return;
+      const arCount = m.skills?.filter(s => (typeof s === 'string' ? s : s.name) === 'Arcane Reservoir').length ?? 0;
+      // 1 node = 1.2× (0.833s), 2 nodes = 1.4× (0.714s), 3 nodes = 2.0× (0.5s)
+      const interval = arCount >= 3 ? 0.5 : arCount === 2 ? (1.0 / 1.4) : arCount === 1 ? (1.0 / 1.2) : 1.0;
+      mpRegenTimers[m.id] = (mpRegenTimers[m.id] ?? 0) + dt;
+      if (mpRegenTimers[m.id] >= interval) {
+        mpRegenTimers[m.id] -= interval;
+        setMp(m.id, m.mp + 1);
+      }
+    });
   }
 
   // ── Process all active status effects each frame ────────────────────────
