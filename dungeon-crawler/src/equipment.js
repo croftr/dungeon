@@ -2907,6 +2907,20 @@ export function useHand(memberIndex, hand, silent = false) {
   // Physical attacks cost 5 SP per staminaDrain level; spells and skills do not
   // Whirlwind / War Dance buff: also prevents SP drain
   let spCost = 5 * (def?.staminaDrain ?? 1);
+
+  // Apply Conservator passive reductions (15% per node, stacks additively up to 45%)
+  if (!isSpell && def?.weaponType && m.skills?.length) {
+    let reduction = 0;
+    for (const skill of m.skills) {
+      const name = typeof skill === 'string' ? skill : skill.name;
+      const skillDef = SKILLS_DATA[name];
+      if (skillDef?.isPassive && skillDef.effectType === 'weaponStaminaReduction' && skillDef.weaponType === def.weaponType) {
+        reduction += skillDef.magnitude || 0;
+      }
+    }
+    if (reduction > 0) spCost = Math.max(0, spCost * (1 - reduction));
+  }
+
   const wwActive = ww.active && ww.actorName === m.name && now < ww.expiresAt;
   const wdActive = skillsState.warDance.active && now < skillsState.warDance.expiresAt;
 

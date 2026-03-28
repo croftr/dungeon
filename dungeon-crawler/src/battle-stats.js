@@ -57,6 +57,25 @@ function _elapsedMinutes() {
   return (Date.now() - _sessionStart) / 60000;
 }
 
+function _downloadCsv() {
+  const mins = _elapsedMinutes();
+  const lines = ['Name,DMG OUT,DMG IN,D/MIN,ACC%,AVG/HIT'];
+  [..._stats.entries()]
+    .sort((a, b) => b[1].dealt - a[1].dealt)
+    .forEach(([name, { dealt, taken, attacks, hits }]) => {
+      const dpm = mins > 0 ? (dealt / mins).toFixed(2) : '0';
+      const acc = attacks > 0 ? Math.round(hits / attacks * 100) : '';
+      const avg = hits > 0 ? (dealt / hits).toFixed(1) : '';
+      lines.push(`${name},${dealt},${taken},${dpm},${acc},${avg}`);
+    });
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'battle-stats.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 function _closePanel() {
   _panelVisible = false;
   const panel = document.getElementById('battle-stats-panel');
@@ -142,6 +161,7 @@ export function initBattleStats() {
     <div class="bsp-titlebar">
       <span class="bsp-title">Battle Stats</span>
       <div class="bsp-titlebar-actions">
+        <button class="bsp-csv" title="Download as CSV">CSV</button>
         <button class="bsp-reset" title="Reset all stats">Reset</button>
         <button class="bsp-close" title="Close">✕</button>
       </div>
@@ -150,5 +170,6 @@ export function initBattleStats() {
   `;
   panel.querySelector('.bsp-close').addEventListener('click', _closePanel);
   panel.querySelector('.bsp-reset').addEventListener('click', resetBattleStats);
+  panel.querySelector('.bsp-csv').addEventListener('click', _downloadCsv);
   document.body.appendChild(panel);
 }

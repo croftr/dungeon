@@ -17,10 +17,13 @@
     { "id": "n14",   "label": "+1 Vitality, +1 Resilience",  "type": "stat",  "benefit": { "vitality": 1, "resilience": 1 },    "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n17"] },
     { "id": "n15",   "label": "Axe Tactician",               "type": "skill", "benefit": { "skill": "Axe Tactician" },          "icon": "/skills/axe-tactician.png",                         "edges": ["n17"] },
     { "id": "n16",   "label": "Axe Master",                  "type": "skill", "benefit": { "skill": "Axe Master" },             "icon": "/skills/axe-master.png",                            "edges": ["n17"] },
-    { "id": "n17",   "label": "+2 Strength",                 "type": "stat",  "benefit": { "strength": 2 },                     "icon": "/skills/stats-increase/strength_increase.png",     "edges": [] },
+    { "id": "n17",   "label": "+2 Strength",                 "type": "stat",  "benefit": { "strength": 2 },                     "icon": "/skills/stats-increase/strength_increase.png",     "edges": ["n21","n22","n23"] },
     { "id": "n18",   "label": "Shield Master",               "type": "skill", "benefit": { "skill": "Shield Master" },          "icon": "/skills/shield-master.png",                         "edges": ["n19"] },
     { "id": "n19",   "label": "Shield Master",               "type": "skill", "benefit": { "skill": "Shield Master" },          "icon": "/skills/shield-master.png",                         "edges": ["n20"] },
-    { "id": "n20",   "label": "Shield Master",               "type": "skill", "benefit": { "skill": "Shield Master" },          "icon": "/skills/shield-master.png",                         "edges": ["n17"] }
+    { "id": "n20",   "label": "Shield Master",               "type": "skill", "benefit": { "skill": "Shield Master" },          "icon": "/skills/shield-master.png",                         "edges": ["n17"] },
+    { "id": "n21",   "label": "Axe Conservator",             "type": "skill", "benefit": { "skill": "Axe Conservator" },        "icon": "/skills/axe-conservator.png",                       "edges": [] },
+    { "id": "n22",   "label": "Axe Conservator",             "type": "skill", "benefit": { "skill": "Axe Conservator" },        "icon": "/skills/axe-conservator.png",                       "edges": [] },
+    { "id": "n23",   "label": "Axe Conservator",             "type": "skill", "benefit": { "skill": "Axe Conservator" },        "icon": "/skills/axe-conservator.png",                       "edges": [] }
   ],
   "positions": {
     "start": [350,  40],
@@ -43,6 +46,9 @@
     "n17":  [350, 660],
     "n18":  [830, 400],
     "n19":  [830, 490],
-    "n20":  [830, 580]
+    "n20":  [830, 580],
+    "n21":  [110, 750],
+    "n22":  [350, 750],
+    "n23":  [590, 750]
   }
 }

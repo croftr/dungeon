@@ -353,5 +353,59 @@
         "blockChanceBonus": 2,
         "magnitude": 1,
         "defenceBonus": 1
+    },
+    "Mace Conservator": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/mace-conservator.png",
+        "description": "Reduces stamina cost of mace attacks by 15%.",
+        "effectType": "weaponStaminaReduction",
+        "weaponType": "mace",
+        "magnitude": 0.15
+    },
+    "Axe Conservator": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/axe-conservator.png",
+        "description": "Reduces stamina cost of axe attacks by 15%.",
+        "effectType": "weaponStaminaReduction",
+        "weaponType": "axe",
+        "magnitude": 0.15
+    },
+    "Dagger Conservator": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/dagger-conservator.png",
+        "description": "Reduces stamina cost of dagger attacks by 15%.",
+        "effectType": "weaponStaminaReduction",
+        "weaponType": "dagger",
+        "magnitude": 0.15
+    },
+    "Crossbow Conservator": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/crossbow-conservator.png",
+        "description": "Reduces stamina cost of crossbow attacks by 15%.",
+        "effectType": "weaponStaminaReduction",
+        "weaponType": "crossbow",
+        "magnitude": 0.15
+    },
+    "Bow Conservator": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/bow-conservator.png",
+        "description": "Reduces stamina cost of bow attacks by 15%.",
+        "effectType": "weaponStaminaReduction",
+        "weaponType": "bow",
+        "magnitude": 0.15
+    },
+    "Two-Handed Conservator": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/two-handed-conservator.png",
+        "description": "Reduces stamina cost of two-handed weapon attacks by 15%.",
+        "effectType": "weaponStaminaReduction",
+        "weaponType": "twoHanded",
+        "magnitude": 0.15
     }
 }

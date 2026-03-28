@@ -17,7 +17,10 @@
     { "id": "n14",   "label": "+1 Strength, +1 Resilience",  "type": "stat",  "benefit": { "strength": 1, "resilience": 1 },    "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n17"] },
     { "id": "n15",   "label": "Crossbow Tactician",          "type": "skill", "benefit": { "skill": "Crossbow Tactician" },     "icon": "/skills/crossbow-tactician.png",                    "edges": ["n17"] },
     { "id": "n16",   "label": "Crossbow Master",             "type": "skill", "benefit": { "skill": "Crossbow Master" },        "icon": "/skills/crossbow-master.png",                       "edges": ["n17"] },
-    { "id": "n17",   "label": "+2 Dexterity",                "type": "stat",  "benefit": { "dexterity": 2 },                    "icon": "/skills/stats-increase/dexterity_increase.png",     "edges": [] }
+    { "id": "n17",   "label": "+2 Dexterity",                "type": "stat",  "benefit": { "dexterity": 2 },                    "icon": "/skills/stats-increase/dexterity_increase.png",     "edges": ["n18","n19","n20"] },
+    { "id": "n18",   "label": "Crossbow Conservator",        "type": "skill", "benefit": { "skill": "Crossbow Conservator" },   "icon": "/skills/crossbow-conservator.png",                  "edges": [] },
+    { "id": "n19",   "label": "Crossbow Conservator",        "type": "skill", "benefit": { "skill": "Crossbow Conservator" },   "icon": "/skills/crossbow-conservator.png",                  "edges": [] },
+    { "id": "n20",   "label": "Crossbow Conservator",        "type": "skill", "benefit": { "skill": "Crossbow Conservator" },   "icon": "/skills/crossbow-conservator.png",                  "edges": [] }
   ],
   "positions": {
     "start": [350,  40],
@@ -37,6 +40,9 @@
     "n14":  [110, 580],
     "n15":  [350, 580],
     "n16":  [590, 580],
-    "n17":  [350, 660]
+    "n17":  [350, 660],
+    "n18":  [110, 750],
+    "n19":  [350, 750],
+    "n20":  [590, 750]
   }
 }

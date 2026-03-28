@@ -17,9 +17,12 @@
     { "id": "n14",   "label": "+1 Strength, +1 Resilience",  "type": "stat",  "benefit": { "strength": 1, "resilience": 1 },    "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n17"] },
     { "id": "n15",   "label": "Mace Tactician",              "type": "skill", "benefit": { "skill": "Mace Tactician" },         "icon": "/skills/mace-tactician.png",                        "edges": ["n17"] },
     { "id": "n16",   "label": "Mace Master",                 "type": "skill", "benefit": { "skill": "Mace Master" },            "icon": "/skills/mace-master.png",                           "edges": ["n17"] },
-    { "id": "n17",   "label": "+2 Resilience",               "type": "stat",  "benefit": { "resilience": 2 },                   "icon": "/skills/stats-increase/resilience_increase.png",   "edges": [] },
+    { "id": "n17",   "label": "+2 Resilience",               "type": "stat",  "benefit": { "resilience": 2 },                   "icon": "/skills/stats-increase/resilience_increase.png",   "edges": ["n20","n21","n22"] },
     { "id": "n18",   "label": "Shield Master",               "type": "skill", "benefit": { "skill": "Shield Master" },          "icon": "/skills/shield-master.png",                         "edges": ["n19"] },
-    { "id": "n19",   "label": "Shield Master",               "type": "skill", "benefit": { "skill": "Shield Master" },          "icon": "/skills/shield-master.png",                         "edges": ["n12"] }
+    { "id": "n19",   "label": "Shield Master",               "type": "skill", "benefit": { "skill": "Shield Master" },          "icon": "/skills/shield-master.png",                         "edges": ["n12"] },
+    { "id": "n20",   "label": "Mace Conservator",            "type": "skill", "benefit": { "skill": "Mace Conservator" },       "icon": "/skills/mace-conservator.png",                      "edges": [] },
+    { "id": "n21",   "label": "Mace Conservator",            "type": "skill", "benefit": { "skill": "Mace Conservator" },       "icon": "/skills/mace-conservator.png",                      "edges": [] },
+    { "id": "n22",   "label": "Mace Conservator",            "type": "skill", "benefit": { "skill": "Mace Conservator" },       "icon": "/skills/mace-conservator.png",                      "edges": [] }
   ],
   "positions": {
     "start": [350,  40],
@@ -41,6 +44,9 @@
     "n16":  [590, 580],
     "n17":  [350, 670],
     "n18":  [830, 310],
-    "n19":  [830, 400]
+    "n19":  [830, 400],
+    "n20":  [110, 760],
+    "n21":  [350, 760],
+    "n22":  [590, 760]
   }
 }

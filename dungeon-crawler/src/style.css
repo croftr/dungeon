@@ -6516,6 +6516,7 @@ body.cursor-interact #renderer-canvas {
   gap: 6px;
 }
 
+.bsp-csv,
 .bsp-reset {
   background: none;
   border: 1px solid #4a3a20;
@@ -6531,6 +6532,7 @@ body.cursor-interact #renderer-canvas {
   transition: border-color 0.15s, color 0.15s;
 }
 
+.bsp-csv:hover,
 .bsp-reset:hover {
   border-color: #c8a84a;
   color: #ffe88a;
