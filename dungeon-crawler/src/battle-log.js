@@ -106,7 +106,7 @@ function _updateCount() {
 // ── Category mapping (used for filter data-attr) ─────────────────────────────
 
 // Attack types that are spells (go under Magic filter, not Attacks)
-const SPELL_ATTACK_TYPES = new Set(['fireball', 'banishment']);
+const SPELL_ATTACK_TYPES = new Set(['fireball', 'banishment', 'incinerate']);
 
 // Skill log entries whose skillName matches these are spells → Magic filter
 // Everything else logged as type:'skill' is an active ability → Skills filter
@@ -175,6 +175,7 @@ const TYPE_ABBR = {
   shoot: 'shoot',
   fireball: 'fire',
   banishment: 'light',
+  incinerate: 'fire',
   attack: 'atk',
   special: 'spell',
 };
@@ -262,8 +263,8 @@ function _formula(e) {
   }
 
   if (e.actor === 'player') {
-    const stat = ['fireball', 'banishment'].includes(e.attackType) ? 'INT' : (e.statLabel ?? 'STR');
-    const mit = ['fireball', 'banishment'].includes(e.attackType) ? 'RES' : 'DEF';
+    const stat = ['fireball', 'banishment', 'incinerate'].includes(e.attackType) ? 'INT' : (e.statLabel ?? 'STR');
+    const mit = ['fireball', 'banishment', 'incinerate'].includes(e.attackType) ? 'RES' : 'DEF';
     const ammoLine = e.ammoModifier && e.ammoModifier !== 1 ? ` ×${e.ammoModifier}ammo` : '';
     const raw = e.statBonus + e.weaponBase - e.mitigation;
     const crit = e.crit ? ` ×${e.critMultiplier}` : '';

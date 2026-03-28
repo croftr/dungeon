@@ -1572,7 +1572,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
   // Stats are now cumulative — no auto-reset on new fight.
 
   // ── Skeleton Shield Block ──────────────────────────────────────────────────
-  if (m.name.includes('Skeleton') && !attackType.includes('poison') && attackType !== 'fireball' && attackType !== 'banishment') {
+  if (m.name.includes('Skeleton') && !attackType.includes('poison') && attackType !== 'fireball' && attackType !== 'banishment' && attackType !== 'incinerate') {
     if (Math.random() <= 0.10) {
       addLogEntry({
         time: Date.now(), actor: 'player',
@@ -1741,7 +1741,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   }
 
   // Fireball/Banishment uses INT + monster magic resilience; all other attacks use STR + monster defence
-  const isMagic = attackType === 'fireball' || attackType === 'banishment';
+  const isMagic = attackType === 'fireball' || attackType === 'banishment' || attackType === 'incinerate';
 
   // Apply Sunder Armor penalty
   const isSundered = skillsState.sunderArmor?.active && skillsState.sunderArmor?.targetId === m.id;
@@ -2311,7 +2311,7 @@ function _playHitAnimation(m, attackType, killer) {
     return; // Skip standard red flash/knockback for dummy
   }
 
-  if (attackType === 'fireball' || attackType === 'banishment') {
+  if (attackType === 'fireball' || attackType === 'banishment' || attackType === 'incinerate') {
     createHitSpark(mesh.position);
   }
 

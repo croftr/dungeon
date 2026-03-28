@@ -590,6 +590,75 @@ export function triggerFireballEffect() {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
+//  INCINERATE — Merlin (Wizard) / Pyromancer
+//  A long, sustained torrent of intense fire filling the area in front
+// ══════════════════════════════════════════════════════════════════════════
+export function triggerIncinerateEffect() {
+    if (!batchRenderer || !sceneRef || !cameraRef) return;
+    const tex = createGlowTexture();
+    const dir = new THREE.Vector3();
+    cameraRef.getWorldDirection(dir);
+
+    // Sustained fire stream — longer and wider than fireball
+    const core = new ParticleSystem({
+        duration: 2.2, looping: false,
+        startLife: new IntervalValue(0.4, 1.0),
+        startSpeed: new IntervalValue(4.0, 10.0),
+        startSize: new IntervalValue(0.15, 0.45),
+        startColor: new ConstantColor(new Vector4(1, 0.9, 0.3, 1)),
+        worldSpace: true, maxParticle: 400,
+        emissionOverTime: new ConstantValue(150),
+        emissionBursts: [{ time: 0, count: new ConstantValue(60), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new ConeEmitter({ radius: 0.2, thickness: 1, arc: Math.PI * 2, angle: Math.PI / 8 }),
+        material: _mat(tex), startTileIndex: new ConstantValue(0),
+        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    core.addBehavior(new ColorOverLife(new ColorRange(
+        new Vector4(1.0, 0.8, 0.2, 1),
+        new Vector4(0.8, 0.1, 0.0, 0),
+    )));
+    core.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 1, 0.8, 0), 0]])));
+    core.emitter.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+    _spawn(core, cameraRef.position, 2.5);
+
+    // Wide lingering fire bloom spread across the two squares
+    const bloom = new ParticleSystem({
+        duration: 2.0, looping: false,
+        startLife: new IntervalValue(0.3, 0.8),
+        startSpeed: new IntervalValue(0.5, 3.0),
+        startSize: new IntervalValue(0.1, 0.35),
+        startColor: new ConstantColor(new Vector4(1, 0.4, 0.05, 1)),
+        worldSpace: true, maxParticle: 200,
+        emissionOverTime: new ConstantValue(80),
+        emissionBursts: [{ time: 0, count: new ConstantValue(40), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.6, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex), startTileIndex: new ConstantValue(0),
+        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    bloom.addBehavior(new ColorOverLife(new ColorRange(new Vector4(1, 0.5, 0.1, 1), new Vector4(0.5, 0.0, 0.0, 0))));
+    bloom.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(0.5, 1.0, 0.8, 0), 0]])));
+    _spawn(bloom, _frontPos(1.5), 2.5);
+    
+    // An extra bloom further out for the 2nd square
+    const bloom2 = new ParticleSystem({
+        duration: 1.8, looping: false,
+        startLife: new IntervalValue(0.3, 0.8),
+        startSpeed: new IntervalValue(0.5, 3.0),
+        startSize: new IntervalValue(0.1, 0.35),
+        startColor: new ConstantColor(new Vector4(1, 0.3, 0.0, 1)),
+        worldSpace: true, maxParticle: 150,
+        emissionOverTime: new ConstantValue(60),
+        emissionBursts: [{ time: 0.2, count: new ConstantValue(30), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.6, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex), startTileIndex: new ConstantValue(0),
+        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    bloom2.addBehavior(new ColorOverLife(new ColorRange(new Vector4(0.9, 0.4, 0.1, 1), new Vector4(0.4, 0.0, 0.0, 0))));
+    bloom2.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(0.5, 1.0, 0.8, 0), 0]])));
+    _spawn(bloom2, _frontPos(3.0), 2.5);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
 //  BANISHMENT — Seraphina (White Mage)
 //  A dangerous beam of pure yellow/white magical light firing forward
 // ══════════════════════════════════════════════════════════════════════════

@@ -30,7 +30,7 @@ export function spawnLevel0Objects(ctx) {
         { name: 'Gold Coins', quantity: 100 },
         'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore", "Life Essence", "Minor Potions Parchment", "Life Berry",
         "Lizard Scale", "Crocodile Hide", "Iron Ore", "Aqua Man Flipper", "Demon's Eyes", "Iron Ore", "Mace", "Cloth Trousers", "Starlight Nectar",
-        "Aether-Glass Silt", "Potions Parchment", "Forge Armour Parchment", "Forge Weapons Parchment", "Minor Potions Parchment", "Party Potions Parchment"
+        "Aether-Glass Silt", "Potions Parchment", "Forge Armour Parchment", "Forge Weapons Parchment", "Minor Potions Parchment", "Party Potions Parchment", "Scroll of Incinerate"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in the east room (center) ────────────────────────────────────

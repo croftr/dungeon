@@ -91,7 +91,7 @@ export function playerHitChance(character, monster, weaponDef = null) {
           chance += skillDef.magnitude || 0;
         }
       }
-      if (skillDef?.isPassive && name === 'Pyromancer' && weaponDef?.attackType === 'fireball') {
+      if (skillDef?.isPassive && name === 'Pyromancer' && (weaponDef?.attackType === 'fireball' || weaponDef?.attackType === 'incinerate')) {
         chance += skillDef.accuracyMagnitude || 0;
       }
     });

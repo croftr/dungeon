@@ -46,6 +46,7 @@ import {
   triggerDefaultSkillEffect,
   triggerSleepEffect,
   triggerBanishmentEffect,
+  triggerIncinerateEffect,
 } from './quarks-intro.js';
 
 // Maps spell attackType → VFX + sound. Add new entries here as spells grow.
@@ -58,6 +59,9 @@ function _dispatchSpellVFX(attackType) {
     case 'banishment':
       triggerBanishmentEffect();
       // audio already handled
+      break;
+    case 'incinerate':
+      triggerIncinerateEffect();
       break;
     case 'regenerate':
       playSkillSound('cure');
@@ -2584,6 +2588,64 @@ function _executeAoEDebuffSpell(caster, casterIndex, hand, spellDef) {
   addLogEntry({ time: Date.now(), type: 'skill', actor: caster.name, skillName: spellDef.name, target: logTarget });
 }
 
+/** Dispatcher for line-of-sight AoE spells (e.g. Incinerate). */
+function _executeLineSpell(caster, casterIndex, hand, spellDef) {
+  if (caster.mp < spellDef.mpCost) {
+    showMessage(`${caster.name} does not have enough mana!`);
+    return;
+  }
+  setMp(caster.id, caster.mp - spellDef.mpCost);
+
+  const isSpellSlot = (hand !== 'skill') && spellDef.slot === 'spell';
+  const baseKey = (hand === 'skill') ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
+  const timeKey = isSpellSlot ? `${baseKey}-${spellDef.name}` : baseKey;
+  lastAttackTimes[timeKey] = performance.now();
+
+  if (hand === 'skill') {
+    const cd = (spellDef.delay ?? 15) * 1000;
+    _startSkillCooldownUI(casterIndex, performance.now() + cd);
+  }
+
+  refreshPartyCards();
+  breakPartyUnseen(`${caster.name} attacks — the cloak of shadow disperses!`);
+
+  playAction(spellDef.attackType, hand, casterIndex);
+  _dispatchSpellVFX(spellDef.attackType);
+
+  const maxRange = spellDef.range ?? 2;
+  const hits = spellDef.hits ?? 2;
+  const durationSec = spellDef.durationSec ?? 2;
+  const intervalMs = (durationSec * 1000) / hits;
+
+  let currentHit = 0;
+  function triggerDamageHit() {
+    if (currentHit >= hits) return;
+
+    // Find monsters currently in the line (it might change each tick if they move)
+    const targets = monsters.filter(m => m.alive && isInFrontOfPlayer(m.gridRow, m.gridCol, maxRange));
+
+    targets.forEach(target => {
+      // Use attackMonster, passing spellDef as the faux weaponDef to carry the damage formula
+      const result = attackMonster(target.id, caster, spellDef, spellDef.attackType);
+
+      addLogEntry({
+        time: Date.now(), actor: 'player', attacker: caster.name, target: result.monsterName || target.name,
+        attackType: spellDef.attackType, hitChance: result.hitChance ?? 0, hit: result.hit, crit: result.crit,
+        weaponBase: result.formula?.weaponBase ?? 0, statBonus: result.formula?.statBonus ?? 0,
+        statLabel: result.formula?.statLabel ?? 'STR', mitigation: result.formula?.mitigation ?? 0,
+        preCritDamage: result.formula?.preCritDamage ?? 0, finalDamage: result.damage,
+        critMultiplier: result.formula?.critMultiplier ?? 1,
+      });
+      _logAppliedEffects(caster.name, result.monsterName || target.name, result.stunned, result.appliedEffects);
+    });
+
+    currentHit++;
+    if (currentHit < hits) setTimeout(triggerDamageHit, intervalMs);
+  }
+
+  triggerDamageHit();
+}
+
 /** Dispatcher for party-member targeted spells — routes to the correct handler. */
 function _executePartyMemberSpell(caster, casterIndex, hand, spellDef, target) {
   // MP check (deducted here, after the player has confirmed their target choice)
@@ -2869,7 +2931,13 @@ export function useHand(memberIndex, hand, silent = false) {
     return;
   }
 
-  const isRanged = attackType === ACTIONS.SHOOT || attackType === ACTIONS.FIREBALL || attackType === ACTIONS.BANISHMENT;
+  // Line-of-sight AoE spells (e.g. Incinerate).
+  if (def?.target === 'monsters-line') {
+    _executeLineSpell(m, memberIndex, hand, def);
+    return;
+  }
+
+  const isRanged = attackType === ACTIONS.SHOOT || attackType === ACTIONS.FIREBALL || attackType === ACTIONS.BANISHMENT || attackType === 'incinerate';
   const isBuff = attackType === ACTIONS.REGENERATE;
 
   // Back-row members can only melee if their front partner is dead (stepped up).
