@@ -1066,7 +1066,8 @@ label.mm-setting-label {
 
 /* Slot inactive/cooldown state */
 .slot-inactive,
-.slot-cooling-down {
+.slot-cooling-down,
+.slot-no-mp {
   opacity: 0.4 !important;
   filter: grayscale(80%);
   pointer-events: none;
@@ -1074,7 +1075,8 @@ label.mm-setting-label {
 }
 
 .slot-inactive::after,
-.slot-cooling-down::after {
+.slot-cooling-down::after,
+.slot-no-mp::after {
   content: '';
   position: absolute;
   inset: 0;

@@ -415,6 +415,8 @@ function refreshMember(m) {
     const lastUsed = lastAttackTimes[lhTimeKey];
     const lhCanAttack = lastUsed === undefined || (performance.now() - lastUsed) >= (lhDelaySec * 1000);
     lhSlot.classList.toggle('slot-cooling-down', !lhCanAttack);
+    const lhNoMp = (lhDef?.mpCost ?? 0) > 0 && m.mp < lhDef.mpCost;
+    lhSlot.classList.toggle('slot-no-mp', lhNoMp);
     // Auto-refresh when cooldown expires if it's currently on cooldown
     if (!lhCanAttack && !m.cooldownTimers['left']) {
       m.cooldownTimers['left'] = setTimeout(() => {
@@ -447,6 +449,8 @@ function refreshMember(m) {
     const rhCanAttack = lastUsed === undefined || (performance.now() - lastUsed) >= (rhDelaySec * 1000);
 
     rhSlot.classList.toggle('slot-cooling-down', !rhCanAttack);
+    const rhNoMp = (rhActualDef?.mpCost ?? 0) > 0 && m.mp < rhActualDef.mpCost;
+    rhSlot.classList.toggle('slot-no-mp', rhNoMp);
     if (!rhCanAttack && !m.cooldownTimers['right']) {
       const remaining = (rhDelaySec * 1000) - (performance.now() - lastUsed);
       m.cooldownTimers['right'] = setTimeout(() => {

@@ -1177,14 +1177,19 @@ function _equipItem(memberIndex, invIndex) {
     const rhItem = m.equipment.rightHand;
     const lhItem = m.equipment.leftHand;
     const rightOnly = getItemDef(item.name)?.rightHandOnly ?? false;
+    const leftOnly = getItemDef(item.name)?.leftHandOnly ?? false;
 
     let targetSlot;
-    if (!rhItem || rhItem.slot === 'spell') {
+    if (leftOnly) {
+      targetSlot = 'leftHand';
+    } else if (rightOnly) {
       targetSlot = 'rightHand';
-    } else if (!rightOnly && (!lhItem || lhItem.slot === 'spell')) {
+    } else if (!rhItem || rhItem.slot === 'spell') {
+      targetSlot = 'rightHand';
+    } else if (!lhItem || lhItem.slot === 'spell') {
       targetSlot = 'leftHand';
     } else {
-      // Both hands occupied, or right-hand-only item — displace right hand
+      // Both hands occupied — displace right hand
       targetSlot = 'rightHand';
     }
 
@@ -1449,7 +1454,7 @@ function _assignLoadoutBRight(memberIndex, invIndex) {
   if (!item) return;
   const def = getItemDef(item.name);
   const slot = def?.slot ?? 'hand';
-  if (slot === 'hand') {
+  if (slot === 'hand' && !def?.leftHandOnly) {
     const displaced = m.loadoutB.rightHand;
     m.loadoutB.rightHand = { name: item.name, slot };
     m.inventory[invIndex] = displaced;

@@ -45,8 +45,8 @@
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
         "startingSkills": [],
         "image": "/heros/human_paladin.png",
-        "leftHand": "Sword",
-        "rightHand": "Shield",
+        "leftHand": "Shield",
+        "rightHand": "Sword",
         "startingInventory": [
             "Cure Poison Potion"
         ],
@@ -72,8 +72,8 @@
         "bio": "A stout and hearty fighter from the mountainous deeps. Thorek believes every problem can be solved with a sharp axe and enough ale.",
         "startingSkills": [],
         "image": "/heros/dwarf_barbarian_head.png",
-        "leftHand": "Axe",
-        "rightHand": "Wooden Shield",
+        "leftHand": "Wooden Shield",
+        "rightHand": "Axe",
         "startingInventory": [
             "Cure Poison Potion"
         ],
