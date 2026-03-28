@@ -7,11 +7,12 @@ import { showMessage, drawMinimap, updateStatus } from './minimap.js';
 import { getItemDef } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refreshPartyCards, setHp, applyStatusEffect } from './party.js';
 import { addLogEntry } from './battle-log.js';
-import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playSoundByUrl } from './audio.js';
+import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playLearntSound, playSoundByUrl, playQuestAudio } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
 import POTION_MERCHANT_DATA from './data/potion-merchant.json';
 import POTIONS_DATA from './data/items/potions.json';
 import FORGE_DATA from './data/forge.json';
+import WEAPONS_DATA from './data/items/weapons.json';
 import { triggerMummyAmbush, monsters } from './monster.js';
 import * as equip from './equipment.js';
 import { showInlineHelp } from './help.js';
@@ -115,10 +116,14 @@ let _merchantMode = 'buy';
 const ALCHEMY_SLOTS = 9; // 8 ingredients + 1 result
 const _alchemyContents = Array(ALCHEMY_SLOTS).fill(null);
 let _alchemyModalOpen = false;
+const _knownAlchemyRecipes = new Set(); // result item names learned by the party
 
 const FORGE_SLOTS = 9; // 8 materials + 1 result
 const _forgeContents = Array(FORGE_SLOTS).fill(null);
 let _forgeModalOpen = false;
+const _knownForgeRecipes = new Set(); // result item names learned by the party
+
+const _FORGE_WEAPON_NAMES = new Set(WEAPONS_DATA.map(w => w.name));
 
 // ─────────────────────────────────────────────
 //  SAVE GAME — container tracking
@@ -185,6 +190,7 @@ export function initObjects(scene, camera) {
         const partyConfirmOverlay = document.getElementById('party-confirm-overlay');
         const trapDisarmOverlay = document.getElementById('trap-disarm-overlay');
         const shrineLootOverlay = document.getElementById('shrine-loot-overlay');
+        const tcOverlay = document.getElementById('training-console-overlay');
         if (
             (weaponRackOverlay && !weaponRackOverlay.classList.contains('chest-hidden')) ||
             (cabinetOverlay && !cabinetOverlay.classList.contains('chest-hidden')) ||
@@ -196,7 +202,8 @@ export function initObjects(scene, camera) {
             (alchemyOverlay && !alchemyOverlay.classList.contains('chest-hidden')) ||
             (charDevOverlay && !charDevOverlay.classList.contains('char-dev-hidden')) ||
             (partyConfirmOverlay && !partyConfirmOverlay.classList.contains('chest-hidden')) ||
-            (shrineLootOverlay && !shrineLootOverlay.classList.contains('chest-hidden'))
+            (shrineLootOverlay && !shrineLootOverlay.classList.contains('chest-hidden')) ||
+            (tcOverlay && !tcOverlay.classList.contains('tc-hidden'))
         ) return;
 
         // Raycast
@@ -494,6 +501,15 @@ export function initObjects(scene, camera) {
                     openAlchemyModal();
                 } else {
                     showMessage("You can't reach the workshop from here.");
+                }
+                break;
+            } else if (obj.userData.isTrainingConsole) {
+                const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
+                const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
+                if (distRow <= 2 && distCol <= 2) {
+                    openTrainingConsole();
+                } else {
+                    showMessage("You need to get closer to the console.");
                 }
                 break;
             } else if (obj.userData.isDroppedItem) {
@@ -1023,6 +1039,36 @@ export function initObjects(scene, camera) {
         };
     }
 
+    // Alchemy parchment button
+    const alchemyParchmentBtn = document.getElementById('alchemy-parchment-btn');
+    if (alchemyParchmentBtn) {
+        alchemyParchmentBtn.onclick = (e) => {
+            e.stopPropagation();
+            _showAlchemyParchmentPicker(e.clientX, e.clientY);
+        };
+    }
+
+    // Alchemy parchment picker close
+    const alchemyParchmentPickerClose = document.getElementById('alchemy-parchment-picker-close');
+    if (alchemyParchmentPickerClose) {
+        alchemyParchmentPickerClose.onclick = (e) => { e.stopPropagation(); _hideAlchemyParchmentPicker(); };
+    }
+
+    // Forge parchment button
+    const anvilParchmentBtn = document.getElementById('anvil-parchment-btn');
+    if (anvilParchmentBtn) {
+        anvilParchmentBtn.onclick = (e) => {
+            e.stopPropagation();
+            _showAnvilParchmentPicker(e.clientX, e.clientY);
+        };
+    }
+
+    // Forge parchment picker close
+    const anvilParchmentPickerClose = document.getElementById('anvil-parchment-picker-close');
+    if (anvilParchmentPickerClose) {
+        anvilParchmentPickerClose.onclick = (e) => { e.stopPropagation(); _hideAnvilParchmentPicker(); };
+    }
+
     // Stop ALL clicks inside the weapon rack overlay from reaching the window listener
     const weaponRackOverlayEl = document.getElementById('weapon-rack-overlay');
     if (weaponRackOverlayEl) {
@@ -1077,6 +1123,101 @@ export function initObjects(scene, camera) {
     if (armorStandOverlayEl) {
         armorStandOverlayEl.addEventListener('click', (e) => e.stopPropagation());
     }
+
+    // ── Training Console event wiring ──────────────────────────────────────
+    const tcOverlayEl = document.getElementById('training-console-overlay');
+    if (tcOverlayEl) {
+        tcOverlayEl.addEventListener('click', (e) => e.stopPropagation());
+    }
+    const tcCloseBtn = document.getElementById('tc-close');
+    if (tcCloseBtn) {
+        tcCloseBtn.onclick = (e) => { e.stopPropagation(); closeTrainingConsole(); };
+    }
+
+    // Combat mode toggle
+    const tcToggle = document.getElementById('tc-combat-toggle');
+    if (tcToggle) {
+        tcToggle.onclick = () => {
+            const dummy = _getDummy();
+            if (!dummy) return;
+            dummy.combatMode = !dummy.combatMode;
+            if (!dummy.combatMode) {
+                dummy.engaged = false;
+            }
+            _tcSyncUI();
+        };
+    }
+
+    // Stat +/- buttons
+    document.querySelectorAll('#tc-body .tc-btn[data-stat]').forEach(btn => {
+        btn.onclick = () => {
+            const dummy = _getDummy();
+            if (!dummy) return;
+            const stat = btn.dataset.stat;
+            const delta = parseFloat(btn.dataset.delta);
+            if (stat === 'attackSpeed') {
+                dummy.attackSpeed = Math.max(0.5, Math.round(((dummy.attackSpeed ?? 1) + delta) * 10) / 10);
+            } else {
+                if (!dummy.stats) dummy.stats = {};
+                dummy.stats[stat] = Math.max(0, (dummy.stats[stat] ?? 0) + delta);
+            }
+            _tcSyncUI();
+        };
+    });
+
+    // On-hit effect checkboxes & sliders
+    for (const eid of ['poison', 'rot', 'frozen', 'stun']) {
+        const cb = document.getElementById(`tc-eff-${eid}`);
+        const range = document.getElementById(`tc-eff-${eid}-chance`);
+        const valSpan = document.getElementById(`tc-eff-${eid}-val`);
+        const update = () => {
+            if (valSpan && range) valSpan.textContent = range.value + '%';
+            const dummy = _getDummy();
+            if (dummy) dummy.onHitEffects = _tcBuildEffectsArray();
+        };
+        if (cb) cb.onchange = update;
+        if (range) range.oninput = update;
+    }
+
+    // Presets
+    document.querySelectorAll('#tc-body .tc-preset[data-preset]').forEach(btn => {
+        btn.onclick = () => {
+            const dummy = _getDummy();
+            if (!dummy) return;
+            const p = _TC_PRESETS[btn.dataset.preset];
+            if (!p) return;
+            if (!dummy.stats) dummy.stats = {};
+            dummy.stats.strength = p.strength;
+            dummy.stats.dexterity = p.dexterity;
+            dummy.attackSpeed = p.attackSpeed;
+            dummy.onHitEffects = JSON.parse(JSON.stringify(p.effects));
+            dummy.combatMode = true;
+            _tcSyncUI();
+        };
+    });
+
+    // Reset button
+    const tcResetBtn = document.getElementById('tc-reset');
+    if (tcResetBtn) {
+        tcResetBtn.onclick = () => {
+            const dummy = _getDummy();
+            if (!dummy) return;
+            dummy.stats = { ...(dummy.originalStats ?? { strength: 0, dexterity: 0, vitality: 10, intelligence: 0, resilience: 10 }) };
+            dummy.attackSpeed = dummy.originalAttackSpeed ?? 1;
+            dummy.onHitEffects = [];
+            dummy.combatMode = false;
+            dummy.engaged = false;
+            _tcSyncUI();
+        };
+    }
+
+    // Escape key closes
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && _trainingConsoleOpen) {
+            e.stopPropagation();
+            closeTrainingConsole();
+        }
+    });
 
 }
 
@@ -1640,7 +1781,7 @@ export function spawnObjectsForLevel() {
         addPortal, addDisabledPortal, addPortcullis, addKeyhole,
         addStatue, addPortalActivatorStatue, addPartyConfirmNPC, addDialogueNPC,
         addAnvil, addAlchemyWorkshop, addDroppedTorch, addEtherealEgg, addStairs,
-        addTrap1, createWallButton, addArmourStand,
+        addTrap1, createWallButton, addArmourStand, addTrainingConsole,
         // Level 1 state flags
         starterPortalEnabled: _starterPortalEnabled,
         starterGateOpened: _starterGateOpened,
@@ -1920,7 +2061,7 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, sh
 
         const greetingCallback = (options.greetingAudio?.length || options.greetingModel) ? () => {
             if (options.greetingAudio?.length) {
-                playSoundByUrl(options.greetingAudio[audioIndex % options.greetingAudio.length]);
+                playQuestAudio(options.greetingAudio[audioIndex % options.greetingAudio.length]);
                 audioIndex++;
             }
             if (mixer && idleAction && greetingAction) {
@@ -2188,6 +2329,113 @@ function addAlchemyWorkshop(scene, loader, col, row, rotY = 0, offsetX = 0, offs
         scene.add(light);
     });
 }
+
+// ── Training Console (dev tool) ────────────────────────────────────────────
+// Places a clickable pedestal near the Training Dummy. Opens a stat editor.
+let _trainingConsoleOpen = false;
+
+const _TC_PRESETS = {
+    weak:   { strength: 8,  dexterity: 5,  attackSpeed: 0.8, effects: [] },
+    medium: { strength: 20, dexterity: 15, attackSpeed: 1.2, effects: [{ effectId: 'poison', chance: 0.2 }] },
+    strong: { strength: 35, dexterity: 25, attackSpeed: 2.0, effects: [{ effectId: 'poison', chance: 0.4 }, { effectId: 'rot', chance: 0.2 }] },
+    boss:   { strength: 45, dexterity: 30, attackSpeed: 2.5, effects: [{ effectId: 'poison', chance: 0.5 }, { effectId: 'frozen', chance: 0.15 }, { effectId: 'stun', chance: 0.1 }] },
+};
+
+function addTrainingConsole(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
+    loader.load(asset('/items/dummy-controller.glb'), (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(0.5);
+        model.position.set(col * CELL + offsetX, 0.0, row * CELL + offsetZ);
+        model.rotation.y = rotY;
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.userData.isTrainingConsole = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+                interactables.push(child);
+            }
+        });
+
+        scene.add(model);
+
+        const light = new THREE.PointLight(0xe94560, 2, 3);
+        light.position.set(col * CELL + offsetX, 1.2, row * CELL + offsetZ);
+        scene.add(light);
+    });
+}
+
+function _getDummy() {
+    return monsters.find(m => m.name === 'Training Dummy' && m.alive);
+}
+
+function _tcUpdatePreview() {
+    const dummy = _getDummy();
+    if (!dummy) return;
+    const str = dummy.stats?.strength ?? 0;
+    const dex = dummy.stats?.dexterity ?? 0;
+    // Est. damage vs 0 defence: raw = STR + 4, min 1
+    const estDmg = Math.max(1, str + 4);
+    document.getElementById('tc-est-dmg').textContent = estDmg;
+    // Hit chance vs 10 DEX target
+    const hitPct = Math.min(0.97, Math.max(0.15, 0.45 + (dex - 10) * 0.015));
+    document.getElementById('tc-est-hit').textContent = Math.round(hitPct * 100) + '%';
+}
+
+function _tcSyncUI() {
+    const dummy = _getDummy();
+    if (!dummy) return;
+    document.getElementById('tc-strength').textContent = dummy.stats?.strength ?? 0;
+    document.getElementById('tc-dexterity').textContent = dummy.stats?.dexterity ?? 0;
+    document.getElementById('tc-attackSpeed').textContent = dummy.attackSpeed ?? 1;
+
+    const toggle = document.getElementById('tc-combat-toggle');
+    toggle.textContent = dummy.combatMode ? 'ON' : 'OFF';
+    toggle.classList.toggle('active', !!dummy.combatMode);
+
+    // Sync on-hit effect checkboxes
+    const effects = dummy.onHitEffects ?? [];
+    for (const eid of ['poison', 'rot', 'frozen', 'stun']) {
+        const eff = effects.find(e => e.effectId === eid);
+        const cb = document.getElementById(`tc-eff-${eid}`);
+        const range = document.getElementById(`tc-eff-${eid}-chance`);
+        const valSpan = document.getElementById(`tc-eff-${eid}-val`);
+        if (cb) cb.checked = !!eff;
+        if (range && eff) range.value = Math.round(eff.chance * 100);
+        if (valSpan) valSpan.textContent = (eff ? Math.round(eff.chance * 100) : range ? range.value : 30) + '%';
+    }
+    _tcUpdatePreview();
+}
+
+function _tcBuildEffectsArray() {
+    const effects = [];
+    for (const eid of ['poison', 'rot', 'frozen', 'stun']) {
+        const cb = document.getElementById(`tc-eff-${eid}`);
+        const range = document.getElementById(`tc-eff-${eid}-chance`);
+        if (cb && cb.checked) {
+            effects.push({ effectId: eid, chance: (parseInt(range.value, 10) || 30) / 100 });
+        }
+    }
+    return effects;
+}
+
+function openTrainingConsole() {
+    const dummy = _getDummy();
+    if (!dummy) { showMessage('No Training Dummy found.'); return; }
+    _trainingConsoleOpen = true;
+    const overlay = document.getElementById('training-console-overlay');
+    overlay.classList.remove('tc-hidden');
+    _tcSyncUI();
+}
+
+function closeTrainingConsole() {
+    _trainingConsoleOpen = false;
+    document.getElementById('training-console-overlay').classList.add('tc-hidden');
+}
+
+export function isTrainingConsoleOpen() { return _trainingConsoleOpen; }
 
 function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, contents = []) {
     const cid = _nextContainerId++;
@@ -2677,6 +2925,7 @@ export function openAnvilModal() {
     const overlay = document.getElementById('anvil-overlay');
     overlay.classList.remove('chest-hidden');
     _renderForgeSlots();
+    _renderKnownForgeRecipes();
 }
 
 // ── Forge message bar ──────────────────────────────────────────────────────────
@@ -2747,8 +2996,14 @@ function _forge() {
     if (matchedResult) {
         for (let i = 0; i < 8; i++) _forgeContents[i] = null;
         _forgeContents[8] = matchedResult;
-        showForgeMessage(`Forging complete! You crafted a ${matchedResult}.`, 'success');
+        const isNew = !_knownForgeRecipes.has(matchedResult);
+        _knownForgeRecipes.add(matchedResult);
+        const msg = isNew
+            ? `Forging complete! You discovered the recipe for ${matchedResult}!`
+            : `Forging complete! You crafted a ${matchedResult}.`;
+        showForgeMessage(msg, 'success');
         playSuccessSound();
+        _renderKnownForgeRecipes();
     } else {
         showForgeMessage('These materials cannot be forged into anything.', 'fail');
         playAnvilSound();
@@ -3557,8 +3812,14 @@ function _transmute() {
         // Consume all ingredients only on success
         for (let i = 0; i < 8; i++) _alchemyContents[i] = null;
         _alchemyContents[8] = matchedResult;
-        showAlchemyMessage(`Transmutation successful! You created a ${matchedResult}.`, 'success');
+        const isNew = !_knownAlchemyRecipes.has(matchedResult);
+        _knownAlchemyRecipes.add(matchedResult);
+        const msg = isNew
+            ? `Transmutation successful! You discovered the recipe for ${matchedResult}!`
+            : `Transmutation successful! You created a ${matchedResult}.`;
+        showAlchemyMessage(msg, 'success');
         playAlchemySound();
+        _renderKnownAlchemyRecipes();
     } else {
         // Ingredients are preserved — nothing is consumed
         showAlchemyMessage('The ingredients do not react — nothing happens.', 'fail');
@@ -3577,6 +3838,7 @@ export function openAlchemyModal() {
     overlay.classList.remove('chest-hidden');
 
     _renderAlchemySlots();
+    _renderKnownAlchemyRecipes();
 }
 
 /**
@@ -4060,6 +4322,272 @@ export function setPendingContainerOverrides(overrides) {
 }
 
 // ─────────────────────────────────────────────
+//  KNOWN RECIPES — RENDER
+// ─────────────────────────────────────────────
+
+function _renderKnownAlchemyRecipes() {
+    const list = document.getElementById('alchemy-known-recipes-list');
+    if (!list) return;
+    list.innerHTML = '';
+    if (_knownAlchemyRecipes.size === 0) {
+        list.innerHTML = '<div class="bench-no-recipes">No recipes discovered yet.</div>';
+        return;
+    }
+    _knownAlchemyRecipes.forEach(resultName => {
+        const recipe = POTIONS_DATA.find(p => p.name === resultName);
+        if (!recipe) return;
+        const entry = document.createElement('div');
+        entry.className = 'bench-recipe-entry';
+        entry.title = 'Click to load ingredients';
+        entry.innerHTML = `<span class="bench-recipe-name">${resultName}</span>`
+            + recipe.ingredients.map(ing => `<span class="bench-recipe-ing">• ${ing.quantity}× ${ing.name}</span>`).join('');
+        entry.onclick = () => _autoPopulateAlchemySlots(recipe);
+        list.appendChild(entry);
+    });
+}
+
+function _renderKnownForgeRecipes() {
+    const list = document.getElementById('anvil-known-recipes-list');
+    if (!list) return;
+    list.innerHTML = '';
+    if (_knownForgeRecipes.size === 0) {
+        list.innerHTML = '<div class="bench-no-recipes">No recipes discovered yet.</div>';
+        return;
+    }
+    _knownForgeRecipes.forEach(resultName => {
+        const recipe = FORGE_DATA.find(r => r.name === resultName);
+        if (!recipe) return;
+        const entry = document.createElement('div');
+        entry.className = 'bench-recipe-entry';
+        entry.title = 'Click to load materials';
+        entry.innerHTML = `<span class="bench-recipe-name">${resultName}</span>`
+            + recipe.ingredients.map(ing => `<span class="bench-recipe-ing">• ${ing.quantity}× ${ing.name}</span>`).join('');
+        entry.onclick = () => _autoPopulateForgeSlots(recipe);
+        list.appendChild(entry);
+    });
+}
+
+function _autoPopulateAlchemySlots(recipe) {
+    // Return any existing ingredient slot contents to inventory
+    for (let i = 0; i < 8; i++) {
+        if (_alchemyContents[i]) {
+            const idx = party.findIndex(m => !m.isEmpty);
+            if (idx !== -1) equip.addItemToInventory(idx, _alchemyContents[i]);
+            _alchemyContents[i] = null;
+        }
+    }
+    // Fill slots from party inventory, ingredient by ingredient
+    let slotIdx = 0;
+    for (const needed of recipe.ingredients) {
+        let remaining = needed.quantity;
+        outer: for (const member of party) {
+            if (member.isEmpty) continue;
+            for (let invIdx = 0; invIdx < member.inventory.length; invIdx++) {
+                if (remaining === 0) break outer;
+                if (slotIdx >= 8) break outer;
+                const item = member.inventory[invIdx];
+                if (!item || item.name !== needed.name) continue;
+                _alchemyContents[slotIdx++] = item.name;
+                member.inventory[invIdx] = null;
+                remaining--;
+            }
+        }
+    }
+    _renderAlchemySlots();
+}
+
+function _autoPopulateForgeSlots(recipe) {
+    // Return any existing material slot contents to inventory
+    for (let i = 0; i < 8; i++) {
+        if (_forgeContents[i]) {
+            const idx = party.findIndex(m => !m.isEmpty);
+            if (idx !== -1) equip.addItemToInventory(idx, _forgeContents[i]);
+            _forgeContents[i] = null;
+        }
+    }
+    // Fill slots from party inventory, ingredient by ingredient
+    let slotIdx = 0;
+    for (const needed of recipe.ingredients) {
+        let remaining = needed.quantity;
+        outer: for (const member of party) {
+            if (member.isEmpty) continue;
+            for (let invIdx = 0; invIdx < member.inventory.length; invIdx++) {
+                if (remaining === 0) break outer;
+                if (slotIdx >= 8) break outer;
+                const item = member.inventory[invIdx];
+                if (!item || item.name !== needed.name) continue;
+                _forgeContents[slotIdx++] = item.name;
+                member.inventory[invIdx] = null;
+                remaining--;
+            }
+        }
+    }
+    _renderForgeSlots();
+}
+
+// ─────────────────────────────────────────────
+//  KNOWN RECIPES — PARCHMENT SUBMISSION
+// ─────────────────────────────────────────────
+
+const _ALCHEMY_PARCHMENT_TYPES = new Set(['minor-potions', 'party-potions', 'potions']);
+const _FORGE_PARCHMENT_TYPES   = new Set(['forge-armour', 'forge-weapons']);
+
+function _getAlchemyRecipesForParchment(parchmentType) {
+    return POTIONS_DATA.filter(p => {
+        if (parchmentType === 'minor-potions') return !p.partyPotion && p.name.startsWith('Minor');
+        if (parchmentType === 'party-potions') return p.partyPotion;
+        if (parchmentType === 'potions')       return !p.partyPotion && !p.name.startsWith('Minor');
+        return false;
+    }).map(p => p.name);
+}
+
+function _getForgeRecipesForParchment(parchmentType) {
+    return FORGE_DATA.filter(item => {
+        if (parchmentType === 'forge-weapons') return _FORGE_WEAPON_NAMES.has(item.name);
+        if (parchmentType === 'forge-armour')  return !_FORGE_WEAPON_NAMES.has(item.name);
+        return false;
+    }).map(item => item.name);
+}
+
+function _submitParchmentToAlchemy(parchmentDef, memberIdx, invIdx) {
+    const names = _getAlchemyRecipesForParchment(parchmentDef.parchmentType);
+    const newCount = names.filter(n => !_knownAlchemyRecipes.has(n)).length;
+    names.forEach(n => _knownAlchemyRecipes.add(n));
+    party[memberIdx].inventory[invIdx] = null;
+    _renderKnownAlchemyRecipes();
+    _hideAlchemyParchmentPicker();
+    const msg = newCount > 0
+        ? `Parchment studied! ${newCount} new recipe${newCount > 1 ? 's' : ''} learned.`
+        : 'Parchment studied — all recipes already known.';
+    showAlchemyMessage(msg, newCount > 0 ? 'success' : 'info');
+    playLearntSound();
+}
+
+function _submitParchmentToForge(parchmentDef, memberIdx, invIdx) {
+    const names = _getForgeRecipesForParchment(parchmentDef.parchmentType);
+    const newCount = names.filter(n => !_knownForgeRecipes.has(n)).length;
+    names.forEach(n => _knownForgeRecipes.add(n));
+    party[memberIdx].inventory[invIdx] = null;
+    _renderKnownForgeRecipes();
+    _hideAnvilParchmentPicker();
+    const msg = newCount > 0
+        ? `Parchment studied! ${newCount} new recipe${newCount > 1 ? 's' : ''} learned.`
+        : 'Parchment studied — all recipes already known.';
+    showForgeMessage(msg, newCount > 0 ? 'success' : 'info');
+    playLearntSound();
+}
+
+function _showAlchemyParchmentPicker(x, y) {
+    const picker = document.getElementById('alchemy-parchment-picker');
+    const grid = document.getElementById('alchemy-parchment-picker-grid');
+    grid.innerHTML = '';
+    let found = false;
+    party.forEach((member, memberIdx) => {
+        if (member.isEmpty) return;
+        member.inventory.forEach((item, invIdx) => {
+            if (!item) return;
+            const def = getItemDef(item.name);
+            if (!def || def.type !== 'parchment' || !_ALCHEMY_PARCHMENT_TYPES.has(def.parchmentType)) return;
+            found = true;
+            const slot = document.createElement('div');
+            slot.className = 'picker-slot';
+            const img = document.createElement('img');
+            img.src = asset(def.icon);
+            slot.appendChild(img);
+            const owner = document.createElement('div');
+            owner.className = 'picker-slot-owner';
+            const canvas = document.createElement('canvas');
+            canvas.width = 14; canvas.height = 14;
+            drawPortrait(canvas, member);
+            owner.appendChild(canvas);
+            slot.appendChild(owner);
+            slot.onclick = () => _submitParchmentToAlchemy(def, memberIdx, invIdx);
+            equip.attachTooltipListeners(slot, () => ({ name: def.name, description: `Held by ${member.name}. Click to study.` }));
+            grid.appendChild(slot);
+        });
+    });
+    if (!found) {
+        const msg = document.createElement('div');
+        msg.className = 'picker-empty-msg';
+        msg.textContent = 'No alchemy parchments in party inventory.';
+        grid.appendChild(msg);
+    }
+    picker.classList.remove('picker-hidden');
+    const pw = picker.offsetWidth || 280;
+    const ph = picker.offsetHeight || 160;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    let lx = x - pw / 2;
+    let ly = y - ph - 10;
+    if (lx < 10) lx = 10;
+    if (lx + pw > vw - 10) lx = vw - pw - 10;
+    if (ly < 10) ly = y + 20;
+    if (ly + ph > vh - 10) ly = vh - ph - 10;
+    picker.style.left = lx + 'px';
+    picker.style.top  = ly + 'px';
+}
+
+function _hideAlchemyParchmentPicker() {
+    const picker = document.getElementById('alchemy-parchment-picker');
+    if (picker) picker.classList.add('picker-hidden');
+}
+
+function _showAnvilParchmentPicker(x, y) {
+    const picker = document.getElementById('anvil-parchment-picker');
+    const grid = document.getElementById('anvil-parchment-picker-grid');
+    grid.innerHTML = '';
+    let found = false;
+    party.forEach((member, memberIdx) => {
+        if (member.isEmpty) return;
+        member.inventory.forEach((item, invIdx) => {
+            if (!item) return;
+            const def = getItemDef(item.name);
+            if (!def || def.type !== 'parchment' || !_FORGE_PARCHMENT_TYPES.has(def.parchmentType)) return;
+            found = true;
+            const slot = document.createElement('div');
+            slot.className = 'picker-slot';
+            const img = document.createElement('img');
+            img.src = asset(def.icon);
+            slot.appendChild(img);
+            const owner = document.createElement('div');
+            owner.className = 'picker-slot-owner';
+            const canvas = document.createElement('canvas');
+            canvas.width = 14; canvas.height = 14;
+            drawPortrait(canvas, member);
+            owner.appendChild(canvas);
+            slot.appendChild(owner);
+            slot.onclick = () => _submitParchmentToForge(def, memberIdx, invIdx);
+            equip.attachTooltipListeners(slot, () => ({ name: def.name, description: `Held by ${member.name}. Click to study.` }));
+            grid.appendChild(slot);
+        });
+    });
+    if (!found) {
+        const msg = document.createElement('div');
+        msg.className = 'picker-empty-msg';
+        msg.textContent = 'No forge parchments in party inventory.';
+        grid.appendChild(msg);
+    }
+    picker.classList.remove('picker-hidden');
+    const pw = picker.offsetWidth || 280;
+    const ph = picker.offsetHeight || 160;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    let lx = x - pw / 2;
+    let ly = y - ph - 10;
+    if (lx < 10) lx = 10;
+    if (lx + pw > vw - 10) lx = vw - pw - 10;
+    if (ly < 10) ly = y + 20;
+    if (ly + ph > vh - 10) ly = vh - ph - 10;
+    picker.style.left = lx + 'px';
+    picker.style.top  = ly + 'px';
+}
+
+function _hideAnvilParchmentPicker() {
+    const picker = document.getElementById('anvil-parchment-picker');
+    if (picker) picker.classList.add('picker-hidden');
+}
+
+// ─────────────────────────────────────────────
 //  SAVE REGISTRY
 // ─────────────────────────────────────────────
 import { registerSaveHandler } from './save-registry.js';
@@ -4070,11 +4598,15 @@ registerSaveHandler('world', {
             flags: getWorldFlags(),
             merchantStock: getMerchantStock(),
             potionMerchantStock: getPotionMerchantStock(),
+            knownAlchemyRecipes: [..._knownAlchemyRecipes],
+            knownForgeRecipes: [..._knownForgeRecipes],
         };
     },
     restore(data) {
         setWorldFlags(data.flags ?? null);
         if (data.merchantStock) setMerchantStock(data.merchantStock);
         if (data.potionMerchantStock) setPotionMerchantStock(data.potionMerchantStock);
+        if (data.knownAlchemyRecipes) data.knownAlchemyRecipes.forEach(r => _knownAlchemyRecipes.add(r));
+        if (data.knownForgeRecipes)   data.knownForgeRecipes.forEach(r => _knownForgeRecipes.add(r));
     },
 });

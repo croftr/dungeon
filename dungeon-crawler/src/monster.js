@@ -715,8 +715,10 @@ function _updateStatsPanel(m) {
 
 
 function _loadMonster(m, scene) {
-  // Load the idle/walking GLB as the base mesh
-  _gltfLoader.load(m.glbIdle, (gltf) => {
+  // Load the idle/walking GLB as the base mesh (fall back to hit or attack GLB for mesh-only monsters like the dummy)
+  const baseGlb = m.glbIdle || m.glbHit || m.glbAttack;
+  if (!baseGlb) return;
+  _gltfLoader.load(baseGlb, (gltf) => {
     // If monster was killed (e.g. save restore) before model finished loading, discard
     if (!m.alive) return;
 
@@ -731,6 +733,7 @@ function _loadMonster(m, scene) {
 
     // Apply initial facing direction before combat (lookAtPlayer takes over once engaged)
     if (m.faceNorth) model.lookAt(wx, 0, wz - 10);
+    else if (m.faceSouth) model.lookAt(wx, 0, wz + 10);
 
     m.lookAtPlayer = (playerPos) => {
       model.lookAt(playerPos.x, model.position.y, playerPos.z);
@@ -763,7 +766,7 @@ function _loadMonster(m, scene) {
 
     m.mixer = new THREE.AnimationMixer(model);
 
-    if (gltf.animations && gltf.animations.length > 0) {
+    if (gltf.animations && gltf.animations.length > 0 && m.glbIdle) {
       const idleAction = m.mixer.clipAction(gltf.animations[0]);
       m.actions.idle = idleAction;
       m._activeIdle = idleAction;
@@ -1353,7 +1356,7 @@ export function updateMonsters(dt, playerCamera, scene) {
 
     // Monsters detect characters only within 1 grid square and when facing them.
     // Unseen cloaks the party — monsters cannot detect or engage them.
-    if (!isSuppressed && !isPartyUnseen() && !m.engaged && m.name !== 'Training Dummy' && distRow <= 1 && distCol <= 1) {
+    if (!isSuppressed && !isPartyUnseen() && !m.engaged && (m.name !== 'Training Dummy' || m.combatMode) && distRow <= 1 && distCol <= 1) {
       if (_hasLineOfSight(m.gridRow, m.gridCol, player.gridRow, player.gridCol)) {
         let seesPlayer = true;
         if (m.mesh && playerPos) {
@@ -1365,7 +1368,7 @@ export function updateMonsters(dt, playerCamera, scene) {
         }
         if (seesPlayer) {
           m.engaged = true;
-          setInCombat();
+          if (m.name !== 'Training Dummy') setInCombat();
         }
       }
     }
@@ -1459,9 +1462,9 @@ export function updateMonsters(dt, playerCamera, scene) {
 
     // Proximity attack logic: if player is adjacent, attack them periodically.
     // Suppressed (sleeping) monsters cannot attack but still mark combat engaged.
-    if (inRange && m.name !== 'Training Dummy') {
+    if (inRange && (m.name !== 'Training Dummy' || m.combatMode)) {
       m.engaged = true;
-      setInCombat();
+      if (m.name !== 'Training Dummy') setInCombat();
 
       if (isSuppressed) {
         // Monster is asleep (or otherwise suppressed) — cannot attack
@@ -1565,7 +1568,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
   // If this is the first hit on a fresh monster (not already engaged) and we're
   // not currently mid-combat, this marks the start of a new fight — reset stats.
   const wasEngaged = m.engaged;
-  if (m.name !== 'Training Dummy') m.engaged = true;
+  if (m.name !== 'Training Dummy' || m.combatMode) m.engaged = true;
   // Stats are now cumulative — no auto-reset on new fight.
 
   // ── Skeleton Shield Block ──────────────────────────────────────────────────
@@ -1577,10 +1580,6 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
         attackType: attackType || 'attack', hitChance: 1, hit: true, crit: false,
         blocked: true,
       });
-
-      if (m.name !== 'Training Dummy') {
-        setInCombat();
-      }
 
       // Sync visual/audio feedback with the action animation
       const delay = (attackType === 'poison-dot') ? 0 : 250;
@@ -1874,12 +1873,12 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
 
 export function triggerMonsterAttack(monsterId) {
   const m = monsters.find((x) => x.id === monsterId && x.alive);
-  if (!m || m.name === 'Training Dummy') return;
+  if (!m || (m.name === 'Training Dummy' && !m.combatMode)) return;
 
   // Unseen — monsters cannot attack the party while cloaked
   if (isPartyUnseen()) return;
 
-  setInCombat();
+  if (m.name !== 'Training Dummy') setInCombat();
 
   // ── Pick attack variant (or fall back to single attack) ──
   let attackAction, soundTimings, damageTimings, attackSound, activeVariant;
@@ -1958,13 +1957,13 @@ export function triggerMonsterAttack(monsterId) {
 
   }
 
-  if (attackAction && m.actions.idle) {
+  if (attackAction) {
     attackAction.reset();
     attackAction.setEffectiveTimeScale(1);
     attackAction.setEffectiveWeight(1);
     attackAction.play();
     const fromAction = (m.actions.walk && m._animState === 'walk') ? m.actions.walk : (m._activeIdle || m.actions.idle);
-    fromAction.crossFadeTo(attackAction, 0.2, true);
+    if (fromAction) fromAction.crossFadeTo(attackAction, 0.2, true);
 
     // ── Sound scheduling ──
     if (attackSound) {
@@ -2293,12 +2292,12 @@ function _playHitAnimation(m, attackType, killer) {
   if (!m.mesh) return;
   const mesh = m.mesh;
 
-  if (m.name === 'Training Dummy') {
+  if (m.name === 'Training Dummy' && !m.combatMode) {
     // Only trigger for recruits (party members)
     const isRecruit = killer && party.some(p => p.name === killer);
-    if (isRecruit && m.mixer && m.actions.attack) {
-      m.actions.attack.stop(); // Stop anything current
-      m.actions.attack.reset().play();
+    if (isRecruit && m.mixer && m.actions.hit) {
+      m.actions.hit.stop();
+      m.actions.hit.reset().play();
     }
     return; // Skip standard red flash/knockback for dummy
   }

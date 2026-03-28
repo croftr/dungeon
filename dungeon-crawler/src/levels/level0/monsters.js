@@ -7,11 +7,18 @@ import { asset } from '../../assets.js';
 //  Only the training dummy lives here — no combat monsters.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const level0Monsters = [
-  // Training dummy in the east room corner
-  inst(D.dummy, 10, 7, 23,
-    asset('/monsters/dummy-annimation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
-    asset('/monsters/dummy-annimation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
-    null, 0.5, 0, 0, 0), // level = 0
+const _dummy = inst(D.dummy, 10, 7, 23,
+    null, // no idle animation — dummy stands still
+    asset('/monsters/dummy-annimation/dummy-attack.glb'),
+    null, 0.5, 0, 0, 0, // level = 0
+    null, // patrol
+    null, // glbDeath
+    asset('/monsters/dummy-annimation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb')); // glbHit
 
-];
+// Dev-tool fields for the Training Console (not persisted across reloads)
+_dummy.faceSouth = true;
+_dummy.combatMode = false;
+_dummy.originalStats = { ...D.dummy.stats };
+_dummy.originalAttackSpeed = D.dummy.attackSpeed;
+
+export const level0Monsters = [_dummy];

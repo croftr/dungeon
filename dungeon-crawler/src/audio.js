@@ -458,15 +458,20 @@ const SKILL_SOUND_MAP = {
  */
 export async function playItemSound(itemName, slot = '') {
   if (!itemName) return;
+  const lowerName = itemName.toLowerCase();
   let url = ITEM_SOUNDS[itemName];
-  if (!url && (itemName.toLowerCase().includes('potion') || slot === 'potion')) {
+
+  // Specific check for parchment/scroll sound
+  if (!url && (lowerName.includes('parchment') || slot === 'parchment' || lowerName.includes('scroll'))) {
+    url = ITEM_SOUNDS['scroll'];
+  }
+
+  if (!url && (lowerName.includes('potion') || slot === 'potion')) {
     url = ITEM_SOUNDS['potion'];
   }
+
   if (!url && itemName === 'Gold Coins') {
     url = ITEM_SOUNDS['Gold Coins'];
-  }
-  if (!url && itemName.toLowerCase().includes('scroll')) {
-    url = ITEM_SOUNDS['scroll'];
   }
 
   if (!url) return;
@@ -709,21 +714,33 @@ export async function playSoundByUrl(url, volume = 0.8) {
 // ── Quest / NPC speech audio ─────────────────────────────────────────────────
 let _questAudioSource = null;
 let _questAudioGain   = null;
+let _questSpeechId    = 0;
+let _questSpeechEndTime = 0;
 
 /**
  * Play NPC quest speech audio. Replaces any currently playing quest audio.
  * Returns the source so callers can attach onended.
  */
 export async function playQuestAudio(url, volume = 0.8) {
+  const currentSpeechId = ++_questSpeechId;
+
   // Stop any previous quest audio immediately
   if (_questAudioSource) {
-    try { _questAudioSource.stop(); } catch (_) {}
-    _questAudioSource = null;
-    _questAudioGain   = null;
+    fadeOutQuestAudio(0.5);
+    _questSpeechEndTime = Date.now() + 1000;
   }
+
+  const delay = _questSpeechEndTime - Date.now();
+  if (delay > 0) {
+    await new Promise(resolve => setTimeout(resolve, delay));
+  }
+
+  if (currentSpeechId !== _questSpeechId) return;
 
   const buffer = await getBuffer(url);
   if (!buffer) return;
+  if (currentSpeechId !== _questSpeechId) return;
+
   try {
     const ctx = getCtx();
     const source   = ctx.createBufferSource();
@@ -732,12 +749,12 @@ export async function playQuestAudio(url, volume = 0.8) {
     gainNode.gain.value = volume;
     source.connect(gainNode);
     gainNode.connect(ctx.destination);
-    source.onended = () => {
+    source.addEventListener('ended', () => {
       if (_questAudioSource === source) {
         _questAudioSource = null;
         _questAudioGain   = null;
       }
-    };
+    });
     source.start(0);
     _questAudioSource = source;
     _questAudioGain   = gainNode;
@@ -912,6 +929,23 @@ export async function playTrapSound() {
     source.start(0);
   } catch (err) {
     console.warn('[audio] playTrapSound failed:', err);
+  }
+}
+
+export async function playLearntSound() {
+  const buffer = await getBuffer(asset('/sounds/learnt.mp3'));
+  if (!buffer) return;
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.8;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playLearntSound failed:', err);
   }
 }
 

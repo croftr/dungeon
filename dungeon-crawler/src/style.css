@@ -2,6 +2,26 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: #4a3a20 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #4a3a20;
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #6a5538;
 }
 
 body {
@@ -1855,8 +1875,6 @@ label.mm-setting-label {
   justify-content: flex-start;
   max-height: 200px;
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #4a3a20 #0d0a06;
 }
 
 /* In the development modal, learned skills sit in a single scrollable row, newest on the left */
@@ -1870,21 +1888,6 @@ label.mm-setting-label {
   flex-wrap: nowrap;
   gap: 8px;
   padding: 8px 12px;
-  scrollbar-width: thin;
-  scrollbar-color: #4a3a20 #0d0a06;
-}
-
-#char-skills::-webkit-scrollbar {
-  width: 6px;
-}
-
-#char-skills::-webkit-scrollbar-track {
-  background: #0d0a06;
-}
-
-#char-skills::-webkit-scrollbar-thumb {
-  background: #4a3a20;
-  border-radius: 3px;
 }
 
 .skill-card {
@@ -2076,8 +2079,6 @@ label.mm-setting-label {
   flex-direction: column;
   border-right: 1px solid #2a2010;
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #4a3a20 #0d0a06;
 }
 
 #char-dev-stats-section {
@@ -4915,7 +4916,6 @@ label.mm-setting-label {
 #anvil-result-slot img {
   width: 110px !important;
   height: 110px !important;
-  image-rendering: auto !important;
 }
 
 /* Forge ingredient/result slots */
@@ -4952,7 +4952,7 @@ label.mm-setting-label {
   width: 42px;
   height: 42px;
   object-fit: contain;
-  image-rendering: pixelated;
+  image-rendering: auto;
 }
 
 /* Forge message bar */
@@ -5297,35 +5297,6 @@ label.mm-setting-label {
   align-content: start;
   overflow-y: auto;
   padding-right: 4px;
-}
-
-#merchant-grid::-webkit-scrollbar,
-#merchant-basket-grid::-webkit-scrollbar,
-#merchant-party-grid::-webkit-scrollbar,
-#merchant-sell-basket-grid::-webkit-scrollbar {
-  width: 4px;
-}
-
-#merchant-grid::-webkit-scrollbar-track,
-#merchant-basket-grid::-webkit-scrollbar-track,
-#merchant-party-grid::-webkit-scrollbar-track,
-#merchant-sell-basket-grid::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-#merchant-grid::-webkit-scrollbar-thumb,
-#merchant-basket-grid::-webkit-scrollbar-thumb,
-#merchant-party-grid::-webkit-scrollbar-thumb,
-#merchant-sell-basket-grid::-webkit-scrollbar-thumb {
-  background: #3a2e18;
-  border-radius: 2px;
-}
-
-#merchant-grid::-webkit-scrollbar-thumb:hover,
-#merchant-basket-grid::-webkit-scrollbar-thumb:hover,
-#merchant-party-grid::-webkit-scrollbar-thumb:hover,
-#merchant-sell-basket-grid::-webkit-scrollbar-thumb:hover {
-  background: #5a4a30;
 }
 
 #merchant-basket-header {
@@ -5733,23 +5704,6 @@ label.mm-setting-label {
   overflow-y: auto;
   overflow-x: hidden;
   padding: 4px 0;
-}
-
-.bl-entries::-webkit-scrollbar {
-  width: 6px;
-}
-
-.bl-entries::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
-}
-
-.bl-entries::-webkit-scrollbar-thumb {
-  background: rgba(232, 200, 122, 0.3);
-  border-radius: 3px;
-}
-
-.bl-entries::-webkit-scrollbar-thumb:hover {
-  background: rgba(232, 200, 122, 0.5);
 }
 
 .bl-row {
@@ -6239,6 +6193,158 @@ body.cursor-interact #renderer-canvas {
   color: #668866;
   font-size: 12px;
   font-style: italic;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   BENCH KNOWN RECIPES + PARCHMENT SUBMISSION
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Submit Parchment bar */
+#alchemy-parchment-bar,
+#anvil-parchment-bar {
+  display: flex;
+  justify-content: center;
+  padding: 6px 0 2px;
+}
+
+#alchemy-parchment-btn,
+#anvil-parchment-btn {
+  background: rgba(60, 40, 10, 0.7);
+  border: 1px solid rgba(180, 130, 40, 0.5);
+  color: #c8a84a;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  padding: 4px 14px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+#alchemy-parchment-btn:hover,
+#anvil-parchment-btn:hover {
+  background: rgba(100, 70, 10, 0.85);
+  border-color: rgba(210, 170, 60, 0.8);
+  color: #f0d070;
+}
+
+/* Known Recipes section */
+#alchemy-known-recipes-section,
+#anvil-known-recipes-section {
+  border-top: 1px solid rgba(80, 120, 80, 0.35);
+  padding: 8px 16px 4px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+#anvil-known-recipes-section {
+  border-top-color: rgba(100, 80, 40, 0.4);
+}
+
+.bench-known-title {
+  margin: 0 0 6px;
+}
+
+#alchemy-known-recipes-list,
+#anvil-known-recipes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bench-no-recipes {
+  font-size: 11px;
+  font-style: italic;
+  color: #668866;
+  padding: 4px 0;
+}
+
+#anvil-known-recipes-section .bench-no-recipes {
+  color: #887766;
+}
+
+.bench-recipe-entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 3px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.bench-recipe-entry:hover {
+  background: rgba(40, 60, 40, 0.55);
+}
+
+#anvil-known-recipes-section .bench-recipe-entry:hover {
+  background: rgba(60, 45, 20, 0.55);
+}
+
+.bench-recipe-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #a8d8a8;
+  flex: 0 0 100%;
+}
+
+#anvil-known-recipes-section .bench-recipe-name {
+  color: #d4b87a;
+}
+
+.bench-recipe-ing {
+  font-size: 11px;
+  color: #8aaa8a;
+}
+
+#anvil-known-recipes-section .bench-recipe-ing {
+  color: #aa9866;
+}
+
+/* Parchment pickers (shared style with existing pickers) */
+#alchemy-parchment-picker,
+#anvil-parchment-picker {
+  position: fixed;
+  width: 280px;
+  background: rgba(18, 10, 4, 0.97);
+  border: 1px solid rgba(120, 80, 20, 0.6);
+  border-radius: 4px;
+  z-index: 3000;
+  padding: 8px;
+}
+
+.bench-parchment-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 4px 8px;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: #c8a84a;
+  border-bottom: 1px solid rgba(120, 80, 20, 0.4);
+  margin-bottom: 8px;
+}
+
+.bench-parchment-picker-header button {
+  background: none;
+  border: none;
+  color: #8a7a5a;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.bench-parchment-picker-header button:hover {
+  color: #ff6666;
+}
+
+#alchemy-parchment-picker-grid,
+#anvil-parchment-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 54px);
+  gap: 6px;
 }
 
 /* ── Alchemy message bar ─────────────────── */
@@ -7577,4 +7683,165 @@ body.cursor-interact #renderer-canvas {
 
 .quest-log-completed {
   opacity: 0.5;
+}
+
+/* ── Training Console Modal ─────────────────────────────────────────────── */
+.tc-hidden { display: none !important; }
+
+#training-console-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1200;
+}
+
+#training-console-modal {
+  background: #1a1a2e;
+  border: 2px solid #e94560;
+  border-radius: 10px;
+  width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+  color: #eee;
+  font-family: inherit;
+  box-shadow: 0 0 30px rgba(233,69,96,0.3);
+}
+
+#tc-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #333;
+}
+#tc-header h2 {
+  font-size: 1.1rem;
+  color: #e94560;
+  margin: 0;
+}
+#tc-close {
+  background: none; border: none;
+  color: #aaa; font-size: 1.4rem;
+  cursor: pointer; line-height: 1;
+}
+#tc-close:hover { color: #fff; }
+
+#tc-body { padding: 12px 16px; }
+
+.tc-row {
+  display: flex; align-items: center; gap: 8px;
+  margin: 6px 0;
+}
+.tc-row label:first-child {
+  flex: 0 0 120px;
+  font-size: 0.85rem;
+  color: #ccc;
+}
+
+.tc-controls {
+  display: flex; align-items: center; gap: 4px;
+  flex: 1;
+}
+
+.tc-value {
+  display: inline-block;
+  width: 36px;
+  text-align: center;
+  font-weight: bold;
+  color: #ffd700;
+  font-size: 0.95rem;
+}
+
+.tc-btn {
+  background: #2a2a4a;
+  border: 1px solid #555;
+  color: #ddd;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  min-width: 28px;
+}
+.tc-btn:hover { background: #3a3a6a; border-color: #e94560; }
+
+.tc-toggle {
+  padding: 4px 18px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.85rem;
+  border: 1px solid #555;
+  background: #2a2a4a;
+  color: #aaa;
+  transition: all 0.2s;
+}
+.tc-toggle.active {
+  background: #e94560;
+  color: #fff;
+  border-color: #e94560;
+}
+
+.tc-divider {
+  border-top: 1px solid #333;
+  margin: 10px 0;
+}
+
+.tc-section-label {
+  font-size: 0.8rem;
+  color: #e94560;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.tc-check-label {
+  font-size: 0.8rem;
+  color: #aaa;
+  margin-right: 4px;
+  flex: 0 0 auto !important;
+}
+
+.tc-range {
+  flex: 1;
+  max-width: 80px;
+  accent-color: #e94560;
+}
+
+.tc-range-val {
+  font-size: 0.8rem;
+  color: #ffd700;
+  width: 32px;
+  text-align: right;
+}
+
+.tc-presets {
+  gap: 6px;
+  justify-content: flex-start;
+}
+.tc-preset {
+  background: #2a2a4a;
+  border: 1px solid #555;
+  color: #ddd;
+  padding: 4px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+.tc-preset:hover { background: #3a3a6a; border-color: #e94560; }
+
+#tc-reset {
+  background: #333;
+  border: 1px solid #555;
+  color: #ddd;
+  padding: 5px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+#tc-reset:hover { background: #e94560; color: #fff; }
+
+#tc-preview {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #888;
+  padding-top: 4px;
 }

@@ -5,6 +5,8 @@ import { SPELLS } from './spells.js';
 import { STATUS_EFFECT_DEFS } from './status-effects.js';
 import { ACTIONS } from './items.js';
 import POTIONS from './data/items/potions.json';
+import FORGE from './data/forge.json';
+import WEAPONS from './data/items/weapons.json';
 import SKILLS_DATA from './data/skills.json';
 import { asset } from './assets.js';
 import { playAction } from './actions.js';
@@ -4470,17 +4472,59 @@ function _readParchment(memberIndex, invIndex, def) {
   if (def.parchmentType === 'minor-potions' || def.parchmentType === 'party-potions') {
     const isParty = def.parchmentType === 'party-potions';
     let html = `<p style="margin-bottom: 20px;"><em>The following recipes for alchemical ${isParty ? 'party ' : ''}concoctions have been inscribed:</em></p>`;
-    
+
     POTIONS.forEach(p => {
       // Filter based on parchment type
       if (isParty && !p.partyPotion) return;
       if (!isParty && p.partyPotion) return;
-      
+
       html += `<div style="margin-bottom: 15px;">`;
       html += `<strong style="font-size: 1.1em; color: #5a2a1a;">${p.name}</strong><br/>`;
       if (p.ingredients && p.ingredients.length > 0) {
         html += `<div style="margin: 5px 0;">`;
         p.ingredients.forEach(ing => {
+          html += `• ${ing.quantity}x ${ing.name}<br/>`;
+        });
+        html += `</div>`;
+      } else {
+        html += `• Unknown ingredients<br/>`;
+      }
+      html += `</div>`;
+    });
+    body.innerHTML = html;
+  } else if (def.parchmentType === 'potions') {
+    let html = `<p style="margin-bottom: 20px;"><em>The following alchemical recipes have been inscribed:</em></p>`;
+    POTIONS.forEach(p => {
+      if (p.partyPotion) return;
+      if (p.name.startsWith('Minor')) return;
+      html += `<div style="margin-bottom: 15px;">`;
+      html += `<strong style="font-size: 1.1em; color: #5a2a1a;">${p.name}</strong><br/>`;
+      if (p.ingredients && p.ingredients.length > 0) {
+        html += `<div style="margin: 5px 0;">`;
+        p.ingredients.forEach(ing => {
+          html += `• ${ing.quantity}x ${ing.name}<br/>`;
+        });
+        html += `</div>`;
+      } else {
+        html += `• Unknown ingredients<br/>`;
+      }
+      html += `</div>`;
+    });
+    body.innerHTML = html;
+  } else if (def.parchmentType === 'forge-armour' || def.parchmentType === 'forge-weapons') {
+    const isWeapons = def.parchmentType === 'forge-weapons';
+    const weaponNames = new Set(WEAPONS.map(w => w.name));
+    const label = isWeapons ? 'weapons' : 'armour';
+    let html = `<p style="margin-bottom: 20px;"><em>The following secrets of forging magical ${label} have been inscribed:</em></p>`;
+    FORGE.forEach(item => {
+      const isWeapon = weaponNames.has(item.name);
+      if (isWeapons && !isWeapon) return;
+      if (!isWeapons && isWeapon) return;
+      html += `<div style="margin-bottom: 15px;">`;
+      html += `<strong style="font-size: 1.1em; color: #5a2a1a;">${item.name}</strong><br/>`;
+      if (item.ingredients && item.ingredients.length > 0) {
+        html += `<div style="margin: 5px 0;">`;
+        item.ingredients.forEach(ing => {
           html += `• ${ing.quantity}x ${ing.name}<br/>`;
         });
         html += `</div>`;

@@ -153,6 +153,40 @@ export function getNextLevelXP(member) {
   return xpThresholds[member.level] ?? null;
 }
 
+// ─────────────────────────────────────────────
+//  DEV UTILITIES (browser console helpers)
+// ─────────────────────────────────────────────
+
+/**
+ * Grant XP to all living party members and trigger level-ups.
+ * Usage: devXP(5000)
+ */
+window.devXP = function(amount) {
+  const living = party.filter(m => !m.isEmpty);
+  for (const m of living) {
+    m.xp = (m.xp ?? 0) + amount;
+    checkLevelUp(m);
+  }
+  refreshPartyCards();
+  console.log(`[dev] Granted ${amount} XP to ${living.map(m => m.name).join(', ')}`);
+};
+
+/**
+ * Set all party members to the given level (with matching XP floor).
+ * Usage: devLevel(10)
+ */
+window.devLevel = function(targetLevel) {
+  const clamped = Math.max(1, Math.min(targetLevel, maxLevel));
+  const xpNeeded = xpThresholds[clamped - 1] ?? 0;
+  const living = party.filter(m => !m.isEmpty);
+  for (const m of living) {
+    m.xp = Math.max(m.xp ?? 0, xpNeeded);
+    checkLevelUp(m);
+  }
+  refreshPartyCards();
+  console.log(`[dev] Set party to level ${clamped} (xp floor: ${xpNeeded})`);
+};
+
 /**
  * Hydrate a skill name string into a full skill object,
  * matching the format used by recruits.js.

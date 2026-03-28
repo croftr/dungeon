@@ -1408,6 +1408,15 @@
             <div id="alchemy-result-slot" class="chest-slot alchemy-slot" data-index="8"></div>
           </div>
         </div>
+        <div id="alchemy-parchment-bar">
+          <button id="alchemy-parchment-btn">📜 Submit Parchment</button>
+        </div>
+      </div>
+
+      <!-- Known Recipes Section -->
+      <div id="alchemy-known-recipes-section">
+        <h4 class="alchemy-section-title bench-known-title">Known Recipes</h4>
+        <div id="alchemy-known-recipes-list"></div>
       </div>
 
       <!-- Alchemy message bar — shows feedback from transmutation -->
@@ -1424,6 +1433,15 @@
         <button id="alchemy-picker-close" aria-label="Close">&times;</button>
       </div>
       <div id="alchemy-picker-grid"></div>
+    </div>
+
+    <!-- Alchemy parchment picker -->
+    <div id="alchemy-parchment-picker" class="picker-hidden">
+      <div class="bench-parchment-picker-header">
+        <span>Select Parchment</span>
+        <button id="alchemy-parchment-picker-close" aria-label="Close">&times;</button>
+      </div>
+      <div id="alchemy-parchment-picker-grid"></div>
     </div>
   </div>
 
@@ -1466,6 +1484,15 @@
             <div id="anvil-result-slot" class="chest-slot anvil-slot" data-index="8"></div>
           </div>
         </div>
+        <div id="anvil-parchment-bar">
+          <button id="anvil-parchment-btn">📜 Submit Parchment</button>
+        </div>
+      </div>
+
+      <!-- Known Recipes Section -->
+      <div id="anvil-known-recipes-section">
+        <h4 class="anvil-section-title bench-known-title">Known Recipes</h4>
+        <div id="anvil-known-recipes-list"></div>
       </div>
 
       <!-- Forge message bar -->
@@ -1482,6 +1509,15 @@
         <button id="anvil-picker-close" aria-label="Close">&times;</button>
       </div>
       <div id="anvil-picker-grid"></div>
+    </div>
+
+    <!-- Forge parchment picker -->
+    <div id="anvil-parchment-picker" class="picker-hidden">
+      <div class="bench-parchment-picker-header">
+        <span>Select Parchment</span>
+        <button id="anvil-parchment-picker-close" aria-label="Close">&times;</button>
+      </div>
+      <div id="anvil-parchment-picker-grid"></div>
     </div>
   </div>
 
@@ -1679,6 +1715,105 @@
       <div class="detail-stat-row" id="detail-row-ammo-mod"><span>Multiplier</span><span
           id="item-detail-ammo-mod"></span></div>
       <div class="detail-stat-row" id="detail-row-ammo-type"><span>Type</span><span id="item-detail-ammo-type"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TRAINING CONSOLE MODAL (dev tool) ── -->
+  <div id="training-console-overlay" class="tc-hidden">
+    <div id="training-console-modal">
+      <div id="tc-header">
+        <h2>Training Dummy Console</h2>
+        <button id="tc-close">&times;</button>
+      </div>
+      <div id="tc-body">
+        <div class="tc-row">
+          <label>Combat Mode</label>
+          <button id="tc-combat-toggle" class="tc-toggle">OFF</button>
+        </div>
+        <div class="tc-divider"></div>
+        <div class="tc-row">
+          <label>Strength (ATK)</label>
+          <div class="tc-controls">
+            <button class="tc-btn" data-stat="strength" data-delta="-5">-5</button>
+            <button class="tc-btn" data-stat="strength" data-delta="-1">-1</button>
+            <span class="tc-value" id="tc-strength">0</span>
+            <button class="tc-btn" data-stat="strength" data-delta="1">+1</button>
+            <button class="tc-btn" data-stat="strength" data-delta="5">+5</button>
+          </div>
+        </div>
+        <div class="tc-row">
+          <label>Dexterity (HIT%)</label>
+          <div class="tc-controls">
+            <button class="tc-btn" data-stat="dexterity" data-delta="-5">-5</button>
+            <button class="tc-btn" data-stat="dexterity" data-delta="-1">-1</button>
+            <span class="tc-value" id="tc-dexterity">0</span>
+            <button class="tc-btn" data-stat="dexterity" data-delta="1">+1</button>
+            <button class="tc-btn" data-stat="dexterity" data-delta="5">+5</button>
+          </div>
+        </div>
+        <div class="tc-row">
+          <label>Attack Speed</label>
+          <div class="tc-controls">
+            <button class="tc-btn" data-stat="attackSpeed" data-delta="-0.5">-0.5</button>
+            <span class="tc-value" id="tc-attackSpeed">1</span>
+            <button class="tc-btn" data-stat="attackSpeed" data-delta="0.5">+0.5</button>
+          </div>
+        </div>
+        <div class="tc-divider"></div>
+        <div class="tc-section-label">On-Hit Effects</div>
+        <div class="tc-row">
+          <label>Poison</label>
+          <div class="tc-controls">
+            <input type="checkbox" id="tc-eff-poison">
+            <label for="tc-eff-poison" class="tc-check-label">Enable</label>
+            <input type="range" id="tc-eff-poison-chance" min="5" max="100" value="30" step="5" class="tc-range">
+            <span class="tc-range-val" id="tc-eff-poison-val">30%</span>
+          </div>
+        </div>
+        <div class="tc-row">
+          <label>Rot</label>
+          <div class="tc-controls">
+            <input type="checkbox" id="tc-eff-rot">
+            <label for="tc-eff-rot" class="tc-check-label">Enable</label>
+            <input type="range" id="tc-eff-rot-chance" min="5" max="100" value="30" step="5" class="tc-range">
+            <span class="tc-range-val" id="tc-eff-rot-val">30%</span>
+          </div>
+        </div>
+        <div class="tc-row">
+          <label>Frozen</label>
+          <div class="tc-controls">
+            <input type="checkbox" id="tc-eff-frozen">
+            <label for="tc-eff-frozen" class="tc-check-label">Enable</label>
+            <input type="range" id="tc-eff-frozen-chance" min="5" max="100" value="30" step="5" class="tc-range">
+            <span class="tc-range-val" id="tc-eff-frozen-val">30%</span>
+          </div>
+        </div>
+        <div class="tc-row">
+          <label>Stun</label>
+          <div class="tc-controls">
+            <input type="checkbox" id="tc-eff-stun">
+            <label for="tc-eff-stun" class="tc-check-label">Enable</label>
+            <input type="range" id="tc-eff-stun-chance" min="5" max="100" value="30" step="5" class="tc-range">
+            <span class="tc-range-val" id="tc-eff-stun-val">30%</span>
+          </div>
+        </div>
+        <div class="tc-divider"></div>
+        <div class="tc-section-label">Presets</div>
+        <div class="tc-row tc-presets">
+          <button class="tc-preset" data-preset="weak">Weak</button>
+          <button class="tc-preset" data-preset="medium">Medium</button>
+          <button class="tc-preset" data-preset="strong">Strong</button>
+          <button class="tc-preset" data-preset="boss">Boss</button>
+        </div>
+        <div class="tc-row">
+          <button id="tc-reset">Reset to Defaults</button>
+        </div>
+        <div class="tc-divider"></div>
+        <div id="tc-preview">
+          <span>Est. damage vs 0 DEF: <b id="tc-est-dmg">4</b></span>
+          <span>Hit chance vs 10 DEX: <b id="tc-est-hit">45%</b></span>
+        </div>
       </div>
     </div>
   </div>

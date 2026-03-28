@@ -15,7 +15,7 @@ export function spawnLevel0Objects(ctx) {
         addPortal, addDisabledPortal, addPortcullis,
         addPartyConfirmNPC,
         addAnvil, addAlchemyWorkshop, addDroppedTorch, addTrap1,
-        addDecoration, addCrystalShrine, addHeroDoor,
+        addDecoration, addCrystalShrine, addHeroDoor, addTrainingConsole,
         createWallButton,
         starterPortalEnabled, starterGateOpened,
         setStarterGate,
@@ -28,9 +28,9 @@ export function spawnLevel0Objects(ctx) {
     // ── Stash in the starter room ─────────────────────────────────────────────
     addChest(group, loader, 13.4, 10, Math.PI / 2, -0.1, [
         { name: 'Gold Coins', quantity: 100 },
-        'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore", "Life Essence", "Minor Potions Parchment",
+        'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore", "Life Essence", "Minor Potions Parchment", "Life Berry",
         "Lizard Scale", "Crocodile Hide", "Iron Ore", "Aqua Man Flipper", "Demon's Eyes", "Iron Ore", "Mace", "Cloth Trousers", "Starlight Nectar",
-        "Aether-Glass Silt"
+        "Aether-Glass Silt", "Potions Parchment", "Forge Armour Parchment", "Forge Weapons Parchment", "Minor Potions Parchment", "Party Potions Parchment"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in the east room (center) ────────────────────────────────────
@@ -93,11 +93,11 @@ export function spawnLevel0Objects(ctx) {
     addDroppedTorch(group, loader, 22, 14, Math.PI, 0, 0.8);
     addAnvil(group, loader, 19, 7, 0, 0, -0.85, ['Life Essence', 'Life Essence']);
 
+    // ── Training Console — next to the training dummy at (7, 23) ────────────
+    addTrainingConsole(group, loader, 22, 7, Math.PI);
+
     // ── Practice trap — NW corner of east room ────────────────────────────────
     addTrap1(group, loader, 7, 17);
 
-    // ── Teleport to Giant Room Button ─────────────────────────────────────────
-    const { group: giantBtn } = createWallButton(-1, { target: 'teleport_giant' });
-    giantBtn.position.set(11 * CELL - 1.0, 1.25, 11 * CELL); // West face of col 11, row 11
-    group.add(giantBtn);
+
 }

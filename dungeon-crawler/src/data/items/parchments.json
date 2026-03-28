@@ -16,5 +16,32 @@
     "parchmentType": "party-potions",
     "value": 15,
     "weight": 0.1
+  },
+  {
+    "name": "Potions Parchment",
+    "icon": "/icons/potions_parchment.png",
+    "description": "An ancient looking piece of parchment. It documents alchemical recipes for creating basic potions.",
+    "type": "parchment",
+    "parchmentType": "potions",
+    "value": 10,
+    "weight": 0.1
+  },
+  {
+    "name": "Forge Armour Parchment",
+    "icon": "/icons/forge-armour.png",
+    "description": "An ancient looking piece of parchment. It documents the secrets of forging magical armor.",
+    "type": "parchment",
+    "parchmentType": "forge-armour",
+    "value": 20,
+    "weight": 0.1
+  },
+  {
+    "name": "Forge Weapons Parchment",
+    "icon": "/icons/forge-weapons.png",
+    "description": "An ancient looking piece of parchment. It documents the secrets of forging magical weapons.",
+    "type": "parchment",
+    "parchmentType": "forge-weapons",
+    "value": 20,
+    "weight": 0.1
   }
 ]
