@@ -91,6 +91,9 @@ export function playerHitChance(character, monster, weaponDef = null) {
           chance += skillDef.magnitude || 0;
         }
       }
+      if (skillDef?.isPassive && name === 'Pyromancer' && weaponDef?.attackType === 'fireball') {
+        chance += skillDef.accuracyMagnitude || 0;
+      }
     });
   }
 
@@ -176,7 +179,7 @@ export function calcPlayerMagicDamage(character, weaponDef, monster) {
   let raw = weaponDef?.magnitudeFormula
     ? resolveSpellMagnitude(weaponDef.name, weaponDef, character)
     : (weaponDef?.baseDamage ?? 0) + (character.stats?.intelligence ?? 10);
-  // Apply Pyromancer passive skill bonus: +1 base damage per instance of the skill
+  // Apply Pyromancer passive skill bonus per instance of the skill
   if (character.skills) {
     character.skills.forEach(skill => {
       const name = typeof skill === 'string' ? skill : skill.name;
@@ -186,6 +189,12 @@ export function calcPlayerMagicDamage(character, weaponDef, monster) {
       }
     });
   }
+
+  // Banishment deals double damage against Undead monsters
+  if (weaponDef?.name === 'Banishment' && monster?.family === 'Undead') {
+    raw *= 2;
+  }
+
   const statMitigation = Math.floor(
     ((monster.stats?.resilience ?? 0) + (monster.stats?.vitality ?? 0)) * RESILIENCE_DAMAGE_FACTOR / 2
   );

@@ -500,6 +500,7 @@ function renderModal(memberIndex) {
   let totalDef = 0;
   // Use a Set to avoid double-counting bothHands items which are in both slots
   const countedItems = new Set();
+  let hasShieldForDef = false;
   Object.values(m.equipment).forEach(item => {
     if (item && !countedItems.has(item)) {
       countedItems.add(item);
@@ -507,8 +508,19 @@ function renderModal(memberIndex) {
       if (def?.defence) {
         totalDef += def.defence;
       }
+      if (def?.weaponType === 'shield') hasShieldForDef = true;
     }
   });
+  // Shield Master passive: +defenceBonus per instance when a shield is equipped
+  if (hasShieldForDef && m.skills?.length) {
+    m.skills.forEach(skill => {
+      const name = typeof skill === 'string' ? skill : skill.name;
+      const skillDef = SKILLS_DATA[name];
+      if (skillDef?.isPassive && skillDef.effectType === 'shieldMasterBonus') {
+        totalDef += skillDef.defenceBonus ?? 0;
+      }
+    });
+  }
   // Apply Rampart doubling if active for this member
   const rampart = skillsState.rampart;
   if (rampart.active && rampart.actorName === m.name && performance.now() < rampart.expiresAt) {

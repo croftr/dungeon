@@ -331,9 +331,10 @@
         "isPassive": true,
         "type": "passive",
         "icon": "/skills/pyromancer.png",
-        "description": "Increases fireball base damage by 2.",
+        "description": "Increases fireball base damage by 4 and accuracy by 5%.",
         "effectType": "fireballDamageBonus",
-        "magnitude": 2
+        "magnitude": 4,
+        "accuracyMagnitude": 0.05
     },
     "Lifewarden": {
         "isPassive": true,

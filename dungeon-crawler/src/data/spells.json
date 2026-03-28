@@ -7,6 +7,7 @@
         "attackType": "fireball",
         "baseDamage": 0,
         "magnitudeFormula": "intelligence",
+        "magnitudeScale": 1.5,
         "magnitudeBonusMode": "flat",
         "delay": 4,
         "mpCost": 10,
@@ -123,7 +124,7 @@
         "delay": 4,
         "mpCost": 6,
         "icon": "/icons/banishment.png",
-        "description": "A dangerous beam of magical light that strikes with pure energy.",
+        "description": "A dangerous beam of magical light that strikes with pure energy. Deals double damage against Undead monsters.",
         "value": 0,
         "weight": 0
     }

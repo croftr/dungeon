@@ -2158,13 +2158,16 @@ function _applyMonsterDamage(monster, opts = {}) {
     }
   });
   if (target.skills) {
-    target.skills.forEach(skill => {
-      const name = typeof skill === 'string' ? skill : skill.name;
-      const skillDef = SKILLS_DATA[name];
-      if (skillDef?.isPassive && skillDef.effectType === 'shieldMasterBonus') {
-        charDefence += skillDef.defenceBonus ?? 0;
-      }
-    });
+    const _shieldEquipped = Object.values(target.equipment ?? {}).some(item => item && getItemDef(item.name)?.weaponType === 'shield');
+    if (_shieldEquipped) {
+      target.skills.forEach(skill => {
+        const name = typeof skill === 'string' ? skill : skill.name;
+        const skillDef = SKILLS_DATA[name];
+        if (skillDef?.isPassive && skillDef.effectType === 'shieldMasterBonus') {
+          charDefence += skillDef.defenceBonus ?? 0;
+        }
+      });
+    }
   }
   charDefence = Math.max(0, charDefence + getDefenceModifier(target));
   const rampartActive = skillsState.rampart.active && skillsState.rampart.actorName === target.name && performance.now() < skillsState.rampart.expiresAt;
