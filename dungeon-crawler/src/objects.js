@@ -1148,6 +1148,17 @@ export function initObjects(scene, camera) {
         };
     }
 
+    // Stamina drain toggle
+    const tcStaminaToggle = document.getElementById('tc-stamina-toggle');
+    if (tcStaminaToggle) {
+        tcStaminaToggle.onclick = () => {
+            const dummy = _getDummy();
+            if (!dummy) return;
+            dummy.drainStamina = !dummy.drainStamina;
+            _tcSyncUI();
+        };
+    }
+
     // Stat +/- buttons
     document.querySelectorAll('#tc-body .tc-btn[data-stat]').forEach(btn => {
         btn.onclick = () => {
@@ -1191,7 +1202,6 @@ export function initObjects(scene, camera) {
             dummy.stats.dexterity = p.dexterity;
             dummy.attackSpeed = p.attackSpeed;
             dummy.onHitEffects = JSON.parse(JSON.stringify(p.effects));
-            dummy.combatMode = true;
             _tcSyncUI();
         };
     });
@@ -1206,6 +1216,7 @@ export function initObjects(scene, camera) {
             dummy.attackSpeed = dummy.originalAttackSpeed ?? 1;
             dummy.onHitEffects = [];
             dummy.combatMode = false;
+            dummy.drainStamina = false;
             dummy.engaged = false;
             _tcSyncUI();
         };
@@ -2395,6 +2406,15 @@ function _tcSyncUI() {
     toggle.textContent = dummy.combatMode ? 'ON' : 'OFF';
     toggle.classList.toggle('active', !!dummy.combatMode);
 
+    const drainToggle = document.getElementById('tc-stamina-toggle');
+    if (drainToggle) {
+        drainToggle.textContent = dummy.drainStamina ? 'ON' : 'OFF';
+        drainToggle.classList.toggle('active', !!dummy.drainStamina);
+    }
+
+    // Keep window flag in sync for party.js SP regen (avoids circular import)
+    window._dummyCombatDrain = !!(dummy.combatMode && dummy.drainStamina);
+
     // Sync on-hit effect checkboxes
     const effects = dummy.onHitEffects ?? [];
     for (const eid of ['poison', 'rot', 'frozen', 'stun']) {
@@ -2436,6 +2456,13 @@ function closeTrainingConsole() {
 }
 
 export function isTrainingConsoleOpen() { return _trainingConsoleOpen; }
+
+/** Returns true when the dummy is in combat mode AND stamina drain is enabled.
+ *  Also exposed as window._dummyCombatDrain to avoid circular imports in party.js. */
+export function isDummyCombatActive() {
+    const dummy = _getDummy();
+    return !!(dummy && dummy.combatMode && dummy.drainStamina);
+}
 
 function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, contents = []) {
     const cid = _nextContainerId++;

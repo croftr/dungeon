@@ -1368,7 +1368,7 @@ export function updateMonsters(dt, playerCamera, scene) {
         }
         if (seesPlayer) {
           m.engaged = true;
-          if (m.name !== 'Training Dummy') setInCombat();
+          if (m.name !== 'Training Dummy' || m.drainStamina) setInCombat();
         }
       }
     }
@@ -1464,7 +1464,7 @@ export function updateMonsters(dt, playerCamera, scene) {
     // Suppressed (sleeping) monsters cannot attack but still mark combat engaged.
     if (inRange && (m.name !== 'Training Dummy' || m.combatMode)) {
       m.engaged = true;
-      if (m.name !== 'Training Dummy') setInCombat();
+      if (m.name !== 'Training Dummy' || m.drainStamina) setInCombat();
 
       if (isSuppressed) {
         // Monster is asleep (or otherwise suppressed) — cannot attack
@@ -1661,7 +1661,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
 
     if (m.statsLabel?.visible) _updateStatsPanel(m);
 
-    if (m.name !== 'Training Dummy') {
+    if (m.name !== 'Training Dummy' || m.drainStamina) {
       setInCombat();
     }
 
@@ -1682,6 +1682,10 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
 
       if (m.name === 'Treeman') {
         setZoneMusic(asset('/sounds/backing/demon-room.mp3'));
+      }
+
+      if (m.name === 'Demon' && (m.level ?? 1) === 2) {
+        setZoneMusic(asset('/sounds/backing/lvl2-post-demon.mp3'));
       }
 
       if (m.name === 'Minotaur' && (m.level ?? 1) === 3 && m.id === 300) {
@@ -1880,7 +1884,7 @@ export function triggerMonsterAttack(monsterId) {
   // Unseen — monsters cannot attack the party while cloaked
   if (isPartyUnseen()) return;
 
-  if (m.name !== 'Training Dummy') setInCombat();
+  if (m.name !== 'Training Dummy' || m.drainStamina) setInCombat();
 
   // ── Pick attack variant (or fall back to single attack) ──
   let attackAction, soundTimings, damageTimings, attackSound, activeVariant;

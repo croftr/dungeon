@@ -276,8 +276,12 @@ setCallbacks({
       if (inAquaManRoom) {
         setZoneMusic(asset('/sounds/water.mp3'));
       } else {
+        const demon = monsters.find(m => m.name === 'Demon' && (m.level ?? 1) === 2);
         const treeman = monsters.find(m => m.name === 'Treeman');
-        if (treeman && !treeman.alive) {
+        
+        if (demon && !demon.alive) {
+          setZoneMusic(asset('/sounds/backing/lvl2-post-demon.mp3'));
+        } else if (treeman && !treeman.alive) {
           setZoneMusic(asset('/sounds/backing/demon-room.mp3'));
         } else {
           setZoneMusic(null);
@@ -296,6 +300,8 @@ setCallbacks({
         hasSeenMinotaurVideo = true; window._saveFlags.hasSeenMinotaurVideo = true;
         if (window.playMinotaurVideo) window.playMinotaurVideo();
       }
+    } else if (window.currentLevel === 4) {
+      setZoneMusic(asset('/sounds/backing/lvl2-post-demon.mp3'));
     } else if (window.currentLevel === 5) {
       setZoneMusic(asset('/sounds/backing/hall-of-heroes.mp3'));
     }
@@ -1544,12 +1550,20 @@ window.loadLevel = function (levelNum) {
   drawMinimap();
   updateStatus();
 
-  // If Treeman is dead, ensure Level 2 music is override
+  // Level 2 music logic
   if (levelNum === 2) {
+    const demon = monsters.find(m => m.name === 'Demon' && (m.level ?? 1) === 2);
     const treeman = monsters.find(m => m.name === 'Treeman');
-    if (treeman && !treeman.alive) {
+    if (demon && !demon.alive) {
+      setZoneMusic(asset('/sounds/backing/lvl2-post-demon.mp3'));
+    } else if (treeman && !treeman.alive) {
       setZoneMusic(asset('/sounds/backing/demon-room.mp3'));
     }
+  }
+
+  // Level 4 music
+  if (levelNum === 4) {
+    setZoneMusic(asset('/sounds/backing/lvl2-post-demon.mp3'));
   }
 
   // Hall of Heroes — always plays its theme

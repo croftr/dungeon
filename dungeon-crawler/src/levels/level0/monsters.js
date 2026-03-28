@@ -18,6 +18,7 @@ const _dummy = inst(D.dummy, 10, 7, 23,
 // Dev-tool fields for the Training Console (not persisted across reloads)
 _dummy.faceSouth = true;
 _dummy.combatMode = false;
+_dummy.drainStamina = false;
 _dummy.originalStats = { ...D.dummy.stats };
 _dummy.originalAttackSpeed = D.dummy.attackSpeed;
 
