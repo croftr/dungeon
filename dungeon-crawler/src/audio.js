@@ -56,21 +56,29 @@ export function prefetchBuffer(url) {
   return p;
 }
 
+const _decodeInFlight = new Map();
 async function getBuffer(url) {
   if (bufferCache.has(url)) return bufferCache.get(url);
-  try {
-    // Use pre-fetched bytes if available, otherwise fetch now
-    const arrayBuffer = rawCache.has(url)
-      ? await rawCache.get(url)
-      : await fetch(url).then(r => r.arrayBuffer());
-    if (!arrayBuffer) return null;
-    const audioBuffer = await getCtx().decodeAudioData(arrayBuffer);
-    bufferCache.set(url, audioBuffer);
-    return audioBuffer;
-  } catch (err) {
-    console.warn('[audio] Failed to load:', url, err);
-    return null;
-  }
+  if (_decodeInFlight.has(url)) return _decodeInFlight.get(url);
+  const promise = (async () => {
+    try {
+      // Use pre-fetched bytes if available, otherwise fetch now
+      const arrayBuffer = rawCache.has(url)
+        ? await rawCache.get(url)
+        : await fetch(url).then(r => r.arrayBuffer());
+      if (!arrayBuffer) return null;
+      const audioBuffer = await getCtx().decodeAudioData(arrayBuffer);
+      bufferCache.set(url, audioBuffer);
+      return audioBuffer;
+    } catch (err) {
+      console.warn('[audio] Failed to load:', url, err);
+      return null;
+    } finally {
+      _decodeInFlight.delete(url);
+    }
+  })();
+  _decodeInFlight.set(url, promise);
+  return promise;
 }
 
 /**
@@ -846,7 +854,8 @@ function _playNextTrack() {
     _playTrack(_zoneTrack, true, _musicGen);
     return;
   }
-  const tracks = MUSIC_TRACKS_BY_LEVEL[_ambientLevel] ?? MUSIC_TRACKS_BY_LEVEL[1];
+  const tracks = MUSIC_TRACKS_BY_LEVEL[_ambientLevel];
+  if (!tracks) return;
   const gen = _musicGen;
   const url = tracks[currentMusicIndex % tracks.length];
   _playTrack(url, false, gen);
@@ -890,6 +899,53 @@ async function _playTrack(url, loop, gen) {
   musicSource = source;
   musicGainNode = gainNode;
   source.start(0);
+}
+
+// ── Title screen theme tune ──────────────────────────────────────────────────
+let _themeTuneSource = null;
+let _themeTuneGain = null;
+let _themeTunePending = false;
+
+export async function playThemeTune() {
+  if (_themeTuneSource || _themeTunePending) return;
+  _themeTunePending = true;
+  const url = asset('/sounds/backing/theme-tune.mp3');
+  const buffer = await getBuffer(url);
+  _themeTunePending = false;
+  if (!buffer) return;
+  try {
+    const ctx = getCtx();
+    // Stop any already-playing theme
+    if (_themeTuneSource) {
+      try { _themeTuneSource.stop(); } catch (_) {}
+      _themeTuneSource = null;
+      _themeTuneGain = null;
+    }
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    const gainNode = ctx.createGain();
+    gainNode.gain.setValueAtTime(0, ctx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.35, ctx.currentTime + 2);
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
+    _themeTuneSource = source;
+    _themeTuneGain = gainNode;
+  } catch (err) {
+    console.warn('[audio] playThemeTune failed:', err);
+  }
+}
+
+export function fadeOutThemeTune(durationMs) {
+  if (!_themeTuneGain || !_themeTuneSource) return;
+  const ctx = getCtx();
+  const durationS = durationMs / 1000;
+  _themeTuneGain.gain.linearRampToValueAtTime(0, ctx.currentTime + durationS);
+  const src = _themeTuneSource;
+  _themeTuneSource = null;
+  _themeTuneGain = null;
+  setTimeout(() => { try { src.stop(); } catch (_) {} }, durationMs + 100);
 }
 
 export async function playInventorySortSound() {

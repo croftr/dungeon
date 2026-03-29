@@ -12,7 +12,7 @@ import { initEquipment, hideDropButton, tickAutoAttack, clearAutoAttackTimers, t
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, getContainerStates, setPendingContainerOverrides, partyHasItem, getCrystalShrineState } from './objects.js';
-import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio } from './audio.js';
+import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
@@ -47,6 +47,22 @@ document.querySelectorAll('img[data-src]').forEach(img => {
   }
 }
 
+// Patch and autoplay the background title video (muted, so no interaction needed).
+{
+  const bgVideo = document.getElementById('title-bg-video');
+  if (bgVideo) {
+    const bgSrc = bgVideo.querySelector('source');
+    if (bgSrc) {
+      bgSrc.src = asset(bgSrc.getAttribute('src'));
+      bgVideo.load();
+    }
+    bgVideo.addEventListener('canplay', () => {
+      bgVideo.play().catch(() => {});
+      bgVideo.classList.add('visible');
+    }, { once: true });
+  }
+}
+
 // Map of level number → video element IDs to preload when entering that level
 const _VIDEO_LEVELS = {
   0: ['battle-prep-video', 'hero-door-video', 'nectar-quest-video', 'crystal-shrine-red-video', 'crystal-shrine-red-blue-video'],
@@ -77,6 +93,7 @@ loadVideosForLevel(0);
 // Pre-fetch back1.mp3 raw bytes now — no AudioContext needed.
 // By the time the user clicks, the bytes are cached and decodeAudioData is near-instant.
 const _audioPreload = prefetchBuffer(asset('/sounds/back1.mp3'));
+const _themeTunePreload = prefetchBuffer(asset('/sounds/backing/theme-tune.mp3'));
 
 // Disable "Start Adventure" until the intro video has buffered enough to play
 // AND the background music file has been pre-fetched. Show a progress bar while loading.
@@ -117,7 +134,7 @@ const _audioPreload = prefetchBuffer(asset('/sounds/back1.mp3'));
       _introVid.addEventListener('canplaythrough', resolve, { once: true });
       _introVid.addEventListener('error', resolve, { once: true });
     });
-    Promise.all([_videoReady, _audioPreload]).then(_enable);
+    Promise.all([_videoReady, _audioPreload, _themeTunePreload]).then(_enable);
   }
 }
 
@@ -548,11 +565,15 @@ function _readStartOptions() {
 
 function finishIntro() {
   if (!introOverlay) return;
+  fadeOutThemeTune(1500);
+  const bgVideo = document.getElementById('title-bg-video');
+  if (bgVideo) { bgVideo.classList.remove('visible'); }
   introOverlay.style.transition = 'opacity 1.5s ease';
   introOverlay.style.opacity = '0';
   setTimeout(() => {
     introVideo.pause();
     introOverlay.remove();
+    startMusic();
 
     if (window.helpEnabled) {
       showHelpDialog({
@@ -567,16 +588,21 @@ function finishIntro() {
 }
 
 if (startBtn) {
-  startBtn.addEventListener('click', () => {
+  startBtn.addEventListener('click', async () => {
     _readStartOptions();
-    splashScreen.classList.add('hidden');
-    videoContainer.classList.remove('hidden');
-    introVideo.play().catch(e => {
-      console.warn("Video play failed:", e);
-      finishIntro();
-    });
-    // Trigger music/audio context via the same click
-    handleFirstInteraction();
+    // Ensure theme tune is playing (await so the tune has started before we dissolve)
+    await handleFirstInteraction();
+    // Dissolve the splash screen
+    splashScreen.classList.add('dissolving');
+    // After splash fades, crossfade to intro cinematic
+    setTimeout(() => {
+      splashScreen.classList.add('hidden');
+      videoContainer.classList.add('fade-in');
+      introVideo.play().catch(e => {
+        console.warn("Video play failed:", e);
+        finishIntro();
+      });
+    }, 1200);
   });
 }
 
@@ -1388,10 +1414,12 @@ if (skipCrystalShrineRedBlueBtn) skipCrystalShrineRedBlueBtn.addEventListener('c
 if (crystalShrineRedBlueVideo) crystalShrineRedBlueVideo.addEventListener('ended', finishCrystalShrineRedBlueVideo);
 
 function handleFirstInteraction() {
-  startMusic();
+  window.removeEventListener('mousedown', handleFirstInteraction);
   window.removeEventListener('click', handleFirstInteraction);
   window.removeEventListener('keydown', handleFirstInteraction);
+  return playThemeTune();
 }
+window.addEventListener('mousedown', handleFirstInteraction);
 window.addEventListener('click', handleFirstInteraction);
 window.addEventListener('keydown', handleFirstInteraction);
 
