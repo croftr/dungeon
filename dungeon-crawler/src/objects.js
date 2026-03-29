@@ -28,6 +28,17 @@ import { showNpcChoice, openQuestDialog, renderMerchantQuestPanel } from './ques
 export const objects = [];
 export const interactables = [];
 
+export function partyHasItem(itemName) {
+    for (const m of party) {
+        if (m && !m.isEmpty && m.inventory) {
+            if (m.inventory.some(item => item && item.name === itemName)) return true;
+        }
+    }
+    return false;
+}
+
+export function getCrystalShrineState() { return _crystalShrineState; }
+
 const _clickRaycaster = new THREE.Raycaster();
 const _clickMouse = new THREE.Vector2();
 
@@ -1950,7 +1961,7 @@ function addPortcullis(scene, loader, col, row, rotY = 0, startOpen = false) {
     return portcullis;
 }
 
-function addKeyhole(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, targetRow = null, targetCol = null) {
+function addKeyhole(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, targetRow = null, targetCol = null, requiredKey = 'Bronze Key') {
     loader.load(asset('/items/keyhole.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.2); // half the previous size (0.4)
@@ -1967,6 +1978,7 @@ function addKeyhole(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, tar
                 // Which portcullis does it open? If not specified, open the one on its own cell
                 child.userData.targetRow = targetRow !== null ? targetRow : row;
                 child.userData.targetCol = targetCol !== null ? targetCol : col;
+                child.userData.requiredKey = requiredKey;
                 interactables.push(child);
 
                 if (child.material) {

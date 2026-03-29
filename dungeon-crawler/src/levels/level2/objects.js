@@ -44,7 +44,7 @@ export function spawnLevel2Objects(ctx) {
 
     // Keyhole on the west face of the portcullis — visible from the main room.
     // targetRow/targetCol tell it to open the portcullis at (row 15, col 9).
-    addKeyhole(group, loader, 9, 15, -Math.PI / 2, -1.1, -1.3, 15, 9);
+    addKeyhole(group, loader, 9, 15, -Math.PI / 2, -1.1, -1.3, 15, 9, 'Bone Key');
 
     // ── Chests ────────────────────────────────────────────────────────────────
     // Two chests in the chest vault (col 1, rows 18–19)

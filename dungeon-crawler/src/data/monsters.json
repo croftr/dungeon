@@ -347,7 +347,7 @@
   "treeman": {
     "name": "Treeman",
     "family": "Ancient and Elemental",
-    "hp": 350,
+    "hp": 370,
     "defence": 9,
     "xp": 1000,
     "attackSpeed": 1.2,
@@ -388,7 +388,7 @@
   "ogre": {
     "name": "Ogre",
     "family": "Mythic and Giants",
-    "hp": 230,
+    "hp": 260,
     "defence": 9,
     "xp": 500,
     "attackSpeed": 1,

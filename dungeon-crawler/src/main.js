@@ -7,10 +7,11 @@ import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles, invalidateParticleTextures } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
 import { initParty, updateParty, party, refreshPartyCards, autoAttack, autoRangeAttack, setHp, flashPortraitHit, showMemberDamage, isPartyUnseen } from './party.js';
+import { getItemDef } from './items.js';
 import { initEquipment, hideDropButton, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS } from './recruits.js';
-import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, getContainerStates, setPendingContainerOverrides } from './objects.js';
+import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, getContainerStates, setPendingContainerOverrides, partyHasItem, getCrystalShrineState } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
@@ -146,6 +147,11 @@ canvas.addEventListener('webglcontextrestored', () => {
 const css2dRenderer = new CSS2DRenderer();
 css2dRenderer.domElement.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;';
 document.body.appendChild(css2dRenderer.domElement);
+
+// Key-item hover cursor overlay
+const _keyItemCursorEl = document.createElement('img');
+_keyItemCursorEl.id = 'key-item-cursor';
+document.body.appendChild(_keyItemCursorEl);
 
 // ─────────────────────────────────────────────
 //  SCENE  &  CAMERA
@@ -1596,6 +1602,7 @@ window.addEventListener('mousemove', (e) => {
   // Only apply 3D world raycasting if interacting with the canvas directly
   if (e.target !== canvas) {
     document.body.classList.remove('cursor-interact');
+    _keyItemCursorEl.style.display = 'none';
     return;
   }
 
@@ -1611,12 +1618,29 @@ window.addEventListener('mousemove', (e) => {
 
   let isHoveringInteractable = false;
   let hoveredBtn = null;
+  let keyItemIcon = null;
   for (let hit of intersects) {
     const ud = hit.object.userData;
-    if (ud && (ud.isButton || ud.isChest || ud.isArmorStand || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDialogueNPC || ud.isDamageTrap || ud.isEgg || ud.isTeleportTorch || ud.isAlchemyWorkshop || ud.isAnvil || ud.isShop || ud.isDroppedItem || ud.isHeroDoor || ud.isCrystalShrine || ud.isPortalActivatorStatue)) {
+    if (ud && (ud.isButton || ud.isChest || ud.isArmorStand || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDialogueNPC || ud.isDamageTrap || ud.isEgg || ud.isTeleportTorch || ud.isAlchemyWorkshop || ud.isAnvil || ud.isShop || ud.isDroppedItem || ud.isHeroDoor || ud.isCrystalShrine || ud.isPortalActivatorStatue || ud.isKeyhole)) {
       if (hit.object.visible) {
         isHoveringInteractable = true;
         if (ud.isButton) hoveredBtn = hit.object;
+
+        // Key-item cursor: show the matching item icon if the party has it
+        if (ud.isKeyhole && ud.requiredKey && partyHasItem(ud.requiredKey)) {
+          const def = getItemDef(ud.requiredKey);
+          if (def?.icon) keyItemIcon = asset(def.icon);
+        } else if (ud.isCrystalShrine) {
+          const state = getCrystalShrineState();
+          if (state === 0 && partyHasItem('Red Crystal')) {
+            const def = getItemDef('Red Crystal');
+            if (def?.icon) keyItemIcon = asset(def.icon);
+          } else if (state === 1 && partyHasItem('Blue Crystal')) {
+            const def = getItemDef('Blue Crystal');
+            if (def?.icon) keyItemIcon = asset(def.icon);
+          }
+        }
+
         break;
       }
     }
@@ -1627,6 +1651,16 @@ window.addEventListener('mousemove', (e) => {
     _setButtonGlow(_hoveredButtonSphere, false);
     _setButtonGlow(hoveredBtn, true);
     _hoveredButtonSphere = hoveredBtn;
+  }
+
+  // Key-item floating icon
+  if (keyItemIcon) {
+    if (_keyItemCursorEl.src !== keyItemIcon) _keyItemCursorEl.src = keyItemIcon;
+    _keyItemCursorEl.style.display = 'block';
+    _keyItemCursorEl.style.left = e.clientX + 20 + 'px';
+    _keyItemCursorEl.style.top = e.clientY + 'px';
+  } else {
+    _keyItemCursorEl.style.display = 'none';
   }
 
   if (isHoveringInteractable) {

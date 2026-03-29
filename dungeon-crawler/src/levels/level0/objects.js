@@ -25,11 +25,11 @@ export function spawnLevel0Objects(ctx) {
     // ── Crystal Temple decoration against south wall, next to the stash ─────
     addCrystalShrine(group, loader, 13, 12, -Math.PI / 2, 0.5, 0.9, 0, 0);
 
-    // ── Stash in the starter room ─────────────────────────────────────────────
+    // ── Starter Stash in the starter room ─────────────────────────────────────────────
     addChest(group, loader, 13.4, 10, Math.PI / 2, -0.1, [
         { name: 'Gold Coins', quantity: 100 },
-        'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore", "Life Essence", "Minor Potions Parchment", "Life Berry",
-        "Iron Ore", "Aqua Man Flipper", "Iron Ore", "Mace", "Cloth Trousers", "Silver Mace", "Warden's Shield",
+        'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore", "Life Essence",
+        "Iron Ore", "Iron Ore", "Red Crystal", "Blue Crystal", "Bronze Key", "Bone Key",
         "Potions Parchment", "Forge Armour Parchment", "Forge Weapons Parchment", "Minor Potions Parchment", "Party Potions Parchment", "Scroll of Incinerate"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 

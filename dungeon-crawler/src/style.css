@@ -5963,6 +5963,24 @@ label.mm-setting-label {
 body.cursor-interact #renderer-canvas {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='28' height='28'%3E%3Cpath fill='%23e8c87a' stroke='%233a2e18' stroke-width='1.5' stroke-linejoin='round' d='M9.5,4.5 L9.5,12.5 L6.5,12.5 L6.5,15.5 L10.5,21.5 L17.5,21.5 L19.5,16.5 L19.5,11.5 L16.5,11.5 L16.5,8.5 L14.5,8.5 L14.5,4.5 Z'/%3E%3Cline x1='12.5' y1='9' x2='12.5' y2='15' stroke='%233a2e18' stroke-width='1.5'/%3E%3Cline x1='15.5' y1='12' x2='15.5' y2='16' stroke='%233a2e18' stroke-width='1.5'/%3E%3C/svg%3E") 9 4, pointer !important;
 }
+/* Key-item hover indicator — floating icon shown when party has the matching key item */
+#key-item-cursor {
+  position: fixed;
+  width: 80px;
+  height: 80px;
+  pointer-events: none;
+  z-index: 9999;
+  display: none;
+  image-rendering: auto;
+  filter: drop-shadow(0 0 6px rgba(232, 200, 122, 0.8)) drop-shadow(0 0 2px rgba(0,0,0,0.6));
+  transform: translate(-50%, -50%);
+  animation: key-cursor-pulse 2s infinite ease-in-out;
+}
+
+@keyframes key-cursor-pulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.9; }
+  50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; filter: drop-shadow(0 0 10px rgba(232, 200, 122, 1)); }
+}
 
 /* ─────────────────────────────────────────────────────────────────────────────
    ALCHEMY WORKSHOP

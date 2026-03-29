@@ -18,10 +18,7 @@
             "Cure Poison Potion",
             "Minor Rejuvenate Potion"
         ],
-        "startingSkills": [
-            "Entangle",
-            "Hunter's Eye"
-        ],
+        "startingSkills": [],
         "image": "/heros/elf_ranger_head.jpg",
         "leftHand": "Torch",
         "rightHand": "Short Bow",
@@ -39,17 +36,14 @@
         "job": "Paladin",
         "race": "Human",
         "stats": {
-            "strength": 7,
-            "dexterity": 6,
-            "vitality": 8,
-            "intelligence": 4,
-            "resilience": 8
+            "strength": 107,
+            "dexterity": 106,
+            "vitality": 108,
+            "intelligence": 104,
+            "resilience": 108
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
-        "startingSkills": [
-            "Holy Radiance",
-            "Sanctuary"
-        ],
+        "startingSkills": [],
         "image": "/heros/human_paladin.png",
         "leftHand": "Shield",
         "rightHand": "Sword",
@@ -76,10 +70,7 @@
             "resilience": 10
         },
         "bio": "A stout and hearty fighter from the mountainous deeps. Thorek believes every problem can be solved with a sharp axe and enough ale.",
-        "startingSkills": [
-            "Rampart",
-            "Sunder Armor"
-        ],
+        "startingSkills": [],
         "image": "/heros/dwarf_barbarian_head.png",
         "leftHand": "Wooden Shield",
         "rightHand": "Axe",
@@ -106,10 +97,7 @@
             "resilience": 5
         },
         "bio": "An eccentric scholar weaving arcane tapestries. Merlin's thirst for forbidden knowledge is matched only by his formidable spellcraft.",
-        "startingSkills": [
-            "Runic Scholar",
-            "Mana Tap"
-        ],
+        "startingSkills": [],
         "startingSpells": [
             "Fireball",
             "Heal"
@@ -142,10 +130,7 @@
             "resilience": 6
         },
         "bio": "A raging storm of muscle and steel. Korg thrives in the heat of battle, leaving devastation in his wake.",
-        "startingSkills": [
-            "Berserk",
-            "Warcry"
-        ],
+        "startingSkills": [],
         "image": "/heros/human_barbarian_head.png",
         "leftHand": "Greataxe",
         "rightHand": "—",
@@ -173,10 +158,7 @@
             "resilience": 7
         },
         "bio": "A keen-eyed marksman who traded the mines for the open hunt. Baldur's crossbow never misses its mark.",
-        "startingSkills": [
-            "Double Attack",
-            "True Shot"
-        ],
+        "startingSkills": [],
         "image": "/heros/dwarf-ranger.png",
         "leftHand": "Torch",
         "rightHand": "Crossbow",
@@ -204,10 +186,7 @@
             "resilience": 6
         },
         "bio": "A graceful tempest of flashing blades. Lumni dances through her enemies, turning battle into a bloody, beautiful art form.",
-        "startingSkills": [
-            "Whirlwind",
-            "War Dance"
-        ],
+        "startingSkills": [],
         "startingInventory": [
             "Cure Poison Potion",
             "Minor Rejuvenate Potion"

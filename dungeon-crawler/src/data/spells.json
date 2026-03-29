@@ -119,7 +119,7 @@
         "attackType": "banishment",
         "baseDamage": 0,
         "magnitudeFormula": "intelligence",
-        "magnitudeScale": 0.5,
+        "magnitudeScale": 1,
         "magnitudeBonusMode": "flat",
         "delay": 4,
         "mpCost": 6,

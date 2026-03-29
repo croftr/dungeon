@@ -56,7 +56,7 @@
     {
         "name": "Bronze Key",
         "slot": "loot",
-        "icon": "/icons/bronze_key.png",
+        "icon": "/icons/key/bronze_key.png",
         "description": "A heavy, tarnished bronze key. Looks like it fits a large lock.",
         "value": 0,
         "weight": 0.5,
@@ -65,7 +65,7 @@
     {
         "name": "Bone Key",
         "slot": "loot",
-        "icon": "/icons/bone_key.png",
+        "icon": "/icons/key/bone_key.png",
         "description": "A heavy, bone key. Looks like it fits a large lock.",
         "value": 0,
         "weight": 0.5,
@@ -182,7 +182,7 @@
     {
         "name": "Broken Sun-Forged Key",
         "slot": "loot",
-        "icon": "/icons/ingredients/sun_forged_key_broken.png",
+        "icon": "/icons/key/sun_forged_key_broken.png",
         "description": "A shattered key of solar gold. Though broken, its fragments still thrum with the heat of a dying star.",
         "value": 50,
         "weight": 0.3,
@@ -191,7 +191,7 @@
     {
         "name": "Sun-Forged Key",
         "slot": "loot",
-        "icon": "/icons/ingredients/sun_forged_key.png",
+        "icon": "/icons/key/sun_forged_key.png",
         "description": "A majestic key forged in the heart of a celestial forge. It radiates a blinding solar brilliance.",
         "value": 500,
         "weight": 0.5,

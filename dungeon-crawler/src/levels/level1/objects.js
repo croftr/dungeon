@@ -122,6 +122,6 @@ export function spawnLevel1Objects(ctx) {
     addPortalActivatorStatue(group, loader, 19, 2, 0);
 
     // Portal Activator Statue in the alcove north of the goblin room — contains Blue Crystal
-    addPortalActivatorStatue(group, loader, 17, 7, Math.PI, 0.45, ['Blue Crystal']);
+    addPortalActivatorStatue(group, loader, 17, 7, 1.5 * Math.PI, 0.45, ['Blue Crystal']);
 
 }
