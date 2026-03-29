@@ -148,8 +148,7 @@
         "value": 450,
         "weight": 2,
         "skillBonuses": {
-            "Sanctuary": 50,
-            "Holy Radiance": 50
+            "Holy Radiance": 20
         }
     },
     {

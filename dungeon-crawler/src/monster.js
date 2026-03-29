@@ -892,6 +892,34 @@ function _loadMonster(m, scene) {
     model.add(stunLabel);
     m.stunLabel = stunLabel;
 
+    // ── Entangle (slowed) indicator (turtle waddle) ───────────────────────
+    const entangleDiv = document.createElement('div');
+    entangleDiv.className = 'monster-entangle-indicator';
+    const turtleSpan = document.createElement('span');
+    turtleSpan.className = 'entangle-turtle';
+    turtleSpan.textContent = '🐢';
+    entangleDiv.appendChild(turtleSpan);
+    const entangleLabel = new CSS2DObject(entangleDiv);
+    entangleLabel.position.set(0, 2.8, 0);
+    entangleLabel.visible = false;
+    model.add(entangleLabel);
+    m.entangleLabel = entangleLabel;
+
+    // ── Sunder Armor (broken defence) indicator (three falling arrows) ───
+    const sunderDiv = document.createElement('div');
+    sunderDiv.className = 'monster-sunder-indicator';
+    ['↓', '↓', '↓'].forEach((arrow, i) => {
+      const s = document.createElement('span');
+      s.className = `sunder-arrow sunder-arrow--${i}`;
+      s.textContent = arrow;
+      sunderDiv.appendChild(s);
+    });
+    const sunderLabel = new CSS2DObject(sunderDiv);
+    sunderLabel.position.set(0, 2.2, 0);
+    sunderLabel.visible = false;
+    model.add(sunderLabel);
+    m.sunderLabel = sunderLabel;
+
     // Load attack animation(s)
     if (m.attacks && m.attacks.length > 0) {
       // ── Multiple attack variants ──
@@ -1279,6 +1307,8 @@ export function updateMonsters(dt, playerCamera, scene) {
       if (m.statsLabel) m.statsLabel.visible = false;
       if (m.sleepLabel) m.sleepLabel.visible = false;
       if (m.stunLabel) m.stunLabel.visible = false;
+      if (m.entangleLabel) m.entangleLabel.visible = false;
+      if (m.sunderLabel) m.sunderLabel.visible = false;
       if (_huntersEyeTargetId === m.id) _huntersEyeTargetId = null;
       if (m.mesh) m.mesh.visible = false;
       return;
@@ -1297,6 +1327,8 @@ export function updateMonsters(dt, playerCamera, scene) {
         if (m.statsLabel) m.statsLabel.visible = false;
         if (m.sleepLabel) m.sleepLabel.visible = false;
         if (m.stunLabel) m.stunLabel.visible = false;
+        if (m.entangleLabel) m.entangleLabel.visible = false;
+        if (m.sunderLabel) m.sunderLabel.visible = false;
         m.mesh.visible = false;
         return;
       }
@@ -1315,6 +1347,8 @@ export function updateMonsters(dt, playerCamera, scene) {
       if (m.statsLabel) m.statsLabel.visible = false;
       if (m.sleepLabel) m.sleepLabel.visible = false;
       if (m.stunLabel) m.stunLabel.visible = false;
+      if (m.entangleLabel) m.entangleLabel.visible = false;
+      if (m.sunderLabel) m.sunderLabel.visible = false;
       if (_huntersEyeTargetId === m.id) _huntersEyeTargetId = null;
       return;
     }
@@ -1343,6 +1377,8 @@ export function updateMonsters(dt, playerCamera, scene) {
 
     if (m.sleepLabel) m.sleepLabel.visible = isAsleep;
     if (m.stunLabel) m.stunLabel.visible = !isAsleep && !!(m.stunUntil && performance.now() < m.stunUntil);
+    if (m.entangleLabel) m.entangleLabel.visible = !!(skillsState.entangle?.active && skillsState.entangle?.targetId === m.id);
+    if (m.sunderLabel) m.sunderLabel.visible = !!(skillsState.sunderArmor?.active && skillsState.sunderArmor?.targetId === m.id);
 
     // Check if monster is suppressed by an action-preventing debuff (sleep, frozen, fear, etc.)
     // Expired debuffs have already been filtered above, so no extra time check needed here.

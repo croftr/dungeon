@@ -22,11 +22,11 @@
     "Holy Radiance": {
         "type": "healing",
         "icon": "/skills/holy-radiance.png",
-        "description": "Calls down a pulse of holy energy, restoring HP equal to the caster's Vitality + Intelligence to every living party member. Cooldown: 150s.",
+        "description": "Calls down a pulse of holy energy, restoring HP equal to the caster's Vitality + Intelligence + Strength to every living party member. Cooldown: 150s.",
         "cooldownMs": 150000,
         "effectType": "partyHeal",
         "effectTarget": "party",
-        "magnitudeFormula": "vitality + intelligence",
+        "magnitudeFormula": "vitality + intelligence + strength",
         "magnitudeBonusMode": "flat"
     },
     "Entangle": {
@@ -84,7 +84,7 @@
     "Berserk": {
         "type": "buff",
         "icon": "/skills/berserk.png",
-        "description": "Enters a state of roaring fury, boosting all damage dealt by 20% (after other calculations) for 30s. Cooldown: 90s.",
+        "description": "Enters a state of roaring fury, boosting all damage dealt by 80% (after other calculations) for 30s. Cooldown: 90s.",
         "cooldownMs": 90000,
         "durationMs": 30000,
         "effectType": "damageMultiplier",
@@ -106,9 +106,9 @@
     "Whirlwind": {
         "type": "buff",
         "icon": "/skills/whirlwind.png",
-        "description": "Becomes a blur of motion, doubling attack speed and preventing stamina drain for 30s. Cooldown: 90s.",
+        "description": "Becomes a blur of motion, doubling attack speed and preventing stamina drain for 60s. Cooldown: 90s.",
         "cooldownMs": 90000,
-        "durationMs": 30000,
+        "durationMs": 60000,
         "effectType": "attackSpeedMultiplier",
         "effectTarget": "self",
         "stateKey": "whirlwind",
@@ -118,9 +118,9 @@
     "True Shot": {
         "type": "buff",
         "icon": "/skills/true-shot.png",
-        "description": "Becomes hyper-focused, ensuring every ranged attack finds its mark for 20 seconds. Cooldown: 90s.",
+        "description": "Becomes hyper-focused, ensuring every ranged attack finds its mark for 60 seconds. Cooldown: 90s.",
         "cooldownMs": 90000,
-        "durationMs": 20000,
+        "durationMs": 60000,
         "effectType": "guaranteedHit",
         "effectTarget": "self",
         "stateKey": "trueShot"
@@ -147,28 +147,16 @@
         "magnitude": 2.0,
         "magnitudeBonusMode": "percent"
     },
-    "Heal": {
-        "type": "healing",
-        "icon": "/skills/heal.png",
-        "description": "A wave of restorative energy that mends wounds. Restores HP equal to double the caster's Intelligence to one party member.",
-        "cooldownMs": 45000,
-        "effectType": "singleHeal",
-        "effectTarget": "party-member",
-        "attackType": "heal",
-        "magnitudeFormula": "intelligence",
-        "magnitudeScale": 2.0,
-        "magnitudeBonusMode": "flat"
-    },
     "Warcry": {
         "type": "buff",
         "icon": "/skills/warcry.png",
-        "description": "Lets out a thunderous shout that inspires the entire party, boosting all damage dealt by 10% (after other calculations) for 30s. Cooldown: 90s.",
+        "description": "Lets out a thunderous shout that inspires the entire party, boosting all damage dealt by 40% (after other calculations) for 30s. Cooldown: 90s.",
         "cooldownMs": 90000,
         "durationMs": 30000,
         "effectType": "damageMultiplier",
         "effectTarget": "party",
         "stateKey": "warcry",
-        "magnitude": 2.1,
+        "magnitude": 1.4,
         "magnitudeBonusMode": "percent"
     },
     "War Dance": {

@@ -251,6 +251,14 @@ export function initObjects(scene, camera) {
                     } else {
                         showMessage("You can't reach that from here.");
                     }
+                } else if (obj.userData.target === 'teleport_level4') {
+                    if (isInFrontOfPlayer(11, 8, 1)) {
+                        playButtonClickSound();
+                        _animateButtonPress(obj);
+                        if (window.loadLevel) window.loadLevel(4);
+                    } else {
+                        showMessage("You can't reach that from here.");
+                    }
                 } else if (obj.userData.target === 'teleport_giant') {
                     if (isInFrontOfPlayer(11, 11, 1)) {
                         playButtonClickSound();
@@ -361,19 +369,41 @@ export function initObjects(scene, camera) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 1 && distCol <= 1) {
-                    // Check live minotaur state — works whether it died this session
-                    // or was already dead when the level loaded.
-                    const minotaur = monsters.find(m => m.id === 300);
-                    const minotaurDead = minotaur ? !minotaur.alive : true;
-                    if (minotaurDead) {
+                    if (obj.userData.isActive) {
+                        // Always-active egg (e.g. the return egg on level 4) — no guardian check.
                         playPortalSound();
-                        if (window.playEggVideo) {
-                            window.playEggVideo(() => { if (window.loadLevel) window.loadLevel(4); });
-                        } else if (window.loadLevel) {
-                            window.loadLevel(4);
+                        const tl = obj.userData.targetLevel ?? 4;
+                        const tr = obj.userData.targetRow;
+                        const tc = obj.userData.targetCol;
+                        if (window.loadLevel) {
+                            window.loadLevel(tl);
+                            if (tr != null && tc != null) {
+                                setTimeout(() => {
+                                    player.gridRow = tr;
+                                    player.gridCol = tc;
+                                    player.facing = 2; // Face south — back the way they came
+                                    const w = cellToWorld(tr, tc);
+                                    camera.position.set(w.x, w.y, w.z);
+                                    camera.rotation.order = 'YXZ';
+                                    camera.rotation.y = FACING_ANGLES[player.facing];
+                                }, 50);
+                            }
                         }
                     } else {
-                        showMessage("The egg pulses with a faint energy, but something holds it back...");
+                        // Standard level-3 egg: check live minotaur state — works whether it
+                        // died this session or was already dead when the level loaded.
+                        const minotaur = monsters.find(m => m.id === 300);
+                        const minotaurDead = minotaur ? !minotaur.alive : true;
+                        if (minotaurDead) {
+                            playPortalSound();
+                            if (window.playEggVideo) {
+                                window.playEggVideo(() => { if (window.loadLevel) window.loadLevel(4); });
+                            } else if (window.loadLevel) {
+                                window.loadLevel(4);
+                            }
+                        } else {
+                            showMessage("The egg pulses with a faint energy, but something holds it back...");
+                        }
                     }
                 } else {
                     showMessage("The egg radiates a strange golden light.");
@@ -442,7 +472,27 @@ export function initObjects(scene, camera) {
                     playPortalSound();
 
                     // Transport the player immediately
-                    if (window.loadLevel) window.loadLevel(targetLevel);
+                    if (window.loadLevel) {
+                        window.loadLevel(targetLevel);
+                        // Optional spawn override — used by portals that target a specific
+                        // position/facing rather than the level's default start cell.
+                        const tr = obj.userData.targetRow;
+                        const tc = obj.userData.targetCol;
+                        const tf = obj.userData.targetFacing;
+                        if (tr != null && tc != null) {
+                            setTimeout(() => {
+                                player.gridRow = tr;
+                                player.gridCol = tc;
+                                const w = cellToWorld(tr, tc);
+                                camera.position.set(w.x, w.y, w.z);
+                                if (tf != null) {
+                                    player.facing = tf;
+                                    camera.rotation.order = 'YXZ';
+                                    camera.rotation.y = FACING_ANGLES[tf];
+                                }
+                            }, 50);
+                        }
+                    }
 
                     if (isTreemanTransition) {
                         // Go straight to Treeman cutscene — no portal video for the starter room portal
@@ -1938,7 +1988,7 @@ function addKeyhole(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, tar
     });
 }
 
-function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offsetX = 0, offsetZ = 0) {
+function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offsetX = 0, offsetZ = 0, targetRow = null, targetCol = null, targetFacing = null) {
     loader.load(asset('/items/Meshy_AI_Blue_Portal_0222102604_texture.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
@@ -1957,6 +2007,9 @@ function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offsetX = 0, 
                 child.receiveShadow = false;
                 child.userData.isPortal = true;
                 child.userData.targetLevel = targetLevel;
+                child.userData.targetRow = targetRow;
+                child.userData.targetCol = targetCol;
+                child.userData.targetFacing = targetFacing;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 interactables.push(child);
@@ -2245,7 +2298,7 @@ function addCrystals(scene, loader, col, row, rotY, offsetX = 0) {
     });
 }
 
-function addEtherealEgg(scene, loader, col, row, rotY = 0, isActive = false) {
+function addEtherealEgg(scene, loader, col, row, rotY = 0, isActive = false, targetLevel = 4, targetRow = null, targetCol = null) {
     _statueGridCells.add(`${row},${col}`);
     loader.load(asset('/items/ethereal_egg.glb'), (gltf) => {
         const model = gltf.scene;
@@ -2283,6 +2336,10 @@ function addEtherealEgg(scene, loader, col, row, rotY = 0, isActive = false) {
                 // Always register for raycasting so hover cursor works regardless of
                 // when the minotaur dies — activation is checked at click time.
                 child.userData.isEgg = true;
+                child.userData.isActive = isActive;
+                child.userData.targetLevel = targetLevel;
+                child.userData.targetRow = targetRow;
+                child.userData.targetCol = targetCol;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 interactables.push(child);

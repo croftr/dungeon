@@ -69,6 +69,9 @@
             "str": 1.5,
             "dex": 0
         },
+        "skillBonuses": {
+            "Sanctuary": 50
+        },
         "icon": "/icons/wardens_shield.png",
         "description": "A heavy, reinforced shield used by the keepers of the deep. Provides exceptional protection.",
         "defence": 2,

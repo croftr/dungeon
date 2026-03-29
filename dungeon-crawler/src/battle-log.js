@@ -202,8 +202,9 @@ function _buildRowHtml(e) {
     const targetText = e.target ? ` → <b>${e.target}</b>` : '';
     const healText = (e.finalDamage != null && e.finalDamage < 0)
       ? ` <span class="bl-heal-amt">+${Math.abs(e.finalDamage)}</span>` : '';
+    const noteText = e.note ? ` <span class="bl-skill-note">(${e.note})</span>` : '';
     return `<span class="bl-badge">✦</span>` +
-      `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.actor}</b> uses <b>${e.skillName}</b>${targetText}${healText}</span>`;
+      `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.actor}</b> uses <b>${e.skillName}</b>${targetText}${healText}${noteText}</span>`;
   }
 
   // ── Status effect applied ──────────────────────────────────────────────────

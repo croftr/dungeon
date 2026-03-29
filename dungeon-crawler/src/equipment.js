@@ -3418,12 +3418,17 @@ function _useEntangle(member, memberIndex) {
     `<span style="color:#80ff80">✦ Entangle</span> — ${member.name} roots the ${target.name}! Monster attack delay ×${entangleDelayStr} for 30s.`,
     3000
   );
-  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Entangle', target: target.name });
+  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Entangle', target: target.name, note: `Atk Spd ×½ for ${Math.round(entangleDurationMs / 1000)}s` });
+
+  // Force the label visible immediately on the target monster
+  const entangleTarget = monsters.find(x => x.id === target.id);
+  if (entangleTarget?.entangleLabel) entangleTarget.entangleLabel.visible = true;
 
   if (_entangleExpireTimer) clearTimeout(_entangleExpireTimer);
   _entangleExpireTimer = setTimeout(() => {
     skillsState.entangle.active = false;
     skillsState.entangle.targetId = null;
+    if (entangleTarget?.entangleLabel) entangleTarget.entangleLabel.visible = false;
     showMessage(`<span style="color:#80ff80">Entangle</span> fades — the roots wither away.`, 2500);
     _entangleExpireTimer = null;
   }, entangleDurationMs);
@@ -3463,12 +3468,17 @@ function _useSunderArmor(member, memberIndex) {
     `<span style="color:#ff8080">✦ Sunder Armor</span> — ${member.name} crushes the ${target.name}! Defence reduced by ${sunderPct}% for 30s.`,
     3000
   );
-  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Sunder Armor', target: target.name });
+  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Sunder Armor', target: target.name, note: `DEF/RES ×½ for ${Math.round(sunderArmorDurationMs / 1000)}s` });
+
+  // Force the label visible immediately on the target monster
+  const targetMonster = monsters.find(x => x.id === target.id);
+  if (targetMonster?.sunderLabel) targetMonster.sunderLabel.visible = true;
 
   if (_sunderArmorExpireTimer) clearTimeout(_sunderArmorExpireTimer);
   _sunderArmorExpireTimer = setTimeout(() => {
     skillsState.sunderArmor.active = false;
     skillsState.sunderArmor.targetId = null;
+    if (targetMonster?.sunderLabel) targetMonster.sunderLabel.visible = false;
     showMessage(`<span style="color:#ff8080">Sunder Armor</span> fades — the armor naturally mends.`, 2500);
     _sunderArmorExpireTimer = null;
   }, sunderArmorDurationMs);
@@ -4005,7 +4015,7 @@ function _useManaTap(member, memberIndex) {
 }
 
 // ── Heal (Korg / Skills) ──────────────────────────────────────────────────
-const HEAL_SKILL_COOLDOWN_MS = SKILLS_DATA['Heal'].cooldownMs;
+const HEAL_SKILL_COOLDOWN_MS = 45000;
 let _healSkillCooldownEnds = [0, 0, 0, 0]; // per-member cooldown for Heal skill if shared
 
 function _useHealSkill(member, memberIndex) {
@@ -4143,7 +4153,17 @@ function attachPaperdollListeners() {
     // Hover tooltip for equipped items
     attachTooltipListeners(el, () => {
       if (activeCharIndex === null) return null;
-      return party[activeCharIndex].equipment[key] ?? null;
+      const m = party[activeCharIndex];
+      let item = m.equipment[key] ?? null;
+      
+      if (item && key === 'skill') {
+        // If it's a skill, grab the full definition from SKILLS_DATA or m.skills
+        const skillDef = SKILLS_DATA[item.name] || {};
+        const potency = _formatSkillPotency(item.name, m);
+        return { ...skillDef, name: item.name, isSkill: true, potency };
+      }
+      
+      return item;
     });
   });
 

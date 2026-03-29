@@ -29,8 +29,8 @@ export function spawnLevel0Objects(ctx) {
     addChest(group, loader, 13.4, 10, Math.PI / 2, -0.1, [
         { name: 'Gold Coins', quantity: 100 },
         'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore", "Life Essence", "Minor Potions Parchment", "Life Berry",
-        "Lizard Scale", "Crocodile Hide", "Iron Ore", "Aqua Man Flipper", "Demon's Eyes", "Iron Ore", "Mace", "Cloth Trousers", "Starlight Nectar",
-        "Aether-Glass Silt", "Potions Parchment", "Forge Armour Parchment", "Forge Weapons Parchment", "Minor Potions Parchment", "Party Potions Parchment", "Scroll of Incinerate"
+        "Iron Ore", "Aqua Man Flipper", "Iron Ore", "Mace", "Cloth Trousers", "Silver Mace", "Warden's Shield",
+        "Potions Parchment", "Forge Armour Parchment", "Forge Weapons Parchment", "Minor Potions Parchment", "Party Potions Parchment", "Scroll of Incinerate"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in the east room (center) ────────────────────────────────────
@@ -99,5 +99,10 @@ export function spawnLevel0Objects(ctx) {
     // ── Practice trap — NW corner of east room ────────────────────────────────
     addTrap1(group, loader, 7, 17);
 
+    // ── Dev shortcut: button on the west wall of the starter room ─────────────
+    // Press while facing west (toward col 8) to teleport directly to level 4.
+    const { group: btn4 } = createWallButton(+1, { target: 'teleport_level4' }, 'x');
+    btn4.position.set(8 * CELL + 1.0, 1.25, 11 * CELL);
+    group.add(btn4);
 
 }

@@ -6,9 +6,25 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function spawnLevel4Objects(ctx) {
-    const { group, loader, addPortal } = ctx;
+    const {
+        group, loader,
+        addEtherealEgg, addPortal, addTrap1, addChest,
+    } = ctx;
 
-    // ── Return portal ─────────────────────────────────────────────────────────
-    // Placed just behind the player's entry point — leads back to Level 3.
-    addPortal(group, loader, 5, 9, 3, Math.PI, 0, 0.85);
+    // ── Ethereal Egg ──────────────────────────────────────────────────────────
+    // West side of entry room — always active; returns party to the minotaur
+    // room on level 3 (col 11, row 11).
+    addEtherealEgg(group, loader, 3, 9, 0, true, 3, 11, 11);
+
+    // ── Blue Portal ───────────────────────────────────────────────────────────
+    // East wall of entry room — transports party to level 0's east room.
+    addPortal(group, loader, 9, 8, 0, Math.PI / 2, 0.5, 0, 10, 17, 1);
+
+    // ── Trap ──────────────────────────────────────────────────────────────────
+    // Centre of the narrow passage — guards the route to the vault.
+    addTrap1(group, loader, 5, 5);
+
+    // ── Chest ─────────────────────────────────────────────────────────────────
+    // North-east corner of the vault room — contains Aether-Glass Silt.
+    addChest(group, loader, 8, 1, 0, -0.8, ['Aether-Glass Silt']);
 }

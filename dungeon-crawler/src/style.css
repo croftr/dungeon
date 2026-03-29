@@ -3678,6 +3678,54 @@ label.mm-setting-label {
   100% { transform: translateY(0px)   rotate(360deg) scale(1.0); opacity: 0.9; }
 }
 
+.monster-sunder-indicator {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.sunder-arrow {
+  font-size: 16px;
+  color: #ff8080;
+  text-shadow: 0 0 8px rgba(255, 80, 80, 0.9), 1px 1px 2px rgba(0, 0, 0, 0.9);
+  display: inline-block;
+  animation: sunder-arrow-fall 0.9s ease-in-out infinite;
+}
+.sunder-arrow--0 { animation-delay: 0s;    }
+.sunder-arrow--1 { animation-delay: 0.3s;  }
+.sunder-arrow--2 { animation-delay: 0.6s;  }
+
+@keyframes sunder-arrow-fall {
+  0%   { transform: translateY(-4px) scale(1.0); opacity: 0.6; }
+  50%  { transform: translateY(4px)  scale(1.2); opacity: 1.0; }
+  100% { transform: translateY(-4px) scale(1.0); opacity: 0.6; }
+}
+
+.monster-entangle-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.entangle-turtle {
+  font-size: 20px;
+  display: inline-block;
+  filter: drop-shadow(0 0 6px rgba(64, 255, 64, 0.8));
+  animation: entangle-turtle-waddle 1.4s ease-in-out infinite;
+}
+
+@keyframes entangle-turtle-waddle {
+  0%   { transform: translateY(0px)  rotate(-8deg) scaleX(1.0);  opacity: 0.85; }
+  25%  { transform: translateY(-4px) rotate(0deg)  scaleX(0.95); opacity: 1.0;  }
+  50%  { transform: translateY(0px)  rotate(8deg)  scaleX(1.0);  opacity: 0.85; }
+  75%  { transform: translateY(-4px) rotate(0deg)  scaleX(1.05); opacity: 1.0;  }
+  100% { transform: translateY(0px)  rotate(-8deg) scaleX(1.0);  opacity: 0.85; }
+}
+
 .monster-hp-fill {
   height: 100%;
   width: 100%;
@@ -5815,6 +5863,11 @@ label.mm-setting-label {
 .bl-heal-amt {
   color: #80e880;
   font-weight: bold;
+}
+
+.bl-skill-note {
+  color: #aaa;
+  font-size: 0.85em;
 }
 
 /* Potion use */
