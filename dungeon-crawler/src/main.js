@@ -10,7 +10,7 @@ import { initParty, updateParty, party, refreshPartyCards, autoAttack, autoRange
 import { getItemDef } from './items.js';
 import { initEquipment, hideDropButton, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
-import { initRecruits, updateRecruitsMeshState, RECRUITS } from './recruits.js';
+import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, getContainerStates, setPendingContainerOverrides, partyHasItem, getCrystalShrineState } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune } from './audio.js';
 import { initBattleLog } from './battle-log.js';
@@ -508,19 +508,18 @@ function animate(now) {
 animate(performance.now());
 
 // ─────────────────────────────────────────────
-//  DEV INFO
+//  INTRO FLOW (pre-start → splash → character select → dungeon)
 // ─────────────────────────────────────────────
-// ─────────────────────────────────────────────
-//  INTRO VIDEO & SPLASH
-// ─────────────────────────────────────────────
-const introOverlay = document.getElementById('intro-overlay');
-const splashScreen = document.getElementById('splash-screen');
-const videoContainer = document.getElementById('video-container');
-const introVideo = document.getElementById('intro-video');
-const startBtn = document.getElementById('start-adventure-btn');
+const introOverlay  = document.getElementById('intro-overlay');
+const preStartScreen = document.getElementById('pre-start-screen');
+const splashScreen  = document.getElementById('splash-screen');
+const charSelectScreen = document.getElementById('char-select-screen');
+const introVideo    = document.getElementById('intro-video');
+const preStartBtn   = document.getElementById('pre-start-btn');
+const startBtn      = document.getElementById('start-adventure-btn');
+
 window.easyMode = false;
 window.helpEnabled = true;
-const skipBtn = document.getElementById('skip-intro-btn');
 
 function _readStartOptions() {
   const diffRadio = document.querySelector('input[name="difficulty"]:checked');
@@ -534,7 +533,6 @@ function finishIntro() {
   introOverlay.style.transition = 'opacity 1.5s ease';
   introOverlay.style.opacity = '0';
   setTimeout(() => {
-    introVideo.pause();
     introOverlay.remove();
     startMusic();
 
@@ -550,10 +548,116 @@ function finishIntro() {
   }, 1500);
 }
 
-if (startBtn) {
-  startBtn.addEventListener('click', async () => {
-    _readStartOptions();
+// ── Screen 1 → Screen 2: Pre-start triggers audio, shows splash ──
+if (preStartBtn) {
+  preStartBtn.addEventListener('click', async () => {
     await handleFirstInteraction();
+    preStartScreen.style.display = 'none';
+    splashScreen.style.display = 'flex';
+    introVideo.play().catch(() => {});
+  });
+}
+
+// ── Screen 2 → Screen 3: Splash submits options, shows character select ──
+if (startBtn) {
+  startBtn.addEventListener('click', () => {
+    _readStartOptions();
+    splashScreen.style.display = 'none';
+    introVideo.pause();
+    showCharacterSelection();
+  });
+}
+
+// ── Character Selection Screen ──
+function showCharacterSelection() {
+  charSelectScreen.style.display = 'flex';
+
+  const selectedIds = new Set();
+
+  charSelectScreen.innerHTML = `
+    <div class="char-select-main">
+      <h2 class="char-select-title">Choose Your Party</h2>
+      <p class="char-select-subtitle">Select four heroes to brave the depths below</p>
+      <div class="char-grid">
+        ${RECRUITS.map(r => `
+          <div class="char-card" data-recruit-id="${r.id}">
+            <img class="char-card-portrait" src="${asset(r.image)}" alt="${r.name}" />
+            <div class="char-card-info">
+              <div class="char-card-name">${r.name}</div>
+              <div class="char-card-class">${r.race} ${r.job}</div>
+              <div class="char-card-stats">
+                <span class="char-stat">STR ${r.stats.strength}</span>
+                <span class="char-stat">DEX ${r.stats.dexterity}</span>
+                <span class="char-stat">VIT ${r.stats.vitality}</span>
+                <span class="char-stat">INT ${r.stats.intelligence}</span>
+                <span class="char-stat">RES ${r.stats.resilience}</span>
+              </div>
+              <div class="char-card-bio">${r.bio}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="char-select-sidebar">
+      <span class="roster-label">Party</span>
+      <div class="roster-slot" data-slot="0"><span class="roster-slot-placeholder">+</span></div>
+      <div class="roster-slot" data-slot="1"><span class="roster-slot-placeholder">+</span></div>
+      <div class="roster-slot" data-slot="2"><span class="roster-slot-placeholder">+</span></div>
+      <div class="roster-slot" data-slot="3"><span class="roster-slot-placeholder">+</span></div>
+      <button id="begin-adventure-btn">Begin Adventure</button>
+    </div>
+  `;
+
+  const cards = charSelectScreen.querySelectorAll('.char-card');
+  const rosterSlots = charSelectScreen.querySelectorAll('.roster-slot');
+  const beginBtn = charSelectScreen.querySelector('#begin-adventure-btn');
+
+  function updateUI() {
+    const full = selectedIds.size >= 4;
+
+    cards.forEach(card => {
+      const id = card.dataset.recruitId;
+      const isSelected = selectedIds.has(id);
+      card.classList.toggle('cc-selected', isSelected);
+      card.classList.toggle('cc-disabled', full && !isSelected);
+    });
+
+    // Fill roster slots with selected recruit portraits
+    const selectedArr = [...selectedIds];
+    rosterSlots.forEach((slot, i) => {
+      if (i < selectedArr.length) {
+        const r = RECRUITS.find(x => x.id === selectedArr[i]);
+        slot.innerHTML = `<img src="${asset(r.image)}" alt="${r.name}" />`;
+        slot.classList.add('filled');
+      } else {
+        slot.innerHTML = '<span class="roster-slot-placeholder">+</span>';
+        slot.classList.remove('filled');
+      }
+    });
+
+    beginBtn.classList.toggle('ready', full);
+    beginBtn.disabled = !full;
+  }
+
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      const id = card.dataset.recruitId;
+      if (selectedIds.has(id)) {
+        selectedIds.delete(id);
+      } else if (selectedIds.size < 4) {
+        selectedIds.add(id);
+      }
+      updateUI();
+    });
+  });
+
+  beginBtn.addEventListener('click', () => {
+    if (selectedIds.size !== 4) return;
+    // Recruit the selected characters into the party
+    for (const id of selectedIds) {
+      const r = RECRUITS.find(x => x.id === id);
+      if (r) recruitCharacter(r);
+    }
     finishIntro();
   });
 }
@@ -1364,9 +1468,6 @@ function handleFirstInteraction() {
   window.removeEventListener('keydown', handleFirstInteraction);
   return playThemeTune();
 }
-window.addEventListener('mousedown', handleFirstInteraction);
-window.addEventListener('click', handleFirstInteraction);
-window.addEventListener('keydown', handleFirstInteraction);
 
 // ─────────────────────────────────────────────
 //  LEVEL LOADING

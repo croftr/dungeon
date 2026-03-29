@@ -239,7 +239,7 @@ export function dropMember(index) {
     if (window.onPartyChanged) window.onPartyChanged();
 }
 
-function recruitCharacter(r) {
+export function recruitCharacter(r) {
     const freeIndex = party.findIndex(m => m.isEmpty);
     if (freeIndex === -1) return;
 

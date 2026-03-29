@@ -22,31 +22,41 @@
 
   <!-- ── INTRO / SPLASH OVERLAY ── -->
   <div id="intro-overlay">
-    <!-- Top section: title -->
-    <div id="splash-header">
-      <h1 id="splash-title">DUNGEON CRAWLER</h1>
-      <p id="splash-subtitle">A darkness stirs beneath the swamp…</p>
+
+    <!-- Screen 1: Pre-start (triggers audio context) -->
+    <div id="pre-start-screen">
+      <h1 id="pre-start-title">DUNGEON CRAWLER</h1>
+      <p id="pre-start-subtitle">A darkness stirs beneath the swamp…</p>
+      <button id="pre-start-btn">Enter the Depths</button>
     </div>
 
-    <!-- Middle section: looping video -->
-    <div id="title-video-panel">
-      <video id="intro-video" muted loop playsinline preload="auto">
-        <source src="/videos/Haunted_Swamp_Dungeon.mp4" type="video/mp4">
-      </video>
+    <!-- Screen 2: Splash with options (hidden until pre-start clicked) -->
+    <div id="splash-screen" style="display:none">
+      <div id="splash-header">
+        <h1 id="splash-title">DUNGEON CRAWLER</h1>
+        <p id="splash-subtitle">A darkness stirs beneath the swamp…</p>
+      </div>
+      <div id="title-video-panel">
+        <video id="intro-video" muted loop playsinline preload="auto">
+          <source src="/videos/Haunted_Swamp_Dungeon.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div id="splash-footer">
+        <div id="difficulty-select">
+          <label class="diff-option"><input type="radio" name="difficulty" value="normal" checked> Normal</label>
+          <label class="diff-option"><input type="radio" name="difficulty" value="hard"> Hard</label>
+        </div>
+        <label id="help-toggle-label"><input type="checkbox" id="help-toggle" checked> Inline Help</label>
+        <button id="start-adventure-btn">Start Adventure</button>
+        <div id="loading-bar-wrap">
+          <div id="loading-bar-fill"></div>
+        </div>
+      </div>
     </div>
 
-    <!-- Bottom section: options -->
-    <div id="splash-footer">
-      <div id="difficulty-select">
-        <label class="diff-option"><input type="radio" name="difficulty" value="normal" checked> Normal</label>
-        <label class="diff-option"><input type="radio" name="difficulty" value="hard"> Hard</label>
-      </div>
-      <label id="help-toggle-label"><input type="checkbox" id="help-toggle" checked> Inline Help</label>
-      <button id="start-adventure-btn">Start Adventure</button>
-      <div id="loading-bar-wrap">
-        <div id="loading-bar-fill"></div>
-      </div>
-    </div>
+    <!-- Screen 3: Character selection (hidden until Start Adventure clicked) -->
+    <div id="char-select-screen" style="display:none"></div>
+
   </div>
 
   <!-- ── OGRE ENCOUNTER VIDEO OVERLAY ── -->
