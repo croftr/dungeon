@@ -24,7 +24,7 @@ export function spawnLevel1Objects(ctx) {
     // ── Chests ───────────────────────────────────────────────────────────────
     // Chest at the end of the long north passage
     addChest(group, loader, 7, 1, 0, -0.7, [
-        { name: 'Gold Coins', quantity: 50 },
+        { name: 'Gold Coins', quantity: 5 },
         'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Ring of Wisdom', 'Worn Boots', "Scroll of Cure Poison"
     ]);
 
@@ -36,7 +36,7 @@ export function spawnLevel1Objects(ctx) {
 
     // 2nd Chest in the Northwest room
     addChest(group, loader, 5, 1, 0, -0.65, [
-        { name: 'Gold Coins', quantity: 100 },
+        { name: 'Gold Coins', quantity: 10 },
         "Ring of Vigour", "Travelling Cloak", "Iron Helm"
     ], undefined, true, 0.35);
 

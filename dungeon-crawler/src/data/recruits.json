@@ -125,12 +125,14 @@
         "stats": {
             "strength": 9,
             "dexterity": 6,
-            "vitality": 6,
+            "vitality": 7,
             "intelligence": 4,
             "resilience": 6
         },
         "bio": "A raging storm of muscle and steel. Korg thrives in the heat of battle, leaving devastation in his wake.",
-        "startingSkills": [],
+        "startingSkills": [
+            "Berserk"
+        ],
         "image": "/heros/human_barbarian_head.png",
         "leftHand": "Greataxe",
         "rightHand": "—",
@@ -153,12 +155,14 @@
         "stats": {
             "strength": 7,
             "dexterity": 7,
-            "vitality": 6,
+            "vitality": 7,
             "intelligence": 4,
             "resilience": 7
         },
         "bio": "A keen-eyed marksman who traded the mines for the open hunt. Baldur's crossbow never misses its mark.",
-        "startingSkills": [],
+        "startingSkills": [
+            "Double Attack"
+        ],
         "image": "/heros/dwarf-ranger.png",
         "leftHand": "Torch",
         "rightHand": "Crossbow",

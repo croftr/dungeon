@@ -45,7 +45,7 @@
         "attackType": "shield-bash",
         "weaponType": "shield",
         "staminaDrain": 1,
-        "baseDamage": 10,
+        "baseDamage": 4,
         "statWeights": {
             "str": 1,
             "dex": 0
