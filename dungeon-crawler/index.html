@@ -22,20 +22,21 @@
 
   <!-- ── INTRO / SPLASH OVERLAY ── -->
   <div id="intro-overlay">
-    <!-- Layer 0: Living background video -->
-    <video id="title-bg-video" muted loop playsinline>
-      <source src="/videos/Haunted_Swamp_Dungeon.mp4" type="video/mp4">
-    </video>
-    <!-- Layer 1: Vignette (CSS only) -->
-    <div id="title-vignette"></div>
-    <!-- Layer 2: Drifting fog -->
-    <div id="title-fog-layer"></div>
-    <!-- Layer 3: Floating golden dust motes -->
-    <div id="title-particle-layer"></div>
-    <!-- Layer 4: Splash content -->
-    <div id="splash-screen">
+    <!-- Top section: title -->
+    <div id="splash-header">
       <h1 id="splash-title">DUNGEON CRAWLER</h1>
       <p id="splash-subtitle">A darkness stirs beneath the swamp…</p>
+    </div>
+
+    <!-- Middle section: looping video -->
+    <div id="title-video-panel">
+      <video id="intro-video" muted loop playsinline preload="auto">
+        <source src="/videos/Haunted_Swamp_Dungeon.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <!-- Bottom section: options -->
+    <div id="splash-footer">
       <div id="difficulty-select">
         <label class="diff-option"><input type="radio" name="difficulty" value="normal" checked> Normal</label>
         <label class="diff-option"><input type="radio" name="difficulty" value="hard"> Hard</label>
@@ -45,14 +46,6 @@
       <div id="loading-bar-wrap">
         <div id="loading-bar-fill"></div>
       </div>
-    </div>
-    <!-- Layer 5: Intro cinematic -->
-    <div id="video-container">
-      <video id="intro-video" preload="none" muted>
-        <source src="/videos/Haunted_Swamp_Dungeon.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-      </video>
-      <button id="skip-intro-btn">Skip Intro</button>
     </div>
   </div>
 

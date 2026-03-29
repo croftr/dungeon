@@ -909,6 +909,10 @@ let _themeTunePending = false;
 export async function playThemeTune() {
   if (_themeTuneSource || _themeTunePending) return;
   _themeTunePending = true;
+  // Unlock the AudioContext synchronously while still inside the user-gesture
+  // call stack. Chrome requires resume() to be called before the first await,
+  // otherwise the gesture is consumed and resume() silently does nothing.
+  getCtx();
   const url = asset('/sounds/backing/theme-tune.mp3');
   const buffer = await getBuffer(url);
   _themeTunePending = false;

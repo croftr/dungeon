@@ -47,21 +47,6 @@ document.querySelectorAll('img[data-src]').forEach(img => {
   }
 }
 
-// Patch and autoplay the background title video (muted, so no interaction needed).
-{
-  const bgVideo = document.getElementById('title-bg-video');
-  if (bgVideo) {
-    const bgSrc = bgVideo.querySelector('source');
-    if (bgSrc) {
-      bgSrc.src = asset(bgSrc.getAttribute('src'));
-      bgVideo.load();
-    }
-    bgVideo.addEventListener('canplay', () => {
-      bgVideo.play().catch(() => {});
-      bgVideo.classList.add('visible');
-    }, { once: true });
-  }
-}
 
 // Map of level number → video element IDs to preload when entering that level
 const _VIDEO_LEVELS = {
@@ -95,46 +80,26 @@ loadVideosForLevel(0);
 const _audioPreload = prefetchBuffer(asset('/sounds/back1.mp3'));
 const _themeTunePreload = prefetchBuffer(asset('/sounds/backing/theme-tune.mp3'));
 
-// Disable "Start Adventure" until the intro video has buffered enough to play
-// AND the background music file has been pre-fetched. Show a progress bar while loading.
+// Autoplay the side video as soon as it can play.
+{
+  const _sideVid = document.getElementById('intro-video');
+  if (_sideVid) {
+    _sideVid.addEventListener('canplay', () => _sideVid.play().catch(() => {}), { once: true });
+  }
+}
+
+// Disable "Start Adventure" until the theme tune is pre-fetched.
 {
   const _startBtn = document.getElementById('start-adventure-btn');
-  const _easyBtn = document.getElementById('easy-mode-btn');
-  const _introVid = document.getElementById('intro-video');
-  const _barFill = document.getElementById('loading-bar-fill');
   const _barWrap = document.getElementById('loading-bar-wrap');
-  if (_startBtn && _introVid) {
+  if (_startBtn) {
     _startBtn.disabled = true;
     _startBtn.textContent = 'Loading…';
-    if (_easyBtn) _easyBtn.disabled = true;
-
-    const _setProgress = (pct) => {
-      if (_barFill) _barFill.style.width = `${Math.round(pct)}%`;
-    };
-
-    const _enable = () => {
-      _setProgress(100);
+    _themeTunePreload.then(() => {
       _startBtn.disabled = false;
       _startBtn.textContent = 'Start Adventure';
-      if (_easyBtn) _easyBtn.disabled = false;
       if (_barWrap) _barWrap.style.opacity = '0';
-    };
-
-    // Progress bar driven by video buffering
-    _introVid.addEventListener('progress', () => {
-      if (!_introVid.duration) return;
-      try {
-        const pct = (_introVid.buffered.end(_introVid.buffered.length - 1) / _introVid.duration) * 100;
-        _setProgress(pct);
-      } catch (_) { /* buffered range not available yet */ }
     });
-
-    // Gate on both: video ready to play AND music pre-fetched
-    const _videoReady = new Promise(resolve => {
-      _introVid.addEventListener('canplaythrough', resolve, { once: true });
-      _introVid.addEventListener('error', resolve, { once: true });
-    });
-    Promise.all([_videoReady, _audioPreload, _themeTunePreload]).then(_enable);
   }
 }
 
@@ -566,8 +531,6 @@ function _readStartOptions() {
 function finishIntro() {
   if (!introOverlay) return;
   fadeOutThemeTune(1500);
-  const bgVideo = document.getElementById('title-bg-video');
-  if (bgVideo) { bgVideo.classList.remove('visible'); }
   introOverlay.style.transition = 'opacity 1.5s ease';
   introOverlay.style.opacity = '0';
   setTimeout(() => {
@@ -590,27 +553,9 @@ function finishIntro() {
 if (startBtn) {
   startBtn.addEventListener('click', async () => {
     _readStartOptions();
-    // Ensure theme tune is playing (await so the tune has started before we dissolve)
     await handleFirstInteraction();
-    // Dissolve the splash screen
-    splashScreen.classList.add('dissolving');
-    // After splash fades, crossfade to intro cinematic
-    setTimeout(() => {
-      splashScreen.classList.add('hidden');
-      videoContainer.classList.add('fade-in');
-      introVideo.play().catch(e => {
-        console.warn("Video play failed:", e);
-        finishIntro();
-      });
-    }, 1200);
+    finishIntro();
   });
-}
-
-if (introVideo) {
-  introVideo.addEventListener('ended', finishIntro);
-}
-if (skipBtn) {
-  skipBtn.addEventListener('click', finishIntro);
 }
 
 // ─────────────────────────────────────────────
