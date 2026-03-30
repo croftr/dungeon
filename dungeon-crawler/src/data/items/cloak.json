@@ -4,7 +4,7 @@
         "slot": "cloak",
         "attackType": null,
         "baseDamage": null,
-        "icon": "/icons/travelling_cloak.png",
+        "icon": "/icons/travelling_cloak.webp",
         "description": "A heavy wool cloak that keeps wind and rain at bay.",
         "defence": 1,
         "value": 24,
@@ -25,7 +25,7 @@
         "slot": "cloak",
         "attackType": null,
         "baseDamage": null,
-        "icon": "/icons/wardancer_cloak.png",
+        "icon": "/icons/wardancer_cloak.webp",
         "description": "A regal cloak of shimmering violet silk. It flows behind the dancer like a trail of shadow and light, granting supernatural grace.",
         "defence": 3,
         "value": 1000,
@@ -37,7 +37,7 @@
     {
         "name": "Celestial Vindicator Cloak",
         "slot": "cloak",
-        "icon": "/icons/celestial_vindicator_cloak.png",
+        "icon": "/icons/celestial_vindicator_cloak.webp",
         "description": "A magnificent cloak of shimmering white silk with silver embroidery. A radiant yellow seal is pinned at the shoulder, guiding the faithful.",
         "defence": 4,
         "value": 1500,
@@ -50,7 +50,7 @@
     {
         "name": "Ironpeak Bear Cloak",
         "slot": "cloak",
-        "icon": "/icons/dwarf_cloak.png",
+        "icon": "/icons/dwarf_cloak.webp",
         "description": "A heavy cloak woven from the fur of a dire bear, bound with large iron clasps. Provides warmth and protection.",
         "defence": 2,
         "value": 750,
@@ -59,7 +59,7 @@
     {
         "name": "Sylvan Elderwood Cloak",
         "slot": "cloak",
-        "icon": "/icons/sylvan_cloak.png",
+        "icon": "/icons/sylvan_cloak.webp",
         "description": "A flowing silken cloak interwoven with silver thread and enchanted leaves.",
         "defence": 3,
         "value": 1000,
@@ -68,7 +68,7 @@
     {
         "name": "Mountain Stalker Heavy Cloak",
         "slot": "cloak",
-        "icon": "/icons/mountain_cloak.png",
+        "icon": "/icons/mountain_cloak.webp",
         "description": "A thick, weather-beaten cloak made from the hide of a crag-cat.",
         "defence": 4,
         "value": 1000,
@@ -77,7 +77,7 @@
     {
         "name": "Aethelgard Archmage Mantle",
         "slot": "cloak",
-        "icon": "/icons/archmage_cloak.png",
+        "icon": "/icons/archmage_cloak.webp",
         "description": "A long, flowing mantle embroidered with constellation maps.",
         "defence": 2,
         "value": 1100,
@@ -89,7 +89,7 @@
     {
         "name": "Storm-Reaver Pelt",
         "slot": "cloak",
-        "icon": "/icons/stormreaver_cloak.png",
+        "icon": "/icons/stormreaver_cloak.webp",
         "description": "A massive bear pelt bound with iron chains, stinking of sweat and victory.",
         "defence": 3,
         "value": 1100,
@@ -98,7 +98,7 @@
     {
         "name": "Seraphic Grace Stole",
         "slot": "cloak",
-        "icon": "/icons/seraphic_cloak.png",
+        "icon": "/icons/seraphic_cloak.webp",
         "description": "A long, narrow stole draped over the shoulders, symbolising life and light.",
         "defence": 2,
         "value": 1100,
@@ -111,7 +111,7 @@
     {
         "name": "Lizard Scale Cloak",
         "slot": "cloak",
-        "icon": "/icons/lizard_scale_cloak.png",
+        "icon": "/icons/lizard_scale_cloak.webp",
         "description": "A powerful cloak crafted from the iridescent scales of a lizard warrior. It glimmers with an otherworldly light, offering superior protection.",
         "defence": 5,
         "value": 1300,

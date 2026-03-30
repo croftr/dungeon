@@ -7,7 +7,7 @@
         "damageModifier": 1,
         "damageType": "normal",
         "ammoType": "arrow",
-        "icon": "/icons/wooden_arrows.png",
+        "icon": "/icons/wooden_arrows.webp",
         "description": "A bundle of simple wooden arrows.",
         "value": 15,
         "weight": 1
@@ -20,7 +20,7 @@
         "damageModifier": 1.5,
         "damageType": "normal",
         "ammoType": "arrow",
-        "icon": "/icons/steel_arrows.png",
+        "icon": "/icons/steel_arrows.webp",
         "description": "Sharp, steel-tipped arrows with balanced fletching. Deploys deadly force.",
         "value": 275,
         "weight": 1.2
@@ -39,7 +39,7 @@
                 "chance": 1
             }
         ],
-        "icon": "/icons/poison_arrows.png",
+        "icon": "/icons/poison_arrows.webp",
         "description": "Arrows tipped with a viscous green neurotoxin. Inflicts 2 DPS for 30 seconds.",
         "value": 290,
         "weight": 1
@@ -52,7 +52,7 @@
         "damageModifier": 1,
         "damageType": "normal",
         "ammoType": "bolt",
-        "icon": "/icons/wooden_bolts.png",
+        "icon": "/icons/wooden_bolts.webp",
         "description": "A bundle of simple wooden bolts.",
         "value": 15,
         "weight": 1
@@ -65,7 +65,7 @@
         "damageModifier": 1.1,
         "damageType": "normal",
         "ammoType": "bolt",
-        "icon": "/icons/steel_bolts.png",
+        "icon": "/icons/steel_bolts.webp",
         "description": "A bundle of steel bolts.",
         "value": 275,
         "weight": 1.2
@@ -78,7 +78,7 @@
         "damageModifier": 1.2,
         "damageType": "normal",
         "ammoType": "bolt",
-        "icon": "/icons/silver_bolts.png",
+        "icon": "/icons/silver_bolts.webp",
         "description": "Crossbow bolts tipped with fine silver. Especially effective against the undead.",
         "value": 450,
         "weight": 1.1
@@ -89,7 +89,7 @@
         "attackType": null,
         "baseDamage": null,
         "delay": 4,
-        "icon": "/icons/spellbook.png",
+        "icon": "/icons/spellbook.webp",
         "description": "An ancient tome. Equip it in the ammo slot, then Right-Click it in the paperdoll to select a spell for your hands. Both hands can hold different spells.",
         "value": 360,
         "weight": 1,
@@ -101,7 +101,7 @@
         "attackType": null,
         "baseDamage": null,
         "delay": 4,
-        "icon": "/icons/seraphic_spellbook.png",
+        "icon": "/icons/seraphic_spellbook.webp",
         "description": "A majestic tome of divine light. Equip it in the ammo slot, then Right-Click it in the paperdoll to select a spell for your hands. Bestows the insight of the divine upon its bearer.",
         "value": 2600,
         "weight": 1.2,

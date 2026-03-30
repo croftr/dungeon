@@ -4,7 +4,7 @@
         "slot": "legs",
         "attackType": null,
         "baseDamage": null,
-        "icon": "/icons/cloth_trousers.png",
+        "icon": "/icons/cloth_trousers.webp",
         "description": "Sturdy travelling trousers. Not much protection but allow easy movement.",
         "defence": 1,
         "value": 12,
@@ -15,7 +15,7 @@
         "slot": "legs",
         "attackType": null,
         "baseDamage": null,
-        "icon": "/icons/chainmail_leggings.png",
+        "icon": "/icons/chainmail_leggings.webp",
         "description": "Riveted chain leggings that protect the thighs and shins.",
         "defence": 2,
         "value": 210,
@@ -26,7 +26,7 @@
         "slot": "legs",
         "attackType": null,
         "baseDamage": null,
-        "icon": "/icons/wardancer_legs.png",
+        "icon": "/icons/wardancer_legs.webp",
         "description": "Form-fitting silver greaves that provide exceptional protection while feeling as light as air. Ornamented with deep purple gems.",
         "defence": 5,
         "value": 800,
@@ -38,7 +38,7 @@
     {
         "name": "Celestial Vindicator Leggings",
         "slot": "legs",
-        "icon": "/icons/celestial_vindicator_legs.png",
+        "icon": "/icons/celestial_vindicator_legs.webp",
         "description": "Heavily plated greaves forged from white-gold alloys and silver. They feel weightless while providing impenetrable holy defense.",
         "defence": 6,
         "value": 1500,
@@ -50,7 +50,7 @@
     {
         "name": "Ironpeak Dwarf Greaves",
         "slot": "legs",
-        "icon": "/icons/dwarf_greaves.png",
+        "icon": "/icons/dwarf_greaves.webp",
         "description": "Heavy iron greaves designed to protect a dwarf warrior in the thickest of melee.",
         "defence": 4,
         "value": 1100,
@@ -59,7 +59,7 @@
     {
         "name": "Sylvan Elderwood Leggings",
         "slot": "legs",
-        "icon": "/icons/sylvan_leggings.png",
+        "icon": "/icons/sylvan_leggings.webp",
         "description": "Flexible and sturdy leggings imbued with the agility of the deep forest.",
         "defence": 5,
         "value": 1100,
@@ -68,7 +68,7 @@
     {
         "name": "Mountain Stalker Trousers",
         "slot": "legs",
-        "icon": "/icons/mountain_leggings.png",
+        "icon": "/icons/mountain_leggings.webp",
         "description": "Heary leather trousers with integrated iron plates on the thighs.",
         "defence": 5,
         "value": 1100,
@@ -77,7 +77,7 @@
     {
         "name": "Aethelgard Archmage Leggings",
         "slot": "legs",
-        "icon": "/icons/archmage_leggings.png",
+        "icon": "/icons/archmage_leggings.webp",
         "description": "Star-silk leggings that feel like moonlight against the skin.",
         "defence": 3,
         "value": 1100,
@@ -90,7 +90,7 @@
     {
         "name": "Storm-Reaver Greaves",
         "slot": "legs",
-        "icon": "/icons/stormreaver_leggings.png",
+        "icon": "/icons/stormreaver_leggings.webp",
         "description": "Thick iron greaves designed for stomping through the blood of fallen foes.",
         "defence": 6,
         "value": 1100,
@@ -99,7 +99,7 @@
     {
         "name": "Seraphic Grace Skirt",
         "slot": "legs",
-        "icon": "/icons/seraphic_leggings.png",
+        "icon": "/icons/seraphic_leggings.webp",
         "description": "A long, pleated skirt made of blessed linen.",
         "defence": 4,
         "value": 1100,
@@ -111,7 +111,7 @@
     {
         "name": "Barbarian's Loin Cloth",
         "slot": "legs",
-        "icon": "/icons/barbarians_loin_cloth.png",
+        "icon": "/icons/barbarians_loin_cloth.webp",
         "description": "A rugged loincloth made of thick fur and reinforced with heavy iron. Perfect for a warrior who respects no master but the blade.",
         "defence": 5,
         "value": 1200,

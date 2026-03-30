@@ -1,31 +1,31 @@
 {
   "nodes": [
     { "id": "start", "label": "Paladin Initiate",            "type": "start", "edges": ["n1"] },
-    { "id": "n1",    "label": "+2 Resilience",               "type": "stat",  "benefit": { "resilience": 2 },                   "icon": "/skills/stats-increase/resilience_increase.png",   "edges": ["n4","n3","n20","n23","n26"] },
-    { "id": "n3",    "label": "Shield Master I",             "type": "skill", "benefit": { "skill": "Shield Master" },          "icon": "/skills/shield-master.png",                         "edges": ["n18"] },
-    { "id": "n4",    "label": "Sanctuary",                   "type": "skill", "benefit": { "skill": "Sanctuary" },              "icon": "/skills/sancturary.png",                            "edges": ["n5","n6"] },
-    { "id": "n5",    "label": "+1 Resilience, +1 Strength",  "type": "stat",  "benefit": { "resilience": 1, "strength": 1 },    "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n9"] },
-    { "id": "n6",    "label": "+1 Vitality, +1 Resilience",  "type": "stat",  "benefit": { "vitality": 1, "resilience": 1 },    "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n9","n10"] },
-    { "id": "n9",    "label": "+2 Resilience",               "type": "stat",  "benefit": { "resilience": 2 },                   "icon": "/skills/stats-increase/resilience_increase.png",   "edges": ["n12"] },
-    { "id": "n10",   "label": "Holy Radiance",               "type": "skill", "benefit": { "skill": "Holy Radiance" },          "icon": "/skills/holy-radiance.png",                         "edges": ["n12"] },
-    { "id": "n12",   "label": "+1 Resilience, +1 Vitality",  "type": "stat",  "benefit": { "resilience": 1, "vitality": 1 },    "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n14"] },
-    { "id": "n14",   "label": "+1 Strength, +1 Resilience",  "type": "stat",  "benefit": { "strength": 1, "resilience": 1 },    "icon": "/skills/stats-increase/mixed_stat_increase.png",    "edges": ["n17"] },
-    { "id": "n17",   "label": "+2 Resilience",               "type": "stat",  "benefit": { "resilience": 2 },                   "icon": "/skills/stats-increase/resilience_increase.png",   "edges": [] },
+    { "id": "n1",    "label": "+2 Resilience",               "type": "stat",  "benefit": { "resilience": 2 },                   "icon": "/skills/stats-increase/resilience_increase.webp",   "edges": ["n4","n3","n20","n23","n26"] },
+    { "id": "n3",    "label": "Shield Master I",             "type": "skill", "benefit": { "skill": "Shield Master" },          "icon": "/skills/shield-master.webp",                         "edges": ["n18"] },
+    { "id": "n4",    "label": "Sanctuary",                   "type": "skill", "benefit": { "skill": "Sanctuary" },              "icon": "/skills/sancturary.webp",                            "edges": ["n5","n6"] },
+    { "id": "n5",    "label": "+1 Resilience, +1 Strength",  "type": "stat",  "benefit": { "resilience": 1, "strength": 1 },    "icon": "/skills/stats-increase/mixed_stat_increase.webp",    "edges": ["n9"] },
+    { "id": "n6",    "label": "+1 Vitality, +1 Resilience",  "type": "stat",  "benefit": { "vitality": 1, "resilience": 1 },    "icon": "/skills/stats-increase/mixed_stat_increase.webp",    "edges": ["n9","n10"] },
+    { "id": "n9",    "label": "+2 Resilience",               "type": "stat",  "benefit": { "resilience": 2 },                   "icon": "/skills/stats-increase/resilience_increase.webp",   "edges": ["n12"] },
+    { "id": "n10",   "label": "Holy Radiance",               "type": "skill", "benefit": { "skill": "Holy Radiance" },          "icon": "/skills/holy-radiance.webp",                         "edges": ["n12"] },
+    { "id": "n12",   "label": "+1 Resilience, +1 Vitality",  "type": "stat",  "benefit": { "resilience": 1, "vitality": 1 },    "icon": "/skills/stats-increase/mixed_stat_increase.webp",    "edges": ["n14"] },
+    { "id": "n14",   "label": "+1 Strength, +1 Resilience",  "type": "stat",  "benefit": { "strength": 1, "resilience": 1 },    "icon": "/skills/stats-increase/mixed_stat_increase.webp",    "edges": ["n17"] },
+    { "id": "n17",   "label": "+2 Resilience",               "type": "stat",  "benefit": { "resilience": 2 },                   "icon": "/skills/stats-increase/resilience_increase.webp",   "edges": [] },
 
-    { "id": "n18",   "label": "Shield Master II",            "type": "skill", "benefit": { "skill": "Shield Master" },          "icon": "/skills/shield-master.png",                         "edges": ["n19"] },
-    { "id": "n19",   "label": "Shield Master III",           "type": "skill", "benefit": { "skill": "Shield Master" },          "icon": "/skills/shield-master.png",                         "edges": [] },
+    { "id": "n18",   "label": "Shield Master II",            "type": "skill", "benefit": { "skill": "Shield Master" },          "icon": "/skills/shield-master.webp",                         "edges": ["n19"] },
+    { "id": "n19",   "label": "Shield Master III",           "type": "skill", "benefit": { "skill": "Shield Master" },          "icon": "/skills/shield-master.webp",                         "edges": [] },
 
-    { "id": "n20",   "label": "Mace Tactician I",            "type": "skill", "benefit": { "skill": "Mace Tactician" },         "icon": "/skills/mace-tactician.png",                        "edges": ["n21"] },
-    { "id": "n21",   "label": "Mace Tactician II",           "type": "skill", "benefit": { "skill": "Mace Tactician" },         "icon": "/skills/mace-tactician.png",                        "edges": ["n22"] },
-    { "id": "n22",   "label": "Mace Tactician III",          "type": "skill", "benefit": { "skill": "Mace Tactician" },         "icon": "/skills/mace-tactician.png",                        "edges": [] },
+    { "id": "n20",   "label": "Mace Tactician I",            "type": "skill", "benefit": { "skill": "Mace Tactician" },         "icon": "/skills/mace-tactician.webp",                        "edges": ["n21"] },
+    { "id": "n21",   "label": "Mace Tactician II",           "type": "skill", "benefit": { "skill": "Mace Tactician" },         "icon": "/skills/mace-tactician.webp",                        "edges": ["n22"] },
+    { "id": "n22",   "label": "Mace Tactician III",          "type": "skill", "benefit": { "skill": "Mace Tactician" },         "icon": "/skills/mace-tactician.webp",                        "edges": [] },
 
-    { "id": "n23",   "label": "Mace Master I",               "type": "skill", "benefit": { "skill": "Mace Master" },            "icon": "/skills/mace-master.png",                           "edges": ["n24"] },
-    { "id": "n24",   "label": "Mace Master II",              "type": "skill", "benefit": { "skill": "Mace Master" },            "icon": "/skills/mace-master.png",                           "edges": ["n25"] },
-    { "id": "n25",   "label": "Mace Master III",             "type": "skill", "benefit": { "skill": "Mace Master" },            "icon": "/skills/mace-master.png",                           "edges": [] },
+    { "id": "n23",   "label": "Mace Master I",               "type": "skill", "benefit": { "skill": "Mace Master" },            "icon": "/skills/mace-master.webp",                           "edges": ["n24"] },
+    { "id": "n24",   "label": "Mace Master II",              "type": "skill", "benefit": { "skill": "Mace Master" },            "icon": "/skills/mace-master.webp",                           "edges": ["n25"] },
+    { "id": "n25",   "label": "Mace Master III",             "type": "skill", "benefit": { "skill": "Mace Master" },            "icon": "/skills/mace-master.webp",                           "edges": [] },
 
-    { "id": "n26",   "label": "Mace Conservator I",          "type": "skill", "benefit": { "skill": "Mace Conservator" },       "icon": "/skills/mace-conservator.png",                      "edges": ["n27"] },
-    { "id": "n27",   "label": "Mace Conservator II",         "type": "skill", "benefit": { "skill": "Mace Conservator" },       "icon": "/skills/mace-conservator.png",                      "edges": ["n28"] },
-    { "id": "n28",   "label": "Mace Conservator III",        "type": "skill", "benefit": { "skill": "Mace Conservator" },       "icon": "/skills/mace-conservator.png",                      "edges": [] }
+    { "id": "n26",   "label": "Mace Conservator I",          "type": "skill", "benefit": { "skill": "Mace Conservator" },       "icon": "/skills/mace-conservator.webp",                      "edges": ["n27"] },
+    { "id": "n27",   "label": "Mace Conservator II",         "type": "skill", "benefit": { "skill": "Mace Conservator" },       "icon": "/skills/mace-conservator.webp",                      "edges": ["n28"] },
+    { "id": "n28",   "label": "Mace Conservator III",        "type": "skill", "benefit": { "skill": "Mace Conservator" },       "icon": "/skills/mace-conservator.webp",                      "edges": [] }
   ],
   "positions": {
     "start": [ 350,  40],

@@ -1,7 +1,7 @@
 {
     "Hunter's Eye": {
         "type": "debuff",
-        "icon": "/skills/hunters-eye.png",
+        "icon": "/skills/hunters-eye.webp",
         "description": "Reveal full stats of the engaged monster — HP, STR, DEX, VIT, INT, RES and Defence. Only usable in combat.",
         "cooldownMs": 90000,
         "effectType": "reveal",
@@ -9,7 +9,7 @@
     },
     "Sanctuary": {
         "type": "buff",
-        "icon": "/skills/sancturary.png",
+        "icon": "/skills/sancturary.webp",
         "description": "Surrounds the party in divine light, reducing all damage received by 10% for 60 seconds. Cooldown: 150s.",
         "cooldownMs": 150000,
         "durationMs": 60000,
@@ -21,7 +21,7 @@
     },
     "Holy Radiance": {
         "type": "healing",
-        "icon": "/skills/holy-radiance.png",
+        "icon": "/skills/holy-radiance.webp",
         "description": "Calls down a pulse of holy energy, restoring HP equal to the caster's Vitality + Intelligence + Strength to every living party member. Cooldown: 150s.",
         "cooldownMs": 150000,
         "effectType": "partyHeal",
@@ -31,7 +31,7 @@
     },
     "Entangle": {
         "type": "debuff",
-        "icon": "/skills/entangle.png",
+        "icon": "/skills/entangle.webp",
         "description": "Halves the attack speed of the monster currently being fought for 30s. Only usable in combat. Cooldown: 90s.",
         "cooldownMs": 90000,
         "durationMs": 30000,
@@ -43,7 +43,7 @@
     },
     "Sunder Armor": {
         "type": "debuff",
-        "icon": "/skills/sunder-armor.png",
+        "icon": "/skills/sunder-armor.webp",
         "description": "Crushes the targeted monster, halving its defence stats for 30s. Only usable in combat. Cooldown: 90s.",
         "cooldownMs": 90000,
         "durationMs": 30000,
@@ -55,7 +55,7 @@
     },
     "Arcane Lantern": {
         "type": "buff",
-        "icon": "/skills/arcane-lantern.png",
+        "icon": "/skills/arcane-lantern.webp",
         "description": "Conjures a sphere of magical light that illuminates the dungeon as brightly as a torch for 60 seconds. Cooldown: 90s.",
         "cooldownMs": 90000,
         "durationMs": 60000,
@@ -65,7 +65,7 @@
     },
     "Runic Scholar": {
         "type": "buff",
-        "icon": "/skills/runic-scholar.png",
+        "icon": "/skills/runic-scholar.webp",
         "description": "Channels arcane power into the next spell cast, doubling its damage after all other modifiers are applied.",
         "cooldownMs": 0,
         "effectType": "spellDamageMultiplier",
@@ -75,7 +75,7 @@
     },
     "Mana Tap": {
         "type": "healing",
-        "icon": "/skills/mana-tap.png",
+        "icon": "/skills/mana-tap.webp",
         "description": "Taps into a hidden vein of arcane energy, instantly replenishing all of Merlin's mana points. Cooldown: 150s.",
         "cooldownMs": 150000,
         "effectType": "restoreMp",
@@ -83,7 +83,7 @@
     },
     "Berserk": {
         "type": "buff",
-        "icon": "/skills/berserk.png",
+        "icon": "/skills/berserk.webp",
         "description": "Enters a state of roaring fury, boosting all damage dealt by 80% (after other calculations) for 30s. Cooldown: 90s.",
         "cooldownMs": 90000,
         "durationMs": 30000,
@@ -95,7 +95,7 @@
     },
     "Miners Light": {
         "type": "buff",
-        "icon": "/skills/arcane-lantern.png",
+        "icon": "/skills/arcane-lantern.webp",
         "description": "Ignites a specialized lantern, illuminating the dungeon brightly for 60 seconds. Cooldown: 90s.",
         "cooldownMs": 90000,
         "durationMs": 60000,
@@ -105,7 +105,7 @@
     },
     "Whirlwind": {
         "type": "buff",
-        "icon": "/skills/whirlwind.png",
+        "icon": "/skills/whirlwind.webp",
         "description": "Becomes a blur of motion, doubling attack speed and preventing stamina drain for 60s. Cooldown: 90s.",
         "cooldownMs": 90000,
         "durationMs": 60000,
@@ -117,7 +117,7 @@
     },
     "True Shot": {
         "type": "buff",
-        "icon": "/skills/true-shot.png",
+        "icon": "/skills/true-shot.webp",
         "description": "Becomes hyper-focused, ensuring every ranged attack finds its mark for 60 seconds. Cooldown: 90s.",
         "cooldownMs": 90000,
         "durationMs": 60000,
@@ -127,7 +127,7 @@
     },
     "Double Attack": {
         "type": "buff",
-        "icon": "/skills/double-attack.png",
+        "icon": "/skills/double-attack.webp",
         "description": "Enters a state of focused aggression, allowing the character to strike twice with every attack for 20 seconds. Cooldown: 90s.",
         "cooldownMs": 90000,
         "durationMs": 20000,
@@ -137,7 +137,7 @@
     },
     "Rampart": {
         "type": "buff",
-        "icon": "/skills/rampart.png",
+        "icon": "/skills/rampart.webp",
         "description": "The character braces themselves like a fortress, doubling their current defense rating for 60 seconds. Cooldown: 120s.",
         "cooldownMs": 120000,
         "durationMs": 60000,
@@ -149,7 +149,7 @@
     },
     "Warcry": {
         "type": "buff",
-        "icon": "/skills/warcry.png",
+        "icon": "/skills/warcry.webp",
         "description": "Lets out a thunderous shout that inspires the entire party, boosting all damage dealt by 40% (after other calculations) for 30s. Cooldown: 90s.",
         "cooldownMs": 90000,
         "durationMs": 30000,
@@ -161,7 +161,7 @@
     },
     "War Dance": {
         "type": "buff",
-        "icon": "/skills/wardance.png",
+        "icon": "/skills/wardance.webp",
         "description": "Inspires the party with a graceful dance, increasing attack speed and preventing stamina drain for 30s. Cooldown: 90s.",
         "cooldownMs": 90000,
         "durationMs": 30000,
@@ -174,7 +174,7 @@
     "Mace Master": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/mace-master.png",
+        "icon": "/skills/mace-master.webp",
         "description": "Increases base damage with maces by 2.",
         "effectType": "weaponDamageBonus",
         "weaponType": "mace",
@@ -183,7 +183,7 @@
     "Sword Master": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/sword-master.png",
+        "icon": "/skills/sword-master.webp",
         "description": "Increases base damage with swords by 2.",
         "effectType": "weaponDamageBonus",
         "weaponType": "sword",
@@ -192,7 +192,7 @@
     "Axe Master": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/axe-master.png",
+        "icon": "/skills/axe-master.webp",
         "description": "Increases base damage with axes by 2.",
         "effectType": "weaponDamageBonus",
         "weaponType": "axe",
@@ -201,7 +201,7 @@
     "Staff Master": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/staff-master.png",
+        "icon": "/skills/staff-master.webp",
         "description": "Increases base damage with staffs by 2.",
         "effectType": "weaponDamageBonus",
         "weaponType": "staff",
@@ -210,7 +210,7 @@
     "Two-Handed Master": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/two-handed-master.png",
+        "icon": "/skills/two-handed-master.webp",
         "description": "Increases base damage with two-handed weapons by 2.",
         "effectType": "weaponDamageBonus",
         "weaponType": "twoHanded",
@@ -219,7 +219,7 @@
     "Crossbow Master": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/crossbow-master.png",
+        "icon": "/skills/crossbow-master.webp",
         "description": "Increases base damage with crossbows by 2.",
         "effectType": "weaponDamageBonus",
         "weaponType": "crossbow",
@@ -228,7 +228,7 @@
     "Dagger Master": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/dagger-master.png",
+        "icon": "/skills/dagger-master.webp",
         "description": "Increases base damage with daggers by 2.",
         "effectType": "weaponDamageBonus",
         "weaponType": "dagger",
@@ -237,7 +237,7 @@
     "Bow Master": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/bow-master.png",
+        "icon": "/skills/bow-master.webp",
         "description": "Increases base damage with bows by 2.",
         "effectType": "weaponDamageBonus",
         "weaponType": "bow",
@@ -246,7 +246,7 @@
     "Mace Tactician": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/mace-tactician.png",
+        "icon": "/skills/mace-tactician.webp",
         "description": "Increases hit chance with maces by 10%.",
         "effectType": "weaponAccuracyBonus",
         "weaponType": "mace",
@@ -255,7 +255,7 @@
     "Sword Tactician": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/sword-tactician.png",
+        "icon": "/skills/sword-tactician.webp",
         "description": "Increases hit chance with swords by 10%.",
         "effectType": "weaponAccuracyBonus",
         "weaponType": "sword",
@@ -264,7 +264,7 @@
     "Axe Tactician": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/axe-tactician.png",
+        "icon": "/skills/axe-tactician.webp",
         "description": "Increases hit chance with axes by 10%.",
         "effectType": "weaponAccuracyBonus",
         "weaponType": "axe",
@@ -273,7 +273,7 @@
     "Staff Tactician": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/staff-tactician.png",
+        "icon": "/skills/staff-tactician.webp",
         "description": "Increases hit chance with staffs by 10%.",
         "effectType": "weaponAccuracyBonus",
         "weaponType": "staff",
@@ -282,7 +282,7 @@
     "Two-Handed Tactician": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/two-handed-tactician.png",
+        "icon": "/skills/two-handed-tactician.webp",
         "description": "Increases hit chance with two-handed weapons by 10%.",
         "effectType": "weaponAccuracyBonus",
         "weaponType": "twoHanded",
@@ -291,7 +291,7 @@
     "Crossbow Tactician": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/crossbow-tactician.png",
+        "icon": "/skills/crossbow-tactician.webp",
         "description": "Increases hit chance with crossbows by 10%.",
         "effectType": "weaponAccuracyBonus",
         "weaponType": "crossbow",
@@ -300,7 +300,7 @@
     "Dagger Tactician": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/dagger-tactician.png",
+        "icon": "/skills/dagger-tactician.webp",
         "description": "Increases hit chance with daggers by 10%.",
         "effectType": "weaponAccuracyBonus",
         "weaponType": "dagger",
@@ -309,7 +309,7 @@
     "Bow Tactician": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/bow-tactician.png",
+        "icon": "/skills/bow-tactician.webp",
         "description": "Increases hit chance with bows by 10%.",
         "effectType": "weaponAccuracyBonus",
         "weaponType": "bow",
@@ -318,7 +318,7 @@
     "Pyromancer": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/pyromancer.png",
+        "icon": "/skills/pyromancer.webp",
         "description": "Increases fireball base damage by 4 and accuracy by 5%.",
         "effectType": "fireballDamageBonus",
         "magnitude": 4,
@@ -327,7 +327,7 @@
     "Lifewarden": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/lifewarden.png",
+        "icon": "/skills/lifewarden.webp",
         "description": "Increases HP restored by cure and heal spells by 2, and increases Regeneration healing by 1 HP per tick.",
         "effectType": "cureHealBonus",
         "magnitude": 2,
@@ -336,7 +336,7 @@
     "Shield Master": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/shield-master.png",
+        "icon": "/skills/shield-master.webp",
         "description": "Mastery of the shield increases block chance by 2% (when a shield is equipped), base damage by 1, and defence by 1.",
         "effectType": "shieldMasterBonus",
         "blockChanceBonus": 2,
@@ -346,7 +346,7 @@
     "Mace Conservator": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/mace-conservator.png",
+        "icon": "/skills/mace-conservator.webp",
         "description": "Reduces stamina cost of mace attacks by 15%.",
         "effectType": "weaponStaminaReduction",
         "weaponType": "mace",
@@ -355,7 +355,7 @@
     "Axe Conservator": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/axe-conservator.png",
+        "icon": "/skills/axe-conservator.webp",
         "description": "Reduces stamina cost of axe attacks by 15%.",
         "effectType": "weaponStaminaReduction",
         "weaponType": "axe",
@@ -364,7 +364,7 @@
     "Dagger Conservator": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/dagger-conservator.png",
+        "icon": "/skills/dagger-conservator.webp",
         "description": "Reduces stamina cost of dagger attacks by 15%.",
         "effectType": "weaponStaminaReduction",
         "weaponType": "dagger",
@@ -373,7 +373,7 @@
     "Crossbow Conservator": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/crossbow-conservator.png",
+        "icon": "/skills/crossbow-conservator.webp",
         "description": "Reduces stamina cost of crossbow attacks by 15%.",
         "effectType": "weaponStaminaReduction",
         "weaponType": "crossbow",
@@ -382,7 +382,7 @@
     "Bow Conservator": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/bow-conservator.png",
+        "icon": "/skills/bow-conservator.webp",
         "description": "Reduces stamina cost of bow attacks by 15%.",
         "effectType": "weaponStaminaReduction",
         "weaponType": "bow",
@@ -391,7 +391,7 @@
     "Two-Handed Conservator": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/two-handed-conservator.png",
+        "icon": "/skills/two-handed-conservator.webp",
         "description": "Reduces stamina cost of two-handed weapon attacks by 15%.",
         "effectType": "weaponStaminaReduction",
         "weaponType": "twoHanded",
@@ -400,14 +400,14 @@
     "Battle Mage": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/battle-mage.png",
+        "icon": "/skills/battle-mage.webp",
         "description": "Regenerates MP during combat. 1 node = 1 MP/3s, 2 nodes = 1 MP/2s, 3 nodes = 1 MP/s.",
         "effectType": "combatManaRegen"
     },
     "Arcane Reservoir": {
         "isPassive": true,
         "type": "passive",
-        "icon": "/skills/arcane-reservoir.png",
+        "icon": "/skills/arcane-reservoir.webp",
         "description": "Speeds up out-of-combat MP regeneration. 1 node = 20% faster, 2 nodes = 40% faster, 3 nodes = double speed.",
         "effectType": "fieldManaRegen"
     }

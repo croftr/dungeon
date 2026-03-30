@@ -11,7 +11,7 @@
             "str": 1,
             "dex": 0
         },
-        "icon": "/icons/torch.png",
+        "icon": "/icons/torch.webp",
         "description": "A burning torch. Lights the way and can be thrust into an enemy's face.",
         "value": 3,
         "weight": 0.6
@@ -28,7 +28,7 @@
             "str": 0.2,
             "dex": 0.8
         },
-        "icon": "/icons/dagger.png",
+        "icon": "/icons/dagger.webp",
         "description": "A short, double-edged blade. Quick and easy to slip past armour.",
         "value": 60,
         "weight": 0.4
@@ -44,7 +44,7 @@
         "statWeights": {
             "dex": 1
         },
-        "icon": "/icons/elven-dagger.png",
+        "icon": "/icons/elven-dagger.webp",
         "description": "A short, double-edged blade. Quick and easy to slip past armour.",
         "value": 60,
         "weight": 0.4
@@ -68,7 +68,7 @@
             "str": 0.1,
             "dex": 0.9
         },
-        "icon": "/icons/vampiric_dagger.png",
+        "icon": "/icons/vampiric_dagger.webp",
         "description": "A black blade dripping with blood. Restores 1 HP on every successful hit.",
         "value": 200,
         "weight": 0.4
@@ -92,7 +92,7 @@
             "str": 0.1,
             "dex": 0.9
         },
-        "icon": "/icons/poison-dagger.png",
+        "icon": "/icons/poison-dagger.webp",
         "description": "A short, double-edged blade coated in poison.",
         "value": 60,
         "weight": 0.4
@@ -109,7 +109,7 @@
             "str": 0.5,
             "dex": 0.5
         },
-        "icon": "/icons/sword.png",
+        "icon": "/icons/sword.webp",
         "description": "A straight iron sword. The classic weapon of choice for adventurers.",
         "value": 195,
         "weight": 1.8
@@ -126,7 +126,7 @@
             "str": 1,
             "dex": 0
         },
-        "icon": "/icons/mace.png",
+        "icon": "/icons/mace.webp",
         "description": "An iron mace with a flanged head. Excellent against armoured foes.",
         "value": 135,
         "weight": 2.2
@@ -143,7 +143,7 @@
             "str": 1,
             "dex": 0
         },
-        "icon": "/icons/silver_mace.png",
+        "icon": "/icons/silver_mace.webp",
         "description": "A mace forged from pure silver, blessed with divine power. Grants sanctuary and holy radiance bonuses.",
         "value": 450,
         "weight": 2,
@@ -163,7 +163,7 @@
             "str": 0.8,
             "dex": 0.2
         },
-        "icon": "/icons/axe.png",
+        "icon": "/icons/axe.webp",
         "description": "A heavy war axe. Slower than a sword but hits with devastating force.",
         "value": 150,
         "weight": 2.8
@@ -180,7 +180,7 @@
             "str": 0.9,
             "dex": 0.1
         },
-        "icon": "/icons/dwarven_axe.png",
+        "icon": "/icons/dwarven_axe.webp",
         "description": "A mastercrafted battle axe of dwarven design. Its heavy iron head is engraved with ancient runes of power.",
         "value": 300,
         "weight": 3.5
@@ -197,7 +197,7 @@
             "str": 0.8,
             "dex": 0.2
         },
-        "icon": "/icons/oak_staff.png",
+        "icon": "/icons/oak_staff.webp",
         "description": "A gnarled wooden staff. A reliable melee weapon for wizards who want to bash enemies.",
         "value": 54,
         "weight": 1.5
@@ -215,7 +215,7 @@
             "str": 0.2,
             "dex": 0.8
         },
-        "icon": "/icons/short_bow.png",
+        "icon": "/icons/short_bow.webp",
         "description": "A recurve hunting bow. Loose to strike enemies at range.",
         "value": 120,
         "weight": 1.2
@@ -233,7 +233,7 @@
             "str": 0.3,
             "dex": 0.7
         },
-        "icon": "/icons/longbow.png",
+        "icon": "/icons/longbow.webp",
         "description": "A tall yew longbow. Tremendous range and power.",
         "value": 225,
         "weight": 1.8
@@ -251,7 +251,7 @@
             "str": 0.5,
             "dex": 0.5
         },
-        "icon": "/icons/wooden-crossbow.png",
+        "icon": "/icons/wooden-crossbow.webp",
         "description": "A mechanical bow that fires powerful bolts. Highly effective at range.",
         "value": 240,
         "weight": 3.5
@@ -269,7 +269,7 @@
             "str": 0.6,
             "dex": 0.4
         },
-        "icon": "/icons/dwarf_crossbow.png",
+        "icon": "/icons/dwarf_crossbow.webp",
         "description": "A heavy, short-limbed mechanical crossbow made of dark iron and reinforced with brass dwarven runes. Robust and deadly.",
         "value": 480,
         "weight": 4.2
@@ -286,7 +286,7 @@
             "str": 0.7,
             "dex": 0.3
         },
-        "icon": "/icons/greatsword.png",
+        "icon": "/icons/greatsword.webp",
         "description": "A massive two-handed blade that cleaves through enemies in a single arc.",
         "value": 450,
         "weight": 5.5
@@ -303,7 +303,7 @@
             "str": 0.8,
             "dex": 0.2
         },
-        "icon": "/icons/tridant.png",
+        "icon": "/icons/tridant.webp",
         "description": "A two-handed tridant. Slow to swing but crushes stone and bone alike.",
         "value": 390,
         "weight": 7
@@ -320,7 +320,7 @@
             "str": 0.8,
             "dex": 0.2
         },
-        "icon": "/icons/greataxe.png",
+        "icon": "/icons/greataxe.webp",
         "description": "A massive two-handed axe that cleaves through enemies in a single arc.",
         "value": 450,
         "weight": 5.5
@@ -337,7 +337,7 @@
             "str": 0.9,
             "dex": 0.1
         },
-        "icon": "/icons/war_hammer.png",
+        "icon": "/icons/war_hammer.webp",
         "description": "A two-handed war hammer. Slow to swing but crushes stone and bone alike.",
         "value": 390,
         "weight": 7
@@ -354,7 +354,7 @@
             "str": 0.0,
             "dex": 1.0
         },
-        "icon": "/icons/wardancer_dagger.png",
+        "icon": "/icons/wardancer_dagger.webp",
         "description": "A legendary elven blade that feels weightless in the hand. Its amethyst-infused edge can slice through the toughest mail with ease.",
         "value": 1500,
         "weight": 0.2,
@@ -372,7 +372,7 @@
             "str": 1.0,
             "dex": 0.0
         },
-        "icon": "/icons/celestial_vindicator_mace.png",
+        "icon": "/icons/celestial_vindicator_mace.webp",
         "description": "A massive two-handed mace of radiant white metal and silver. A core of holy yellow energy pulses within the head, ready to shatter evil.",
         "value": 2000,
         "weight": 12,
@@ -387,7 +387,7 @@
         "type": "weapon",
         "attackType": "swipe",
         "baseDamage": 14,
-        "icon": "/icons/dwarf_battleaxe.png",
+        "icon": "/icons/dwarf_battleaxe.webp",
         "description": "A heavy, double-bladed dwarf battleaxe inscribed with glowing iron runes of power.",
         "value": 2200,
         "weight": 6.0,
@@ -409,7 +409,7 @@
             "str": 0.2,
             "dex": 0.8
         },
-        "icon": "/icons/sylvan_bow.png",
+        "icon": "/icons/sylvan_bow.webp",
         "description": "A legendary longbow carved from the heartwood of an ancient magical tree. It hums with immense power.",
         "value": 2200,
         "weight": 1.5
@@ -428,7 +428,7 @@
             "str": 0.5,
             "dex": 0.5
         },
-        "icon": "/icons/mountain_crossbow.png",
+        "icon": "/icons/mountain_crossbow.webp",
         "description": "A high-tension crossbow made of reinforced steel and dark oak, capable of piercing dragon scales.",
         "value": 2400,
         "weight": 5.0
@@ -445,7 +445,7 @@
         "statWeights": {
             "intelligence": 1.0
         },
-        "icon": "/icons/archmage_staff.png",
+        "icon": "/icons/archmage_staff.webp",
         "description": "A staff made of pure crystal and solidified mana, crackling with arcane force.",
         "value": 2400,
         "weight": 2.0,
@@ -465,7 +465,7 @@
         "statWeights": {
             "str": 1.0
         },
-        "icon": "/icons/stormreaver_axe.png",
+        "icon": "/icons/stormreaver_axe.webp",
         "description": "A massive two-handed axe of serrated iron, capable of cleaving an ogre in twain.",
         "value": 2600,
         "weight": 12.0
@@ -485,7 +485,7 @@
         "statBonuses": {
             "strength": 2
         },
-        "icon": "/icons/barbarians_club.png",
+        "icon": "/icons/barbarians_club.webp",
         "description": "A devastating war club crafted from giant timber and reinforced with crude iron bands.",
         "value": 1500,
         "weight": 15.0

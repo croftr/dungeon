@@ -2,7 +2,7 @@
     {
         "name": "Life Essence",
         "slot": "loot",
-        "icon": "/icons/ingredients/life_essence.png",
+        "icon": "/icons/ingredients/life_essence.webp",
         "description": "A glowing orb of pure life energy. Prized by alchemists for crafting.",
         "value": 0,
         "weight": 0.1,
@@ -11,7 +11,7 @@
     {
         "name": "Poison Vial",
         "slot": "loot",
-        "icon": "/icons/ingredients/poison_vial.png",
+        "icon": "/icons/ingredients/poison_vial.webp",
         "description": "A small vial of concentrated poison harvested from slain creatures.",
         "value": 20,
         "weight": 0.2,
@@ -47,7 +47,7 @@
     {
         "name": "Starlight Nectar",
         "slot": "loot",
-        "icon": "/icons/ingredients/starlight_nectar.png",
+        "icon": "/icons/ingredients/starlight_nectar.webp",
         "description": "A luminous, glowing silver-blue liquid that pulses with magical aura. Extremely rare.",
         "value": 150,
         "weight": 0.1,
@@ -56,7 +56,7 @@
     {
         "name": "Bronze Key",
         "slot": "loot",
-        "icon": "/icons/key/bronze_key.png",
+        "icon": "/icons/key/bronze_key.webp",
         "description": "A heavy, tarnished bronze key. Looks like it fits a large lock.",
         "value": 0,
         "weight": 0.5,
@@ -65,7 +65,7 @@
     {
         "name": "Bone Key",
         "slot": "loot",
-        "icon": "/icons/key/bone_key.png",
+        "icon": "/icons/key/bone_key.webp",
         "description": "A heavy, bone key. Looks like it fits a large lock.",
         "value": 0,
         "weight": 0.5,
@@ -74,7 +74,7 @@
     {
         "name": "Gold Coins",
         "slot": "loot",
-        "icon": "/icons/gold_coins.png",
+        "icon": "/icons/gold_coins.webp",
         "description": "A pile of glittering gold coins.",
         "value": 3,
         "weight": 0,
@@ -83,7 +83,7 @@
     {
         "name": "Ogre's Head",
         "slot": "loot",
-        "icon": "/icons/ingredients/ogre_head.png",
+        "icon": "/icons/ingredients/ogre_head.webp",
         "description": "The severed head of a mighty ogre. A gruesome but valuable alchemical trophy.",
         "value": 150,
         "weight": 5.0,
@@ -92,7 +92,7 @@
     {
         "name": "Minotaur Horn",
         "slot": "loot",
-        "icon": "/icons/ingredients/minotaur_horn.png",
+        "icon": "/icons/ingredients/minotaur_horn.webp",
         "description": "A massive, curved horn from a minotaur. Infused with raw physical power.",
         "value": 200,
         "weight": 2.5,
@@ -101,7 +101,7 @@
     {
         "name": "Aqua Man Flipper",
         "slot": "loot",
-        "icon": "/icons/ingredients/aqua_flipper.png",
+        "icon": "/icons/ingredients/aqua_flipper.webp",
         "description": "A scaly flipper from an aquatic humanoid. Useful for potions of water breathing or agility.",
         "value": 120,
         "weight": 0.8,
@@ -110,7 +110,7 @@
     {
         "name": "Demon's Eyes",
         "slot": "loot",
-        "icon": "/icons/ingredients/demon_eyes.png",
+        "icon": "/icons/ingredients/demon_eyes.webp",
         "description": "A pair of glowing eyes from a low-level demon. They still seem to track movement.",
         "value": 250,
         "weight": 0.3,
@@ -119,7 +119,7 @@
     {
         "name": "Iron Ore",
         "slot": "loot",
-        "icon": "/icons/ingredients/iron_ore.png",
+        "icon": "/icons/ingredients/iron_ore.webp",
         "description": "A heavy chunk of raw iron ore. Can be smelted and forged into powerful gear.",
         "value": 50,
         "weight": 2.0,
@@ -128,7 +128,7 @@
     {
         "name": "Lizard Scale",
         "slot": "loot",
-        "icon": "/icons/ingredients/lizard_scale.png",
+        "icon": "/icons/ingredients/lizard_scale.webp",
         "description": "A tough, shimmering scale from a lizard warrior. Excellent for reinforcing leather armor.",
         "value": 180,
         "weight": 0.2,
@@ -137,7 +137,7 @@
     {
         "name": "Crocodile Hide",
         "slot": "loot",
-        "icon": "/icons/ingredients/crocodile_hide.png",
+        "icon": "/icons/ingredients/crocodile_hide.webp",
         "description": "A thick, durable piece of crocodile hide covering. Its tough ridges are perfect for crafting heavy-duty leather armor.",
         "value": 120,
         "weight": 0.5,
@@ -146,7 +146,7 @@
     {
         "name": "Giant's Loin Cloth",
         "slot": "loot",
-        "icon": "/icons/ingredients/giants_loin_cloth.png",
+        "icon": "/icons/ingredients/giants_loin_cloth.webp",
         "description": "A massive, tattered piece of crude cloth and fur from a giant's attire. Smells of ozone and mountain air.",
         "value": 200,
         "weight": 3.0,
@@ -155,7 +155,7 @@
     {
         "name": "Giant's Club",
         "slot": "loot",
-        "icon": "/icons/ingredients/giants_club.png",
+        "icon": "/icons/ingredients/giants_club.webp",
         "description": "A crudely fashioned tree trunk, too heavy for mortals but a formidable weapon in a giant's hands.",
         "value": 250,
         "weight": 15.0,
@@ -164,7 +164,7 @@
     {
         "name": "Blue Crystal",
         "slot": "loot",
-        "icon": "/icons/key/blue_crystal.png",
+        "icon": "/icons/key/blue_crystal.webp",
         "description": "A powerful blue crystal pulsing with mystical energy. It looks like it might be part of a larger mechanism.",
         "value": 500,
         "weight": 0.5,
@@ -173,7 +173,7 @@
     {
         "name": "Red Crystal",
         "slot": "loot",
-        "icon": "/icons/key/red_crystal.png",
+        "icon": "/icons/key/red_crystal.webp",
         "description": "A powerful red crystal glowing with intense fiery energy. It feels warm to the touch.",
         "value": 500,
         "weight": 0.5,
@@ -182,7 +182,7 @@
     {
         "name": "Broken Sun-Forged Key",
         "slot": "loot",
-        "icon": "/icons/key/sun_forged_key_broken.png",
+        "icon": "/icons/key/sun_forged_key_broken.webp",
         "description": "A shattered key of solar gold. Though broken, its fragments still thrum with the heat of a dying star.",
         "value": 50,
         "weight": 0.3,
@@ -191,7 +191,7 @@
     {
         "name": "Sun-Forged Key",
         "slot": "loot",
-        "icon": "/icons/key/sun_forged_key.png",
+        "icon": "/icons/key/sun_forged_key.webp",
         "description": "A majestic key forged in the heart of a celestial forge. It radiates a blinding solar brilliance.",
         "value": 500,
         "weight": 0.5,
@@ -200,7 +200,7 @@
     {
         "name": "Aether-Glass Silt",
         "slot": "loot",
-        "icon": "/icons/ingredients/aether_glass_silt.png",
+        "icon": "/icons/ingredients/aether_glass_silt.webp",
         "description": "Finely ground crystalline particles that shimmer with iridescent Aether energy. Used in the most advanced crafting.",
         "value": 100,
         "weight": 0.1,

@@ -28,7 +28,7 @@
         "magnitudeBonusMode": "flat",
         "delay": 30,
         "mpCost": 12,
-        "icon": "/icons/regeneration.png",
+        "icon": "/icons/regeneration.webp",
         "description": "A restorative blessing. Once cast, slowly heals the targeted party member for (Intelligence / 10) HP every 2 seconds for 30 seconds.",
         "value": 0,
         "weight": 0
@@ -42,7 +42,7 @@
         "baseDamage": 0,
         "delay": 4,
         "mpCost": 8,
-        "icon": "/icons/cure-poison.png",
+        "icon": "/icons/cure-poison.webp",
         "description": "A purifying incantation that draws venom from the body of the afflicted. Cures Poison from one party member.",
         "value": 0,
         "weight": 0
@@ -56,7 +56,7 @@
         "baseDamage": 0,
         "delay": 4,
         "mpCost": 8,
-        "icon": "/icons/resist-poison.png",
+        "icon": "/icons/resist-poison.webp",
         "description": "A warding incantation that halves the chance of the entire party being afflicted by poison for 60 seconds.",
         "value": 0,
         "weight": 0
@@ -73,7 +73,7 @@
         "magnitudeBonusMode": "flat",
         "delay": 5,
         "mpCost": 15,
-        "icon": "/icons/heal.png",
+        "icon": "/icons/heal.webp",
         "description": "A wave of restorative energy that mends wounds. Restores HP equal to double the caster's Intelligence to one party member.",
         "value": 0,
         "weight": 0
@@ -90,7 +90,7 @@
         "magnitudeBonusMode": "flat",
         "delay": 5,
         "mpCost": 7,
-        "icon": "/icons/rejuvenate.png",
+        "icon": "/icons/rejuvenate.webp",
         "description": "A surge of golden light that banishes fatigue. Restores SP equal to double the caster's Intelligence to one party member.",
         "value": 0,
         "weight": 0
@@ -106,7 +106,7 @@
         "statusDuration": 20,
         "delay": 10,
         "mpCost": 14,
-        "icon": "/icons/sleep.png",
+        "icon": "/icons/sleep.webp",
         "description": "An arcane lullaby that lulls all nearby monsters into magical slumber. Affects all enemies within 1 grid square. Each monster resists based on its Resilience. Modify hitChance (0–1) and statusDuration (seconds) in spells.json.",
         "value": 0,
         "weight": 0
@@ -123,7 +123,7 @@
         "magnitudeBonusMode": "flat",
         "delay": 4,
         "mpCost": 6,
-        "icon": "/icons/banishment.png",
+        "icon": "/icons/banishment.webp",
         "description": "A dangerous beam of magical light that strikes with pure energy. Deals double damage against Undead monsters.",
         "value": 0,
         "weight": 0
@@ -140,7 +140,7 @@
         "magnitudeBonusMode": "flat",
         "delay": 4,
         "mpCost": 20,
-        "icon": "/icons/Incinerate.png",
+        "icon": "/icons/Incinerate.webp",
         "description": "Shoots a long torrent of fire directly in front of the caster, filling 2 squares and burning enemies twice over 2 seconds.",
         "range": 2,
         "hits": 2,

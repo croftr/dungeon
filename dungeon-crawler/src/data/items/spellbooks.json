@@ -4,7 +4,7 @@
         "type": "spellbook",
         "spellName": "Heal",
         "requiredInt": 8,
-        "icon": "/icons/heal.png",
+        "icon": "/icons/heal.webp",
         "description": "A vellum scroll containing restorative prayers. Requires 8 Intelligence to decypher.",
         "value": 450,
         "weight": 0.5
@@ -14,7 +14,7 @@
         "type": "spellbook",
         "spellName": "Regeneration",
         "requiredInt": 12,
-        "icon": "/icons/regeneration.png",
+        "icon": "/icons/regeneration.webp",
         "description": "A thick book smelling of damp earth and moss. Requires 12 Intelligence to decypher.",
         "value": 750,
         "weight": 1.2
@@ -24,7 +24,7 @@
         "type": "spellbook",
         "spellName": "Cure Poison",
         "requiredInt": 6,
-        "icon": "/icons/cure-poison.png",
+        "icon": "/icons/cure-poison.webp",
         "description": "A small pamphlet detailed with botanical sketches. Requires 6 Intelligence to decypher.",
         "value": 300,
         "weight": 0.3
@@ -34,7 +34,7 @@
         "type": "spellbook",
         "spellName": "Resist Poison",
         "requiredInt": 6,
-        "icon": "/icons/resist-poison-scroll.png",
+        "icon": "/icons/resist-poison-scroll.webp",
         "description": "A small pamphlet detailed with botanical sketches. Reduces poison damage. Requires 6 Intelligence to decypher.",
         "value": 300,
         "weight": 0.3
@@ -44,7 +44,7 @@
         "type": "spellbook",
         "spellName": "Rejuvenate",
         "requiredInt": 10,
-        "icon": "/icons/scroll_rejuvenate.png",
+        "icon": "/icons/scroll_rejuvenate.webp",
         "description": "A golden-bound tome glowing with vitality. Requires 10 Intelligence to decypher.",
         "value": 540,
         "weight": 0.5
@@ -54,7 +54,7 @@
         "type": "spellbook",
         "spellName": "Fireball",
         "requiredInt": 10,
-        "icon": "/icons/scroll_fireball.png",
+        "icon": "/icons/scroll_fireball.webp",
         "description": "Ancient parchment inscribed with blazing runes. Study it to learn Fireball. Requires 10 Intelligence.",
         "value": 600,
         "weight": 0.2
@@ -64,7 +64,7 @@
         "type": "spellbook",
         "spellName": "Heal",
         "requiredInt": 9,
-        "icon": "/icons/scroll_heal.png",
+        "icon": "/icons/scroll_heal.webp",
         "description": "A roll of white vellum filled with restorative prayers. Study it to learn Heal. Requires 10 Intelligence.",
         "value": 540,
         "weight": 0.2
@@ -74,7 +74,7 @@
         "type": "spellbook",
         "spellName": "Regeneration",
         "requiredInt": 9,
-        "icon": "/icons/scroll_regeneration.png",
+        "icon": "/icons/scroll_regeneration.webp",
         "description": "A scroll smelling of damp earth and fresh moss. Study it to learn Regeneration. Requires 10 Intelligence.",
         "value": 660,
         "weight": 0.2
@@ -84,7 +84,7 @@
         "type": "spellbook",
         "spellName": "Cure Poison",
         "requiredInt": 9,
-        "icon": "/icons/scroll_cure_poison.png",
+        "icon": "/icons/scroll_cure_poison.webp",
         "description": "A scroll bearing botanical sketches and purifying incantations. Study it to learn Cure Poison. Requires 10 Intelligence.",
         "value": 480,
         "weight": 0.2
@@ -94,7 +94,7 @@
         "type": "spellbook",
         "spellName": "Resist Poison",
         "requiredInt": 10,
-        "icon": "/icons/resist-poison-scroll.png",
+        "icon": "/icons/resist-poison-scroll.webp",
         "description": "Ancient parchment bearer of purifying incantations. Study it to learn Resist Poison. Requires 10 Intelligence.",
         "value": 480,
         "weight": 0.2
@@ -104,7 +104,7 @@
         "type": "spellbook",
         "spellName": "Rejuvenate",
         "requiredInt": 10,
-        "icon": "/icons/scroll_rejuvenate.png",
+        "icon": "/icons/scroll_rejuvenate.webp",
         "description": "A parchment scroll radiating a warm, glowing yellowish aura. Study it to learn Rejuvenate. Requires 10 Intelligence.",
         "value": 540,
         "weight": 0.2
@@ -114,7 +114,7 @@
         "type": "spellbook",
         "spellName": "Sleep",
         "requiredInt": 12,
-        "icon": "/icons/scroll_sleep.png",
+        "icon": "/icons/scroll_sleep.webp",
         "description": "A whispering scroll etched with soporific runes. Study it to learn Sleep. Requires 12 Intelligence.",
         "value": 680,
         "weight": 0.2
@@ -124,7 +124,7 @@
         "type": "spellbook",
         "spellName": "Incinerate",
         "requiredInt": 12,
-        "icon": "/icons/Incinerate.png",
+        "icon": "/icons/Incinerate.webp",
         "description": "Ancient parchment radiating an intense heat. Study it to learn Incinerate. Requires 12 Intelligence.",
         "value": 850,
         "weight": 0.2

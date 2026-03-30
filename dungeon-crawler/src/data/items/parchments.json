@@ -1,7 +1,7 @@
 [
   {
     "name": "Minor Potions Parchment",
-    "icon": "/icons/minor_potions_parchment.png",
+    "icon": "/icons/minor_potions_parchment.webp",
     "description": "An ancient looking piece of parchment. It documents alchemy ingredients for creating minor potions.",
     "type": "parchment",
     "parchmentType": "minor-potions",
@@ -10,7 +10,7 @@
   },
   {
     "name": "Party Potions Parchment",
-    "icon": "/icons/party_potions_parchment.png",
+    "icon": "/icons/party_potions_parchment.webp",
     "description": "An ancient looking piece of parchment. It documents alchemical recipes for creating party potions.",
     "type": "parchment",
     "parchmentType": "party-potions",
@@ -19,7 +19,7 @@
   },
   {
     "name": "Potions Parchment",
-    "icon": "/icons/potions_parchment.png",
+    "icon": "/icons/potions_parchment.webp",
     "description": "An ancient looking piece of parchment. It documents alchemical recipes for creating basic potions.",
     "type": "parchment",
     "parchmentType": "potions",
@@ -28,7 +28,7 @@
   },
   {
     "name": "Forge Armour Parchment",
-    "icon": "/icons/forge-armour.png",
+    "icon": "/icons/forge-armour.webp",
     "description": "An ancient looking piece of parchment. It documents the secrets of forging magical armor.",
     "type": "parchment",
     "parchmentType": "forge-armour",
@@ -37,7 +37,7 @@
   },
   {
     "name": "Forge Weapons Parchment",
-    "icon": "/icons/forge-weapons.png",
+    "icon": "/icons/forge-weapons.webp",
     "description": "An ancient looking piece of parchment. It documents the secrets of forging magical weapons.",
     "type": "parchment",
     "parchmentType": "forge-weapons",

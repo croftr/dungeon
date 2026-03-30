@@ -2297,8 +2297,8 @@ function _showNodeDetail(node, m) {
     const statKeys = Object.keys(node.benefit);
     const derivedIcon = node.icon
       ?? (statKeys.length > 1
-        ? '/skills/stats-increase/mixed_stat_increase.png'
-        : `/skills/stats-increase/${statKeys[0]}_increase.png`);
+        ? '/skills/stats-increase/mixed_stat_increase.webp'
+        : `/skills/stats-increase/${statKeys[0]}_increase.webp`);
     _setDetailIcon(derivedIcon);
   } else if (node.type === 'skill') {
     const skillName = node.benefit.skill;

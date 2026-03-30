@@ -214,7 +214,7 @@
     },
     {
         "name": "Potion of Invincibility",
-        "icon": "/icons/potions/potion_of_invincibility.png",
+        "icon": "/icons/potions/potion_of_invincibility.webp",
         "description": "A radiant, golden elixir imbued with divine power. For 60 seconds the entire party becomes impervious to all damage.",
         "type": "potion",
         "partyPotion": true,
@@ -237,7 +237,7 @@
     },
     {
         "name": "Potion of Unseen",
-        "icon": "/icons/potions/potion_of_unseen.png",
+        "icon": "/icons/potions/potion_of_unseen.webp",
         "description": "A swirling violet brew that smells like night mist. Cloaks the entire party in shadow for 60 seconds — monsters cannot see or attack them, and the party can pass through enemies. Instantly dispelled by any action other than moving.",
         "type": "potion",
         "partyPotion": true,
