@@ -4,14 +4,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="A premium 3D grid-based dungeon crawler game featuring tactical combat, party management, and deep progression." />
+  <meta name="description"
+    content="A premium 3D grid-based dungeon crawler game featuring tactical combat, party management, and deep progression." />
   <meta name="theme-color" content="#0d0a06" />
-  
+
   <!-- Open Graph -->
   <meta property="og:title" content="Grid Dungeon Crawler" />
-  <meta property="og:description" content="Explore deep dungeons, build your party, and survive the abyss in this high-fidelity grid crawler." />
+  <meta property="og:description"
+    content="Explore deep dungeons, build your party, and survive the abyss in this high-fidelity grid crawler." />
   <meta property="og:type" content="website" />
-  
+
   <title>Grid Dungeon Crawler</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="apple-touch-icon" href="/favicon.svg" />
@@ -26,8 +28,7 @@
     <!-- Screen 1: Pre-start (triggers audio context) -->
     <div id="pre-start-screen">
       <h1 id="pre-start-title">DUNGEON CRAWLER</h1>
-      <p id="pre-start-subtitle">A darkness stirs beneath the swamp…</p>
-      <button id="pre-start-btn">Enter the Depths</button>
+      <button id="pre-start-btn">Start Game</button>
     </div>
 
     <!-- Screen 2: Splash with options (hidden until pre-start clicked) -->
@@ -47,7 +48,7 @@
           <label class="diff-option"><input type="radio" name="difficulty" value="hard"> Hard</label>
         </div>
         <label id="help-toggle-label"><input type="checkbox" id="help-toggle" checked> Inline Help</label>
-        <button id="start-adventure-btn">Start Adventure</button>
+        <button id="start-adventure-btn">Choose Your Heroes</button>
         <div id="loading-bar-wrap">
           <div id="loading-bar-fill"></div>
         </div>
@@ -1170,11 +1171,12 @@
       margin: auto;
       text-align: center;
       position: relative;
-      box-shadow: 0 0 40px rgba(0,0,0,0.95);
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.95);
       font-family: 'Georgia', serif;
       padding: 0;
       overflow: hidden;
     }
+
     #trap-disarm-header {
       background: rgba(0, 0, 0, 0.4);
       padding: 15px 20px;
@@ -1188,38 +1190,45 @@
       text-transform: uppercase;
       letter-spacing: 2px;
     }
+
     #trap-disarm-image-banner {
       width: 100%;
       height: 280px;
       background: url('/images/trap_disarm_bg.png') no-repeat center center;
       background-size: cover;
       border-bottom: 2px solid #3a2e18;
-      box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+      box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8);
     }
+
     #trap-disarm-body {
       padding: 30px 40px;
       background: transparent;
       line-height: 1.6;
     }
+
     .trap-disarm-desc {
       font-size: 16px;
       margin-bottom: 25px;
       color: #e0d0b0;
     }
+
     .trap-disarm-chance-row {
       font-size: 18px;
       margin-bottom: 25px;
       color: #c8a84a;
     }
+
     #trap-disarm-chance {
       font-weight: bold;
       color: #ff4040;
     }
+
     #trap-disarm-buttons {
       display: flex;
       justify-content: center;
       gap: 20px;
     }
+
     #trap-disarm-buttons button {
       background: #3a2e18;
       border: 1px solid #7a6030;
@@ -1233,11 +1242,13 @@
       text-transform: uppercase;
       letter-spacing: 1px;
     }
+
     #trap-disarm-buttons button:hover {
       background: #5a4628;
       border-color: #e8c87a;
-      box-shadow: 0 0 15px rgba(232,200,122,0.4);
+      box-shadow: 0 0 15px rgba(232, 200, 122, 0.4);
     }
+
     #trap-disarm-close {
       background: none;
       border: none;
@@ -1245,6 +1256,7 @@
       font-size: 24px;
       cursor: pointer;
     }
+
     #trap-disarm-close:hover {
       color: #ff4040;
     }
@@ -1260,7 +1272,8 @@
       </div>
       <div id="trap-disarm-image-banner"></div>
       <div id="trap-disarm-body">
-        <p class="trap-disarm-desc">Your party has spotted a hidden trap. Attempting to disarm it is dangerous &mdash; only
+        <p class="trap-disarm-desc">Your party has spotted a hidden trap. Attempting to disarm it is dangerous &mdash;
+          only
           the most skilled rogues succeed. Failure will trigger the trap!</p>
         <div class="trap-disarm-chance-row">
           <span>Disarm chance:</span>
@@ -1308,10 +1321,11 @@
       margin: auto;
       text-align: center;
       position: relative;
-      box-shadow: 0 0 40px rgba(0,0,0,0.95);
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.95);
       font-family: 'Georgia', serif;
       overflow: hidden;
     }
+
     #party-confirm-header {
       background: rgba(0, 0, 0, 0.4);
       margin: 0;
@@ -1322,29 +1336,34 @@
       letter-spacing: 2px;
       font-size: 20px;
     }
+
     #party-confirm-image-banner {
       width: 100%;
       height: 280px;
       background: url('/images/party_confirm_bg.png') no-repeat center center;
       background-size: cover;
       border-bottom: 2px solid #3a2e18;
-      box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+      box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8);
     }
+
     #party-confirm-body {
       padding: 30px 40px;
       background: transparent;
     }
+
     #party-confirm-body p {
       font-size: 16px;
       line-height: 1.6;
       margin: 0 0 25px 0;
     }
+
     #party-confirm-buttons {
       display: flex;
       justify-content: center;
       gap: 20px;
       margin-top: 20px;
     }
+
     #party-confirm-buttons button {
       background: #3a2e18;
       border: 1px solid #7a6030;
@@ -1358,16 +1377,18 @@
       text-transform: uppercase;
       letter-spacing: 1px;
     }
+
     #party-confirm-buttons button#party-confirm-yes:hover {
       background: #508050;
       border-color: #70c070;
-      box-shadow: 0 0 15px rgba(112,192,112,0.4);
+      box-shadow: 0 0 15px rgba(112, 192, 112, 0.4);
       color: #fff;
     }
+
     #party-confirm-buttons button#party-confirm-no:hover {
       background: #804040;
       border-color: #c07070;
-      box-shadow: 0 0 15px rgba(192,112,112,0.4);
+      box-shadow: 0 0 15px rgba(192, 112, 112, 0.4);
       color: #fff;
     }
   </style>
@@ -1687,17 +1708,24 @@
   </div>
 
   <!-- Parchment modal -->
-  <div id="parchment-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.8); z-index: 99999; align-items: center; justify-content: center;">
-    <div id="parchment-modal" style="background: url(/parchment_bg.png) no-repeat center center; background-size: 100% 100%; width: 550px; height: 550px; padding: 60px 120px; color: #3a2a1a; font-family: 'Times New Roman', serif; position: relative; margin: 0 auto; filter: drop-shadow(0 0 20px rgba(0,0,0,0.8)); display: flex; flex-direction: column; text-align: center;">
-      <div id="parchment-header" style="text-align: center; border-bottom: 2px solid rgba(90, 74, 58, 0.5); padding-bottom: 10px; margin-bottom: 20px; position: relative;">
-        <span id="parchment-title" style="font-size: 28px; font-weight: bold; font-style: italic; color: #3a2a1a;">Parchment</span>
-        <button id="parchment-close" aria-label="Close" style="position: absolute; top: -10px; right: 0px; background: none; border: none; font-size: 28px; cursor: pointer; color: #3a2a1a; font-weight: bold;">&times;</button>
+  <div id="parchment-overlay"
+    style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.8); z-index: 99999; align-items: center; justify-content: center;">
+    <div id="parchment-modal"
+      style="background: url(/parchment_bg.png) no-repeat center center; background-size: 100% 100%; width: 550px; height: 550px; padding: 60px 120px; color: #3a2a1a; font-family: 'Times New Roman', serif; position: relative; margin: 0 auto; filter: drop-shadow(0 0 20px rgba(0,0,0,0.8)); display: flex; flex-direction: column; text-align: center;">
+      <div id="parchment-header"
+        style="text-align: center; border-bottom: 2px solid rgba(90, 74, 58, 0.5); padding-bottom: 10px; margin-bottom: 20px; position: relative;">
+        <span id="parchment-title"
+          style="font-size: 28px; font-weight: bold; font-style: italic; color: #3a2a1a;">Parchment</span>
+        <button id="parchment-close" aria-label="Close"
+          style="position: absolute; top: -10px; right: 0px; background: none; border: none; font-size: 28px; cursor: pointer; color: #3a2a1a; font-weight: bold;">&times;</button>
       </div>
-      <div id="parchment-body" style="overflow-y: auto; flex: 1; font-size: 18px; line-height: 1.5; padding-right: 5px; text-shadow: none; text-align: center;">
+      <div id="parchment-body"
+        style="overflow-y: auto; flex: 1; font-size: 18px; line-height: 1.5; padding-right: 5px; text-shadow: none; text-align: center;">
         <!-- content generated here -->
       </div>
       <div style="text-align: center; margin-top: 15px;">
-        <button id="parchment-close-btn" style="padding: 10px 20px; font-size: 16px; cursor: pointer; background: #5a4a3a; color: #f0d8a0; border: 1px solid #706050; border-radius: 4px; font-weight: bold; width: 120px;">Close</button>
+        <button id="parchment-close-btn"
+          style="padding: 10px 20px; font-size: 16px; cursor: pointer; background: #5a4a3a; color: #f0d8a0; border: 1px solid #706050; border-radius: 4px; font-weight: bold; width: 120px;">Close</button>
       </div>
     </div>
   </div>

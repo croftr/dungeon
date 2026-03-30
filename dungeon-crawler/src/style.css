@@ -140,7 +140,6 @@ body {
   letter-spacing: 12px;
   text-shadow: 0 0 30px rgba(232, 200, 122, 0.4);
   text-transform: uppercase;
-  animation: titleReveal 3s ease forwards;
 }
 
 #pre-start-subtitle {
@@ -166,9 +165,6 @@ body {
   transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   border-radius: 4px;
   text-transform: uppercase;
-  opacity: 0;
-  animation: fadeInUp 0.8s ease forwards, btnPulse 2.5s ease-in-out 3.5s infinite;
-  animation-delay: 3.5s;
 }
 
 #pre-start-btn:hover {

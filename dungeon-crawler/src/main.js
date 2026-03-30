@@ -84,7 +84,7 @@ const _themeTunePreload = prefetchBuffer(asset('/sounds/backing/theme-tune.mp3')
 {
   const _sideVid = document.getElementById('intro-video');
   if (_sideVid) {
-    _sideVid.addEventListener('canplay', () => _sideVid.play().catch(() => {}), { once: true });
+    _sideVid.addEventListener('canplay', () => _sideVid.play().catch(() => { }), { once: true });
   }
 }
 
@@ -97,7 +97,7 @@ const _themeTunePreload = prefetchBuffer(asset('/sounds/backing/theme-tune.mp3')
     _startBtn.textContent = 'Loading…';
     _themeTunePreload.then(() => {
       _startBtn.disabled = false;
-      _startBtn.textContent = 'Start Adventure';
+      _startBtn.textContent = 'Choose Your Party';
       if (_barWrap) _barWrap.style.opacity = '0';
     });
   }
@@ -266,7 +266,7 @@ setCallbacks({
       } else {
         const demon = monsters.find(m => m.name === 'Demon' && (m.level ?? 1) === 2);
         const treeman = monsters.find(m => m.name === 'Treeman');
-        
+
         if (demon && !demon.alive) {
           setZoneMusic(asset('/sounds/backing/lvl2-post-demon.mp3'));
         } else if (treeman && !treeman.alive) {
@@ -510,13 +510,13 @@ animate(performance.now());
 // ─────────────────────────────────────────────
 //  INTRO FLOW (pre-start → splash → character select → dungeon)
 // ─────────────────────────────────────────────
-const introOverlay  = document.getElementById('intro-overlay');
+const introOverlay = document.getElementById('intro-overlay');
 const preStartScreen = document.getElementById('pre-start-screen');
-const splashScreen  = document.getElementById('splash-screen');
+const splashScreen = document.getElementById('splash-screen');
 const charSelectScreen = document.getElementById('char-select-screen');
-const introVideo    = document.getElementById('intro-video');
-const preStartBtn   = document.getElementById('pre-start-btn');
-const startBtn      = document.getElementById('start-adventure-btn');
+const introVideo = document.getElementById('intro-video');
+const preStartBtn = document.getElementById('pre-start-btn');
+const startBtn = document.getElementById('start-adventure-btn');
 
 window.easyMode = false;
 window.helpEnabled = true;
@@ -554,7 +554,7 @@ if (preStartBtn) {
     await handleFirstInteraction();
     preStartScreen.style.display = 'none';
     splashScreen.style.display = 'flex';
-    introVideo.play().catch(() => {});
+    introVideo.play().catch(() => { });
   });
 }
 
