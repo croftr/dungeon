@@ -46,10 +46,10 @@ export function setCallbacks({ moved, reached, blocked }) {
 // ─────────────────────────────────────────────
 //  MOVEMENT
 // ─────────────────────────────────────────────
-export function initPlayer(startRow, startCol, camera) {
+export function initPlayer(startRow, startCol, camera, facing = 0) {
   player.gridRow = startRow;
   player.gridCol = startCol;
-  player.facing = 0;
+  player.facing = facing;
 
   const w = cellToWorld(startRow, startCol);
   camera.position.set(w.x, w.y, w.z);

@@ -352,6 +352,7 @@ let currentMusicIndex = 0;
 // Ambient playlists keyed by level number. Level 1 rotates two tracks;
 // level 2+ have their own dedicated track(s).
 const MUSIC_TRACKS_BY_LEVEL = {
+  0: [asset('/sounds/back1.mp3')],
   1: [asset('/sounds/back1.mp3'), asset('/sounds/back2.mp3')],
   2: [asset('/sounds/backing/level-2.mp3')],
   3: [asset('/sounds/backing/minotaur-level.mp3')],

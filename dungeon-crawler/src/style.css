@@ -224,20 +224,19 @@ body {
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  position: relative;
 }
 
-/* Title floats over the top-centre of the detail panel */
+/* Title floats over the top of the detail panel */
 .cs-title-overlay {
   position: absolute;
   top: 0;
-  left: 260px;          /* clear the roster column */
-  right: 260px;         /* clear the party column */
+  left: 0;
+  right: 0;
   text-align: center;
   pointer-events: none;
   z-index: 4;
   padding: 18px 20px 28px;
-  background: linear-gradient(to bottom, rgba(6, 4, 2, 0.7) 0%, transparent 100%);
+  background: linear-gradient(to bottom, rgba(6, 4, 2, 0.75) 0%, transparent 100%);
 }
 
 .char-select-title {
@@ -380,23 +379,42 @@ body {
 }
 
 .cs-detail-empty {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.cs-detail-bg-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  filter: brightness(0.45) saturate(0.7);
+}
+
+.cs-detail-empty-prompt {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 12px;
-  color: rgba(232, 200, 122, 0.18);
+  color: rgba(232, 200, 122, 0.5);
   font-family: Georgia, serif;
   font-size: 12px;
   font-style: italic;
   letter-spacing: 1px;
   text-align: center;
   user-select: none;
+  pointer-events: none;
 }
 
 .cs-detail-empty-icon {
   font-size: 34px;
   display: block;
-  opacity: 0.3;
+  opacity: 0.5;
 }
 
 @keyframes detailReveal {

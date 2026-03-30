@@ -12,7 +12,7 @@ import { initEquipment, hideDropButton, tickAutoAttack, clearAutoAttackTimers, t
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, getContainerStates, setPendingContainerOverrides, partyHasItem, getCrystalShrineState } from './objects.js';
-import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune } from './audio.js';
+import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
@@ -79,6 +79,9 @@ loadVideosForLevel(0);
 // By the time the user clicks, the bytes are cached and decodeAudioData is near-instant.
 const _audioPreload = prefetchBuffer(asset('/sounds/back1.mp3'));
 const _themeTunePreload = prefetchBuffer(asset('/sounds/backing/theme-tune.mp3'));
+prefetchBuffer(asset('/sounds/browse-member.mp3'));
+prefetchBuffer(asset('/sounds/select-member.mp3'));
+prefetchBuffer(asset('/sounds/party-confirmed.mp3'));
 
 // Autoplay the side video as soon as it can play.
 {
@@ -189,8 +192,7 @@ initParticles(scene, camera);
 // ─────────────────────────────────────────────
 //  PLAYER
 // ─────────────────────────────────────────────
-const start = findCell(CELL_START);
-initPlayer(start.row, start.col, camera);
+initPlayer(11, 15, camera, 3);
 
 let hasSeenOgreVideo = false;
 let hasSeenPrepVideo = false;
@@ -593,9 +595,17 @@ if (preStartBtn) {
   });
 }
 
+// ── Screen 2 Options Sound ──
+document.querySelectorAll('#difficulty-select input, #help-toggle').forEach(el => {
+  el.addEventListener('change', () => {
+    playSoundByUrl(asset('/sounds/browse-member.mp3'), 0.4);
+  });
+});
+
 // ── Screen 2 → Screen 3: Splash submits options, shows character select ──
 if (startBtn) {
   startBtn.addEventListener('click', () => {
+    playSoundByUrl(asset('/sounds/party-confirmed.mp3'), 0.5);
     _readStartOptions();
     splashScreen.style.display = 'none';
     introVideo.pause();
@@ -675,10 +685,6 @@ function showCharacterSelection() {
 
   charSelectScreen.innerHTML = `
     <div class="cs-layout">
-      <div class="cs-title-overlay">
-        <h2 class="char-select-title">Choose Your Party</h2>
-        <p class="char-select-subtitle">Select four heroes — front row fights, back row supports</p>
-      </div>
       <div class="cs-body">
         <div class="cs-roster-col">
           <div class="cs-mini-grid">
@@ -686,9 +692,18 @@ function showCharacterSelection() {
           </div>
         </div>
         <div class="cs-detail-panel">
+          <div class="cs-title-overlay">
+            <h2 class="char-select-title">Choose Your Party</h2>
+            <p class="char-select-subtitle">Select four heroes — front row fights, back row supports</p>
+          </div>
           <div class="cs-detail-empty">
-            <span class="cs-detail-empty-icon">⚔</span>
-            Select a hero to view details
+            <video class="cs-detail-bg-video" autoplay loop muted playsinline>
+              <source src="/videos/Haunted_Swamp_Dungeon.mp4" type="video/mp4" />
+            </video>
+            <div class="cs-detail-empty-prompt">
+              <span class="cs-detail-empty-icon">⚔</span>
+              Select a hero to view details
+            </div>
           </div>
         </div>
         <div class="cs-party-col">
@@ -707,7 +722,7 @@ function showCharacterSelection() {
             </div>
           </div>
           <div class="cs-party-hint" id="cs-party-hint">Select 4 heroes<br>to begin</div>
-          <button id="begin-adventure-btn">Begin<br>Adventure</button>
+          <button id="begin-adventure-btn">Party<br>Confirmed</button>
         </div>
       </div>
     </div>
@@ -729,6 +744,7 @@ function showCharacterSelection() {
     );
 
     detailPanel.querySelector('[data-detail-btn]').addEventListener('click', () => {
+      playSoundByUrl(asset('/sounds/select-member.mp3'), 0.4);
       toggleSelection(recruitId);
     });
   }
@@ -777,12 +793,14 @@ function showCharacterSelection() {
 
   miniCards.forEach(card => {
     card.addEventListener('click', () => {
+      playSoundByUrl(asset('/sounds/browse-member.mp3'), 0.4);
       renderDetail(card.dataset.recruitId);
     });
   });
 
   beginBtn.addEventListener('click', () => {
     if (selectedIds.size !== 4) return;
+    playSoundByUrl(asset('/sounds/party-confirmed.mp3'), 0.5);
     for (const id of selectedIds) {
       const r = RECRUITS.find(x => x.id === id);
       if (r) recruitCharacter(r);
