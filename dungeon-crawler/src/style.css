@@ -264,13 +264,15 @@ body {
   min-height: 0;
 }
 
-/* Left: scrollable 2-col mini card grid */
+/* Left: 2-col mini card grid filling full height */
 .cs-roster-col {
-  width: 260px;
+  width: 380px;
   flex-shrink: 0;
-  overflow-y: auto;
-  padding: 16px 14px;
+  overflow: hidden;
+  padding: 10px 10px;
   border-right: 1px solid rgba(232, 200, 122, 0.07);
+  display: flex;
+  flex-direction: column;
 }
 
 .cs-roster-col::-webkit-scrollbar { width: 3px; }
@@ -280,7 +282,10 @@ body {
 .cs-mini-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 11px;
+  grid-template-rows: repeat(4, 1fr);
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
 }
 
 .cs-mini-card {
@@ -293,6 +298,9 @@ body {
   transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease, opacity 0.3s ease;
   opacity: 0;
   animation: cardReveal 0.4s ease forwards;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .cs-mini-card:nth-child(1) { animation-delay: 0.04s; }
@@ -339,7 +347,8 @@ body {
 
 .cs-mini-portrait {
   width: 100%;
-  aspect-ratio: 3 / 4;
+  flex: 1;
+  min-height: 0;
   object-fit: cover;
   object-position: top;
   display: block;
@@ -732,13 +741,13 @@ body {
 
 /* Responsive */
 @media (max-width: 1024px) {
-  .cs-roster-col { width: 220px; }
+  .cs-roster-col { width: 300px; }
   .cs-party-col  { width: 220px; }
   .roster-slot   { width: 82px; height: 100px; }
   .cs-detail-video-wrap { width: 38%; }
 }
 @media (max-width: 800px) {
-  .cs-roster-col { width: 180px; }
+  .cs-roster-col { width: 240px; }
   .cs-mini-grid  { grid-template-columns: 1fr; }
   .cs-party-col  { width: 180px; }
   .roster-slot   { width: 70px; height: 86px; }
