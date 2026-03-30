@@ -89,16 +89,37 @@ const _themeTunePreload = prefetchBuffer(asset('/sounds/backing/theme-tune.mp3')
 }
 
 // Disable "Start Adventure" until the theme tune is pre-fetched.
+// The button also must not appear until all other splash elements have animated in
+// (last element: delay 3s + duration 0.8s = 3.8s after splash shown).
+let _splashShownAt = 0;  // timestamp set when splash screen becomes visible
+let _themeLoaded   = false;
+
 {
+  const BTN_REVEAL_DELAY = 4300; // ms after splash shown before button appears
   const _startBtn = document.getElementById('start-adventure-btn');
-  const _barWrap = document.getElementById('loading-bar-wrap');
+  const _barWrap  = document.getElementById('loading-bar-wrap');
+
+  function _revealStartBtn() {
+    if (!_startBtn) return;
+    _startBtn.style.opacity = '';
+    _startBtn.style.animation = '';
+    _startBtn.style.pointerEvents = '';
+    if (_barWrap) _barWrap.style.opacity = '0';
+  }
+
   if (_startBtn) {
-    _startBtn.disabled = true;
-    _startBtn.textContent = 'Loading…';
+    // Hide completely — no disabled state, no placeholder text
+    _startBtn.style.opacity = '0';
+    _startBtn.style.animation = 'none';
+    _startBtn.style.pointerEvents = 'none';
     _themeTunePreload.then(() => {
-      _startBtn.disabled = false;
-      _startBtn.textContent = 'Choose Your Party';
-      if (_barWrap) _barWrap.style.opacity = '0';
+      _themeLoaded = true;
+      if (_splashShownAt) {
+        // Splash already visible — schedule reveal for the right moment
+        const elapsed = Date.now() - _splashShownAt;
+        setTimeout(_revealStartBtn, Math.max(0, BTN_REVEAL_DELAY - elapsed));
+      }
+      // If splash not shown yet, the preStartBtn handler will schedule the reveal
     });
   }
 }
@@ -555,6 +576,20 @@ if (preStartBtn) {
     preStartScreen.style.display = 'none';
     splashScreen.style.display = 'flex';
     introVideo.play().catch(() => { });
+    _splashShownAt = Date.now();
+    if (_themeLoaded) {
+      // Theme already ready — schedule the button reveal from now
+      const startBtn = document.getElementById('start-adventure-btn');
+      const barWrap  = document.getElementById('loading-bar-wrap');
+      setTimeout(() => {
+        if (startBtn) {
+          startBtn.style.opacity = '';
+          startBtn.style.animation = '';
+          startBtn.style.pointerEvents = '';
+        }
+        if (barWrap) barWrap.style.opacity = '0';
+      }, 4300);
+    }
   });
 }
 
@@ -573,61 +608,156 @@ function showCharacterSelection() {
   charSelectScreen.style.display = 'flex';
 
   const selectedIds = new Set();
+  let activeRecruitId = null;
+
+  function getVideoSrc(imagePath) {
+    const filename = imagePath.split('/').pop();
+    const base = filename.replace(/\.(png|jpg|jpeg)$/i, '').replace(/_head$/, '');
+    return `/heros/${base}_full.mp4`;
+  }
+
+  function miniCardHTML(r) {
+    return `
+      <div class="cs-mini-card" data-recruit-id="${r.id}">
+        <img class="cs-mini-portrait" src="${asset(r.image)}" alt="${r.name}" />
+        <div class="cs-mini-name">${r.name}</div>
+      </div>
+    `;
+  }
+
+  function detailHTML(r) {
+    const videoSrc = getVideoSrc(r.image);
+    const isSelected = selectedIds.has(r.id);
+    const full = selectedIds.size >= 4;
+    const canAdd = !isSelected && full;
+    const stats = [
+      { label: 'STR', val: r.stats.strength },
+      { label: 'DEX', val: r.stats.dexterity },
+      { label: 'VIT', val: r.stats.vitality },
+      { label: 'INT', val: r.stats.intelligence },
+      { label: 'RES', val: r.stats.resilience },
+    ];
+    return `
+      <div class="cs-detail-content">
+        <div class="cs-detail-video-wrap">
+          <video class="cs-detail-video" autoplay loop muted playsinline>
+            <source src="${videoSrc}" type="video/mp4" />
+          </video>
+        </div>
+        <div class="cs-detail-info">
+          <div class="cs-detail-hero-header">
+            <div class="cs-detail-name">${r.name}</div>
+            <div class="cs-detail-class">${r.race} &middot; ${r.job}</div>
+          </div>
+          <div class="cs-detail-divider"></div>
+          <div class="cs-detail-stats">
+            ${stats.map(s => `
+              <div class="cs-detail-stat-row">
+                <div class="cs-detail-stat-label">${s.label}</div>
+                <div class="cs-detail-stat-bar">
+                  <div class="cs-detail-stat-fill" style="width:${Math.round(s.val / 12 * 100)}%"></div>
+                </div>
+                <div class="cs-detail-stat-val">${s.val}</div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="cs-detail-bio">${r.bio}</div>
+          <div class="cs-detail-actions">
+            <button class="cs-detail-recruit-btn ${isSelected ? 'is-selected' : ''} ${canAdd ? 'is-full' : ''}"
+                    data-detail-btn="${r.id}">
+              ${isSelected ? '✓ Remove from Party' : '+ Add to Party'}
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
 
   charSelectScreen.innerHTML = `
-    <div class="char-select-main">
-      <h2 class="char-select-title">Choose Your Party</h2>
-      <p class="char-select-subtitle">Select four heroes to brave the depths below</p>
-      <div class="char-grid">
-        ${RECRUITS.map(r => `
-          <div class="char-card" data-recruit-id="${r.id}">
-            <img class="char-card-portrait" src="${asset(r.image)}" alt="${r.name}" />
-            <div class="char-card-info">
-              <div class="char-card-name">${r.name}</div>
-              <div class="char-card-class">${r.race} ${r.job}</div>
-              <div class="char-card-stats">
-                <span class="char-stat">STR ${r.stats.strength}</span>
-                <span class="char-stat">DEX ${r.stats.dexterity}</span>
-                <span class="char-stat">VIT ${r.stats.vitality}</span>
-                <span class="char-stat">INT ${r.stats.intelligence}</span>
-                <span class="char-stat">RES ${r.stats.resilience}</span>
-              </div>
-              <div class="char-card-bio">${r.bio}</div>
+    <div class="cs-layout">
+      <div class="cs-title-overlay">
+        <h2 class="char-select-title">Choose Your Party</h2>
+        <p class="char-select-subtitle">Select four heroes — front row fights, back row supports</p>
+      </div>
+      <div class="cs-body">
+        <div class="cs-roster-col">
+          <div class="cs-mini-grid">
+            ${RECRUITS.map(miniCardHTML).join('')}
+          </div>
+        </div>
+        <div class="cs-detail-panel">
+          <div class="cs-detail-empty">
+            <span class="cs-detail-empty-icon">⚔</span>
+            Select a hero to view details
+          </div>
+        </div>
+        <div class="cs-party-col">
+          <div class="cs-party-label">Your Party</div>
+          <div class="cs-formation">
+            <div class="cs-row-label">Front Row</div>
+            <div class="cs-formation-row cs-front-row">
+              <div class="roster-slot" data-slot="0"><span class="roster-slot-placeholder">+</span></div>
+              <div class="roster-slot" data-slot="1"><span class="roster-slot-placeholder">+</span></div>
+            </div>
+            <div class="cs-row-divider"></div>
+            <div class="cs-row-label cs-row-label--back">Back Row</div>
+            <div class="cs-formation-row cs-back-row">
+              <div class="roster-slot" data-slot="2"><span class="roster-slot-placeholder">+</span></div>
+              <div class="roster-slot" data-slot="3"><span class="roster-slot-placeholder">+</span></div>
             </div>
           </div>
-        `).join('')}
+          <div class="cs-party-hint" id="cs-party-hint">Select 4 heroes<br>to begin</div>
+          <button id="begin-adventure-btn">Begin<br>Adventure</button>
+        </div>
       </div>
-    </div>
-    <div class="char-select-sidebar">
-      <span class="roster-label">Party</span>
-      <div class="roster-slot" data-slot="0"><span class="roster-slot-placeholder">+</span></div>
-      <div class="roster-slot" data-slot="1"><span class="roster-slot-placeholder">+</span></div>
-      <div class="roster-slot" data-slot="2"><span class="roster-slot-placeholder">+</span></div>
-      <div class="roster-slot" data-slot="3"><span class="roster-slot-placeholder">+</span></div>
-      <button id="begin-adventure-btn">Begin Adventure</button>
     </div>
   `;
 
-  const cards = charSelectScreen.querySelectorAll('.char-card');
+  const miniCards = charSelectScreen.querySelectorAll('.cs-mini-card');
+  const detailPanel = charSelectScreen.querySelector('.cs-detail-panel');
   const rosterSlots = charSelectScreen.querySelectorAll('.roster-slot');
   const beginBtn = charSelectScreen.querySelector('#begin-adventure-btn');
+
+  function renderDetail(recruitId) {
+    activeRecruitId = recruitId;
+    const r = RECRUITS.find(x => x.id === recruitId);
+    if (!r) return;
+    detailPanel.innerHTML = detailHTML(r);
+
+    miniCards.forEach(c =>
+      c.classList.toggle('cc-active-view', c.dataset.recruitId === recruitId)
+    );
+
+    detailPanel.querySelector('[data-detail-btn]').addEventListener('click', () => {
+      toggleSelection(recruitId);
+    });
+  }
+
+  function toggleSelection(id) {
+    if (selectedIds.has(id)) {
+      selectedIds.delete(id);
+    } else if (selectedIds.size < 4) {
+      selectedIds.add(id);
+    }
+    updateUI();
+    if (activeRecruitId === id) renderDetail(id);
+  }
 
   function updateUI() {
     const full = selectedIds.size >= 4;
 
-    cards.forEach(card => {
+    miniCards.forEach(card => {
       const id = card.dataset.recruitId;
       const isSelected = selectedIds.has(id);
       card.classList.toggle('cc-selected', isSelected);
       card.classList.toggle('cc-disabled', full && !isSelected);
     });
 
-    // Fill roster slots with selected recruit portraits
     const selectedArr = [...selectedIds];
     rosterSlots.forEach((slot, i) => {
       if (i < selectedArr.length) {
         const r = RECRUITS.find(x => x.id === selectedArr[i]);
-        slot.innerHTML = `<img src="${asset(r.image)}" alt="${r.name}" />`;
+        slot.innerHTML = `<img src="${asset(r.image)}" alt="${r.name}" /><span class="roster-name">${r.name}</span>`;
         slot.classList.add('filled');
       } else {
         slot.innerHTML = '<span class="roster-slot-placeholder">+</span>';
@@ -635,25 +765,24 @@ function showCharacterSelection() {
       }
     });
 
+    const hint = charSelectScreen.querySelector('#cs-party-hint');
+    if (hint) {
+      const remaining = 4 - selectedIds.size;
+      hint.innerHTML = full ? 'Party ready!' : `${remaining} more hero${remaining !== 1 ? 'es' : ''} needed`;
+    }
+
     beginBtn.classList.toggle('ready', full);
     beginBtn.disabled = !full;
   }
 
-  cards.forEach(card => {
+  miniCards.forEach(card => {
     card.addEventListener('click', () => {
-      const id = card.dataset.recruitId;
-      if (selectedIds.has(id)) {
-        selectedIds.delete(id);
-      } else if (selectedIds.size < 4) {
-        selectedIds.add(id);
-      }
-      updateUI();
+      renderDetail(card.dataset.recruitId);
     });
   });
 
   beginBtn.addEventListener('click', () => {
     if (selectedIds.size !== 4) return;
-    // Recruit the selected characters into the party
     for (const id of selectedIds) {
       const r = RECRUITS.find(x => x.id === id);
       if (r) recruitCharacter(r);
