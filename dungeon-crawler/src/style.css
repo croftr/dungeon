@@ -363,16 +363,7 @@ body {
 }
 
 .cs-mini-name {
-  text-align: center;
-  color: rgba(232, 200, 122, 0.75);
-  font-family: Georgia, serif;
-  font-size: 11px;
-  padding: 6px 4px 7px;
-  background: rgba(0, 0, 0, 0.5);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  letter-spacing: 0.5px;
+  display: none;
 }
 
 /* Center: hero detail panel */

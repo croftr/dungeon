@@ -65,18 +65,32 @@ export function initRecruits(scene, camera) {
 
     // Draw them as embedded wall frescoes
     RECRUITS.forEach(r => {
-        const map = loader.load(asset(r.image));
-        map.magFilter = THREE.LinearFilter;
-        map.minFilter = THREE.LinearMipmapLinearFilter;
-        map.anisotropy = 16;
-        // We use transparent: true and our alphaMap so edges fade into the procedural wall
+        // We use transparent: true and our alphaMap so edges fade into the procedural wall.
+        // Stone tint (0xa09080) multiplied over a greyscale image gives a carved-stone look.
         const picMat = new THREE.MeshLambertMaterial({
-            map,
             alphaMap: alphaTex,
             transparent: true,
-            color: 0xffffff,
+            color: 0xa09080,
             depthWrite: false // prevents z-sorting transparency artifacts
         });
+
+        // Load image, desaturate via canvas filter, then apply as texture
+        const img = new Image();
+        img.onload = () => {
+            const grayCanvas = document.createElement('canvas');
+            grayCanvas.width = img.naturalWidth || 256;
+            grayCanvas.height = img.naturalHeight || 256;
+            const gctx = grayCanvas.getContext('2d');
+            gctx.filter = 'grayscale(1)';
+            gctx.drawImage(img, 0, 0);
+            const map = new THREE.CanvasTexture(grayCanvas);
+            map.magFilter = THREE.LinearFilter;
+            map.minFilter = THREE.LinearMipmapLinearFilter;
+            map.anisotropy = 16;
+            picMat.map = map;
+            picMat.needsUpdate = true;
+        };
+        img.src = asset(r.image);
 
         const mesh = new THREE.Mesh(frameGeo, picMat);
 

@@ -630,7 +630,6 @@ function showCharacterSelection() {
     return `
       <div class="cs-mini-card" data-recruit-id="${r.id}">
         <img class="cs-mini-portrait" src="${asset(r.image)}" alt="${r.name}" />
-        <div class="cs-mini-name">${r.name}</div>
       </div>
     `;
   }
