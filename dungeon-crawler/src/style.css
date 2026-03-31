@@ -453,7 +453,7 @@ body {
   padding: 28px 24px 20px 26px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 16px;
   min-width: 0;
   overflow-y: auto;
@@ -578,112 +578,22 @@ body {
   cursor: default;
 }
 
-/* Right: party formation column */
-.cs-party-col {
-  width: 260px;
-  flex-shrink: 0;
+/* Party corner — bottom-right overlay matching #party-panel position */
+.cs-party-corner {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
-  padding: 22px 18px;
-  border-left: 1px solid rgba(232, 200, 122, 0.07);
-  background: rgba(6, 4, 2, 0.6);
+  align-items: stretch;
+  gap: 8px;
 }
 
-.cs-party-label {
-  color: rgba(232, 200, 122, 0.3);
-  font-family: Georgia, serif;
-  font-size: 10px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-}
-
-.cs-formation {
+.cs-corner-header {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  width: 100%;
-}
-
-.cs-row-label {
-  color: rgba(232, 200, 122, 0.25);
-  font-family: Georgia, serif;
-  font-size: 9px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  text-align: center;
-  margin-bottom: 3px;
-}
-
-.cs-row-label--back { margin-top: 4px; }
-
-.cs-formation-row {
-  display: flex;
-  gap: 14px;
-  justify-content: center;
-}
-
-.cs-row-divider {
-  width: 90px;
-  height: 1px;
-  background: linear-gradient(to right, transparent, rgba(232, 200, 122, 0.14), transparent);
-  margin: 6px 0;
-}
-
-/* Roster slots */
-.roster-slot {
-  width: 96px;
-  height: 116px;
-  border: 1px dashed rgba(232, 200, 122, 0.17);
-  border-radius: 4px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  overflow: hidden;
-  position: relative;
-  background: rgba(20, 15, 10, 0.55);
-}
-
-.roster-slot.filled {
-  border-style: solid;
-  border-color: rgba(232, 200, 122, 0.32);
-  box-shadow: 0 0 12px rgba(232, 200, 122, 0.07);
-}
-
-.roster-slot-placeholder {
-  color: rgba(232, 200, 122, 0.1);
-  font-size: 26px;
-  font-family: Georgia, serif;
-}
-
-.roster-slot img {
-  width: 100%;
-  flex: 1;
-  object-fit: cover;
-  object-position: top;
-  display: block;
-  animation: rosterFill 0.3s ease forwards;
-}
-
-.roster-name {
-  display: block;
-  width: 100%;
-  text-align: center;
-  color: rgba(232, 200, 122, 0.75);
-  font-family: Georgia, serif;
-  font-size: 9px;
-  letter-spacing: 0.5px;
-  padding: 3px 4px 4px;
-  background: rgba(0, 0, 0, 0.65);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex-shrink: 0;
+  align-items: stretch;
+  gap: 6px;
 }
 
 .cs-party-hint {
@@ -730,18 +640,79 @@ body {
   animation: none;
 }
 
+/* 2×2 grid of corner cards — responsive */
+.cs-corner-cards {
+  display: grid;
+  grid-template-columns: repeat(2, clamp(88px, 9.5vw, 148px));
+  gap: 6px;
+}
+
+.cs-corner-card {
+  width: 100%;
+  height: clamp(110px, 12vw, 185px);
+  background: rgba(8, 6, 4, 0.88);
+  border: 1px solid rgba(90, 74, 48, 0.6);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: inset 0 1px 0 rgba(255, 220, 120, 0.06), 0 2px 8px rgba(0, 0, 0, 0.7);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cs-corner-card.cs-slot-filled {
+  border-color: rgba(232, 200, 122, 0.38);
+  box-shadow: 0 0 14px rgba(232, 200, 122, 0.1), inset 0 1px 0 rgba(255, 220, 120, 0.1);
+  animation: cornerFill 0.35s ease forwards;
+}
+
+.cs-corner-card img {
+  width: 100%;
+  flex: 1;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+
+.cs-corner-name {
+  display: block;
+  width: 100%;
+  text-align: center;
+  color: rgba(232, 200, 122, 0.75);
+  font-family: Georgia, serif;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  padding: 3px 4px 4px;
+  background: rgba(0, 0, 0, 0.72);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+.cs-corner-empty-icon {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(232, 200, 122, 0.1);
+  font-size: 22px;
+  font-family: Georgia, serif;
+}
+
+@keyframes cornerFill {
+  from { opacity: 0.6; transform: scale(0.97); }
+  to   { opacity: 1;   transform: scale(1); }
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .cs-roster-col { width: 300px; }
-  .cs-party-col  { width: 220px; }
-  .roster-slot   { width: 82px; height: 100px; }
   .cs-detail-video-wrap { width: 38%; }
 }
 @media (max-width: 800px) {
   .cs-roster-col { width: 240px; }
   .cs-mini-grid  { grid-template-columns: 1fr; }
-  .cs-party-col  { width: 180px; }
-  .roster-slot   { width: 70px; height: 86px; }
   .cs-detail-video-wrap { width: 35%; }
 }
 

@@ -95,12 +95,12 @@ prefetchBuffer(asset('/sounds/party-confirmed.mp3'));
 // The button also must not appear until all other splash elements have animated in
 // (last element: delay 3s + duration 0.8s = 3.8s after splash shown).
 let _splashShownAt = 0;  // timestamp set when splash screen becomes visible
-let _themeLoaded   = false;
+let _themeLoaded = false;
 
 {
   const BTN_REVEAL_DELAY = 4300; // ms after splash shown before button appears
   const _startBtn = document.getElementById('start-adventure-btn');
-  const _barWrap  = document.getElementById('loading-bar-wrap');
+  const _barWrap = document.getElementById('loading-bar-wrap');
 
   function _revealStartBtn() {
     if (!_startBtn) return;
@@ -582,7 +582,7 @@ if (preStartBtn) {
     if (_themeLoaded) {
       // Theme already ready — schedule the button reveal from now
       const startBtn = document.getElementById('start-adventure-btn');
-      const barWrap  = document.getElementById('loading-bar-wrap');
+      const barWrap = document.getElementById('loading-bar-wrap');
       setTimeout(() => {
         if (startBtn) {
           startBtn.style.opacity = '';
@@ -705,31 +705,25 @@ function showCharacterSelection() {
             </div>
           </div>
         </div>
-        <div class="cs-party-col">
-          <div class="cs-party-label">Your Party</div>
-          <div class="cs-formation">
-            <div class="cs-row-label">Front Row</div>
-            <div class="cs-formation-row cs-front-row">
-              <div class="roster-slot" data-slot="0"><span class="roster-slot-placeholder">+</span></div>
-              <div class="roster-slot" data-slot="1"><span class="roster-slot-placeholder">+</span></div>
-            </div>
-            <div class="cs-row-divider"></div>
-            <div class="cs-row-label cs-row-label--back">Back Row</div>
-            <div class="cs-formation-row cs-back-row">
-              <div class="roster-slot" data-slot="2"><span class="roster-slot-placeholder">+</span></div>
-              <div class="roster-slot" data-slot="3"><span class="roster-slot-placeholder">+</span></div>
-            </div>
-          </div>
-          <div class="cs-party-hint" id="cs-party-hint">Select 4 heroes<br>to begin</div>
-          <button id="begin-adventure-btn">Party<br>Confirmed</button>
-        </div>
+      </div>
+    </div>
+    <div class="cs-party-corner" id="cs-party-corner">
+      <div class="cs-corner-header">
+        <div class="cs-party-hint" id="cs-party-hint">Select 4 heroes<br>to begin</div>
+        <button id="begin-adventure-btn">Enter Dungeon</button>
+      </div>
+      <div class="cs-corner-cards">
+        <div class="cs-corner-card" data-slot="0"><span class="cs-corner-empty-icon">+</span></div>
+        <div class="cs-corner-card" data-slot="1"><span class="cs-corner-empty-icon">+</span></div>
+        <div class="cs-corner-card" data-slot="2"><span class="cs-corner-empty-icon">+</span></div>
+        <div class="cs-corner-card" data-slot="3"><span class="cs-corner-empty-icon">+</span></div>
       </div>
     </div>
   `;
 
   const miniCards = charSelectScreen.querySelectorAll('.cs-mini-card');
   const detailPanel = charSelectScreen.querySelector('.cs-detail-panel');
-  const rosterSlots = charSelectScreen.querySelectorAll('.roster-slot');
+  const cornerCards = charSelectScreen.querySelectorAll('.cs-corner-card');
   const beginBtn = charSelectScreen.querySelector('#begin-adventure-btn');
 
   function renderDetail(recruitId) {
@@ -769,14 +763,14 @@ function showCharacterSelection() {
     });
 
     const selectedArr = [...selectedIds];
-    rosterSlots.forEach((slot, i) => {
+    cornerCards.forEach((card, i) => {
       if (i < selectedArr.length) {
         const r = RECRUITS.find(x => x.id === selectedArr[i]);
-        slot.innerHTML = `<img src="${asset(r.image)}" alt="${r.name}" /><span class="roster-name">${r.name}</span>`;
-        slot.classList.add('filled');
+        card.innerHTML = `<img src="${asset(r.image)}" alt="${r.name}" /><span class="cs-corner-name">${r.name}</span>`;
+        card.classList.add('cs-slot-filled');
       } else {
-        slot.innerHTML = '<span class="roster-slot-placeholder">+</span>';
-        slot.classList.remove('filled');
+        card.innerHTML = '<span class="cs-corner-empty-icon">+</span>';
+        card.classList.remove('cs-slot-filled');
       }
     });
 
@@ -804,6 +798,7 @@ function showCharacterSelection() {
       const r = RECRUITS.find(x => x.id === id);
       if (r) recruitCharacter(r);
     }
+
     finishIntro();
   });
 }
