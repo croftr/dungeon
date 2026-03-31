@@ -30,11 +30,12 @@ const ARC_START_R = new THREE.Vector3(0.18, 0.14, -0.45);
 const ARC_MID_R   = new THREE.Vector3(-0.02, 0.0, -0.4);
 const ARC_END_R   = new THREE.Vector3(-0.2, -0.16, -0.45);
 
-// Shield bash arc — short vertical travel so the wide ribbon reads as round
-const SHIELD_START = new THREE.Vector3(0.0, -0.18, -0.45);
-const SHIELD_MID   = new THREE.Vector3(0.0, -0.08, -0.38);
-const SHIELD_END   = new THREE.Vector3(0.0,  0.0,  -0.45);
-const SHIELD_WIDTH = 0.07;    // broad shield disc
+// Shield bash arc — diagonal upward swipe from hand side toward centre
+// x-offset gets mirrored per hand so left shield comes from left, right from right
+const SHIELD_START = new THREE.Vector3(-0.10, -0.20, -0.45);
+const SHIELD_MID   = new THREE.Vector3(-0.01, -0.05, -0.40);
+const SHIELD_END   = new THREE.Vector3( 0.03,  0.06, -0.45);
+const SHIELD_WIDTH = 0.045;   // smaller than before
 
 /** Quadratic bezier sample */
 function bezier(a, b, c, t) {
@@ -189,18 +190,21 @@ export function playSlashTrail(hand = 'left', memberIndex = 0) {
 /**
  * Play a chunky shield bash trail — rises from bottom to mid-screen.
  * @param {'left'|'right'} hand
- * @param {number} memberIndex — party member index (0-3), used to pick arc direction
+ * @param {number} memberIndex — party member index (0-3); right column (1,3) mirrors the arc
  */
-export function playShieldTrail(hand = 'left') {
+export function playShieldTrail(hand = 'left', memberIndex = 0) {
   if (!_shieldMesh || _shieldAnimating) return;
   _shieldAnimating = true;
 
-  const mirror = hand === 'right' ? -1 : 1;
+  // Right column members (1, 3) get the arc from the opposite side
+  const rightColumn = memberIndex % 2 === 1;
+  const side = rightColumn ? -1 : 1;
+
   _shieldMesh.visible = true;
 
-  const start = new THREE.Vector3(SHIELD_START.x * mirror, SHIELD_START.y, SHIELD_START.z);
-  const mid   = new THREE.Vector3(SHIELD_MID.x * mirror,   SHIELD_MID.y,   SHIELD_MID.z);
-  const end   = new THREE.Vector3(SHIELD_END.x * mirror,   SHIELD_END.y,   SHIELD_END.z);
+  const start = new THREE.Vector3(SHIELD_START.x * side, SHIELD_START.y, SHIELD_START.z);
+  const mid   = new THREE.Vector3(SHIELD_MID.x * side,   SHIELD_MID.y,   SHIELD_MID.z);
+  const end   = new THREE.Vector3(SHIELD_END.x * side,   SHIELD_END.y,   SHIELD_END.z);
 
   const up = new THREE.Vector3(0, 0, 1);
   const posAttr = _shieldMesh.geometry.getAttribute('position');
@@ -223,14 +227,11 @@ export function playShieldTrail(hand = 'left') {
           .normalize();
         const perp = new THREE.Vector3().crossVectors(tangent, up).normalize();
 
-        // Flat plateau with smooth rounded edges — shield disc profile
-        // smoothstep ramps from 0→1 over the first 15% and back to 0 over the last 15%
-        const edge = 0.15;
-        const lo = Math.min(segT / edge, 1);
-        const hi = Math.min((1 - segT) / edge, 1);
-        const flat = Math.min(lo, hi);
-        const smooth = flat * flat * (3 - 2 * flat); // smoothstep
-        const taper = smooth * SHIELD_WIDTH;
+        // Tapered: pointed at the bottom (tail), growing wider toward the top (head)
+        // Gives the feeling of a shield edge cutting upward and the face slamming in
+        const grow = Math.pow(segT, 0.55);      // thin at 0, full at 1
+        const trimTip = 1 - segT * 0.12;        // very slight taper at the top tip
+        const taper = grow * trimTip * SHIELD_WIDTH;
 
         const i2 = i * 2;
         posAttr.setXYZ(i2,     pt.x + perp.x * taper, pt.y + perp.y * taper, pt.z + perp.z * taper);

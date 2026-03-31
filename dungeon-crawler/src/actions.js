@@ -207,7 +207,7 @@ export function playAction(attackType, hand = 'left', memberIndex = 0) {
 
   // Shield bash — chunky bottom-up trail
   if (attackType === ACTIONS.SHIELD_BASH) {
-    playShieldTrail(hand);
+    playShieldTrail(hand, memberIndex);
     return;
   }
 
