@@ -4463,13 +4463,21 @@ function _renderKnownForgeRecipes() {
     });
 }
 
+function _returnItemToParty(itemName) {
+    for (let pi = 0; pi < party.length; pi++) {
+        if (party[pi].isEmpty) continue;
+        if (equip.addItemToInventory(pi, itemName)) return true;
+    }
+    return false;
+}
+
 function _autoPopulateAlchemySlots(recipe) {
     // Return any existing ingredient slot contents to inventory
     for (let i = 0; i < 8; i++) {
         if (_alchemyContents[i]) {
-            const idx = party.findIndex(m => !m.isEmpty);
-            if (idx !== -1) equip.addItemToInventory(idx, _alchemyContents[i]);
-            _alchemyContents[i] = null;
+            if (_returnItemToParty(_alchemyContents[i])) {
+                _alchemyContents[i] = null;
+            }
         }
     }
     // Fill slots from party inventory, ingredient by ingredient
@@ -4496,9 +4504,9 @@ function _autoPopulateForgeSlots(recipe) {
     // Return any existing material slot contents to inventory
     for (let i = 0; i < 8; i++) {
         if (_forgeContents[i]) {
-            const idx = party.findIndex(m => !m.isEmpty);
-            if (idx !== -1) equip.addItemToInventory(idx, _forgeContents[i]);
-            _forgeContents[i] = null;
+            if (_returnItemToParty(_forgeContents[i])) {
+                _forgeContents[i] = null;
+            }
         }
     }
     // Fill slots from party inventory, ingredient by ingredient

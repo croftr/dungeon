@@ -1770,14 +1770,19 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     hitChance = 1.0;
   }
 
+  // Fireball/Banishment uses INT + monster magic resilience; all other attacks use STR + monster defence
+  const isMagic = attackType === 'fireball' || attackType === 'banishment' || attackType === 'incinerate';
+
   // DEX-based hit chance — higher DEX advantage means more reliable hits
   if (Math.random() >= hitChance) {
     recordAttack(character.name, false);
+    // Runic Scholar is consumed on any spell attempt, hit or miss
+    if (isMagic && character.runicScholarActive) {
+      character.runicScholarActive = false;
+      refreshPartyCards();
+    }
     return { hit: false, damage: 0, killed: false, monsterHp: m.hp, crit: false, hitChance, formula: null, monsterName: m.name };
   }
-
-  // Fireball/Banishment uses INT + monster magic resilience; all other attacks use STR + monster defence
-  const isMagic = attackType === 'fireball' || attackType === 'banishment' || attackType === 'incinerate';
 
   // Apply Sunder Armor penalty
   const isSundered = skillsState.sunderArmor?.active && skillsState.sunderArmor?.targetId === m.id;

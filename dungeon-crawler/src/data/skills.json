@@ -66,8 +66,8 @@
     "Runic Scholar": {
         "type": "buff",
         "icon": "/skills/runic-scholar.webp",
-        "description": "Channels arcane power into the next spell cast, doubling its damage after all other modifiers are applied.",
-        "cooldownMs": 0,
+        "description": "Channels arcane power into the next spell cast, doubling its damage after all other modifiers are applied. Cooldown: 60s.",
+        "cooldownMs": 60000,
         "effectType": "spellDamageMultiplier",
         "effectTarget": "self",
         "magnitude": 2.0,

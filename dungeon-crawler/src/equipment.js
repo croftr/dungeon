@@ -3079,6 +3079,12 @@ export function useHand(memberIndex, hand, silent = false) {
     // ~400ms so we wait long enough for the first swing to visually complete.
     const daDelay = attackType === ACTIONS.SHOOT ? 150 : 450;
     setTimeout(() => {
+      // Deduct stamina for the second hit (spells/spCost=0/ww/wdActive exempt)
+      if (!isSpell && spCost > 0) {
+        if (m.sp < spCost) return; // exhausted before second hit fires
+        setSp(m.id, m.sp - spCost);
+        refreshPartyCards();
+      }
       let daResult, daTarget;
       if (!target.alive) {
         // Find a new target if the first one died
@@ -3959,8 +3965,13 @@ function _useRampart(member, memberIndex) {
 }
 
 // ── Runic Scholar (Merlin) ────────────────────────────────────────────────
+const RUNIC_SCHOLAR_COOLDOWN_MS = SKILLS_DATA['Runic Scholar'].cooldownMs;
+let _runicScholarCooldownEnds = [0, 0, 0, 0];
+
 function _useRunicScholar(member, memberIndex) {
-  // Toggle off if already primed (lets the player cancel the buff)
+  const now = performance.now();
+
+  // Toggle off if already primed (lets the player cancel — cooldown still applies)
   if (member.runicScholarActive) {
     member.runicScholarActive = false;
     refreshPartyCards();
@@ -3968,8 +3979,16 @@ function _useRunicScholar(member, memberIndex) {
     return;
   }
 
+  if (now < _runicScholarCooldownEnds[memberIndex]) {
+    const remaining = Math.ceil((_runicScholarCooldownEnds[memberIndex] - now) / 1000);
+    showMessage(`<span style="color:#c080ff">Runic Scholar</span> — ready in ${remaining}s`, 2000);
+    return;
+  }
+
   member.runicScholarActive = true;
   member.runicScholarMagnitude = resolveSkillMagnitude('Runic Scholar', SKILLS_DATA['Runic Scholar'], member);
+  _runicScholarCooldownEnds[memberIndex] = now + RUNIC_SCHOLAR_COOLDOWN_MS;
+  lastAttackTimes[`${memberIndex}-skill-Runic Scholar`] = now;
   refreshPartyCards(); // immediately lights up the skill slot glow
 
   playSkillSound('magic');
@@ -3979,6 +3998,8 @@ function _useRunicScholar(member, memberIndex) {
     3000
   );
   addLogEntry({ type: 'skill', actor: member.name, skillName: 'Runic Scholar' });
+
+  _startSkillCooldownUI(memberIndex, _runicScholarCooldownEnds[memberIndex]);
 }
 
 // ── Mana Tap (Merlin) ─────────────────────────────────────────────────────
