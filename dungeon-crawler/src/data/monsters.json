@@ -449,7 +449,7 @@
   "minotaur": {
     "name": "Minotaur",
     "family": "Mythic and Giants",
-    "hp": 400,
+    "hp": 450,
     "defence": 10,
     "xp": 1200,
     "attackSpeed": 1.8,
@@ -627,7 +627,7 @@
   "giant": {
     "name": "Giant",
     "family": "Mythic and Giants",
-    "hp": 500,
+    "hp": 550,
     "defence": 12,
     "xp": 1500,
     "attackSpeed": 1.3,
