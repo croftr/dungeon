@@ -50,16 +50,24 @@ import {
 } from './quarks-intro.js';
 
 // Maps spell attackType → VFX + sound. Add new entries here as spells grow.
-function _dispatchSpellVFX(attackType) {
+function _dispatchSpellVFX(attackType, target = null) {
   switch (attackType) {
-    case 'fireball':
-      triggerFireballEffect();
+    case 'fireball': {
+      const dist = target
+        ? Math.abs(target.gridRow - player.gridRow) + Math.abs(target.gridCol - player.gridCol)
+        : 2;
+      triggerFireballEffect(dist);
       // fireball audio already handled by playActionSound inside playAction
       break;
-    case 'banishment':
-      triggerBanishmentEffect();
+    }
+    case 'banishment': {
+      const dist = target
+        ? Math.abs(target.gridRow - player.gridRow) + Math.abs(target.gridCol - player.gridCol)
+        : 2;
+      triggerBanishmentEffect(dist);
       // audio already handled
       break;
+    }
     case 'incinerate':
       triggerIncinerateEffect();
       break;
@@ -3027,7 +3035,7 @@ export function useHand(memberIndex, hand, silent = false) {
 
   // Play the visual + audio animation regardless of whether a target exists
   playAction(attackType, hand, memberIndex);
-  if (isSpell || isBuff) _dispatchSpellVFX(attackType);
+  if (isSpell || isBuff) _dispatchSpellVFX(attackType, target);
 
   if (isBuff) {
     // Legacy global buffs handled here. 
@@ -3092,13 +3100,13 @@ export function useHand(memberIndex, hand, silent = false) {
         if (daTarget) {
           daResult = attackMonster(daTarget.id, m, def, attackType, ammoDef);
           playAction(attackType, hand, memberIndex);
-          if (isSpell || isBuff) _dispatchSpellVFX(attackType);
+          if (isSpell || isBuff) _dispatchSpellVFX(attackType, daTarget);
         }
       } else {
         daTarget = target;
         daResult = attackMonster(target.id, m, def, attackType, ammoDef);
         playAction(attackType, hand, memberIndex);
-        if (isSpell || isBuff) _dispatchSpellVFX(attackType);
+        if (isSpell || isBuff) _dispatchSpellVFX(attackType, daTarget);
       }
       if (daResult) {
         addLogEntry({

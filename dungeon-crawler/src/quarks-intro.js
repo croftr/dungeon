@@ -542,51 +542,94 @@ export function triggerManaTapEffect() {
 //  FIREBALL — Merlin (Wizard)
 //  Dense white-hot → orange → dark-red fire cone firing forward
 // ══════════════════════════════════════════════════════════════════════════
-export function triggerFireballEffect() {
+export function triggerFireballEffect(travelCells = 2) {
     if (!batchRenderer || !sceneRef || !cameraRef) return;
     const tex = createGlowTexture();
     const dir = new THREE.Vector3();
     cameraRef.getWorldDirection(dir);
 
-    // Core fire stream — tight narrow cone aimed forward
-    const core = new ParticleSystem({
-        duration: 0.7, looping: false,
-        startLife: new IntervalValue(0.3, 0.8),
-        startSpeed: new IntervalValue(5.0, 14.0),
-        startSize: new IntervalValue(0.08, 0.30),
-        startColor: new ConstantColor(new Vector4(1, 1, 0.5, 1)),
-        worldSpace: true, maxParticle: 160,
-        emissionOverTime: new ConstantValue(0),
-        emissionBursts: [{ time: 0, count: new ConstantValue(120), cycle: 1, interval: 0.005, probability: 1 }],
-        shape: new ConeEmitter({ radius: 0.08, thickness: 1, arc: Math.PI * 2, angle: Math.PI / 10 }),
-        material: _mat(tex), startTileIndex: new ConstantValue(0),
-        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
-    });
-    core.addBehavior(new ColorOverLife(new ColorRange(
-        new Vector4(1.0, 0.9, 0.3, 1),
-        new Vector4(0.9, 0.05, 0.0, 0),
-    )));
-    core.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 1, 0.6, 0), 0]])));
-    core.emitter.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
-    _spawn(core, cameraRef.position, 1.5);
+    const WORLD_PER_CELL = 2; // must match map.js CELL constant
+    const travelDist = travelCells * WORLD_PER_CELL;
+    const SPEED = 12; // world-units per second
+    const travelMs = (travelDist / SPEED) * 1000;
 
-    // Wide fire bloom at impact zone — spawned further forward
-    const bloom = new ParticleSystem({
-        duration: 0.6, looping: false,
-        startLife: new IntervalValue(0.2, 0.6),
-        startSpeed: new IntervalValue(2.0, 7.0),
-        startSize: new IntervalValue(0.06, 0.22),
-        startColor: new ConstantColor(new Vector4(1, 0.5, 0.1, 1)),
-        worldSpace: true, maxParticle: 100,
-        emissionOverTime: new ConstantValue(0),
-        emissionBursts: [{ time: 0, count: new ConstantValue(70), cycle: 1, interval: 0.01, probability: 1 }],
-        shape: new SphereEmitter({ radius: 0.2, thickness: 1, arc: Math.PI * 2 }),
-        material: _mat(tex), startTileIndex: new ConstantValue(0),
-        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    // ── Glowing orb sprite that flies forward through the 3D corridor ────────
+    const orbMat = new THREE.SpriteMaterial({
+        map: tex, color: 0xff6600,
+        blending: THREE.AdditiveBlending, transparent: true, depthWrite: false,
     });
-    bloom.addBehavior(new ColorOverLife(new ColorRange(new Vector4(1, 0.7, 0.2, 1), new Vector4(0.7, 0.0, 0.0, 0))));
-    bloom.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(0.4, 1.0, 0.8, 0), 0]])));
-    _spawn(bloom, _frontPos(2.5), 1.5);
+    const orb = new THREE.Sprite(orbMat);
+    orb.scale.setScalar(0.55);
+    const startPos = new THREE.Vector3().copy(cameraRef.position).addScaledVector(dir, 0.8);
+    const endPos = startPos.clone().addScaledVector(dir, travelDist);
+    orb.position.copy(startPos);
+    sceneRef.add(orb);
+
+    // ── Fire trail: small bursts spawned every 50 ms at the orb's position ───
+    let trailActive = true;
+    const trailId = setInterval(() => {
+        if (!trailActive || !batchRenderer || !sceneRef) return;
+        const burst = new ParticleSystem({
+            duration: 0.2, looping: false,
+            startLife: new IntervalValue(0.12, 0.28),
+            startSpeed: new IntervalValue(0.2, 0.9),
+            startSize: new IntervalValue(0.05, 0.16),
+            startColor: new ConstantColor(new Vector4(1, 0.55, 0.08, 0.9)),
+            worldSpace: true, maxParticle: 12,
+            emissionOverTime: new ConstantValue(0),
+            emissionBursts: [{ time: 0, count: new ConstantValue(8), cycle: 1, interval: 0.01, probability: 1 }],
+            shape: new SphereEmitter({ radius: 0.07, thickness: 1, arc: Math.PI * 2 }),
+            material: _mat(tex),
+            startTileIndex: new ConstantValue(0), uTileCount: 1, vTileCount: 1,
+            renderMode: RenderMode.BillBoard, renderOrder: 2,
+        });
+        burst.addBehavior(new ColorOverLife(new ColorRange(
+            new Vector4(1.0, 0.65, 0.1, 1),
+            new Vector4(0.9, 0.05, 0.0, 0),
+        )));
+        burst.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.6, 0.2, 0), 0]])));
+        _spawn(burst, orb.position.clone(), 0.55);
+    }, 50);
+
+    // ── Animate orb along the forward ray, then explode at destination ───────
+    const startTime = performance.now();
+    function animateOrb() {
+        const t = Math.min((performance.now() - startTime) / travelMs, 1);
+        orb.position.lerpVectors(startPos, endPos, t);
+        if (t < 1) {
+            requestAnimationFrame(animateOrb);
+        } else {
+            clearInterval(trailId);
+            trailActive = false;
+            if (orb.parent) sceneRef.remove(orb);
+            orbMat.dispose();
+            _spawnFireballImpact(endPos.clone(), tex);
+        }
+    }
+    requestAnimationFrame(animateOrb);
+}
+
+function _spawnFireballImpact(pos, tex) {
+    const bloom = new ParticleSystem({
+        duration: 0.5, looping: false,
+        startLife: new IntervalValue(0.2, 0.6),
+        startSpeed: new IntervalValue(2.5, 8.0),
+        startSize: new IntervalValue(0.08, 0.30),
+        startColor: new ConstantColor(new Vector4(1, 0.5, 0.1, 1)),
+        worldSpace: true, maxParticle: 120,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(90), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.25, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex),
+        startTileIndex: new ConstantValue(0), uTileCount: 1, vTileCount: 1,
+        renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    bloom.addBehavior(new ColorOverLife(new ColorRange(
+        new Vector4(1, 0.7, 0.2, 1),
+        new Vector4(0.7, 0.0, 0.0, 0),
+    )));
+    bloom.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(0.3, 1.0, 0.8, 0), 0]])));
+    _spawn(bloom, pos, 1.5);
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -662,51 +705,95 @@ export function triggerIncinerateEffect() {
 //  BANISHMENT — Seraphina (White Mage)
 //  A dangerous beam of pure yellow/white magical light firing forward
 // ══════════════════════════════════════════════════════════════════════════
-export function triggerBanishmentEffect() {
+export function triggerBanishmentEffect(travelCells = 2) {
     if (!batchRenderer || !sceneRef || !cameraRef) return;
     const tex = createGlowTexture();
     const dir = new THREE.Vector3();
     cameraRef.getWorldDirection(dir);
 
-    // Core light stream — tight narrow cone aimed forward
-    const core = new ParticleSystem({
-        duration: 0.7, looping: false,
-        startLife: new IntervalValue(0.3, 0.8),
-        startSpeed: new IntervalValue(5.0, 14.0),
-        startSize: new IntervalValue(0.08, 0.30),
-        startColor: new ConstantColor(new Vector4(1.0, 1.0, 0.8, 1)),
-        worldSpace: true, maxParticle: 160,
-        emissionOverTime: new ConstantValue(0),
-        emissionBursts: [{ time: 0, count: new ConstantValue(120), cycle: 1, interval: 0.005, probability: 1 }],
-        shape: new ConeEmitter({ radius: 0.08, thickness: 1, arc: Math.PI * 2, angle: Math.PI / 10 }),
-        material: _mat(tex), startTileIndex: new ConstantValue(0),
-        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
-    });
-    core.addBehavior(new ColorOverLife(new ColorRange(
-        new Vector4(1.0, 1.0, 0.5, 1),
-        new Vector4(1.0, 0.8, 0.0, 0),
-    )));
-    core.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 1, 0.6, 0), 0]])));
-    core.emitter.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
-    _spawn(core, cameraRef.position, 1.5);
+    const WORLD_PER_CELL = 2;
+    const travelDist = travelCells * WORLD_PER_CELL;
+    const SPEED = 12;
+    const travelMs = (travelDist / SPEED) * 1000;
 
-    // Wide light bloom at impact zone — spawned further forward
-    const bloom = new ParticleSystem({
-        duration: 0.6, looping: false,
-        startLife: new IntervalValue(0.2, 0.6),
-        startSpeed: new IntervalValue(2.0, 7.0),
-        startSize: new IntervalValue(0.06, 0.22),
-        startColor: new ConstantColor(new Vector4(1.0, 0.9, 0.4, 1)),
-        worldSpace: true, maxParticle: 100,
-        emissionOverTime: new ConstantValue(0),
-        emissionBursts: [{ time: 0, count: new ConstantValue(70), cycle: 1, interval: 0.01, probability: 1 }],
-        shape: new SphereEmitter({ radius: 0.2, thickness: 1, arc: Math.PI * 2 }),
-        material: _mat(tex), startTileIndex: new ConstantValue(0),
-        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    // ── Bright white orb that flies forward ──────────────────────────────────
+    const orbMat = new THREE.SpriteMaterial({
+        map: tex, color: 0xddeeff,
+        blending: THREE.AdditiveBlending, transparent: true, depthWrite: false,
     });
-    bloom.addBehavior(new ColorOverLife(new ColorRange(new Vector4(1.0, 1.0, 0.5, 1), new Vector4(1.0, 0.8, 0.0, 0))));
-    bloom.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(0.4, 1.0, 0.8, 0), 0]])));
-    _spawn(bloom, _frontPos(2.5), 1.5);
+    const orb = new THREE.Sprite(orbMat);
+    orb.scale.setScalar(0.5);
+    const startPos = new THREE.Vector3().copy(cameraRef.position).addScaledVector(dir, 0.8);
+    const endPos = startPos.clone().addScaledVector(dir, travelDist);
+    orb.position.copy(startPos);
+    sceneRef.add(orb);
+
+    // ── Trail: scattered sparks of holy light left behind ────────────────────
+    let trailActive = true;
+    const trailId = setInterval(() => {
+        if (!trailActive || !batchRenderer || !sceneRef) return;
+        const burst = new ParticleSystem({
+            duration: 0.25, looping: false,
+            startLife: new IntervalValue(0.15, 0.35),
+            startSpeed: new IntervalValue(0.3, 1.2),
+            startSize: new IntervalValue(0.04, 0.14),
+            startColor: new ConstantColor(new Vector4(1.0, 1.0, 1.0, 1.0)),
+            worldSpace: true, maxParticle: 14,
+            emissionOverTime: new ConstantValue(0),
+            emissionBursts: [{ time: 0, count: new ConstantValue(9), cycle: 1, interval: 0.01, probability: 1 }],
+            shape: new SphereEmitter({ radius: 0.06, thickness: 1, arc: Math.PI * 2 }),
+            material: _mat(tex),
+            startTileIndex: new ConstantValue(0), uTileCount: 1, vTileCount: 1,
+            renderMode: RenderMode.BillBoard, renderOrder: 2,
+        });
+        burst.addBehavior(new ColorOverLife(new ColorRange(
+            new Vector4(1.0, 1.0, 1.0, 1.0),
+            new Vector4(0.7, 0.85, 1.0, 0),  // fades to pale blue
+        )));
+        burst.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.5, 0.2, 0), 0]])));
+        _spawn(burst, orb.position.clone(), 0.6);
+    }, 50);
+
+    // ── Animate orb, then flash on impact ────────────────────────────────────
+    const startTime = performance.now();
+    function animateOrb() {
+        const t = Math.min((performance.now() - startTime) / travelMs, 1);
+        orb.position.lerpVectors(startPos, endPos, t);
+        if (t < 1) {
+            requestAnimationFrame(animateOrb);
+        } else {
+            clearInterval(trailId);
+            trailActive = false;
+            if (orb.parent) sceneRef.remove(orb);
+            orbMat.dispose();
+            _spawnBanishmentImpact(endPos.clone(), tex);
+        }
+    }
+    requestAnimationFrame(animateOrb);
+}
+
+function _spawnBanishmentImpact(pos, tex) {
+    // Brilliant white-gold flash expanding outward
+    const flash = new ParticleSystem({
+        duration: 0.5, looping: false,
+        startLife: new IntervalValue(0.2, 0.7),
+        startSpeed: new IntervalValue(3.0, 9.0),
+        startSize: new IntervalValue(0.08, 0.28),
+        startColor: new ConstantColor(new Vector4(1.0, 1.0, 1.0, 1.0)),
+        worldSpace: true, maxParticle: 130,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(100), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.2, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex),
+        startTileIndex: new ConstantValue(0), uTileCount: 1, vTileCount: 1,
+        renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    flash.addBehavior(new ColorOverLife(new ColorRange(
+        new Vector4(1.0, 1.0, 1.0, 1.0),  // pure white
+        new Vector4(0.8, 0.9, 1.0, 0),     // fades to pale blue-white
+    )));
+    flash.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(0.2, 1.0, 0.7, 0), 0]])));
+    _spawn(flash, pos, 1.5);
 }
 
 // ══════════════════════════════════════════════════════════════════════════
