@@ -2977,7 +2977,7 @@ export function useHand(memberIndex, hand, silent = false) {
     }
   }
 
-  const maxRange = isRanged ? 4 : 1;
+  const maxRange = isRanged ? 8 : 1;
 
   // Find the alive monster closest to the player that is directly in front
   const target = isBuff ? null : _closestMonsterInFront(maxRange);
