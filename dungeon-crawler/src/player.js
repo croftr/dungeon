@@ -187,7 +187,7 @@ export function facingDir() {
  *
  * @param {number} targetRow
  * @param {number} targetCol
- * @param {number} maxSteps  — 1 for melee, 3 for ranged
+ * @param {number} maxSteps  — 1 for melee, 4 for ranged
  */
 export function isInFrontOfPlayer(targetRow, targetCol, maxSteps = 1) {
   const dir = DIR[player.facing];

@@ -508,7 +508,7 @@ function animate(now) {
     const hasRangedTarget = monsters.some(t =>
       t.alive &&
       (t.level ?? 1) === currentLevel &&
-      isInFrontOfPlayer(t.gridRow, t.gridCol, 3) &&
+      isInFrontOfPlayer(t.gridRow, t.gridCol, 4) &&
       isPassable(t.gridRow, t.gridCol) &&
       isPassable(player.gridRow, player.gridCol)
     );
