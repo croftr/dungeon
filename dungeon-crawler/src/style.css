@@ -1314,37 +1314,37 @@ label.mm-setting-label {
    row 1 = front row      | row 2  = back row
 ═══════════════════════════════════════════ */
 #party-panel {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: fixed;
+  bottom: 0px;
+  left: 0;
+  right: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: auto auto;
-  gap: 6px;
-  align-items: start;
+  column-gap: 230px;
+  row-gap: 6px;
+  padding: 12px;
+  align-items: end;
+  pointer-events: none;
+}
+
+#party-panel > * {
+  pointer-events: auto;
 }
 
 /* Member cards */
-#member-0 {
-  grid-column: 1;
-  grid-row: 1;
+#member-0, #member-2 {
+  justify-self: end;
 }
 
-#member-1 {
-  grid-column: 2;
-  grid-row: 1;
+#member-1, #member-3 {
+  justify-self: start;
 }
 
-#member-2 {
-  grid-column: 1;
-  grid-row: 2;
-}
-
-#member-3 {
-  grid-column: 2;
-  grid-row: 2;
-}
+#member-0 { grid-column: 1; grid-row: 1; }
+#member-1 { grid-column: 2; grid-row: 1; }
+#member-2 { grid-column: 1; grid-row: 2; }
+#member-3 { grid-column: 2; grid-row: 2; }
 
 /* ═══════════════════════════════════════════
    PARTY TACTICS MODAL
@@ -1547,22 +1547,30 @@ label.mm-setting-label {
 
 /* One member card */
 .member-card {
-  background: rgba(8, 6, 4, 0.88);
+  background: rgba(8, 6, 4, 0.9);
   border: 1px solid #5a4a30;
   border-radius: 4px;
   padding: 4px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   box-shadow: inset 0 1px 0 rgba(255, 220, 120, 0.08), 0 2px 8px rgba(0, 0, 0, 0.7);
   position: relative;
+  min-height: 94px;
 }
 
 .status-banner {
   display: flex;
   gap: 4px;
-  height: 18px;
+  height: 20px;
+  min-height: 20px;
+  padding: 2px 6px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid #3a3020;
+  border-radius: 2px;
   pointer-events: none;
+  align-items: center;
+  width: 100%;
 }
 
 .status-banner .buff-icon {
@@ -1580,22 +1588,39 @@ label.mm-setting-label {
 .member-main {
   display: flex;
   flex-direction: row;
-  align-items: center;
-  gap: 4px;
+  align-items: stretch;
+  gap: 6px;
   position: relative;
+  height: 84px;
   /* anchor for incoming damage popups */
+}
+
+.member-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 240px;
+  justify-content: flex-end;
+}
+
+.info-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 4px;
 }
 
 /* Portrait box */
 .portrait {
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
+  width: 84px;
+  height: 84px;
   border: 1px solid #5a4a30;
   border-radius: 3px;
   overflow: hidden;
   background: #0d0a06;
-  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.8);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
   cursor: pointer;
   transition: border-color 0.15s ease;
 }
@@ -1611,20 +1636,19 @@ label.mm-setting-label {
   height: 100%;
 }
 
-/* Bars column — fixed narrow width within the horizontal strip */
 .bars {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 3px;
-  width: 76px;
-  flex-shrink: 0;
+  gap: 2px;
+  flex: 1;
+  width: 100%;
 }
 
 .bar-row {
   display: flex;
   align-items: center;
   gap: 5px;
+  width: 100%;
 }
 
 
@@ -1632,7 +1656,7 @@ label.mm-setting-label {
 .bar-track {
   position: relative;
   flex: 1;
-  height: 13px;
+  height: 19px;
   background: rgba(0, 0, 0, 0.6);
   border: 1px solid #3a3020;
   border-radius: 2px;
@@ -1665,11 +1689,11 @@ label.mm-setting-label {
 
 .bar-value {
   position: absolute;
-  right: 3px;
+  right: 6px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 8px;
-  color: rgba(255, 255, 255, 0.75);
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.85);
   pointer-events: none;
   text-shadow: 0 0 3px #000;
   white-space: nowrap;
@@ -1685,19 +1709,30 @@ label.mm-setting-label {
 
 .slot-group {
   display: flex;
-  flex-direction: row;
-  gap: 2px;
+  gap: 4px;
+}
+
+.slot-group--hands .equip-slot {
+  width: 61px;
+  height: 61px;
+}
+
+.slot-group--actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 4px;
 }
 
 .slot-group + .slot-group {
-  margin-left: 4px;
+  margin-left: 2px;
   padding-left: 4px;
   border-left: 1px solid #3a2e18;
 }
 
 .equip-slot {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   flex-shrink: 0;
   background: rgba(0, 0, 0, 0.5);
   border: 1px solid #4a3a20;
