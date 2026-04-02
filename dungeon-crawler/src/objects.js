@@ -266,7 +266,19 @@ export function initObjects(scene, camera) {
                     if (isInFrontOfPlayer(11, 8, 1)) {
                         playButtonClickSound();
                         _animateButtonPress(obj);
-                        if (window.loadLevel) window.loadLevel(4);
+                        if (window.loadLevel) {
+                            window.loadLevel(4);
+                            setTimeout(() => {
+                                player.gridRow = 2;
+                                player.gridCol = 5;
+                                player.facing = 2; // South
+                                const w = cellToWorld(2, 5);
+                                camera.position.set(w.x, w.y, w.z);
+                                camera.rotation.order = 'YXZ';
+                                camera.rotation.y = FACING_ANGLES[player.facing];
+                                showMessage("Teleported to the Lizard Man Room (Level 4)!");
+                            }, 50);
+                        }
                     } else {
                         showMessage("You can't reach that from here.");
                     }

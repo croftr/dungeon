@@ -709,5 +709,34 @@
         "chance": 0.3
       }
     ]
+  },
+  "demon_ogre": {
+    "name": "Demon Ogre",
+    "family": "Mythic and Giants",
+    "hp": 450,
+    "defence": 18,
+    "xp": 800,
+    "attackSpeed": 1.2,
+    "stats": {
+      "strength": 32,
+      "dexterity": 22,
+      "vitality": 28,
+      "intelligence": 18,
+      "resilience": 24
+    },
+    "drops": [
+      {
+        "item": "Life Essence",
+        "chance": 0.5
+      },
+      {
+        "item": "Demon's Eyes",
+        "chance": 0.4
+      },
+      {
+        "item": "Ogre's Head",
+        "chance": 0.4
+      }
+    ]
   }
 }

@@ -16,4 +16,17 @@ export const level4Monsters = [
     asset('/monsters/lizard-man/Meshy_AI_Galactic_Entity_Adven_biped_Animation_Dead_withSkin.glb'),
     asset('/monsters/lizard-man/Meshy_AI_Galactic_Entity_Adven_biped_Animation_Face_Punch_Reaction_withSkin.glb'),
     asset('/monsters/lizard-man/Meshy_AI_Galactic_Entity_Adven_biped_Animation_Walking_withSkin.glb')),
+
+  inst(D.demon_ogre, 401, 4, 14,
+    asset('/monsters/demon-ogre/idle.glb'),
+    asset('/monsters/demon-ogre/standard-attack.glb'),
+    asset('/monsters/demon-ogre/standard-attack.mp3'),
+    0.7, 0, 0, 4, // scale=0.7, level=4
+    { bounds: { minRow: 3, maxRow: 5, minCol: 13, maxCol: 14 }, speed: 0.4, waitTime: 3.0 },
+    asset('/monsters/demon-ogre/dying.glb'),
+    asset('/monsters/demon-ogre/getting-hit.glb'),
+    asset('/monsters/demon-ogre/walking.glb'),
+    null,
+    asset('/monsters/demon-ogre/combat-idle.glb')
+  ),
 ];

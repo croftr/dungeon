@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
-import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createCrocodileSparkle } from './particles.js';
+import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createCrocodileSparkle, createHellSpawn } from './particles.js';
 import { CELL, isPassable } from './map.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
@@ -422,6 +422,28 @@ _applyMultiAttacks('Lizard Man', [
     damageMultiplier: 0.8,
     specialAttack: true,
     specialOnHitEffects: [{ effectId: 'poison', chance: 0.70 }],
+  },
+]);
+
+_applyMultiAttacks('Demon Ogre', [
+  {
+    name: 'standardAttack',
+    glb: asset('/monsters/demon-ogre/standard-attack.glb'),
+    sound: asset('/monsters/demon-ogre/standard-attack.mp3'),
+    soundTimings: [0.4],
+    damageTimings: [0.4],
+    weight: 7,
+  },
+  {
+    name: 'hellSpawn',
+    glb: asset('/monsters/demon-ogre/special-attack.glb'),
+    sound: asset('/monsters/demon-ogre/special-attack.mp3'),
+    soundTimings: [0.5],
+    damageTimings: [0.5],
+    weight: 3,
+    damageMultiplier: 0.5,
+    specialAttack: true,
+    specialOnHitEffects: [{ effectId: 'rot', chance: 0.5 }],
   },
 ]);
 
@@ -1992,6 +2014,12 @@ export function triggerMonsterAttack(monsterId) {
         const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
         setTimeout(() => { if (m.alive) createPoisonCloud(m.mesh.position); }, duration * pts * 1000);
         showMessage(`<b>${m.name}</b> releases a toxic poison cloud!`, 2000);
+      }
+      if (variant.name === 'hellSpawn' && m.mesh) {
+        const duration = attackAction.getClip().duration;
+        const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
+        setTimeout(() => { if (m.alive) createHellSpawn(m.mesh.position); }, duration * pts * 1000);
+        showMessage(`<b>${m.name}</b> unleashes the Hell Spawn!`, 2000);
       }
     }
   }

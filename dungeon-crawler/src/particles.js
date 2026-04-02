@@ -673,3 +673,57 @@ export function createLizardVenomSpit(position) {
         setTimeout(() => { proton.removeEmitter(emitter); }, 2000);
     }, 400);
 }
+
+export function createHellSpawn(position) {
+    if (!proton) return;
+
+    // A two-phase hellish eruption:
+    // 1. A burst of deep red flames.
+    // 2. A swirling vortex of dark purple rot-energy.
+
+    // --- Phase 1: Red Flames ---
+    const flames = new Proton.Emitter();
+    flames.rate = new Proton.Rate(new Proton.Span(20, 30), new Proton.Span(0.015));
+    flames.addInitialize(new Proton.Mass(1));
+    flames.addInitialize(new Proton.Radius(0.5, 1.2));
+    flames.addInitialize(new Proton.Life(0.8, 1.5));
+    flames.addInitialize(new Proton.V(2.5, new Proton.Vector3D(0, 1, 0), 160));
+    const matFlames = new THREE.SpriteMaterial({
+        map: sparkTexture, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false
+    });
+    flames.addInitialize(new Proton.Body(new THREE.Sprite(matFlames)));
+    if (position) flames.addInitialize(new Proton.Position(new Proton.PointZone(position.x, position.y + 0.2, position.z)));
+    flames.addBehaviour(new Proton.Alpha(1, 0));
+    flames.addBehaviour(new Proton.Scale(2.5, 0.5));
+    flames.addBehaviour(new Proton.Color('#ff0000', '#660000'));
+    flames.addBehaviour(new Proton.RandomDrift(1.2, 0.8, 1.2, 0.05));
+
+    // --- Phase 2: Purple Rot Swirl ---
+    const rot = new Proton.Emitter();
+    rot.rate = new Proton.Rate(new Proton.Span(15, 25), new Proton.Span(0.03));
+    rot.addInitialize(new Proton.Mass(1));
+    rot.addInitialize(new Proton.Radius(0.3, 0.8));
+    rot.addInitialize(new Proton.Life(1.5, 2.5));
+    rot.addInitialize(new Proton.V(1.2, new Proton.Vector3D(0, 1, 0), 180));
+    const matRot = new THREE.SpriteMaterial({
+        map: sparkTexture, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false
+    });
+    rot.addInitialize(new Proton.Body(new THREE.Sprite(matRot)));
+    if (position) rot.addInitialize(new Proton.Position(new Proton.PointZone(position.x, position.y + 0.8, position.z)));
+    rot.addBehaviour(new Proton.Alpha(0.6, 0));
+    rot.addBehaviour(new Proton.Scale(1.8, 0.2));
+    rot.addBehaviour(new Proton.Color('#8800ff', '#440066')); // Deep purple/rot color
+    rot.addBehaviour(new Proton.RandomDrift(2.0, 1.5, 2.0, 0.06));
+
+    flames.emit(); proton.addEmitter(flames);
+    rot.emit(); proton.addEmitter(rot);
+
+    setTimeout(() => { flames.stopEmit(); }, 500);
+    setTimeout(() => {
+        rot.stopEmit();
+        setTimeout(() => {
+            proton.removeEmitter(flames);
+            proton.removeEmitter(rot);
+        }, 3000);
+    }, 1200);
+}
