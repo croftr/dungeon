@@ -1,5 +1,5 @@
 import { getItemDef } from './items.js';
-import { renderItemIcon, attachTooltipListeners, hideTooltip, useQuickslotPotion, rotateLoadout, clearAutoAttackTimers, clearAutoRangeAttackTimers, updateEffectiveStats } from './equipment.js';
+import { renderItemIcon, attachTooltipListeners, hideTooltip, rotateLoadout, clearAutoAttackTimers, clearAutoRangeAttackTimers, updateEffectiveStats } from './equipment.js';
 import { addLogEntry } from './battle-log.js';
 import { isInCombat, playGoldSound } from './audio.js';
 import { showMessage } from './minimap.js';
@@ -359,9 +359,19 @@ function refreshMember(m) {
   const lhEl = document.getElementById(`item-lh-${i}`);
   const rhEl = document.getElementById(`item-rh-${i}`);
   const skEl = document.getElementById(`item-sk-${i}`);
+  const sk2El = document.getElementById(`item-sk2-${i}`);
+  const sk3El = document.getElementById(`item-sk3-${i}`);
+  const sk4El = document.getElementById(`item-sk4-${i}`);
+  const sk5El = document.getElementById(`item-sk5-${i}`);
+  const sk6El = document.getElementById(`item-sk6-${i}`);
   const lhSlot = document.getElementById(`slot-lh-${i}`);
   const rhSlot = document.getElementById(`slot-rh-${i}`);
   const skSlot = document.getElementById(`slot-sk-${i}`);
+  const sk2Slot = document.getElementById(`slot-sk2-${i}`);
+  const sk3Slot = document.getElementById(`slot-sk3-${i}`);
+  const sk4Slot = document.getElementById(`slot-sk4-${i}`);
+  const sk5Slot = document.getElementById(`slot-sk5-${i}`);
+  const sk6Slot = document.getElementById(`slot-sk6-${i}`);
 
   // Use m.equipment as the authoritative source when it exists (after the equipment
   // modal has initialised it), otherwise fall back to the initial hand-assignment strings.
@@ -374,6 +384,11 @@ function refreshMember(m) {
   const skName = m.equipment
     ? (m.equipment.skill?.name ?? null)
     : null;
+  const sk2Name = m.equipment?.skill2?.name ?? null;
+  const sk3Name = m.equipment?.skill3?.name ?? null;
+  const sk4Name = m.equipment?.skill4?.name ?? null;
+  const sk5Name = m.equipment?.skill5?.name ?? null;
+  const sk6Name = m.equipment?.skill6?.name ?? null;
 
   let lhDef = null;
   let rhDef = null;
@@ -394,6 +409,11 @@ function refreshMember(m) {
   if (lhEl) renderItemIcon(lhName ? { name: lhName } : null, lhEl);
   if (rhEl) renderItemIcon((lhBothHands ? lhName : rhName) ? { name: lhBothHands ? lhName : rhName } : null, rhEl);
   if (skEl) renderItemIcon(m.equipment?.skill ?? null, skEl);
+  if (sk2El) renderItemIcon(m.equipment?.skill2 ?? null, sk2El);
+  if (sk3El) renderItemIcon(m.equipment?.skill3 ?? null, sk3El);
+  if (sk4El) renderItemIcon(m.equipment?.skill4 ?? null, sk4El);
+  if (sk5El) renderItemIcon(m.equipment?.skill5 ?? null, sk5El);
+  if (sk6El) renderItemIcon(m.equipment?.skill6 ?? null, sk6El);
 
   if (!m.cooldownTimers) m.cooldownTimers = {};
 
@@ -478,28 +498,93 @@ function refreshMember(m) {
     }
   }
 
-  // ── Quickslot button (active potion slot) ──
-  const qsBtn = document.getElementById(`qs-${i}-0`);
-  if (qsBtn) {
-    const item = m.quickslots?.[0] ?? null;
-    qsBtn.classList.toggle('qs-occupied', !!item);
-    // Key label is the rotate-loadout key (1-4 per member)
-    const rotateKey = i + 1;
-    const hasAltItems = !!(m.loadoutB?.leftHand || m.loadoutB?.rightHand || m.loadoutB?.potion || m.loadoutB?.skill);
-    if (item) {
-      const def = getItemDef(item.name);
-      const iconSrc = def?.icon ?? null;
-      if (iconSrc) {
-        qsBtn.innerHTML = `<img src="${asset(iconSrc)}" draggable="false" /><span class="qs-key">${rotateKey}</span>`;
-      } else {
-        qsBtn.innerHTML = `<span class="qs-key" style="font-size:6px">${item.name.substring(0, 3)}</span>`;
-      }
-    } else {
-      qsBtn.innerHTML = `<span class="qs-key">${rotateKey}</span>`;
+  if (sk2Slot) {
+    sk2Slot.classList.toggle('slot-empty', !sk2Name);
+    const sk2Def = sk2Name ? getSkillOrSpellDef(sk2Name) : null;
+    const sk2DelaySec = sk2Def?.delay ?? 0;
+    const lastUsed2 = lastAttackTimes[`${i}-skill-${sk2Name}`];
+    const sk2CanUse = lastUsed2 === undefined || (performance.now() - lastUsed2) >= (sk2DelaySec * 1000);
+    sk2Slot.classList.toggle('slot-cooling-down', !!sk2Name && !sk2CanUse);
+    const sk2NoMp = (sk2Def?.mpCost ?? 0) > 0 && m.mp < sk2Def.mpCost;
+    sk2Slot.classList.toggle('slot-no-mp', sk2NoMp);
+    if (sk2Name && !sk2CanUse && !m.cooldownTimers['skill2']) {
+      const remaining = (sk2DelaySec * 1000) - (performance.now() - lastUsed2);
+      m.cooldownTimers['skill2'] = setTimeout(() => {
+        m.cooldownTimers['skill2'] = null;
+        refreshMember(m);
+      }, remaining);
     }
-    // Show an indicator dot if loadout B has any items
-    if (hasAltItems) {
-      qsBtn.innerHTML += `<span class="qs-alt-dot" title="Loadout B has items — press ${rotateKey} (or Space for all) to rotate"></span>`;
+  }
+
+  if (sk3Slot) {
+    sk3Slot.classList.toggle('slot-empty', !sk3Name);
+    const sk3Def = sk3Name ? getSkillOrSpellDef(sk3Name) : null;
+    const sk3DelaySec = sk3Def?.delay ?? 0;
+    const lastUsed3 = lastAttackTimes[`${i}-skill-${sk3Name}`];
+    const sk3CanUse = lastUsed3 === undefined || (performance.now() - lastUsed3) >= (sk3DelaySec * 1000);
+    sk3Slot.classList.toggle('slot-cooling-down', !!sk3Name && !sk3CanUse);
+    const sk3NoMp = (sk3Def?.mpCost ?? 0) > 0 && m.mp < sk3Def.mpCost;
+    sk3Slot.classList.toggle('slot-no-mp', sk3NoMp);
+    if (sk3Name && !sk3CanUse && !m.cooldownTimers['skill3']) {
+      const remaining = (sk3DelaySec * 1000) - (performance.now() - lastUsed3);
+      m.cooldownTimers['skill3'] = setTimeout(() => {
+        m.cooldownTimers['skill3'] = null;
+        refreshMember(m);
+      }, remaining);
+    }
+  }
+
+  if (sk4Slot) {
+    sk4Slot.classList.toggle('slot-empty', !sk4Name);
+    const sk4Def = sk4Name ? getSkillOrSpellDef(sk4Name) : null;
+    const sk4DelaySec = sk4Def?.delay ?? 0;
+    const lastUsed4 = lastAttackTimes[`${i}-skill-${sk4Name}`];
+    const sk4CanUse = lastUsed4 === undefined || (performance.now() - lastUsed4) >= (sk4DelaySec * 1000);
+    sk4Slot.classList.toggle('slot-cooling-down', !!sk4Name && !sk4CanUse);
+    const sk4NoMp = (sk4Def?.mpCost ?? 0) > 0 && m.mp < sk4Def.mpCost;
+    sk4Slot.classList.toggle('slot-no-mp', sk4NoMp);
+    if (sk4Name && !sk4CanUse && !m.cooldownTimers['skill4']) {
+      const remaining = (sk4DelaySec * 1000) - (performance.now() - lastUsed4);
+      m.cooldownTimers['skill4'] = setTimeout(() => {
+        m.cooldownTimers['skill4'] = null;
+        refreshMember(m);
+      }, remaining);
+    }
+  }
+
+  if (sk5Slot) {
+    sk5Slot.classList.toggle('slot-empty', !sk5Name);
+    const sk5Def = sk5Name ? getSkillOrSpellDef(sk5Name) : null;
+    const sk5DelaySec = sk5Def?.delay ?? 0;
+    const lastUsed5 = lastAttackTimes[`${i}-skill-${sk5Name}`];
+    const sk5CanUse = lastUsed5 === undefined || (performance.now() - lastUsed5) >= (sk5DelaySec * 1000);
+    sk5Slot.classList.toggle('slot-cooling-down', !!sk5Name && !sk5CanUse);
+    const sk5NoMp = (sk5Def?.mpCost ?? 0) > 0 && m.mp < sk5Def.mpCost;
+    sk5Slot.classList.toggle('slot-no-mp', sk5NoMp);
+    if (sk5Name && !sk5CanUse && !m.cooldownTimers['skill5']) {
+      const remaining = (sk5DelaySec * 1000) - (performance.now() - lastUsed5);
+      m.cooldownTimers['skill5'] = setTimeout(() => {
+        m.cooldownTimers['skill5'] = null;
+        refreshMember(m);
+      }, remaining);
+    }
+  }
+
+  if (sk6Slot) {
+    sk6Slot.classList.toggle('slot-empty', !sk6Name);
+    const sk6Def = sk6Name ? getSkillOrSpellDef(sk6Name) : null;
+    const sk6DelaySec = sk6Def?.delay ?? 0;
+    const lastUsed6 = lastAttackTimes[`${i}-skill-${sk6Name}`];
+    const sk6CanUse = lastUsed6 === undefined || (performance.now() - lastUsed6) >= (sk6DelaySec * 1000);
+    sk6Slot.classList.toggle('slot-cooling-down', !!sk6Name && !sk6CanUse);
+    const sk6NoMp = (sk6Def?.mpCost ?? 0) > 0 && m.mp < sk6Def.mpCost;
+    sk6Slot.classList.toggle('slot-no-mp', sk6NoMp);
+    if (sk6Name && !sk6CanUse && !m.cooldownTimers['skill6']) {
+      const remaining = (sk6DelaySec * 1000) - (performance.now() - lastUsed6);
+      m.cooldownTimers['skill6'] = setTimeout(() => {
+        m.cooldownTimers['skill6'] = null;
+        refreshMember(m);
+      }, remaining);
     }
   }
 }
@@ -805,7 +890,7 @@ export function flashPortraitCrit(index) {
 
 /** Float a red damage number above the member's portrait when they are hit. */
 export function showMemberDamage(memberIndex, damage, isCrit) {
-  const memberTop = document.querySelector(`#member-${memberIndex} .member-top`);
+  const memberTop = document.querySelector(`#member-${memberIndex} .member-main`);
   if (!memberTop) return;
   const popup = document.createElement('span');
   popup.className = 'damage-popup damage-popup--incoming' +
@@ -817,7 +902,7 @@ export function showMemberDamage(memberIndex, damage, isCrit) {
 
 /** Float a green text above the member's portrait to indicate healing. */
 export function showMemberHeal(memberIndex, amount) {
-  const memberTop = document.querySelector(`#member-${memberIndex} .member-top`);
+  const memberTop = document.querySelector(`#member-${memberIndex} .member-main`);
   if (!memberTop) return;
   const popup = document.createElement('span');
   popup.className = 'damage-popup damage-popup--heal damage-popup--incoming';

@@ -122,7 +122,7 @@ const SLOT_KEYS = [
   'leftHand', 'rightHand',
   'belt', 'hands',
   'ring1', 'ring2',
-  'legs', 'feet', 'ammo', 'skill',
+  'legs', 'feet', 'ammo', 'skill', 'skill2', 'skill3', 'skill4', 'skill5', 'skill6',
 ];
 
 // Item types that can be placed in quick-use slots.
@@ -259,8 +259,15 @@ export function extendPartyData() {
     if (m.xp === undefined) m.xp = 0;
     if (!m.statBonuses) m.statBonuses = { strength: 0, dexterity: 0, vitality: 0, intelligence: 0, resilience: 0 };
     if (m.pendingLevelUp === undefined) m.pendingLevelUp = false;
-    if (!m.quickslots) m.quickslots = [null];
-    if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null, skill: null };
+    if (!m.quickslots) m.quickslots = [null, null, null];
+    else while (m.quickslots.length < 3) m.quickslots.push(null);
+    if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, skill: null };
+    else {
+      // Migrate old potion fields out of loadoutB (potions now live in action slots)
+      delete m.loadoutB.potion;
+      delete m.loadoutB.potion2;
+      delete m.loadoutB.potion3;
+    }
     // Skill tree fields
     if (!m.acquiredNodes) m.acquiredNodes = ['start'];
     if (m.pendingNodeChoice === undefined) m.pendingNodeChoice = null;
@@ -271,6 +278,17 @@ export function extendPartyData() {
     }
 
     if (m.equipment) {
+      if (m.equipment.skill2 === undefined) m.equipment.skill2 = null;
+      if (m.equipment.skill3 === undefined) m.equipment.skill3 = null;
+      if (m.equipment.skill4 === undefined) m.equipment.skill4 = null;
+      if (m.equipment.skill5 === undefined) m.equipment.skill5 = null;
+      if (m.equipment.skill6 === undefined) m.equipment.skill6 = null;
+      // Migrate old quickslots[0..2] → skill4/5/6 (one-time migration)
+      if (m.quickslots) {
+        if (!m.equipment.skill4 && m.quickslots[0]) { m.equipment.skill4 = m.quickslots[0]; m.quickslots[0] = null; }
+        if (!m.equipment.skill5 && m.quickslots[1]) { m.equipment.skill5 = m.quickslots[1]; m.quickslots[1] = null; }
+        if (!m.equipment.skill6 && m.quickslots[2]) { m.equipment.skill6 = m.quickslots[2]; m.quickslots[2] = null; }
+      }
       updateEffectiveStats(m);
       return; // Already initialized
     }
@@ -429,6 +447,7 @@ function renderModal(memberIndex) {
   // We show the name in full on the primary (leftHand) slot and faded on rightHand.
   SLOT_KEYS.forEach((key) => {
     const el = document.getElementById(`pd-${key}`);
+    if (!el) return;
     const item = m.equipment[key];
     const isBothHands = item?.slot === 'bothHands';
     const isSecondary = isBothHands && key === 'rightHand';
@@ -438,21 +457,10 @@ function renderModal(memberIndex) {
     renderItemIcon(item, pdItemEl);
   });
 
-  // ── Quickslots (paperdoll) ──
-  [0].forEach(qsi => {
-    const el = document.getElementById(`pd-quickslot-${qsi}`);
-    if (!el) return;
-    const item = m.quickslots?.[qsi] ?? null;
-    el.classList.toggle('occupied', !!item);
-    const pdItemEl = el.querySelector('.pd-item') || el;
-    renderItemIcon(item, pdItemEl);
-  });
-
   // ── Loadout B slots ──
-  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null, skill: null };
+  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, skill: null };
   const lhbEl = document.getElementById('pd-lhB');
   const rhbEl = document.getElementById('pd-rhB');
-  const potbEl = document.getElementById('pd-potB');
   const skbEl = document.getElementById('pd-skB');
   if (lhbEl) {
     lhbEl.classList.toggle('occupied', !!m.loadoutB.leftHand);
@@ -464,10 +472,6 @@ function renderModal(memberIndex) {
     rhbEl.classList.toggle('both-hands-secondary', lhbIsBothHands);
     renderItemIcon(lhbIsBothHands ? m.loadoutB.leftHand : m.loadoutB.rightHand,
       rhbEl.querySelector('.pd-item') || rhbEl);
-  }
-  if (potbEl) {
-    potbEl.classList.toggle('occupied', !!m.loadoutB.potion);
-    renderItemIcon(m.loadoutB.potion, potbEl.querySelector('.pd-item') || potbEl);
   }
   if (skbEl) {
     skbEl.classList.toggle('occupied', !!m.loadoutB.skill);
@@ -1390,19 +1394,16 @@ export function useQuickslotPotion(memberIndex, slotIdx) {
 export function rotateLoadout(memberIndex) {
   const m = party[memberIndex];
   if (!m || m.isEmpty || m.isDead) return;
-  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null, skill: null };
-  if (!m.quickslots) m.quickslots = [null];
+  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, skill: null };
 
   const activeLeft = m.equipment.leftHand;
   const isActiveBothHands = activeLeft?.slot === 'bothHands';
   // For bothHands, rightHand is just a mirror — don't save it separately into loadoutB
   const activeRight = isActiveBothHands ? null : m.equipment.rightHand;
-  const activePotion = m.quickslots[0] ?? null;
   const activeSkill = m.equipment.skill ?? null;
 
   const newLeft = m.loadoutB.leftHand ?? null;
   const newRight = m.loadoutB.rightHand ?? null;
-  const newPotion = m.loadoutB.potion ?? null;
   const newSkill = m.loadoutB.skill ?? null;
 
   // Apply new active loadout
@@ -1412,13 +1413,11 @@ export function rotateLoadout(memberIndex) {
   } else {
     m.equipment.rightHand = newRight;
   }
-  m.quickslots[0] = newPotion;
   m.equipment.skill = newSkill;
 
   // Store old active into loadout B
   m.loadoutB.leftHand = activeLeft ?? null;
   m.loadoutB.rightHand = activeRight ?? null;
-  m.loadoutB.potion = activePotion;
   m.loadoutB.skill = activeSkill;
 
   updateEffectiveStats(m);
@@ -1431,7 +1430,7 @@ export function rotateLoadout(memberIndex) {
 function _assignLoadoutBLeft(memberIndex, invIndex) {
   const m = party[memberIndex];
   if (!m || m.isEmpty) return;
-  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null, skill: null };
+  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, skill: null };
   const item = m.inventory[invIndex];
   if (!item) return;
   const def = getItemDef(item.name);
@@ -1457,7 +1456,7 @@ function _assignLoadoutBLeft(memberIndex, invIndex) {
 function _assignLoadoutBRight(memberIndex, invIndex) {
   const m = party[memberIndex];
   if (!m || m.isEmpty) return;
-  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null, skill: null };
+  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, skill: null };
   const item = m.inventory[invIndex];
   if (!item) return;
   const def = getItemDef(item.name);
@@ -1478,7 +1477,7 @@ function _assignLoadoutBRight(memberIndex, invIndex) {
 function _assignLoadoutBPotion(memberIndex, invIndex) {
   const m = party[memberIndex];
   if (!m || m.isEmpty) return;
-  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null, skill: null };
+  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, skill: null };
   const item = m.inventory[invIndex];
   if (!item) return;
   const displaced = m.loadoutB.potion;
@@ -1495,7 +1494,7 @@ function _assignLoadoutBPotion(memberIndex, invIndex) {
 function _assignLoadoutBSkill(memberIndex, invIndex) {
   const m = party[memberIndex];
   if (!m || m.isEmpty) return;
-  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, potion: null, skill: null };
+  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, skill: null };
   const item = m.inventory[invIndex];
   if (!item) return;
   const def = getItemDef(item.name);
@@ -1681,19 +1680,8 @@ function onInventoryCellClick(e) {
   const def = getItemDef(item.name);
 
   if (def?.type && QUICKSLOT_TYPES.includes(def.type)) {
-    // Left-click moves into the first empty quickslot (like equipping).
-    // To drink, use right-click → Drink, a shortcut key, or the party panel button.
-    const m2 = party[activeCharIndex];
-    if (!m2.quickslots) m2.quickslots = [null];
-    const freeSlot = m2.quickslots.findIndex(s => !s);
-    const targetSlot = freeSlot !== -1 ? freeSlot : 0;
-    playItemSound(item.name, 'potion');
-    const displaced = m2.quickslots[targetSlot];
-    m2.quickslots[targetSlot] = item;
-    m2.inventory[invIndex] = displaced;
-    showMessage(`${item.name} assigned to Quick Slot ${targetSlot + 1}.`);
-    renderModal(activeCharIndex);
-    refreshPartyCards();
+    // Potions stay in inventory — equip them via an action slot (left-click an empty slot on the party panel).
+    showMessage(`${item.name} — equip via an action slot on the party panel.`);
     return;
   }
 
@@ -1922,14 +1910,22 @@ function _showSkillSwitchMenu(x, y, memberIndex, mode, hand = null) {
   const m = party[memberIndex];
   if (!m || m.isEmpty) return;
 
-  let items = mode === 'skill' ? (m.skills || []) : (m.spells || []);
-  if (mode === 'skill') {
-    items = items.filter(s => {
-      const def = SKILLS_DATA[s.name];
-      return !def?.isPassive;
-    });
+  let items;
+  if (mode === 'unified') {
+    // Combined list: non-passive skills + all spells
+    const skills = (m.skills || []).filter(s => !SKILLS_DATA[s.name]?.isPassive);
+    const spells = m.spells || [];
+    items = [...skills, ...spells];
+  } else if (mode === 'skill') {
+    items = (m.skills || []).filter(s => !SKILLS_DATA[s.name]?.isPassive);
+  } else {
+    items = m.spells || [];
   }
-  if (!items.length) return;
+
+  const targetSlot = hand ?? 'skill';
+  const occupied = hand ? !!m.equipment?.[targetSlot] : false;
+  // Show menu only if there are items to switch to, or if slot is occupied (for Clear Slot)
+  if (!items.length && !occupied) return;
 
   _skillSwMenuCtx = { memberIndex, mode, hand };
 
@@ -1938,11 +1934,51 @@ function _showSkillSwitchMenu(x, y, memberIndex, mode, hand = null) {
 
   const header = document.createElement('div');
   header.className = 'skill-sw-header';
-  header.textContent = mode === 'skill' ? 'Switch Skill' : 'Switch Spell';
+  header.textContent = mode === 'unified' ? 'Equip Skill / Spell' : (mode === 'skill' ? 'Switch Skill' : 'Switch Spell');
   menu.appendChild(header);
 
-  const currentName = mode === 'skill'
-    ? m.equipment?.skill?.name
+  // Clear Slot option — shown when the slot has something in it
+  if (occupied) {
+    const clearRow = document.createElement('div');
+    clearRow.className = 'skill-sw-item skill-sw-clear';
+    const clearSpan = document.createElement('span');
+    clearSpan.textContent = '✕  Clear Slot';
+    clearRow.appendChild(clearSpan);
+    clearRow.addEventListener('click', () => {
+      const ctx = _skillSwMenuCtx;
+      if (!ctx) return;
+      const member = party[ctx.memberIndex];
+      if (!member) return;
+      const slot = ctx.hand ?? 'skill';
+      const existing = member.equipment[slot];
+      if (existing) {
+        // If it's a potion, return to inventory
+        if (getItemDef(existing.name)?.type === 'potion') {
+          const freeSlot = member.inventory.indexOf(null);
+          if (freeSlot !== -1) {
+            member.inventory[freeSlot] = existing;
+            showMessage(`${existing.name} returned to inventory.`);
+          } else {
+            showMessage('Inventory full — cannot clear slot!');
+            _hideSkillSwitchMenu();
+            return;
+          }
+        }
+        member.equipment[slot] = null;
+        refreshPartyCards();
+      }
+      _hideSkillSwitchMenu();
+    });
+    menu.appendChild(clearRow);
+    if (items.length) {
+      const div = document.createElement('div');
+      div.className = 'skill-sw-divider';
+      menu.appendChild(div);
+    }
+  }
+
+  const currentName = (mode === 'unified' || mode === 'skill')
+    ? m.equipment?.[targetSlot]?.name
     : (hand ? m.equipment?.[hand]?.name : null);
 
   items.forEach(item => {
@@ -1969,8 +2005,21 @@ function _showSkillSwitchMenu(x, y, memberIndex, mode, hand = null) {
     }
 
     row.addEventListener('click', () => {
-      if (mode === 'skill') {
-        m.equipment.skill = { name: item.name, slot: 'skill', icon: item.icon };
+      if (mode === 'unified') {
+        const isSpell = m.spells?.some(s => s.name === item.name);
+        const slot = _skillSwMenuCtx.hand ?? 'skill';
+        // If replacing a potion, return it to inventory first
+        const prev = m.equipment[slot];
+        if (prev && getItemDef(prev.name)?.type === 'potion') {
+          const freeSlot = m.inventory.indexOf(null);
+          if (freeSlot !== -1) m.inventory[freeSlot] = prev;
+        }
+        m.equipment[slot] = isSpell
+          ? { name: item.name, slot: 'spell' }
+          : { name: item.name, slot: 'skill', icon: item.icon };
+      } else if (mode === 'skill') {
+        const slot = _skillSwMenuCtx.hand ?? 'skill';
+        m.equipment[slot] = { name: item.name, slot: 'skill', icon: item.icon };
       } else {
         // Equip the selected spell directly into the hand that was right-clicked
         const targetHand = _skillSwMenuCtx.hand;
@@ -2500,7 +2549,7 @@ function _executePartySpell(caster, casterIndex, hand, spellDef) {
   setMp(caster.id, caster.mp - spellDef.mpCost);
 
   const isSpellSlot = (hand !== 'skill') && spellDef.slot === 'spell';
-  const baseKey = (hand === 'skill') ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
+  const baseKey = (hand === 'skill' || hand === 'skill2' || hand === 'skill3' || hand === 'skill4' || hand === 'skill5' || hand === 'skill6') ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
   const timeKey = isSpellSlot ? `${baseKey}-${spellDef.name}` : baseKey;
   lastAttackTimes[timeKey] = performance.now();
 
@@ -2551,7 +2600,7 @@ function _executeAoEDebuffSpell(caster, casterIndex, hand, spellDef) {
   setMp(caster.id, caster.mp - spellDef.mpCost);
 
   const isSpellSlot = (hand !== 'skill') && spellDef.slot === 'spell';
-  const baseKey = (hand === 'skill') ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
+  const baseKey = (hand === 'skill' || hand === 'skill2' || hand === 'skill3' || hand === 'skill4' || hand === 'skill5' || hand === 'skill6') ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
   const timeKey = isSpellSlot ? `${baseKey}-${spellDef.name}` : baseKey;
   lastAttackTimes[timeKey] = performance.now();
 
@@ -2610,7 +2659,7 @@ function _executeLineSpell(caster, casterIndex, hand, spellDef) {
   setMp(caster.id, caster.mp - spellDef.mpCost);
 
   const isSpellSlot = (hand !== 'skill') && spellDef.slot === 'spell';
-  const baseKey = (hand === 'skill') ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
+  const baseKey = (hand === 'skill' || hand === 'skill2' || hand === 'skill3' || hand === 'skill4' || hand === 'skill5' || hand === 'skill6') ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
   const timeKey = isSpellSlot ? `${baseKey}-${spellDef.name}` : baseKey;
   lastAttackTimes[timeKey] = performance.now();
 
@@ -2672,7 +2721,7 @@ function _executePartyMemberSpell(caster, casterIndex, hand, spellDef, target) {
   // Spells include the spell name so switching spells in the same hand doesn't
   // inherit the previous spell's cooldown.
   const isSpellSlot = (hand !== 'skill') && spellDef.slot === 'spell';
-  const baseKey = (hand === 'skill') ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
+  const baseKey = (hand === 'skill' || hand === 'skill2' || hand === 'skill3' || hand === 'skill4' || hand === 'skill5' || hand === 'skill6') ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
   const timeKey = isSpellSlot ? `${baseKey}-${spellDef.name}` : baseKey;
   lastAttackTimes[timeKey] = performance.now();
 
@@ -2878,17 +2927,20 @@ export function useHand(memberIndex, hand, silent = false) {
     return;
   }
 
-  const slotKey = hand === 'left' ? 'leftHand' : 'rightHand';
+  const isSkillSlotHand = hand === 'skill' || hand === 'skill2' || hand === 'skill3' || hand === 'skill4' || hand === 'skill5' || hand === 'skill6';
+  const slotKeyMap = { left: 'leftHand', right: 'rightHand', skill: 'skill', skill2: 'skill2', skill3: 'skill3', skill4: 'skill4', skill5: 'skill5', skill6: 'skill6' };
+  const slotKey = slotKeyMap[hand] ?? 'leftHand';
   const item = m.equipment?.[slotKey];
 
   const def = item ? getItemDef(item.name) : null;
 
   // Empty hand → punch; items with no attackType (e.g. Shield) → no action
-  const attackType = item ? (def?.attackType ?? null) : ACTIONS.PUNCH;
+  // Skill slots with empty item show "nothing equipped" message (handled in useSkillSlot)
+  const attackType = item ? (def?.attackType ?? null) : (isSkillSlotHand ? null : ACTIONS.PUNCH);
   if (!attackType) return;
 
   // Cooldown validation
-  const isBothHands = def?.slot === 'bothHands';
+  const isBothHands = !isSkillSlotHand && def?.slot === 'bothHands';
   let delaySec = def?.delay ?? 2;
 
   // Whirlwind buff: double attack speed (half delay)
@@ -2911,8 +2963,11 @@ export function useHand(memberIndex, hand, silent = false) {
   // one cooldown, we only care about its primary slot timer (left).
   // Spells include the spell name in the key so switching spells in the same
   // hand slot doesn't inherit the previous spell's cooldown.
+  // Skill slot spells all share a per-spell key regardless of which skill slot.
   const isSpellSlot = def?.slot === 'spell';
-  const baseKey = isBothHands ? `${memberIndex}-left` : `${memberIndex}-${hand}`;
+  const baseKey = isBothHands ? `${memberIndex}-left`
+    : isSkillSlotHand ? `${memberIndex}-skill`
+    : `${memberIndex}-${hand}`;
   const timeKey = isSpellSlot ? `${baseKey}-${item.name}` : baseKey;
   const now = performance.now();
   if (lastAttackTimes[timeKey]) {
@@ -3321,7 +3376,149 @@ let _entangleExpireTimer = null;
 let _sunderArmorCooldownEnd = 0;
 let _sunderArmorExpireTimer = null;
 
+// ── Action Slot Picker ────────────────────────────────────────────────────────
+let _pickerCtx = null; // { memberIndex, slotKey }
+
+function openActionSlotPicker(memberIndex, slotKey) {
+  const m = party[memberIndex];
+  if (!m || m.isEmpty || m.isDead) return;
+  _pickerCtx = { memberIndex, slotKey };
+
+  const overlay = document.getElementById('action-slot-picker-overlay');
+  const title = document.getElementById('action-slot-picker-title');
+  const body = document.getElementById('action-slot-picker-body');
+  if (!overlay || !body) return;
+
+  title.textContent = `${m.name} — Equip Action Slot`;
+  body.innerHTML = '';
+
+  const skills = (m.skills || []).filter(s => !SKILLS_DATA[s.name]?.isPassive);
+  const spells = m.spells || [];
+  const potions = (m.inventory || []).filter(item => item && getItemDef(item.name)?.type === 'potion');
+
+  function addSection(label, items) {
+    if (!items.length) return;
+    const hdr = document.createElement('div');
+    hdr.className = 'asp-section-header';
+    hdr.textContent = label;
+    body.appendChild(hdr);
+    items.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'asp-item';
+      const def = item.slot === 'spell' ? null : getItemDef(item.name);
+      const iconSrc = item.icon || def?.icon || null;
+      if (iconSrc) {
+        const img = document.createElement('img');
+        img.src = asset(iconSrc);
+        img.alt = item.name;
+        row.appendChild(img);
+      }
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = item.name;
+      row.appendChild(nameSpan);
+      row.addEventListener('click', () => {
+        const ctx = _pickerCtx;
+        if (!ctx) return;
+        const member = party[ctx.memberIndex];
+        if (!member) return;
+        const isPotion = getItemDef(item.name)?.type === 'potion';
+        if (isPotion) {
+          // Remove from inventory and place in action slot; displace existing to inventory
+          const invIdx = member.inventory.findIndex(inv => inv && inv.name === item.name);
+          if (invIdx === -1) { closeActionSlotPicker(); return; }
+          const displaced = member.equipment[ctx.slotKey];
+          member.equipment[ctx.slotKey] = item;
+          member.inventory[invIdx] = displaced; // displaced could be null or a skill ref (just drop it)
+          if (displaced && getItemDef(displaced.name)?.type !== 'potion') {
+            // Skills/spells don't go to inventory — just clear
+            member.inventory[invIdx] = null;
+          }
+        } else {
+          const isSpell = member.spells?.some(s => s.name === item.name);
+          member.equipment[ctx.slotKey] = isSpell
+            ? { name: item.name, slot: 'spell' }
+            : { name: item.name, slot: 'skill', icon: item.icon };
+        }
+        refreshPartyCards();
+        closeActionSlotPicker();
+      });
+      body.appendChild(row);
+    });
+  }
+
+  addSection('Skills', skills);
+  if (skills.length && spells.length) {
+    const div = document.createElement('div');
+    div.className = 'asp-divider';
+    body.appendChild(div);
+  }
+  addSection('Spells', spells);
+  if ((skills.length || spells.length) && potions.length) {
+    const div = document.createElement('div');
+    div.className = 'asp-divider';
+    body.appendChild(div);
+  }
+  addSection('Potions', potions);
+
+  if (!skills.length && !spells.length && !potions.length) {
+    const empty = document.createElement('div');
+    empty.className = 'asp-item';
+    empty.style.color = '#5a4a28';
+    empty.textContent = 'Nothing available to equip.';
+    body.appendChild(empty);
+  }
+
+  overlay.classList.remove('action-slot-picker-hidden');
+}
+
+function closeActionSlotPicker() {
+  _pickerCtx = null;
+  const overlay = document.getElementById('action-slot-picker-overlay');
+  if (overlay) overlay.classList.add('action-slot-picker-hidden');
+}
+
 // ── Dispatcher ────────────────────────────────────────────────────────────────
+function useSkillSlot(memberIndex, slotKey) {
+  const m = party[memberIndex];
+  if (!m || m.isDead) return;
+  if (hasEffectFlag(m, 'preventsAction')) {
+    showMessage(`${m.name} cannot act!`);
+    return;
+  }
+  const item = m.equipment?.[slotKey];
+  if (!item) {
+    // Empty slot — open picker
+    openActionSlotPicker(memberIndex, slotKey);
+    return;
+  }
+  // Check if it's a potion
+  const itemDef = getItemDef(item.name);
+  if (itemDef?.type === 'potion') {
+    if (!itemDef.partyPotion) breakPartyUnseen(`${m.name} uses an item — the cloak of shadow disperses!`);
+    if (_applyPotionEffect(m, item)) {
+      m.equipment[slotKey] = null;
+    }
+    refreshPartyCards();
+    return;
+  }
+  // Check if it's a spell (spells can be placed in any skill slot)
+  const isSpell = m.spells?.some(s => s.name === item.name);
+  if (isSpell) {
+    // Route through useHand using slotKey as the virtual hand
+    useHand(memberIndex, slotKey);
+  } else {
+    // It's a skill — route through useSkill dispatch
+    if (slotKey === 'skill') {
+      useSkill(memberIndex);
+    } else {
+      const orig = m.equipment.skill;
+      m.equipment.skill = item;
+      useSkill(memberIndex);
+      m.equipment.skill = orig;
+    }
+  }
+}
+
 function useSkill(memberIndex) {
   const m = party[memberIndex];
   if (!m || m.isDead) return;
@@ -4177,6 +4374,7 @@ function buildInventoryGrid() {
 function attachPaperdollListeners() {
   SLOT_KEYS.forEach((key) => {
     const el = document.getElementById(`pd-${key}`);
+    if (!el) return;
     el.addEventListener('click', onPaperdollSlotClick);
     el.addEventListener('contextmenu', onPaperdollSlotContextMenu);
     // Hover tooltip for equipped items
@@ -4196,31 +4394,8 @@ function attachPaperdollListeners() {
     });
   });
 
-  // Quickslot divs: click to clear the assignment; tooltip shows assigned item
-  [0].forEach(qsi => {
-    const el = document.getElementById(`pd-quickslot-${qsi}`);
-    if (!el) return;
-    el.addEventListener('click', () => {
-      if (activeCharIndex === null) return;
-      const m = party[activeCharIndex];
-      if (m.isDead) return;
-      if (!m.quickslots) return;
-      const prev = m.quickslots[qsi];
-      if (!prev) return;
-      // Return item to first free inventory slot
-      const freeInvSlot = m.inventory.findIndex(s => !s);
-      if (freeInvSlot !== -1) m.inventory[freeInvSlot] = prev;
-      m.quickslots[qsi] = null;
-      showMessage(`${prev.name} returned to inventory.`);
-      renderModal(activeCharIndex);
-      refreshPartyCards();
-    });
-    attachTooltipListeners(el, () => {
-      if (activeCharIndex === null) return null;
-      return party[activeCharIndex].quickslots?.[qsi] ?? null;
-    });
-  });
 }
+
 
 function attachBarTooltipListeners() {
   const hpRow = document.getElementById('equip-row-hp');
@@ -4298,32 +4473,21 @@ function attachCardListeners() {
       });
     }
 
-    const skSlot = document.getElementById(`slot-sk-${i}`);
-    if (skSlot) {
-      skSlot.addEventListener('click', (e) => {
+    ['skill', 'skill2', 'skill3', 'skill4', 'skill5', 'skill6'].forEach(slotKey => {
+      const suffix = slotKey === 'skill' ? '' : slotKey.replace('skill', '');
+      const slotEl = document.getElementById(`slot-sk${suffix}-${i}`);
+      if (!slotEl) return;
+      slotEl.addEventListener('click', (e) => {
         e.stopPropagation();
-        useSkill(i);
+        useSkillSlot(i, slotKey);
       });
-      skSlot.addEventListener('contextmenu', (e) => {
+      slotEl.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         e.stopPropagation();
         const m = party[i];
         if (!m || m.isEmpty) return;
-        if (m.skills?.length) {
-          _showSkillSwitchMenu(e.clientX, e.clientY, i, 'skill');
-        }
+        _showSkillSwitchMenu(e.clientX, e.clientY, i, 'unified', slotKey);
       });
-    }
-
-    // Quickslot click → use the assigned potion
-    [0, 1].forEach(qsi => {
-      const qsBtn = document.getElementById(`qs-${i}-${qsi}`);
-      if (qsBtn) {
-        qsBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          useQuickslotPotion(i, qsi);
-        });
-      }
     });
 
   });
@@ -4343,7 +4507,7 @@ function attachOverlayListeners() {
   }
 
   // Loadout B slots — clicking a B slot with an item unequips it back to inventory
-  ['pd-lhB', 'pd-rhB', 'pd-potB', 'pd-skB'].forEach(id => {
+  ['pd-lhB', 'pd-rhB', 'pd-skB'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('click', () => {
@@ -4360,9 +4524,6 @@ function attachOverlayListeners() {
       } else if (lb === 'rightHand') {
         item = m.loadoutB.rightHand;
         m.loadoutB.rightHand = null;
-      } else if (lb === 'potion') {
-        item = m.loadoutB.potion;
-        m.loadoutB.potion = null;
       } else if (lb === 'skill') {
         item = m.loadoutB.skill;
         m.loadoutB.skill = null;
@@ -4376,7 +4537,6 @@ function attachOverlayListeners() {
           // Restore on slot if inventory full
           if (lb === 'leftHand') m.loadoutB.leftHand = item;
           else if (lb === 'rightHand') m.loadoutB.rightHand = item;
-          else if (lb === 'potion') m.loadoutB.potion = item;
           else m.loadoutB.skill = item;
           showMessage('Inventory full!');
         }
@@ -4384,6 +4544,14 @@ function attachOverlayListeners() {
       renderModal(activeCharIndex);
       refreshPartyCards();
     });
+  });
+
+  // Action slot picker close button + backdrop click
+  const aspClose = document.getElementById('action-slot-picker-close');
+  if (aspClose) aspClose.addEventListener('click', closeActionSlotPicker);
+  const aspOverlay = document.getElementById('action-slot-picker-overlay');
+  if (aspOverlay) aspOverlay.addEventListener('click', (e) => {
+    if (e.target === aspOverlay) closeActionSlotPicker();
   });
 
   // Close button
@@ -4399,6 +4567,11 @@ function attachOverlayListeners() {
   // Escape key — close context menu first, then modal
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
+      if (_pickerCtx !== null) {
+        e.stopPropagation();
+        closeActionSlotPicker();
+        return;
+      }
       if (_skillSwMenuCtx !== null) {
         e.stopPropagation();
         _hideSkillSwitchMenu();

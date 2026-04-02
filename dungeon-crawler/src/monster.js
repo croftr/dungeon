@@ -2175,7 +2175,7 @@ function _applyMonsterDamage(monster, opts = {}) {
     playShieldBlockSound();
 
     // UI Feedback for block
-    const memberTop = document.querySelector(`#member-${target.id} .member-top`);
+    const memberTop = document.querySelector(`#member-${target.id} .member-main`);
     if (memberTop) {
       const popup = document.createElement('span');
       popup.className = 'damage-popup damage-popup--incoming';
@@ -2235,7 +2235,7 @@ function _applyMonsterDamage(monster, opts = {}) {
 
   // Invincibility — party cannot take damage
   if (isPartyInvincible()) {
-    const memberTop = document.querySelector(`#member-${target.id} .member-top`);
+    const memberTop = document.querySelector(`#member-${target.id} .member-main`);
     if (memberTop) {
       const popup = document.createElement('span');
       popup.className = 'damage-popup damage-popup--incoming';
