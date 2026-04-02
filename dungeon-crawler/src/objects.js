@@ -1897,10 +1897,12 @@ function createWallButton(protrusionDir, userData, axis = 'x') {
     const hitMat = new THREE.MeshBasicMaterial({ visible: false });
     const btn = new THREE.Mesh(hitGeo, hitMat);
     if (axis === 'z') btn.position.z = protrusionDir * 0.04;
-    else              btn.position.x = protrusionDir * 0.04;
+    else btn.position.x = protrusionDir * 0.04;
     btn.position.y = -0.2;
-    btn.userData = { isButton: true, animAxis: axis, animDir: protrusionDir, ...userData,
-                     pressTarget: btn, glowMeshes: [] };
+    btn.userData = {
+        isButton: true, animAxis: axis, animDir: protrusionDir, ...userData,
+        pressTarget: btn, glowMeshes: []
+    };
     interactables.push(btn);
     group.add(btn);
 
@@ -2415,10 +2417,10 @@ function addAlchemyWorkshop(scene, loader, col, row, rotY = 0, offsetX = 0, offs
 let _trainingConsoleOpen = false;
 
 const _TC_PRESETS = {
-    weak:   { strength: 8,  dexterity: 5,  attackSpeed: 0.8, effects: [] },
+    weak: { strength: 8, dexterity: 5, attackSpeed: 0.8, effects: [] },
     medium: { strength: 20, dexterity: 15, attackSpeed: 1.2, effects: [{ effectId: 'poison', chance: 0.2 }] },
     strong: { strength: 35, dexterity: 25, attackSpeed: 2.0, effects: [{ effectId: 'poison', chance: 0.4 }, { effectId: 'rot', chance: 0.2 }] },
-    boss:   { strength: 45, dexterity: 30, attackSpeed: 2.5, effects: [{ effectId: 'poison', chance: 0.5 }, { effectId: 'frozen', chance: 0.15 }, { effectId: 'stun', chance: 0.1 }] },
+    boss: { strength: 45, dexterity: 30, attackSpeed: 2.5, effects: [{ effectId: 'poison', chance: 0.5 }, { effectId: 'frozen', chance: 0.15 }, { effectId: 'stun', chance: 0.1 }] },
 };
 
 function addTrainingConsole(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
@@ -3093,6 +3095,7 @@ function _forge() {
         for (let i = 0; i < 8; i++) _forgeContents[i] = null;
         _forgeContents[8] = matchedResult;
         const isNew = !_knownForgeRecipes.has(matchedResult);
+        _knownForgeRecipes.delete(matchedResult);
         _knownForgeRecipes.add(matchedResult);
         const msg = isNew
             ? `Forging complete! You discovered the recipe for ${matchedResult}!`
@@ -3373,33 +3376,33 @@ function _renderMerchantShop() {
         }
 
         displayAvailable.forEach(name => {
-                const itemDef = getItemDef(name);
-                if (!itemDef) return;
+            const itemDef = getItemDef(name);
+            if (!itemDef) return;
 
-                const slot = document.createElement('div');
-                slot.className = 'merch-slot';
+            const slot = document.createElement('div');
+            slot.className = 'merch-slot';
 
-                const img = document.createElement('img');
-                img.src = asset(itemDef.icon);
-                slot.appendChild(img);
+            const img = document.createElement('img');
+            img.src = asset(itemDef.icon);
+            slot.appendChild(img);
 
-                const price = document.createElement('div');
-                price.className = 'merch-price';
-                price.textContent = `${getItemDef(name)?.value ?? '?'}g`;
-                slot.appendChild(price);
+            const price = document.createElement('div');
+            price.className = 'merch-price';
+            price.textContent = `${getItemDef(name)?.value ?? '?'}g`;
+            slot.appendChild(price);
 
-                slot.addEventListener('click', () => {
-                    playItemSound(name);
-                    _merchantBasket.push(name);
-                    _renderMerchantShop();
-                    _renderMerchantBasket();
-                    _updateMerchantTotals();
-                });
-
-                equip.attachTooltipListeners(slot, () => ({ name }), false, true);
-
-                grid.appendChild(slot);
+            slot.addEventListener('click', () => {
+                playItemSound(name);
+                _merchantBasket.push(name);
+                _renderMerchantShop();
+                _renderMerchantBasket();
+                _updateMerchantTotals();
             });
+
+            equip.attachTooltipListeners(slot, () => ({ name }), false, true);
+
+            grid.appendChild(slot);
+        });
     }
 }
 
@@ -3909,6 +3912,7 @@ function _transmute() {
         for (let i = 0; i < 8; i++) _alchemyContents[i] = null;
         _alchemyContents[8] = matchedResult;
         const isNew = !_knownAlchemyRecipes.has(matchedResult);
+        _knownAlchemyRecipes.delete(matchedResult);
         _knownAlchemyRecipes.add(matchedResult);
         const msg = isNew
             ? `Transmutation successful! You discovered the recipe for ${matchedResult}!`
@@ -4269,7 +4273,7 @@ export function spawnDroppedItem(col, row, itemName, quantity = 1) {
         const sprite = new THREE.Sprite(spriteMat);
 
         const img = new Image();
-        img.src = asset('/icons/gold_coins.png');
+        img.src = asset('/icons/gold_coins.webp');
         img.onload = () => {
             const canvas = document.createElement('canvas');
             canvas.width = 256;
@@ -4429,7 +4433,7 @@ function _renderKnownAlchemyRecipes() {
         list.innerHTML = '<div class="bench-no-recipes">No recipes discovered yet.</div>';
         return;
     }
-    _knownAlchemyRecipes.forEach(resultName => {
+    [..._knownAlchemyRecipes].reverse().forEach(resultName => {
         const recipe = POTIONS_DATA.find(p => p.name === resultName);
         if (!recipe) return;
         const entry = document.createElement('div');
@@ -4450,7 +4454,7 @@ function _renderKnownForgeRecipes() {
         list.innerHTML = '<div class="bench-no-recipes">No recipes discovered yet.</div>';
         return;
     }
-    _knownForgeRecipes.forEach(resultName => {
+    [..._knownForgeRecipes].reverse().forEach(resultName => {
         const recipe = FORGE_DATA.find(r => r.name === resultName);
         if (!recipe) return;
         const entry = document.createElement('div');
@@ -4472,6 +4476,11 @@ function _returnItemToParty(itemName) {
 }
 
 function _autoPopulateAlchemySlots(recipe) {
+    // Move to most recently used
+    _knownAlchemyRecipes.delete(recipe.name);
+    _knownAlchemyRecipes.add(recipe.name);
+    _renderKnownAlchemyRecipes();
+
     // Return any existing ingredient slot contents to inventory
     for (let i = 0; i < 8; i++) {
         if (_alchemyContents[i]) {
@@ -4501,6 +4510,11 @@ function _autoPopulateAlchemySlots(recipe) {
 }
 
 function _autoPopulateForgeSlots(recipe) {
+    // Move to most recently used
+    _knownForgeRecipes.delete(recipe.name);
+    _knownForgeRecipes.add(recipe.name);
+    _renderKnownForgeRecipes();
+
     // Return any existing material slot contents to inventory
     for (let i = 0; i < 8; i++) {
         if (_forgeContents[i]) {
@@ -4534,13 +4548,13 @@ function _autoPopulateForgeSlots(recipe) {
 // ─────────────────────────────────────────────
 
 const _ALCHEMY_PARCHMENT_TYPES = new Set(['minor-potions', 'party-potions', 'potions']);
-const _FORGE_PARCHMENT_TYPES   = new Set(['forge-armour', 'forge-weapons']);
+const _FORGE_PARCHMENT_TYPES = new Set(['forge-armour', 'forge-weapons']);
 
 function _getAlchemyRecipesForParchment(parchmentType) {
     return POTIONS_DATA.filter(p => {
         if (parchmentType === 'minor-potions') return !p.partyPotion && p.name.startsWith('Minor');
         if (parchmentType === 'party-potions') return p.partyPotion;
-        if (parchmentType === 'potions')       return !p.partyPotion && !p.name.startsWith('Minor');
+        if (parchmentType === 'potions') return !p.partyPotion && !p.name.startsWith('Minor');
         return false;
     }).map(p => p.name);
 }
@@ -4548,7 +4562,7 @@ function _getAlchemyRecipesForParchment(parchmentType) {
 function _getForgeRecipesForParchment(parchmentType) {
     return FORGE_DATA.filter(item => {
         if (parchmentType === 'forge-weapons') return _FORGE_WEAPON_NAMES.has(item.name);
-        if (parchmentType === 'forge-armour')  return !_FORGE_WEAPON_NAMES.has(item.name);
+        if (parchmentType === 'forge-armour') return !_FORGE_WEAPON_NAMES.has(item.name);
         return false;
     }).map(item => item.name);
 }
@@ -4556,7 +4570,10 @@ function _getForgeRecipesForParchment(parchmentType) {
 function _submitParchmentToAlchemy(parchmentDef, memberIdx, invIdx) {
     const names = _getAlchemyRecipesForParchment(parchmentDef.parchmentType);
     const newCount = names.filter(n => !_knownAlchemyRecipes.has(n)).length;
-    names.forEach(n => _knownAlchemyRecipes.add(n));
+    names.forEach(n => {
+        _knownAlchemyRecipes.delete(n);
+        _knownAlchemyRecipes.add(n);
+    });
     party[memberIdx].inventory[invIdx] = null;
     _renderKnownAlchemyRecipes();
     _hideAlchemyParchmentPicker();
@@ -4570,7 +4587,10 @@ function _submitParchmentToAlchemy(parchmentDef, memberIdx, invIdx) {
 function _submitParchmentToForge(parchmentDef, memberIdx, invIdx) {
     const names = _getForgeRecipesForParchment(parchmentDef.parchmentType);
     const newCount = names.filter(n => !_knownForgeRecipes.has(n)).length;
-    names.forEach(n => _knownForgeRecipes.add(n));
+    names.forEach(n => {
+        _knownForgeRecipes.delete(n);
+        _knownForgeRecipes.add(n);
+    });
     party[memberIdx].inventory[invIdx] = null;
     _renderKnownForgeRecipes();
     _hideAnvilParchmentPicker();
@@ -4628,7 +4648,7 @@ function _showAlchemyParchmentPicker(x, y) {
     if (ly < 10) ly = y + 20;
     if (ly + ph > vh - 10) ly = vh - ph - 10;
     picker.style.left = lx + 'px';
-    picker.style.top  = ly + 'px';
+    picker.style.top = ly + 'px';
 }
 
 function _hideAlchemyParchmentPicker() {
@@ -4683,7 +4703,7 @@ function _showAnvilParchmentPicker(x, y) {
     if (ly < 10) ly = y + 20;
     if (ly + ph > vh - 10) ly = vh - ph - 10;
     picker.style.left = lx + 'px';
-    picker.style.top  = ly + 'px';
+    picker.style.top = ly + 'px';
 }
 
 function _hideAnvilParchmentPicker() {
@@ -4711,6 +4731,6 @@ registerSaveHandler('world', {
         if (data.merchantStock) setMerchantStock(data.merchantStock);
         if (data.potionMerchantStock) setPotionMerchantStock(data.potionMerchantStock);
         if (data.knownAlchemyRecipes) data.knownAlchemyRecipes.forEach(r => _knownAlchemyRecipes.add(r));
-        if (data.knownForgeRecipes)   data.knownForgeRecipes.forEach(r => _knownForgeRecipes.add(r));
+        if (data.knownForgeRecipes) data.knownForgeRecipes.forEach(r => _knownForgeRecipes.add(r));
     },
 });

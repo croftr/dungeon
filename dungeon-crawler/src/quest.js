@@ -323,7 +323,7 @@ function _showQuestCompleteModal(itemNames, gold) {
         const row = document.createElement('div');
         row.className = 'quest-complete-item';
         const img = document.createElement('img');
-        img.src = asset('/icons/gold_coins.png');
+        img.src = asset('/icons/gold_coins.webp');
         img.alt = 'Gold';
         row.appendChild(img);
         const label = document.createElement('span');
@@ -470,6 +470,6 @@ export function initQuests() {
 import { registerSaveHandler } from './save-registry.js';
 
 registerSaveHandler('quests', {
-  serialize() { return getQuestLog(); },
-  restore(data) { setQuestLog(data); },
+    serialize() { return getQuestLog(); },
+    restore(data) { setQuestLog(data); },
 });

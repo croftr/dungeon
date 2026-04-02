@@ -46,7 +46,7 @@ export function setPartyGold(amount) {
 
 function updateGoldDisplay() {
   const el = document.getElementById('tactics-gold');
-  if (el) el.innerHTML = `<img src="${asset('/icons/gold_coins.png')}" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}`;
+  if (el) el.innerHTML = `<img src="${asset('/icons/gold_coins.webp')}" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}`;
 }
 
 export const lastAttackTimes = {};
@@ -663,7 +663,7 @@ function buildTacticsOverlay() {
           <input type="checkbox" id="tactics-auto-range-attack">
           Auto Range Attack <span class="tactics-toggle-hint">(bow/crossbow users attack automatically)</span>
         </label>
-        <span id="tactics-gold" style="margin-top:10px; display:flex; justify-content:center; align-items:center; font-size:1.1em; color:#ffd700; text-shadow:1px 1px 0 #000;"><img src="${asset('/icons/gold_coins.png')}" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}</span>
+        <span id="tactics-gold" style="margin-top:10px; display:flex; justify-content:center; align-items:center; font-size:1.1em; color:#ffd700; text-shadow:1px 1px 0 #000;"><img src="${asset('/icons/gold_coins.webp')}" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}</span>
       </div>
     </div>
   `;
