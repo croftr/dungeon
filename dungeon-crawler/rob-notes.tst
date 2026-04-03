@@ -1,1 +1,1 @@
-$ ffmpeg -i "pngaaa.com-235683.png" -vf "scale=128:128" "bronze_key.webp"
+ffmpeg -i "pngaaa.com-235683.png" -vf "scale=128:128" "bronze_key.webp"

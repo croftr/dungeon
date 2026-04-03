@@ -121,8 +121,10 @@
         "value": 850,
         "weight": 2.0,
         "statBonuses": {
-            "resilience": 1,
             "vitality": 1
+        },
+        "skillBonuses": {
+            "fire": 1
         }
     }
 ]

@@ -1016,7 +1016,7 @@ function populateTooltip(obj, showBuyPrice = false) {
     }
 
     if (hasBonusList) {
-      const BONUS_LABELS = { all: 'All Skills', healing: 'Healing', buff: 'Buff', debuff: 'Debuff' };
+      const BONUS_LABELS = { all: 'All Skills', healing: 'Healing', buff: 'Buff', debuff: 'Debuff', fire: 'Fire Magic' };
       const listEl = document.getElementById('detail-row-skillbonus');
       let html = '';
 

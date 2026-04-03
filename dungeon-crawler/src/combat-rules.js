@@ -412,6 +412,7 @@ function _itemMagnitudeBonus(name, def, caster) {
   let total = 0;
   total += bonuses['all'] ?? 0;
   if (def.type) total += bonuses[def.type] ?? 0;
+  if (def.element) total += bonuses[def.element] ?? 0;
   if (name) total += bonuses[name] ?? 0;
   return total;
 }
