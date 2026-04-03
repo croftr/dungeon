@@ -8776,3 +8776,51 @@ body.cursor-interact #renderer-canvas {
   color: #888;
   padding-top: 4px;
 }
+
+/* -- PARCHMENT VIEWER OVERLAY ---------------------------------------------- */
+#parchment-viewer-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 10000;
+}
+#parchment-viewer-modal {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center;
+}
+#parchment-viewer-close-bar {
+  width: 100%; display: flex; justify-content: flex-end; padding-bottom: 10px;
+}
+#parchment-viewer-close {
+  background: rgba(40,20,10,0.8); border: 1px solid #c8a84a; color: #c8a84a;
+  border-radius: 4px; padding: 4px 12px; cursor: pointer; font-size: 20px;
+}
+
+
+/* -- MERCHANT SLOT INSPECT (Eye Icon) ------------------------------------- */
+.merch-slot .merchant-slot-inspect {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  background: rgba(30, 20, 10, 0.95);
+  border: 1px solid #c8a84a;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 11px;
+  color: #c8a84a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.6);
+}
+.merch-slot .merchant-slot-inspect:hover {
+  background: #c8a84a;
+  color: #1a0f08;
+  transform: scale(1.2);
+  box-shadow: 0 0 8px rgba(200, 168, 74, 0.5);
+}
+

@@ -43,5 +43,85 @@
     "parchmentType": "forge-weapons",
     "value": 20,
     "weight": 0.1
+  },
+  {
+    "name": "Ogre Helm Parchment",
+    "icon": "/icons/forge-armour.webp",
+    "description": "An ancient looking piece of parchment. It documents the secrets of forging an Ogre Helm.",
+    "type": "parchment",
+    "parchmentType": "essence-recipe",
+    "recipeName": "Ogre Helm",
+    "value": 1,
+    "weight": 0.1
+  },
+  {
+    "name": "Minotaur Cuirass Parchment",
+    "icon": "/icons/forge-armour.webp",
+    "description": "An ancient looking piece of parchment. It documents the secrets of forging a Minotaur Cuirass.",
+    "type": "parchment",
+    "parchmentType": "essence-recipe",
+    "recipeName": "Minotaur Cuirass",
+    "value": 1,
+    "weight": 0.1
+  },
+  {
+    "name": "Lizard Scale Cloak Parchment",
+    "icon": "/icons/forge-armour.webp",
+    "description": "An ancient looking piece of parchment. It documents the secrets of forging a Lizard Scale Cloak.",
+    "type": "parchment",
+    "parchmentType": "essence-recipe",
+    "recipeName": "Lizard Scale Cloak",
+    "value": 1,
+    "weight": 0.1
+  },
+  {
+    "name": "Crocodilian Boots Parchment",
+    "icon": "/icons/forge-armour.webp",
+    "description": "An ancient looking piece of parchment. It documents the secrets of forging Crocodilian Boots.",
+    "type": "parchment",
+    "parchmentType": "essence-recipe",
+    "recipeName": "Crocodilian Boots",
+    "value": 1,
+    "weight": 0.1
+  },
+  {
+    "name": "Seers Shawl Parchment",
+    "icon": "/icons/forge-armour.webp",
+    "description": "An ancient looking piece of parchment. It documents the secrets of forging a Seers Shawl.",
+    "type": "parchment",
+    "parchmentType": "essence-recipe",
+    "recipeName": "Seers Shawl",
+    "value": 1,
+    "weight": 0.1
+  },
+  {
+    "name": "Trickster's Hood Parchment",
+    "icon": "/icons/forge-armour.webp",
+    "description": "An ancient looking piece of parchment. It documents the secrets of forging a Trickster's Hood.",
+    "type": "parchment",
+    "parchmentType": "essence-recipe",
+    "recipeName": "Trickster's Hood",
+    "value": 1,
+    "weight": 0.1
+  },
+  {
+    "name": "Barbarian's Loin Cloth Parchment",
+    "icon": "/icons/forge-armour.webp",
+    "description": "An ancient looking piece of parchment. It documents the secrets of forging a Barbarian's Loin Cloth.",
+    "type": "parchment",
+    "parchmentType": "essence-recipe",
+    "recipeName": "Barbarian's Loin Cloth",
+    "value": 1,
+    "weight": 0.1
+  },
+  {
+    "name": "Barbarian's Club Parchment",
+    "icon": "/icons/forge-armour.webp",
+    "description": "An ancient looking piece of parchment. It documents the secrets of forging a Barbarian's Club.",
+    "type": "parchment",
+    "parchmentType": "essence-recipe",
+    "recipeName": "Barbarian's Club",
+    "value": 1,
+    "weight": 0.1
   }
 ]
