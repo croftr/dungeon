@@ -763,6 +763,7 @@ function showCharacterSelection() {
           <div class="cs-title-overlay">
             <h2 class="char-select-title">Choose Your Party</h2>
             <p class="char-select-subtitle">Select four heroes — front row fights, back row supports</p>
+            <button id="quick-pick-btn" class="cs-quick-pick-btn">Quick Pick</button>
           </div>
           <div class="cs-detail-empty">
             <video class="cs-detail-bg-video" autoplay loop muted playsinline>
@@ -794,6 +795,7 @@ function showCharacterSelection() {
   const detailPanel = charSelectScreen.querySelector('.cs-detail-panel');
   const cornerCards = charSelectScreen.querySelectorAll('.cs-corner-card');
   const beginBtn = charSelectScreen.querySelector('#begin-adventure-btn');
+  const quickPickBtn = charSelectScreen.querySelector('#quick-pick-btn');
 
   function renderDetail(recruitId) {
     activeRecruitId = recruitId;
@@ -859,6 +861,18 @@ function showCharacterSelection() {
       renderDetail(card.dataset.recruitId);
     });
   });
+
+  if (quickPickBtn) {
+    quickPickBtn.addEventListener('click', () => {
+      playSoundByUrl(asset('/sounds/party-confirmed.mp3'), 0.5);
+      selectedIds.clear();
+      // Paladin (recruit_2), Wardancer (recruit_7), White Mage (recruit_8), Wood Elf (recruit_1)
+      const ids = ['recruit_2', 'recruit_7', 'recruit_8', 'recruit_1'];
+      ids.forEach(id => selectedIds.add(id));
+      updateUI();
+      renderDetail('recruit_2');
+    });
+  }
 
   beginBtn.addEventListener('click', () => {
     if (selectedIds.size !== 4) return;
