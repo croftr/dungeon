@@ -30,7 +30,7 @@ export function spawnLevel0Objects(ctx) {
     addChest(group, loader, 13.4, 10, Math.PI / 2, -0.1, [
         { name: 'Gold Coins', quantity: 100 },
         'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore", "Life Essence", "Red Crystal", "Blue Crystal", "Ogre's Head", "Iron Helm",
-        "Forge Armour Parchment", "Forge Weapons Parchment", "Aqua Man Essence", "Crocodile Warrior Essence", "Demon Ogre Essence", "Demon Essence", "Giant Essence", "Lizard Man Essence", "Minotaur Essence", "Ogre Essence", "Tree Man Essence"
+        "Leather Gloves", "Aqua Man Essence", "Crocodile Warrior Essence", "Demon Ogre Essence", "Demon Essence", "Giant Essence", "Lizard Man Essence", "Minotaur Essence", "Ogre Essence", "Tree Man Essence"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in the east room (center) ────────────────────────────────────
@@ -102,7 +102,7 @@ export function spawnLevel0Objects(ctx) {
     } else {
         // Monster relocated here - col 17, row 7, face North (0)
         // Now using addShop with idle base and agree-gesture greeting
-        addShop(group, loader, 17, 7, 0, 0, 0, 'none', asset('/npcs/monster-npc/idle.glb'), {
+        addShop(group, loader, 17, 7, 0, 0, 0, 'barnaby', asset('/npcs/monster-npc/idle.glb'), {
             questNpcId: 'monster-npc',
             scale: 0.6,
             greetingModel: asset('/npcs/monster-npc/agree-gesture.glb'),

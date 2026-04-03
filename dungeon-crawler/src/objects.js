@@ -12,6 +12,7 @@ import MERCHANT_DATA from './data/merchant.json';
 import POTION_MERCHANT_DATA from './data/potion-merchant.json';
 import POTIONS_DATA from './data/items/potions.json';
 import FORGE_DATA from './data/forge.json';
+import BARNABY_DATA from './data/barnaby.json';
 import WEAPONS_DATA from './data/items/weapons.json';
 import { triggerMummyAmbush, monsters } from './monster.js';
 import * as equip from './equipment.js';
@@ -163,7 +164,7 @@ const _knownAlchemyRecipes = new Set(); // result item names learned by the part
 // Monster NPC Special Shop State
 let _seenEssences = new Set();
 let _unlockedRecipes = new Set();
-let _monsterNpcStock = []; // Array of parchment item names
+let _monsterNpcStock = [...BARNABY_DATA.stock]; // Array of parchment item names
 
 const ESSENCE_TO_PARCHMENTS = {
     "Aqua Man Essence": ["Trickster's Hood Parchment"],
@@ -174,7 +175,7 @@ const ESSENCE_TO_PARCHMENTS = {
     "Minotaur Essence": ["Minotaur Cuirass Parchment"],
     "Ogre Essence": ["Ogre Helm Parchment"],
     "Demon Ogre Essence": [],
-    "Tree Man Essence": []
+    "Tree Man Essence": ["Pyro Palms Parchment"]
 };
 
 const FORGE_SLOTS = 9; // 8 materials + 1 result
@@ -3458,7 +3459,7 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
 
     let title = 'Merchant';
     if (shopType === 'potions') title = 'Apothecary';
-    else if (shopType === 'none') title = 'Barnaby';
+    else if (shopType === 'none' || shopType === 'barnaby') title = 'Barnaby';
 
     document.getElementById('merchant-title').textContent = title;
 
@@ -3483,10 +3484,10 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
         document.getElementById('merchant-sell-body').style.display = 'none';
     } else {
         tabs.style.display = 'flex';
-        if (questNpcId === 'monster-npc') {
+        if (questNpcId === 'monster-npc' || shopType === 'barnaby') {
             title = 'Barnaby';
             document.getElementById('merchant-title').textContent = title;
-            tabs.style.display = 'none'; // Only selling parchments, no sell-back tab
+            // tabs.style.display = 'none'; // allow selling to Barnaby now
 
             _activeMerchantAvailable = _monsterNpcStock;
 

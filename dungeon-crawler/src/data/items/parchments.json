@@ -123,5 +123,15 @@
     "recipeName": "Barbarian's Club",
     "value": 1,
     "weight": 0.1
+  },
+  {
+    "name": "Pyro Palms Parchment",
+    "icon": "/icons/forge-armour.webp",
+    "description": "An ancient looking piece of parchment. It documents the secrets of forging Pyro Palms.",
+    "type": "parchment",
+    "parchmentType": "essence-recipe",
+    "recipeName": "Pyro Palms",
+    "value": 1,
+    "weight": 0.1
   }
 ]

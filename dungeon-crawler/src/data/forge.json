@@ -217,6 +217,52 @@
         ]
     },
     {
+        "name": "Barbarian's Club",
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Mace",
+                "quantity": 1
+            },
+            {
+                "name": "Giant's Club",
+                "quantity": 1
+            },
+            {
+                "name": "Giant Essence",
+                "quantity": 1
+            }
+        ]
+    },
+    {
+        "name": "Pyro Palms",
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Leather Gloves",
+                "quantity": 1
+            },
+            {
+                "name": "Tree Man Essence",
+                "quantity": 1
+            }
+        ]
+    },
+    {
         "name": "Sun-Forged Key",
         "ingredients": [
             {
