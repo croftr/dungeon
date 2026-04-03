@@ -1688,6 +1688,14 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
 
   if (killedByThisHit) {
     m.alive = false;
+    // In arena mode, fire the victory callback once all arena monsters are dead
+    if (window._arenaMode) {
+      const arenaLevel = window.currentLevel;
+      const stillAlive = monsters.filter(x => x.alive && (x.level ?? 1) === arenaLevel);
+      if (stillAlive.length === 0) {
+        setTimeout(() => window._arenaVictory?.(), 1400);
+      }
+    }
   }
 
   // Track damage dealt for battle summary
@@ -1729,8 +1737,9 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
 
       // ── Drop table roll ─────────────────────────────────────────────────────
       // Roll each entry in the monster's drops table independently.
+      // No loot in arena encounters.
       const droppedItems = [];
-      if (m.drops && m.drops.length > 0) {
+      if (!window._arenaMode && m.drops && m.drops.length > 0) {
         for (const drop of m.drops) {
           if (Math.random() < drop.chance) {
             droppedItems.push(drop.item);

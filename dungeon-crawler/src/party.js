@@ -865,6 +865,10 @@ export function setHp(index, value) {
 }
 
 function _showGameOver() {
+  if (window._arenaMode) {
+    window._arenaDefeat?.();
+    return;
+  }
   const el = document.getElementById('game-over');
   if (!el) return;
   el.classList.add('active');

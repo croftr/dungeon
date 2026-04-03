@@ -2,6 +2,7 @@
   "goblin": {
     "name": "Goblin",
     "family": "Greenskins and Goblinoids",
+    "description": "Feral vermin of the underground, these snickering menaces swarm in packs and are infamous for cowardly ambushes and poisoned blades. Their numbers make them dangerous despite their weakness.",
     "hp": 100,
     "defence": 5,
     "xp": 110,
@@ -43,6 +44,7 @@
   "skeletonWarrior": {
     "name": "Skeleton Warrior",
     "family": "Undead",
+    "description": "Animated by fell sorcery, these ancient soldiers serve no king yet fight with terrible purpose. Their hollow eyes have witnessed empires rise and crumble to dust.",
     "hp": 120,
     "defence": 12,
     "xp": 100,
@@ -80,6 +82,7 @@
   "mummy": {
     "name": "Mummy",
     "family": "Undead",
+    "description": "Bound in cursed wrappings and seething with ancient plague, the Mummy's touch rots flesh to blackened ruin. They wander burial halls in eternal unrest, despising all warmth and life.",
     "hp": 100,
     "defence": 6,
     "xp": 100,
@@ -123,6 +126,7 @@
   "crocodile_warrior": {
     "name": "Crocodile Warrior",
     "family": "Scaled and Aquatic",
+    "description": "Warriors of the deep swamp who stand upright and carry the hides of their ancestors as armour. Relentless in pursuit and merciless in battle, their jaws can shear through iron.",
     "image": "/monster-images/crocodile-warrior.png",
     "hp": 250,
     "defence": 8,
@@ -161,6 +165,7 @@
   "orc_warrior": {
     "name": "Orc Warrior",
     "family": "Greenskins and Goblinoids",
+    "description": "Bred for war and hardened in the blood-pits of the orcish clans, these green-skinned brutes charge headlong into carnage with savage delight and an iron hunger for conquest.",
     "hp": 170,
     "defence": 6,
     "xp": 160,
@@ -202,6 +207,7 @@
   "ghoul": {
     "name": "Ghoul",
     "family": "Undead",
+    "description": "Once-human souls twisted by necromantic hunger, ghouls stalk the living with frantic desperation. Their raking claws spread foul rot and their maddened screams drive brave men to flee.",
     "hp": 180,
     "defence": 3,
     "xp": 150,
@@ -245,6 +251,7 @@
   "zombie": {
     "name": "Zombie",
     "family": "Undead",
+    "description": "The shambling dead raised by dark magic — mindless and tireless. Wherever they tread, disease follows in their wake and hope withers. Even the bravest veterans dread their rot.",
     "hp": 200,
     "defence": 1,
     "xp": 120,
@@ -280,6 +287,7 @@
   "iceman": {
     "name": "IceMan",
     "family": "Ancient and Elemental",
+    "description": "An elemental horror born of glacier and killing frost, the IceMan channels the cold of the deep north through its crystalline form. Its very touch freezes blood in the veins.",
     "hp": 200,
     "defence": 8,
     "xp": 265,
@@ -323,6 +331,7 @@
   "treekin": {
     "name": "TreeKin",
     "family": "Ancient and Elemental",
+    "description": "Ancient forest spirits drawn into bark and briar by centuries of corruption, TreeKin hurl nature's wrath at those who would defile their sacred groves. They speak only in creaking fury.",
     "hp": 150,
     "defence": 9,
     "xp": 245,
@@ -352,6 +361,7 @@
   "treeman": {
     "name": "Treeman",
     "family": "Ancient and Elemental",
+    "description": "The primordial guardian of the deep forest, awakened only when its domain faces ultimate desecration. Ancient beyond memory, to face the Treeman is to face the wrath of the world itself.",
     "image": "/monster-images/treeman.png",
     "hp": 370,
     "defence": 9,
@@ -398,6 +408,7 @@
   "ogre": {
     "name": "Ogre",
     "family": "Mythic and Giants",
+    "description": "Massive and brute-brained, Ogres compensate for their low cunning with overwhelming ferocity. A single blow from their knotted fists can cave iron armour and shatter stone columns.",
     "image": "/monster-images/ogre.png",
     "hp": 260,
     "defence": 9,
@@ -448,6 +459,7 @@
   "dummy": {
     "name": "Training Dummy",
     "family": "Misc",
+    "description": "A training construct of wood and straw, enchanted to resist destruction. It does not bleed, does not fear, and will not forgive sloppy form. Perfect for those who prefer practice over peril.",
     "hp": 100000,
     "defence": 5,
     "xp": 0,
@@ -464,6 +476,7 @@
   "minotaur": {
     "name": "Minotaur",
     "family": "Mythic and Giants",
+    "description": "Imprisoned at the heart of a labyrinth of its own rage, the Minotaur is part man and part beast — and wholly terrifying. Its gore-stained horn has ended the charge of a hundred ill-fated heroes.",
     "image": "/monster-images/minotaur.png",
     "hp": 450,
     "defence": 10,
@@ -516,6 +529,7 @@
   "aqua_man": {
     "name": "Aqua Man",
     "family": "Scaled and Aquatic",
+    "description": "Amphibious hunters who slip between worlds of water and air with equal ease, the Aqua Men are both predator and dark omen. Their tridents carry the death of the deep sea.",
     "image": "/monster-images/aqua-man.png",
     "hp": 290,
     "defence": 12,
@@ -568,6 +582,7 @@
   "lizardMan": {
     "name": "Lizard Man",
     "family": "Scaled and Aquatic",
+    "description": "The cold-blooded killers of the deep caverns, Lizard Men move with reptilian patience and strike with venom-laced precision. They are ancient predators who remember a world without men.",
     "image": "/monster-images/lizard-man.png",
     "hp": 380,
     "defence": 12,
@@ -620,6 +635,7 @@
   "night_goblin": {
     "name": "Night Goblin",
     "family": "Greenskins and Goblinoids",
+    "description": "Cousins to the common goblin, Night Goblins dwell in lightless depths and have grown both more vicious and more cunning for it. They strike from shadow and vanish before dawn.",
     "hp": 120,
     "defence": 4,
     "xp": 120,
@@ -657,6 +673,7 @@
   "giant": {
     "name": "Giant",
     "family": "Mythic and Giants",
+    "description": "A colossus born of mountain stone and ancient hunger, the Giant's footfalls shake the earth. Few swords can reach its vital organs and fewer warriors live to tell the tale.",
     "image": "/monster-images/giant.png",
     "hp": 550,
     "defence": 12,
@@ -703,6 +720,7 @@
   "demon": {
     "name": "Demon",
     "family": "Mythic and Giants",
+    "description": "A creature born of pure malice in the pit between worlds, summoned by dark recklessness. Its eyes burn with loathing for all living things and its form warps reality around it.",
     "image": "/monster-images/demon.png",
     "hp": 200,
     "defence": 15,
@@ -753,6 +771,7 @@
   "demon_ogre": {
     "name": "Demon Ogre",
     "family": "Mythic and Giants",
+    "description": "When demonic essence fuses with ogre flesh, the result is a nightmare of physical power and infernal will. An apex predator born of two hells, it revels in slaughter above all else.",
     "image": "/monster-images/demon-ogre.png",
     "hp": 450,
     "defence": 18,

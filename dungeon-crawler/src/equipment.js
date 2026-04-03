@@ -12,7 +12,6 @@ import { asset } from './assets.js';
 import { playAction } from './actions.js';
 import { attackMonster, monsters, getInRangeMonster, setHuntersEyeTarget, getHuntersEyeTargetId, applyMonsterStatusEffect } from './monster.js';
 import { showMessage } from './minimap.js';
-import { dropMember } from './recruits.js';
 import RECRUITS_DATA from './data/recruits.json';
 import SPELL_TYPE_ICONS from './data/spell-type-icons.json';
 import { isInFrontOfPlayer, player } from './player.js';
@@ -4640,18 +4639,7 @@ document.getElementById('equip-char-dev').addEventListener('click', () => {
   }
 });
 
-// Drop button
-document.getElementById('equip-drop').addEventListener('click', () => {
-  if (activeCharIndex !== null) {
-    dropMember(activeCharIndex);
-    closeModal();
-  }
-});
 
-export function hideDropButton() {
-  const btn = document.getElementById('equip-drop');
-  if (btn) btn.style.display = 'none';
-}
 
 /**
  * Public helper to add an item to a specific character's inventory.

@@ -237,21 +237,6 @@ function openRecruitModal(recruitId) {
     }
 }
 
-// Drops a member from the party by their slot index
-export function dropMember(index) {
-    const m = party[index];
-    if (!m || m.isEmpty) return;
-
-    // Find them in RECRUITS
-    const r = RECRUITS.find(x => x.name === m.name);
-    if (r) r.isRecruited = false;
-
-    party[index] = { id: index, isEmpty: true };
-
-    // Clean up any references or trigger global refresh
-    updateRecruitsMeshState();
-    if (window.onPartyChanged) window.onPartyChanged();
-}
 
 export function recruitCharacter(r) {
     const freeIndex = party.findIndex(m => m.isEmpty);

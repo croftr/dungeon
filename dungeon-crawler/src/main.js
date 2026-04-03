@@ -6,9 +6,9 @@ import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES,
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles, invalidateParticleTextures } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
-import { initParty, updateParty, party, refreshPartyCards, autoAttack, autoRangeAttack, setHp, flashPortraitHit, showMemberDamage, isPartyUnseen } from './party.js';
+import { initParty, updateParty, party, refreshPartyCards, autoAttack, autoRangeAttack, setHp, flashPortraitHit, showMemberDamage, isPartyUnseen, resurrectAll } from './party.js';
 import { getItemDef } from './items.js';
-import { initEquipment, hideDropButton, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
+import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, getContainerStates, setPendingContainerOverrides, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags } from './objects.js';
@@ -23,6 +23,9 @@ import { showHelpDialog } from './help.js';
 import { asset } from './assets.js';
 import { initQuests } from './quest.js';
 import { initSlashTrail } from './slash-trail.js';
+import { initEssentiary } from './essentiary.js';
+import { MONSTER_DEFS } from './monster-defs.js';
+import { inst } from './monster-factory.js';
 
 import './style.css';
 
@@ -30,6 +33,28 @@ import './style.css';
 //  RENDERER & GLOBALS
 // ─────────────────────────────────────────────
 window.currentLevel = 0;
+
+// ─────────────────────────────────────────────
+//  ARENA MAP  (level 99 — used by The Essentiary)
+// ─────────────────────────────────────────────
+const ARENA_LEVEL = 99;
+const ARENA_MAP = [
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,2,0,0,0,0,0,0,0,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+];
 
 // Patch hardcoded asset paths in index.html to use CDN base URL.
 // Uses data-src (no src) so the browser preloader never fetches from localhost.
@@ -513,6 +538,7 @@ if (_pendingSave?.recruits) {
 initRecruits(scene, camera);
 initObjects(scene, camera);
 initSlashTrail(camera);
+initEssentiary();
 
 // ─────────────────────────────────────────────
 //  MONSTERS
@@ -1120,7 +1146,7 @@ function finishBattlePrepVideo() {
       _battlePrepCallback = null;
     }
     // Remove the option to drop party members after this dramatic event
-    hideDropButton();
+    
   }, 1500);
 }
 
@@ -1874,6 +1900,173 @@ window.loadLevel = function (levelNum) {
   if (levelNum === 5) {
     setZoneMusic(asset('/sounds/backing/hall-of-heroes.mp3'));
   }
+};
+
+// ─────────────────────────────────────────────
+//  ARENA  — enter / exit (The Essentiary)
+// ─────────────────────────────────────────────
+
+function _arenaFade(cb) {
+  const blackout = document.getElementById('fall-blackout');
+  if (!blackout) { cb(); return; }
+  blackout.classList.remove('hidden');
+  blackout.offsetHeight; // force reflow
+  blackout.classList.add('visible');
+  setTimeout(() => {
+    cb();
+    blackout.classList.remove('visible');
+    setTimeout(() => blackout.classList.add('hidden'), 520);
+  }, 550);
+}
+
+function _showArenaResult(text, className) {
+  const overlay = document.getElementById('arena-result-overlay');
+  const banner  = document.getElementById('arena-result-banner');
+  if (!overlay || !banner) return;
+  banner.textContent = text;
+  banner.className   = className;
+  overlay.classList.remove('hidden');
+  requestAnimationFrame(() => banner.classList.add('result-show'));
+  setTimeout(() => {
+    banner.classList.remove('result-show');
+    setTimeout(() => overlay.classList.add('hidden'), 520);
+  }, 2000);
+}
+
+window._arenaEnter = function (monsterId) {
+  const def = MONSTER_DEFS[monsterId];
+  if (!def) { console.warn('Arena: unknown monster key', monsterId); return; }
+
+  // Save state to restore after the fight
+  window._preArenaState = {
+    level:   window.currentLevel,
+    gridRow: player.gridRow,
+    gridCol: player.gridCol,
+    facing:  player.facing,
+  };
+  window._arenaMode = true;
+
+  // Start arena music immediately — before the fade so it's audible straight away
+  setZoneMusic(asset('/sounds/backing/arena.mp3'));
+
+  _arenaFade(() => {
+    window._isRestoring = true;
+    window.currentLevel = ARENA_LEVEL;
+
+    // Build arena geometry
+    changeMapArray(ARENA_MAP);
+    buildLevel(scene);
+
+    // Overlay arena-floor.jpg on every non-wall cell
+    const floorCells = [];
+    ARENA_MAP.forEach((row, r) => row.forEach((cell, c) => {
+      if (cell !== 1) floorCells.push([r, c]);
+    }));
+    buildTextureZone(scene, [], floorCells,
+      asset('/textures/wall1.jpg'),
+      asset('/textures/arena-floor.jpg'));
+
+    clearObjects(scene);
+
+    // Remove any stale arena monsters then create a fresh one
+    for (let i = monsters.length - 1; i >= 0; i--) {
+      if (monsters[i].level === ARENA_LEVEL) {
+        if (monsters[i].mesh) scene.remove(monsters[i].mesh);
+        monsters.splice(i, 1);
+      }
+    }
+
+    // Clone GLB paths from the first matching template in any level
+    const template = monsters.find(m => m.name === def.name);
+    if (template) {
+      const arenaMonster = inst(
+        def, 9999, 2, 7,
+        template.glbIdle, template.glbAttack, template.attackSound,
+        template.scale, 0, 0, ARENA_LEVEL,
+        null, template.glbDeath, template.glbHit,
+        template.glbWalk, template.glbIdleAlt, template.glbCombatIdle
+      );
+      monsters.push(arenaMonster);
+      loadMonstersForLevel(scene, ARENA_LEVEL);
+    } else {
+      console.warn('Arena: no template found for', def.name);
+    }
+
+    // Place player at start cell
+    const start = findCell(CELL_START);
+    player.gridRow = start.row;
+    player.gridCol = start.col;
+    player.facing  = 0; // North
+    const w = cellToWorld(start.row, start.col);
+    camera.position.set(w.x, w.y, w.z);
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = FACING_ANGLES[0];
+
+    drawMinimap();
+    updateStatus();
+    window._isRestoring = false;
+  });
+
+  // Callbacks fired by monster.js (victory) and party.js (defeat)
+  window._arenaVictory = () => {
+    _showArenaResult('Victory!', 'result-victory');
+    setTimeout(() => window._arenaExit(true), 2600);
+  };
+  window._arenaDefeat = () => {
+    _showArenaResult('Defeated...', 'result-defeat');
+    setTimeout(() => window._arenaExit(false), 2600);
+  };
+};
+
+window._arenaExit = function (won) {
+  window._arenaMode = false;
+
+  _arenaFade(() => {
+    window._isRestoring = true;
+
+    // Revive party on defeat (no permadeath — restore to 25% HP)
+    if (!won) {
+      resurrectAll();
+      party.forEach(m => {
+        if (!m.isEmpty) m.hp = Math.max(1, Math.floor(m.hpMax * 0.25));
+      });
+      refreshPartyCards();
+    }
+
+    // Remove arena monsters from the shared array
+    for (let i = monsters.length - 1; i >= 0; i--) {
+      if (monsters[i].level === ARENA_LEVEL) {
+        if (monsters[i].mesh) scene.remove(monsters[i].mesh);
+        if (monsters[i].hpBarFill) monsters[i].hpBarFill.parentElement?.remove();
+        monsters.splice(i, 1);
+      }
+    }
+
+    // Restore pre-arena state
+    const pre = window._preArenaState ?? { level: 0, gridRow: 13, gridCol: 14, facing: 2 };
+    window.currentLevel = pre.level;
+    const maps = [level0Map, level1Map, level2Map, level3Map, level4Map, level5Map];
+    changeMapArray(maps[pre.level] ?? level0Map);
+    buildLevel(scene);
+    clearObjects(scene);
+    setPendingContainerOverrides(_visitedLevelContainers[pre.level] ?? null);
+    spawnObjectsForLevel();
+    loadMonstersForLevel(scene, pre.level);
+    setAmbientLevel(pre.level);
+    setZoneMusic(null);
+
+    player.gridRow = pre.gridRow;
+    player.gridCol = pre.gridCol;
+    player.facing  = pre.facing;
+    const w = cellToWorld(pre.gridRow, pre.gridCol);
+    camera.position.set(w.x, w.y, w.z);
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = FACING_ANGLES[pre.facing];
+
+    drawMinimap();
+    updateStatus();
+    window._isRestoring = false;
+  });
 };
 
 const raycaster = new THREE.Raycaster();

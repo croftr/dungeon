@@ -334,19 +334,7 @@ export function initObjects(scene, camera) {
                     if (isInFrontOfPlayer(11, 8, 1)) {
                         playButtonClickSound();
                         _animateButtonPress(obj);
-                        if (window.loadLevel) {
-                            window.loadLevel(4);
-                            setTimeout(() => {
-                                player.gridRow = 2;
-                                player.gridCol = 5;
-                                player.facing = 2; // South
-                                const w = cellToWorld(2, 5);
-                                camera.position.set(w.x, w.y, w.z);
-                                camera.rotation.order = 'YXZ';
-                                camera.rotation.y = FACING_ANGLES[player.facing];
-                                showMessage("Teleported to the Lizard Man Room (Level 4)!");
-                            }, 50);
-                        }
+                        window.openEssentiary?.();
                     } else {
                         showMessage("You can't reach that from here.");
                     }
@@ -1101,10 +1089,7 @@ export function initObjects(scene, camera) {
             } else {
                 if (_starterGate) openPortcullis(_starterGate);
             }
-            // Also ensure the drop button is hidden immediately for good measure
-            if (equip.hideDropButton) {
-                equip.hideDropButton();
-            }
+            
         };
     }
 
@@ -3481,6 +3466,17 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
     }
 
     document.getElementById('merchant-overlay').classList.remove('merchant-hidden');
+
+    // Show / hide the Essentiary shortcut for Barnaby
+    const essentiaryBtn = document.getElementById('barnaby-essentiary-btn');
+    if (essentiaryBtn) {
+        const isBarnabyShop = (questNpcId === 'monster-npc' || shopType === 'barnaby');
+        essentiaryBtn.style.display = isBarnabyShop ? '' : 'none';
+        essentiaryBtn.onclick = () => {
+            document.getElementById('merchant-overlay').classList.add('merchant-hidden');
+            window.openEssentiary?.();
+        };
+    }
 
     const tabs = document.getElementById('merchant-tabs');
     const mainCol = document.getElementById('merchant-main-col');
