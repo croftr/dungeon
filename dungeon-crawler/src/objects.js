@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
-import { CELL, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld, buildLevel, level2Map } from './map.js';
+import { CELL, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld, buildLevel, level1Map, level2Map } from './map.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, isInFrontOfPlayer, player, FACING_ANGLES, setPlayerFrozen } from './player.js';
 import { showMessage, drawMinimap, updateStatus } from './minimap.js';
@@ -47,6 +47,32 @@ const _intervals = [];
 
 export function updateObjects(dt) {
     for (const mixer of _mixers) mixer.update(dt);
+
+    if (_proximityAudios.length > 0 && player) {
+        for (const item of _proximityAudios) {
+            const distRow = Math.abs(player.gridRow - item.row);
+            const distCol = Math.abs(player.gridCol - item.col);
+
+            const isClose = (distRow + distCol) <= (item.range ?? 2);
+
+            if (isClose) {
+                const now = Date.now();
+                if (!item.isPlaying && (now - item.lastPlayTime) > 5000) {
+                    item.isPlaying = true;
+                    item.lastPlayTime = now;
+                    playSoundByUrl(item.audioUrl, 0.8).then(source => {
+                        if (source) {
+                            source.onended = () => {
+                                item.isPlaying = false;
+                            };
+                        } else {
+                            item.isPlaying = false;
+                        }
+                    });
+                }
+            }
+        }
+    }
 }
 
 // ─────────────────────────────────────────────
@@ -67,9 +93,13 @@ let _starterGate = null; // portcullis behind the party-confirm NPC; opens only 
 let _level2PortcullisOpened = false;
 let _level2GiantPortcullisOpened = false;
 let _level2HoleClosed = false;
+let _level1HoleRoomSpawned = false;
 let _npcMixer = null;
 let _npcIdleAction = null;
 let _npcTalkAction = null;
+
+// Track NPCs with proximity-based audio triggers
+const _proximityAudios = [];
 
 // ─────────────────────────────────────────────
 //  CHEST / MERCHANT SHARED STATE
@@ -1863,13 +1893,14 @@ export function spawnObjectsForLevel() {
         addChest, addWeaponRack, addSpellCabinet, addShop,
         addCrystals, addBonePile, addDecoration, addCrystalShrine, addHeroDoor,
         addPortal, addDisabledPortal, addPortcullis, addKeyhole,
-        addStatue, addPortalActivatorStatue, addPartyConfirmNPC, addDialogueNPC,
+        addStatue, addPortalActivatorStatue, addPartyConfirmNPC, addDialogueNPC, addCustomNPC,
         addAnvil, addAlchemyWorkshop, addDroppedTorch, addEtherealEgg, addStairs,
         addTrap1, createWallButton, addArmourStand, addTrainingConsole,
         // Level 1 state flags
         starterPortalEnabled: _starterPortalEnabled,
         starterGateOpened: _starterGateOpened,
         mummyGateOpened: _mummyGateOpened,
+        level1HoleRoomSpawned: _level1HoleRoomSpawned,
         // Level 2 state flags
         level2PortcullisOpened: _level2PortcullisOpened,
         level2GiantPortcullisOpened: _level2GiantPortcullisOpened,
@@ -1879,6 +1910,7 @@ export function spawnObjectsForLevel() {
         crystalShrineState: _crystalShrineState,
         // State setters (values written back to objects.js module scope)
         setStarterGate: (g) => { _starterGate = g; },
+        setLevel1HoleRoomSpawned: (val) => { _level1HoleRoomSpawned = val; },
         // Shared refs for custom object loading code in level files
         interactables,
     };
@@ -2699,10 +2731,10 @@ function addPartyConfirmNPC(scene, loader, col, row, rotY = 0, offsetX = 0, offs
     });
 }
 
-function addDialogueNPC(scene, loader, col, row, dialogue, rotY = 0, offsetX = 0, offsetZ = 0) {
-    loader.load(asset('/npcs/otter/Meshy_AI_Animation_Idle_withSkin.glb'), (gltf) => {
+function addCustomNPC(scene, loader, col, row, glbPath, dialogue, scale = 0.55, rotY = 0, offsetX = 0, offsetZ = 0, proximityAudio = null, proximityRange = 2) {
+    loader.load(asset(glbPath), (gltf) => {
         const model = gltf.scene;
-        model.scale.setScalar(0.55);
+        model.scale.setScalar(scale);
         model.position.set(col * CELL + offsetX, 0, row * CELL + offsetZ);
         model.rotation.y = rotY;
 
@@ -2714,6 +2746,8 @@ function addDialogueNPC(scene, loader, col, row, dialogue, rotY = 0, offsetX = 0
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.dialogue = dialogue;
+                child.userData.proximityAudio = proximityAudio;
+                child.userData.proximityRange = proximityRange;
                 interactables.push(child);
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];
@@ -2736,8 +2770,23 @@ function addDialogueNPC(scene, loader, col, row, dialogue, rotY = 0, offsetX = 0
             _mixers.push(mixer);
         }
 
+        if (proximityAudio) {
+            _proximityAudios.push({
+                row: row,
+                col: col,
+                audioUrl: asset(proximityAudio),
+                range: proximityRange,
+                lastPlayTime: 0,
+                isPlaying: false
+            });
+        }
+
         scene.add(model);
     });
+}
+
+function addDialogueNPC(scene, loader, col, row, dialogue, rotY = 0, offsetX = 0, offsetZ = 0) {
+    addCustomNPC(scene, loader, col, row, '/npcs/otter/Meshy_AI_Animation_Idle_withSkin.glb', dialogue, 0.55, rotY, offsetX, offsetZ);
 }
 
 
@@ -4380,10 +4429,13 @@ export function getWorldFlags() {
         level2PortcullisOpened: _level2PortcullisOpened,
         level2GiantPortcullisOpened: _level2GiantPortcullisOpened,
         level2HoleClosed: _level2HoleClosed,
+        level1HoleRoomSpawned: _level1HoleRoomSpawned,
         disarmedTraps: [..._trapDisarmedSet],
         crystalShrineState: _crystalShrineState,
     };
 }
+
+export function setLevel1HoleRoomSpawned(val) { _level1HoleRoomSpawned = val; }
 
 /** Restores gate/portal flags. Call BEFORE spawnObjectsForLevel(). */
 export function setWorldFlags(flags) {
@@ -4394,8 +4446,16 @@ export function setWorldFlags(flags) {
     _level2PortcullisOpened = flags.level2PortcullisOpened ?? false;
     _level2GiantPortcullisOpened = flags.level2GiantPortcullisOpened ?? false;
     _level2HoleClosed = flags.level2HoleClosed ?? false;
+    _level1HoleRoomSpawned = flags.level1HoleRoomSpawned ?? false;
     _crystalShrineState = flags.crystalShrineState ?? 0;
     if (_level2HoleClosed) level2Map[17][23] = CELL_FLOOR;
+    if (_level1HoleRoomSpawned) {
+        for (let r = 24; r <= 26; r++) {
+            for (let c = 1; c <= 3; c++) {
+                level1Map[r][c] = CELL_FLOOR;
+            }
+        }
+    }
     _trapDisarmedSet.clear();
     if (Array.isArray(flags.disarmedTraps)) {
         for (const key of flags.disarmedTraps) _trapDisarmedSet.add(key);

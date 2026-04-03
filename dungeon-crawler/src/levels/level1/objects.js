@@ -14,12 +14,19 @@ export function spawnLevel1Objects(ctx) {
         addBonePile, addDecoration,
         addPortal, addPortcullis,
         addStatue, addPortalActivatorStatue,
-        addTrap1,
+        addTrap1, addCustomNPC, addDialogueNPC,
         createWallButton,
         mummyGateOpened,
         crystalShrineState,
+        level1HoleRoomSpawned,
         interactables,
     } = ctx;
+
+    // ── Monster NPC ──────────────────────────────────────────────────────────
+    // In the hidden basement arrival room at (26, 2).
+    if (level1HoleRoomSpawned) {
+        addCustomNPC(group, loader, 2, 26, '/npcs/monster-npc/agree-gesture.glb', "Mmmm... more meat for the grinder?", 0.6, 0, 0, 0, '/npcs/monster-npc/help.mp3', 2);
+    }
 
     // ── Chests ───────────────────────────────────────────────────────────────
     // Chest at the end of the long north passage
@@ -72,13 +79,14 @@ export function spawnLevel1Objects(ctx) {
     // ── Spell Cabinet ────────────────────────────────────────────────────────
     // Goblin room — moved west away from the passage at col 17
     addSpellCabinet(group, loader, 15, 11, 0, 0, -0.7, [
-        'Minor Potions Parchment', "Scroll of Incinerate"
+        "Scroll of Incinerate", "Potions Parchment"
     ]);
 
     // Dead-end passage near the zombie room
     addSpellCabinet(group, loader, 21, 16, -Math.PI / 2, 0.7, 0, [
         'Scroll of Regeneration',
-        'Scroll of Rejuvenate'
+        'Scroll of Rejuvenate',
+        'Minor Potions Parchment'
     ]);
 
     // ── Portal to Level 3 (The Abyssal Crypts) ───────────────────────────────

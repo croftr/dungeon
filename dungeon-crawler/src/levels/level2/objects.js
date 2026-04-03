@@ -13,10 +13,11 @@ export function spawnLevel2Objects(ctx) {
         group, loader,
         addChest, addStairs, addTrap1,
         addPortal, addPortcullis, addKeyhole,
-        createWallButton,
+        createWallButton, addCustomNPC,
         level2PortcullisOpened,
         level2GiantPortcullisOpened,
     } = ctx;
+
 
     // ── Portal back to Level 0 ────────────────────────────────────────────────
     addPortal(group, loader, 7, 1, 0, 0, 0, -0.85);

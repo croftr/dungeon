@@ -11,7 +11,7 @@ import { getItemDef } from './items.js';
 import { initEquipment, hideDropButton, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
-import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, getContainerStates, setPendingContainerOverrides, partyHasItem, getCrystalShrineState } from './objects.js';
+import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, getContainerStates, setPendingContainerOverrides, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
@@ -319,6 +319,68 @@ setCallbacks({
 
     // --- Special Grid Logic (Teleports) ---
     const cell = dungeonMap[player.gridRow][player.gridCol];
+    if (window.currentLevel === 1 && player.gridRow === 1 && player.gridCol === 15) {
+      tweenGroup.removeAll();
+      player.moving = false;
+
+      const blackout = document.getElementById('fall-blackout');
+      if (blackout) {
+        blackout.classList.remove('hidden');
+        blackout.offsetHeight;
+        blackout.classList.add('visible');
+      }
+
+      playFallSequence();
+      showMessage("Aaaaaah! You fall through the hole!");
+      window._cutscenePlaying = true;
+
+      // Fall damage
+      party.forEach((m, i) => {
+        if (m.isEmpty || m.isDead) return;
+        const dmg = 8 + Math.floor(Math.random() * 8); // 8–15
+        setHp(i, m.hp - dmg);
+        showMemberDamage(i, dmg, false);
+        flashPortraitHit(i);
+      });
+
+      setTimeout(() => {
+        // Spawn the secret room now that we've fallen
+        setLevel1HoleRoomSpawned(true);
+        
+        // Transform the walls into a room
+        for (let r = 24; r <= 26; r++) {
+          for (let c = 1; c <= 3; c++) {
+            level1Map[r][c] = 0;
+          }
+        }
+        
+        // Rebuild the map and objects to include the NPC and new floor
+        changeMapArray(level1Map);
+        clearObjects(scene);
+        buildLevel(scene);
+        spawnObjectsForLevel();
+
+        // Teleport to the secret room (row 25, col 2)
+        player.gridRow = 25;
+        player.gridCol = 2;
+        const w = cellToWorld(25, 2);
+        camera.position.set(w.x, w.y, w.z);
+        // Face South (2)
+        player.facing = 2;
+        camera.rotation.order = 'YXZ';
+        camera.rotation.y = FACING_ANGLES[player.facing];
+        drawMinimap();
+        updateStatus();
+
+        // Hide the blackout
+        if (blackout) {
+          blackout.classList.remove('visible');
+          setTimeout(() => blackout.classList.add('hidden'), 500);
+        }
+        
+        window._cutscenePlaying = false;
+      }, 1000);
+    }
     if (window.currentLevel === 2) {
       if (cell === CELL_HOLE) {
         tweenGroup.removeAll();
