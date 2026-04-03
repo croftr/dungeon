@@ -362,6 +362,7 @@ const MUSIC_TRACKS_BY_LEVEL = {
 const TRACK_VOLUME = {
   [asset('/sounds/backing/minotaur-level.mp3')]: 0.6,
   [asset('/sounds/backing/battle.mp3')]: 0.15,
+  [asset('/sounds/backing/arena.mp3')]: 0.6,
 };
 let _ambientLevel = 0;
 const BATTLE_TRACK = asset('/sounds/backing/battle.mp3');

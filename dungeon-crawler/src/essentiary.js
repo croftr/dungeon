@@ -59,6 +59,17 @@ function _showDetailScreen() {
   if (nav) nav.style.display = '';
 }
 
+const UPSCALE_MONSTERS = new Set(['giant', 'minotaur', 'aqua_man']);
+
+// On the list cards, aqua_man and giant fill the frame edge-to-edge after
+// being re-cropped, so scale them down slightly for breathing room.
+// Minotaur still benefits from the upscale.
+const LIST_IMG_CLASS = {
+  giant:    'img-shrink',
+  aqua_man: 'img-shrink',
+  minotaur: 'img-upscale',
+};
+
 function _renderList() {
   const grid = document.getElementById('essentiary-grid');
   if (!grid) return;
@@ -70,9 +81,10 @@ function _renderList() {
   entries.forEach(([key, def]) => {
     const card = document.createElement('div');
     card.className = 'essentiary-card';
+    const imgExtra = LIST_IMG_CLASS[key] ? ` ${LIST_IMG_CLASS[key]}` : '';
     card.innerHTML = `
       <div class="essentiary-card-img-wrap">
-        <img src="${def.image}" alt="${def.name}" class="essentiary-card-img" loading="lazy">
+        <img src="${def.image}" alt="${def.name}" class="essentiary-card-img${imgExtra}" loading="lazy">
       </div>
       <div class="essentiary-card-info">
         <div class="essentiary-card-name">${def.name}</div>
@@ -95,8 +107,6 @@ function _openDetail(key) {
   if (navMonster) navMonster.textContent = def.name;
 
   // Populate detail
-  const UPSCALE_MONSTERS = new Set(['giant', 'minotaur', 'aqua_man']);
-
   const img = document.getElementById('essentiary-detail-img');
   img.src = def.image ?? '';
   img.alt = def.name;
