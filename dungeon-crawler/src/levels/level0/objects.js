@@ -102,7 +102,15 @@ export function spawnLevel0Objects(ctx) {
         addTrap1(group, loader, 7, 17);
     } else {
         // Monster relocated here - col 17, row 7, face North (0)
-        addCustomNPC(group, loader, 17, 7, '/npcs/monster-npc/agree-gesture.glb', "Mmmm... better here. Much safer.", 0.6, 0, 0, 0, null, 2);
+        // Now using addShop to handle the quest modal and rotating greetings
+        addShop(group, loader, 17, 7, 0, 0, 0, 'none', '/npcs/monster-npc/agree-gesture.glb', {
+            questNpcId: 'monster-npc',
+            scale: 0.6,
+            greetingAudio: [
+                '/npcs/monster-npc/greeting1.mp3',
+                '/npcs/monster-npc/greeting2.mp3'
+            ]
+        });
     }
 
     // ── Dev shortcut: button on the west wall of the starter room ─────────────

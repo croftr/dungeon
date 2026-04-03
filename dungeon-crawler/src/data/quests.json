@@ -38,15 +38,15 @@
     "id": "life-essence",
     "name": "Life Essents",
     "giver": "monster-npc",
-    "text": "Ah! You made it back. I’ve finally scrubbed the dungeon grime out of my beard. As promised, let’s talk about how you’re going to survive the deeper floors. See that glow in your pack? That’s Life Essence. When you slay the monsters down there, their vital energy crystallizes. It’s the most versatile material in the world if you know how to handle it. Bring it to my forge, and I can weave it into your gear to make it stronger, sharper, and tougher.In here, essence is the only currency that truly matters",
-    "audio": "/npcs/monster-npc/help.mp3",
+    "text": "See that glow in your pack? That’s Life Essence. When you slay the monsters down there, their vital energy crystallizes. It’s the most versatile material in the world if you know how to handle it. Bring it to my forge, and I can weave it into your gear to make it stronger, sharper, and tougher.In here, essence is the only currency that truly matters",
+    "audio": "/npcs/monster-npc/quest-start.mp3",
     "requiredItems": [
-      "Aether-Glass Silt"
+      "All essence"
     ],
     "keepRequiredItems": true,
     "completionAudio": "/npcs/monster-npc/thank-you.mp3",
     "completionRewards": [
-      "Broken Sun-Forged Key"
+      "Unknown"
     ]
   }
 ]

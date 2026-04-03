@@ -2177,7 +2177,7 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, sh
     _shopGridCells.add(`${row},${col}`); // block player movement through this cell
     loader.load(modelPath ?? asset('/npcs/merchant1/merchant-idle.glb'), (gltf) => {
         const model = gltf.scene;
-        model.scale.setScalar(0.5);
+        model.scale.setScalar(options.scale ?? 0.5);
         model.position.set(col * CELL + offsetX, 0, row * CELL + offsetZ);
         model.rotation.y = rotY;
 
@@ -3409,7 +3409,11 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
     _merchantSellBasket = [];
     _merchantMode = 'buy';
     _activeMerchantAvailable = shopType === 'potions' ? _potionMerchantAvailable : _merchantAvailable;
-    const title = shopType === 'potions' ? 'Apothecary' : 'Merchant';
+    
+    let title = 'Merchant';
+    if (shopType === 'potions') title = 'Apothecary';
+    else if (shopType === 'none') title = 'The Lost Recruit';
+    
     document.getElementById('merchant-title').textContent = title;
 
     const modal = document.getElementById('merchant-modal');
@@ -3424,7 +3428,17 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
     }
 
     document.getElementById('merchant-overlay').classList.remove('merchant-hidden');
-    _switchMerchantTab('buy');
+    
+    const tabs = document.getElementById('merchant-tabs');
+    const mainCol = document.getElementById('merchant-main-col');
+    if (shopType === 'none') {
+        tabs.style.display = 'none';
+        document.getElementById('merchant-body').style.display = 'none';
+        document.getElementById('merchant-sell-body').style.display = 'none';
+    } else {
+        tabs.style.display = 'flex';
+        _switchMerchantTab('buy');
+    }
 }
 
 function _switchMerchantTab(mode) {
