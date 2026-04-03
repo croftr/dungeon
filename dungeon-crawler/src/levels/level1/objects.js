@@ -19,6 +19,7 @@ export function spawnLevel1Objects(ctx) {
         mummyGateOpened,
         crystalShrineState,
         level1HoleRoomSpawned,
+        level1BtnPortcullisOpened,
         monsterNpcSaved,
         interactables,
     } = ctx;
@@ -111,8 +112,8 @@ export function spawnLevel1Objects(ctx) {
     addTrap1(group, loader, 21, 10);  // long south corridor
 
     // ── Portcullises & Gates ──────────────────────────────────────────────────
-    // Portcullis at col 7, row 7 (opened by wall button)
-    addPortcullis(group, loader, 7, 7);
+    // Portcullis at col 7, row 7 (opened by wall button). Persists via level1BtnPortcullisOpened.
+    addPortcullis(group, loader, 7, 7, 0, level1BtnPortcullisOpened);
 
     // Button for that portcullis
     const { group: portcullisBtn } = createWallButton(-1, { target: 'portcullis' });

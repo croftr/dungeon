@@ -96,6 +96,8 @@ let _level2GiantPortcullisOpened = false;
 let _level2HoleClosed = false;
 let _level1HoleRoomSpawned = false;
 let _monsterNpcSaved = false;
+let _level1BtnPortcullisOpened = false;
+
 let _npcMixer = null;
 let _npcIdleAction = null;
 let _npcTalkAction = null;
@@ -393,7 +395,10 @@ export function initObjects(scene, camera) {
                         _animateButtonPress(obj);
                         // Hardcoded portcullis open
                         const p = objects.find(o => o.name === 'Portcullis' && o.gridRow === 7 && o.gridCol === 7);
-                        if (p) openPortcullis(p);
+                        if (p) {
+                            openPortcullis(p);
+                            _level1BtnPortcullisOpened = true;
+                        }
                     } else {
                         showMessage("You can't reach that from here.");
                     }
@@ -1976,6 +1981,7 @@ export function spawnObjectsForLevel() {
         mummyGateOpened: _mummyGateOpened,
         crystalShrineState: _crystalShrineState,
         level1HoleRoomSpawned: _level1HoleRoomSpawned,
+        level1BtnPortcullisOpened: _level1BtnPortcullisOpened,
         monsterNpcSaved: _monsterNpcSaved,
         // Level 2 state flags
         level2PortcullisOpened: _level2PortcullisOpened,
@@ -4577,6 +4583,7 @@ export function getWorldFlags() {
         level2GiantPortcullisOpened: _level2GiantPortcullisOpened,
         level2HoleClosed: _level2HoleClosed,
         level1HoleRoomSpawned: _level1HoleRoomSpawned,
+        level1BtnPortcullisOpened: _level1BtnPortcullisOpened,
         monsterNpcSaved: _monsterNpcSaved,
         disarmedTraps: [..._trapDisarmedSet],
         crystalShrineState: _crystalShrineState,
@@ -4598,6 +4605,7 @@ export function setWorldFlags(flags) {
     _level2GiantPortcullisOpened = flags.level2GiantPortcullisOpened ?? false;
     _level2HoleClosed = flags.level2HoleClosed ?? false;
     _level1HoleRoomSpawned = flags.level1HoleRoomSpawned ?? false;
+    _level1BtnPortcullisOpened = flags.level1BtnPortcullisOpened ?? false;
     _monsterNpcSaved = flags.monsterNpcSaved ?? false;
     _crystalShrineState = flags.crystalShrineState ?? 0;
     _seenEssences = new Set(flags.seenEssences ?? []);
