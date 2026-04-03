@@ -692,7 +692,7 @@ function showCharacterSelection() {
   function getVideoSrc(imagePath) {
     const filename = imagePath.split('/').pop();
     const base = filename.replace(/\.(png|jpg|jpeg)$/i, '').replace(/_head$/, '');
-    return `/heros/${base}_full.mp4`;
+    return asset(`/heros/${base}_full.mp4`);
   }
 
   function miniCardHTML(r) {
@@ -766,7 +766,7 @@ function showCharacterSelection() {
           </div>
           <div class="cs-detail-empty">
             <video class="cs-detail-bg-video" autoplay loop muted playsinline>
-              <source src="/videos/Haunted_Swamp_Dungeon.mp4" type="video/mp4" />
+              <source src="${asset('/videos/Haunted_Swamp_Dungeon.mp4')}" type="video/mp4" />
             </video>
             <div class="cs-detail-empty-prompt">
               <span class="cs-detail-empty-icon">⚔</span>
