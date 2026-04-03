@@ -2030,6 +2030,131 @@
       box-shadow: 0 0 10px rgba(212, 160, 23, 0.3);
     }
 
+    /* ── Special Attacks Section ── */
+    .essentiary-special-section {
+      margin-top: 14px;
+    }
+    .essentiary-section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .essentiary-section-icon {
+      font-size: 15px;
+      color: #d4501a;
+      flex-shrink: 0;
+      filter: drop-shadow(0 0 5px rgba(220,80,30,0.8));
+    }
+    .essentiary-section-title {
+      font-family: 'Georgia', serif;
+      font-size: 12px;
+      color: #d4501a;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      white-space: nowrap;
+      text-shadow: 0 0 8px rgba(220,80,30,0.6);
+    }
+    .essentiary-section-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, #7a2810 0%, transparent 100%);
+    }
+    .essentiary-special-attack {
+      background: linear-gradient(135deg, #150904 0%, #1c0f07 100%);
+      border: 1px solid #6a2808;
+      border-left: 3px solid #d4501a;
+      border-radius: 0 4px 4px 0;
+      padding: 13px 16px 12px;
+      margin-bottom: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    .essentiary-special-attack::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(220,80,30,0.06) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .essentiary-special-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 7px;
+    }
+    .essentiary-special-name {
+      font-family: 'Georgia', serif;
+      font-size: 16px;
+      font-weight: bold;
+      color: #ff7a40;
+      text-shadow: 0 0 10px rgba(255,100,40,0.45);
+      letter-spacing: 0.04em;
+    }
+    .essentiary-special-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .essentiary-badge-aoe {
+      background: rgba(180,40,20,0.30);
+      border: 1px solid #a03010;
+      color: #ff6040;
+    }
+    .essentiary-badge-trigger {
+      background: rgba(160,100,20,0.30);
+      border: 1px solid #906010;
+      color: #e0a040;
+    }
+    .essentiary-special-desc {
+      font-size: 13px;
+      color: #b08060;
+      line-height: 1.65;
+      margin-bottom: 10px;
+    }
+    .essentiary-special-footer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .essentiary-dmg-badge {
+      background: rgba(212,160,23,0.14);
+      border: 1px solid #6a4a10;
+      color: #d4a017;
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 2px;
+      letter-spacing: 0.06em;
+      font-weight: bold;
+    }
+    .essentiary-summon-badge {
+      background: rgba(40,140,60,0.18);
+      border: 1px solid #1e7030;
+      color: #60c878;
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 2px;
+      letter-spacing: 0.05em;
+    }
+    .essentiary-effect-chip {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 2px;
+      letter-spacing: 0.05em;
+    }
+    .effect-chip-fear   { background: rgba(100,40,180,0.25); border: 1px solid #5820a0; color: #c080ff; }
+    .effect-chip-poison { background: rgba(40,150,40,0.22);  border: 1px solid #1e7820; color: #70d870; }
+    .effect-chip-slow   { background: rgba(40,100,200,0.22); border: 1px solid #2050b0; color: #70b0ff; }
+    .effect-chip-rot    { background: rgba(100,70,20,0.32);  border: 1px solid #604010; color: #c09850; }
+    .effect-chip-frozen { background: rgba(30,160,210,0.20); border: 1px solid #1898c8; color: #70d8ff; }
+    .effect-chip-stun   { background: rgba(210,170,20,0.20); border: 1px solid #a08010; color: #ffdd50; }
+
     /* ── Arena result notification ── */
     #arena-result-overlay {
       position: fixed;

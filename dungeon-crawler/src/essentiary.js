@@ -3,6 +3,63 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import MONSTERS_DATA from './data/monsters.json';
 
+const _EFFECT_CHIP_CLASS = {
+  fear:   'effect-chip-fear',
+  poison: 'effect-chip-poison',
+  slow:   'effect-chip-slow',
+  rot:    'effect-chip-rot',
+  frozen: 'effect-chip-frozen',
+  stun:   'effect-chip-stun',
+};
+
+const _EFFECT_DISPLAY = {
+  fear:   'Fear',
+  poison: 'Poison',
+  slow:   'Slow',
+  rot:    'Rot',
+  frozen: 'Frozen',
+  stun:   'Stun',
+};
+
+function _renderSpecialAttack(atk) {
+  const badges = [];
+  if (atk.aoe) badges.push(`<span class="essentiary-special-badge essentiary-badge-aoe">AoE</span>`);
+  if (atk.triggerCondition === 'half_hp') badges.push(`<span class="essentiary-special-badge essentiary-badge-trigger">&#9760; Triggers at 50% HP</span>`);
+
+  const footer = [];
+  if (atk.hits > 1 && atk.damageMultiplier != null) {
+    footer.push(`<span class="essentiary-dmg-badge">${atk.hits} hits &times; ${atk.damageMultiplier}&times;</span>`);
+  } else if (atk.damageMultiplier != null && atk.damageMultiplier !== 1) {
+    footer.push(`<span class="essentiary-dmg-badge">${atk.damageMultiplier}&times; damage</span>`);
+  }
+  if (atk.onHitEffects?.length) {
+    atk.onHitEffects.forEach(e => {
+      const cls = _EFFECT_CHIP_CLASS[e.effectId] ?? '';
+      const name = _EFFECT_DISPLAY[e.effectId] ?? e.effectId;
+      const pct = Math.round(e.chance * 100);
+      const dur = e.durationSec ? ` &middot; ${e.durationSec}s` : '';
+      footer.push(`<span class="essentiary-effect-chip ${cls}">${name} ${pct}%${dur}</span>`);
+    });
+  }
+  if (atk.summons?.length) {
+    atk.summons.forEach(s => {
+      const label = s.monsterType.charAt(0).toUpperCase() + s.monsterType.slice(1);
+      footer.push(`<span class="essentiary-summon-badge">&#8853; Summons ${s.count} ${label}</span>`);
+    });
+  }
+
+  return `
+    <div class="essentiary-special-attack">
+      <div class="essentiary-special-header">
+        <span class="essentiary-special-name">${atk.displayName}</span>
+        ${badges.join('')}
+      </div>
+      <div class="essentiary-special-desc">${atk.description}</div>
+      ${footer.length ? `<div class="essentiary-special-footer">${footer.join('')}</div>` : ''}
+    </div>
+  `;
+}
+
 let _currentMonsterKey = null;
 
 // ── Public API ────────────────────────────────────────────────────────────────
@@ -140,6 +197,23 @@ function _openDetail(key) {
       `<span class="essentiary-effect-tag">${e.effectId} (${Math.round(e.chance * 100)}%)</span>`
     ).join('');
     statsEl.innerHTML += `<div class="essentiary-effects-row">${effects}</div>`;
+  }
+
+  // Special attacks section — remove any previous before re-rendering
+  document.getElementById('essentiary-detail-special')?.remove();
+  if (def.specialAttacks?.length) {
+    const section = document.createElement('div');
+    section.id = 'essentiary-detail-special';
+    section.className = 'essentiary-special-section';
+    section.innerHTML = `
+      <div class="essentiary-section-header">
+        <span class="essentiary-section-icon">&#9876;</span>
+        <span class="essentiary-section-title">Special Abilities</span>
+        <div class="essentiary-section-line"></div>
+      </div>
+      ${def.specialAttacks.map(_renderSpecialAttack).join('')}
+    `;
+    statsEl.after(section);
   }
 
   _showDetailScreen();
