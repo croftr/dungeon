@@ -128,6 +128,15 @@
     "family": "Scaled and Aquatic",
     "description": "Warriors of the deep swamp who stand upright and carry the hides of their ancestors as armour. Relentless in pursuit and merciless in battle, their jaws can shear through iron.",
     "image": "/monster-images/crocodile-warrior.png",
+    "specialAttacks": [
+      {
+        "name": "crocSpecial",
+        "displayName": "Arcane Strike",
+        "description": "Channels arcane energy into a savage strike that hits all party members for heavy damage.",
+        "aoe": true,
+        "damageMultiplier": 1.3
+      }
+    ],
     "hp": 250,
     "defence": 8,
     "xp": 150,
@@ -363,6 +372,18 @@
     "family": "Ancient and Elemental",
     "description": "The primordial guardian of the deep forest, awakened only when its domain faces ultimate desecration. Ancient beyond memory, to face the Treeman is to face the wrath of the world itself.",
     "image": "/monster-images/treeman.png",
+    "specialAttacks": [
+      {
+        "name": "treemanAwakening",
+        "displayName": "Awakening of the Woods",
+        "description": "Triggered once when HP drops below 50%. The Treeman channels the primal fury of the forest, dealing AoE damage to all party members and summoning two TreeKin allies.",
+        "aoe": true,
+        "triggerCondition": "half_hp",
+        "summons": [
+          { "monsterType": "treekin", "count": 2 }
+        ]
+      }
+    ],
     "hp": 370,
     "defence": 9,
     "xp": 1000,
@@ -410,6 +431,19 @@
     "family": "Mythic and Giants",
     "description": "Massive and brute-brained, Ogres compensate for their low cunning with overwhelming ferocity. A single blow from their knotted fists can cave iron armour and shatter stone columns.",
     "image": "/monster-images/ogre.png",
+    "specialAttacks": [
+      {
+        "name": "doubleCombo",
+        "displayName": "Furious Double Strike",
+        "description": "A ferocious two-hit combo that hammers all party members. Each blow carries a very high chance to inflict fear, potentially routing the entire party.",
+        "aoe": true,
+        "damageMultiplier": 0.375,
+        "hits": 2,
+        "onHitEffects": [
+          { "effectId": "fear", "chance": 0.75, "durationSec": 10 }
+        ]
+      }
+    ],
     "hp": 260,
     "defence": 9,
     "xp": 500,
@@ -478,6 +512,17 @@
     "family": "Mythic and Giants",
     "description": "Imprisoned at the heart of a labyrinth of its own rage, the Minotaur is part man and part beast — and wholly terrifying. Its gore-stained horn has ended the charge of a hundred ill-fated heroes.",
     "image": "/monster-images/minotaur.png",
+    "specialAttacks": [
+      {
+        "name": "minotaurRage",
+        "displayName": "Rage",
+        "description": "The Minotaur roars with terrifying fury, releasing a wave of primal force that strikes all party members with a chance to inflict fear.",
+        "aoe": true,
+        "onHitEffects": [
+          { "effectId": "fear", "chance": 0.20 }
+        ]
+      }
+    ],
     "hp": 450,
     "defence": 10,
     "xp": 1200,
@@ -531,6 +576,19 @@
     "family": "Scaled and Aquatic",
     "description": "Amphibious hunters who slip between worlds of water and air with equal ease, the Aqua Men are both predator and dark omen. Their tridents carry the death of the deep sea.",
     "image": "/monster-images/aqua-man.png",
+    "specialAttacks": [
+      {
+        "name": "tidalWave",
+        "displayName": "Tidal Wave",
+        "description": "Unleashes a devastating surge of water that crashes over all party members, dealing reduced damage with a high chance to slow movement and a chance to poison.",
+        "aoe": true,
+        "damageMultiplier": 0.8,
+        "onHitEffects": [
+          { "effectId": "slow", "chance": 0.60, "durationSec": 8 },
+          { "effectId": "poison", "chance": 0.20 }
+        ]
+      }
+    ],
     "hp": 290,
     "defence": 12,
     "xp": 350,
@@ -584,6 +642,18 @@
     "family": "Scaled and Aquatic",
     "description": "The cold-blooded killers of the deep caverns, Lizard Men move with reptilian patience and strike with venom-laced precision. They are ancient predators who remember a world without men.",
     "image": "/monster-images/lizard-man.png",
+    "specialAttacks": [
+      {
+        "name": "venomSpit",
+        "displayName": "Venom Spit",
+        "description": "Spews a torrent of corrosive venom at all party members, dealing reduced damage with a very high chance to inflict poison.",
+        "aoe": true,
+        "damageMultiplier": 0.8,
+        "onHitEffects": [
+          { "effectId": "poison", "chance": 0.70 }
+        ]
+      }
+    ],
     "hp": 380,
     "defence": 12,
     "xp": 1100,
@@ -675,6 +745,17 @@
     "family": "Mythic and Giants",
     "description": "A colossus born of mountain stone and ancient hunger, the Giant's footfalls shake the earth. Few swords can reach its vital organs and fewer warriors live to tell the tale.",
     "image": "/monster-images/giant.png",
+    "specialAttacks": [
+      {
+        "name": "giantsRoar",
+        "displayName": "Giant's Roar",
+        "description": "A bone-shaking roar that blasts all party members — including the back row — with concussive force, with a chance to inflict fear.",
+        "aoe": true,
+        "onHitEffects": [
+          { "effectId": "fear", "chance": 0.20 }
+        ]
+      }
+    ],
     "hp": 550,
     "defence": 12,
     "xp": 1500,
@@ -722,6 +803,18 @@
     "family": "Mythic and Giants",
     "description": "A creature born of pure malice in the pit between worlds, summoned by dark recklessness. Its eyes burn with loathing for all living things and its form warps reality around it.",
     "image": "/monster-images/demon.png",
+    "specialAttacks": [
+      {
+        "name": "demonCleave",
+        "displayName": "Demon Cleave",
+        "description": "A nightmarish cleave that rends the air itself, striking all party members for half damage with a chance to inflict fear.",
+        "aoe": true,
+        "damageMultiplier": 0.5,
+        "onHitEffects": [
+          { "effectId": "fear", "chance": 0.25, "durationSec": 10 }
+        ]
+      }
+    ],
     "hp": 200,
     "defence": 15,
     "xp": 220,
@@ -773,6 +866,18 @@
     "family": "Mythic and Giants",
     "description": "When demonic essence fuses with ogre flesh, the result is a nightmare of physical power and infernal will. An apex predator born of two hells, it revels in slaughter above all else.",
     "image": "/monster-images/demon-ogre.png",
+    "specialAttacks": [
+      {
+        "name": "hellSpawn",
+        "displayName": "Hell Spawn",
+        "description": "Calls upon infernal power to unleash dark energy against all party members for half damage, with a chance to inflict rot.",
+        "aoe": true,
+        "damageMultiplier": 0.5,
+        "onHitEffects": [
+          { "effectId": "rot", "chance": 0.50 }
+        ]
+      }
+    ],
     "hp": 450,
     "defence": 18,
     "xp": 800,
