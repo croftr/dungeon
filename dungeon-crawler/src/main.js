@@ -11,7 +11,7 @@ import { getItemDef } from './items.js';
 import { initEquipment, hideDropButton, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
-import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, getContainerStates, setPendingContainerOverrides, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned } from './objects.js';
+import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, getContainerStates, setPendingContainerOverrides, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
@@ -371,6 +371,13 @@ setCallbacks({
         camera.rotation.y = FACING_ANGLES[player.facing];
         drawMinimap();
         updateStatus();
+
+        // Play the help audio once upon falling – if he's not yet saved
+        const flags = getWorldFlags();
+        console.log("Antigravity: Fall sequence - monsterNpcSaved:", flags.monsterNpcSaved);
+        if (!flags.monsterNpcSaved) {
+          playSoundByUrl(asset('/npcs/monster-npc/help.mp3'), 1.0);
+        }
 
         // Hide the blackout
         if (blackout) {
@@ -1898,7 +1905,7 @@ window.addEventListener('mousemove', (e) => {
   let keyItemIcon = null;
   for (let hit of intersects) {
     const ud = hit.object.userData;
-    if (ud && (ud.isButton || ud.isChest || ud.isArmorStand || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDialogueNPC || ud.isDamageTrap || ud.isEgg || ud.isTeleportTorch || ud.isAlchemyWorkshop || ud.isAnvil || ud.isShop || ud.isDroppedItem || ud.isHeroDoor || ud.isCrystalShrine || ud.isPortalActivatorStatue || ud.isKeyhole)) {
+    if (ud && (ud.isButton || ud.isChest || ud.isArmorStand || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDialogueNPC || ud.isDamageTrap || ud.isEgg || ud.isTeleportTorch || ud.isAlchemyWorkshop || ud.isAnvil || ud.isShop || ud.isDroppedItem || ud.isHeroDoor || ud.isCrystalShrine || ud.isPortalActivatorStatue || ud.isKeyhole || ud.isPitLadder)) {
       if (hit.object.visible) {
         isHoveringInteractable = true;
         if (ud.isButton) hoveredBtn = hit.object;

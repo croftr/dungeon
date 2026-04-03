@@ -94,6 +94,7 @@ let _level2PortcullisOpened = false;
 let _level2GiantPortcullisOpened = false;
 let _level2HoleClosed = false;
 let _level1HoleRoomSpawned = false;
+let _monsterNpcSaved = false;
 let _npcMixer = null;
 let _npcIdleAction = null;
 let _npcTalkAction = null;
@@ -579,6 +580,14 @@ export function initObjects(scene, camera) {
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 3 && distCol <= 3) {
                     showMessage(obj.userData.dialogue || '...');
+                    if (obj.userData.clickAudio) {
+                        playSoundByUrl(asset(obj.userData.clickAudio), 0.8);
+                    }
+                    // Relocate quest: If this is the monster npc in the pit trap room
+                    if (window.currentLevel === 1 && obj.userData.gridRow === 26 && obj.userData.gridCol === 2) {
+                        _monsterNpcSaved = true;
+                        console.log("Antigravity: Monster NPC saved! _monsterNpcSaved is now true.");
+                    }
                 }
                 break;
             } else if (obj.userData.isWeaponRack) {
@@ -598,12 +607,30 @@ export function initObjects(scene, camera) {
                 }
                 break;
             } else if (obj.userData.isAlchemyWorkshop) {
+                const isOnSameSquare = (player.gridRow === obj.userData.gridRow && player.gridCol === obj.userData.gridCol);
+                if (isOnSameSquare) {
+                    openAlchemyModal();
+                } else {
+                    showMessage("Stand by the workshop to use it.");
+                }
+                break;
+            } else if (obj.userData.isPitLadder) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 1 && distCol <= 1) {
-                    openAlchemyModal();
+                    // Teleport back up – near the hole (1, 15)
+                    player.gridRow = 1;
+                    player.gridCol = 14;
+                    player.facing = 3; // West – facing away from the hole at (1, 15)
+                    const w = cellToWorld(1, 14);
+                    camera.position.set(w.x, w.y, w.z);
+                    camera.rotation.order = 'YXZ';
+                    camera.rotation.y = FACING_ANGLES[player.facing];
+                    drawMinimap();
+                    updateStatus();
+                    showMessage("You climb back up the ladder.");
                 } else {
-                    showMessage("You can't reach the workshop from here.");
+                    showMessage("You are too far from the ladder.");
                 }
                 break;
             } else if (obj.userData.isTrainingConsole) {
@@ -1895,19 +1922,20 @@ export function spawnObjectsForLevel() {
         addPortal, addDisabledPortal, addPortcullis, addKeyhole,
         addStatue, addPortalActivatorStatue, addPartyConfirmNPC, addDialogueNPC, addCustomNPC,
         addAnvil, addAlchemyWorkshop, addDroppedTorch, addEtherealEgg, addStairs,
-        addTrap1, createWallButton, addArmourStand, addTrainingConsole,
+        addTrap1, createWallButton, addArmourStand, addTrainingConsole, addPitLadder,
         // Level 1 state flags
         starterPortalEnabled: _starterPortalEnabled,
         starterGateOpened: _starterGateOpened,
         mummyGateOpened: _mummyGateOpened,
+        crystalShrineState: _crystalShrineState,
         level1HoleRoomSpawned: _level1HoleRoomSpawned,
+        monsterNpcSaved: _monsterNpcSaved,
         // Level 2 state flags
         level2PortcullisOpened: _level2PortcullisOpened,
         level2GiantPortcullisOpened: _level2GiantPortcullisOpened,
         level2HoleClosed: _level2HoleClosed,
         // Level 3 state flags
         minotaurDead,
-        crystalShrineState: _crystalShrineState,
         // State setters (values written back to objects.js module scope)
         setStarterGate: (g) => { _starterGate = g; },
         setLevel1HoleRoomSpawned: (val) => { _level1HoleRoomSpawned = val; },
@@ -2748,6 +2776,7 @@ function addCustomNPC(scene, loader, col, row, glbPath, dialogue, scale = 0.55, 
                 child.userData.dialogue = dialogue;
                 child.userData.proximityAudio = proximityAudio;
                 child.userData.proximityRange = proximityRange;
+                child.userData.clickAudio = arguments[12]; // Support for clickAudio in 13th arg
                 interactables.push(child);
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];
@@ -4430,6 +4459,7 @@ export function getWorldFlags() {
         level2GiantPortcullisOpened: _level2GiantPortcullisOpened,
         level2HoleClosed: _level2HoleClosed,
         level1HoleRoomSpawned: _level1HoleRoomSpawned,
+        monsterNpcSaved: _monsterNpcSaved,
         disarmedTraps: [..._trapDisarmedSet],
         crystalShrineState: _crystalShrineState,
     };
@@ -4447,6 +4477,7 @@ export function setWorldFlags(flags) {
     _level2GiantPortcullisOpened = flags.level2GiantPortcullisOpened ?? false;
     _level2HoleClosed = flags.level2HoleClosed ?? false;
     _level1HoleRoomSpawned = flags.level1HoleRoomSpawned ?? false;
+    _monsterNpcSaved = flags.monsterNpcSaved ?? false;
     _crystalShrineState = flags.crystalShrineState ?? 0;
     if (_level2HoleClosed) level2Map[17][23] = CELL_FLOOR;
     if (_level1HoleRoomSpawned) {
@@ -4460,6 +4491,24 @@ export function setWorldFlags(flags) {
     if (Array.isArray(flags.disarmedTraps)) {
         for (const key of flags.disarmedTraps) _trapDisarmedSet.add(key);
     }
+}
+
+function addPitLadder(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, scale = 0.5) {
+    loader.load(asset('/items/ladder.glb'), (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(scale);
+        model.position.set(col * CELL + offsetX, 0, row * CELL + offsetZ);
+        model.rotation.y = rotY;
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.userData.isPitLadder = true;
+                child.userData.gridRow = row;
+                child.userData.gridCol = col;
+                interactables.push(child);
+            }
+        });
+        scene.add(model);
+    });
 }
 
 /** Returns a snapshot of merchant stock. */

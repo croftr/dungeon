@@ -14,18 +14,26 @@ export function spawnLevel1Objects(ctx) {
         addBonePile, addDecoration,
         addPortal, addPortcullis,
         addStatue, addPortalActivatorStatue,
-        addTrap1, addCustomNPC, addDialogueNPC,
+        addTrap1, addCustomNPC, addDialogueNPC, addPitLadder,
         createWallButton,
         mummyGateOpened,
         crystalShrineState,
         level1HoleRoomSpawned,
+        monsterNpcSaved,
         interactables,
     } = ctx;
 
     // ── Monster NPC ──────────────────────────────────────────────────────────
     // In the hidden basement arrival room at (26, 2).
+    if (level1HoleRoomSpawned && !monsterNpcSaved) {
+        addCustomNPC(group, loader, 2, 26, '/npcs/monster-npc/agree-gesture.glb', "", 0.6, Math.PI, 0, 0, null, 2, '/npcs/monster-npc/thank-you.mp3');
+    }
+
+    // ── Pit Ladder ───────────────────────────────────────────────────────────
     if (level1HoleRoomSpawned) {
-        addCustomNPC(group, loader, 2, 26, '/npcs/monster-npc/agree-gesture.glb', "Mmmm... more meat for the grinder?", 0.6, 0, 0, 0, '/npcs/monster-npc/help.mp3', 2);
+        // Place ladder against the north wall – where the player fell from
+        // Rotated Math.PI / 2 to be flat on the wall, and more north (offsetZ -0.8)
+        addPitLadder(group, loader, 2, 24, Math.PI / 2, 0, -0.8, 0.7);
     }
 
     // ── Chests ───────────────────────────────────────────────────────────────

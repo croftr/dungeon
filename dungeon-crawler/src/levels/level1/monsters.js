@@ -211,4 +211,13 @@ export const level1Monsters = [
     asset('/monsters/zombie-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
     null,
     asset('/monsters/zombie-animation/zombie-combat-idle.glb')),
+
+  // Mummy in the Level 1 pit arrival room (24, 1)
+  inst(D.mummy, 104, 24, 1,
+    asset('/monsters/mummy-annimation/Meshy_AI_Animation_Idle_withSkin.glb'),
+    asset('/monsters/mummy-annimation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb'),
+    asset('/monsters/mummy-annimation/mummy-attack.mp3'), 0.45, 0, 0, 1, null,
+    asset('/monsters/mummy-annimation/Meshy_AI_Animation_Dead_withSkin.glb'),
+    null,
+    asset('/monsters/mummy-annimation/Meshy_AI_Animation_Walking_withSkin.glb')),
 ];

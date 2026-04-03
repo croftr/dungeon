@@ -14,11 +14,12 @@ export function spawnLevel0Objects(ctx) {
         addCrystals,
         addPortal, addDisabledPortal, addPortcullis,
         addPartyConfirmNPC,
-        addAnvil, addAlchemyWorkshop, addDroppedTorch, addTrap1,
+        addAnvil, addAlchemyWorkshop, addDroppedTorch, addTrap1, addCustomNPC, addDialogueNPC,
         addDecoration, addCrystalShrine, addHeroDoor, addTrainingConsole,
         createWallButton,
         starterPortalEnabled, starterGateOpened,
         setStarterGate,
+        monsterNpcSaved,
         interactables,
     } = ctx;
 
@@ -97,7 +98,12 @@ export function spawnLevel0Objects(ctx) {
     addTrainingConsole(group, loader, 22, 7, Math.PI);
 
     // ── Practice trap — NW corner of east room ────────────────────────────────
-    addTrap1(group, loader, 7, 17);
+    if (!monsterNpcSaved) {
+        addTrap1(group, loader, 7, 17);
+    } else {
+        // Monster relocated here - col 17, row 7, face North (0)
+        addCustomNPC(group, loader, 17, 7, '/npcs/monster-npc/agree-gesture.glb', "Mmmm... better here. Much safer.", 0.6, 0, 0, 0, null, 2);
+    }
 
     // ── Dev shortcut: button on the west wall of the starter room ─────────────
     // Press while facing west (toward col 8) to teleport directly to level 4.
