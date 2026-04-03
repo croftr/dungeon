@@ -3455,11 +3455,11 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
     _merchantSellBasket = [];
     _merchantMode = 'buy';
     _activeMerchantAvailable = shopType === 'potions' ? _potionMerchantAvailable : _merchantAvailable;
-    
+
     let title = 'Merchant';
     if (shopType === 'potions') title = 'Apothecary';
-    else if (shopType === 'none') title = 'The Lost Recruit';
-    
+    else if (shopType === 'none') title = 'Barnaby';
+
     document.getElementById('merchant-title').textContent = title;
 
     const modal = document.getElementById('merchant-modal');
@@ -3474,7 +3474,7 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
     }
 
     document.getElementById('merchant-overlay').classList.remove('merchant-hidden');
-    
+
     const tabs = document.getElementById('merchant-tabs');
     const mainCol = document.getElementById('merchant-main-col');
     if (shopType === 'none' && questNpcId !== 'monster-npc') {
@@ -3484,12 +3484,12 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
     } else {
         tabs.style.display = 'flex';
         if (questNpcId === 'monster-npc') {
-            title = 'The Lost Recruit';
+            title = 'Barnaby';
             document.getElementById('merchant-title').textContent = title;
             tabs.style.display = 'none'; // Only selling parchments, no sell-back tab
-            
+
             _activeMerchantAvailable = _monsterNpcStock;
-            
+
             // Check for new essences to update stock
             const essencesHeld = [];
             party.forEach(member => {
@@ -3597,6 +3597,7 @@ function _renderMerchantShop() {
             slot.addEventListener('click', () => {
                 playItemSound(name);
                 _merchantBasket.push(name);
+                equip.hideTooltip();
                 _renderMerchantShop();
                 _renderMerchantBasket();
                 _updateMerchantTotals();
@@ -3634,6 +3635,7 @@ function _renderMerchantBasket() {
             slot.addEventListener('click', () => {
                 playItemSound(name);
                 _merchantBasket.splice(idx, 1);
+                equip.hideTooltip();
                 _renderMerchantShop();
                 _renderMerchantBasket();
                 _updateMerchantTotals();
@@ -3757,6 +3759,7 @@ function _renderMerchantPartyItems() {
                 slot.addEventListener('click', () => {
                     playItemSound(item.name);
                     _merchantSellBasket.push({ charIndex: ci, invIndex: invIdx, name: item.name });
+                    equip.hideTooltip();
                     _renderMerchantPartyItems();
                     _renderMerchantSellBasket();
                     _updateMerchantSellTotals();
@@ -3797,6 +3800,7 @@ function _renderMerchantSellBasket() {
             slot.addEventListener('click', () => {
                 playItemSound(entry.name);
                 _merchantSellBasket.splice(idx, 1);
+                equip.hideTooltip();
                 _renderMerchantPartyItems();
                 _renderMerchantSellBasket();
                 _updateMerchantSellTotals();
