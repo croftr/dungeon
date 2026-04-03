@@ -29,9 +29,8 @@ export function spawnLevel0Objects(ctx) {
     // ── Starter Stash in the starter room ─────────────────────────────────────────────
     addChest(group, loader, 13.4, 10, Math.PI / 2, -0.1, [
         { name: 'Gold Coins', quantity: 100 },
-        'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore", "Life Essence", "Red Crystal", "Blue Crystal",
-        "Iron Ore", "Iron Ore", "Scroll of Fireball", "Scroll of Cure Poison", "Scroll of Rejuvenate",
-        "Potions Parchment", "Forge Armour Parchment", "Forge Weapons Parchment", "Minor Potions Parchment", "Party Potions Parchment", "Scroll of Incinerate"
+        'Torch', 'Potion of Invincibility', 'Potion of Unseen', "Life Essence", "Iron Ore", "Life Essence", "Red Crystal", "Blue Crystal", "Ogre's Head", "Iron Helm",
+        "Forge Armour Parchment", "Forge Weapons Parchment", "Aqua Man Essence", "Crocodile Warrior Essence", "Demon Ogre Essence", "Demon Essence", "Giant Essence", "Lizard Man Essence", "Minotaur Essence", "Ogre Essence", "Tree Man Essence"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in the east room (center) ────────────────────────────────────

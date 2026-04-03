@@ -205,5 +205,86 @@
         "value": 100,
         "weight": 0.1,
         "sellable": true
+    },
+    {
+        "name": "Aqua Man Essence",
+        "slot": "loot",
+        "icon": "/icons/ingredients/aqua_man_essence.webp",
+        "description": "A shimmering blue-green orb containing the core essence of an Aqua Man.",
+        "value": 0,
+        "weight": 0.1,
+        "sellable": false
+    },
+    {
+        "name": "Crocodile Warrior Essence",
+        "slot": "loot",
+        "icon": "/icons/ingredients/crocodile_warrior_essence.webp",
+        "description": "A tough, swampy orb containing the core essence of a Crocodile Warrior.",
+        "value": 0,
+        "weight": 0.1,
+        "sellable": false
+    },
+    {
+        "name": "Demon Ogre Essence",
+        "slot": "loot",
+        "icon": "/icons/ingredients/demon_ogre_essence.webp",
+        "description": "A chaotic, fiery orb containing the core essence of a Demon Ogre.",
+        "value": 0,
+        "weight": 0.1,
+        "sellable": false
+    },
+    {
+        "name": "Demon Essence",
+        "slot": "loot",
+        "icon": "/icons/ingredients/demon_essence.webp",
+        "description": "A malicious, glowing orb containing the core essence of a Demon.",
+        "value": 0,
+        "weight": 0.1,
+        "sellable": false
+    },
+    {
+        "name": "Giant Essence",
+        "slot": "loot",
+        "icon": "/icons/ingredients/giant_essence.webp",
+        "description": "A massive, earthy orb containing the core essence of a Giant.",
+        "value": 0,
+        "weight": 0.1,
+        "sellable": false
+    },
+    {
+        "name": "Lizard Man Essence",
+        "slot": "loot",
+        "icon": "/icons/ingredients/lizard_man_essence.webp",
+        "description": "A reptilian, vibrant orb containing the core essence of a Lizard Man.",
+        "value": 0,
+        "weight": 0.1,
+        "sellable": false
+    },
+    {
+        "name": "Minotaur Essence",
+        "slot": "loot",
+        "icon": "/icons/ingredients/minotaur_essence.webp",
+        "description": "A powerful, blood-orange orb containing the core essence of a Minotaur.",
+        "value": 0,
+        "weight": 0.1,
+        "sellable": false
+    },
+    {
+        "name": "Ogre Essence",
+        "slot": "loot",
+        "icon": "/icons/ingredients/ogre_essence.webp",
+        "description": "A brutish, mossy orb containing the core essence of an Ogre.",
+        "value": 0,
+        "weight": 0.1,
+        "sellable": false
+    },
+    {
+        "name": "Tree Man Essence",
+        "slot": "loot",
+        "icon": "/icons/ingredients/tree_man_essence.webp",
+        "description": "A nature-infused, wood-like orb containing the core essence of a Tree Man.",
+        "value": 0,
+        "weight": 0.1,
+        "sellable": false
     }
 ]

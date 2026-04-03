@@ -34,6 +34,10 @@
             {
                 "name": "Ogre's Head",
                 "quantity": 1
+            },
+            {
+                "name": "Ogre Essence",
+                "quantity": 1
             }
         ]
     },
@@ -54,6 +58,10 @@
             },
             {
                 "name": "Minotaur Horn",
+                "quantity": 1
+            },
+            {
+                "name": "Minotaur Essence",
                 "quantity": 1
             }
         ]
@@ -76,6 +84,10 @@
             {
                 "name": "Lizard Scale",
                 "quantity": 1
+            },
+            {
+                "name": "Lizard Man Essence",
+                "quantity": 1
             }
         ]
     },
@@ -96,6 +108,10 @@
             },
             {
                 "name": "Crocodile Hide",
+                "quantity": 1
+            },
+            {
+                "name": "Crocodile Warrior Essence",
                 "quantity": 1
             }
         ]
@@ -118,6 +134,10 @@
             {
                 "name": "Demon's Eyes",
                 "quantity": 1
+            },
+            {
+                "name": "Demon Essence",
+                "quantity": 1
             }
         ]
     },
@@ -138,6 +158,10 @@
             },
             {
                 "name": "Aqua Man Flipper",
+                "quantity": 1
+            },
+            {
+                "name": "Aqua Man Essence",
                 "quantity": 1
             }
         ]
@@ -160,6 +184,10 @@
             {
                 "name": "Giant's Loin Cloth",
                 "quantity": 1
+            },
+            {
+                "name": "Giant Essence",
+                "quantity": 1
             }
         ]
     },
@@ -180,6 +208,10 @@
             },
             {
                 "name": "Giant's Club",
+                "quantity": 1
+            },
+            {
+                "name": "Giant Essence",
                 "quantity": 1
             }
         ]

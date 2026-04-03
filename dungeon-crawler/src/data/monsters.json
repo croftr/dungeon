@@ -150,6 +150,10 @@
       {
         "item": "Crocodile Hide",
         "chance": 0.7
+      },
+      {
+        "item": "Crocodile Warrior Essence",
+        "chance": 1
       }
     ]
   },
@@ -382,6 +386,10 @@
       {
         "item": "Fermented Sugar",
         "chance": 0.25
+      },
+      {
+        "item": "Tree Man Essence",
+        "chance": 1
       }
     ]
   },
@@ -427,6 +435,10 @@
       {
         "item": "Iron Ore",
         "chance": 0.5
+      },
+      {
+        "item": "Ogre Essence",
+        "chance": 1
       }
     ]
   },
@@ -484,6 +496,10 @@
       {
         "item": "Minotaur Horn",
         "chance": 1
+      },
+      {
+        "item": "Minotaur Essence",
+        "chance": 1
       }
     ],
     "onHitEffects": [
@@ -537,6 +553,10 @@
       {
         "item": "Aqua Man Flipper",
         "chance": 0.3
+      },
+      {
+        "item": "Aqua Man Essence",
+        "chance": 1
       }
     ]
   },
@@ -583,6 +603,10 @@
       },
       {
         "item": "Lizard Scale",
+        "chance": 1
+      },
+      {
+        "item": "Lizard Man Essence",
         "chance": 1
       }
     ]
@@ -662,6 +686,10 @@
       {
         "item": "Giant's Loin Cloth",
         "chance": 1
+      },
+      {
+        "item": "Giant Essence",
+        "chance": 1
       }
     ]
   },
@@ -707,6 +735,10 @@
       {
         "item": "Iron Ore",
         "chance": 0.3
+      },
+      {
+        "item": "Demon Essence",
+        "chance": 1
       }
     ]
   },
@@ -736,6 +768,10 @@
       {
         "item": "Ogre's Head",
         "chance": 0.4
+      },
+      {
+        "item": "Demon Ogre Essence",
+        "chance": 1
       }
     ]
   }
