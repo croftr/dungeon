@@ -14,7 +14,7 @@ export function spawnLevel1Objects(ctx) {
         addBonePile, addDecoration,
         addPortal, addPortcullis,
         addStatue, addPortalActivatorStatue,
-        addTrap1, addCustomNPC, addDialogueNPC, addPitLadder,
+        addTrap1, addCustomNPC, addDialogueNPC, addPitLadder, addShop,
         createWallButton,
         mummyGateOpened,
         crystalShrineState,
@@ -26,7 +26,13 @@ export function spawnLevel1Objects(ctx) {
     // ── Monster NPC ──────────────────────────────────────────────────────────
     // In the hidden basement arrival room at (26, 2).
     if (level1HoleRoomSpawned && !monsterNpcSaved) {
-        addCustomNPC(group, loader, 2, 26, '/npcs/monster-npc/agree-gesture.glb', "", 0.6, Math.PI, 0, 0, null, 2, '/npcs/monster-npc/thank-you.mp3');
+        // Monster here - col 2, row 26, face South (Math.PI)
+        // Using addShop (questType: 'none') to support model swapping and greeting audio
+        addShop(group, loader, 2, 26, Math.PI, 0, 0, 'none', '/npcs/monster-npc/idle.glb', {
+            scale: 0.6,
+            greetingModel: '/npcs/monster-npc/agree-gesture.glb',
+            greetingAudio: ['/npcs/monster-npc/thank-you.mp3']
+        });
     }
 
     // ── Pit Ladder ───────────────────────────────────────────────────────────

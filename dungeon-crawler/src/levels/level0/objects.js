@@ -102,10 +102,11 @@ export function spawnLevel0Objects(ctx) {
         addTrap1(group, loader, 7, 17);
     } else {
         // Monster relocated here - col 17, row 7, face North (0)
-        // Now using addShop to handle the quest modal and rotating greetings
-        addShop(group, loader, 17, 7, 0, 0, 0, 'none', '/npcs/monster-npc/agree-gesture.glb', {
+        // Now using addShop with idle base and agree-gesture greeting
+        addShop(group, loader, 17, 7, 0, 0, 0, 'none', '/npcs/monster-npc/idle.glb', {
             questNpcId: 'monster-npc',
             scale: 0.6,
+            greetingModel: '/npcs/monster-npc/agree-gesture.glb',
             greetingAudio: [
                 '/npcs/monster-npc/greeting1.mp3',
                 '/npcs/monster-npc/greeting2.mp3'

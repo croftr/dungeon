@@ -571,6 +571,12 @@ export function initObjects(scene, camera) {
                         playShopkeeperSound();
                     }
                     openMerchantModal(obj.userData.shopType || 'weapons', obj.userData.questNpcId || null);
+
+                    // Relocate quest: If this is the monster npc in the pit trap room (now an isShop entity)
+                    if (window.currentLevel === 1 && obj.userData.gridRow === 26 && obj.userData.gridCol === 2) {
+                        _monsterNpcSaved = true;
+                        console.log("Antigravity: Monster NPC saved via shop interaction!");
+                    }
                 } else {
                     showMessage("The merchant watches you from behind the counter.");
                 }
