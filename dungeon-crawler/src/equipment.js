@@ -4855,6 +4855,26 @@ function _readParchment(memberIndex, invIndex, def) {
       html += `</div>`;
     });
     body.innerHTML = html;
+  } else if (def.parchmentType === 'essence-recipe' && def.recipeName) {
+    const item = FORGE.find(r => r.name === def.recipeName);
+    let html = `<p style="margin-bottom: 20px;"><em>The following ancient monster-crafted recipe has been deciphered:</em></p>`;
+    if (item) {
+      html += `<div style="margin-bottom: 15px;">`;
+      html += `<strong style="font-size: 1.1em; color: #5a2a1a;">${item.name}</strong><br/>`;
+      if (item.ingredients && item.ingredients.length > 0) {
+        html += `<div style="margin: 5px 0;">`;
+        item.ingredients.forEach(ing => {
+          html += `• ${ing.quantity}x ${ing.name}<br/>`;
+        });
+        html += `</div>`;
+      } else {
+        html += `• Unknown ingredients<br/>`;
+      }
+      html += `</div>`;
+    } else {
+      html += `<p>${def.description || 'The parchment is blank.'}</p>`;
+    }
+    body.innerHTML = html;
   } else {
     body.innerHTML = `<p>${def.description || 'The parchment is blank.'}</p>`;
   }

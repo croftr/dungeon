@@ -7,7 +7,7 @@ import { showMessage, drawMinimap, updateStatus } from './minimap.js';
 import { getItemDef } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refreshPartyCards, setHp, applyStatusEffect } from './party.js';
 import { addLogEntry } from './battle-log.js';
-import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playLearntSound, playSoundByUrl, playQuestAudio } from './audio.js';
+import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playLearntSound, playSoundByUrl, playQuestAudio, fadeOutQuestAudio } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
 import POTION_MERCHANT_DATA from './data/potion-merchant.json';
 import POTIONS_DATA from './data/items/potions.json';
@@ -183,6 +183,23 @@ let _forgeModalOpen = false;
 const _knownForgeRecipes = new Set(); // result item names learned by the party
 
 const _FORGE_WEAPON_NAMES = new Set(WEAPONS_DATA.map(w => w.name));
+
+/**
+ * Returns true if the current party is holding a monster essence that the NPC has NOT seen yet.
+ */
+function _hasNewEssencesForNpc(questNpcId) {
+    if (questNpcId !== 'monster-npc') return false;
+    let foundNew = false;
+    party.forEach(member => {
+        if (member.isEmpty) return;
+        member.inventory.forEach(item => {
+            if (item && item.name.endsWith(' Essence') && item.name !== 'Life Essence') {
+                if (!_seenEssences.has(item.name)) foundNew = true;
+            }
+        });
+    });
+    return foundNew;
+}
 
 // ─────────────────────────────────────────────
 //  SAVE GAME — container tracking
@@ -582,12 +599,17 @@ export function initObjects(scene, camera) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 1 && distCol <= 1) {
-                    if (obj.userData.greetingCallback) {
-                        obj.userData.greetingCallback();
-                    } else {
-                        playShopkeeperSound();
+                    const skipGreeting = window.currentLevel === 0 && _hasNewEssencesForNpc(obj.userData.questNpcId);
+                    if (!skipGreeting) {
+                        if (obj.userData.greetingCallback) {
+                            obj.userData.greetingCallback();
+                        } else {
+                            playShopkeeperSound();
+                        }
                     }
-                    openMerchantModal(obj.userData.shopType || 'weapons', obj.userData.questNpcId || null);
+                    if (obj.userData.questNpcId !== 'monster-npc' || window.currentLevel === 0) {
+                        openMerchantModal(obj.userData.shopType || 'weapons', obj.userData.questNpcId || null);
+                    }
 
                     // Relocate quest: If this is the monster npc in the pit trap room (now an isShop entity)
                     if (window.currentLevel === 1 && obj.userData.gridRow === 26 && obj.userData.gridCol === 2) {
@@ -651,6 +673,7 @@ export function initObjects(scene, camera) {
                     camera.rotation.y = FACING_ANGLES[player.facing];
                     drawMinimap();
                     updateStatus();
+                    fadeOutQuestAudio(0.5);
                     showMessage("You climb back up the ladder.");
                 } else {
                     showMessage("You are too far from the ladder.");
@@ -3493,7 +3516,10 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
             });
 
             if (playNewAudio) {
-                playSoundByUrl(asset('/npcs/monster-npc/new-essence.mp3'), 1.0);
+                playSuccessSound();
+                setTimeout(() => {
+                    playSoundByUrl(asset('/npcs/monster-npc/new-essence.mp3'), 1.0);
+                }, 1000);
             }
         }
 
@@ -4589,7 +4615,7 @@ export function setWorldFlags(flags) {
 function addPitLadder(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, scale = 0.5) {
     loader.load(asset('/items/ladder.glb'), (gltf) => {
         const model = gltf.scene;
-        model.scale.setScalar(scale);
+        model.scale.set(scale, scale * 1.5, scale);
         model.position.set(col * CELL + offsetX, 0, row * CELL + offsetZ);
         model.rotation.y = rotY;
         model.traverse((child) => {
