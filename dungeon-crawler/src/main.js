@@ -11,7 +11,7 @@ import { getItemDef } from './items.js';
 import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
-import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, getContainerStates, setPendingContainerOverrides, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags } from './objects.js';
+import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, getContainerStates, setPendingContainerOverrides, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
@@ -597,7 +597,7 @@ function animate(now) {
     const hasRangedTarget = monsters.some(t =>
       t.alive &&
       (t.level ?? 1) === currentLevel &&
-      isInFrontOfPlayer(t.gridRow, t.gridCol, 8) &&
+      isInFrontOfPlayer(t.gridRow, t.gridCol, 4) &&
       isPassable(t.gridRow, t.gridCol) &&
       isPassable(player.gridRow, player.gridCol)
     );
@@ -1736,9 +1736,9 @@ registerSaveHandler('level', {
 });
 
 window.loadLevel = function (levelNum) {
-  // Auto-save before leaving (skip during save restore)
+  // Auto-save before leaving removed.
   if (!window._isRestoring) {
-    autoSave(levelNum);
+    // autoSave(levelNum); // removed
   }
 
   // Lazily load videos needed for this level
@@ -2038,9 +2038,10 @@ window._arenaEnter = function (monsterId) {
   });
 
   // Callbacks fired by monster.js (victory) and party.js (defeat)
-  window._arenaVictory = () => {
+  window._arenaVictory = (row, col) => {
     _showArenaResult('Victory!', 'result-victory');
-    setTimeout(() => window._arenaExit(true), 2600);
+    // Spawn a blue portal at the arena start location (7, 4) so it doesn't overlap loot.
+    if (spawnArenaPortal) spawnArenaPortal(7, 4);
   };
   window._arenaDefeat = () => {
     _showArenaResult('Defeated...', 'result-defeat');

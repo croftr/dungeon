@@ -914,6 +914,7 @@ function populateTooltip(obj, showBuyPrice = false) {
         </div>
         <div id="detail-row-skillbonus" class="detail-skillbonus-list"></div>
         <div id="detail-row-onhit" class="detail-onhit-list"></div>
+        <div id="detail-row-familybonus" class="detail-familybonus-list"></div>
     `;
 
   if (isCustom) {
@@ -945,7 +946,7 @@ function populateTooltip(obj, showBuyPrice = false) {
       </div>
       <div class="detail-stat-row" id="detail-row-value">
           <span>${showBuyPrice ? 'Buy Price' : 'Sell Value'}</span>
-          <span id="item-detail-value">${showBuyPrice ? def.value : Math.max(1, Math.ceil(def.value / 5))} gp</span>
+          <span id="item-detail-value">${showBuyPrice ? def.value : Math.max(1, Math.ceil(def.value / 10))} gp</span>
       </div>
     `;
     return;
@@ -963,6 +964,7 @@ function populateTooltip(obj, showBuyPrice = false) {
   const hasSkillDurationBonus = def?.skillDurationBonusMs != null && def.skillDurationBonusMs !== 0;
   const hasTrapDisarmBonus = def?.trapDisarmBonus != null && def.trapDisarmBonus !== 0;
   const hasOnHitEffects = def?.onHitEffects && def.onHitEffects.length > 0;
+  const hasFamilyBonus = def?.familyBonus && def.familyBonus.length > 0;
   const hasBonusList = hasStatBonus || hasSkillBonus || hasSkillDurationBonus || hasTrapDisarmBonus;
 
   // Hide/show rows based on item type and available stats
@@ -974,6 +976,7 @@ function populateTooltip(obj, showBuyPrice = false) {
   document.getElementById('detail-row-statchange').style.display = hasStatChange ? 'flex' : 'none';
   document.getElementById('detail-row-skillbonus').style.display = hasBonusList ? 'flex' : 'none';
   document.getElementById('detail-row-onhit').style.display = hasOnHitEffects ? 'flex' : 'none';
+  document.getElementById('detail-row-familybonus').style.display = hasFamilyBonus ? 'flex' : 'none';
   document.getElementById('detail-row-scaling').style.display = hasScaling ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-mod').style.display = isAmmo ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-type').style.display = isAmmo ? 'flex' : 'none';
@@ -999,7 +1002,7 @@ function populateTooltip(obj, showBuyPrice = false) {
   descEl.textContent = '';
 
   document.getElementById('item-detail-value').textContent =
-    def != null ? (showBuyPrice ? def.value : Math.max(1, Math.ceil(def.value / 5))) + ' gp' : '—';
+    def != null ? (showBuyPrice ? def.value : Math.max(1, Math.ceil(def.value / 10))) + ' gp' : '—';
   document.getElementById('item-detail-weight').textContent =
     def != null ? def.weight + ' kg' : '—';
 
@@ -1070,6 +1073,19 @@ function populateTooltip(obj, showBuyPrice = false) {
       if (weights.resilience > 0) parts.push(`RES ${Math.round(weights.resilience * 100)}%`);
       document.getElementById('item-detail-scaling').textContent = parts.join(' · ');
     }
+  }
+
+  // Family bonus — extra damage vs a specific monster family
+  if (hasFamilyBonus) {
+    const listEl = document.getElementById('detail-row-familybonus');
+    listEl.innerHTML = def.familyBonus.map(({ family, bonus }) => {
+      const label = family.charAt(0).toUpperCase() + family.slice(1) + 's';
+      const sign = bonus >= 0 ? '+' : '';
+      return `<div class="detail-familybonus-item">
+        <span>vs. ${label}</span>
+        <span>${sign}${bonus} dmg</span>
+      </div>`;
+    }).join('');
   }
 
   // On-hit effects apply to both weapons AND ammo
@@ -2680,7 +2696,7 @@ function _executeLineSpell(caster, casterIndex, hand, spellDef) {
   playAction(spellDef.attackType, hand, casterIndex);
   _dispatchSpellVFX(spellDef.attackType);
 
-  const maxRange = spellDef.range ?? 2;
+  const maxRange = spellDef.range ?? 1;
   const hits = spellDef.hits ?? 2;
   const durationSec = spellDef.durationSec ?? 2;
   const intervalMs = (durationSec * 1000) / hits;
@@ -3038,7 +3054,7 @@ export function useHand(memberIndex, hand, silent = false) {
     }
   }
 
-  const maxRange = isRanged ? 8 : 1;
+  const maxRange = isRanged ? 4 : 1;
 
   // Find the alive monster closest to the player that is directly in front
   const target = isBuff ? null : _closestMonsterInFront(maxRange);

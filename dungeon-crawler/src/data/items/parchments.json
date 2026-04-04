@@ -51,7 +51,7 @@
     "type": "parchment",
     "parchmentType": "essence-recipe",
     "recipeName": "Ogre Helm",
-    "value": 1,
+    "value": 25,
     "weight": 0.1
   },
   {
@@ -61,7 +61,7 @@
     "type": "parchment",
     "parchmentType": "essence-recipe",
     "recipeName": "Minotaur Cuirass",
-    "value": 1,
+    "value": 25,
     "weight": 0.1
   },
   {
@@ -71,7 +71,7 @@
     "type": "parchment",
     "parchmentType": "essence-recipe",
     "recipeName": "Lizard Scale Cloak",
-    "value": 1,
+    "value": 25,
     "weight": 0.1
   },
   {
@@ -81,7 +81,7 @@
     "type": "parchment",
     "parchmentType": "essence-recipe",
     "recipeName": "Crocodilian Boots",
-    "value": 1,
+    "value": 25,
     "weight": 0.1
   },
   {
@@ -91,7 +91,7 @@
     "type": "parchment",
     "parchmentType": "essence-recipe",
     "recipeName": "Seers Shawl",
-    "value": 1,
+    "value": 25,
     "weight": 0.1
   },
   {
@@ -101,7 +101,7 @@
     "type": "parchment",
     "parchmentType": "essence-recipe",
     "recipeName": "Trickster's Hood",
-    "value": 1,
+    "value": 25,
     "weight": 0.1
   },
   {
@@ -111,7 +111,7 @@
     "type": "parchment",
     "parchmentType": "essence-recipe",
     "recipeName": "Barbarian's Loin Cloth",
-    "value": 1,
+    "value": 25,
     "weight": 0.1
   },
   {
@@ -121,7 +121,7 @@
     "type": "parchment",
     "parchmentType": "essence-recipe",
     "recipeName": "Barbarian's Club",
-    "value": 1,
+    "value": 25,
     "weight": 0.1
   },
   {
@@ -131,7 +131,17 @@
     "type": "parchment",
     "parchmentType": "essence-recipe",
     "recipeName": "Pyro Palms",
-    "value": 1,
+    "value": 25,
+    "weight": 0.1
+  },
+  {
+    "name": "Demon Blade Parchment",
+    "icon": "/icons/forge-weapons.webp",
+    "description": "An ancient looking piece of parchment. It documents the secrets of forging a Demon Blade.",
+    "type": "parchment",
+    "parchmentType": "essence-recipe",
+    "recipeName": "Demon Blade",
+    "value": 25,
     "weight": 0.1
   }
 ]

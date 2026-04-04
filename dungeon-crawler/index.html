@@ -1830,6 +1830,32 @@
       transform: translateY(-2px);
     }
 
+    .essentiary-card-locked {
+      cursor: default;
+      border-color: #2a2a2a;
+      background: linear-gradient(135deg, #0a0a0a 0%, #111 100%);
+    }
+    .essentiary-card-locked::before { background: none; }
+    .essentiary-card-locked:hover {
+      border-color: #2a2a2a;
+      box-shadow: none;
+      transform: none;
+    }
+    .essentiary-card-locked .essentiary-card-img-wrap {
+      border-color: #222;
+    }
+    .essentiary-card-locked .essentiary-card-img {
+      filter: brightness(0) saturate(0);
+      opacity: 0.15;
+    }
+    .essentiary-card-locked .essentiary-card-name {
+      color: #555;
+    }
+    .essentiary-card-locked .essentiary-card-desc {
+      color: #444;
+      font-style: italic;
+    }
+
     .essentiary-card-img-wrap {
       flex-shrink: 0;
       width: 120px;

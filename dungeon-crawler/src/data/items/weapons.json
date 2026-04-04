@@ -50,6 +50,26 @@
         "weight": 0.4
     },
     {
+        "name": "Demon Blade",
+        "slot": "hand",
+        "attackType": "swipe",
+        "weaponType": "dagger",
+        "staminaDrain": 1,
+        "baseDamage": 7,
+        "delay": 2,
+        "statWeights": {
+            "str": 0.1,
+            "dex": 0.9
+        },
+        "familyBonus": [
+            { "family": "demon", "bonus": 1 }
+        ],
+        "icon": "/icons/demon_blade.webp",
+        "description": "A wicked obsidian blade forged for the sole purpose of slaying demons.",
+        "value": 60,
+        "weight": 0.4
+    },
+    {
         "name": "Vampiric Dagger",
         "slot": "hand",
         "attackType": "swipe",
@@ -201,7 +221,9 @@
         "description": "A gnarled wooden staff. A reliable melee weapon for wizards who want to bash enemies.",
         "value": 54,
         "weight": 1.5,
-        "statBonuses": { "mp": 2 }
+        "statBonuses": {
+            "mp": 2
+        }
     },
     {
         "name": "Short Bow",

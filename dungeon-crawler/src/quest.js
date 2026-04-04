@@ -189,6 +189,7 @@ function _showQuestDetail(body, npcQuests, quest) {
             completeBtn.className = 'quest-btn quest-btn-accept';
             completeBtn.textContent = 'Complete Quest';
             completeBtn.addEventListener('click', () => {
+                completeBtn.disabled = true;
                 _completeQuest(body, npcQuests, quest);
             });
             btnRow.appendChild(completeBtn);

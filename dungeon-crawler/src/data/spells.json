@@ -144,7 +144,7 @@
         "mpCost": 20,
         "icon": "/icons/Incinerate.webp",
         "description": "Shoots a long torrent of fire directly in front of the caster, filling 2 squares and burning enemies twice over 2 seconds.",
-        "range": 2,
+        "range": 1,
         "hits": 2,
         "durationSec": 2,
         "value": 0,

@@ -156,7 +156,14 @@ export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef 
     });
   }
 
-  let raw = (weaponDef?.baseDamage ?? 0) + statBonus + passiveBonus;
+  let familyBonus = 0;
+  if (weaponDef?.familyBonus && monster?.family) {
+    for (const entry of weaponDef.familyBonus) {
+      if (entry.family === monster.family) familyBonus += entry.bonus;
+    }
+  }
+
+  let raw = (weaponDef?.baseDamage ?? 0) + statBonus + passiveBonus + familyBonus;
   if (ammoDef && ammoDef.damageModifier) {
     raw = Math.round(raw * ammoDef.damageModifier);
   }
@@ -213,10 +220,10 @@ export function calcPlayerMagicDamage(character, weaponDef, monster) {
  */
 export function calcMonsterDamage(monster, character, characterDefence = 0) {
   const raw = (monster.stats?.strength ?? 10) + MONSTER_BASE_ATTACK;
-  const mitigation = Math.floor(
-    ((character.stats?.resilience ?? 0) + (character.stats?.vitality ?? 0)) * RESILIENCE_DAMAGE_FACTOR / 2
-  );
-  const dmg = Math.max(1, raw - mitigation - characterDefence);
+  const resVit = (character.stats?.resilience ?? 0) + (character.stats?.vitality ?? 0);
+  const resFactor = 100 / (100 + resVit);
+  const afterRes = Math.floor(raw * resFactor);
+  const dmg = Math.max(1, afterRes - characterDefence);
   return window.easyMode ? Math.max(1, Math.floor(dmg * 0.5)) : dmg;
 }
 

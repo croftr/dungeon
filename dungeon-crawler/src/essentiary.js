@@ -5,6 +5,7 @@ import MONSTERS_DATA from './data/monsters.json';
 import MONSTER_FAMILIES from './data/monster-families.json';
 import STATUS_EFFECTS from './data/status-effects.json';
 import { asset } from './assets.js';
+import { getSeenEssences } from './objects.js';
 
 const _EFFECT_CHIP_CLASS = {
   fear:   'effect-chip-fear',
@@ -54,6 +55,15 @@ function _renderSpecialAttack(atk) {
       ${footer.length ? `<div class="essentiary-special-footer">${footer.join('')}</div>` : ''}
     </div>
   `;
+}
+
+/** Return the boss essence name from a monster def's drops, or null. */
+function _getEssenceName(def) {
+  if (!def.drops) return null;
+  for (const d of def.drops) {
+    if (d.item.endsWith(' Essence') && d.item !== 'Life Essence') return d.item;
+  }
+  return null;
 }
 
 let _currentMonsterKey = null;
@@ -181,22 +191,26 @@ function _renderList() {
 
   // Only monsters with a valid image field
   const entries = Object.entries(MONSTERS_DATA).filter(([, def]) => def.image);
+  const seen = getSeenEssences();
 
   entries.forEach(([key, def]) => {
+    const essenceName = _getEssenceName(def);
+    const locked = essenceName && !seen.has(essenceName);
+
     const card = document.createElement('div');
-    card.className = 'essentiary-card';
+    card.className = 'essentiary-card' + (locked ? ' essentiary-card-locked' : '');
     const imgExtra = LIST_IMG_CLASS[key] ? ` ${LIST_IMG_CLASS[key]}` : '';
     card.innerHTML = `
       <div class="essentiary-card-img-wrap">
-        <img src="${def.image}" alt="${def.name}" class="essentiary-card-img${imgExtra}" loading="lazy">
+        <img src="${def.image}" alt="${locked ? '???' : def.name}" class="essentiary-card-img${imgExtra}" loading="lazy">
       </div>
       <div class="essentiary-card-info">
-        <div class="essentiary-card-name">${def.name}</div>
-        <div class="essentiary-card-family">${MONSTER_FAMILIES[def.family]?.name ?? def.family}</div>
-        <div class="essentiary-card-desc">${def.description ?? ''}</div>
+        <div class="essentiary-card-name">${locked ? '???' : def.name}</div>
+        <div class="essentiary-card-family">${locked ? '' : (MONSTER_FAMILIES[def.family]?.name ?? def.family)}</div>
+        <div class="essentiary-card-desc">${locked ? 'Present its essence to Barnaby to unlock.' : (def.description ?? '')}</div>
       </div>
     `;
-    card.addEventListener('click', () => _openDetail(key));
+    if (!locked) card.addEventListener('click', () => _openDetail(key));
     grid.appendChild(card);
   });
 

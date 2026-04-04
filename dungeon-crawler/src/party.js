@@ -488,6 +488,8 @@ function refreshMember(m) {
     const lastUsed = lastAttackTimes[`${i}-skill-${skName}`];
     const skCanUse = lastUsed === undefined || (performance.now() - lastUsed) >= (skDelaySec * 1000);
     skSlot.classList.toggle('slot-cooling-down', !!skName && !skCanUse);
+    const skNoMp = (skDef?.mpCost ?? 0) > 0 && m.mp < skDef.mpCost;
+    skSlot.classList.toggle('slot-no-mp', !!skName && skNoMp);
 
     if (skName && !skCanUse && !m.cooldownTimers['skill']) {
       const remaining = (skDelaySec * 1000) - (performance.now() - lastUsed);

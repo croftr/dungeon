@@ -282,5 +282,26 @@
                 "quantity": 1
             }
         ]
+    },
+    {
+        "name": "Demon Blade",
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Dagger",
+                "quantity": 1
+            },
+            {
+                "name": "Demon Ogre Essence",
+                "quantity": 1
+            }
+        ]
     }
 ]

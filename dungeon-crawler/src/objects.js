@@ -39,6 +39,7 @@ export function partyHasItem(itemName) {
 }
 
 export function getCrystalShrineState() { return _crystalShrineState; }
+export function getSeenEssences() { return _seenEssences; }
 
 const _clickRaycaster = new THREE.Raycaster();
 const _clickMouse = new THREE.Vector2();
@@ -552,6 +553,11 @@ export function initObjects(scene, camera) {
 
                     showMessage("You step into the swirling blue portal...");
                     playPortalSound();
+
+                    if (obj.userData.isArenaExit) {
+                        if (window._arenaExit) window._arenaExit(true);
+                        return;
+                    }
 
                     // Transport the player immediately
                     if (window.loadLevel) {
@@ -2119,7 +2125,11 @@ function addKeyhole(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, tar
     });
 }
 
-function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offsetX = 0, offsetZ = 0, targetRow = null, targetCol = null, targetFacing = null) {
+export function spawnArenaPortal(row, col) {
+    addPortal(objectsGroup, _gltfLoader, col, row, 0, 0, 0, 0, null, null, null, true);
+}
+
+export function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offsetX = 0, offsetZ = 0, targetRow = null, targetCol = null, targetFacing = null, isArenaExit = false) {
     loader.load(asset('/items/Meshy_AI_Blue_Portal_0222102604_texture.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
@@ -2141,6 +2151,7 @@ function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offsetX = 0, 
                 child.userData.targetRow = targetRow;
                 child.userData.targetCol = targetCol;
                 child.userData.targetFacing = targetFacing;
+                child.userData.isArenaExit = isArenaExit;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 interactables.push(child);
@@ -3725,7 +3736,7 @@ function _buyItems() {
 function _getMerchantSellPrice(name) {
     const def = getItemDef(name);
     if (!def) return 0;
-    return Math.ceil((def.value ?? 0) / 5);
+    return Math.ceil((def.value ?? 0) / 10);
 }
 
 function _renderMerchantPartyItems() {

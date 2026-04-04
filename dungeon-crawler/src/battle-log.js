@@ -46,6 +46,7 @@ function _buildPanel() {
     <div class="bl-header">
       <span class="bl-title">⚔ Battle Log <span class="bl-count" id="bl-count"></span></span>
       <div class="bl-header-btns">
+        <button class="bl-csv-btn" id="bl-csv-btn" title="Download log as CSV">CSV</button>
         <button class="bl-icon-btn" id="bl-clear-btn" title="Clear log">✕</button>
         <button class="bl-expand-btn" id="bl-expand-btn" title="Expand to full screen">⤢</button>
       </div>
@@ -69,6 +70,8 @@ function _buildPanel() {
     if (c) c.innerHTML = '';
     _updateCount();
   });
+
+  document.getElementById('bl-csv-btn').addEventListener('click', _downloadCsv);
 
   document.getElementById('bl-filter-bar').addEventListener('click', (e) => {
     const btn = e.target.closest('.bl-filter-btn');
@@ -101,6 +104,75 @@ function _toggleExpand() {
 function _updateCount() {
   const el = document.getElementById('bl-count');
   if (el) el.textContent = _log.length > 0 ? `(${_log.length})` : '';
+}
+
+function _downloadCsv() {
+  if (_log.length === 0) return;
+  const headers = ['Time', 'Type', 'Actor', 'Target', 'Action', 'Result', 'Damage', 'Details'];
+  const rows = _log.map(e => {
+    const time = e.time ? new Date(e.time).toLocaleTimeString() : '';
+    const type = e.type || 'attack';
+    const actor = e.actor || e.attacker || e.killer || e.actorName || '';
+    const target = e.target || '';
+    let action = '';
+    let result = '';
+    let damage = '';
+    let details = '';
+
+    if (type === 'death') {
+      action = 'Death';
+      damage = e.damage != null ? e.damage : '';
+      result = 'Killed';
+      details = e.killer ? `Killed by ${e.killer}` : '';
+    } else if (type === 'levelup') {
+      action = 'Level Up';
+      result = `Level ${e.level}`;
+    } else if (type === 'skill') {
+      action = e.skillName || '';
+      damage = (e.finalDamage != null) ? e.finalDamage : '';
+      result = (e.finalDamage != null && e.finalDamage < 0) ? 'Heal' : 'Skill';
+      details = e.note || '';
+    } else if (type === 'status-effect') {
+      action = e.effectName || '';
+      result = 'Afflicted';
+      details = `By ${e.attacker || ''}`;
+    } else if (type === 'tick') {
+      action = e.effectName || '';
+      damage = e.amount != null ? e.amount : '';
+      result = e.amount < 0 ? 'Regen' : 'Poison';
+    } else if (type === 'potion') {
+      action = e.itemName || '';
+      result = 'Use';
+      details = e.description || '';
+    } else {
+      // Attack
+      action = e.attackType || 'attack';
+      if (e.blocked) {
+        result = 'Blocked';
+      } else if (!e.hit) {
+        result = 'Miss';
+      } else {
+        result = e.crit ? 'Crit' : 'Hit';
+        damage = e.finalDamage != null ? e.finalDamage : '';
+      }
+      details = _formula(e).replace(/"/g, '""'); // Escaping quotes for CSV
+    }
+
+    return [
+      time, type, actor, target, action, result, damage, details
+    ].map(v => `"${v}"`).join(',');
+  });
+
+  const csvContent = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `battle_log_${new Date().toISOString().slice(0, 10)}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 // ── Category mapping (used for filter data-attr) ─────────────────────────────
@@ -279,10 +351,12 @@ function _formula(e) {
 
   // monster attack
   const defMit = e.defenceMitigation ?? 0;
-  const raw = e.statBonus + e.baseBonus - e.mitigation - defMit;
+  const grossRaw = e.statBonus + e.baseBonus;
+  const afterRes = Math.floor(grossRaw * (100 - e.mitigation) / 100);
+  const raw = afterRes - defMit;
   const crit = e.crit ? ` ×${e.critMultiplier}` : '';
   const stunText = e.stunned ? ' (Stunned!)' : '';
   const poisonText = e.poisoned ? ' (Poisoned!)' : '';
   const defStr = defMit > 0 ? `−def${defMit}` : '';
-  return `(STR${e.statBonus}+${e.baseBonus}−res${e.mitigation}${defStr}=${raw}${crit})${stunText}${poisonText}`;
+  return `(STR${e.statBonus}+${e.baseBonus}−res${e.mitigation}%${defStr}=${raw}${crit})${stunText}${poisonText}`;
 }

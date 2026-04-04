@@ -4125,6 +4125,27 @@ label.mm-setting-label {
   font-size: 10px;
 }
 
+/* Family bonus list — extra damage vs a monster family */
+.detail-familybonus-list {
+  display: none; /* shown via JS when hasFamilyBonus */
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  margin-top: 1px;
+}
+
+.detail-familybonus-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #e8a040;
+}
+
+.detail-familybonus-item span:last-child {
+  color: #f0c060;
+  font-size: 10px;
+}
+
 /* Stat-scaling bar (STR / DEX split under the Scales With row) */
 #detail-row-scaling-bar {
   margin: -2px 0 1px 0;
@@ -6537,6 +6558,29 @@ label.mm-setting-label {
   display: flex;
   gap: 4px;
   align-items: center;
+}
+
+/* CSV button */
+.bl-csv-btn {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(232, 200, 122, 0.3);
+  color: rgba(232, 200, 122, 0.7);
+  font-size: 9px;
+  font-weight: bold;
+  line-height: 1;
+  padding: 3px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.bl-csv-btn:hover {
+  color: #fff;
+  border-color: #e8c87a;
+  background: rgba(232, 200, 122, 0.15);
 }
 
 /* Clear button */

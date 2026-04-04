@@ -1,7 +1,7 @@
 {
     "basePlayerHitChance": 0.80,
-    "baseMonsterHitChance": 0.45,
-    "dexHitModifier": 0.010,
+    "baseMonsterHitChance": 0.60,
+    "dexHitModifier": 0.015,
     "minHitChance": 0.15,
     "maxHitChance": 0.97,
     "critChance": 0.05,

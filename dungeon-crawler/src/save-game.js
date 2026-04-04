@@ -45,9 +45,9 @@ function _save(targetLevel) {
   localStorage.setItem(key, JSON.stringify(save));
 }
 
-/** Auto-save triggered on every level transition. */
+/** Auto-save disabled as per user request (only manual saves from the Esc menu are allowed). */
 export function autoSave(targetLevel) {
-  _save(targetLevel);
+  // auto-save removed
 }
 
 /** Manual save from the Esc menu. */

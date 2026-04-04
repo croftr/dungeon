@@ -39,6 +39,7 @@ import { asset } from './assets.js';
 //  HUNTER'S EYE STATE  — tracks which monster is currently being analysed
 // ─────────────────────────────────────────────────────────────────────────────
 let _huntersEyeTargetId = null;
+let _droppedBossEssences = new Set();
 
 /** Returns the id of the monster currently targeted by Hunter's Eye, or null. */
 export function getHuntersEyeTargetId() { return _huntersEyeTargetId; }
@@ -1414,7 +1415,7 @@ export function updateMonsters(dt, playerCamera, scene) {
 
     // Monsters detect characters only within 1 grid square and when facing them.
     // Unseen cloaks the party — monsters cannot detect or engage them.
-    if (!isSuppressed && !isPartyUnseen() && !m.engaged && (m.name !== 'Training Dummy' || m.combatMode) && distRow <= 1 && distCol <= 1) {
+    if (!isSuppressed && !isPartyUnseen() && !m.engaged && (m.name !== 'Training Dummy' || m.combatMode) && distRow <= 2 && distCol <= 2) {
       if (_hasLineOfSight(m.gridRow, m.gridCol, player.gridRow, player.gridCol)) {
         let seesPlayer = true;
         if (m.mesh && playerPos) {
@@ -1693,7 +1694,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       const arenaLevel = window.currentLevel;
       const stillAlive = monsters.filter(x => x.alive && (x.level ?? 1) === arenaLevel);
       if (stillAlive.length === 0) {
-        setTimeout(() => window._arenaVictory?.(), 1400);
+        setTimeout(() => window._arenaVictory?.(m.gridRow, m.gridCol), 1400);
       }
     }
   }
@@ -1737,12 +1738,38 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
 
       // ── Drop table roll ─────────────────────────────────────────────────────
       // Roll each entry in the monster's drops table independently.
-      // No loot in arena encounters.
+      // Arena: only a 50% chance of boss essence, nothing else.
       const droppedItems = [];
-      if (!window._arenaMode && m.drops && m.drops.length > 0) {
-        for (const drop of m.drops) {
-          if (Math.random() < drop.chance) {
-            droppedItems.push(drop.item);
+      if (m.drops && m.drops.length > 0) {
+        if (window._arenaMode) {
+          // Arena: 50% chance to drop boss essence only
+          for (const drop of m.drops) {
+            if (drop.item.endsWith(' Essence') && drop.item !== 'Life Essence') {
+              if (Math.random() < 0.5) {
+                // Award directly to inventory (arena auto-exits, corpse inaccessible)
+                for (const member of party) {
+                  if (member.isEmpty) continue;
+                  const slot = member.inventory.indexOf(null);
+                  if (slot !== -1) {
+                    member.inventory[slot] = { name: drop.item, slot: 'loot' };
+                    showMessage(`<b>${member.name}</b> obtained <b>${drop.item}</b>!`, 3000);
+                    break;
+                  }
+                }
+              }
+              break;
+            }
+          }
+        } else {
+          for (const drop of m.drops) {
+            if (Math.random() < drop.chance) {
+              // Boss essences only drop on first kill
+              if (drop.item.endsWith(' Essence') && drop.item !== 'Life Essence') {
+                if (_droppedBossEssences.has(drop.item)) continue;
+                _droppedBossEssences.add(drop.item);
+              }
+              droppedItems.push(drop.item);
+            }
           }
         }
       }
@@ -1773,8 +1800,8 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
         text: 'Well done on your first kill! Click the <strong>battle summary</strong> icon (top left) to monitor your party\'s performance. Press <strong>B</strong> to open the battle log for in-depth details.'
       });
 
-      // ── Award XP to living party members ──────────────────────────────────
-      if (m.xp > 0) awardXP(m.xp);
+      // ── Award XP to living party members (NO XP in Arena level 99) ────────
+      if (m.xp > 0 && window.currentLevel !== 99) awardXP(m.xp);
 
       _playDeathAnimation(m);
     } else {
@@ -2255,10 +2282,11 @@ function _applyMonsterDamage(monster, opts = {}) {
 
   const baseDamage = calcMonsterDamage(monster, effTarget, charDefence);
   const preCritDamage = damageMultiplier ? Math.round(baseDamage * damageMultiplier) : baseDamage;
-  const resMitigation = Math.floor((effTarget.stats?.resilience ?? 0) * RESILIENCE_DAMAGE_FACTOR);
+  const resVit = (effTarget.stats?.resilience ?? 0) + (effTarget.stats?.vitality ?? 0);
+  const resMitigation = Math.round(100 * resVit / (100 + resVit));
 
-  // 5% chance to critically hit — triples the calculated damage
-  const isCrit = Math.random() < CRIT_CHANCE;
+  // 5% chance to critically hit — triples the calculated damage (standard attacks only)
+  const isCrit = !isSpecial && Math.random() < CRIT_CHANCE;
   let damage = isCrit ? Math.round(preCritDamage * CRIT_MULTIPLIER) : preCritDamage;
 
   // Sanctuary buff — reduces all incoming party damage by a percentage.
@@ -2493,3 +2521,11 @@ export function restoreMonsterStates(saved) {
     if (s.awakeningUsed) m._awakeningUsed = true;
   }
 }
+
+// ── Save / Restore ────────────────────────────────────────────────────────────
+import { registerSaveHandler } from './save-registry.js';
+
+registerSaveHandler('monsters', {
+  serialize: () => ({ droppedBossEssences: [..._droppedBossEssences] }),
+  restore: (data) => { _droppedBossEssences = new Set(data.droppedBossEssences ?? []); },
+});
