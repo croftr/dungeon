@@ -57,6 +57,7 @@ function _renderSpecialAttack(atk) {
 }
 
 let _currentMonsterKey = null;
+let _listResizeObserver = null;
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
@@ -94,6 +95,10 @@ export function closeEssentiary() {
   const overlay = document.getElementById('essentiary-overlay');
   if (overlay) overlay.classList.add('essentiary-hidden');
   _currentMonsterKey = null;
+  if (_listResizeObserver) {
+    _listResizeObserver.disconnect();
+    _listResizeObserver = null;
+  }
 }
 
 // ── Internal ──────────────────────────────────────────────────────────────────
@@ -125,9 +130,53 @@ const LIST_IMG_CLASS = {
   minotaur: 'img-upscale',
 };
 
+function _makeSkeleton() {
+  const card = document.createElement('div');
+  card.className = 'essentiary-card essentiary-card-skeleton';
+  card.setAttribute('aria-hidden', 'true');
+  card.innerHTML = `
+    <div class="essentiary-card-img-wrap skel-block"></div>
+    <div class="essentiary-card-info">
+      <div class="skel-line skel-name"></div>
+      <div class="skel-line skel-family"></div>
+      <div class="skel-line skel-desc1"></div>
+      <div class="skel-line skel-desc2"></div>
+    </div>
+  `;
+  return card;
+}
+
+function _fillSkeletons(grid, list, realCount) {
+  // Remove previous skeletons
+  grid.querySelectorAll('.essentiary-card-skeleton').forEach(el => el.remove());
+
+  const listH = list.clientHeight;
+  const gridW = grid.clientWidth;
+  if (!listH || !gridW) return;
+
+  // Match CSS: repeat(auto-fill, minmax(340px, 1fr)) gap 20px
+  const colMinW = 340;
+  const gap = 20;
+  const cols = Math.max(1, Math.floor((gridW + gap) / (colMinW + gap)));
+
+  // Use first real card height if available, else estimate
+  const firstCard = grid.querySelector('.essentiary-card:not(.essentiary-card-skeleton)');
+  const cardH = firstCard ? firstCard.offsetHeight : 120;
+  const rowH = cardH + gap;
+
+  const rows = Math.ceil(listH / rowH);
+  const totalSlots = cols * rows;
+  const skeletonCount = Math.max(0, totalSlots - realCount);
+
+  for (let i = 0; i < skeletonCount; i++) {
+    grid.appendChild(_makeSkeleton());
+  }
+}
+
 function _renderList() {
   const grid = document.getElementById('essentiary-grid');
-  if (!grid) return;
+  const list = document.getElementById('essentiary-list');
+  if (!grid || !list) return;
   grid.innerHTML = '';
 
   // Only monsters with a valid image field
@@ -150,6 +199,19 @@ function _renderList() {
     card.addEventListener('click', () => _openDetail(key));
     grid.appendChild(card);
   });
+
+  const realCount = entries.length;
+
+  // Disconnect previous observer if any
+  if (_listResizeObserver) {
+    _listResizeObserver.disconnect();
+    _listResizeObserver = null;
+  }
+
+  _listResizeObserver = new ResizeObserver(() => {
+    _fillSkeletons(grid, list, realCount);
+  });
+  _listResizeObserver.observe(list);
 }
 
 function _openDetail(key) {

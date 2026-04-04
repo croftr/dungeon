@@ -127,7 +127,7 @@
     "name": "Crocodile Warrior",
     "family": "aquatic",
     "description": "Warriors of the deep swamp who stand upright and carry the hides of their ancestors as armour. Relentless in pursuit and merciless in battle, their jaws can shear through iron.",
-    "image": "/monster-images/crocodile-warrior.png",
+    "image": "/monster-images/crocodile-warrior.webp",
     "specialAttacks": [
       {
         "name": "crocSpecial",
@@ -371,7 +371,7 @@
     "name": "Treeman",
     "family": "ancient",
     "description": "The primordial guardian of the deep forest, awakened only when its domain faces ultimate desecration. Ancient beyond memory, to face the Treeman is to face the wrath of the world itself.",
-    "image": "/monster-images/treeman.png",
+    "image": "/monster-images/treeman.webp",
     "specialAttacks": [
       {
         "name": "treemanAwakening",
@@ -433,7 +433,7 @@
     "name": "Ogre",
     "family": "ogre",
     "description": "Massive and brute-brained, Ogres compensate for their low cunning with overwhelming ferocity. A single blow from their knotted fists can cave iron armour and shatter stone columns.",
-    "image": "/monster-images/ogre.png",
+    "image": "/monster-images/ogre.webp",
     "specialAttacks": [
       {
         "name": "doubleCombo",
@@ -518,7 +518,7 @@
     "name": "Minotaur",
     "family": "giant",
     "description": "Imprisoned at the heart of a labyrinth of its own rage, the Minotaur is part man and part beast — and wholly terrifying. Its gore-stained horn has ended the charge of a hundred ill-fated heroes.",
-    "image": "/monster-images/minotaur.png",
+    "image": "/monster-images/minotaur.webp",
     "specialAttacks": [
       {
         "name": "minotaurRage",
@@ -585,7 +585,7 @@
     "name": "Aqua Man",
     "family": "aquatic",
     "description": "Amphibious hunters who slip between worlds of water and air with equal ease, the Aqua Men are both predator and dark omen. Their tridents carry the death of the deep sea.",
-    "image": "/monster-images/aqua-man.png",
+    "image": "/monster-images/aqua-man.webp",
     "specialAttacks": [
       {
         "name": "tidalWave",
@@ -658,7 +658,7 @@
     "name": "Lizard Man",
     "family": "aquatic",
     "description": "The cold-blooded killers of the deep caverns, Lizard Men move with reptilian patience and strike with venom-laced precision. They are ancient predators who remember a world without men.",
-    "image": "/monster-images/lizard-man.png",
+    "image": "/monster-images/lizard-man.webp",
     "specialAttacks": [
       {
         "name": "venomSpit",
@@ -764,7 +764,7 @@
     "name": "Giant",
     "family": "giant",
     "description": "A colossus born of mountain stone and ancient hunger, the Giant's footfalls shake the earth. Few swords can reach its vital organs and fewer warriors live to tell the tale.",
-    "image": "/monster-images/giant.png",
+    "image": "/monster-images/giant.webp",
     "specialAttacks": [
       {
         "name": "giantsRoar",
@@ -825,7 +825,7 @@
     "name": "Demon",
     "family": "demon",
     "description": "A creature born of pure malice in the pit between worlds, summoned by dark recklessness. Its eyes burn with loathing for all living things and its form warps reality around it.",
-    "image": "/monster-images/demon.png",
+    "image": "/monster-images/demon.webp",
     "specialAttacks": [
       {
         "name": "demonCleave",
@@ -892,7 +892,7 @@
     "name": "Demon Ogre",
     "family": "demon",
     "description": "When demonic essence fuses with ogre flesh, the result is a nightmare of physical power and infernal will. An apex predator born of two hells, it revels in slaughter above all else.",
-    "image": "/monster-images/demon-ogre.png",
+    "image": "/monster-images/demon-ogre.webp",
     "specialAttacks": [
       {
         "name": "hellSpawn",

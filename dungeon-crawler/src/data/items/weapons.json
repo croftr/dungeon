@@ -200,7 +200,8 @@
         "icon": "/icons/oak_staff.webp",
         "description": "A gnarled wooden staff. A reliable melee weapon for wizards who want to bash enemies.",
         "value": 54,
-        "weight": 1.5
+        "weight": 1.5,
+        "statBonuses": { "mp": 2 }
     },
     {
         "name": "Short Bow",

@@ -181,6 +181,7 @@ export function updateEffectiveStats(m) {
   const newSkillBonuses = {};
   const newStatusResistances = {};
   let newSkillDurationBonusMs = 0;
+  let directHpBonus = 0, directMpBonus = 0, directSpBonus = 0;
   const countedItems = new Set();
 
   Object.values(m.equipment || {}).forEach(item => {
@@ -192,9 +193,13 @@ export function updateEffectiveStats(m) {
       // Preferred: structured statBonuses object  { vitality: 1, intelligence: 2, … }
       // This is the general-purpose data-driven approach — add a statBonuses entry to
       // any item definition and it will be applied automatically when equipped.
+      // hp/mp/sp keys directly boost the max pool (bypassing stat scaling).
       if (def.statBonuses) {
         Object.entries(def.statBonuses).forEach(([stat, delta]) => {
-          if (newStats[stat] !== undefined) {
+          if (stat === 'hp') directHpBonus += delta;
+          else if (stat === 'mp') directMpBonus += delta;
+          else if (stat === 'sp') directSpBonus += delta;
+          else if (newStats[stat] !== undefined) {
             newStats[stat] += delta;
           }
         });
@@ -229,11 +234,12 @@ export function updateEffectiveStats(m) {
   m.statusResistances = newStatusResistances;
   m.skillDurationBonusMs = newSkillDurationBonusMs;
 
-  // Recalculate hpMax/mpMax/spMax from the (now equipment-boosted) stats
+  // Recalculate hpMax/mpMax/spMax from the (now equipment-boosted) stats,
+  // then add any direct pool bonuses from item statBonuses (hp/mp/sp keys).
   const derived = calcDerivedMaxStats(newStats);
-  m.hpMax = derived.hpMax;
-  m.mpMax = derived.mpMax;
-  m.spMax = derived.spMax;
+  m.hpMax = derived.hpMax + directHpBonus;
+  m.mpMax = derived.mpMax + directMpBonus;
+  m.spMax = derived.spMax + directSpBonus;
 
   // Initialise current values on first equip; otherwise clamp to new maxes
   if (m.hp === undefined) m.hp = m.hpMax;
@@ -1024,7 +1030,8 @@ function populateTooltip(obj, showBuyPrice = false) {
         html += Object.entries(def.statBonuses)
           .filter(([, v]) => v !== 0)
           .map(([stat, v]) => {
-            const label = stat.charAt(0).toUpperCase() + stat.slice(1);
+            const labelMap = { hp: 'Max HP', mp: 'Max MP', sp: 'Max SP' };
+            const label = labelMap[stat] ?? (stat.charAt(0).toUpperCase() + stat.slice(1));
             const color = v > 0 ? '#70c870' : '#c87070';
             const sign = v > 0 ? '+' : '';
             return `<div class="detail-skillbonus-item" style="--sb-color:${color}"><span>${label}</span><span>${sign}${v}</span></div>`;
