@@ -320,8 +320,8 @@
         "chance": 0.25
       },
       {
-        "item": "Travelling Cloak",
-        "chance": 0.05
+        "item": "Oak Staff",
+        "chance": 0.1
       },
       {
         "item": "Mana Berry",
@@ -364,6 +364,10 @@
       {
         "item": "Worn Boots",
         "chance": 0.05
+      },
+      {
+        "item": "Oak Staff",
+        "chance": 0.2
       }
     ]
   },
@@ -412,8 +416,8 @@
         "chance": 1
       },
       {
-        "item": "Travelling Cloak",
-        "chance": 0.2
+        "item": "Oak Staff",
+        "chance": 0.1
       },
       {
         "item": "Leather Cap",
@@ -753,6 +757,10 @@
       {
         "item": "Leather Gloves",
         "chance": 0.08
+      },
+      {
+        "item": "Oak Staff",
+        "chance": 0.1
       },
       {
         "item": "Fermented Sugar",

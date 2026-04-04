@@ -1886,12 +1886,12 @@
       display: flex;
       gap: 28px;
       flex: 1;
+      width: 100%;
+      align-items: flex-start;
     }
 
     /* ── 3-column identity/stats/abilities layout ── */
     #essentiary-col-identity {
-      /* Restored to original portrait size — name/family are absolutely positioned
-         over the image so they never affect its dimensions or position */
       width: clamp(260px, 38vw, 520px);
       flex-shrink: 0;
       position: relative; /* anchor for the absolute name/family overlay */
@@ -1913,17 +1913,32 @@
       pointer-events: none;
     }
     #essentiary-col-stats {
-      width: clamp(200px, 28vw, 340px);
-      flex-shrink: 0;
+      flex: 1;
+      min-width: 0;
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
     #essentiary-col-abilities {
       flex: 1;
-      min-width: 320px;
+      min-width: 0;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
+    }
+    /* Small screens: portrait full-width on top, stats+abilities stack below */
+    @media (max-width: 700px) {
+      #essentiary-detail-content {
+        flex-direction: column;
+      }
+      #essentiary-col-identity {
+        width: 100%;
+      }
+      #essentiary-col-stats,
+      #essentiary-col-abilities {
+        flex: 1 1 45%;
+        min-width: 0;
+      }
     }
     .essentiary-no-abilities {
       color: #4a3820;
