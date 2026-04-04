@@ -128,6 +128,9 @@
         "statBonuses": {
             "intelligence": 3,
             "vitality": 1
+        },
+        "skillBonuses": {
+            "fire": 2
         }
     },
     {

@@ -1966,6 +1966,7 @@ window._arenaEnter = function (monsterId) {
       asset('/textures/arena-floor.jpg'));
 
     clearObjects(scene);
+    spawnObjectsForLevel();
 
     // Remove any stale arena monsters then create a fresh one
     for (let i = monsters.length - 1; i >= 0; i--) {

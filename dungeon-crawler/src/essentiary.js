@@ -112,7 +112,9 @@ function _showDetailScreen() {
   if (nav) nav.style.display = '';
 }
 
-const UPSCALE_MONSTERS = new Set(['giant', 'minotaur', 'aqua_man']);
+// Giant and aqua_man images fill the frame edge-to-edge — treat the same as
+// every other monster in the detail view (no upscale needed or desired).
+const UPSCALE_MONSTERS = new Set(['minotaur']);
 
 // On the list cards, aqua_man and giant fill the frame edge-to-edge after
 // being re-cropped, so scale them down slightly for breathing room.
@@ -196,32 +198,51 @@ function _openDetail(key) {
     </table>
   `;
 
-  // On-hit effects badge
-  if (def.onHitEffects?.length) {
-    const effects = def.onHitEffects.map(e => {
-      const effectDef = STATUS_EFFECTS[e.effectId];
-      const name = effectDef?.name ?? e.effectId;
-      const icon = effectDef?.icon ? `<img src="${asset(effectDef.icon)}" class="essentiary-effect-icon" alt="">` : '';
-      return `<span class="essentiary-effect-tag">${icon}${name} (${Math.round(e.chance * 100)}%)</span>`;
-    }).join('');
-    statsEl.innerHTML += `<div class="essentiary-effects-row">${effects}</div>`;
-  }
+  // Column 3 — on-hit effects + special attacks
+  const abilitiesCol = document.getElementById('essentiary-col-abilities');
+  if (abilitiesCol) {
+    abilitiesCol.innerHTML = ''; // clear previous monster's content
 
-  // Special attacks section — remove any previous before re-rendering
-  document.getElementById('essentiary-detail-special')?.remove();
-  if (def.specialAttacks?.length) {
-    const section = document.createElement('div');
-    section.id = 'essentiary-detail-special';
-    section.className = 'essentiary-special-section';
-    section.innerHTML = `
-      <div class="essentiary-section-header">
-        <span class="essentiary-section-icon">&#9876;</span>
-        <span class="essentiary-section-title">Special Abilities</span>
-        <div class="essentiary-section-line"></div>
-      </div>
-      ${def.specialAttacks.map(_renderSpecialAttack).join('')}
-    `;
-    statsEl.after(section);
+    // On-hit effects (passive status applied on normal attacks)
+    if (def.onHitEffects?.length) {
+      const effectsHtml = def.onHitEffects.map(e => {
+        const effectDef = STATUS_EFFECTS[e.effectId];
+        const name = effectDef?.name ?? e.effectId;
+        const icon = effectDef?.icon ? `<img src="${asset(effectDef.icon)}" class="essentiary-effect-icon" alt="">` : '';
+        return `<span class="essentiary-effect-tag">${icon}${name} (${Math.round(e.chance * 100)}%)</span>`;
+      }).join('');
+      const effectsSection = document.createElement('div');
+      effectsSection.className = 'essentiary-special-section';
+      effectsSection.innerHTML = `
+        <div class="essentiary-section-header">
+          <span class="essentiary-section-icon">&#9763;</span>
+          <span class="essentiary-section-title">On-Hit Effects</span>
+          <div class="essentiary-section-line"></div>
+        </div>
+        <div class="essentiary-effects-row">${effectsHtml}</div>
+      `;
+      abilitiesCol.appendChild(effectsSection);
+    }
+
+    // Special attacks
+    if (def.specialAttacks?.length) {
+      const section = document.createElement('div');
+      section.id = 'essentiary-detail-special';
+      section.className = 'essentiary-special-section';
+      section.innerHTML = `
+        <div class="essentiary-section-header">
+          <span class="essentiary-section-icon">&#9876;</span>
+          <span class="essentiary-section-title">Special Abilities</span>
+          <div class="essentiary-section-line"></div>
+        </div>
+        ${def.specialAttacks.map(_renderSpecialAttack).join('')}
+      `;
+      abilitiesCol.appendChild(section);
+    }
+
+    if (!def.onHitEffects?.length && !def.specialAttacks?.length) {
+      abilitiesCol.innerHTML = '<p class="essentiary-no-abilities">No special abilities</p>';
+    }
   }
 
   _showDetailScreen();

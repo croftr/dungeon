@@ -451,6 +451,9 @@
         "weight": 2.0,
         "statBonuses": {
             "intelligence": 4
+        },
+        "skillBonuses": {
+            "fire": 2
         }
     },
     {

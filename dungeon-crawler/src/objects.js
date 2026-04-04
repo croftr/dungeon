@@ -1987,6 +1987,13 @@ export function spawnObjectsForLevel() {
     else if (level === 3) spawnLevel3Objects(ctx);
     else if (level === 4) spawnLevel4Objects(ctx);
     else if (level === 5) spawnLevel5Objects(ctx);
+    else if (level === 99) {
+        // Arena – place 4 torches evenly around the edge
+        addDroppedTorch(objectsGroup, _gltfLoader, 1, 1, 0);
+        addDroppedTorch(objectsGroup, _gltfLoader, 1, 7, 0);
+        addDroppedTorch(objectsGroup, _gltfLoader, 7, 1, 0);
+        addDroppedTorch(objectsGroup, _gltfLoader, 7, 7, 0);
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

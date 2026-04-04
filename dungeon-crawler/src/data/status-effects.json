@@ -126,5 +126,15 @@
     "unseen": true,
     "breakOnAction": true,
     "partyEffect": true
+  },
+  "stun": {
+    "id": "stun",
+    "name": "Stun",
+    "description": "Stunned by a heavy blow — cannot act for 5 seconds.",
+    "type": "debuff",
+    "icon": "/icons/stun.webp",
+    "color": "#ffff00",
+    "duration": 5,
+    "preventsAction": true
   }
 }

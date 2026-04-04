@@ -96,6 +96,9 @@
         "statBonuses": {
             "intelligence": 1,
             "resilience": 1
+        },
+        "skillBonuses": {
+            "fire": 2
         }
     },
     {

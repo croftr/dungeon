@@ -36,9 +36,9 @@
         "job": "Paladin",
         "race": "Human",
         "stats": {
-            "strength": 107,
-            "dexterity": 106,
-            "vitality": 108,
+            "strength": 7,
+            "dexterity": 6,
+            "vitality": 8,
             "intelligence": 4,
             "resilience": 8
         },
@@ -104,7 +104,14 @@
         ],
         "startingInventory": [
             "Minor Mana Potion",
-            "Minor Mana Potion"
+            "Minor Mana Potion",
+            "Aethelgard Archmage Hood",
+            "Aethelgard Archmage Robe",
+            "Aethelgard Archmage Cuffs",
+            "Aethelgard Archmage Leggings",
+            "Aethelgard Archmage Slippers",
+            "Aethelgard Grand Staff",
+            "Aethelgard Archmage Mantle"
         ],
         "image": "/heros/human_wizard_head.png",
         "leftHand": "Fireball",
