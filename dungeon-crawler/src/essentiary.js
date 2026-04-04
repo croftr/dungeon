@@ -2,6 +2,9 @@
 //  THE ESSENTIARY — Monster Bestiary & Arena UI
 // ─────────────────────────────────────────────────────────────────────────────
 import MONSTERS_DATA from './data/monsters.json';
+import MONSTER_FAMILIES from './data/monster-families.json';
+import STATUS_EFFECTS from './data/status-effects.json';
+import { asset } from './assets.js';
 
 const _EFFECT_CHIP_CLASS = {
   fear:   'effect-chip-fear',
@@ -10,15 +13,6 @@ const _EFFECT_CHIP_CLASS = {
   rot:    'effect-chip-rot',
   frozen: 'effect-chip-frozen',
   stun:   'effect-chip-stun',
-};
-
-const _EFFECT_DISPLAY = {
-  fear:   'Fear',
-  poison: 'Poison',
-  slow:   'Slow',
-  rot:    'Rot',
-  frozen: 'Frozen',
-  stun:   'Stun',
 };
 
 function _renderSpecialAttack(atk) {
@@ -35,10 +29,12 @@ function _renderSpecialAttack(atk) {
   if (atk.onHitEffects?.length) {
     atk.onHitEffects.forEach(e => {
       const cls = _EFFECT_CHIP_CLASS[e.effectId] ?? '';
-      const name = _EFFECT_DISPLAY[e.effectId] ?? e.effectId;
+      const effectDef = STATUS_EFFECTS[e.effectId];
+      const name = effectDef?.name ?? e.effectId;
+      const icon = effectDef?.icon ? `<img src="${asset(effectDef.icon)}" class="essentiary-effect-icon" alt="">` : '';
       const pct = Math.round(e.chance * 100);
       const dur = e.durationSec ? ` &middot; ${e.durationSec}s` : '';
-      footer.push(`<span class="essentiary-effect-chip ${cls}">${name} ${pct}%${dur}</span>`);
+      footer.push(`<span class="essentiary-effect-chip ${cls}">${icon}${name} ${pct}%${dur}</span>`);
     });
   }
   if (atk.summons?.length) {
@@ -145,7 +141,7 @@ function _renderList() {
       </div>
       <div class="essentiary-card-info">
         <div class="essentiary-card-name">${def.name}</div>
-        <div class="essentiary-card-family">${def.family}</div>
+        <div class="essentiary-card-family">${MONSTER_FAMILIES[def.family]?.name ?? def.family}</div>
         <div class="essentiary-card-desc">${def.description ?? ''}</div>
       </div>
     `;
@@ -170,7 +166,16 @@ function _openDetail(key) {
   img.classList.toggle('img-upscale', UPSCALE_MONSTERS.has(key));
 
   document.getElementById('essentiary-detail-name').textContent = def.name;
-  document.getElementById('essentiary-detail-family').textContent = def.family;
+  
+  // Family lookup
+  const familyDef = MONSTER_FAMILIES[def.family];
+  const familyName = familyDef?.name ?? def.family;
+  const familyIcon = familyDef?.icon ? `<img src="${asset(familyDef.icon)}" class="essentiary-family-icon" alt="">` : '';
+  
+  const familyEl = document.getElementById('essentiary-detail-family');
+  familyEl.innerHTML = `${familyIcon}${familyName}`;
+  familyEl.title = familyDef?.description ?? '';
+
   document.getElementById('essentiary-detail-desc').textContent = def.description ?? '';
 
   // Stats
@@ -193,9 +198,12 @@ function _openDetail(key) {
 
   // On-hit effects badge
   if (def.onHitEffects?.length) {
-    const effects = def.onHitEffects.map(e =>
-      `<span class="essentiary-effect-tag">${e.effectId} (${Math.round(e.chance * 100)}%)</span>`
-    ).join('');
+    const effects = def.onHitEffects.map(e => {
+      const effectDef = STATUS_EFFECTS[e.effectId];
+      const name = effectDef?.name ?? e.effectId;
+      const icon = effectDef?.icon ? `<img src="${asset(effectDef.icon)}" class="essentiary-effect-icon" alt="">` : '';
+      return `<span class="essentiary-effect-tag">${icon}${name} (${Math.round(e.chance * 100)}%)</span>`;
+    }).join('');
     statsEl.innerHTML += `<div class="essentiary-effects-row">${effects}</div>`;
   }
 

@@ -191,7 +191,7 @@ export function calcPlayerMagicDamage(character, weaponDef, monster) {
   }
 
   // Banishment deals double damage against Undead monsters
-  if (weaponDef?.name === 'Banishment' && monster?.family === 'Undead') {
+  if (weaponDef?.name === 'Banishment' && monster?.family === 'undead') {
     raw *= 2;
   }
 

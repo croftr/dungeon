@@ -39,21 +39,15 @@ window.currentLevel = 0;
 // ─────────────────────────────────────────────
 const ARENA_LEVEL = 99;
 const ARENA_MAP = [
-  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,2,0,0,0,0,0,0,0,1],
-  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,1,1,1,1,1,1,1,1],
+  [1,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,1],
+  [1,0,0,0,2,0,0,0,1],
+  [1,1,1,1,1,1,1,1,1],
 ];
 
 // Patch hardcoded asset paths in index.html to use CDN base URL.
@@ -1953,6 +1947,11 @@ window._arenaEnter = function (monsterId) {
     window._isRestoring = true;
     window.currentLevel = ARENA_LEVEL;
 
+    // Hide recruit wall frescoes — they live directly in the scene at level-0
+    // grid positions and are NOT removed by clearObjects(), so they must be
+    // toggled via the visibility helper.
+    updateRecruitsMeshState();
+
     // Build arena geometry
     changeMapArray(ARENA_MAP);
     buildLevel(scene);
@@ -1978,9 +1977,10 @@ window._arenaEnter = function (monsterId) {
 
     // Clone GLB paths from the first matching template in any level
     const template = monsters.find(m => m.name === def.name);
+    let arenaMonster = null;
     if (template) {
-      const arenaMonster = inst(
-        def, 9999, 2, 7,
+      arenaMonster = inst(
+        def, 9999, 1, 4,
         template.glbIdle, template.glbAttack, template.attackSound,
         template.scale, 0, 0, ARENA_LEVEL,
         null, template.glbDeath, template.glbHit,
@@ -2005,6 +2005,35 @@ window._arenaEnter = function (monsterId) {
     drawMinimap();
     updateStatus();
     window._isRestoring = false;
+
+    // Show loading screen until the monster mesh has finished streaming in.
+    // The fall-blackout fades out after this callback returns, so the loading
+    // overlay takes over and covers the canvas until the GLB is ready.
+    const loadOverlay = document.getElementById('level-load-overlay');
+    const loadText    = document.getElementById('level-load-text');
+    const loadFill    = document.getElementById('level-load-bar-fill');
+    if (loadOverlay && arenaMonster) {
+      if (loadText) loadText.textContent = 'Entering the Arena\u2026';
+      if (loadFill) { loadFill.style.transition = 'none'; loadFill.style.width = '0%'; }
+      loadOverlay.classList.add('visible');
+      requestAnimationFrame(() => {
+        if (loadFill) { loadFill.style.transition = 'width 2s linear'; loadFill.style.width = '80%'; }
+      });
+
+      const loadStart = performance.now();
+      const _pollId = setInterval(() => {
+        if (arenaMonster.mesh && performance.now() - loadStart >= 900) {
+          clearInterval(_pollId);
+          if (loadFill) { loadFill.style.transition = 'width 0.15s ease'; loadFill.style.width = '100%'; }
+          setTimeout(() => {
+            loadOverlay.classList.remove('visible');
+            setTimeout(() => {
+              if (loadFill) { loadFill.style.transition = 'none'; loadFill.style.width = '0%'; }
+            }, 400);
+          }, 200);
+        }
+      }, 80);
+    }
   });
 
   // Callbacks fired by monster.js (victory) and party.js (defeat)
@@ -2051,6 +2080,7 @@ window._arenaExit = function (won) {
     clearObjects(scene);
     setPendingContainerOverrides(_visitedLevelContainers[pre.level] ?? null);
     spawnObjectsForLevel();
+    updateRecruitsMeshState();
     loadMonstersForLevel(scene, pre.level);
     setAmbientLevel(pre.level);
     setZoneMusic(null);

@@ -1,0 +1,56 @@
+{
+  "goblinoid": {
+    "id": "goblinoid",
+    "name": "Greenskins and Goblinoids",
+    "description": "Feral, swarming underground vermin that strike from shadow with poisoned blades.",
+    "icon": "/icons/family/goblinoid.webp"
+  },
+  "undead": {
+    "id": "undead",
+    "name": "Undead",
+    "description": "Restless souls bound by fell sorcery, haunting ancient tombs and forgotten ruins.",
+    "icon": "/icons/family/undead.webp"
+  },
+  "aquatic": {
+    "id": "aquatic",
+    "name": "Scaled and Aquatic",
+    "description": "Cold-blooded predators of the deep caves and dark swamps, masters of scale and tooth.",
+    "icon": "/icons/family/aquatic.webp"
+  },
+  "elemental": {
+    "id": "elemental",
+    "name": "Elemental",
+    "description": "Living manifestations of primal forces, born of glacier or inferno.",
+    "icon": "/icons/family/elemental.webp"
+  },
+  "ancient": {
+    "id": "ancient",
+    "name": "Ancient",
+    "description": "Primordial guardians of the earth, older than memory and rooted in ancient magic.",
+    "icon": "/icons/family/ancient.webp"
+  },
+  "ogre": {
+    "id": "ogre",
+    "name": "Ogre",
+    "description": "Brutish mountain-dwellers with raw strength and limited cunning.",
+    "icon": "/icons/family/ogre.webp"
+  },
+  "giant": {
+    "id": "giant",
+    "name": "Mythic and Giants",
+    "description": "Colossi that shake the mountains themselves, born of ancient stone and deep hunger.",
+    "icon": "/icons/family/giant.webp"
+  },
+  "demon": {
+    "id": "demon",
+    "name": "Demon",
+    "description": "Malicious horrors from infernal planes that warp reality with their mere presence.",
+    "icon": "/icons/family/demon.webp"
+  },
+  "misc": {
+    "id": "misc",
+    "name": "Misc",
+    "description": "Entities that defy standard classification, from magical constructs to simple training dummies.",
+    "icon": "/icons/family/misc.webp"
+  }
+}
