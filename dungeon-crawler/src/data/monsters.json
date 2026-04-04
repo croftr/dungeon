@@ -38,6 +38,10 @@
       {
         "item": "Iron Ore",
         "chance": 0.1
+      },
+      {
+        "item": "Goblin Shiv",
+        "chance": 0.05
       }
     ]
   },
@@ -101,10 +105,6 @@
       }
     ],
     "drops": [
-      {
-        "item": "Life Essence",
-        "chance": 0.25
-      },
       {
         "item": "Poison Vial",
         "chance": 0.4
@@ -214,6 +214,10 @@
       {
         "item": "Iron Ore",
         "chance": 0.3
+      },
+      {
+        "item": "Goblin Shiv",
+        "chance": 0.02
       }
     ]
   },
@@ -239,10 +243,6 @@
       }
     ],
     "drops": [
-      {
-        "item": "Life Essence",
-        "chance": 0.25
-      },
       {
         "item": "Poison Vial",
         "chance": 0.4
@@ -283,10 +283,6 @@
       }
     ],
     "drops": [
-      {
-        "item": "Life Essence",
-        "chance": 0.25
-      },
       {
         "item": "Shawl",
         "chance": 0.1
