@@ -13,7 +13,7 @@ import { playSoundByUrl } from './audio.js';
 import elrondTree from './data/skill-trees/elrond.json';
 import alaricTree from './data/skill-trees/alaric.json';
 import thorekTree from './data/skill-trees/thorek.json';
-import merlinTree from './data/skill-trees/merlin.json';
+import asharTree from './data/skill-trees/ashar.json';
 import korgTree from './data/skill-trees/korg.json';
 import baldurTree from './data/skill-trees/baldur.json';
 import lumniTree from './data/skill-trees/lumni.json';
@@ -23,7 +23,7 @@ const TREES = {
   elrond: elrondTree,
   alaric: alaricTree,
   thorek: thorekTree,
-  merlin: merlinTree,
+  ashar: asharTree,
   korg: korgTree,
   baldur: baldurTree,
   lumni: lumniTree,

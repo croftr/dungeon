@@ -655,6 +655,12 @@ function finishIntro() {
   introOverlay.style.transition = 'opacity 1.5s ease';
   introOverlay.style.opacity = '0';
   setTimeout(() => {
+    introOverlay.querySelectorAll('video').forEach(v => {
+      v.pause();
+      v.removeAttribute('src');
+      v.querySelectorAll('source').forEach(s => s.remove());
+      v.load();
+    });
     introOverlay.remove();
     startMusic();
 
@@ -721,7 +727,7 @@ function showCharacterSelection() {
 
   function getVideoSrc(imagePath) {
     const filename = imagePath.split('/').pop();
-    const base = filename.replace(/\.(png|jpg|jpeg)$/i, '').replace(/_head$/, '');
+    const base = filename.replace(/\.(png|jpg|jpeg|webp)$/i, '').replace(/_head$/, '');
     return asset(`/heros/${base}_full.mp4`);
   }
 

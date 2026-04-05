@@ -45,7 +45,7 @@
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
         "startingSkills": [],
-        "image": "/heros/human_paladin.png",
+        "image": "/heros/human_paladin.webp",
         "leftHand": "Shield",
         "rightHand": "Sword",
         "startingInventory": [
@@ -74,7 +74,7 @@
         },
         "bio": "A stout and hearty fighter from the mountainous deeps. Thorek believes every problem can be solved with a sharp axe and enough ale.",
         "startingSkills": [],
-        "image": "/heros/dwarf_barbarian_head.png",
+        "image": "/heros/dwarf_barbarian_head.webp",
         "leftHand": "Wooden Shield",
         "rightHand": "Axe",
         "startingInventory": [
@@ -89,8 +89,8 @@
     },
     {
         "id": "recruit_4",
-        "name": "Merlin",
-        "skillTree": "merlin",
+        "name": "Ashar",
+        "skillTree": "ashar",
         "startXp": 0,
         "job": "Wizard",
         "race": "Human",
@@ -101,7 +101,7 @@
             "intelligence": 10,
             "resilience": 5
         },
-        "bio": "An eccentric scholar weaving arcane tapestries. Merlin's thirst for forbidden knowledge is matched only by his formidable spellcraft.",
+        "bio": "An eccentric scholar weaving arcane tapestries. Ashar's thirst for forbidden knowledge is matched only by his formidable spellcraft.",
         "startingSkills": [],
         "startingSpells": [
             "Fireball",
@@ -119,7 +119,7 @@
             "Aethelgard Grand Staff",
             "Aethelgard Archmage Mantle"
         ],
-        "image": "/heros/human_wizard_head.png",
+        "image": "/heros/human_wizard_head.webp",
         "leftHand": "Fireball",
         "rightHand": "Heal",
         "ammo": "Spellbook",
@@ -144,7 +144,7 @@
         },
         "bio": "A raging storm of muscle and steel. Korg thrives in the heat of battle, leaving devastation in his wake.",
         "startingSkills": [],
-        "image": "/heros/human_barbarian_head.png",
+        "image": "/heros/human_barbarian_head.webp",
         "leftHand": "Greataxe",
         "rightHand": "—",
         "startingInventory": [
@@ -172,7 +172,7 @@
         },
         "bio": "A keen-eyed marksman who traded the mines for the open hunt. Baldur's crossbow never misses its mark.",
         "startingSkills": [],
-        "image": "/heros/dwarf-ranger.png",
+        "image": "/heros/dwarf-ranger.webp",
         "leftHand": "Torch",
         "rightHand": "Crossbow",
         "ammo": "Wooden Bolts",
@@ -207,7 +207,7 @@
             "Minor Rejuvenate Potion",
             "Minor Healing Potion"
         ],
-        "image": "/heros/high-elf.png",
+        "image": "/heros/high-elf.webp",
         "leftHand": "Dagger",
         "rightHand": "Dagger",
         "gridCol": 8,
@@ -238,7 +238,7 @@
             "Minor Mana Potion",
             "Minor Mana Potion"
         ],
-        "image": "/heros/white-mage.png",
+        "image": "/heros/white-mage.webp",
         "leftHand": "Heal",
         "rightHand": "Banishment",
         "ammo": "Spellbook",

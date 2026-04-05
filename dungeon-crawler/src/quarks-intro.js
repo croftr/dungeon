@@ -393,7 +393,7 @@ export function triggerWarcryEffect() {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-//  ARCANE LANTERN — Merlin (Wizard)
+//  ARCANE LANTERN — Ashar (Wizard)
 //  Soft blue/cyan sparkles blooming outward  (magical light conjuring)
 // ══════════════════════════════════════════════════════════════════════════
 export function triggerArcaneLanternEffect() {
@@ -441,7 +441,7 @@ export function triggerArcaneLanternEffect() {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-//  RUNIC SCHOLAR — Merlin (Wizard)
+//  RUNIC SCHOLAR — Ashar (Wizard)
 //  Tight purple/violet arcane charge  (power being concentrated, focused)
 // ══════════════════════════════════════════════════════════════════════════
 export function triggerRunicScholarEffect() {
@@ -490,7 +490,7 @@ export function triggerRunicScholarEffect() {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-//  MANA TAP — Merlin (Wizard)
+//  MANA TAP — Ashar (Wizard)
 //  Bright blue/cyan energy surging upward  (drawing power from within)
 // ══════════════════════════════════════════════════════════════════════════
 export function triggerManaTapEffect() {
@@ -539,7 +539,7 @@ export function triggerManaTapEffect() {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-//  FIREBALL — Merlin (Wizard)
+//  FIREBALL — Ashar (Wizard)
 //  Dense white-hot → orange → dark-red fire cone firing forward
 // ══════════════════════════════════════════════════════════════════════════
 export function triggerFireballEffect(travelCells = 2) {
@@ -633,7 +633,7 @@ function _spawnFireballImpact(pos, tex) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-//  INCINERATE — Merlin (Wizard) / Pyromancer
+//  INCINERATE — Ashar (Wizard) / Pyromancer
 //  A long, sustained torrent of intense fire filling the area in front
 // ══════════════════════════════════════════════════════════════════════════
 export function triggerIncinerateEffect() {
@@ -797,7 +797,7 @@ function _spawnBanishmentImpact(pos, tex) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-//  REGENERATION — Merlin (Wizard)
+//  REGENERATION — Ashar (Wizard)
 //  Soft green pulse rippling outward, gentle and sustained  (healing)
 // ══════════════════════════════════════════════════════════════════════════
 export function triggerRegenerationEffect() {
@@ -846,7 +846,7 @@ export function triggerRegenerationEffect() {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-//  CURE POISON — Merlin (Wizard)
+//  CURE POISON — Ashar (Wizard)
 //  Sickly green/purple toxin burst then cleansing violet overwrite
 // ══════════════════════════════════════════════════════════════════════════
 export function triggerCurePoisonEffect() {

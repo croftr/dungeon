@@ -16,7 +16,7 @@ export const skillsState = {
     magnitude: 1,     // resolved from caster's stats + gear at cast time
   },
 
-  /** Arcane Lantern — Merlin's spell illuminates the dungeon like a torch. */
+  /** Arcane Lantern — Ashar's spell illuminates the dungeon like a torch. */
   arcaneLight: {
     active: false,
     expiresAt: 0,

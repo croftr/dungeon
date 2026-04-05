@@ -5731,7 +5731,8 @@ label.mm-setting-label {
 }
 
 #anvil-header {
-  padding: 14px 20px;
+  height: 55px;
+  padding: 0 20px;
   background: rgba(60, 35, 10, 0.3);
   border-bottom: 1px solid #5a3a18;
   display: flex;
@@ -5748,7 +5749,10 @@ label.mm-setting-label {
 #anvil-header-icon {
   width: 24px;
   height: 24px;
-  filter: drop-shadow(0 0 5px rgba(255, 160, 40, 0.5));
+  transform: scale(1.9);
+  transform-origin: left center;
+  margin-right: 24px;
+  filter: drop-shadow(0 0 8px rgba(255, 160, 40, 0.6));
 }
 
 #anvil-title {
@@ -6929,13 +6933,13 @@ body.cursor-interact #renderer-canvas {
   color: #c8d8c8;
 }
 
-#alchemy-header {
-  padding: 14px 20px;
-  background: rgba(40, 60, 40, 0.3);
-  border-bottom: 1px solid #2d4d2d;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+#alchemy-header-icon {
+  width: 24px;
+  height: 24px;
+  transform: scale(2.2);
+  transform-origin: left center;
+  margin-right: 32px;
+  filter: drop-shadow(0 0 8px rgba(0, 255, 0, 0.6));
 }
 
 #alchemy-title-wrap {
@@ -6944,10 +6948,14 @@ body.cursor-interact #renderer-canvas {
   gap: 12px;
 }
 
-#alchemy-header-icon {
-  width: 24px;
-  height: 24px;
-  filter: drop-shadow(0 0 5px rgba(0, 255, 0, 0.5));
+#alchemy-header {
+  height: 55px;
+  padding: 0 20px;
+  background: rgba(40, 60, 40, 0.3);
+  border-bottom: 1px solid #2d4d2d;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 #alchemy-title {

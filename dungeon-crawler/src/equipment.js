@@ -3889,7 +3889,7 @@ function _useHolyRadiance(member, memberIndex) {
   _startSkillCooldownUI(memberIndex, _holyRadianceCooldownEnd);
 }
 
-// ── Arcane Lantern (Merlin) ───────────────────────────────────────────────
+// ── Arcane Lantern (Ashar) ───────────────────────────────────────────────
 const ARCANE_LANTERN_COOLDOWN_MS = SKILLS_DATA['Arcane Lantern'].cooldownMs;
 const ARCANE_LANTERN_DURATION_MS = SKILLS_DATA['Arcane Lantern'].durationMs;
 let _arcaneLanternCooldownEnd = 0;
@@ -4197,7 +4197,7 @@ function _useRampart(member, memberIndex) {
   _startSkillCooldownUI(memberIndex, _rampartCooldownEnds[memberIndex]);
 }
 
-// ── Runic Scholar (Merlin) ────────────────────────────────────────────────
+// ── Runic Scholar (Ashar) ────────────────────────────────────────────────
 const RUNIC_SCHOLAR_COOLDOWN_MS = SKILLS_DATA['Runic Scholar'].cooldownMs;
 let _runicScholarCooldownEnds = [0, 0, 0, 0];
 
@@ -4235,7 +4235,7 @@ function _useRunicScholar(member, memberIndex) {
   _startSkillCooldownUI(memberIndex, _runicScholarCooldownEnds[memberIndex]);
 }
 
-// ── Mana Tap (Merlin) ─────────────────────────────────────────────────────
+// ── Mana Tap (Ashar) ─────────────────────────────────────────────────────
 const MANA_TAP_COOLDOWN_MS = SKILLS_DATA['Mana Tap'].cooldownMs;
 let _manaTapCooldownEnd = 0;
 

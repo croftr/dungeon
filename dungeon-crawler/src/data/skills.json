@@ -76,7 +76,7 @@
     "Mana Tap": {
         "type": "healing",
         "icon": "/skills/mana-tap.webp",
-        "description": "Taps into a hidden vein of arcane energy, instantly replenishing all of Merlin's mana points. Cooldown: 150s.",
+        "description": "Taps into a hidden vein of arcane energy, instantly replenishing all of Ashar's mana points. Cooldown: 150s.",
         "cooldownMs": 150000,
         "effectType": "restoreMp",
         "effectTarget": "self"
