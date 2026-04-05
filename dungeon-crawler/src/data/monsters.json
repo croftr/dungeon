@@ -80,6 +80,10 @@
       {
         "item": "Life Berry",
         "chance": 0.1
+      },
+      {
+        "item": "Fermented Sugar",
+        "chance": 0.2
       }
     ]
   },
@@ -151,7 +155,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.4
+        "chance": 0.5
       },
       {
         "item": "Iron Ore",
@@ -289,7 +293,7 @@
       },
       {
         "item": "Fermented Sugar",
-        "chance": 0.1
+        "chance": 0.2
       }
     ]
   },
@@ -317,11 +321,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.25
-      },
-      {
-        "item": "Oak Staff",
-        "chance": 0.1
+        "chance": 0.5
       },
       {
         "item": "Mana Berry",
@@ -329,7 +329,7 @@
       },
       {
         "item": "Fermented Sugar",
-        "chance": 0.25
+        "chance": 0.5
       },
       {
         "item": "Iron Ore",
@@ -355,7 +355,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.25
+        "chance": 0.5
       },
       {
         "item": "Life Berry",
@@ -391,7 +391,7 @@
         ]
       }
     ],
-    "hp": 370,
+    "hp": 340,
     "defence": 9,
     "xp": 1000,
     "attackSpeed": 1.2,
@@ -449,13 +449,13 @@
         "onHitEffects": [
           {
             "effectId": "fear",
-            "chance": 0.75,
+            "chance": 0.5,
             "durationSec": 10
           }
         ]
       }
     ],
-    "hp": 260,
+    "hp": 240,
     "defence": 9,
     "xp": 500,
     "attackSpeed": 1,
@@ -469,7 +469,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.25
+        "chance": 0.5
       },
       {
         "item": "Life Berry",
@@ -744,7 +744,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.25
+        "chance": 0.5
       },
       {
         "item": "Poison Vial",

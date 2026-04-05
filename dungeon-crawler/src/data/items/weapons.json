@@ -55,7 +55,7 @@
         "attackType": "swipe",
         "weaponType": "dagger",
         "staminaDrain": 1,
-        "baseDamage": 7,
+        "baseDamage": 8,
         "delay": 2,
         "statWeights": {
             "str": 0.1,
@@ -64,7 +64,7 @@
         "familyBonus": [
             {
                 "family": "demon",
-                "bonus": 2
+                "bonus": 3
             }
         ],
         "icon": "/icons/demon_blade.webp",
@@ -189,6 +189,12 @@
             "str": 1,
             "dex": 0
         },
+        "familyBonus": [
+            {
+                "family": "undead",
+                "bonus": 2
+            }
+        ],
         "icon": "/icons/silver_mace.webp",
         "description": "A mace forged from pure silver, blessed with divine power. Grants sanctuary and holy radiance bonuses.",
         "value": 450,
@@ -503,6 +509,27 @@
         },
         "skillBonuses": {
             "fire": 2
+        }
+    },
+    {
+        "name": "Life Staff",
+        "slot": "hand",
+        "type": "weapon",
+        "attackType": "bash",
+        "weaponType": "staff",
+        "staminaDrain": 1,
+        "baseDamage": 12,
+        "delay": 3.2,
+        "statWeights": {
+            "intelligence": 1.0
+        },
+        "icon": "/icons/life_staff.webp",
+        "description": "A staff crafted from living elderwood, pulsing with the essence of vitality and magic. It restores and bolsters the life force of its wielder.",
+        "value": 1800,
+        "weight": 2.5,
+        "statBonuses": {
+            "hp": 2,
+            "mp": 2
         }
     },
     {
