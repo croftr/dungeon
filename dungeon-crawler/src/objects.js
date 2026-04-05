@@ -306,23 +306,23 @@ export function initObjects(scene, camera) {
                         showMessage("You can't reach that from here.");
                     }
                 } else if (obj.userData.target === 'demon_room') {
-                    // Player at (18, 3) facing west presses button on east face of col-2 wall
-                    if (isInFrontOfPlayer(18, 2, 1)) {
+                    // Player at (33, 3) facing west presses button on east face of col-2 wall
+                    if (isInFrontOfPlayer(33, 2, 1)) {
                         playButtonClickSound();
                         _animateButtonPress(obj);
-                        const vaultDoor = objects.find(o => o.name === 'Portcullis' && o.gridRow === 17 && o.gridCol === 2);
+                        const vaultDoor = objects.find(o => o.name === 'Portcullis' && o.gridRow === 32 && o.gridCol === 2);
                         if (vaultDoor) openPortcullis(vaultDoor);
                     } else {
                         showMessage("You can't reach that from here.");
                     }
                 } else if (obj.userData.target === 'close_hole') {
-                    if (isInFrontOfPlayer(16, 28, 1)) {
+                    if (isInFrontOfPlayer(31, 28, 1)) {
                         playButtonClickSound();
                         if (!_level2HoleClosed) {
                             _animateButtonPress(obj);
                             _level2HoleClosed = true;
-                            dungeonMap[17][23] = CELL_FLOOR;
-                            level2Map[17][23] = CELL_FLOOR;
+                            dungeonMap[32][23] = CELL_FLOOR;
+                            level2Map[32][23] = CELL_FLOOR;
                             buildLevel(objectsGroup.parent);
                             showMessage("You hear mechanisms grinding. The pit is closed.");
                         } else {
@@ -582,12 +582,7 @@ export function initObjects(scene, camera) {
                         }
                     }
 
-                    if (isTreemanTransition) {
-                        // Go straight to Treeman cutscene — no portal video for the starter room portal
-                        if (window.playTreemanVideo && !window.hasSeenTreemanVideo) {
-                            window.playTreemanVideo();
-                        }
-                    } else if (isMinotaurTransition && window.playPortalVideo) {
+                    if (isMinotaurTransition && window.playPortalVideo) {
                         // Play the portal animation when leaving level 1 for level 3
                         window.playPortalVideo();
                     }
@@ -746,7 +741,7 @@ export function initObjects(scene, camera) {
                     const p = objects.find(o => o.name === 'Portcullis' && o.gridRow === obj.userData.targetRow && o.gridCol === obj.userData.targetCol);
                     if (p) {
                         if (!p.isOpen) {
-                            if (p.gridRow === 15 && p.gridCol === 9) {
+                            if (p.gridRow === 30 && p.gridCol === 9) {
                                 let keyFound = false;
                                 for (let i = 0; i < party.length; i++) {
                                     if (party[i] && !party[i].isEmpty && party[i].inventory) {

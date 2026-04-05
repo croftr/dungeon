@@ -16,6 +16,7 @@
         "bio": "A swift and silent guardian of the deep woods. Elrond's bow strikes with the fury of nature itself.",
         "startingInventory": [
             "Cure Poison Potion",
+            "Minor Rejuvenate Potion",
             "Minor Rejuvenate Potion"
         ],
         "startingSkills": [],
@@ -36,11 +37,11 @@
         "job": "Paladin",
         "race": "Human",
         "stats": {
-            "strength": 7,
-            "dexterity": 6,
-            "vitality": 8,
-            "intelligence": 4,
-            "resilience": 8
+            "strength": 107,
+            "dexterity": 106,
+            "vitality": 108,
+            "intelligence": 104,
+            "resilience": 108
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
         "startingSkills": [],
@@ -48,7 +49,9 @@
         "leftHand": "Shield",
         "rightHand": "Sword",
         "startingInventory": [
-            "Cure Poison Potion"
+            "Cure Poison Potion",
+            "Minor Rejuvenate Potion",
+            "Minor Healing Potion"
         ],
         "gridCol": 10,
         "gridRow": 8,
@@ -75,7 +78,9 @@
         "leftHand": "Wooden Shield",
         "rightHand": "Axe",
         "startingInventory": [
-            "Cure Poison Potion"
+            "Cure Poison Potion",
+            "Minor Rejuvenate Potion",
+            "Minor Healing Potion"
         ],
         "gridCol": 12,
         "gridRow": 8,
@@ -172,7 +177,9 @@
         "rightHand": "Crossbow",
         "ammo": "Wooden Bolts",
         "startingInventory": [
-            "Cure Poison Potion"
+            "Cure Poison Potion",
+            "Minor Rejuvenate Potion",
+            "Minor Healing Potion"
         ],
         "gridCol": 14,
         "gridRow": 9,
@@ -197,7 +204,8 @@
         "startingSkills": [],
         "startingInventory": [
             "Cure Poison Potion",
-            "Minor Rejuvenate Potion"
+            "Minor Rejuvenate Potion",
+            "Minor Healing Potion"
         ],
         "image": "/heros/high-elf.png",
         "leftHand": "Dagger",

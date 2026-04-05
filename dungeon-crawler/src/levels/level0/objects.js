@@ -28,7 +28,7 @@ export function spawnLevel0Objects(ctx) {
 
     // ── Starter Stash in the starter room ─────────────────────────────────────────────
     addChest(group, loader, 13.4, 10, Math.PI / 2, -0.1, [
-        { name: 'Gold Coins', quantity: 100 },
+        { name: 'Gold Coins', quantity: 10000 },
         'Potion of Invincibility', 'Potion of Unseen', "Red Crystal", "Blue Crystal", "Demon Blade", "Goblin Shiv", "Goblin Shiv", "Silver Mace", "Warden's Shield",
         "Leather Gloves", "Aqua Man Essence", "Crocodile Warrior Essence", "Demon Ogre Essence", "Demon Essence", "Giant Essence", "Lizard Man Essence", "Minotaur Essence", "Ogre Essence", "Tree Man Essence"
     ], asset('/items/stash.glb'), true, 0, 'Stash');

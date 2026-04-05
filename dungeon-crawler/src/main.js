@@ -70,8 +70,8 @@ document.querySelectorAll('img[data-src]').forEach(img => {
 // Map of level number → video element IDs to preload when entering that level
 const _VIDEO_LEVELS = {
   0: ['battle-prep-video', 'hero-door-video', 'nectar-quest-video', 'crystal-shrine-red-video', 'crystal-shrine-red-blue-video'],
-  1: ['ogre-video', 'mummy-video', 'demon-video', 'aqua-man-video', 'portal-video'],
-  2: ['treeman-video', 'giant-video'],
+  1: ['ogre-video', 'mummy-video', 'aqua-man-video', 'portal-video'],
+  2: ['treeman-video', 'demon-video', 'giant-video'],
   3: ['minotaur-video', 'minotaur-death-video', 'statue-portal-video', 'egg-video'],
   4: ['stairs-video'],
 };
@@ -298,27 +298,37 @@ setCallbacks({
       // Prep video triggers ONLY when confirming the NPC modal now,
       // so we remove the position-based trigger entirely.
     } else if (window.currentLevel === 2) {
-      // Demon room: the big chamber at the south end of the passage
-      const inDemonRoom = player.gridRow >= 14 && player.gridRow <= 20
+      // Demon room: south section of the passage (rows 31-34 after +15 map shift)
+      const inDemonRoom = player.gridRow >= 31 && player.gridRow <= 34
         && player.gridCol >= 3 && player.gridCol <= 8;
-      const inAquaManRoom = player.gridCol === 3 && player.gridRow >= 22 && player.gridRow <= 26;
+      // Aqua man pit arrival area (rows 37-41 after +15 map shift)
+      const inAquaManRoom = player.gridCol === 3 && player.gridRow >= 37 && player.gridRow <= 41;
 
       if (inAquaManRoom) {
         setZoneMusic(asset('/sounds/water.mp3'));
       } else {
         const demon = monsters.find(m => m.name === 'Demon' && (m.level ?? 1) === 2);
         const treeman = monsters.find(m => m.name === 'Treeman');
+        // Treeman room and beyond (row 16+) gets boss/fight music
+        const inTreemanRoom = player.gridRow >= 16 && player.gridRow <= 29;
 
         if (demon && !demon.alive) {
           setZoneMusic(asset('/sounds/backing/lvl2-post-demon.mp3'));
-        } else if (treeman && !treeman.alive) {
+        } else if (inTreemanRoom || (treeman && !treeman.alive)) {
           setZoneMusic(asset('/sounds/backing/demon-room.mp3'));
         } else {
-          setZoneMusic(null);
+          setZoneMusic(asset('/sounds/backing/lvl2-post-demon.mp3'));
         }
       }
 
-      if (inDemonRoom && !hasSeenDemonVideo) {
+      // Treeman video: fires when player first steps into the main treeman chamber
+      if (!window.hasSeenTreemanVideo && player.gridRow === 16 && player.gridCol === 7) {
+        window.hasSeenTreemanVideo = true;
+        if (window.playTreemanVideo) window.playTreemanVideo();
+      }
+
+      // Demon video: fires in the passage at row 28, col 7 — just before the demon room
+      if (!hasSeenDemonVideo && player.gridRow === 28 && player.gridCol === 7) {
         hasSeenDemonVideo = true; window._saveFlags.hasSeenDemonVideo = true;
         playDemonVideo();
       }
@@ -435,10 +445,10 @@ setCallbacks({
 
         // Wait 1 second before teleporting and playing the video
         setTimeout(() => {
-          // Teleport to pit arrival chamber (row 22, col 3)
-          player.gridRow = 22;
+          // Teleport to pit arrival chamber (row 37, col 3) — shifted +15 from original row 22
+          player.gridRow = 37;
           player.gridCol = 3;
-          const w = cellToWorld(22, 3);
+          const w = cellToWorld(37, 3);
           camera.position.set(w.x, w.y, w.z);
           // Face South (2) towards the new passage
           player.facing = 2;
@@ -466,10 +476,10 @@ setCallbacks({
         tweenGroup.removeAll();
         player.moving = false;
 
-        // Teleport to far end of original passage (row 17, col 24) immediately
-        player.gridRow = 17;
+        // Teleport to far end of original passage (row 32, col 24) — shifted +15
+        player.gridRow = 32;
         player.gridCol = 24;
-        const w = cellToWorld(17, 24);
+        const w = cellToWorld(32, 24);
         camera.position.set(w.x, w.y, w.z);
         // Face East (1) back towards the demon room
         player.facing = 1;
@@ -1781,18 +1791,18 @@ window.loadLevel = function (levelNum) {
   // 2. Rebuild map meshes for walls/floors
   buildLevel(scene);
 
-  // Level 2: overlay pit-corridor (rows 22–26, col 3) with wet-wall / black-stone textures
+  // Level 2: overlay pit-corridor (rows 37–41, col 3) with wet-wall / black-stone textures
   if (levelNum === 2) {
     buildTextureZone(
       scene,
       // Wall cells: left col (2) and right col (4) flanking the corridor, plus north cap
       [
-        [21, 2], [22, 2], [23, 2], [24, 2], [25, 2], [26, 2],
-        [21, 4], [22, 4], [23, 4], [24, 4], [25, 4], [26, 4],
-        [21, 3],
+        [36, 2], [37, 2], [38, 2], [39, 2], [40, 2], [41, 2],
+        [36, 4], [37, 4], [38, 4], [39, 4], [40, 4], [41, 4],
+        [36, 3],
       ],
       // Floor cells: the walkable corridor column
-      [[22, 3], [23, 3], [24, 3], [25, 3], [26, 3]],
+      [[37, 3], [38, 3], [39, 3], [40, 3], [41, 3]],
       asset('/textures/wet-wall.png'),
       asset('/textures/black-stone2.png')
     );
@@ -1882,6 +1892,9 @@ window.loadLevel = function (levelNum) {
       setZoneMusic(asset('/sounds/backing/lvl2-post-demon.mp3'));
     } else if (treeman && !treeman.alive) {
       setZoneMusic(asset('/sounds/backing/demon-room.mp3'));
+    } else {
+      // Both alive — play exploration music for the new dungeon area
+      setZoneMusic(asset('/sounds/backing/lvl2-post-demon.mp3'));
     }
   }
 

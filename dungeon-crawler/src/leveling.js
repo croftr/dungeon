@@ -153,6 +153,14 @@ export function getNextLevelXP(member) {
   return xpThresholds[member.level] ?? null;
 }
 
+/**
+ * Get the XP threshold for the current level (XP floor).
+ */
+export function getCurrentLevelThreshold(member) {
+  if (member.level <= 0) return 0;
+  return xpThresholds[member.level - 1] ?? 0;
+}
+
 // ─────────────────────────────────────────────
 //  DEV UTILITIES (browser console helpers)
 // ─────────────────────────────────────────────

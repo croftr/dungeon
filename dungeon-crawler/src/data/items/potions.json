@@ -59,9 +59,9 @@
         ],
         "effect": {
             "type": "restore-mp",
-            "value": 80
+            "value": 40
         },
-        "value": 40,
+        "value": 80,
         "weight": 0.3
     },
     {

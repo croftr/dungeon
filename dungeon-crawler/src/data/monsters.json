@@ -367,7 +367,7 @@
       },
       {
         "item": "Oak Staff",
-        "chance": 0.2
+        "chance": 0.3
       }
     ]
   },
@@ -414,10 +414,6 @@
       {
         "item": "Bronze Key",
         "chance": 1
-      },
-      {
-        "item": "Oak Staff",
-        "chance": 0.1
       },
       {
         "item": "Leather Cap",

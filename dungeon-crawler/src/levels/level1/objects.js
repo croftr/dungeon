@@ -53,7 +53,7 @@ export function spawnLevel1Objects(ctx) {
 
     // Chest in the Northwest room — far northeast corner
     addChest(group, loader, 5, 1, 0, -0.65, [
-        "Ring of Dexterity", "Steel Arrows", "Poison Dagger", "Leather Belt", "Adventurer's Belt",
+        "Ring of Dexterity", "Steel Arrows", "Elven Dagger", "Leather Belt", "Adventurer's Belt",
         "Dwarf Crossbow"
     ], undefined, true, -0.35);
 
@@ -84,7 +84,7 @@ export function spawnLevel1Objects(ctx) {
     // ── Weapon Racks ─────────────────────────────────────────────────────────
     // Mummy room dead-end passage
     addWeaponRack(group, loader, 22, 4, Math.PI / 2, 0.65, 0, [
-        'Elven Dagger', 'Mace', 'Dagger', 'Dwarven Axe', 'Spiked Shield'
+        'Goblin Shiv', 'Mace', 'Dagger', 'Dwarven Axe', 'Spiked Shield'
     ]);
 
     // South corridor

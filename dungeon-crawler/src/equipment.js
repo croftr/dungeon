@@ -20,7 +20,7 @@ import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude, calcOnHitChance
 import { playCritSound, playSkillSound, playItemSound, playLevelUpConfirmSound, playInventorySortSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { skillsState } from './skills-state.js';
-import { getNextLevelXP, hydrateSkill } from './leveling.js';
+import { getNextLevelXP, getCurrentLevelThreshold, hydrateSkill } from './leveling.js';
 import { getSkillTree, applyNodeBenefit, renderSkillTree } from './skill-tree.js';
 import {
   triggerSanctuaryEffect,
@@ -406,8 +406,11 @@ function renderModal(memberIndex) {
   const levelEl = document.getElementById('equip-char-level');
   if (levelEl) {
     const nextXP = getNextLevelXP(m);
+    const currXPThreshold = getCurrentLevelThreshold(m);
     if (nextXP !== null) {
-      levelEl.textContent = `Lv.${m.level ?? 0}  ·  ${m.xp ?? 0} / ${nextXP} XP`;
+      const currentProgress = (m.xp ?? 0) - currXPThreshold;
+      const neededForNext = nextXP - currXPThreshold;
+      levelEl.textContent = `Lv.${m.level ?? 0}  ·  ${currentProgress} / ${neededForNext} XP`;
     } else {
       levelEl.textContent = `Lv.${m.level ?? 0}  ·  MAX`;
     }
@@ -681,12 +684,15 @@ function updatePartyBar(activeIndex) {
     const nameLevel = document.createElement('span');
     nameLevel.id = 'equip-xp-name';
     const nextXP = getNextLevelXP(m);
+    const currXPThreshold = getCurrentLevelThreshold(m);
     nameLevel.textContent = `${m.name}  ·  Lv.${m.level ?? 0}`;
 
     const xpText = document.createElement('span');
     xpText.id = 'equip-xp-text';
     if (nextXP !== null) {
-      xpText.textContent = `${m.xp ?? 0} / ${nextXP} XP`;
+      const currentProgress = (m.xp ?? 0) - currXPThreshold;
+      const neededForNext = nextXP - currXPThreshold;
+      xpText.textContent = `${currentProgress} / ${neededForNext} XP`;
     } else {
       xpText.textContent = `${m.xp ?? 0} XP  ·  MAX LEVEL`;
     }
@@ -699,7 +705,7 @@ function updatePartyBar(activeIndex) {
 
     const fill = document.createElement('div');
     fill.id = 'equip-xp-bar-fill';
-    const pct = nextXP ? Math.min(100, ((m.xp ?? 0) / nextXP) * 100) : 100;
+    const pct = nextXP ? Math.min(100, (((m.xp ?? 0) - currXPThreshold) / (nextXP - currXPThreshold)) * 100) : 100;
     fill.style.width = pct + '%';
 
     track.appendChild(fill);

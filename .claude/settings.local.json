@@ -45,7 +45,12 @@
       "Bash(npx vite:*)",
       "Bash(grep -c '\"\"id\"\":' src/data/recruits.json)",
       "Bash(python3 -c \":*)",
-      "Bash(find /c/Users/rob/projects/dungeon/dungeon-crawler -name .env* -o -name vite.config*)"
+      "Bash(find /c/Users/rob/projects/dungeon/dungeon-crawler -name .env* -o -name vite.config*)",
+      "Bash(magick --version)",
+      "Bash(for f:*)",
+      "Bash(do name=\"$f%.png\" echo \"Converting $f...\" ffmpeg -y -i \"$f\" -vf \"scale=''''min\\(1024,iw\\)'''':''''min\\(1024,ih\\)'''':force_original_aspect_ratio=decrease:flags=lanczos\" -c:v libwebp -quality 85 -lossless 0 \"$name.webp\")",
+      "Bash(tail -1 done echo Done ls -lh *.webp)",
+      "Bash(find C:/Users/rob/projects/dungeon/dungeon-crawler -name wet-wall* -o -name black-stone*)"
     ]
   }
 }

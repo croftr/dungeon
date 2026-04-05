@@ -5,7 +5,7 @@ import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, crea
 import { CELL, isPassable } from './map.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
-import { party, setHp, flashPortraitHit, showMemberDamage, showMemberHeal, refreshPartyCards, applyStatusEffect, getEffectiveStats, getEffectiveStatusResistances, getDefenceModifier, describeEffect, isPartyInvincible, isPartyUnseen } from './party.js';
+import { party, setHp, addGold, flashPortraitHit, showMemberDamage, showMemberHeal, refreshPartyCards, applyStatusEffect, getEffectiveStats, getEffectiveStatusResistances, getDefenceModifier, describeEffect, isPartyInvincible, isPartyUnseen } from './party.js';
 import { STATUS_EFFECT_DEFS } from './status-effects.js';
 import { showMessage } from './minimap.js';
 import {
@@ -1742,6 +1742,11 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       const droppedItems = [];
       if (m.drops && m.drops.length > 0) {
         if (window._arenaMode) {
+          // Drop 1-100 gold
+          const gold = Math.floor(Math.random() * 100) + 1;
+          addGold(gold);
+          showMessage(`Obtained <b>${gold}</b> gold!`, 3000);
+
           // Arena: 50% chance to drop boss essence only
           for (const drop of m.drops) {
             if (drop.item.endsWith(' Essence') && drop.item !== 'Life Essence') {
@@ -1800,8 +1805,8 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
         text: 'Well done on your first kill! Click the <strong>battle summary</strong> icon (top left) to monitor your party\'s performance. Press <strong>B</strong> to open the battle log for in-depth details.'
       });
 
-      // ── Award XP to living party members (NO XP in Arena level 99) ────────
-      if (m.xp > 0 && window.currentLevel !== 99) awardXP(m.xp);
+      // ── Award XP to living party members ────────
+      if (m.xp > 0) awardXP(m.xp);
 
       _playDeathAnimation(m);
     } else {
