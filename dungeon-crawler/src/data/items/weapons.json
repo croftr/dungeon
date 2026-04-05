@@ -427,9 +427,12 @@
             "str": 1.0,
             "dex": 0.0
         },
-        "familyBonus": {
-            "undead": 10
-        },
+        "familyBonus": [
+            {
+                "family": "undead",
+                "bonus": 10
+            }
+        ],
         "icon": "/icons/celestial_vindicator_mace.webp",
         "description": "A massive two-handed mace of radiant white metal and silver. A core of holy yellow energy pulses within the head, ready to shatter evil.",
         "value": 2000,

@@ -970,7 +970,7 @@ function populateTooltip(obj, showBuyPrice = false) {
   const hasSkillDurationBonus = def?.skillDurationBonusMs != null && def.skillDurationBonusMs !== 0;
   const hasTrapDisarmBonus = def?.trapDisarmBonus != null && def.trapDisarmBonus !== 0;
   const hasOnHitEffects = def?.onHitEffects && def.onHitEffects.length > 0;
-  const hasFamilyBonus = def?.familyBonus && def.familyBonus.length > 0;
+  const hasFamilyBonus = def?.familyBonus && (Array.isArray(def.familyBonus) ? def.familyBonus.length > 0 : Object.keys(def.familyBonus).length > 0);
   const hasBonusList = hasStatBonus || hasSkillBonus || hasSkillDurationBonus || hasTrapDisarmBonus;
 
   // Hide/show rows based on item type and available stats
@@ -1084,7 +1084,11 @@ function populateTooltip(obj, showBuyPrice = false) {
   // Family bonus — extra damage vs a specific monster family
   if (hasFamilyBonus) {
     const listEl = document.getElementById('detail-row-familybonus');
-    listEl.innerHTML = def.familyBonus.map(({ family, bonus }) => {
+    const entries = Array.isArray(def.familyBonus)
+      ? def.familyBonus
+      : Object.entries(def.familyBonus).map(([family, bonus]) => ({ family, bonus }));
+
+    listEl.innerHTML = entries.map(({ family, bonus }) => {
       const label = family.charAt(0).toUpperCase() + family.slice(1) + 's';
       const sign = bonus >= 0 ? '+' : '';
       return `<div class="detail-familybonus-item">

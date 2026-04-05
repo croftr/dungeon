@@ -158,7 +158,11 @@ export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef 
 
   let familyBonus = 0;
   if (weaponDef?.familyBonus && monster?.family) {
-    for (const entry of weaponDef.familyBonus) {
+    const entries = Array.isArray(weaponDef.familyBonus)
+      ? weaponDef.familyBonus
+      : Object.entries(weaponDef.familyBonus).map(([family, bonus]) => ({ family, bonus }));
+
+    for (const entry of entries) {
       if (entry.family === monster.family) familyBonus += entry.bonus;
     }
   }

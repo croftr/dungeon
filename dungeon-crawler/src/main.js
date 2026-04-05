@@ -1533,17 +1533,51 @@ function finishHeroDoorVideo() {
     if (_heroDoorVideoCallback) _heroDoorVideoCallback();
     return;
   }
+  
+  // Hide the video overlay and pause the video
   heroDoorVideoOverlay.style.opacity = '0';
-
   setTimeout(() => {
+    heroDoorVideoOverlay.classList.add('hidden');
     heroDoorVideoElement.pause();
     heroDoorVideoElement.currentTime = 0;
-    heroDoorVideoOverlay.classList.add('hidden');
+  }, 1500);
+
+  // Show the level loading overlay with a progress bar
+  const overlay = document.getElementById('level-load-overlay');
+  const fill = document.getElementById('level-load-bar-fill');
+  const text = document.getElementById('level-load-text');
+  
+  if (overlay && fill) {
+    if (text) text.textContent = 'Entering the Hall of Heroes\u2026';
+    fill.style.transition = 'none';
+    fill.style.width = '0%';
+    overlay.classList.add('visible');
+    
+    // Smooth progress bar over 3 seconds
+    requestAnimationFrame(() => {
+      fill.style.transition = 'width 3s linear';
+      fill.style.width = '100%';
+    });
+
+    setTimeout(() => {
+      overlay.classList.remove('visible');
+      if (_heroDoorVideoCallback) {
+        _heroDoorVideoCallback();
+        _heroDoorVideoCallback = null;
+      }
+      // Reset bar for future reuse after the fade-out
+      setTimeout(() => {
+        fill.style.transition = 'none';
+        fill.style.width = '0%';
+      }, 500);
+    }, 3200);
+  } else {
+    // Fallback if overlay elements aren't found
     if (_heroDoorVideoCallback) {
       _heroDoorVideoCallback();
       _heroDoorVideoCallback = null;
     }
-  }, 1500);
+  }
 }
 
 if (skipHeroDoorBtn) skipHeroDoorBtn.addEventListener('click', finishHeroDoorVideo);
