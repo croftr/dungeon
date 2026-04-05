@@ -51,8 +51,7 @@
         "startingInventory": [
             "Cure Poison Potion",
             "Minor Rejuvenate Potion",
-            "Minor Healing Potion",
-            "Celestial Vindicator Greatmace"
+            "Minor Healing Potion"
         ],
         "gridCol": 10,
         "gridRow": 8,
@@ -111,14 +110,7 @@
         "startingInventory": [
             "Oak Staff",
             "Minor Mana Potion",
-            "Minor Mana Potion",
-            "Aethelgard Archmage Hood",
-            "Aethelgard Archmage Robe",
-            "Aethelgard Archmage Cuffs",
-            "Aethelgard Archmage Leggings",
-            "Aethelgard Archmage Slippers",
-            "Aethelgard Grand Staff",
-            "Aethelgard Archmage Mantle"
+            "Minor Mana Potion"
         ],
         "image": "/heros/human_wizard_head.webp",
         "leftHand": "Fireball",
