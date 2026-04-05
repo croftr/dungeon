@@ -202,7 +202,7 @@ function _renderList() {
     const imgExtra = LIST_IMG_CLASS[key] ? ` ${LIST_IMG_CLASS[key]}` : '';
     card.innerHTML = `
       <div class="essentiary-card-img-wrap">
-        <img src="${def.image}" alt="${locked ? '???' : def.name}" class="essentiary-card-img${imgExtra}" loading="lazy">
+        <img src="${asset(def.image)}" alt="${locked ? '???' : def.name}" class="essentiary-card-img${imgExtra}" loading="lazy">
       </div>
       <div class="essentiary-card-info">
         <div class="essentiary-card-name">${locked ? '???' : def.name}</div>
@@ -239,7 +239,7 @@ function _openDetail(key) {
 
   // Populate detail
   const img = document.getElementById('essentiary-detail-img');
-  img.src = def.image ?? '';
+  img.src = asset(def.image ?? '');
   img.alt = def.name;
   img.classList.toggle('img-upscale', UPSCALE_MONSTERS.has(key));
 

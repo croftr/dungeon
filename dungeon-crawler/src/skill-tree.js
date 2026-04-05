@@ -9,6 +9,7 @@
 import SKILLS_DATA from './data/skills.json';
 import { hydrateSkill } from './leveling.js';
 import { playSoundByUrl } from './audio.js';
+import { asset } from './assets.js';
 
 import elrondTree from './data/skill-trees/elrond.json';
 import alaricTree from './data/skill-trees/alaric.json';
@@ -216,7 +217,7 @@ export function renderSkillTree(m, container, onNodeClick) {
     } else if (node.icon) {
       // Explicit icon in tree JSON takes precedence over all auto-derived icons
       const img = document.createElement('img');
-      img.src = node.icon;
+      img.src = asset(node.icon);
       icon.appendChild(img);
     } else if (node.type === 'stat') {
       // Fallback: auto-derive stat icon from benefit keys
@@ -225,14 +226,14 @@ export function renderSkillTree(m, container, onNodeClick) {
         ? '/skills/stats-increase/mixed_stat_increase.webp'
         : `/skills/stats-increase/${stats[0]}_increase.webp`;
       const img = document.createElement('img');
-      img.src = iconPath;
+      img.src = asset(iconPath);
       icon.appendChild(img);
     } else if (node.type === 'skill') {
       // Fallback: auto-derive from skills.json
       const skillDef = SKILLS_DATA[node.benefit.skill];
       if (skillDef?.icon) {
         const img = document.createElement('img');
-        img.src = skillDef.icon;
+        img.src = asset(skillDef.icon);
         icon.appendChild(img);
       } else {
         icon.textContent = '⚔';

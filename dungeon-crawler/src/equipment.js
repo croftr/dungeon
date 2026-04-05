@@ -2333,7 +2333,7 @@ function _setDetailIcon(iconPath, textFallback = '') {
   el.innerHTML = '';
   if (iconPath) {
     const img = document.createElement('img');
-    img.src = iconPath;
+    img.src = asset(iconPath);
     img.alt = '';
     el.appendChild(img);
     el.classList.add('has-icon');

@@ -61,7 +61,7 @@ document.querySelectorAll('img[data-src]').forEach(img => {
 {
   const introSrc = document.querySelector('#intro-video source');
   if (introSrc) {
-    introSrc.src = asset(introSrc.getAttribute('src'));
+    introSrc.src = asset(introSrc.getAttribute('data-src'));
     document.getElementById('intro-video')?.load();
   }
 }
@@ -86,7 +86,7 @@ function loadVideosForLevel(levelNum) {
     if (!video) return;
     const source = video.querySelector('source');
     if (!source) return;
-    source.src = asset(source.getAttribute('src'));
+    source.src = asset(source.getAttribute('data-src'));
     video.load();
   });
 }
