@@ -119,4 +119,10 @@ export function spawnLevel0Objects(ctx) {
     btn4.position.set(8 * CELL + 1.0, 1.25, 11 * CELL);
     group.add(btn4);
 
+    // ── Essentiary button (all monsters unlocked) ───────────────────────────
+    // Adjacent button — opens Essentiary with every monster available.
+    const { group: btnEss } = createWallButton(+1, { target: 'essentiary_unlock_all' }, 'x');
+    btnEss.position.set(8 * CELL + 1.0, 1.25, 12 * CELL);
+    group.add(btnEss);
+
 }

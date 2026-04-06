@@ -73,7 +73,7 @@ const _VIDEO_LEVELS = {
   1: ['ogre-video', 'mummy-video', 'aqua-man-video', 'portal-video'],
   2: ['treeman-video', 'demon-video', 'giant-video'],
   3: ['minotaur-video', 'minotaur-death-video', 'statue-portal-video', 'egg-video'],
-  4: ['stairs-video'],
+  4: ['stairs-video', 'demon-ogre-video', 'lizard-man-video'],
 };
 const _loadedVideoIds = new Set();
 
@@ -813,7 +813,7 @@ function showCharacterSelection() {
         </div>
       </div>
     </div>
-    <div class="cs-party-corner" id="cs-party-corner">
+    <div class="cs-party-corner" id="cs-party-corner" style="display: none;">
       <div class="cs-corner-header">
         <div class="cs-party-hint" id="cs-party-hint">Select 4 heroes<br>to begin</div>
         <button id="begin-adventure-btn">Enter Dungeon</button>
@@ -861,6 +861,10 @@ function showCharacterSelection() {
 
   function updateUI() {
     const full = selectedIds.size >= 4;
+    const corner = charSelectScreen.querySelector('#cs-party-corner');
+    if (corner) {
+      corner.style.display = selectedIds.size > 0 ? 'flex' : 'none';
+    }
 
     miniCards.forEach(card => {
       const id = card.dataset.recruitId;
@@ -1317,6 +1321,97 @@ function finishDemonVideo() {
 
 if (skipDemonBtn) skipDemonBtn.addEventListener('click', finishDemonVideo);
 if (demonVideo) demonVideo.addEventListener('ended', finishDemonVideo);
+
+// ─────────────────────────────────────────────
+//  OTTER VIDEO SEQUENCE
+// ─────────────────────────────────────────────
+window.playOtterVideoSequence = function() {
+  const ogreOverlay = document.getElementById('demon-ogre-video-overlay');
+  const ogreVid = document.getElementById('demon-ogre-video');
+  const lizardOverlay = document.getElementById('lizard-man-video-overlay');
+  const lizardVid = document.getElementById('lizard-man-video');
+
+  if (!ogreOverlay || !ogreVid || !lizardOverlay || !lizardVid) return;
+
+  function playLizard() {
+    lizardOverlay.classList.remove('hidden');
+    setTimeout(() => {
+      lizardOverlay.style.opacity = '1';
+      lizardVid.play().catch(console.warn);
+    }, 50);
+  }
+
+  function finishLizard() {
+    lizardOverlay.style.opacity = '0';
+    setTimeout(() => {
+      lizardVid.pause();
+      lizardOverlay.classList.add('hidden');
+    }, 500);
+  }
+  document.getElementById('skip-lizard-man-btn').onclick = finishLizard;
+  lizardVid.onended = finishLizard;
+
+  function finishOgre() {
+    ogreOverlay.style.opacity = '0';
+    setTimeout(() => {
+      ogreVid.pause();
+      ogreOverlay.classList.add('hidden');
+      setTimeout(playLizard, 1000); // Followed a second later
+    }, 500);
+  }
+  document.getElementById('skip-demon-ogre-btn').onclick = finishOgre;
+  ogreVid.onended = finishOgre;
+
+  ogreOverlay.classList.remove('hidden');
+  setTimeout(() => {
+    ogreOverlay.style.opacity = '1';
+    ogreVid.play().catch(console.warn);
+  }, 50);
+};
+
+// ─────────────────────────────────────────────
+//  ARENA INTRO VIDEO
+// ─────────────────────────────────────────────
+const _ARENA_INTRO_VIDEOS = {
+  'demon_ogre': { overlay: 'demon-ogre-video-overlay', video: 'demon-ogre-video', skip: 'skip-demon-ogre-btn', src: '/videos/demon-ogre.mp4' },
+  'lizardMan': { overlay: 'lizard-man-video-overlay', video: 'lizard-man-video', skip: 'skip-lizard-man-btn', src: '/videos/lizard-man.mp4' },
+  'ogre': { overlay: 'ogre-video-overlay', video: 'ogre-video', skip: 'skip-ogre-btn', src: '/videos/ogre.mp4' },
+};
+
+function _playArenaIntroVideo(monsterId) {
+  const cfg = _ARENA_INTRO_VIDEOS[monsterId];
+  if (!cfg) return;
+  const overlay = document.getElementById(cfg.overlay);
+  const vid     = document.getElementById(cfg.video);
+  const skipBtn = document.getElementById(cfg.skip);
+  if (!overlay || !vid) return;
+
+  function finish() {
+    overlay.style.opacity = '0';
+    setTimeout(() => {
+      vid.pause();
+      overlay.classList.add('hidden');
+    }, 500);
+    if (skipBtn) skipBtn.onclick = null;
+    vid.onended = null;
+  }
+
+  // Set the src directly (same approach as arena music) and load
+  vid.src = asset(cfg.src);
+  vid.load();
+
+  if (skipBtn) skipBtn.onclick = finish;
+  vid.onended = finish;
+
+  overlay.classList.remove('hidden');
+
+  function startPlayback() {
+    overlay.style.opacity = '1';
+    vid.play().catch(console.warn);
+  }
+
+  vid.addEventListener('canplay', () => setTimeout(startPlayback, 50), { once: true });
+}
 
 // ─────────────────────────────────────────────
 //  AQUA MAN VIDEO OVERLAY
@@ -2008,6 +2103,7 @@ window._arenaEnter = function (monsterId) {
   window._arenaMode = true;
 
   // Start arena music immediately — before the fade so it's audible straight away
+  setAmbientLevel(ARENA_LEVEL);
   setZoneMusic(asset('/sounds/backing/arena.mp3'));
 
   _arenaFade(() => {
@@ -2095,6 +2191,7 @@ window._arenaEnter = function (monsterId) {
           if (loadFill) { loadFill.style.transition = 'width 0.15s ease'; loadFill.style.width = '100%'; }
           setTimeout(() => {
             loadOverlay.classList.remove('visible');
+            _playArenaIntroVideo(monsterId);
             setTimeout(() => {
               if (loadFill) { loadFill.style.transition = 'none'; loadFill.style.width = '0%'; }
             }, 400);

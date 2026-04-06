@@ -90,10 +90,13 @@ export function initEssentiary() {
   }
 
   // Expose on window for easy access from objects.js
-  window.openEssentiary = openEssentiary;
+  window.openEssentiary = (opts) => openEssentiary(opts);
 }
 
-export function openEssentiary() {
+let _unlockAll = false;
+
+export function openEssentiary(opts) {
+  _unlockAll = !!(opts && opts.unlockAll);
   const overlay = document.getElementById('essentiary-overlay');
   if (!overlay) return;
   _renderList();
@@ -195,7 +198,7 @@ function _renderList() {
 
   entries.forEach(([key, def]) => {
     const essenceName = _getEssenceName(def);
-    const locked = essenceName && !seen.has(essenceName);
+    const locked = !_unlockAll && essenceName && !seen.has(essenceName);
 
     const card = document.createElement('div');
     card.className = 'essentiary-card' + (locked ? ' essentiary-card-locked' : '');

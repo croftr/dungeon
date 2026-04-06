@@ -366,6 +366,7 @@ const TRACK_VOLUME = {
 };
 let _ambientLevel = 0;
 const BATTLE_TRACK = asset('/sounds/backing/battle.mp3');
+const ARENA_LEVEL = 99;
 
 let musicSource = null;
 let musicGainNode = null;
@@ -833,7 +834,8 @@ function _switchToCombatMusic() {
   isCombatMusicPlaying = true;
   _musicGen++;                  // invalidate any pending normal-track load
   _stopCurrent();
-  const track = _ambientLevel === 4 ? asset('/sounds/backing/arena.mp3') : BATTLE_TRACK;
+  // Level 4 and Level 99 (Arena) both play the arena track in combat
+  const track = (_ambientLevel === 4 || _ambientLevel === ARENA_LEVEL) ? asset('/sounds/backing/arena.mp3') : BATTLE_TRACK;
   _playTrack(track, true, _musicGen);
 }
 

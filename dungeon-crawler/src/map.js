@@ -574,7 +574,7 @@ export function buildTextureZone(scene, wallCells, floorCells, wallTexPath, floo
   fTex.wrapS = fTex.wrapT = THREE.RepeatWrapping;
   fTex.anisotropy = 16;
 
-  const wMat = new THREE.MeshLambertMaterial({ map: wTex });
+  const wMat = new THREE.MeshLambertMaterial({ map: wTex, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
   const fMat = new THREE.MeshLambertMaterial({ map: fTex });
 
   for (const [row, col] of wallCells) {

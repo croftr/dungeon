@@ -331,6 +331,14 @@ export function initObjects(scene, camera) {
                     } else {
                         showMessage("You can't reach that from here.");
                     }
+                } else if (obj.userData.target === 'essentiary_unlock_all') {
+                    if (isInFrontOfPlayer(12, 8, 1)) {
+                        playButtonClickSound();
+                        _animateButtonPress(obj);
+                        if (window.openEssentiary) window.openEssentiary({ unlockAll: true });
+                    } else {
+                        showMessage("You can't reach that from here.");
+                    }
                 } else if (obj.userData.target === 'teleport_level4') {
                     if (isInFrontOfPlayer(11, 8, 1)) {
                         playButtonClickSound();
@@ -639,6 +647,13 @@ export function initObjects(scene, camera) {
                     if (obj.userData.clickAudio) {
                         playSoundByUrl(asset(obj.userData.clickAudio), 0.8);
                         
+                        // Otter NPC level 4 first-click video sequence trigger
+                        if (obj.userData.clickAudio.includes('post-minotaur.mp3') && window.playOtterVideoSequence) {
+                            setTimeout(() => {
+                                window.playOtterVideoSequence();
+                            }, 10000);
+                        }
+
                         if (obj.userData.fallbackClickAudio) {
                             // After playing the primary audio once, swap to the fallback for future clicks
                             obj.userData.clickAudio = obj.userData.fallbackClickAudio;

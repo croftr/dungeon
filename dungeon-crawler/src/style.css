@@ -543,23 +543,24 @@ body {
 .cs-detail-actions { margin-top: 2px; }
 
 .cs-detail-recruit-btn {
-  background: none;
-  border: 1px solid rgba(232, 200, 122, 0.28);
-  color: rgba(232, 200, 122, 0.55);
-  padding: 9px 20px;
+  background: rgba(232, 200, 122, 0.15);
+  border: 1px solid rgba(232, 200, 122, 0.6);
+  color: #e8c87a;
+  padding: 14px 28px;
   font-family: Georgia, serif;
-  font-size: 11px;
-  letter-spacing: 1.5px;
+  font-size: 14px;
+  letter-spacing: 2px;
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: 4px;
   text-transform: uppercase;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 }
 
 .cs-detail-recruit-btn:hover:not(.is-full) {
-  border-color: rgba(232, 200, 122, 0.6);
-  color: #e8c87a;
-  background: rgba(232, 200, 122, 0.07);
+  border-color: #e8c87a;
+  background: rgba(232, 200, 122, 0.3);
+  box-shadow: 0 0 20px rgba(232, 200, 122, 0.35);
 }
 
 .cs-detail-recruit-btn.is-selected {
@@ -608,22 +609,32 @@ body {
   background: rgba(232, 200, 122, 0.05);
 }
 
-/* Party corner — bottom-right overlay matching #party-panel position */
+/* Party corner — centered within the right info panel */
 .cs-party-corner {
   position: absolute;
-  bottom: 12px;
-  right: 12px;
+  bottom: 24px;
+  right: 0;
+  width: calc((100vw - 360px) * 0.58);
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
+  z-index: 10;
+}
+
+@media (max-width: 1024px) {
+  .cs-party-corner { width: calc((100vw - 300px) * 0.62); }
+}
+
+@media (max-width: 800px) {
+  .cs-party-corner { width: calc((100vw - 240px) * 0.65); }
 }
 
 .cs-corner-header {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  gap: 6px;
+  align-items: center;
+  gap: 8px;
 }
 
 .cs-party-hint {
@@ -674,11 +685,12 @@ body {
 .cs-corner-cards {
   display: grid;
   grid-template-columns: repeat(2, clamp(88px, 9.5vw, 148px));
+  justify-content: center;
   gap: 6px;
 }
 
 .cs-corner-card {
-  width: 100%;
+  width: clamp(88px, 9.5vw, 148px);
   height: clamp(110px, 12vw, 185px);
   background: rgba(8, 6, 4, 0.88);
   border: 1px solid rgba(90, 74, 48, 0.6);
@@ -765,10 +777,10 @@ body {
   width: 1000px;
   max-width: 90%;
   aspect-ratio: 16 / 9;
-  object-fit: contain;
-  box-shadow: 0 0 100px rgba(0, 0, 0, 0.8);
-  border: 1px solid rgba(232, 200, 122, 0.1);
-  border-radius: 4px;
+  object-fit: cover;
+  box-shadow: 0 0 80px 20px rgba(0, 0, 0, 0.95);
+  border: 2px solid rgba(232, 200, 122, 0.4);
+  border-radius: 24px;
 }
 
 /* ── Bottom section: options ── */
