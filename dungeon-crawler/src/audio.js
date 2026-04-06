@@ -833,7 +833,8 @@ function _switchToCombatMusic() {
   isCombatMusicPlaying = true;
   _musicGen++;                  // invalidate any pending normal-track load
   _stopCurrent();
-  _playTrack(BATTLE_TRACK, true, _musicGen);
+  const track = _ambientLevel === 4 ? asset('/sounds/backing/arena.mp3') : BATTLE_TRACK;
+  _playTrack(track, true, _musicGen);
 }
 
 function _switchToNormalMusic() {

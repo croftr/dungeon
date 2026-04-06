@@ -8,7 +8,7 @@
 export function spawnLevel4Objects(ctx) {
     const {
         group, loader,
-        addEtherealEgg, addPortal, addTrap1, addChest,
+        addEtherealEgg, addPortal, addTrap1, addChest, addCustomNPC
     } = ctx;
 
     // ── Ethereal Egg ──────────────────────────────────────────────────────────
@@ -19,6 +19,10 @@ export function spawnLevel4Objects(ctx) {
     // ── Blue Portal ───────────────────────────────────────────────────────────
     // East wall of entry room — transports party to level 0's east room.
     addPortal(group, loader, 9, 8, 0, Math.PI / 2, 0.5, 0, 10, 17, 1);
+
+    // ── Otter NPC ─────────────────────────────────────────────────────────────
+    // Stands next to the blue portal, plays audio when clicked.
+    addCustomNPC(group, loader, 8, 7, '/npcs/otter/Meshy_AI_Animation_Idle_withSkin.glb', null, 0.55, Math.PI / 2, 0, 0, null, 2, '/npcs/otter/post-minotaur.mp3', '/npcs/otter/talking.glb', '/npcs/otter/post-mino-bark.mp3');
 
     // ── Trap ──────────────────────────────────────────────────────────────────
     // Centre of the narrow passage — guards the route to the vault.

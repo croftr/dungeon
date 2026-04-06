@@ -1223,15 +1223,19 @@ export function updateParty(dt) {
           : (def.tickDamage || 0);
         if (hpAmount !== 0) {
           setHp(m.id, m.hp - hpAmount);
-          addLogEntry({
-            time: Date.now(),
-            type: 'tick',
-            target: m.name,
-            effectId: d.effectId,
-            effectName: def.name ?? d.effectId,
-            amount: hpAmount, // positive = damage, negative = heal
-            effectColor: def.color ?? null,
-          });
+          // Only log damage ticks (poison, etc.); skip healing ticks (regeneration)
+          // to keep the battle log clean and focused on combat actions.
+          if (hpAmount > 0) {
+            addLogEntry({
+              time: Date.now(),
+              type: 'tick',
+              target: m.name,
+              effectId: d.effectId,
+              effectName: def.name ?? d.effectId,
+              amount: hpAmount, // positive = damage, negative = heal
+              effectColor: def.color ?? null,
+            });
+          }
         }
         // MP drain
         if (def.tickManaDrain) setMp(m.id, m.mp - def.tickManaDrain);

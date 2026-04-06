@@ -1848,6 +1848,20 @@ window.loadLevel = function (levelNum) {
     );
   }
 
+  // Level 4: entirely uses demon-wall and black-stone2
+  if (levelNum === 4) {
+    const wallCells = [];
+    const floorCells = [];
+    level4Map.forEach((row, r) => row.forEach((cell, c) => {
+      if (cell === 1 || cell === 7) wallCells.push([r, c]);
+      else if (cell !== CELL_HOLE) floorCells.push([r, c]);
+    }));
+    buildTextureZone(scene, wallCells, floorCells,
+      asset('/textures/demon-wall.png'),
+      asset('/textures/black-stone2.png')
+    );
+  }
+
   // 3. Clear and respawn level objects
   clearObjects(scene);
   setPendingContainerOverrides(_visitedLevelContainers[levelNum] ?? null);

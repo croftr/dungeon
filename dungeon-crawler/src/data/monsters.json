@@ -391,7 +391,7 @@
         ]
       }
     ],
-    "hp": 340,
+    "hp": 380,
     "defence": 9,
     "xp": 1000,
     "attackSpeed": 1.2,
@@ -451,7 +451,7 @@
         ]
       }
     ],
-    "hp": 240,
+    "hp": 280,
     "defence": 9,
     "xp": 500,
     "attackSpeed": 1,
@@ -533,7 +533,7 @@
         ]
       }
     ],
-    "hp": 450,
+    "hp": 470,
     "defence": 10,
     "xp": 1200,
     "attackSpeed": 1.8,
@@ -912,13 +912,13 @@
         ]
       }
     ],
-    "hp": 500,
+    "hp": 550,
     "defence": 18,
     "xp": 800,
-    "attackSpeed": 1.2,
+    "attackSpeed": 1.5,
     "stats": {
-      "strength": 32,
-      "dexterity": 22,
+      "strength": 34,
+      "dexterity": 28,
       "vitality": 28,
       "intelligence": 18,
       "resilience": 24

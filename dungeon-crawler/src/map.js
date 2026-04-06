@@ -177,42 +177,150 @@ const floorPatternTex = textureLoader.load(asset('/textures/floor1.jpg'));
 floorPatternTex.wrapS = floorPatternTex.wrapT = THREE.RepeatWrapping;
 floorPatternTex.anisotropy = 16;
 
+// Detail overlay atlas 1 (moss, blood, cracks, blank — 2x2 grid on transparency)
+const detailAtlasTex = textureLoader.load(asset('/textures/detail-atlas.png'));
+detailAtlasTex.wrapS = detailAtlasTex.wrapT = THREE.ClampToEdgeWrapping;
+detailAtlasTex.anisotropy = 16;
+
+// Detail overlay atlas 2 (2x2 grid on transparency)
+const detailAtlas2Tex = textureLoader.load(asset('/textures/detail-atlas2.png'));
+detailAtlas2Tex.wrapS = detailAtlas2Tex.wrapT = THREE.ClampToEdgeWrapping;
+detailAtlas2Tex.anisotropy = 16;
+
+// Detail overlay atlas 3 (2x2 grid on transparency)
+const detailAtlas3Tex = textureLoader.load(asset('/textures/detail-atlas3.png'));
+detailAtlas3Tex.wrapS = detailAtlas3Tex.wrapT = THREE.ClampToEdgeWrapping;
+detailAtlas3Tex.anisotropy = 16;
+
 /** Call after a WebGL context restore to force texture re-upload on next frame. */
 export function invalidateWallTextures() {
   stoneWallTex.needsUpdate = true;
   floorPatternTex.needsUpdate = true;
+  detailAtlasTex.needsUpdate = true;
+  detailAtlas2Tex.needsUpdate = true;
+  detailAtlas3Tex.needsUpdate = true;
 }
 
 // ─────────────────────────────────────────────
 //  MATERIALS
 // ─────────────────────────────────────────────
+// Shared shader injection for UV variation + shade + detail atlas overlay
+function injectVariationShader(material) {
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.detailAtlas = { value: detailAtlasTex };
+    shader.uniforms.detailAtlas2 = { value: detailAtlas2Tex };
+    shader.uniforms.detailAtlas3 = { value: detailAtlas3Tex };
+
+    // Vertex: pass per-instance attributes to fragment
+    shader.vertexShader = shader.vertexShader
+      .replace(
+        'void main() {',
+        [
+          'attribute vec3 aUvVariation;',  // offsetU, offsetV, unused
+          'attribute float aShade;',        // brightness multiplier 0.85–1.15
+          'attribute vec3 aDetail;',        // detailIndex, detailOpacity, unused (atlas 1)
+          'attribute vec3 aDetail2;',       // detailIndex, detailOpacity, unused (atlas 2)
+          'attribute vec3 aDetail3;',       // detailIndex, detailOpacity, unused (atlas 3)
+          'varying vec3 vUvVariation;',
+          'varying float vShade;',
+          'varying vec3 vDetail;',
+          'varying vec3 vDetail2;',
+          'varying vec3 vDetail3;',
+          'void main() {',
+          '  vUvVariation = aUvVariation;',
+          '  vShade = aShade;',
+          '  vDetail = aDetail;',
+          '  vDetail2 = aDetail2;',
+          '  vDetail3 = aDetail3;',
+        ].join('\n')
+      );
+
+    // Fragment: apply UV offset, shade, and both detail overlays
+    shader.fragmentShader = [
+      'uniform sampler2D detailAtlas;',
+      'uniform sampler2D detailAtlas2;',
+      'uniform sampler2D detailAtlas3;',
+      'varying vec3 vUvVariation;',
+      'varying float vShade;',
+      'varying vec3 vDetail;',
+      'varying vec3 vDetail2;',
+      'varying vec3 vDetail3;',
+    ].join('\n') + '\n' + shader.fragmentShader;
+
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        '#include <map_fragment>',
+        [
+          '#ifdef USE_MAP',
+          '  {',
+          '    vec2 uv = fract(vMapUv + vUvVariation.xy);',
+          '    vec4 sampledDiffuseColor = texture2D(map, uv);',
+          '    #ifdef DECODE_VIDEO_TEXTURE',
+          '      sampledDiffuseColor = sRGBTransferEOTF(sampledDiffuseColor);',
+          '    #endif',
+          '    diffuseColor *= sampledDiffuseColor;',
+          '    diffuseColor.rgb *= vShade;',
+          '    // Detail atlas 1 (moss, blood, cracks)',
+          '    if (vDetail.y > 0.0) {',
+          '      float d1Idx = vDetail.x;',
+          '      float d1Opacity = vDetail.y;',
+          '      float d1Col = mod(d1Idx, 2.0);',
+          '      float d1Row = floor(d1Idx / 2.0);',
+          '      float d1Scale = 0.22;',
+          '      vec2 d1TileUv = fract(vMapUv);',
+          '      vec2 d1Center = vec2(0.3 + vUvVariation.x * 0.4, 0.3 + vUvVariation.y * 0.4);',
+          '      vec2 d1Scaled = (d1TileUv - d1Center) / d1Scale + 0.5;',
+          '      if (d1Scaled.x >= 0.0 && d1Scaled.x <= 1.0 && d1Scaled.y >= 0.0 && d1Scaled.y <= 1.0) {',
+          '        vec2 d1Uv = d1Scaled * 0.5 + vec2(d1Col * 0.5, d1Row * 0.5);',
+          '        vec4 d1Color = texture2D(detailAtlas, d1Uv);',
+          '        diffuseColor.rgb = mix(diffuseColor.rgb, d1Color.rgb, d1Color.a * d1Opacity);',
+          '      }',
+          '    }',
+          '    // Detail atlas 2 (holes, iron, brick, etc.)',
+          '    if (vDetail2.y > 0.0) {',
+          '      float d2Idx = vDetail2.x;',
+          '      float d2Opacity = vDetail2.y;',
+          '      float d2Col = mod(d2Idx, 2.0);',
+          '      float d2Row = floor(d2Idx / 2.0);',
+          '      float d2Scale = 0.22;',
+          '      vec2 d2TileUv = fract(vMapUv);',
+          // Use reversed UV variation so atlas 2 detail is placed differently from atlas 1
+          '      vec2 d2Center = vec2(0.3 + vUvVariation.y * 0.4, 0.3 + vUvVariation.x * 0.4);',
+          '      vec2 d2Scaled = (d2TileUv - d2Center) / d2Scale + 0.5;',
+          '      if (d2Scaled.x >= 0.0 && d2Scaled.x <= 1.0 && d2Scaled.y >= 0.0 && d2Scaled.y <= 1.0) {',
+          '        vec2 d2Uv = d2Scaled * 0.5 + vec2(d2Col * 0.5, d2Row * 0.5);',
+          '        vec4 d2Color = texture2D(detailAtlas2, d2Uv);',
+          '        diffuseColor.rgb = mix(diffuseColor.rgb, d2Color.rgb, d2Color.a * d2Opacity);',
+          '      }',
+          '    }',
+          '    // Detail atlas 3',
+          '    if (vDetail3.y > 0.0) {',
+          '      float d3Idx = vDetail3.x;',
+          '      float d3Opacity = vDetail3.y;',
+          '      float d3Col = mod(d3Idx, 2.0);',
+          '      float d3Row = floor(d3Idx / 2.0);',
+          '      float d3Scale = 0.22;',
+          '      vec2 d3TileUv = fract(vMapUv);',
+          '      vec2 d3Center = vec2(0.3 + fract(vUvVariation.x + 0.5) * 0.4, 0.3 + fract(vUvVariation.y + 0.5) * 0.4);',
+          '      vec2 d3Scaled = (d3TileUv - d3Center) / d3Scale + 0.5;',
+          '      if (d3Scaled.x >= 0.0 && d3Scaled.x <= 1.0 && d3Scaled.y >= 0.0 && d3Scaled.y <= 1.0) {',
+          '        vec2 d3Uv = d3Scaled * 0.5 + vec2(d3Col * 0.5, d3Row * 0.5);',
+          '        vec4 d3Color = texture2D(detailAtlas3, d3Uv);',
+          '        // Atlas 3 = holes: mostly opaque but let some wall show through',
+          '        diffuseColor.rgb = mix(diffuseColor.rgb, d3Color.rgb, d3Color.a * 0.85);',
+          '      }',
+          '    }',
+          '  }',
+          '#endif',
+        ].join('\n')
+      );
+  };
+}
+
 const wallMat = new THREE.MeshLambertMaterial({ map: stoneWallTex });
-wallMat.onBeforeCompile = (shader) => {
-  // Per-instance UV variation: vec3(offsetU, offsetV, rotation0-3)
-  shader.vertexShader = shader.vertexShader
-    .replace(
-      'void main() {',
-      'attribute vec3 aUvVariation;\nvarying vec3 vUvVariation;\nvoid main() {\n  vUvVariation = aUvVariation;'
-    );
-  shader.fragmentShader = shader.fragmentShader
-    .replace(
-      '#include <map_fragment>',
-      [
-        '#ifdef USE_MAP',
-        '  {',
-        '    vec2 uv = fract(vMapUv + vUvVariation.xy);',
-        '    vec4 sampledDiffuseColor = texture2D(map, uv);',
-        '    #ifdef DECODE_VIDEO_TEXTURE',
-        '      sampledDiffuseColor = sRGBTransferEOTF(sampledDiffuseColor);',
-        '    #endif',
-        '    diffuseColor *= sampledDiffuseColor;',
-        '  }',
-        '#endif',
-      ].join('\n')
-    );
-  shader.fragmentShader = 'varying vec3 vUvVariation;\n' + shader.fragmentShader;
-};
+injectVariationShader(wallMat);
 const floorMat = new THREE.MeshLambertMaterial({ map: floorPatternTex });
+injectVariationShader(floorMat);
 const ceilMat = new THREE.MeshLambertMaterial({ color: 0x111008 });
 const exitMat = new THREE.MeshLambertMaterial({ color: 0x226622, emissive: 0x113311 });
 const blackWallMat = new THREE.MeshLambertMaterial({ color: 0x000000 });
@@ -287,28 +395,109 @@ export function buildLevel(scene) {
   }
 
   // 2. Create Instanced Meshes
+  const rng = mulberry32(0xa117e45);
+
+  // --- Walls ---
   const wallIMGeo = wallGeo.clone();
   const wallIM = new THREE.InstancedMesh(wallIMGeo, wallMat, wallCount);
   wallIM.castShadow = true;
   wallIM.receiveShadow = true;
 
-  // Per-instance UV variation (offsetU, offsetV, rotation 0-3)
-  const uvVar = new Float32Array(wallCount * 3);
-  const rng = mulberry32(0xa117e45);
+  const wallUvVar = new Float32Array(wallCount * 3);
+  const wallShade = new Float32Array(wallCount);
+  const wallDetail = new Float32Array(wallCount * 3);
   for (let i = 0; i < wallCount; i++) {
-    uvVar[i * 3] = rng();           // offsetU
-    uvVar[i * 3 + 1] = rng();           // offsetV
-    uvVar[i * 3 + 2] = Math.floor(rng() * 4); // rotation 0-3
+    wallUvVar[i * 3] = rng();
+    wallUvVar[i * 3 + 1] = rng();
+    wallUvVar[i * 3 + 2] = 0;
+    wallShade[i] = 0.85 + rng() * 0.3;  // 0.85–1.15
+    // ~30% of walls get a detail from atlas 1 (moss=0, blood=1, cracks=2)
+    const wallRoll = rng();
+    if (wallRoll < 0.10) {
+      wallDetail[i * 3] = 0; // moss
+      wallDetail[i * 3 + 1] = 0.7 + rng() * 0.3;
+    } else if (wallRoll < 0.20) {
+      wallDetail[i * 3] = 1; // blood
+      wallDetail[i * 3 + 1] = 0.7 + rng() * 0.3;
+    } else if (wallRoll < 0.30) {
+      wallDetail[i * 3] = 2; // cracks
+      wallDetail[i * 3 + 1] = 0.7 + rng() * 0.3;
+    } else {
+      wallDetail[i * 3] = 3; // blank
+      wallDetail[i * 3 + 1] = 0;
+    }
+    wallDetail[i * 3 + 2] = 0;
   }
-  wallIMGeo.setAttribute('aUvVariation',
-    new THREE.InstancedBufferAttribute(uvVar, 3));
+
+  // ~15% of walls get a detail from atlas 2
+  const wallDetail2 = new Float32Array(wallCount * 3);
+  for (let i = 0; i < wallCount; i++) {
+    const wallRoll2 = rng();
+    if (wallRoll2 < 0.15) {
+      wallDetail2[i * 3] = Math.floor(rng() * 3);
+      wallDetail2[i * 3 + 1] = 0.7 + rng() * 0.3;
+    } else {
+      wallDetail2[i * 3] = 3;
+      wallDetail2[i * 3 + 1] = 0;
+    }
+    wallDetail2[i * 3 + 2] = 0;
+  }
+
+  // ~12% of walls get a hole from atlas 3
+  const wallDetail3 = new Float32Array(wallCount * 3);
+  for (let i = 0; i < wallCount; i++) {
+    const wallRoll3 = rng();
+    if (wallRoll3 < 0.12) {
+      wallDetail3[i * 3] = Math.floor(rng() * 3);
+      wallDetail3[i * 3 + 1] = 0.85;
+    } else {
+      wallDetail3[i * 3] = 3;
+      wallDetail3[i * 3 + 1] = 0;
+    }
+    wallDetail3[i * 3 + 2] = 0;
+  }
+
+  wallIMGeo.setAttribute('aUvVariation', new THREE.InstancedBufferAttribute(wallUvVar, 3));
+  wallIMGeo.setAttribute('aShade', new THREE.InstancedBufferAttribute(wallShade, 1));
+  wallIMGeo.setAttribute('aDetail', new THREE.InstancedBufferAttribute(wallDetail, 3));
+  wallIMGeo.setAttribute('aDetail2', new THREE.InstancedBufferAttribute(wallDetail2, 3));
+  wallIMGeo.setAttribute('aDetail3', new THREE.InstancedBufferAttribute(wallDetail3, 3));
 
   const blackWallIM = new THREE.InstancedMesh(wallGeo, blackWallMat, blackWallCount);
   blackWallIM.castShadow = true;
   blackWallIM.receiveShadow = true;
 
-  const floorIM = new THREE.InstancedMesh(tileGeo, floorMat, floorCount);
+  // --- Floors ---
+  const floorIMGeo = tileGeo.clone();
+  const floorIM = new THREE.InstancedMesh(floorIMGeo, floorMat, floorCount);
   floorIM.receiveShadow = true;
+
+  const floorUvVar = new Float32Array(floorCount * 3);
+  const floorShade = new Float32Array(floorCount);
+  const floorDetail = new Float32Array(floorCount * 3);  // all blank
+  const floorDetail2 = new Float32Array(floorCount * 3); // all blank
+  const floorDetail3 = new Float32Array(floorCount * 3); // all blank
+  for (let i = 0; i < floorCount; i++) {
+    floorUvVar[i * 3] = rng();
+    floorUvVar[i * 3 + 1] = rng();
+    floorUvVar[i * 3 + 2] = 0;
+    floorShade[i] = 0.85 + rng() * 0.3;
+    floorDetail[i * 3] = 3;
+    floorDetail[i * 3 + 1] = 0;
+    floorDetail[i * 3 + 2] = 0;
+    floorDetail2[i * 3] = 3;
+    floorDetail2[i * 3 + 1] = 0;
+    floorDetail2[i * 3 + 2] = 0;
+    floorDetail3[i * 3] = 3;
+    floorDetail3[i * 3 + 1] = 0;
+    floorDetail3[i * 3 + 2] = 0;
+  }
+
+  floorIMGeo.setAttribute('aUvVariation', new THREE.InstancedBufferAttribute(floorUvVar, 3));
+  floorIMGeo.setAttribute('aShade', new THREE.InstancedBufferAttribute(floorShade, 1));
+  floorIMGeo.setAttribute('aDetail', new THREE.InstancedBufferAttribute(floorDetail, 3));
+  floorIMGeo.setAttribute('aDetail2', new THREE.InstancedBufferAttribute(floorDetail2, 3));
+  floorIMGeo.setAttribute('aDetail3', new THREE.InstancedBufferAttribute(floorDetail3, 3));
 
   const ceilIM = new THREE.InstancedMesh(tileGeo, ceilMat, ceilCount);
 

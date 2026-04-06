@@ -113,8 +113,8 @@ export function spawnLevel0Objects(ctx) {
         });
     }
 
-    // ── Dev shortcut: button on the west wall of the starter room ─────────────
-    // Press while facing west (toward col 8) to teleport directly to level 4.
+    // ── Button on the west wall of the starter room ──────────────────────────
+    // Press while facing west (toward col 8) to teleport to level 4 (egg room).
     const { group: btn4 } = createWallButton(+1, { target: 'teleport_level4' }, 'x');
     btn4.position.set(8 * CELL + 1.0, 1.25, 11 * CELL);
     group.add(btn4);

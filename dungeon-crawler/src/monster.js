@@ -1742,25 +1742,15 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       const droppedItems = [];
       if (m.drops && m.drops.length > 0) {
         if (window._arenaMode) {
-          // Drop 1-100 gold
+          // Drop 1-100 gold in the bone pile
           const gold = Math.floor(Math.random() * 100) + 1;
-          addGold(gold);
-          showMessage(`Obtained <b>${gold}</b> gold!`, 3000);
+          droppedItems.push({ name: 'Gold Coins', quantity: gold });
 
-          // Arena: 50% chance to drop boss essence only
+          // Arena: 50% chance to drop boss essence in the bone pile
           for (const drop of m.drops) {
             if (drop.item.endsWith(' Essence') && drop.item !== 'Life Essence') {
               if (Math.random() < 0.5) {
-                // Award directly to inventory (arena auto-exits, corpse inaccessible)
-                for (const member of party) {
-                  if (member.isEmpty) continue;
-                  const slot = member.inventory.indexOf(null);
-                  if (slot !== -1) {
-                    member.inventory[slot] = { name: drop.item, slot: 'loot' };
-                    showMessage(`<b>${member.name}</b> obtained <b>${drop.item}</b>!`, 3000);
-                    break;
-                  }
-                }
+                droppedItems.push(drop.item);
               }
               break;
             }

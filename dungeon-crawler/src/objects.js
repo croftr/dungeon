@@ -177,7 +177,7 @@ const ESSENCE_TO_PARCHMENTS = {
     "Lizard Man Essence": ["Lizard Scale Cloak Parchment"],
     "Minotaur Essence": ["Minotaur Cuirass Parchment"],
     "Ogre Essence": ["Ogre Helm Parchment"],
-    "Demon Ogre Essence": [],
+    "Demon Ogre Essence": ["Demon Blade Parchment"],
     "Tree Man Essence": ["Pyro Palms Parchment"]
 };
 
@@ -335,7 +335,20 @@ export function initObjects(scene, camera) {
                     if (isInFrontOfPlayer(11, 8, 1)) {
                         playButtonClickSound();
                         _animateButtonPress(obj);
-                        window.openEssentiary?.();
+
+                        if (window.loadLevel) {
+                            window.loadLevel(4);
+                            setTimeout(() => {
+                                player.gridRow = 9;
+                                player.gridCol = 4;
+                                player.facing = 3; // West — facing the egg
+                                const w = cellToWorld(9, 4);
+                                camera.position.set(w.x, w.y, w.z);
+                                camera.rotation.order = 'YXZ';
+                                camera.rotation.y = FACING_ANGLES[player.facing];
+                                showMessage("You are transported to the Forgotten Vault.");
+                            }, 50);
+                        }
                     } else {
                         showMessage("You can't reach that from here.");
                     }
@@ -619,10 +632,52 @@ export function initObjects(scene, camera) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 3 && distCol <= 3) {
-                    showMessage(obj.userData.dialogue || '...');
+                    if (obj.userData.dialogue) {
+                        showMessage(obj.userData.dialogue);
+                    }
+                    
                     if (obj.userData.clickAudio) {
                         playSoundByUrl(asset(obj.userData.clickAudio), 0.8);
+                        
+                        if (obj.userData.fallbackClickAudio) {
+                            // After playing the primary audio once, swap to the fallback for future clicks
+                            obj.userData.clickAudio = obj.userData.fallbackClickAudio;
+                        } else {
+                            obj.userData.clickAudio = null; // Only play once
+                        }
                     }
+                    
+                    // Turn to face the player
+                    let root = obj;
+                    while (root.parent && root.parent !== objectsGroup) root = root.parent;
+                    
+                    if (root) {
+                        const px = player.gridCol * CELL;
+                        const pz = player.gridRow * CELL;
+                        const targetAngle = Math.atan2(px - root.position.x, pz - root.position.z);
+                        let diff = targetAngle - root.rotation.y;
+                        while (diff > Math.PI) diff -= 2 * Math.PI;
+                        while (diff < -Math.PI) diff += 2 * Math.PI;
+                        new Tween(root.rotation, tweenGroup)
+                            .to({ y: root.rotation.y + diff }, 600)
+                            .easing(Easing.Quadratic.Out)
+                            .start();
+
+                        // Crossfade idle → talking
+                        if (root.userData.idleAction && root.userData.talkAction) {
+                            root.userData.idleAction.fadeOut(0.3);
+                            root.userData.talkAction.reset().fadeIn(0.3).play();
+                            
+                            // Return to idle after a duration (~5s is a good default for dialogue audio)
+                            setTimeout(() => {
+                                if (root.userData.talkAction && root.userData.idleAction) {
+                                    root.userData.talkAction.fadeOut(0.3);
+                                    root.userData.idleAction.reset().fadeIn(0.3).play();
+                                }
+                            }, 5000);
+                        }
+                    }
+
                     // Relocate quest: If this is the monster npc in the pit trap room
                     if (window.currentLevel === 1 && obj.userData.gridRow === 26 && obj.userData.gridCol === 2) {
                         _monsterNpcSaved = true;
@@ -788,7 +843,7 @@ export function initObjects(scene, camera) {
                                 playKeyLockSound();
                                 setTimeout(() => {
                                     openPortcullis(p);
-                                    if (window.currentLevel === 2 && p.gridRow === 8 && p.gridCol === 7) {
+                                    if (window.currentLevel === 2 && p.gridRow === 23 && p.gridCol === 7) {
                                         _level2PortcullisOpened = true;
                                     }
                                 }, 400);
@@ -2828,6 +2883,7 @@ function addCustomNPC(scene, loader, col, row, glbPath, dialogue, scale = 0.55, 
                 child.userData.proximityAudio = proximityAudio;
                 child.userData.proximityRange = proximityRange;
                 child.userData.clickAudio = arguments[12]; // Support for clickAudio in 13th arg
+                child.userData.fallbackClickAudio = arguments[14]; // Support for fallbackClickAudio in 15th arg
                 interactables.push(child);
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];
@@ -2846,8 +2902,22 @@ function addCustomNPC(scene, loader, col, row, glbPath, dialogue, scale = 0.55, 
 
         if (gltf.animations && gltf.animations.length > 0) {
             const mixer = new THREE.AnimationMixer(model);
-            mixer.clipAction(gltf.animations[0]).setLoop(THREE.LoopRepeat).play();
+            const idleAction = mixer.clipAction(gltf.animations[0]);
+            idleAction.setLoop(THREE.LoopRepeat).play();
+            model.userData.mixer = mixer;
+            model.userData.idleAction = idleAction;
             _mixers.push(mixer);
+
+            const talkAnimPath = arguments[13];
+            if (talkAnimPath) {
+                loader.load(asset(talkAnimPath), (talkGltf) => {
+                    if (talkGltf.animations && talkGltf.animations.length > 0) {
+                        const talkAction = mixer.clipAction(talkGltf.animations[0]);
+                        talkAction.setLoop(THREE.LoopRepeat);
+                        model.userData.talkAction = talkAction;
+                    }
+                });
+            }
         }
 
         if (proximityAudio) {
@@ -3522,10 +3592,39 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
                 if (!_seenEssences.has(essence)) {
                     _seenEssences.add(essence);
                     playNewAudio = true;
+
+                    // Remove the essence FIRST to ensure there's at least one free slot for the reward
+                    let essenceMember = null;
+                    let essenceIdx = -1;
+                    for (const member of party) {
+                        if (member.isEmpty) continue;
+                        const idx = member.inventory.findIndex(it => it && it.name === essence);
+                        if (idx !== -1) {
+                            essenceMember = member;
+                            essenceIdx = idx;
+                            member.inventory[idx] = null;
+                            break;
+                        }
+                    }
+
                     const parchments = ESSENCE_TO_PARCHMENTS[essence] || [];
                     parchments.forEach(p => {
                         if (!_monsterNpcStock.includes(p)) {
                             _monsterNpcStock.push(p);
+
+                            // Award one free copy of the parchment
+                            let awarded = false;
+                            for (let i = 0; i < 4; i++) {
+                                if (party[i] && !party[i].isEmpty && equip.addItemToInventory(i, p)) {
+                                    showMessage(`Barnaby takes the ${essence} and hands you a ${p}!`);
+                                    awarded = true;
+                                    break;
+                                }
+                            }
+                            if (!awarded && essenceMember) {
+                                // This should be impossible since we just freed a slot, but return it just in case
+                                essenceMember.inventory[essenceIdx] = { name: essence };
+                            }
                         }
                     });
                 }
