@@ -1,3 +1,5 @@
+import { asset } from '../../assets.js';
+
 // ─────────────────────────────────────────────────────────────────────────────
 //  LEVEL 4 – The Forgotten Vault
 //  Object/container/portal placement.
@@ -31,4 +33,16 @@ export function spawnLevel4Objects(ctx) {
     // ── Chest ─────────────────────────────────────────────────────────────────
     // North-east corner of the vault room — contains Aether-Glass Silt.
     addChest(group, loader, 8, 1, 0, -0.8, ['Aether-Glass Silt']);
+    
+    // ── Decorations ───────────────────────────────────────────────────────────
+    if (ctx.addDecoration) {
+        // Skull column in the demon's room — nudged south-east within its cell.
+        ctx.addDecoration(group, loader, 14, 5, 0, asset('/items/skull-column.glb'), 0.65, true, 0.5, 0.5, 0);
+
+        // Torture statue — nudged west and slightly further north within the cell.
+        ctx.addDecoration(group, loader, 1, 1, Math.PI / 3, asset('/items/torture-statue.glb'), 0.65, true, -0.3, -0.3, 0);
+
+        // Cauldron in the centre of the lizard-man vault room, shifted back from the passage entrance.
+        ctx.addDecoration(group, loader, 5, 2, 0, asset('/items/cauldron.glb'), 0.5, true, 0, -0.5, 0);
+    }
 }

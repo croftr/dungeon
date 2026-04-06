@@ -1521,7 +1521,8 @@ export function updateMonsters(dt, playerCamera, scene) {
 
     // Proximity attack logic: if player is adjacent, attack them periodically.
     // Suppressed (sleeping) monsters cannot attack but still mark combat engaged.
-    if (inRange && (m.name !== 'Training Dummy' || m.combatMode)) {
+    // Unseen cloaks the party — monsters cannot detect or engage even at proximity.
+    if (inRange && !isPartyUnseen() && (m.name !== 'Training Dummy' || m.combatMode)) {
       m.engaged = true;
       if (m.name !== 'Training Dummy' || m.drainStamina) setInCombat();
 

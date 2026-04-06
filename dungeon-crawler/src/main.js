@@ -1962,6 +1962,8 @@ window.loadLevel = function (levelNum) {
       } else if (r === 6) {
         if (c === 5 && cell !== CELL_HOLE) floorCells.push([r, c]);
         else if ((c === 4 || c === 6) && (cell === 1 || cell === 7)) wallCells.push([r, c]);
+        // South wall of the demon room (cols 13–14)
+        else if ((c === 13 || c === 14) && (cell === 1 || cell === 7)) wallCells.push([r, c]);
       }
     }));
     buildTextureZone(scene, wallCells, floorCells,
