@@ -12,7 +12,7 @@ import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAtta
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, getContainerStates, setPendingContainerOverrides, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal } from './objects.js';
-import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl } from './audio.js';
+import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
@@ -371,6 +371,7 @@ setCallbacks({
         showMemberDamage(i, dmg, false);
         flashPortraitHit(i);
       });
+      playPartyHitSound();
 
       setTimeout(() => {
         // Spawn the secret room now that we've fallen
@@ -442,6 +443,7 @@ setCallbacks({
           showMemberDamage(i, dmg, false);
           flashPortraitHit(i);
         });
+        playPartyHitSound();
 
         // Wait 1 second before teleporting and playing the video
         setTimeout(() => {
@@ -2106,6 +2108,9 @@ window._arenaEnter = function (monsterId) {
   };
   window._arenaMode = true;
 
+  // Pre-load the party-hit sound buffer so it's ready instantly on first hit
+  prefetchBuffer(asset('/sounds/actions/party-hit.mp3'));
+
   // Start arena music immediately — before the fade so it's audible straight away
   setAmbientLevel(ARENA_LEVEL);
   setZoneMusic(asset('/sounds/backing/arena.mp3'));
@@ -2154,6 +2159,9 @@ window._arenaEnter = function (monsterId) {
         null, template.glbDeath, template.glbHit,
         template.glbWalk, template.glbIdleAlt, template.glbCombatIdle
       );
+      // Copy multi-attack variants from the template so arena fights use the
+      // same attack roster as the dungeon (e.g. Ogre's Furious Double Strike).
+      if (template.attacks) arenaMonster.attacks = template.attacks;
       monsters.push(arenaMonster);
       loadMonstersForLevel(scene, ARENA_LEVEL);
     } else {

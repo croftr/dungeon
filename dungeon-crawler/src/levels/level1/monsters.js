@@ -86,7 +86,9 @@ export const level1Monsters = [
     asset('/monsters/ogre/ogre.mp3'), 0.7, 0, 0, 1,
     { bounds: { minRow: 1, maxRow: 5, minCol: 1, maxCol: 5 }, speed: 0.5, waitTime: 2.0 },
     asset('/monsters/ogre/Meshy_AI_Animation_Dead_withSkin.glb'),
-    asset('/monsters/ogre/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb')),
+    asset('/monsters/ogre/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+    null, null,
+    asset('/monsters/ogre/combat-idle.glb')),
 
   // Goblin guard in the vertical passage leading to the Northwest room
   inst(D.goblin, 23, 8, 1,

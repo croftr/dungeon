@@ -7,7 +7,7 @@ import { showMessage, drawMinimap, updateStatus } from './minimap.js';
 import { getItemDef } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refreshPartyCards, setHp, applyStatusEffect } from './party.js';
 import { addLogEntry } from './battle-log.js';
-import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playLearntSound, playSoundByUrl, playQuestAudio, fadeOutQuestAudio } from './audio.js';
+import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playLearntSound, playSoundByUrl, playQuestAudio, fadeOutQuestAudio, playPartyHitSound } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
 import POTION_MERCHANT_DATA from './data/potion-merchant.json';
 import POTIONS_DATA from './data/items/potions.json';
@@ -1736,13 +1736,16 @@ function _fireTrap(trapObj) {
     const dmgRange = TRAP_DAMAGE[level] ?? TRAP_DAMAGE[1];
 
     let damageMessage = 'The trap springs! ';
+    let anyHit = false;
     party.forEach((m, i) => {
         if (m.isEmpty || m.isDead) return;
         const dmg = Math.floor(dmgRange.min + Math.random() * (dmgRange.max - dmgRange.min + 1));
         const before = m.hp;
         setHp(i, before - dmg);
         damageMessage += `${m.name} takes ${dmg} damage. `;
+        anyHit = true;
     });
+    if (anyHit) playPartyHitSound();
 
     showMessage(damageMessage.trim());
 

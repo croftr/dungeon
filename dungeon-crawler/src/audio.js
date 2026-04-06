@@ -251,11 +251,15 @@ export async function playPartyHitSound() {
 
   try {
     const ctx = getCtx();
+    // Ensure the context is running — resume() is a no-op if already running.
+    if (ctx.state === 'suspended') {
+      await ctx.resume();
+    }
     const source = ctx.createBufferSource();
     source.buffer = buffer;
 
     const gainNode = ctx.createGain();
-    gainNode.gain.value = 0.7;
+    gainNode.gain.value = 0.85; // Slightly louder to be audible over arena music
 
     source.connect(gainNode);
     gainNode.connect(ctx.destination);

@@ -1,7 +1,7 @@
 import { getItemDef } from './items.js';
 import { renderItemIcon, attachTooltipListeners, hideTooltip, rotateLoadout, clearAutoAttackTimers, clearAutoRangeAttackTimers, updateEffectiveStats } from './equipment.js';
 import { addLogEntry } from './battle-log.js';
-import { isInCombat, playGoldSound } from './audio.js';
+import { isInCombat, playGoldSound, playPartyHitSound } from './audio.js';
 import { showMessage } from './minimap.js';
 import { skillsState } from './skills-state.js';
 import { SPELLS } from './spells.js';
@@ -1226,6 +1226,7 @@ export function updateParty(dt) {
           // Only log damage ticks (poison, etc.); skip healing ticks (regeneration)
           // to keep the battle log clean and focused on combat actions.
           if (hpAmount > 0) {
+            playPartyHitSound();
             addLogEntry({
               time: Date.now(),
               type: 'tick',
