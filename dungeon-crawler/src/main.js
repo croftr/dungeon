@@ -951,8 +951,12 @@ function finishOgreVideo() {
   if (!ogreOverlay) return;
   ogreOverlay.style.opacity = '0';
 
-  // Start the Ogre Room music as the video fades out
-  setZoneMusic(asset('/sounds/backing/ogre-room.mp3'));
+  // Start the Ogre Room music as the video fades out — but not if we're in the
+  // arena, where the ogre-video element is reused for the arena intro and the
+  // arena music must keep playing.
+  if (!window._arenaMode) {
+    setZoneMusic(asset('/sounds/backing/ogre-room.mp3'));
+  }
 
   setTimeout(() => {
     ogreVideo.pause();

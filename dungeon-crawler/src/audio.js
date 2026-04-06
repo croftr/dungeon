@@ -396,10 +396,10 @@ export function setAmbientLevel(level) {
   _zonePlaylistIndex = 0;
   currentMusicIndex = 0;
 
-  // Level 3 never plays combat music, so if we are switching to level 3,
-  // ensure we stop any current combat music and switch to ambient.
-  if (!isCombatMusicPlaying || _ambientLevel === 3) {
-    if (isCombatMusicPlaying && _ambientLevel === 3) {
+  // Level 3 and the Arena never play the generic combat track — switch to
+  // ambient immediately even if combat music was playing.
+  if (!isCombatMusicPlaying || _ambientLevel === 3 || _ambientLevel === ARENA_LEVEL) {
+    if (isCombatMusicPlaying && (_ambientLevel === 3 || _ambientLevel === ARENA_LEVEL)) {
       isCombatMusicPlaying = false;
     }
     _musicGen++;
