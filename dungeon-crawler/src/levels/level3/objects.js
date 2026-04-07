@@ -33,21 +33,23 @@ export function spawnLevel3Objects(ctx) {
     ]);
 
     // ── Chests ────────────────────────────────────────────────────────────────
-    // North-West room (row 2, col 3)
+    // North-West room (row 2, col 3) — Red Crystal for the shrine
     addChest(group, loader, 3, 2, 0, -0.8, [
+        "Red Crystal",
         "Rune Pendant",
         "Silver Bolts",
     ]);
 
-    // South-East room (row 18, col 19)
+    // South-East room (row 18, col 19) — Blue Crystal for the shrine
     addChest(group, loader, 19, 18, 0, -0.8, [
+        "Blue Crystal",
         "Sun Pendant",
         "Longsword"
     ]);
 
     // ── Ethereal Egg ──────────────────────────────────────────────────────────
-    // Center of the minotaur room — portal to Level 4 once the minotaur is dead
-    addEtherealEgg(group, loader, 11, 11, 0, minotaurDead);
+    // Decorative only — warp to Level 4 is now handled by the portal on Level 0
+    addEtherealEgg(group, loader, 11, 11, 0, minotaurDead, 4, null, null, true);
 
     // ── Trap ──────────────────────────────────────────────────────────────────
     // Guards the entry corridor to the central minotaur room

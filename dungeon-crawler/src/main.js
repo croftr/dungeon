@@ -69,9 +69,9 @@ document.querySelectorAll('img[data-src]').forEach(img => {
 
 // Map of level number → video element IDs to preload when entering that level
 const _VIDEO_LEVELS = {
-  0: ['battle-prep-video', 'hero-door-video', 'nectar-quest-video', 'crystal-shrine-red-video', 'crystal-shrine-red-blue-video'],
-  1: ['ogre-video', 'mummy-video', 'aqua-man-video', 'portal-video'],
-  2: ['treeman-video', 'demon-video', 'giant-video'],
+  0: ['battle-prep-video', 'hero-door-video', 'nectar-quest-video', 'crystal-shrine-red-video', 'crystal-shrine-red-blue-video', 'portal-video'],
+  1: ['ogre-video', 'mummy-video'],
+  2: ['treeman-video', 'demon-video', 'giant-video', 'aqua-man-video', 'stairs-video'],
   3: ['minotaur-video', 'minotaur-death-video', 'statue-portal-video', 'egg-video'],
   4: ['stairs-video', 'demon-ogre-video', 'lizard-man-video'],
 };
@@ -445,13 +445,25 @@ setCallbacks({
         });
         playPartyHitSound();
 
-        // Wait 1 second before teleporting and playing the video
+        // 1. Trigger the Aqua Man video immediately so the fade-in (1.5s) begins
+        // while the scream/blackout is still covering the screen.
+        if (!hasSeenAquaManVideo) {
+          hasSeenAquaManVideo = true;
+          window._saveFlags.hasSeenAquaManVideo = true;
+        }
+        playAquaManVideo(() => {
+          // Once the video and its fade-out are complete, release cutscene lock
+          window._cutscenePlaying = false;
+        });
+
+        // 2. Wait 1 second for the scream/land sound sequence before teleporting the party.
         setTimeout(() => {
-          // Teleport to pit arrival chamber (row 37, col 3) — shifted +15 from original row 22
+          // Teleport to pit arrival chamber (row 37, col 3)
           player.gridRow = 37;
           player.gridCol = 3;
           const w = cellToWorld(37, 3);
           camera.position.set(w.x, w.y, w.z);
+          
           // Face South (2) towards the new passage
           player.facing = 2;
           camera.rotation.order = 'YXZ';
@@ -459,41 +471,37 @@ setCallbacks({
           drawMinimap();
           updateStatus();
 
-          // Hide the blackout now — the video overlay covers the scene
+          // Move the blackout overlay back to hidden once the video overlay is opaque
           if (blackout) {
             blackout.classList.remove('visible');
             setTimeout(() => blackout.classList.add('hidden'), 500);
           }
-
-          // Force play the video as the transition experience
-          if (!hasSeenAquaManVideo) {
-            hasSeenAquaManVideo = true;
-            window._saveFlags.hasSeenAquaManVideo = true;
-          }
-          playAquaManVideo(() => {
-            window._cutscenePlaying = false;
-          });
         }, 1000);
       } else if (cell === CELL_STAIRS_UP) {
         tweenGroup.removeAll();
         player.moving = false;
 
-        // Teleport to far end of original passage (row 32, col 24) — shifted +15
-        player.gridRow = 32;
-        player.gridCol = 24;
-        const w = cellToWorld(32, 24);
-        camera.position.set(w.x, w.y, w.z);
-        // Face East (1) back towards the demon room
-        player.facing = 1;
-        camera.rotation.order = 'YXZ';
-        camera.rotation.y = FACING_ANGLES[player.facing];
-        drawMinimap();
-        updateStatus();
-
         if (window.playStairsVideo) {
+          window._cutscenePlaying = true;
           window.playStairsVideo(() => {
+            window._cutscenePlaying = false;
             showMessage("You climb the stairs back to the upper passage.");
           });
+
+          // Teleport while the video is covering the screen
+          setTimeout(() => {
+            // Teleport to far end of original passage (row 32, col 24) — shifted +15
+            player.gridRow = 32;
+            player.gridCol = 24;
+            const w = cellToWorld(32, 24);
+            camera.position.set(w.x, w.y, w.z);
+            // Face East (1) back towards the demon room
+            player.facing = 1;
+            camera.rotation.order = 'YXZ';
+            camera.rotation.y = FACING_ANGLES[player.facing];
+            drawMinimap();
+            updateStatus();
+          }, 1000);
         }
       }
     }

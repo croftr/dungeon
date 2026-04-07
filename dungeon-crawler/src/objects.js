@@ -92,6 +92,8 @@ let _crystalShrineParams = null;
 let _disabledPortalMesh = null;       // level 2 disabled portal mesh
 let _level3DisabledPortalMesh = null; // level 3 disabled portal mesh
 let _level3PortalEnabled = false;
+let _level4DisabledPortalMesh = null; // level 4 disabled portal mesh
+let _level4PortalEnabled = false;
 let _partyConfirmNPCModel = null; // true once the player confirms — prevents re-triggering
 let _starterGate = null; // portcullis behind the party-confirm NPC; opens only via dialogue
 let _level2PortcullisOpened = false;
@@ -475,7 +477,9 @@ export function initObjects(scene, camera) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 1 && distCol <= 1) {
-                    if (obj.userData.isActive) {
+                    if (obj.userData.decorative) {
+                        showMessage("The egg pulses with an otherworldly energy, its purpose now fulfilled.");
+                    } else if (obj.userData.isActive) {
                         // Always-active egg (e.g. the return egg on level 4) — no guardian check.
                         playPortalSound();
                         const tl = obj.userData.targetLevel ?? 4;
@@ -487,7 +491,7 @@ export function initObjects(scene, camera) {
                                 setTimeout(() => {
                                     player.gridRow = tr;
                                     player.gridCol = tc;
-                                    player.facing = 2; // Face south — back the way they came
+                                    player.facing = obj.userData.targetFacing ?? 2;
                                     const w = cellToWorld(tr, tc);
                                     camera.position.set(w.x, w.y, w.z);
                                     camera.rotation.order = 'YXZ';
@@ -571,9 +575,6 @@ export function initObjects(scene, camera) {
                         return;
                     }
 
-                    const isTreemanTransition = (targetLevel === 2 && window.currentLevel === 0);
-                    const isMinotaurTransition = (targetLevel === 3 && window.currentLevel === 0);
-
                     showMessage("You step into the swirling blue portal...");
                     playPortalSound();
 
@@ -582,32 +583,39 @@ export function initObjects(scene, camera) {
                         return;
                     }
 
-                    // Transport the player immediately
-                    if (window.loadLevel) {
-                        window.loadLevel(targetLevel);
-                        // Optional spawn override — used by portals that target a specific
-                        // position/facing rather than the level's default start cell.
-                        const tr = obj.userData.targetRow;
-                        const tc = obj.userData.targetCol;
-                        const tf = obj.userData.targetFacing;
-                        if (tr != null && tc != null) {
-                            setTimeout(() => {
-                                player.gridRow = tr;
-                                player.gridCol = tc;
-                                const w = cellToWorld(tr, tc);
-                                camera.position.set(w.x, w.y, w.z);
-                                if (tf != null) {
-                                    player.facing = tf;
-                                    camera.rotation.order = 'YXZ';
-                                    camera.rotation.y = FACING_ANGLES[tf];
-                                }
-                            }, 50);
+                    const tr = obj.userData.targetRow;
+                    const tc = obj.userData.targetCol;
+                    const tf = obj.userData.targetFacing;
+
+                    function _doLoad() {
+                        if (window.loadLevel) {
+                            window.loadLevel(targetLevel);
+                            if (tr != null && tc != null) {
+                                setTimeout(() => {
+                                    player.gridRow = tr;
+                                    player.gridCol = tc;
+                                    const w = cellToWorld(tr, tc);
+                                    camera.position.set(w.x, w.y, w.z);
+                                    if (tf != null) {
+                                        player.facing = tf;
+                                        camera.rotation.order = 'YXZ';
+                                        camera.rotation.y = FACING_ANGLES[tf];
+                                    }
+                                }, 50);
+                            }
                         }
                     }
 
-                    if (isMinotaurTransition && window.playPortalVideo) {
-                        // Play the portal animation when leaving level 1 for level 3
-                        window.playPortalVideo();
+                    if (window.currentLevel === 0 && targetLevel > 0) {
+                        // All outgoing warps from the starter room play the portal entry video first
+                        if (window.playPortalVideo) {
+                            window.playPortalVideo(() => _doLoad());
+                        } else {
+                            _doLoad();
+                        }
+                    } else {
+                        // Return portals and all other transitions — load immediately
+                        _doLoad();
                     }
                 } else {
                     showMessage("Step closer to the portal to enter.");
@@ -912,14 +920,18 @@ export function initObjects(scene, camera) {
                             showMessage("The portal opens!");
                             if (window.playCrystalShrineRedBlueVideo) {
                                 window.playCrystalShrineRedBlueVideo(() => {
-                                    if (_starterPortalEnabled) {
+                                    if (_starterPortalEnabled && _level3PortalEnabled) {
+                                        _activateLevel4Portal();
+                                    } else if (_starterPortalEnabled) {
                                         _activateLevel3Portal();
                                     } else {
                                         _activateStarterPortal();
                                     }
                                 });
                             } else {
-                                if (_starterPortalEnabled) {
+                                if (_starterPortalEnabled && _level3PortalEnabled) {
+                                    _activateLevel4Portal();
+                                } else if (_starterPortalEnabled) {
                                     _activateLevel3Portal();
                                 } else {
                                     _activateStarterPortal();
@@ -1681,6 +1693,23 @@ function _activateLevel3Portal() {
     showMessage("The crystal shrine blazes with power — the portal to the Abyssal Crypts has opened!");
 }
 
+function _activateLevel4Portal() {
+    _level4PortalEnabled = true;
+    if (_level4DisabledPortalMesh) {
+        _level4DisabledPortalMesh.traverse((child) => {
+            const idx = interactables.indexOf(child);
+            if (idx !== -1) interactables.splice(idx, 1);
+        });
+        if (_level4DisabledPortalMesh.parent) _level4DisabledPortalMesh.parent.remove(_level4DisabledPortalMesh);
+        _level4DisabledPortalMesh = null;
+    }
+    addPortal(objectsGroup, _gltfLoader, 11, 13, 4, 0, 0, 0.85);
+    // Reset shrine to empty
+    _crystalShrineState = 0;
+    _swapCrystalShrine();
+    showMessage("The crystal shrine blazes with power — the portal to the Egg Chamber has opened!");
+}
+
 let _activeShrineLootObj = null;
 
 function openShrineLootModal(shrineObj) {
@@ -2080,6 +2109,8 @@ export function spawnObjectsForLevel() {
         level2HoleClosed: _level2HoleClosed,
         // Level 3 state flags
         level3PortalEnabled: _level3PortalEnabled,
+        // Level 4 state flags
+        level4PortalEnabled: _level4PortalEnabled,
         minotaurDead,
         // State setters (values written back to objects.js module scope)
         setStarterGate: (g) => { _starterGate = g; },
@@ -2298,6 +2329,8 @@ function addDisabledPortal(scene, loader, col, row, rotY = 0, offsetX = 0, offse
         scene.add(model);
         if (tag === 'level3') {
             _level3DisabledPortalMesh = model;
+        } else if (tag === 'level4') {
+            _level4DisabledPortalMesh = model;
         } else {
             _disabledPortalMesh = model;
         }
@@ -2545,7 +2578,7 @@ function addCrystals(scene, loader, col, row, rotY, offsetX = 0) {
     });
 }
 
-function addEtherealEgg(scene, loader, col, row, rotY = 0, isActive = false, targetLevel = 4, targetRow = null, targetCol = null) {
+function addEtherealEgg(scene, loader, col, row, rotY = 0, isActive = false, targetLevel = 4, targetRow = null, targetCol = null, decorative = false, targetFacing = null) {
     _statueGridCells.add(`${row},${col}`);
     loader.load(asset('/items/ethereal_egg.glb'), (gltf) => {
         const model = gltf.scene;
@@ -2584,7 +2617,9 @@ function addEtherealEgg(scene, loader, col, row, rotY = 0, isActive = false, tar
                 // when the minotaur dies — activation is checked at click time.
                 child.userData.isEgg = true;
                 child.userData.isActive = isActive;
+                child.userData.decorative = decorative;
                 child.userData.targetLevel = targetLevel;
+                child.userData.targetFacing = targetFacing;
                 child.userData.targetRow = targetRow;
                 child.userData.targetCol = targetCol;
                 child.userData.gridRow = row;
@@ -4751,6 +4786,7 @@ export function getWorldFlags() {
         disarmedTraps: [..._trapDisarmedSet],
         crystalShrineState: _crystalShrineState,
         level3PortalEnabled: _level3PortalEnabled,
+        level4PortalEnabled: _level4PortalEnabled,
         seenEssences: [..._seenEssences],
         unlockedRecipes: [..._unlockedRecipes],
         monsterNpcStock: [..._monsterNpcStock],
@@ -4773,6 +4809,7 @@ export function setWorldFlags(flags) {
     _monsterNpcSaved = flags.monsterNpcSaved ?? false;
     _crystalShrineState = flags.crystalShrineState ?? 0;
     _level3PortalEnabled = flags.level3PortalEnabled ?? false;
+    _level4PortalEnabled = flags.level4PortalEnabled ?? false;
     _seenEssences = new Set(flags.seenEssences ?? []);
     _unlockedRecipes = new Set(flags.unlockedRecipes ?? []);
     _monsterNpcStock = flags.monsterNpcStock ?? [];

@@ -18,7 +18,7 @@ export function spawnLevel0Objects(ctx) {
         addDecoration, addCrystalShrine, addHeroDoor, addTrainingConsole,
         createWallButton,
         starterPortalEnabled, starterGateOpened,
-        level3PortalEnabled,
+        level3PortalEnabled, level4PortalEnabled,
         setStarterGate,
         monsterNpcSaved,
         interactables,
@@ -48,11 +48,17 @@ export function spawnLevel0Objects(ctx) {
     }
 
     // ── Portal to Level 3 (The Abyssal Crypts) — south wall, beside Level 2 portal ──
-    // Activated by filling the crystal shrine a second time with crystals from Level 2
     if (level3PortalEnabled) {
         addPortal(group, loader, 12, 13, 3, 0, 0, 0.85, 21, 11, 0);
     } else {
         addDisabledPortal(group, loader, 12, 13, 0, 0, 0.85, 'level3');
+    }
+
+    // ── Portal to Level 4 (The Egg Chamber) — south wall, beside Level 3 portal ──
+    if (level4PortalEnabled) {
+        addPortal(group, loader, 11, 13, 4, 0, 0, 0.85);
+    } else {
+        addDisabledPortal(group, loader, 11, 13, 0, 0, 0.85, 'level4');
     }
 
     // ── Starter gate (portcullis) — closed until party is confirmed ───────────
