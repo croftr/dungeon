@@ -18,6 +18,7 @@ export function spawnLevel0Objects(ctx) {
         addDecoration, addCrystalShrine, addHeroDoor, addTrainingConsole,
         createWallButton,
         starterPortalEnabled, starterGateOpened,
+        level3PortalEnabled,
         setStarterGate,
         monsterNpcSaved,
         interactables,
@@ -29,7 +30,7 @@ export function spawnLevel0Objects(ctx) {
     // ── Starter Stash in the starter room ─────────────────────────────────────────────
     addChest(group, loader, 13.4, 10, Math.PI / 2, -0.1, [
         { name: 'Gold Coins', quantity: 10000 },
-        'Potion of Invincibility', 'Potion of Unseen', "Red Crystal", "Blue Crystal", "Demon Blade", "Goblin Shiv", "Goblin Shiv", "Silver Mace", "Warden's Shield",
+        'Potion of Invincibility', 'Potion of Unseen', "Red Crystal", "Blue Crystal", "Demon Blade", "Goblin Shiv", "Goblin Shiv", "Silver Mace", "Warden's Shield", "Trickster's Hood",
         "Leather Gloves", "Aqua Man Essence", "Crocodile Warrior Essence", "Demon Ogre Essence", "Demon Essence", "Giant Essence", "Lizard Man Essence", "Minotaur Essence", "Ogre Essence", "Tree Man Essence"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
@@ -41,9 +42,17 @@ export function spawnLevel0Objects(ctx) {
 
     // ── Portal to Level 2 — only after Portal Activator Statue is used ────────
     if (starterPortalEnabled) {
-        addPortal(group, loader, 13, 13, 2, Math.PI / 2, 0.85, 0);
+        addPortal(group, loader, 13, 13, 2, 0, 0, 0.85);
     } else {
-        addDisabledPortal(group, loader, 13, 13, Math.PI / 2, 0.85, 0);
+        addDisabledPortal(group, loader, 13, 13, 0, 0, 0.85);
+    }
+
+    // ── Portal to Level 3 (The Abyssal Crypts) — south wall, beside Level 2 portal ──
+    // Activated by filling the crystal shrine a second time with crystals from Level 2
+    if (level3PortalEnabled) {
+        addPortal(group, loader, 12, 13, 3, 0, 0, 0.85, 21, 11, 0);
+    } else {
+        addDisabledPortal(group, loader, 12, 13, 0, 0, 0.85, 'level3');
     }
 
     // ── Starter gate (portcullis) — closed until party is confirmed ───────────

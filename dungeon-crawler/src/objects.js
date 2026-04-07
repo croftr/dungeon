@@ -89,7 +89,9 @@ let _crystalShrineMesh = null;
 let _crystalShrineScene = null;
 let _crystalShrineLoader = null;
 let _crystalShrineParams = null;
-let _disabledPortalMesh = null;
+let _disabledPortalMesh = null;       // level 2 disabled portal mesh
+let _level3DisabledPortalMesh = null; // level 3 disabled portal mesh
+let _level3PortalEnabled = false;
 let _partyConfirmNPCModel = null; // true once the player confirms — prevents re-triggering
 let _starterGate = null; // portcullis behind the party-confirm NPC; opens only via dialogue
 let _level2PortcullisOpened = false;
@@ -570,7 +572,7 @@ export function initObjects(scene, camera) {
                     }
 
                     const isTreemanTransition = (targetLevel === 2 && window.currentLevel === 0);
-                    const isMinotaurTransition = (targetLevel === 3 && window.currentLevel === 1);
+                    const isMinotaurTransition = (targetLevel === 3 && window.currentLevel === 0);
 
                     showMessage("You step into the swirling blue portal...");
                     playPortalSound();
@@ -909,9 +911,19 @@ export function initObjects(scene, camera) {
                             _swapCrystalShrine();
                             showMessage("The portal opens!");
                             if (window.playCrystalShrineRedBlueVideo) {
-                                window.playCrystalShrineRedBlueVideo(() => _activateStarterPortal());
+                                window.playCrystalShrineRedBlueVideo(() => {
+                                    if (_starterPortalEnabled) {
+                                        _activateLevel3Portal();
+                                    } else {
+                                        _activateStarterPortal();
+                                    }
+                                });
                             } else {
-                                _activateStarterPortal();
+                                if (_starterPortalEnabled) {
+                                    _activateLevel3Portal();
+                                } else {
+                                    _activateStarterPortal();
+                                }
                             }
                         } else {
                             showMessage("The shrine pulses with red energy. It seems to need a Blue Crystal.");
@@ -1645,8 +1657,28 @@ function _activateStarterPortal() {
         if (_disabledPortalMesh.parent) _disabledPortalMesh.parent.remove(_disabledPortalMesh);
         _disabledPortalMesh = null;
     }
-    addPortal(objectsGroup, _gltfLoader, 13, 13, 2, Math.PI / 2, 0.85, 0);
+    addPortal(objectsGroup, _gltfLoader, 13, 13, 2, 0, 0, 0.85);
+    // Reset shrine to empty so it can be reused for the level 3 portal
+    _crystalShrineState = 0;
+    _swapCrystalShrine();
     showMessage("The crystal shrine blazes with power — a portal has opened!");
+}
+
+function _activateLevel3Portal() {
+    _level3PortalEnabled = true;
+    if (_level3DisabledPortalMesh) {
+        _level3DisabledPortalMesh.traverse((child) => {
+            const idx = interactables.indexOf(child);
+            if (idx !== -1) interactables.splice(idx, 1);
+        });
+        if (_level3DisabledPortalMesh.parent) _level3DisabledPortalMesh.parent.remove(_level3DisabledPortalMesh);
+        _level3DisabledPortalMesh = null;
+    }
+    addPortal(objectsGroup, _gltfLoader, 12, 13, 3, 0, 0, 0.85, 21, 11, 0);
+    // Reset shrine to empty
+    _crystalShrineState = 0;
+    _swapCrystalShrine();
+    showMessage("The crystal shrine blazes with power — the portal to the Abyssal Crypts has opened!");
 }
 
 let _activeShrineLootObj = null;
@@ -2047,6 +2079,7 @@ export function spawnObjectsForLevel() {
         level2GiantPortcullisOpened: _level2GiantPortcullisOpened,
         level2HoleClosed: _level2HoleClosed,
         // Level 3 state flags
+        level3PortalEnabled: _level3PortalEnabled,
         minotaurDead,
         // State setters (values written back to objects.js module scope)
         setStarterGate: (g) => { _starterGate = g; },
@@ -2244,7 +2277,7 @@ export function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offset
     });
 }
 
-function addDisabledPortal(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
+function addDisabledPortal(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, tag = 'default') {
     loader.load(asset('/items/disabled-portal.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
@@ -2263,7 +2296,11 @@ function addDisabledPortal(scene, loader, col, row, rotY = 0, offsetX = 0, offse
         });
 
         scene.add(model);
-        _disabledPortalMesh = model;
+        if (tag === 'level3') {
+            _level3DisabledPortalMesh = model;
+        } else {
+            _disabledPortalMesh = model;
+        }
     });
 }
 
@@ -4713,6 +4750,7 @@ export function getWorldFlags() {
         monsterNpcSaved: _monsterNpcSaved,
         disarmedTraps: [..._trapDisarmedSet],
         crystalShrineState: _crystalShrineState,
+        level3PortalEnabled: _level3PortalEnabled,
         seenEssences: [..._seenEssences],
         unlockedRecipes: [..._unlockedRecipes],
         monsterNpcStock: [..._monsterNpcStock],
@@ -4734,6 +4772,7 @@ export function setWorldFlags(flags) {
     _level1BtnPortcullisOpened = flags.level1BtnPortcullisOpened ?? false;
     _monsterNpcSaved = flags.monsterNpcSaved ?? false;
     _crystalShrineState = flags.crystalShrineState ?? 0;
+    _level3PortalEnabled = flags.level3PortalEnabled ?? false;
     _seenEssences = new Set(flags.seenEssences ?? []);
     _unlockedRecipes = new Set(flags.unlockedRecipes ?? []);
     _monsterNpcStock = flags.monsterNpcStock ?? [];

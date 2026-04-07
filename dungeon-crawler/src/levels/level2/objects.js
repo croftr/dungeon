@@ -55,20 +55,20 @@ export function spawnLevel2Objects(ctx) {
     addKeyhole(group, loader, 9, 30, -Math.PI / 2, -1.1, -1.3, 30, 9, 'Bone Key');
 
     // ── Chests ────────────────────────────────────────────────────────────────
-    // Two chests in the chest vault (col 1, rows 33–34)
+    // Two chests in the chest vault (col 1, rows 33–34) — Red Crystal in the first
     addChest(group, loader, 0.7, 34, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 10 },
-        'Life Essence', 'Mana Berry', 'Scroll of Fireball'
+        'Red Crystal', 'Life Essence', 'Mana Berry', 'Scroll of Fireball'
     ]);
     addChest(group, loader, 1.3, 34, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 10 },
         'Ring of Strength', 'Ring of Wisdom', 'Ring of Dexterity'
     ]);
 
-    // Chest at the end of the long passage
+    // Chest at the end of the long passage — Blue Crystal
     addChest(group, loader, 28, 32, -Math.PI / 2, 0.0, [
         { name: 'Gold Coins', quantity: 10 },
-        'Ruby Ring', 'Mana Potion', 'Life Essence',
+        'Blue Crystal', 'Ruby Ring', 'Mana Potion', 'Life Essence',
         'Chain Shirt', 'Plate Cuirass'
     ], asset('/items/chest1.glb'), true, 0.5);
 

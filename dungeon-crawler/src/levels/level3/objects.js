@@ -14,8 +14,8 @@ export function spawnLevel3Objects(ctx) {
     } = ctx;
 
     // ── Portals ───────────────────────────────────────────────────────────────
-    // Return portal to Level 1 — behind the player at spawn
-    addPortal(group, loader, 11, 21, 1, Math.PI, 0, 0.85);
+    // Return portal to Level 0 — lands next to the Level 3 portal in the starter room, facing north
+    addPortal(group, loader, 11, 21, 0, Math.PI, 0, 0.85, 13, 12, 0);
 
     // Exit portal (game end) at the far end of the exit corridor
     addPortal(group, loader, 20, 21, -1, Math.PI, 0, 0.85);

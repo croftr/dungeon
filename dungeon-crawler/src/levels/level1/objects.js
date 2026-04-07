@@ -105,9 +105,6 @@ export function spawnLevel1Objects(ctx) {
         'Minor Potions Parchment'
     ]);
 
-    // ── Portal to Level 3 (The Abyssal Crypts) ───────────────────────────────
-    addPortal(group, loader, 1, 22, 3, 0, 0, 0);
-
     // ── Traps ─────────────────────────────────────────────────────────────────
     addTrap1(group, loader, 21, 10);  // long south corridor
 
