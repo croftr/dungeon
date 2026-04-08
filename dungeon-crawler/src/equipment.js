@@ -1836,14 +1836,14 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
     // Show B-slot options for hand items
     const handSlots = ['hand', 'bothHands'];
     if (handSlots.includes(def.slot)) {
-      if (lbLeftBtn && !def.rightHandOnly) {
+      if (lbLeftBtn && !def.rightHandOnly && !def.leftHandOnly) {
         lbLeftBtn.style.display = 'block';
         lbLeftBtn.onclick = () => {
           _assignLoadoutBLeft(activeCharIndex, _ctxInvIndex);
           _hideContextMenu();
         };
       }
-      if (lbRightBtn && def.slot !== 'bothHands') {
+      if (lbRightBtn && def.slot !== 'bothHands' && !def.leftHandOnly) {
         lbRightBtn.style.display = 'block';
         lbRightBtn.onclick = () => {
           _assignLoadoutBRight(activeCharIndex, _ctxInvIndex);
@@ -2199,6 +2199,7 @@ function _confirmDrop() {
   const dropItem = party[_dropPendingCharIndex]?.inventory[_dropPendingInvIndex];
   if (dropItem) {
     party[_dropPendingCharIndex].inventory[_dropPendingInvIndex] = null;
+    addLogEntry({ type: 'item', subtype: 'drop', itemName: dropItem.name, time: Date.now() });
     showMessage(`Dropped ${dropItem.name}.`);
     renderModal(_dropPendingCharIndex);
   }
@@ -2580,14 +2581,15 @@ function _executePartySpell(caster, casterIndex, hand, spellDef) {
   }
   setMp(caster.id, caster.mp - spellDef.mpCost);
 
-  const isSpellSlot = (hand !== 'skill') && spellDef.slot === 'spell';
-  const baseKey = (hand === 'skill' || hand === 'skill2' || hand === 'skill3' || hand === 'skill4' || hand === 'skill5' || hand === 'skill6') ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
+  const isSkillHand = hand.startsWith('skill');
+  const isSpellSlot = !isSkillHand && spellDef.slot === 'spell';
+  const baseKey = isSkillHand ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
   const timeKey = isSpellSlot ? `${baseKey}-${spellDef.name}` : baseKey;
   lastAttackTimes[timeKey] = performance.now();
 
-  if (hand === 'skill') {
+  if (isSkillHand) {
     const cd = (spellDef.delay ?? 15) * 1000;
-    _startSkillCooldownUI(casterIndex, performance.now() + cd);
+    _startSkillCooldownUI(casterIndex, performance.now() + cd, hand);
   }
 
   refreshPartyCards();
@@ -2631,10 +2633,16 @@ function _executeAoEDebuffSpell(caster, casterIndex, hand, spellDef) {
   }
   setMp(caster.id, caster.mp - spellDef.mpCost);
 
-  const isSpellSlot = (hand !== 'skill') && spellDef.slot === 'spell';
-  const baseKey = (hand === 'skill' || hand === 'skill2' || hand === 'skill3' || hand === 'skill4' || hand === 'skill5' || hand === 'skill6') ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
+  const isSkillHand = hand.startsWith('skill');
+  const isSpellSlot = !isSkillHand && spellDef.slot === 'spell';
+  const baseKey = isSkillHand ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
   const timeKey = isSpellSlot ? `${baseKey}-${spellDef.name}` : baseKey;
   lastAttackTimes[timeKey] = performance.now();
+
+  if (isSkillHand) {
+    const cd = (spellDef.delay ?? 15) * 1000;
+    _startSkillCooldownUI(casterIndex, performance.now() + cd, hand);
+  }
 
   refreshPartyCards();
   playAction(spellDef.attackType, hand, casterIndex);
@@ -2690,14 +2698,15 @@ function _executeLineSpell(caster, casterIndex, hand, spellDef) {
   }
   setMp(caster.id, caster.mp - spellDef.mpCost);
 
-  const isSpellSlot = (hand !== 'skill') && spellDef.slot === 'spell';
-  const baseKey = (hand === 'skill' || hand === 'skill2' || hand === 'skill3' || hand === 'skill4' || hand === 'skill5' || hand === 'skill6') ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
+  const isSkillHand = hand.startsWith('skill');
+  const isSpellSlot = !isSkillHand && spellDef.slot === 'spell';
+  const baseKey = isSkillHand ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
   const timeKey = isSpellSlot ? `${baseKey}-${spellDef.name}` : baseKey;
   lastAttackTimes[timeKey] = performance.now();
 
-  if (hand === 'skill') {
+  if (isSkillHand) {
     const cd = (spellDef.delay ?? 15) * 1000;
-    _startSkillCooldownUI(casterIndex, performance.now() + cd);
+    _startSkillCooldownUI(casterIndex, performance.now() + cd, hand);
   }
 
   refreshPartyCards();
@@ -2752,16 +2761,17 @@ function _executePartyMemberSpell(caster, casterIndex, hand, spellDef, target) {
   // Record cooldown so the slot greys out normally.
   // Spells include the spell name so switching spells in the same hand doesn't
   // inherit the previous spell's cooldown.
-  const isSpellSlot = (hand !== 'skill') && spellDef.slot === 'spell';
-  const baseKey = (hand === 'skill' || hand === 'skill2' || hand === 'skill3' || hand === 'skill4' || hand === 'skill5' || hand === 'skill6') ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
+  const isSkillHand = hand.startsWith('skill');
+  const isSpellSlot = !isSkillHand && spellDef.slot === 'spell';
+  const baseKey = isSkillHand ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
   const timeKey = isSpellSlot ? `${baseKey}-${spellDef.name}` : baseKey;
   lastAttackTimes[timeKey] = performance.now();
 
-  if (hand === 'skill') {
+  if (isSkillHand) {
     const cd = (spellDef.delay ?? 15) * 1000;
     const ends = performance.now() + cd;
     if (spellDef.name === 'Heal') _healSkillCooldownEnds[casterIndex] = ends;
-    _startSkillCooldownUI(casterIndex, ends);
+    _startSkillCooldownUI(casterIndex, ends, hand);
   }
 
   refreshPartyCards();
@@ -4308,8 +4318,9 @@ function _useHealSkill(member, memberIndex) {
  * @param {number} memberIndex - Party slot index (0-3)
  * @param {number} expiresAt   - performance.now() timestamp when cooldown ends
  */
-function _startSkillCooldownUI(memberIndex, expiresAt) {
-  const slotEl = document.getElementById(`slot-sk-${memberIndex}`);
+function _startSkillCooldownUI(memberIndex, expiresAt, slotKey = 'skill') {
+  const suffix = slotKey === 'skill' ? '' : slotKey.replace('skill', '');
+  const slotEl = document.getElementById(`slot-sk${suffix}-${memberIndex}`);
   if (!slotEl) return;
 
   // Cancel any existing timer stored on this element

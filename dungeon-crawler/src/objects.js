@@ -780,6 +780,7 @@ export function initObjects(scene, camera) {
                             for (let i = 0; i < 4; i++) {
                                 if (equip.addItemToInventory(i, obj.userData.itemName)) {
                                     added = true;
+                                    addLogEntry({ type: 'item', subtype: 'loot', itemName: obj.userData.itemName, time: Date.now() });
                                     showMessage(`Picked up ${obj.userData.itemName}.`);
                                     playItemSound(obj.userData.itemName);
                                     if (obj.userData.modelContainer) {
@@ -2204,9 +2205,15 @@ function addPortcullis(scene, loader, col, row, rotY = 0, startOpen = false) {
         z: row * CELL,
         isOpen: startOpen
     };
-    // If starting open, make the cell passable on the map
-    if (startOpen && dungeonMap[row]?.[col] === CELL_PORTCULLIS) {
-        dungeonMap[row][col] = CELL_FLOOR;
+    // Sync map cell with portcullis state
+    if (startOpen) {
+        if (dungeonMap[row]?.[col] === CELL_PORTCULLIS) {
+            dungeonMap[row][col] = CELL_FLOOR;
+        }
+    } else {
+        if (dungeonMap[row]?.[col] !== undefined) {
+            dungeonMap[row][col] = CELL_PORTCULLIS;
+        }
     }
     loader.load(portcullis.path, (gltf) => {
         const model = gltf.scene;
@@ -3426,6 +3433,7 @@ function _forge() {
     }
 
     if (matchedResult) {
+        const usedMaterials = [...materials];
         for (let i = 0; i < 8; i++) _forgeContents[i] = null;
         _forgeContents[8] = matchedResult;
         const isNew = !_knownForgeRecipes.has(matchedResult);
@@ -3435,6 +3443,7 @@ function _forge() {
             ? `Forging complete! You discovered the recipe for ${matchedResult}!`
             : `Forging complete! You crafted a ${matchedResult}.`;
         showForgeMessage(msg, 'success');
+        addLogEntry({ type: 'item', subtype: 'forge', itemName: matchedResult, materials: usedMaterials, time: Date.now() });
         playSuccessSound();
         _renderKnownForgeRecipes();
     } else {
@@ -3716,38 +3725,11 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
                     _seenEssences.add(essence);
                     playNewAudio = true;
 
-                    // Remove the essence FIRST to ensure there's at least one free slot for the reward
-                    let essenceMember = null;
-                    let essenceIdx = -1;
-                    for (const member of party) {
-                        if (member.isEmpty) continue;
-                        const idx = member.inventory.findIndex(it => it && it.name === essence);
-                        if (idx !== -1) {
-                            essenceMember = member;
-                            essenceIdx = idx;
-                            member.inventory[idx] = null;
-                            break;
-                        }
-                    }
-
                     const parchments = ESSENCE_TO_PARCHMENTS[essence] || [];
                     parchments.forEach(p => {
                         if (!_monsterNpcStock.includes(p)) {
                             _monsterNpcStock.push(p);
-
-                            // Award one free copy of the parchment
-                            let awarded = false;
-                            for (let i = 0; i < 4; i++) {
-                                if (party[i] && !party[i].isEmpty && equip.addItemToInventory(i, p)) {
-                                    showMessage(`Barnaby takes the ${essence} and hands you a ${p}!`);
-                                    awarded = true;
-                                    break;
-                                }
-                            }
-                            if (!awarded && essenceMember) {
-                                // This should be impossible since we just freed a slot, but return it just in case
-                                essenceMember.inventory[essenceIdx] = { name: essence };
-                            }
+                            showMessage(`Barnaby recognises the ${essence}! A ${p} is now available in his shop.`);
                         }
                     });
                 }
@@ -3927,6 +3909,9 @@ function _buyItems() {
         if (spent > 0) {
             removeGold(spent);
             showMessage(`Bought ${boughtItems.length} items for ${spent} gold.`);
+            for (const name of boughtItems) {
+                addLogEntry({ type: 'item', subtype: 'buy', itemName: name, gold: getItemDef(name)?.value ?? 0, time: Date.now() });
+            }
         }
 
         if (failedItems.length > 0) {
@@ -4082,6 +4067,9 @@ function _sellItems() {
 
     addGold(total);
     showMessage(`Sold ${soldNames.length} item${soldNames.length > 1 ? 's' : ''} for ${total} gold.`);
+    for (const name of soldNames) {
+        addLogEntry({ type: 'item', subtype: 'sell', itemName: name, gold: _getMerchantSellPrice(name), time: Date.now() });
+    }
 
     _merchantSellBasket = [];
     _renderMerchantPartyItems();
@@ -4209,6 +4197,7 @@ function _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx) {
     const target = party[targetIdx];
     const success = equip.addItemToInventory(targetIdx, itemDef.name);
     if (success) {
+        addLogEntry({ type: 'item', subtype: 'loot', itemName: itemDef.name, time: Date.now() });
         playItemSound(itemDef.name);
         if (_activeSentLabelId) {
             const label = document.getElementById(_activeSentLabelId);
@@ -4358,6 +4347,7 @@ function _transmute() {
 
     if (matchedResult) {
         // Consume all ingredients only on success
+        const usedIngredients = [...ingredients];
         for (let i = 0; i < 8; i++) _alchemyContents[i] = null;
         _alchemyContents[8] = matchedResult;
         const isNew = !_knownAlchemyRecipes.has(matchedResult);
@@ -4367,6 +4357,7 @@ function _transmute() {
             ? `Transmutation successful! You discovered the recipe for ${matchedResult}!`
             : `Transmutation successful! You created a ${matchedResult}.`;
         showAlchemyMessage(msg, 'success');
+        addLogEntry({ type: 'item', subtype: 'alchemy', itemName: matchedResult, ingredients: usedIngredients, time: Date.now() });
         playAlchemySound();
         _renderKnownAlchemyRecipes();
     } else {

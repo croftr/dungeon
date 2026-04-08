@@ -1275,12 +1275,13 @@ function getActiveEffectsForMember(m) {
 }
 
 function getSkillOrSpellDef(name) {
-  // Check status effect debuffs (e.g. Poison from monster attacks)
+  // Check normal skills/spells first (they have cooldown/delay properties)
+  const skillOrSpell = (SKILLS_DATA[name] || (SPELLS ? SPELLS.find(s => s.name === name) : null)) ?? null;
+  if (skillOrSpell) return skillOrSpell;
+
+  // Then check status effect debuffs if not found
   const effectDef = Object.values(STATUS_EFFECT_DEFS).find(d => d.name === name);
   if (effectDef) return effectDef;
-
-  const spellDef = SPELLS.find(s => s.name === name);
-  if (spellDef) return spellDef;
 
   for (const p of party) {
     if (p.isEmpty) continue;

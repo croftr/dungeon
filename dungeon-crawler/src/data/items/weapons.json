@@ -240,6 +240,7 @@
     {
         "name": "Oak Staff",
         "slot": "hand",
+        "rightHandOnly": true,
         "attackType": "bash",
         "weaponType": "staff",
         "staminaDrain": 1,
@@ -497,6 +498,7 @@
     {
         "name": "Aethelgard Grand Staff",
         "slot": "hand",
+        "rightHandOnly": true,
         "type": "weapon",
         "attackType": "bash",
         "weaponType": "staff",
@@ -520,6 +522,7 @@
     {
         "name": "Life Staff",
         "slot": "hand",
+        "rightHandOnly": true,
         "type": "weapon",
         "attackType": "bash",
         "weaponType": "staff",
@@ -533,6 +536,28 @@
         "description": "A staff crafted from living elderwood, pulsing with the essence of vitality and magic. It restores and bolsters the life force of its wielder.",
         "value": 1800,
         "weight": 2.5,
+        "statBonuses": {
+            "hp": 2,
+            "mp": 2
+        }
+    },
+    {
+        "name": "Life orb",
+        "slot": "hand",
+        "leftHandOnly": true,
+        "type": "weapon",
+        "attackType": "orb",
+        "weaponType": "orb",
+        "staminaDrain": 0,
+        "baseDamage": 0,
+        "delay": 3.2,
+        "statWeights": {
+            "intelligence": 1.0
+        },
+        "icon": "/icons/life_orb.webp",
+        "description": "A radiant crystal orb that pulses with the essence of vitality. It bolsters the wielder's health and mana without the need for physical strike.",
+        "value": 2000,
+        "weight": 0.8,
         "statBonuses": {
             "hp": 2,
             "mp": 2

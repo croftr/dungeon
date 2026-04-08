@@ -1724,20 +1724,49 @@ window.playPortalVideo = function (onComplete) {
   }, 50);
 };
 
+function _showLevelTitle(levelNum) {
+  const overlay = document.getElementById('level-title-overlay');
+  const text = document.getElementById('level-title-text');
+  if (!overlay || !text) return;
+  text.textContent = `Level ${levelNum}`;
+  overlay.classList.remove('hidden');
+  // Force reflow so the transition fires
+  overlay.getBoundingClientRect();
+  overlay.classList.add('visible');
+  playSoundByUrl(asset('/sounds/new-level.mp3'), 1.0);
+  // Hold for 2s then fade out
+  setTimeout(() => {
+    overlay.classList.remove('visible');
+    setTimeout(() => overlay.classList.add('hidden'), 800);
+  }, 2000);
+}
+
 function finishPortalVideo() {
   if (!portalOverlay) {
     if (_portalCallback) _portalCallback();
     return;
   }
-  portalOverlay.style.opacity = '0';
 
-  setTimeout(() => {
-    portalVideo.pause();
-    portalOverlay.classList.add('hidden');
-    if (_portalCallback) {
-      _portalCallback();
-      _portalCallback = null;
+  // Fire the level transition immediately so the new level loads under the overlay.
+  // The overlay then fades out to reveal the new level, not the old one.
+  if (_portalCallback) {
+    // Mark before callback so we can detect the new level number after
+    const prevLevel = window.currentLevel;
+    _portalCallback();
+    _portalCallback = null;
+    // After loadLevel fires, window.currentLevel is the new level
+    const newLevel = window.currentLevel;
+    if (newLevel !== prevLevel && !_portalVisitedLevels.has(newLevel)) {
+      _portalVisitedLevels.add(newLevel);
+      // Show announcement once the portal overlay finishes fading out
+      setTimeout(() => _showLevelTitle(newLevel), 1500);
     }
+  }
+
+  portalVideo.pause();
+  portalOverlay.style.opacity = '0';
+  setTimeout(() => {
+    portalOverlay.classList.add('hidden');
   }, 1500);
 }
 
@@ -1887,6 +1916,9 @@ let _level1FirstLoad = true; // shows loading screen on first entry to level 1
 // Container states keyed by level number — persists looted state across level transitions
 let _visitedLevelContainers = {};
 
+// Levels the player has entered via portal for the first time (persisted)
+let _portalVisitedLevels = new Set();
+
 registerSaveHandler('level', {
   serialize() {
     // Capture current level's container state before serializing
@@ -1894,10 +1926,12 @@ registerSaveHandler('level', {
     return {
       currentLevel: window.currentLevel,
       visitedLevelContainers: JSON.parse(JSON.stringify(_visitedLevelContainers)),
+      portalVisitedLevels: [..._portalVisitedLevels],
     };
   },
   restore(data) {
     _visitedLevelContainers = data.visitedLevelContainers ?? {};
+    _portalVisitedLevels = new Set(data.portalVisitedLevels ?? []);
   },
 });
 
@@ -2040,12 +2074,12 @@ window.loadLevel = function (levelNum) {
     camera.rotation.order = 'YXZ';
     camera.rotation.y = FACING_ANGLES[player.facing];
   } else if (levelNum === 0 && oldLevel === 2) {
-    // Returning from Level 2 via blue portal — place in starter room, facing west
+    // Returning from Level 2 via blue portal — place in starter room, facing north
     player.gridRow = 13;
     player.gridCol = 13;
     const wRet2 = cellToWorld(13, 13);
     camera.position.set(wRet2.x, wRet2.y, wRet2.z);
-    player.facing = 3; // West
+    player.facing = 0; // North
     camera.rotation.order = 'YXZ';
     camera.rotation.y = FACING_ANGLES[player.facing];
   } else if (levelNum === 0 && oldLevel === 5) {

@@ -57,6 +57,7 @@ function _buildPanel() {
       <button class="bl-filter-btn" data-filter="magic">Magic</button>
       <button class="bl-filter-btn" data-filter="skill">Skills</button>
       <button class="bl-filter-btn" data-filter="effect">Effects</button>
+      <button class="bl-filter-btn" data-filter="items">Items</button>
     </div>
     <div class="bl-entries" id="bl-entries"></div>
   `;
@@ -140,6 +141,14 @@ function _downloadCsv() {
       action = e.effectName || '';
       damage = e.amount != null ? e.amount : '';
       result = e.amount < 0 ? 'Regen' : 'Poison';
+    } else if (type === 'item') {
+      const st = e.subtype || 'loot';
+      if (st === 'loot') { action = 'Looted'; result = e.itemName || ''; }
+      else if (st === 'drop') { action = 'Dropped'; result = e.itemName || ''; }
+      else if (st === 'buy') { action = 'Bought'; result = e.itemName || ''; damage = e.gold != null ? e.gold : ''; }
+      else if (st === 'sell') { action = 'Sold'; result = e.itemName || ''; damage = e.gold != null ? e.gold : ''; }
+      else if (st === 'alchemy') { action = 'Alchemy'; result = e.itemName || ''; details = e.ingredients ? e.ingredients.join('; ') : ''; }
+      else if (st === 'forge') { action = 'Forge'; result = e.itemName || ''; details = e.materials ? e.materials.join('; ') : ''; }
     } else if (type === 'potion') {
       action = e.itemName || '';
       result = 'Use';
@@ -197,7 +206,8 @@ function _getCat(entry) {
   if (entry.actor === 'player' && SPELL_ATTACK_TYPES.has(entry.attackType)) return 'magic';
   if (entry.type === 'status-effect') return 'effect';
   if (entry.type === 'tick') return 'effect'; // both poison ticks and regen ticks
-  if (entry.type === 'potion') return 'item';  // potions visible in All only
+  if (entry.type === 'potion') return 'item';
+  if (entry.type === 'item') return 'item';
   return 'attack';
 }
 
@@ -218,6 +228,15 @@ function _prependRow(entry) {
   else if (entry.type === 'status-effect') typeClass = 'bl--status-effect';
   else if (entry.type === 'tick') typeClass = entry.amount > 0 ? 'bl--tick-dmg' : 'bl--tick-heal';
   else if (entry.type === 'potion') typeClass = 'bl--potion';
+  else if (entry.type === 'item') {
+    const st = entry.subtype || 'loot';
+    if (st === 'sell') typeClass = 'bl--item-sell';
+    else if (st === 'drop') typeClass = 'bl--item-drop';
+    else if (st === 'buy') typeClass = 'bl--item-buy';
+    else if (st === 'alchemy') typeClass = 'bl--item-alchemy';
+    else if (st === 'forge') typeClass = 'bl--item-forge';
+    else typeClass = 'bl--item-loot';
+  }
   else if (entry.blocked) typeClass = 'bl--block';
   else if (entry.stunned) typeClass = 'bl--stun';
   else if (entry.poisoned) typeClass = 'bl--poison';
@@ -294,6 +313,39 @@ function _buildRowHtml(e) {
     const verb = isHeal ? `+${amt} HP` : `−${amt} HP`;
     return `<span class="bl-badge">${badge}</span>` +
       `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.target}</b> [${e.effectName}] ${verb}</span>`;
+  }
+
+  // ── Item transaction (loot / buy / sell / alchemy / forge) ────────────────
+  if (e.type === 'item') {
+    const st = e.subtype || 'loot';
+    if (st === 'loot') {
+      return `<span class="bl-badge">▲</span>` +
+        `<span class="bl-who" style="max-width: none; flex: 1;">Looted <b>${e.itemName}</b></span>`;
+    }
+    if (st === 'buy') {
+      return `<span class="bl-badge">+</span>` +
+        `<span class="bl-who" style="max-width: none; flex: 1;">Bought <b>${e.itemName}</b> for <b>${e.gold}g</b></span>`;
+    }
+    if (st === 'sell') {
+      return `<span class="bl-badge">$</span>` +
+        `<span class="bl-who" style="max-width: none; flex: 1;">Sold <b>${e.itemName}</b> for <b>${e.gold}g</b></span>`;
+    }
+    if (st === 'drop') {
+      return `<span class="bl-badge">▼</span>` +
+        `<span class="bl-who" style="max-width: none; flex: 1;">Dropped <b>${e.itemName}</b></span>`;
+    }
+    if (st === 'alchemy') {
+      const used = e.ingredients ? ` (used: ${e.ingredients.join(', ')})` : '';
+      return `<span class="bl-badge">⚗</span>` +
+        `<span class="bl-who" style="max-width: none; flex: 1;">Crafted <b>${e.itemName}</b>${used}</span>`;
+    }
+    if (st === 'forge') {
+      const used = e.materials ? ` (used: ${e.materials.join(', ')})` : '';
+      return `<span class="bl-badge">⚒</span>` +
+        `<span class="bl-who" style="max-width: none; flex: 1;">Forged <b>${e.itemName}</b>${used}</span>`;
+    }
+    return `<span class="bl-badge">▲</span>` +
+      `<span class="bl-who" style="max-width: none; flex: 1;">${e.itemName || ''}</span>`;
   }
 
   // ── Potion / consumable ────────────────────────────────────────────────────

@@ -1040,6 +1040,38 @@ body {
   border-radius: 2px;
 }
 
+/* ── Level title announcement overlay ──────────────────────────────────── */
+#level-title-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 12000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+#level-title-overlay.visible {
+  opacity: 1;
+}
+
+#level-title-text {
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+  font-size: 72px;
+  font-weight: bold;
+  color: #e8c97a;
+  text-align: center;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 40px rgba(200, 140, 30, 0.9),
+    0 0 80px rgba(200, 140, 30, 0.5),
+    0 0 120px rgba(200, 140, 30, 0.25),
+    2px 2px 6px rgba(0, 0, 0, 0.9);
+}
+
 /* ── Main Menu modal ────────────────────────────────────────────────────── */
 #main-menu-overlay {
   position: fixed;
@@ -6681,6 +6713,7 @@ label.mm-setting-label {
 #battle-log-panel[data-filter="magic"]  .bl-row:not([data-cat="magic"])  { display: none; }
 #battle-log-panel[data-filter="skill"]  .bl-row:not([data-cat="skill"])  { display: none; }
 #battle-log-panel[data-filter="effect"] .bl-row:not([data-cat="effect"]) { display: none; }
+#battle-log-panel[data-filter="items"]  .bl-row:not([data-cat="item"])   { display: none; }
 
 .bl-entries {
   flex: 1;
@@ -6846,6 +6879,47 @@ label.mm-setting-label {
 .bl--levelup .bl-badge {
   color: #ffd700;
   text-shadow: 0 0 6px rgba(255, 215, 0, 0.7);
+}
+
+/* Item events (loot / buy / sell / alchemy / forge) */
+.bl--item-loot {
+  color: #b8e4b8;
+}
+.bl--item-loot .bl-badge {
+  color: #6fc06f;
+}
+.bl--item-buy {
+  color: #a8d4f0;
+}
+.bl--item-buy .bl-badge {
+  color: #5aaee0;
+  font-weight: bold;
+}
+.bl--item-sell {
+  color: #f0d488;
+}
+.bl--item-sell .bl-badge {
+  color: #c8a820;
+}
+.bl--item-drop {
+  color: #b0b0b0;
+}
+.bl--item-drop .bl-badge {
+  color: #808080;
+}
+.bl--item-alchemy {
+  color: #d4b8f0;
+}
+.bl--item-alchemy .bl-badge {
+  color: #9060c8;
+  text-shadow: 0 0 5px rgba(144, 96, 200, 0.6);
+}
+.bl--item-forge {
+  color: #f0c090;
+}
+.bl--item-forge .bl-badge {
+  color: #c07030;
+  text-shadow: 0 0 5px rgba(192, 112, 48, 0.6);
 }
 
 /* Incoming attack from monsters — subtle red left border */

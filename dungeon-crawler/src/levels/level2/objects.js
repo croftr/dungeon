@@ -21,14 +21,14 @@ export function spawnLevel2Objects(ctx) {
 
 
     // ── Portal back to Level 0 ────────────────────────────────────────────────
-    addPortal(group, loader, 7, 1, 0, 0, 0, -0.85);
+    addPortal(group, loader, 7, 1, 0, 0, 0, -0.85, 13, 13, 0);
 
     // ── New area: Spell Cabinet (Room A, north wall, row 3 col 5) ─────────────
     addSpellCabinet(group, loader, 5, 3, 0, 0, -0.7, ['Scroll of Incinerate']);
 
     // ── New area: Chest (Room C, south wall, row 13 col 9) ───────────────────
     addChest(group, loader, 9, 13, Math.PI, 0.7, [
-        'Poison Arrows', 'Poison Dagger', 'Life Staff',
+        'Poison Arrows', 'Poison Dagger', 'Life Orb',
         { name: 'Gold Coins', quantity: 10 }
     ]);
 
