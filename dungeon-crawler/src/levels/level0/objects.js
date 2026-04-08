@@ -32,7 +32,7 @@ export function spawnLevel0Objects(ctx) {
         { name: 'Gold Coins', quantity: 10000 },
         'Potion of Invincibility', 'Potion of Unseen', "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal",
         "Demon Blade", "Goblin Shiv", "Silver Mace", "Warden's Shield", "Trickster's Hood",
-        "Ogre Essence", "Tree Man Essence"
+        "Ogre Essence", "Tree Man Essence", "Life Orb", "Life Staff"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in the east room (center) ────────────────────────────────────

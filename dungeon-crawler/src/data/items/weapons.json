@@ -542,7 +542,7 @@
         }
     },
     {
-        "name": "Life orb",
+        "name": "Life Orb",
         "slot": "hand",
         "leftHandOnly": true,
         "type": "weapon",
