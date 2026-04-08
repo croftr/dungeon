@@ -10,12 +10,8 @@ import { asset } from '../../assets.js';
 export function spawnLevel4Objects(ctx) {
     const {
         group, loader,
-        addEtherealEgg, addPortal, addTrap1, addChest, addCustomNPC
+        addPortal, addTrap1, addChest, addCustomNPC
     } = ctx;
-
-    // ── Ethereal Egg ──────────────────────────────────────────────────────────
-    // Moved to the east wall of the entry room.
-    addEtherealEgg(group, loader, 9, 8, 0, true, 0, 13, 11, false, 0);
 
     // ── Blue Portal ───────────────────────────────────────────────────────────
     // Moved to the south wall of the entry room — nudged south towards the wall.

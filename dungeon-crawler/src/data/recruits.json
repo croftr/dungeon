@@ -7,11 +7,11 @@
         "job": "Ranger",
         "race": "Wood Elf",
         "stats": {
-            "strength": 106,
-            "dexterity": 109,
-            "vitality": 105,
-            "intelligence": 107,
-            "resilience": 105
+            "strength": 6,
+            "dexterity": 9,
+            "vitality": 5,
+            "intelligence": 7,
+            "resilience": 5
         },
         "bio": "A swift and silent guardian of the deep woods. Elrond's bow strikes with the fury of nature itself.",
         "startingInventory": [
@@ -37,11 +37,11 @@
         "job": "Paladin",
         "race": "Human",
         "stats": {
-            "strength": 107,
-            "dexterity": 106,
-            "vitality": 108,
-            "intelligence": 104,
-            "resilience": 108
+            "strength": 7,
+            "dexterity": 6,
+            "vitality": 8,
+            "intelligence": 4,
+            "resilience": 8
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
         "startingSkills": [],
@@ -66,11 +66,11 @@
         "job": "Warrior",
         "race": "Dwarf",
         "stats": {
-            "strength": 108,
-            "dexterity": 106,
-            "vitality": 108,
-            "intelligence": 104,
-            "resilience": 108
+            "strength": 8,
+            "dexterity": 6,
+            "vitality": 8,
+            "intelligence": 4,
+            "resilience": 10
         },
         "bio": "A stout and hearty fighter from the mountainous deeps. Thorek believes every problem can be solved with a sharp axe and enough ale.",
         "startingSkills": [],

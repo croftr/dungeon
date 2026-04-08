@@ -13,7 +13,7 @@ export function spawnLevel2Objects(ctx) {
         group, loader,
         addChest, addStairs, addTrap1,
         addPortal, addPortcullis, addKeyhole,
-        addSpellCabinet,
+        addSpellCabinet, addPortalActivatorStatue,
         createWallButton, addCustomNPC,
         level2PortcullisOpened,
         level2GiantPortcullisOpened,
@@ -55,22 +55,28 @@ export function spawnLevel2Objects(ctx) {
     addKeyhole(group, loader, 9, 30, -Math.PI / 2, -1.1, -1.3, 30, 9, 'Bone Key');
 
     // ── Chests ────────────────────────────────────────────────────────────────
-    // Two chests in the chest vault (col 1, rows 33–34) — Red Crystal in the first
+    // Two chests in the chest vault (col 1, rows 33–34)
     addChest(group, loader, 0.7, 34, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 10 },
-        'Red Crystal', 'Life Essence', 'Mana Berry', 'Scroll of Fireball'
+        'Life Essence', 'Mana Berry', 'Scroll of Fireball'
     ]);
     addChest(group, loader, 1.3, 34, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 10 },
         'Ring of Strength', 'Ring of Wisdom', 'Ring of Dexterity'
     ]);
 
-    // Chest at the end of the long passage — Blue Crystal
-    addChest(group, loader, 28, 32, -Math.PI / 2, 0.0, [
+    // Ethereal Egg in the centre of the demon room — contains Red Crystal
+    addPortalActivatorStatue(group, loader, 5, 31, 0, 0.45, ['Red Crystal']);
+
+    // Chest at col 28 north side — side by side with the egg against the east wall
+    addChest(group, loader, 28, 32, -Math.PI / 2, -0.5, [
         { name: 'Gold Coins', quantity: 10 },
-        'Blue Crystal', 'Ruby Ring', 'Mana Potion', 'Life Essence',
+        'Ruby Ring', 'Mana Potion', 'Life Essence',
         'Chain Shirt', 'Plate Cuirass'
     ], asset('/items/chest1.glb'), true, 0.5);
+
+    // Ethereal Egg at col 28 south side — side by side with the chest
+    addPortalActivatorStatue(group, loader, 28, 32, Math.PI / 2, 0.45, ['Blue Crystal'], 0, 0.5);
 
     // Chest in the NE corner of the giant room
     addChest(group, loader, 24, 17, -Math.PI / 2, 0.7, [
@@ -82,9 +88,9 @@ export function spawnLevel2Objects(ctx) {
     addStairs(group, loader, 3, 41, Math.PI, { x: 1.25, y: 0.7, z: 0.7 }, 0, 0.25);
 
     // ── Buttons ───────────────────────────────────────────────────────────────
-    // Button to close the hole, on the North wall of cell (row 31, col 28) facing South
+    // Button to close the hole — moved forward (west) to col 25 so player can reach it past the chest and egg
     const { group: closeHoleBtn } = createWallButton(+1, { target: 'close_hole', gridRow: 31, gridCol: 28 });
-    closeHoleBtn.position.set(28 * CELL, 1.25, 31 * CELL + 1.0);
+    closeHoleBtn.position.set(25 * CELL, 1.25, 31 * CELL + 1.0);
     closeHoleBtn.rotation.y = -Math.PI / 2;
     group.add(closeHoleBtn);
 

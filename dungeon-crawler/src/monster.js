@@ -533,7 +533,8 @@ function _spawnTreekin(parentMonster, scene, offsetRow, offsetCol) {
     asset('/monsters/treekin-animation/Meshy_AI_Animation_Dead_withSkin.glb'),
     asset('/monsters/treekin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'));
 
-  m.engaged = true; // immediately hostile
+  m.engaged = true;   // immediately hostile
+  m.noDrops = true;   // summoned mid-fight — never drops anything
   monsters.push(m);
   _loadMonster(m, scene);
 
@@ -1741,7 +1742,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       // Roll each entry in the monster's drops table independently.
       // Arena: only a 50% chance of boss essence, nothing else.
       const droppedItems = [];
-      if (m.drops && m.drops.length > 0) {
+      if (m.drops && m.drops.length > 0 && !m.noDrops) {
         if (window._arenaMode) {
           // Drop 1-100 gold in the bone pile
           const gold = Math.floor(Math.random() * 100) + 1;

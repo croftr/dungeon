@@ -8,9 +8,8 @@
 export function spawnLevel3Objects(ctx) {
     const {
         group, loader,
-        addChest, addWeaponRack, addSpellCabinet, addEtherealEgg,
+        addChest, addWeaponRack, addSpellCabinet, addPortalActivatorStatue,
         addPortal, addTrap1,
-        minotaurDead,
     } = ctx;
 
     // ── Portals ───────────────────────────────────────────────────────────────
@@ -33,23 +32,24 @@ export function spawnLevel3Objects(ctx) {
     ]);
 
     // ── Chests ────────────────────────────────────────────────────────────────
-    // North-West room (row 2, col 3) — Red Crystal for the shrine
+    // North-West room (row 2, col 3)
     addChest(group, loader, 3, 2, 0, -0.8, [
-        "Red Crystal",
         "Rune Pendant",
         "Silver Bolts",
     ]);
 
-    // South-East room (row 18, col 19) — Blue Crystal for the shrine
+    // South-East room (row 18, col 19)
     addChest(group, loader, 19, 18, 0, -0.8, [
-        "Blue Crystal",
         "Sun Pendant",
         "Longsword"
     ]);
 
-    // ── Ethereal Egg ──────────────────────────────────────────────────────────
-    // Decorative only — warp to Level 4 is now handled by the portal on Level 0
-    addEtherealEgg(group, loader, 11, 11, 0, minotaurDead, 4, null, null, true);
+    // ── Portal Activator Eggs ───────────────────────────────────────────────────────────
+    // Minotaur room centre — contains Red Crystal
+    addPortalActivatorStatue(group, loader, 11, 11, 0, 0.45, ['Red Crystal']);
+
+    // Alcove at col 20, row 19 — contains Blue Crystal
+    addPortalActivatorStatue(group, loader, 20, 19, 0, 0.45, ['Blue Crystal']);
 
     // ── Trap ──────────────────────────────────────────────────────────────────
     // Guards the entry corridor to the central minotaur room

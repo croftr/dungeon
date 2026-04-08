@@ -287,7 +287,9 @@ export function initObjects(scene, camera) {
             (charDevOverlay && !charDevOverlay.classList.contains('char-dev-hidden')) ||
             (partyConfirmOverlay && !partyConfirmOverlay.classList.contains('chest-hidden')) ||
             (shrineLootOverlay && !shrineLootOverlay.classList.contains('chest-hidden')) ||
-            (tcOverlay && !tcOverlay.classList.contains('tc-hidden'))
+            (tcOverlay && !tcOverlay.classList.contains('tc-hidden')) ||
+            e.target.closest('button[id^="skip-"]') ||
+            e.target.closest('[id$="-video-overlay"]')
         ) return;
 
         // Raycast
@@ -320,7 +322,7 @@ export function initObjects(scene, camera) {
                         showMessage("You can't reach that from here.");
                     }
                 } else if (obj.userData.target === 'close_hole') {
-                    if (isInFrontOfPlayer(31, 28, 1)) {
+                    if (isInFrontOfPlayer(31, 25, 1)) {
                         playButtonClickSound();
                         if (!_level2HoleClosed) {
                             _animateButtonPress(obj);
@@ -1669,7 +1671,7 @@ function _activateStarterPortal() {
         if (_disabledPortalMesh.parent) _disabledPortalMesh.parent.remove(_disabledPortalMesh);
         _disabledPortalMesh = null;
     }
-    addPortal(objectsGroup, _gltfLoader, 13, 13, 2, 0, 0, 0.85);
+    addPortal(objectsGroup, _gltfLoader, 13, 13, 2, 0, 0, 0.85); // Left -> Level 2
     // Reset shrine to empty so it can be reused for the level 3 portal
     _crystalShrineState = 0;
     _swapCrystalShrine();
@@ -1686,7 +1688,7 @@ function _activateLevel3Portal() {
         if (_level3DisabledPortalMesh.parent) _level3DisabledPortalMesh.parent.remove(_level3DisabledPortalMesh);
         _level3DisabledPortalMesh = null;
     }
-    addPortal(objectsGroup, _gltfLoader, 12, 13, 3, 0, 0, 0.85, 21, 11, 0);
+    addPortal(objectsGroup, _gltfLoader, 12, 13, 3, 0, 0, 0.85, 21, 11, 0); // Middle -> Level 3
     // Reset shrine to empty
     _crystalShrineState = 0;
     _swapCrystalShrine();
@@ -1703,7 +1705,7 @@ function _activateLevel4Portal() {
         if (_level4DisabledPortalMesh.parent) _level4DisabledPortalMesh.parent.remove(_level4DisabledPortalMesh);
         _level4DisabledPortalMesh = null;
     }
-    addPortal(objectsGroup, _gltfLoader, 11, 13, 4, 0, 0, 0.85);
+    addPortal(objectsGroup, _gltfLoader, 11, 13, 4, 0, 0, 0.85); // Right -> Level 4
     // Reset shrine to empty
     _crystalShrineState = 0;
     _swapCrystalShrine();
@@ -2263,13 +2265,16 @@ export function spawnArenaPortal(row, col) {
 
 export function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offsetX = 0, offsetZ = 0, targetRow = null, targetCol = null, targetFacing = null, isArenaExit = false) {
     loader.load(asset('/items/Meshy_AI_Blue_Portal_0222102604_texture.glb'), (gltf) => {
-        const model = gltf.scene;
+        // Clone the scene so each portal instance has its own independent mesh
+        // children and userData objects. Without this, the GLTF loader's internal
+        // cache returns the same parsed scene for every call with the same URL,
+        // meaning all portals share the same child meshes and the last
+        // userData.targetLevel assignment overwrites all previous ones.
+        const model = gltf.scene.clone();
         model.scale.setScalar(0.7);
         model.position.set(col * CELL + offsetX, 0.6, row * CELL + offsetZ);
         model.rotation.y = rotY;
 
-        // Add a gentle rotation animation to the portal? Not directly supported here unless we put it in an update loop.
-        // We can just add a light for atmosphere.
         const light = new THREE.PointLight(0x0088ff, 4, 4);
         light.position.set(col * CELL + offsetX, 0.6, row * CELL + offsetZ);
         scene.add(light);
@@ -2278,6 +2283,7 @@ export function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offset
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = false;
+                child.userData = {}; // Ensure a clean, isolated userData on the clone
                 child.userData.isPortal = true;
                 child.userData.targetLevel = targetLevel;
                 child.userData.targetRow = targetRow;
@@ -2288,7 +2294,9 @@ export function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offset
                 child.userData.gridCol = col;
                 interactables.push(child);
 
-                // Fix pixelation by ensuring smooth filtering and max texture resolution across all material maps
+                console.log(`Antigravity: Portal spawned at col=${col} row=${row} -> Level ${targetLevel}`);
+
+                // Ensure smooth texture filtering
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];
                     mats.forEach(mat => {
@@ -2310,7 +2318,7 @@ export function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offset
 
 function addDisabledPortal(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, tag = 'default') {
     loader.load(asset('/items/disabled-portal.glb'), (gltf) => {
-        const model = gltf.scene;
+        const model = gltf.scene.clone(); // Clone to avoid shared userData with other disabled portals
         model.scale.setScalar(0.7);
         model.position.set(col * CELL + offsetX, 0.6, row * CELL + offsetZ);
         model.rotation.y = rotY;
@@ -2337,17 +2345,40 @@ function addDisabledPortal(scene, loader, col, row, rotY = 0, offsetX = 0, offse
     });
 }
 
-function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.45, initialContents = ['Red Crystal']) {
+function _applyEggGlow(model, contents) {
+    if (!model) return;
+    const crystal = contents ? contents.find(c => c != null) : null;
+    let emissiveColor = null;
+    if (crystal === 'Red Crystal')       emissiveColor = new THREE.Color(1.0, 0.15, 0.05);
+    else if (crystal === 'Blue Crystal') emissiveColor = new THREE.Color(0.05, 0.3, 1.0);
+
+    model.traverse(child => {
+        if (!child.isMesh || !child.material) return;
+        const mats = Array.isArray(child.material) ? child.material : [child.material];
+        mats.forEach(m => {
+            if (!('emissive' in m)) return;
+            if (emissiveColor) {
+                m.emissive.copy(emissiveColor);
+                m.emissiveIntensity = 0.7;
+            } else {
+                m.emissive.set(0, 0, 0);
+                m.emissiveIntensity = 0;
+            }
+        });
+    });
+}
+
+function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.45, initialContents = ['Red Crystal'], offsetX = 0, offsetZ = 0) {
     _statueGridCells.add(`${row},${col}`); // block player movement through this cell
     const cid = _nextContainerId++;
     let contents = [...initialContents];
     if (_pendingContainerOverrides && cid in _pendingContainerOverrides) {
         contents = _pendingContainerOverrides[cid];
     }
-    loader.load(asset('/items/statue1.glb'), (gltf) => {
+    loader.load(asset('/items/ethereal_egg.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(scale);
-        model.position.set(col * CELL, 0.02, row * CELL);
+        model.position.set(col * CELL + offsetX, 0.02, row * CELL + offsetZ);
         model.rotation.y = rotY;
 
         model.traverse((child) => {
@@ -2359,10 +2390,12 @@ function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.4
                 child.userData.gridCol = col;
                 child.userData.containerId = cid;
                 child.userData.contents = contents;
+                child.userData.eggModel = model;
                 interactables.push(child);
             }
         });
 
+        _applyEggGlow(model, contents);
         scene.add(model);
     });
 }
@@ -4168,6 +4201,8 @@ function _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx) {
         slot.onclick = null;
         slot.oncontextmenu = null;
         equip.hideTooltip();
+        if (_activeShrineLootObj?.userData.isPortalActivatorStatue)
+            _applyEggGlow(_activeShrineLootObj.userData.eggModel, contents);
         return;
     }
 
@@ -4186,6 +4221,8 @@ function _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx) {
         slot.onclick = null;
         slot.oncontextmenu = null;
         equip.hideTooltip();
+        if (_activeShrineLootObj?.userData.isPortalActivatorStatue)
+            _applyEggGlow(_activeShrineLootObj.userData.eggModel, contents);
         // Refresh the deposit panel so the received item shows up
         if (targetIdx === _chestPartyMemberIdx) _renderChestPartyInv();
     } else {

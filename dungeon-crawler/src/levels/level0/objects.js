@@ -42,21 +42,21 @@ export function spawnLevel0Objects(ctx) {
 
     // ── Portal to Level 2 — only after Portal Activator Statue is used ────────
     if (starterPortalEnabled) {
-        addPortal(group, loader, 13, 13, 2, 0, 0, 0.85);
+        addPortal(group, loader, 13, 13, 2, 0, 0, 0.85); // Left
     } else {
         addDisabledPortal(group, loader, 13, 13, 0, 0, 0.85);
     }
 
     // ── Portal to Level 3 (The Abyssal Crypts) — south wall, beside Level 2 portal ──
     if (level3PortalEnabled) {
-        addPortal(group, loader, 12, 13, 3, 0, 0, 0.85, 21, 11, 0);
+        addPortal(group, loader, 12, 13, 3, 0, 0, 0.85, 21, 11, 0); // Middle
     } else {
         addDisabledPortal(group, loader, 12, 13, 0, 0, 0.85, 'level3');
     }
 
     // ── Portal to Level 4 (The Egg Chamber) — south wall, beside Level 3 portal ──
     if (level4PortalEnabled) {
-        addPortal(group, loader, 11, 13, 4, 0, 0, 0.85);
+        addPortal(group, loader, 11, 13, 4, 0, 0, 0.85); // Right
     } else {
         addDisabledPortal(group, loader, 11, 13, 0, 0, 0.85, 'level4');
     }

@@ -97,6 +97,7 @@ loadVideosForLevel(0);
 // Pre-fetch back1.mp3 raw bytes now — no AudioContext needed.
 // By the time the user clicks, the bytes are cached and decodeAudioData is near-instant.
 const _audioPreload = prefetchBuffer(asset('/sounds/back1.mp3'));
+
 const _themeTunePreload = prefetchBuffer(asset('/sounds/backing/theme-tune.mp3'));
 prefetchBuffer(asset('/sounds/browse-member.mp3'));
 prefetchBuffer(asset('/sounds/select-member.mp3'));
@@ -974,7 +975,7 @@ function finishOgreVideo() {
   }, 1500);
 }
 
-if (skipOgreBtn) skipOgreBtn.addEventListener('click', finishOgreVideo);
+if (skipOgreBtn) skipOgreBtn.addEventListener('click', (e) => { e.stopPropagation(); finishOgreVideo(); });
 if (ogreVideo) ogreVideo.addEventListener('ended', finishOgreVideo);
 
 // ─────────────────────────────────────────────
@@ -1021,7 +1022,7 @@ function finishNectarQuestVideo() {
   }, 1500);
 }
 
-if (skipNectarQuestBtn) skipNectarQuestBtn.addEventListener('click', finishNectarQuestVideo);
+if (skipNectarQuestBtn) skipNectarQuestBtn.addEventListener('click', (e) => { e.stopPropagation(); finishNectarQuestVideo(); });
 if (nectarQuestVideo) {
   nectarQuestVideo.addEventListener('timeupdate', () => {
     if (!_nectarQuestFading && nectarQuestVideo.duration && nectarQuestVideo.currentTime >= nectarQuestVideo.duration - 2.5) {
@@ -1086,7 +1087,7 @@ function finishTreemanVideo() {
   }, 1500);
 }
 
-if (skipTreemanBtn) skipTreemanBtn.addEventListener('click', finishTreemanVideo);
+if (skipTreemanBtn) skipTreemanBtn.addEventListener('click', (e) => { e.stopPropagation(); finishTreemanVideo(); });
 if (treemanVideo) treemanVideo.addEventListener('ended', finishTreemanVideo);
 
 // ─────────────────────────────────────────────
@@ -1131,7 +1132,7 @@ function finishMummyVideo() {
   }, 1500);
 }
 
-if (skipMummyBtn) skipMummyBtn.addEventListener('click', finishMummyVideo);
+if (skipMummyBtn) skipMummyBtn.addEventListener('click', (e) => { e.stopPropagation(); finishMummyVideo(); });
 if (mummyVideo) mummyVideo.addEventListener('ended', finishMummyVideo);
 
 // ─────────────────────────────────────────────
@@ -1178,7 +1179,7 @@ function finishBattlePrepVideo() {
   }, 1500);
 }
 
-if (skipBattlePrepBtn) skipBattlePrepBtn.addEventListener('click', finishBattlePrepVideo);
+if (skipBattlePrepBtn) skipBattlePrepBtn.addEventListener('click', (e) => { e.stopPropagation(); finishBattlePrepVideo(); });
 if (battlePrepVideo) battlePrepVideo.addEventListener('ended', finishBattlePrepVideo);
 
 // ─────────────────────────────────────────────
@@ -1223,7 +1224,7 @@ function finishMinotaurVideo() {
   }, 1500);
 }
 
-if (skipMinotaurBtn) skipMinotaurBtn.addEventListener('click', finishMinotaurVideo);
+if (skipMinotaurBtn) skipMinotaurBtn.addEventListener('click', (e) => { e.stopPropagation(); finishMinotaurVideo(); });
 if (minotaurVideo) minotaurVideo.addEventListener('ended', finishMinotaurVideo);
 
 // ─────────────────────────────────────────────
@@ -1281,7 +1282,7 @@ function finishMinotaurDeathVideo() {
   }, 1500);
 }
 
-if (skipMinotaurDeathBtn) skipMinotaurDeathBtn.addEventListener('click', finishMinotaurDeathVideo);
+if (skipMinotaurDeathBtn) skipMinotaurDeathBtn.addEventListener('click', (e) => { e.stopPropagation(); finishMinotaurDeathVideo(); });
 if (minotaurDeathVideo) {
   minotaurDeathVideo.addEventListener('ended', finishMinotaurDeathVideo);
   minotaurDeathVideo.addEventListener('error', () => {
@@ -1333,7 +1334,7 @@ function finishDemonVideo() {
   }, 1500);
 }
 
-if (skipDemonBtn) skipDemonBtn.addEventListener('click', finishDemonVideo);
+if (skipDemonBtn) skipDemonBtn.addEventListener('click', (e) => { e.stopPropagation(); finishDemonVideo(); });
 if (demonVideo) demonVideo.addEventListener('ended', finishDemonVideo);
 
 // ─────────────────────────────────────────────
@@ -1362,7 +1363,7 @@ window.playOtterVideoSequence = function() {
       lizardOverlay.classList.add('hidden');
     }, 500);
   }
-  document.getElementById('skip-lizard-man-btn').onclick = finishLizard;
+  document.getElementById('skip-lizard-man-btn').onclick = (e) => { if (e) e.stopPropagation(); finishLizard(); };
   lizardVid.onended = finishLizard;
 
   function finishOgre() {
@@ -1373,7 +1374,7 @@ window.playOtterVideoSequence = function() {
       setTimeout(playLizard, 1000); // Followed a second later
     }, 500);
   }
-  document.getElementById('skip-demon-ogre-btn').onclick = finishOgre;
+  document.getElementById('skip-demon-ogre-btn').onclick = (e) => { if (e) e.stopPropagation(); finishOgre(); };
   ogreVid.onended = finishOgre;
 
   ogreOverlay.classList.remove('hidden');
@@ -1387,9 +1388,15 @@ window.playOtterVideoSequence = function() {
 //  ARENA INTRO VIDEO
 // ─────────────────────────────────────────────
 const _ARENA_INTRO_VIDEOS = {
-  'demon_ogre': { overlay: 'demon-ogre-video-overlay', video: 'demon-ogre-video', skip: 'skip-demon-ogre-btn', src: '/videos/demon-ogre.mp4' },
-  'lizardMan': { overlay: 'lizard-man-video-overlay', video: 'lizard-man-video', skip: 'skip-lizard-man-btn', src: '/videos/lizard-man.mp4' },
-  'ogre': { overlay: 'ogre-video-overlay', video: 'ogre-video', skip: 'skip-ogre-btn', src: '/videos/ogre.mp4' },
+  'demon_ogre':        { overlay: 'demon-ogre-video-overlay',            video: 'demon-ogre-video',            skip: 'skip-demon-ogre-btn',            src: '/videos/demon-ogre.mp4' },
+  'lizardMan':         { overlay: 'lizard-man-video-overlay',            video: 'lizard-man-video',            skip: 'skip-lizard-man-btn',            src: '/videos/lizard-man.mp4' },
+  'ogre':              { overlay: 'ogre-video-overlay',                  video: 'ogre-video',                  skip: 'skip-ogre-btn',                  src: '/videos/ogre.mp4' },
+  'aqua_man':          { overlay: 'aqua-man-arena-video-overlay',        video: 'aqua-man-arena-video',        skip: 'skip-aqua-man-arena-btn',        src: '/videos/aqua-man-arena.mp4' },
+  'crocodile_warrior': { overlay: 'crocodile-warrior-arena-video-overlay', video: 'crocodile-warrior-arena-video', skip: 'skip-crocodile-warrior-arena-btn', src: '/videos/crocodile-warrior-arena.mp4' },
+  'demon':             { overlay: 'demon-arena-video-overlay',           video: 'demon-arena-video',           skip: 'skip-demon-arena-btn',           src: '/videos/demon-arena.mp4' },
+  'minotaur':          { overlay: 'minotaur-arena-video-overlay',        video: 'minotaur-arena-video',        skip: 'skip-minotaur-arena-btn',        src: '/videos/minotaur-arena.mp4' },
+  'giant':             { overlay: 'giant-arena-video-overlay',           video: 'giant-arena-video',           skip: 'skip-giant-arena-btn',           src: '/videos/giant-arena.mp4' },
+  'treeman':           { overlay: 'treeman-arena-video-overlay',         video: 'treeman-arena-video',         skip: 'skip-treeman-arena-btn',         src: '/videos/treeman-arena.mp4' },
 };
 
 function _playArenaIntroVideo(monsterId) {
@@ -1414,7 +1421,7 @@ function _playArenaIntroVideo(monsterId) {
   vid.src = asset(cfg.src);
   vid.load();
 
-  if (skipBtn) skipBtn.onclick = finish;
+  if (skipBtn) skipBtn.onclick = (e) => { if (e) e.stopPropagation(); finish(); };
   vid.onended = finish;
 
   overlay.classList.remove('hidden');
@@ -1462,7 +1469,7 @@ function playAquaManVideo(onComplete) {
     }, 1500);
   }
 
-  if (skipAquaManBtn) skipAquaManBtn.onclick = finishAquaManVideo;
+  if (skipAquaManBtn) skipAquaManBtn.onclick = (e) => { if (e) e.stopPropagation(); finishAquaManVideo(); };
   if (aquaManVideo) aquaManVideo.onended = finishAquaManVideo;
 
   setTimeout(() => {
@@ -1511,7 +1518,7 @@ function playGiantVideo(onComplete) {
     }, 1500);
   }
 
-  if (skipGiantBtn) skipGiantBtn.onclick = finishGiantVideo;
+  if (skipGiantBtn) skipGiantBtn.onclick = (e) => { if (e) e.stopPropagation(); finishGiantVideo(); };
   if (giantVideo) giantVideo.onended = finishGiantVideo;
 
   setTimeout(() => {
@@ -1567,7 +1574,7 @@ function finishStairsVideo() {
   }, 1500);
 }
 
-if (skipStairsBtn) skipStairsBtn.addEventListener('click', finishStairsVideo);
+if (skipStairsBtn) skipStairsBtn.addEventListener('click', (e) => { e.stopPropagation(); finishStairsVideo(); });
 if (stairsVideoElement) stairsVideoElement.addEventListener('ended', finishStairsVideo);
 
 // ─────────────────────────────────────────────
@@ -1611,7 +1618,7 @@ function finishEggVideo() {
   }, 1500);
 }
 
-if (skipEggBtn) skipEggBtn.addEventListener('click', finishEggVideo);
+if (skipEggBtn) skipEggBtn.addEventListener('click', (e) => { e.stopPropagation(); finishEggVideo(); });
 if (eggVideoElement) eggVideoElement.addEventListener('ended', finishEggVideo);
 
 // ─────────────────────────────────────────────
@@ -1689,7 +1696,7 @@ function finishHeroDoorVideo() {
   }
 }
 
-if (skipHeroDoorBtn) skipHeroDoorBtn.addEventListener('click', finishHeroDoorVideo);
+if (skipHeroDoorBtn) skipHeroDoorBtn.addEventListener('click', (e) => { e.stopPropagation(); finishHeroDoorVideo(); });
 if (heroDoorVideoElement) heroDoorVideoElement.addEventListener('ended', finishHeroDoorVideo);
 
 // ─────────────────────────────────────────────
@@ -1734,7 +1741,7 @@ function finishPortalVideo() {
   }, 1500);
 }
 
-if (skipPortalBtn) skipPortalBtn.addEventListener('click', finishPortalVideo);
+if (skipPortalBtn) skipPortalBtn.addEventListener('click', (e) => { e.stopPropagation(); finishPortalVideo(); });
 if (portalVideo) portalVideo.addEventListener('ended', finishPortalVideo);
 
 // ─────────────────────────────────────────────
@@ -1779,7 +1786,7 @@ function finishStatuePortalVideo() {
   }, 1500);
 }
 
-if (skipStatuePortalBtn) skipStatuePortalBtn.addEventListener('click', finishStatuePortalVideo);
+if (skipStatuePortalBtn) skipStatuePortalBtn.addEventListener('click', (e) => { e.stopPropagation(); finishStatuePortalVideo(); });
 if (statuePortalVideo) statuePortalVideo.addEventListener('ended', finishStatuePortalVideo);
 
 // ─────────────────────────────────────────────
@@ -1822,7 +1829,7 @@ function finishCrystalShrineRedVideo() {
   }, 1500);
 }
 
-if (skipCrystalShrineRedBtn) skipCrystalShrineRedBtn.addEventListener('click', finishCrystalShrineRedVideo);
+if (skipCrystalShrineRedBtn) skipCrystalShrineRedBtn.addEventListener('click', (e) => { e.stopPropagation(); finishCrystalShrineRedVideo(); });
 if (crystalShrineRedVideo) crystalShrineRedVideo.addEventListener('ended', finishCrystalShrineRedVideo);
 
 const crystalShrineRedBlueOverlay = document.getElementById('crystal-shrine-red-blue-video-overlay');
@@ -1862,7 +1869,7 @@ function finishCrystalShrineRedBlueVideo() {
   }, 1500);
 }
 
-if (skipCrystalShrineRedBlueBtn) skipCrystalShrineRedBlueBtn.addEventListener('click', finishCrystalShrineRedBlueVideo);
+if (skipCrystalShrineRedBlueBtn) skipCrystalShrineRedBlueBtn.addEventListener('click', (e) => { e.stopPropagation(); finishCrystalShrineRedBlueVideo(); });
 if (crystalShrineRedBlueVideo) crystalShrineRedBlueVideo.addEventListener('ended', finishCrystalShrineRedBlueVideo);
 
 function handleFirstInteraction() {
