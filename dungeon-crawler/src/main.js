@@ -951,6 +951,8 @@ function playOgreVideo() {
   // Give the browser a moment to process the display change before animating opacity
   setTimeout(() => {
     ogreOverlay.style.opacity = '1';
+    ogreVideo.muted = false;
+    ogreVideo.volume = 1;
     ogreVideo.play().catch(e => {
       console.warn("Ogre video play failed:", e);
       finishOgreVideo();
@@ -1050,6 +1052,8 @@ window.playTreemanVideo = function (onComplete) {
 
   setTimeout(() => {
     treemanOverlay.style.opacity = '1';
+    treemanVideo.muted = false;
+    treemanVideo.volume = 1;
     treemanVideo.play().catch(e => {
       console.warn("Treeman video play failed:", e);
       finishTreemanVideo();
@@ -1305,6 +1309,8 @@ function playDemonVideo() {
 
   setTimeout(() => {
     demonOverlay.style.opacity = '1';
+    demonVideo.muted = false;
+    demonVideo.volume = 1;
     demonVideo.play().catch(e => {
       console.warn("Demon video play failed:", e);
       finishDemonVideo();
@@ -2009,9 +2015,9 @@ window.loadLevel = function (levelNum) {
         if (cell === 1 || cell === 7) wallCells.push([r, c]);
         else if (cell !== CELL_HOLE) floorCells.push([r, c]);
       } else if (r <= 11) {
-        // Passage corridor: only the single-cell column (col 10) and its walls (cols 9, 11)
+        // Passage corridor: only the single-cell column (col 10) and its walls
         if (c === 10 && cell !== CELL_HOLE) floorCells.push([r, c]);
-        else if ((c === 9 || c === 11) && (cell === 1 || cell === 7)) wallCells.push([r, c]);
+        else if ((cell === 1 || cell === 7) && c >= 6 && c <= 14) wallCells.push([r, c]);
         // Demon alcove floor (rows 6–7, cols 18–19)
         else if (r <= 7 && (c === 18 || c === 19) && cell !== CELL_HOLE) floorCells.push([r, c]);
         // South wall of the demon alcove (row 8, cols 18–19)

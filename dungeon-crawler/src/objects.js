@@ -81,6 +81,7 @@ export function updateObjects(dt) {
 //  SARCOPHAGUS STATE
 // ─────────────────────────────────────────────
 let _mummyGateOpened = false;
+let _mummyEscapeGateOpened = false; // true once escape button pressed — keeps entrance open after zone
 let _starterGateOpened = false; // persists across level reloads — once open, never re-closes
 let _starterPortalEnabled = false;
 // Crystal shrine state: 0=empty, 1=red crystal placed, 2=red+blue placed
@@ -306,6 +307,7 @@ export function initObjects(scene, camera) {
                     if (isInFrontOfPlayer(3, 21, 1)) {
                         playButtonClickSound();
                         _animateButtonPress(obj);
+                        _mummyEscapeGateOpened = true;
                         const trapDoor = objects.find(o => o.name === 'Portcullis' && o.gridRow === 1 && o.gridCol === 10);
                         if (trapDoor) openPortcullis(trapDoor);
                     } else {
@@ -2102,6 +2104,7 @@ export function spawnObjectsForLevel() {
         starterPortalEnabled: _starterPortalEnabled,
         starterGateOpened: _starterGateOpened,
         mummyGateOpened: _mummyGateOpened,
+        mummyEscapeGateOpened: _mummyEscapeGateOpened,
         crystalShrineState: _crystalShrineState,
         level1HoleRoomSpawned: _level1HoleRoomSpawned,
         level1BtnPortcullisOpened: _level1BtnPortcullisOpened,
@@ -4803,6 +4806,7 @@ export function spawnDroppedItem(col, row, itemName, quantity = 1) {
 export function getWorldFlags() {
     return {
         mummyGateOpened: _mummyGateOpened,
+        mummyEscapeGateOpened: _mummyEscapeGateOpened,
         starterGateOpened: _starterGateOpened,
         starterPortalEnabled: _starterPortalEnabled,
         level2PortcullisOpened: _level2PortcullisOpened,
@@ -4827,6 +4831,7 @@ export function setLevel1HoleRoomSpawned(val) { _level1HoleRoomSpawned = val; }
 export function setWorldFlags(flags) {
     if (!flags) return;
     _mummyGateOpened = flags.mummyGateOpened ?? false;
+    _mummyEscapeGateOpened = flags.mummyEscapeGateOpened ?? false;
     _starterGateOpened = flags.starterGateOpened ?? false;
     _starterPortalEnabled = flags.starterPortalEnabled ?? false;
     _level2PortcullisOpened = flags.level2PortcullisOpened ?? false;

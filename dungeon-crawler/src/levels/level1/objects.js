@@ -17,6 +17,7 @@ export function spawnLevel1Objects(ctx) {
         addTrap1, addCustomNPC, addDialogueNPC, addPitLadder, addShop,
         createWallButton,
         mummyGateOpened,
+        mummyEscapeGateOpened,
         crystalShrineState,
         level1HoleRoomSpawned,
         level1BtnPortcullisOpened,
@@ -117,8 +118,8 @@ export function spawnLevel1Objects(ctx) {
     portcullisBtn.position.set(8 * CELL - 1.0, 1.25, 8 * CELL);
     group.add(portcullisBtn);
 
-    // Mummy area entrance portcullis (starts open; closes on ambush)
-    addPortcullis(group, loader, 10, 1, Math.PI / 2, !mummyGateOpened);
+    // Mummy area entrance portcullis (starts open; closes on ambush; reopens once escape button pressed)
+    addPortcullis(group, loader, 10, 1, Math.PI / 2, !mummyGateOpened || mummyEscapeGateOpened);
 
     // Three-wide portcullis on far side of the 5x5 room — stays open once triggered
     addPortcullis(group, loader, 16, 2, Math.PI / 2, mummyGateOpened);
