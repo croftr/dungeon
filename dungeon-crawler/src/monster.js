@@ -441,7 +441,7 @@ _applyMultiAttacks('Demon Ogre', [
     sound: asset('/monsters/demon-ogre/special-attack.mp3'),
     soundTimings: [0.5],
     damageTimings: [0.5],
-    weight: 3,
+    weight: 1,
     damageMultiplier: 0.5,
     specialAttack: true,
     specialOnHitEffects: [{ effectId: 'rot', chance: 0.5 }],
@@ -475,6 +475,27 @@ _applyMultiAttacks('Night Goblin', [
     damageMultiplier: 0,  // no damage — pure status
     specialAttack: true,
     specialOnHitEffects: [{ effectId: 'poison', chance: 0.20 }],
+  },
+]);
+
+_applyMultiAttacks('Demon Spawn', [
+  {
+    name: 'demonSpawnAttack',
+    glb: asset('/monsters/demon-spawn/basic-attack.glb'),
+    sound: asset('/monsters/demon-spawn/demon-spawn-attacl.mp3'),
+    soundTimings: [0.4],
+    damageTimings: [0.4],
+    weight: 4,
+  },
+  {
+    name: 'demonSpawnJump',
+    glb: asset('/monsters/demon-spawn/jump-attack.glb'),
+    sound: asset('/monsters/demon-spawn/evil-laugh.mp3'),
+    soundTimings: [0.5],
+    damageTimings: [0.5],
+    weight: 2,
+    damageMultiplier: 0.5,
+    specialAttack: true,
   },
 ]);
 
@@ -1377,6 +1398,17 @@ export function updateMonsters(dt, playerCamera, scene) {
       return;
     }
 
+    // ── Ambient taunt sound ───────────────────────────────────────────────────
+    if (m.tauntSound) {
+      const now = performance.now();
+      if (m._nextTauntAt == null) m._nextTauntAt = now + 8000 + Math.random() * 12000;
+      if (now >= m._nextTauntAt) {
+        const tDist = Math.max(Math.abs(m.gridRow - player.gridRow), Math.abs(m.gridCol - player.gridCol));
+        if (tDist <= 4) playSoundByUrl(m.tauntSound, 0.6);
+        m._nextTauntAt = now + 15000 + Math.random() * 20000;
+      }
+    }
+
     // ── Process active status effects (poison ticks, stat debuffs, etc.) ──
     let isAsleep = false;
     if (m.activeDebuffs?.length) {
@@ -1755,6 +1787,17 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
                 droppedItems.push(drop.item);
               }
               break;
+            }
+          }
+
+          // Arena: unique item drops — either a single item (50%) or an array with per-item chances
+          if (m.uniqueArenaItem) {
+            if (Array.isArray(m.uniqueArenaItem)) {
+              for (const entry of m.uniqueArenaItem) {
+                if (Math.random() < entry.chance) droppedItems.push(entry.item);
+              }
+            } else if (Math.random() < 0.5) {
+              droppedItems.push(m.uniqueArenaItem);
             }
           }
         } else {

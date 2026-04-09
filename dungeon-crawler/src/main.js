@@ -2003,16 +2003,16 @@ window.loadLevel = function (levelNum) {
     const wallCells = [];
     const floorCells = [];
     level4Map.forEach((row, r) => row.forEach((cell, c) => {
-      // Floor: Everything north of the room (r <= 5), plus the first passage tile (r=6, c=5)
-      // Walls: Everything north of the room (r <= 5), plus the passage walls (r=6, c=4 and c=6)
+      // Floor: Everything north of the room (r <= 5), plus the first passage tile (r=6, c=10)
+      // Walls: Everything north of the room (r <= 5), plus the passage walls (r=6, c=9 and c=11)
       if (r <= 5) {
         if (cell === 1 || cell === 7) wallCells.push([r, c]);
         else if (cell !== CELL_HOLE) floorCells.push([r, c]);
       } else if (r === 6) {
-        if (c === 5 && cell !== CELL_HOLE) floorCells.push([r, c]);
-        else if ((c === 4 || c === 6) && (cell === 1 || cell === 7)) wallCells.push([r, c]);
-        // South wall of the demon room (cols 13–14)
-        else if ((c === 13 || c === 14) && (cell === 1 || cell === 7)) wallCells.push([r, c]);
+        if (c === 10 && cell !== CELL_HOLE) floorCells.push([r, c]);
+        else if ((c === 9 || c === 11) && (cell === 1 || cell === 7)) wallCells.push([r, c]);
+        // South wall of the demon alcove (cols 18–19)
+        else if ((c === 18 || c === 19) && (cell === 1 || cell === 7)) wallCells.push([r, c]);
       }
     }));
     buildTextureZone(scene, wallCells, floorCells,

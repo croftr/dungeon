@@ -484,7 +484,7 @@ function refreshMember(m) {
     skSlot.classList.toggle('skill-runic-active', !!m.runicScholarActive);
 
     const skDef = skName ? getSkillOrSpellDef(skName) : null;
-    const skDelaySec = skDef?.delay ?? 0;
+    const skDelaySec = skDef ? (skDef.delay ?? (skDef.cooldownMs != null ? skDef.cooldownMs / 1000 : 0)) : 0;
     const lastUsed = lastAttackTimes[`${i}-skill-${skName}`];
     const skCanUse = lastUsed === undefined || (performance.now() - lastUsed) >= (skDelaySec * 1000);
     skSlot.classList.toggle('slot-cooling-down', !!skName && !skCanUse);
@@ -503,7 +503,7 @@ function refreshMember(m) {
   if (sk2Slot) {
     sk2Slot.classList.toggle('slot-empty', !sk2Name);
     const sk2Def = sk2Name ? getSkillOrSpellDef(sk2Name) : null;
-    const sk2DelaySec = sk2Def?.delay ?? 0;
+    const sk2DelaySec = sk2Def ? (sk2Def.delay ?? (sk2Def.cooldownMs != null ? sk2Def.cooldownMs / 1000 : 0)) : 0;
     const lastUsed2 = lastAttackTimes[`${i}-skill-${sk2Name}`];
     const sk2CanUse = lastUsed2 === undefined || (performance.now() - lastUsed2) >= (sk2DelaySec * 1000);
     sk2Slot.classList.toggle('slot-cooling-down', !!sk2Name && !sk2CanUse);
@@ -521,7 +521,7 @@ function refreshMember(m) {
   if (sk3Slot) {
     sk3Slot.classList.toggle('slot-empty', !sk3Name);
     const sk3Def = sk3Name ? getSkillOrSpellDef(sk3Name) : null;
-    const sk3DelaySec = sk3Def?.delay ?? 0;
+    const sk3DelaySec = sk3Def ? (sk3Def.delay ?? (sk3Def.cooldownMs != null ? sk3Def.cooldownMs / 1000 : 0)) : 0;
     const lastUsed3 = lastAttackTimes[`${i}-skill-${sk3Name}`];
     const sk3CanUse = lastUsed3 === undefined || (performance.now() - lastUsed3) >= (sk3DelaySec * 1000);
     sk3Slot.classList.toggle('slot-cooling-down', !!sk3Name && !sk3CanUse);
@@ -539,7 +539,7 @@ function refreshMember(m) {
   if (sk4Slot) {
     sk4Slot.classList.toggle('slot-empty', !sk4Name);
     const sk4Def = sk4Name ? getSkillOrSpellDef(sk4Name) : null;
-    const sk4DelaySec = sk4Def?.delay ?? 0;
+    const sk4DelaySec = sk4Def ? (sk4Def.delay ?? (sk4Def.cooldownMs != null ? sk4Def.cooldownMs / 1000 : 0)) : 0;
     const lastUsed4 = lastAttackTimes[`${i}-skill-${sk4Name}`];
     const sk4CanUse = lastUsed4 === undefined || (performance.now() - lastUsed4) >= (sk4DelaySec * 1000);
     sk4Slot.classList.toggle('slot-cooling-down', !!sk4Name && !sk4CanUse);
@@ -557,7 +557,7 @@ function refreshMember(m) {
   if (sk5Slot) {
     sk5Slot.classList.toggle('slot-empty', !sk5Name);
     const sk5Def = sk5Name ? getSkillOrSpellDef(sk5Name) : null;
-    const sk5DelaySec = sk5Def?.delay ?? 0;
+    const sk5DelaySec = sk5Def ? (sk5Def.delay ?? (sk5Def.cooldownMs != null ? sk5Def.cooldownMs / 1000 : 0)) : 0;
     const lastUsed5 = lastAttackTimes[`${i}-skill-${sk5Name}`];
     const sk5CanUse = lastUsed5 === undefined || (performance.now() - lastUsed5) >= (sk5DelaySec * 1000);
     sk5Slot.classList.toggle('slot-cooling-down', !!sk5Name && !sk5CanUse);
@@ -575,7 +575,7 @@ function refreshMember(m) {
   if (sk6Slot) {
     sk6Slot.classList.toggle('slot-empty', !sk6Name);
     const sk6Def = sk6Name ? getSkillOrSpellDef(sk6Name) : null;
-    const sk6DelaySec = sk6Def?.delay ?? 0;
+    const sk6DelaySec = sk6Def ? (sk6Def.delay ?? (sk6Def.cooldownMs != null ? sk6Def.cooldownMs / 1000 : 0)) : 0;
     const lastUsed6 = lastAttackTimes[`${i}-skill-${sk6Name}`];
     const sk6CanUse = lastUsed6 === undefined || (performance.now() - lastUsed6) >= (sk6DelaySec * 1000);
     sk6Slot.classList.toggle('slot-cooling-down', !!sk6Name && !sk6CanUse);

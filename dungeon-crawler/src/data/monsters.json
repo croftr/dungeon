@@ -177,7 +177,8 @@
         "item": "Crocodile Warrior Essence",
         "chance": 1
       }
-    ]
+    ],
+    "uniqueArenaItem": "Crocodile Hide"
   },
   "orc_warrior": {
     "name": "Orc Warrior",
@@ -431,7 +432,8 @@
         "item": "Life Staff",
         "chance": 0.1
       }
-    ]
+    ],
+    "uniqueArenaItem": "Ancient Heartwood"
   },
   "ogre": {
     "name": "Ogre",
@@ -499,7 +501,8 @@
         "item": "Ogre Essence",
         "chance": 1
       }
-    ]
+    ],
+    "uniqueArenaItem": "Ogre's Head"
   },
   "dummy": {
     "name": "Training Dummy",
@@ -578,6 +581,7 @@
         "chance": 1
       }
     ],
+    "uniqueArenaItem": "Minotaur Horn",
     "onHitEffects": [
       {
         "effectId": "stun",
@@ -656,7 +660,8 @@
         "item": "Aqua Man Essence",
         "chance": 1
       }
-    ]
+    ],
+    "uniqueArenaItem": "Aqua Man Flipper"
   },
   "lizardMan": {
     "name": "Lizard Man",
@@ -724,7 +729,8 @@
         "item": "Lizard Man Essence",
         "chance": 1
       }
-    ]
+    ],
+    "uniqueArenaItem": "Lizard Scale"
   },
   "night_goblin": {
     "name": "Night Goblin",
@@ -827,6 +833,10 @@
         "item": "Giant Essence",
         "chance": 1
       }
+    ],
+    "uniqueArenaItem": [
+      { "item": "Giant's Club", "chance": 0.25 },
+      { "item": "Giant's Loin Cloth", "chance": 0.25 }
     ]
   },
   "demon": {
@@ -894,6 +904,54 @@
         "item": "Demon Essence",
         "chance": 1
       }
+    ],
+    "uniqueArenaItem": "Demon's Eyes"
+  },
+  "demon_spawn": {
+    "name": "Demon Spawn",
+    "family": "demon",
+    "description": "A wretched imp-ling of the infernal pits, freshly hatched and already ravenous. Small but fiercely aggressive, it launches itself at prey with reckless abandon — what it lacks in power it makes up for in feral spite.",
+    "specialAttacks": [
+      {
+        "name": "demonSpawnJump",
+        "displayName": "Leaping Pounce",
+        "description": "Launches itself into the air and crashes down on the entire party, dealing reduced damage to all members.",
+        "aoe": true,
+        "damageMultiplier": 0.5
+      }
+    ],
+    "hp": 105,
+    "defence": 4,
+    "xp": 115,
+    "attackSpeed": 1,
+    "stats": {
+      "strength": 13,
+      "dexterity": 14,
+      "vitality": 8,
+      "intelligence": 6,
+      "resilience": 5
+    },
+    "drops": [
+      {
+        "item": "Life Essence",
+        "chance": 0.4
+      },
+      {
+        "item": "Poison Vial",
+        "chance": 0.3
+      },
+      {
+        "item": "Fermented Sugar",
+        "chance": 0.15
+      },
+      {
+        "item": "Iron Ore",
+        "chance": 0.1
+      },
+      {
+        "item": "Demon Essence",
+        "chance": 0.5
+      }
     ]
   },
   "demon_ogre": {
@@ -944,6 +1002,7 @@
         "item": "Demon Ogre Essence",
         "chance": 1
       }
-    ]
+    ],
+    "uniqueArenaItem": "Demon's Eyes"
   }
 }

@@ -22,4 +22,18 @@ _dummy.drainStamina = false;
 _dummy.originalStats = { ...D.dummy.stats };
 _dummy.originalAttackSpeed = D.dummy.attackSpeed;
 
-export const level0Monsters = [_dummy];
+// ── East Room ──────────────────────────────────────────────────────────────
+const _demonSpawn = inst(D.demon_spawn, 11, 10, 20,
+  asset('/monsters/demon-spawn/idle-2.glb'),   // glbIdle
+  asset('/monsters/demon-spawn/basic-attack.glb'), // glbAttack
+  asset('/monsters/demon-spawn/demon-spawn-attacl.mp3'), // attackSound
+  0.4, 0, 0, 0, // scale, offsetX, offsetZ, level=0
+  null,  // patrol
+  asset('/monsters/demon-spawn/dead.glb'),     // glbDeath
+  asset('/monsters/demon-spawn/getting-hit.glb'), // glbHit
+  asset('/monsters/demon-spawn/walking.glb'),  // glbWalk
+);
+
+_demonSpawn.tauntSound = asset('/monsters/demon-spawn/evil-laugh.mp3');
+
+export const level0Monsters = [_dummy, _demonSpawn];

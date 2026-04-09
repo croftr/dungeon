@@ -162,6 +162,15 @@
         "sellable": true
     },
     {
+        "name": "Ancient Heartwood",
+        "slot": "loot",
+        "icon": "/icons/ingredients/tree_man_essence.webp",
+        "description": "A dense, pulsing core of living wood carved from deep within the Treeman. Ancient beyond reckoning, it hums with primordial forest energy.",
+        "value": 300,
+        "weight": 2.0,
+        "sellable": true
+    },
+    {
         "name": "Blue Crystal",
         "slot": "loot",
         "icon": "/icons/key/blue_crystal.webp",
