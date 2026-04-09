@@ -1998,21 +1998,24 @@ window.loadLevel = function (levelNum) {
     );
   }
 
-  // Level 4: entirely uses demon-wall and black-stone2
+  // Level 4: vault area (rows 0–5) and the passage corridor (rows 6–11) use demon-wall / black-stone2.
+  // Entry room (rows 12–15) uses default textures.
   if (levelNum === 4) {
     const wallCells = [];
     const floorCells = [];
     level4Map.forEach((row, r) => row.forEach((cell, c) => {
-      // Floor: Everything north of the room (r <= 5), plus the first passage tile (r=6, c=10)
-      // Walls: Everything north of the room (r <= 5), plus the passage walls (r=6, c=9 and c=11)
       if (r <= 5) {
+        // Vault, lizard den, east room — all cells
         if (cell === 1 || cell === 7) wallCells.push([r, c]);
         else if (cell !== CELL_HOLE) floorCells.push([r, c]);
-      } else if (r === 6) {
+      } else if (r <= 11) {
+        // Passage corridor: only the single-cell column (col 10) and its walls (cols 9, 11)
         if (c === 10 && cell !== CELL_HOLE) floorCells.push([r, c]);
         else if ((c === 9 || c === 11) && (cell === 1 || cell === 7)) wallCells.push([r, c]);
-        // South wall of the demon alcove (cols 18–19)
-        else if ((c === 18 || c === 19) && (cell === 1 || cell === 7)) wallCells.push([r, c]);
+        // Demon alcove floor (rows 6–7, cols 18–19)
+        else if (r <= 7 && (c === 18 || c === 19) && cell !== CELL_HOLE) floorCells.push([r, c]);
+        // South wall of the demon alcove (row 8, cols 18–19)
+        else if (r === 8 && (c === 18 || c === 19) && (cell === 1 || cell === 7)) wallCells.push([r, c]);
       }
     }));
     buildTextureZone(scene, wallCells, floorCells,

@@ -1448,7 +1448,8 @@ export function updateMonsters(dt, playerCamera, scene) {
 
     // Monsters detect characters only within 1 grid square and when facing them.
     // Unseen cloaks the party — monsters cannot detect or engage them.
-    if (!isSuppressed && !isPartyUnseen() && !m.engaged && (m.name !== 'Training Dummy' || m.combatMode) && distRow <= 2 && distCol <= 2) {
+    const aggroRange = m.aggroRange ?? 2;
+    if (!isSuppressed && !isPartyUnseen() && !m.engaged && (m.name !== 'Training Dummy' || m.combatMode) && distRow <= aggroRange && distCol <= aggroRange) {
       if (_hasLineOfSight(m.gridRow, m.gridCol, player.gridRow, player.gridCol)) {
         let seesPlayer = true;
         if (m.mesh && playerPos) {

@@ -924,6 +924,7 @@
     "defence": 4,
     "xp": 115,
     "attackSpeed": 1,
+    "aggroRange": 4,
     "stats": {
       "strength": 13,
       "dexterity": 14,
