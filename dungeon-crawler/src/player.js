@@ -222,11 +222,9 @@ export function initInput(camera) {
     'd': () => strafePlayer(camera, 1),
     'Tab': () => {
       document.getElementById('minimap-wrap').classList.toggle('hud-hidden');
-      document.getElementById('status').classList.toggle('hud-hidden');
     },
     'm': () => {
       document.getElementById('minimap-wrap').classList.toggle('hud-hidden');
-      document.getElementById('status').classList.toggle('hud-hidden');
     },
     '=': () => {
       const wrap = document.getElementById('minimap-wrap');
