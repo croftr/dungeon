@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
-import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createCrocodileSparkle, createHellSpawn } from './particles.js';
+import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createCrocodileSparkle, createHellSpawn, createBloodSplatter } from './particles.js';
 import { CELL, isPassable } from './map.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
@@ -2460,6 +2460,8 @@ function _playHitAnimation(m, attackType, killer) {
 
   if (attackType === 'fireball' || attackType === 'banishment' || attackType === 'incinerate') {
     createHitSpark(mesh.position);
+  } else {
+    createBloodSplatter(mesh.position);
   }
 
   // Standard hit flash and knockback logic below...

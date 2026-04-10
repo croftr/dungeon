@@ -27,6 +27,61 @@ function createSparkTexture() {
     return new THREE.CanvasTexture(canvas);
 }
 
+// Blood splatter: irregular slash + drip blobs, drawn once and reused
+let bloodSplatterTexture;
+
+function createBloodSplatterTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+
+    // Diagonal slash wound — elongated ellipse at ~40° angle
+    ctx.save();
+    ctx.translate(64, 60);
+    ctx.rotate(-0.65);
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 7, 26, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(165, 5, 5, 1.0)';
+    ctx.fill();
+    ctx.restore();
+
+    // Second shallower slash offset slightly
+    ctx.save();
+    ctx.translate(72, 54);
+    ctx.rotate(-0.5);
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 4, 16, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(130, 0, 0, 0.85)';
+    ctx.fill();
+    ctx.restore();
+
+    // Drip blobs radiating from the wound
+    const drops = [
+        { x: 48, y: 76, rx: 9,  ry: 7,  rot:  0.3 },
+        { x: 80, y: 52, rx: 8,  ry: 6,  rot: -0.5 },
+        { x: 42, y: 58, rx: 5,  ry: 4,  rot:  0.9 },
+        { x: 84, y: 70, rx: 6,  ry: 5,  rot: -0.2 },
+        { x: 58, y: 90, rx: 4,  ry: 6,  rot:  0.1 },
+        { x: 35, y: 68, rx: 3,  ry: 4,  rot: -0.7 },
+        { x: 90, y: 62, rx: 4,  ry: 3,  rot:  0.6 },
+        { x: 62, y: 98, rx: 3,  ry: 5,  rot:  0.0 },
+    ];
+
+    drops.forEach((d, i) => {
+        ctx.save();
+        ctx.translate(d.x, d.y);
+        ctx.rotate(d.rot);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, d.rx, d.ry, 0, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(120, 0, 0, ${0.85 - i * 0.08})`;
+        ctx.fill();
+        ctx.restore();
+    });
+
+    return new THREE.CanvasTexture(canvas);
+}
+
 // Pure white-to-transparent glow — no warm tones, so Color behaviours tint cleanly
 let waterDropTexture;
 let waterFoamTexture;
@@ -71,12 +126,14 @@ export function initParticles(scene, camera) {
     proton.addRender(new Proton.SpriteRender(scene));
 
     sparkTexture = createSparkTexture();
+    bloodSplatterTexture = createBloodSplatterTexture();
     waterDropTexture = createWaterDropTexture();
     waterFoamTexture = createWaterFoamTexture();
 }
 
 export function invalidateParticleTextures() {
     if (sparkTexture) sparkTexture.needsUpdate = true;
+    if (bloodSplatterTexture) bloodSplatterTexture.needsUpdate = true;
     if (waterDropTexture) waterDropTexture.needsUpdate = true;
     if (waterFoamTexture) waterFoamTexture.needsUpdate = true;
 }
@@ -185,6 +242,41 @@ export function createCritSpark(position) {
         emitter.stopEmit();
         setTimeout(() => { proton.removeEmitter(emitter); }, 700);
     }, 100);
+}
+
+// Single billboard sprite — a slash wound + drip blobs that fades out.
+// No particles: the sprite sits directly on the monster's surface and fades in ~700 ms.
+export function createBloodSplatter(position) {
+    if (!sceneRef || !bloodSplatterTexture) return;
+
+    const material = new THREE.SpriteMaterial({
+        map: bloodSplatterTexture,
+        blending: THREE.NormalBlending,
+        transparent: true,
+        depthWrite: false,
+        opacity: 0.6,
+    });
+
+    const sprite = new THREE.Sprite(material);
+    sprite.scale.set(0.45, 0.45, 1);
+    // Place at lower torso height; nudge slightly toward viewer so it renders in front
+    sprite.position.set(position.x, position.y + 0.45, position.z - 0.05);
+    sceneRef.add(sprite);
+
+    // Fade out over 700 ms then remove
+    const start = performance.now();
+    const duration = 700;
+    function tick() {
+        const t = Math.min((performance.now() - start) / duration, 1);
+        material.opacity = 0.6 * (1 - t);
+        if (t < 1) {
+            requestAnimationFrame(tick);
+        } else {
+            sceneRef.remove(sprite);
+            material.dispose();
+        }
+    }
+    requestAnimationFrame(tick);
 }
 
 export function createIceBurst(position) {
