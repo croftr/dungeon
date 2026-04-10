@@ -246,7 +246,7 @@ export function createCritSpark(position) {
 
 // Single billboard sprite — a slash wound + drip blobs that fades out.
 // No particles: the sprite sits directly on the monster's surface and fades in ~700 ms.
-export function createBloodSplatter(position) {
+export function createBloodSplatter(position, yOffset = 0.45) {
     if (!sceneRef || !bloodSplatterTexture) return;
 
     const material = new THREE.SpriteMaterial({
@@ -259,8 +259,7 @@ export function createBloodSplatter(position) {
 
     const sprite = new THREE.Sprite(material);
     sprite.scale.set(0.45, 0.45, 1);
-    // Place at lower torso height; nudge slightly toward viewer so it renders in front
-    sprite.position.set(position.x, position.y + 0.45, position.z - 0.05);
+    sprite.position.set(position.x, position.y + yOffset, position.z - 0.05);
     sceneRef.add(sprite);
 
     // Fade out over 700 ms then remove

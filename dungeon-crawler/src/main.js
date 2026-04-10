@@ -2195,13 +2195,14 @@ window._arenaEnter = function (monsterId) {
     changeMapArray(ARENA_MAP);
     buildLevel(scene);
 
-    // Overlay arena-floor.jpg on every non-wall cell
-    const floorCells = [];
+    // Overlay arena-wall.jpg on walls, arena-floor.jpg on every non-wall cell
+    const wallCells = [], floorCells = [];
     ARENA_MAP.forEach((row, r) => row.forEach((cell, c) => {
-      if (cell !== 1) floorCells.push([r, c]);
+      if (cell === 1) wallCells.push([r, c]);
+      else floorCells.push([r, c]);
     }));
-    buildTextureZone(scene, [], floorCells,
-      asset('/textures/wall1.jpg'),
+    buildTextureZone(scene, wallCells, floorCells,
+      asset('/textures/arena-wall.jpg'),
       asset('/textures/arena-floor.jpg'));
 
     clearObjects(scene);

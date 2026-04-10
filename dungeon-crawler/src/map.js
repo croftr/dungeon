@@ -302,9 +302,10 @@ export function buildLevel(scene) {
     geo.setAttribute('aDetail4', new THREE.InstancedBufferAttribute(attrs.detail4, 3));
   };
 
-  // Walls
+  // Walls — no random UV offset so seamless texture tiles correctly across adjacent blocks
   const wGeo = wallGeo.clone();
   const wAttrs = createIMAttributes(wallCount);
+  wAttrs.uvVar.fill(0);
   // Special wall details
   for (let i = 0; i < wallCount; i++) {
     const roll = rng();

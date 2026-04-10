@@ -2460,8 +2460,10 @@ function _playHitAnimation(m, attackType, killer) {
 
   if (attackType === 'fireball' || attackType === 'banishment' || attackType === 'incinerate') {
     createHitSpark(mesh.position);
-  } else {
-    createBloodSplatter(mesh.position);
+  } else if (!m.name.includes('Skeleton')) {
+    const smallMobs = ['Goblin', 'Demon Spawn', 'Zombie', 'Treekin'];
+    const yOffset = smallMobs.some(n => m.name.includes(n)) ? 0.45 : 0.9;
+    createBloodSplatter(mesh.position, yOffset);
   }
 
   // Standard hit flash and knockback logic below...
