@@ -327,9 +327,11 @@ export function buildLevel(scene) {
   const floorIM = new THREE.InstancedMesh(fGeo, floorMat, floorCount);
   floorIM.receiveShadow = true;
 
-  // Ceilings
+  // Ceilings — no random UV offset so seamless texture tiles correctly across adjacent tiles
   const cGeo = tileGeo.clone();
-  applyAttrs(cGeo, createIMAttributes(ceilCount));
+  const cAttrs = createIMAttributes(ceilCount);
+  cAttrs.uvVar.fill(0);
+  applyAttrs(cGeo, cAttrs);
   const ceilIM = new THREE.InstancedMesh(cGeo, ceilMat, ceilCount);
   ceilIM.receiveShadow = true;
 
