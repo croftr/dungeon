@@ -386,6 +386,10 @@
     <!-- top-right column: minimap + status stacked -->
     <div id="top-right">
       <div id="minimap-wrap" class="hud-hidden">
+        <div id="mm-controls">
+          <button id="mm-zoom-out" title="Zoom Out">-</button>
+          <button id="mm-zoom-in" title="Zoom In">+</button>
+        </div>
         <canvas id="minimap"></canvas>
       </div>
       <div id="status" class="hud-hidden">
@@ -913,7 +917,7 @@
 
           <!-- Loadout B section — alternate items that swap in when rotating -->
           <div id="loadout-b-section">
-            <button id="loadout-rotate-btn" title="Rotate all loadout slots (Space bar or keys 1-4 in game)">&#8644;
+            <button id="loadout-rotate-btn" title="Rotate all loadout slots (Keys 1-4 in game)">&#8644;
               Rotate</button>
             <div id="loadout-b-slots">
               <div class="pd-loadout-b-slot" id="pd-lhB" data-lb="leftHand">

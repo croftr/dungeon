@@ -816,11 +816,10 @@ export function initParty() {
 
       if (e.key === ' ') {
         e.preventDefault();
-        party.forEach((m, idx) => {
-          if (m && !m.isEmpty) {
-            rotateLoadout(idx);
-          }
-        });
+        const panel = document.getElementById('party-panel');
+        if (panel) {
+          panel.classList.toggle('party-panel--hidden');
+        }
       } else {
         const memberIdx = loadoutKeyMap[e.key];
         const m = party[memberIdx];

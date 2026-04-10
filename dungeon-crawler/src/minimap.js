@@ -15,14 +15,40 @@ const CELL_COLORS = {
 
 let mmCtx    = null;
 let MM_CELL  = 14;
+let zoomLevel = 1.0;
 
 export function initMinimap() {
   const canvas = document.getElementById('minimap');
-  MM_CELL = Math.floor(200 / Math.max(ROWS, COLS));
+  
+  // Base cell size based on 200px / dimensions
+  const baseCell = Math.floor(200 / Math.max(ROWS, COLS));
+  MM_CELL = Math.max(4, Math.floor(baseCell * zoomLevel));
+  
   canvas.width  = COLS * MM_CELL;
   canvas.height = ROWS * MM_CELL;
   mmCtx = canvas.getContext('2d');
+
+  // Hook up controls
+  document.getElementById('mm-zoom-in')?.addEventListener('click', () => {
+    changeZoom(0.2);
+  });
+  document.getElementById('mm-zoom-out')?.addEventListener('click', () => {
+    changeZoom(-0.2);
+  });
 }
+
+export function changeZoom(delta) {
+  zoomLevel = Math.min(3.0, Math.max(0.5, zoomLevel + delta));
+  const canvas = document.getElementById('minimap');
+  const baseCell = Math.floor(200 / Math.max(ROWS, COLS));
+  MM_CELL = Math.max(4, Math.floor(baseCell * zoomLevel));
+  
+  canvas.width  = COLS * MM_CELL;
+  canvas.height = ROWS * MM_CELL;
+  drawMinimap();
+}
+
+
 
 export function drawMinimap() {
   if (!mmCtx) return;
@@ -50,8 +76,10 @@ export function drawMinimap() {
   mmCtx.translate(px, py);
   mmCtx.rotate(angle);
 
-  const r = MM_CELL * 0.38;
+  const r = MM_CELL * 0.45; // slightly larger arrow
   mmCtx.fillStyle = '#e8c87a';
+  mmCtx.shadowBlur = 4;
+  mmCtx.shadowColor = 'rgba(0,0,0,0.5)';
   mmCtx.beginPath();
   mmCtx.moveTo(0, -r);
   mmCtx.lineTo( r * 0.55,  r * 0.7);
