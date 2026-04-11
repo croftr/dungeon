@@ -1,5 +1,5 @@
 import { Tween, Easing, Group } from '@tweenjs/tween.js';
-import { changeZoom } from './minimap.js';
+import { changeZoom, changeSize, toggleFullscreen } from './minimap.js';
 
 export const tweenGroup = new Group();
 import { isPassable, cellToWorld, CELL_EXIT, dungeonMap } from './map.js';
@@ -228,15 +228,23 @@ export function initInput(camera) {
     },
     '=': () => {
       const wrap = document.getElementById('minimap-wrap');
-      if (!wrap.classList.contains('hud-hidden')) {
-        changeZoom(0.2);
-      }
+      if (!wrap.classList.contains('hud-hidden')) changeZoom(0.25);
     },
     '-': () => {
       const wrap = document.getElementById('minimap-wrap');
-      if (!wrap.classList.contains('hud-hidden')) {
-        changeZoom(-0.2);
-      }
+      if (!wrap.classList.contains('hud-hidden')) changeZoom(-0.25);
+    },
+    '[': () => {
+      const wrap = document.getElementById('minimap-wrap');
+      if (!wrap.classList.contains('hud-hidden')) changeSize(-40);
+    },
+    ']': () => {
+      const wrap = document.getElementById('minimap-wrap');
+      if (!wrap.classList.contains('hud-hidden')) changeSize(40);
+    },
+    'f': () => {
+      const wrap = document.getElementById('minimap-wrap');
+      if (!wrap.classList.contains('hud-hidden')) toggleFullscreen();
     }
   };
 
