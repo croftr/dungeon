@@ -973,7 +973,7 @@ function finishOgreVideo() {
 
   setTimeout(() => {
     ogreVideo.pause();
-    ogreOverlay.remove();
+    ogreOverlay.classList.add('hidden');
   }, 1500);
 }
 
@@ -1396,7 +1396,7 @@ window.playOtterVideoSequence = function() {
 const _ARENA_INTRO_VIDEOS = {
   'demon_ogre':        { overlay: 'demon-ogre-video-overlay',            video: 'demon-ogre-video',            skip: 'skip-demon-ogre-btn',            src: '/videos/demon-ogre.mp4' },
   'lizardMan':         { overlay: 'lizard-man-video-overlay',            video: 'lizard-man-video',            skip: 'skip-lizard-man-btn',            src: '/videos/lizard-man.mp4' },
-  'ogre':              { overlay: 'ogre-video-overlay',                  video: 'ogre-video',                  skip: 'skip-ogre-btn',                  src: '/videos/ogre.mp4' },
+  'ogre':              { overlay: 'ogre-arena-video-overlay',            video: 'ogre-arena-video',            skip: 'skip-ogre-arena-btn',            src: '/videos/ogre.mp4' },
   'aqua_man':          { overlay: 'aqua-man-arena-video-overlay',        video: 'aqua-man-arena-video',        skip: 'skip-aqua-man-arena-btn',        src: '/videos/aqua-man-arena.mp4' },
   'crocodile_warrior': { overlay: 'crocodile-warrior-arena-video-overlay', video: 'crocodile-warrior-arena-video', skip: 'skip-crocodile-warrior-arena-btn', src: '/videos/crocodile-warrior-arena.mp4' },
   'demon':             { overlay: 'demon-arena-video-overlay',           video: 'demon-arena-video',           skip: 'skip-demon-arena-btn',           src: '/videos/demon-arena.mp4' },
