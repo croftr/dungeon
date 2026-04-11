@@ -2197,6 +2197,8 @@ function _applyMonsterSpecialAttack(monster, variant) {
     return;
   }
 
+  const specialName = variant.displayName ?? variant.name ?? null;
+
   if (variant.specialAttackType === 'randomAny') {
     // Pick one random alive party member (ignoring formation rules)
     const target = aliveMembers[Math.floor(Math.random() * aliveMembers.length)];
@@ -2204,6 +2206,8 @@ function _applyMonsterSpecialAttack(monster, variant) {
       forceTarget: target,
       onHitEffectsOverride: effectsOverride,
       damageMultiplier: variant.damageMultiplier ?? 1,
+      specialName,
+      isAoe: false,
     });
   } else {
     // Default AoE: hit all alive members
@@ -2212,6 +2216,8 @@ function _applyMonsterSpecialAttack(monster, variant) {
         forceTarget: target,
         onHitEffectsOverride: effectsOverride,
         damageMultiplier: variant.damageMultiplier ?? 1,
+        specialName,
+        isAoe: true,
       });
     });
   }
@@ -2221,7 +2227,9 @@ function _applyMonsterDamage(monster, opts = {}) {
   // opts.forceTarget — bypass directional targeting (used for special/AoE attacks)
   // opts.onHitEffectsOverride — replace monster.onHitEffects for this hit
   // opts.damageMultiplier — multiply base damage (e.g. 2 for ogre double combo)
-  const { forceTarget, onHitEffectsOverride, damageMultiplier } = opts;
+  // opts.specialName — display name of the special attack (for battle log)
+  // opts.isAoe — whether this hit is part of an AoE special attack
+  const { forceTarget, onHitEffectsOverride, damageMultiplier, specialName, isAoe } = opts;
   const isSpecial = forceTarget !== undefined;
 
   // Target whoever is on the face of the formation the monster is attacking from.
@@ -2239,6 +2247,8 @@ function _applyMonsterDamage(monster, opts = {}) {
       time: Date.now(), actor: 'monster',
       attacker: monster.name, target: target.name,
       attackType: isSpecial ? 'special' : 'attack', hitChance, hit: false, crit: false,
+      specialName: specialName ?? null,
+      isAoe: isAoe ?? false,
     });
     return;
   }
@@ -2376,6 +2386,8 @@ function _applyMonsterDamage(monster, opts = {}) {
     preCritDamage,
     finalDamage: damage,
     critMultiplier: isCrit ? CRIT_MULTIPLIER : 1,
+    specialName: specialName ?? null,
+    isAoe: isAoe ?? false,
   });
 
   // Apply on-hit status effects defined on this monster type (or override for special attacks)

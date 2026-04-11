@@ -356,8 +356,13 @@ function _buildRowHtml(e) {
 
   // ── Standard attack / hit / miss / block / crit ───────────────────────────
   const badge = e.blocked ? '🛡' : (e.crit ? '⚡' : e.hit ? '●' : '○');
-  const type = TYPE_ABBR[e.attackType] ?? e.attackType;
   const dir = e.actor === 'monster' ? '↓' : '';
+  let type;
+  if (e.specialName) {
+    type = e.isAoe ? `${e.specialName} [AoE]` : e.specialName;
+  } else {
+    type = TYPE_ABBR[e.attackType] ?? e.attackType;
+  }
 
   let dmgPart = 'miss';
   if (e.blocked) {
