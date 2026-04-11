@@ -57,7 +57,7 @@ export function spawnLevel0Objects(ctx) {
 
     // ── Portal to Level 4 (The Egg Chamber) — south wall, beside Level 3 portal ──
     if (level4PortalEnabled) {
-        addPortal(group, loader, 11, 13, 4, 0, 0, 0.85); // Right
+        addPortal(group, loader, 11, 13, 4, 0, 0, 0.85, 14, 10, 2); // Right
     } else {
         addDisabledPortal(group, loader, 11, 13, 0, 0, 0.85, 'level4');
     }

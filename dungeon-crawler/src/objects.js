@@ -355,10 +355,10 @@ export function initObjects(scene, camera) {
                         if (window.loadLevel) {
                             window.loadLevel(4);
                             setTimeout(() => {
-                                player.gridRow = 9;
-                                player.gridCol = 4;
-                                player.facing = 3; // West — facing the egg
-                                const w = cellToWorld(9, 4);
+                                player.gridRow = 14;
+                                player.gridCol = 10;
+                                player.facing = 2; // South
+                                const w = cellToWorld(14, 10);
                                 camera.position.set(w.x, w.y, w.z);
                                 camera.rotation.order = 'YXZ';
                                 camera.rotation.y = FACING_ANGLES[player.facing];
@@ -1708,7 +1708,7 @@ function _activateLevel4Portal() {
         if (_level4DisabledPortalMesh.parent) _level4DisabledPortalMesh.parent.remove(_level4DisabledPortalMesh);
         _level4DisabledPortalMesh = null;
     }
-    addPortal(objectsGroup, _gltfLoader, 11, 13, 4, 0, 0, 0.85); // Right -> Level 4
+    addPortal(objectsGroup, _gltfLoader, 11, 13, 4, 0, 0, 0.85, 14, 10, 2); // Right -> Level 4
     // Reset shrine to empty
     _crystalShrineState = 0;
     _swapCrystalShrine();

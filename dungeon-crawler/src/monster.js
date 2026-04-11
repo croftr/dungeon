@@ -2461,8 +2461,16 @@ function _playHitAnimation(m, attackType, killer) {
   if (attackType === 'fireball' || attackType === 'banishment' || attackType === 'incinerate') {
     createHitSpark(mesh.position);
   } else if (!m.name.includes('Skeleton')) {
-    const smallMobs = ['Goblin', 'Demon Spawn', 'Zombie', 'Treekin'];
-    const yOffset = smallMobs.some(n => m.name.includes(n)) ? 0.45 : 0.9;
+    let yOffset;
+    if (m.name.includes('Treekin')) {
+      yOffset = 0.2;
+    } else if (['Goblin', 'Demon Spawn', 'Zombie'].some(n => m.name.includes(n))) {
+      yOffset = 0.45;
+    } else if (['Mummy', 'Orc', 'Ghoul', 'Iceman'].some(n => m.name.includes(n))) {
+      yOffset = 0.65;
+    } else {
+      yOffset = 0.9;
+    }
     createBloodSplatter(mesh.position, yOffset);
   }
 
