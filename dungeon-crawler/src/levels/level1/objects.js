@@ -34,7 +34,8 @@ export function spawnLevel1Objects(ctx) {
             questNpcId: 'monster-npc',
             scale: 0.6,
             greetingModel: asset('/npcs/monster-npc/agree-gesture.glb'),
-            greetingAudio: [asset('/npcs/monster-npc/thank-you.mp3')]
+            greetingAudio: [asset('/npcs/monster-npc/thank-you.mp3')],
+            playOnce: true
         });
     }
 

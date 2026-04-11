@@ -1571,7 +1571,7 @@ export function updateMonsters(dt, playerCamera, scene) {
         if (m.attackCooldown <= 0) {
           triggerMonsterAttack(m.id);
           let nextAttack = (5.0 + (Math.random() * 2.0)) / (m.attackSpeed ?? 1); // Next attack in 5.0 - 7.0 seconds (scaled by attackSpeed)
-          if (skillsState.entangle?.active && skillsState.entangle?.targetId === m.id) {
+          if (skillsState.entangle?.active && skillsState.entangle?.targetId === m.id && performance.now() < skillsState.entangle.expiresAt) {
             nextAttack *= skillsState.entangle.magnitude;
           }
           m.attackCooldown = nextAttack;
@@ -1862,10 +1862,11 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
 
   let hitChance = playerHitChance(effChar, m, weaponDef);
 
+  const now = performance.now();
   // True Shot: Never miss with ranged attacks
   const ts = skillsState.trueShot;
   const isRanged = attackType === 'shoot' || attackType === 'throw'; // assuming throw might also be ranged
-  if (ts?.active && ts.actorName === character.name && isRanged) {
+  if (ts?.active && ts.actorName === character.name && isRanged && now < ts.expiresAt) {
     hitChance = 1.0;
   }
 
@@ -1884,7 +1885,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   }
 
   // Apply Sunder Armor penalty
-  const isSundered = skillsState.sunderArmor?.active && skillsState.sunderArmor?.targetId === m.id;
+  const isSundered = skillsState.sunderArmor?.active && skillsState.sunderArmor?.targetId === m.id && now < skillsState.sunderArmor.expiresAt;
   const sunderMag = skillsState.sunderArmor.magnitude;
   const effectiveDefence = isSundered ? Math.floor((m.defence ?? 0) * sunderMag) : (m.defence ?? 0);
   const effectiveResilience = isSundered ? Math.floor((m.stats?.resilience ?? 0) * sunderMag) : (m.stats?.resilience ?? 0);
@@ -1911,14 +1912,14 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     refreshPartyCards();                  // remove the glow from the skill slot
   }
 
-  // Berserk — applies a x1.2 damage multiplier after everything else
-  const berserkActive = skillsState.berserk?.active && skillsState.berserk?.actorName === character.name;
+  // Berserk — applies a magnitude-based damage multiplier after everything else
+  const berserkActive = skillsState.berserk?.active && skillsState.berserk?.actorName === character.name && now < skillsState.berserk.expiresAt;
   if (berserkActive) {
     damage = Math.round(damage * skillsState.berserk.magnitude);
   }
-
-  // Warcry — applies a x1.1 damage multiplier to all party members
-  if (skillsState.warcry?.active) {
+  
+  // Warcry — applies a damage multiplier to all party members
+  if (skillsState.warcry?.active && now < skillsState.warcry.expiresAt) {
     damage = Math.round(damage * skillsState.warcry.magnitude);
   }
 
@@ -1958,8 +1959,8 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     preCritDamage,
     critMultiplier: isCrit ? CRIT_MULTIPLIER : 1,
     runicScholar: runicActive,
-    berserkMultiplier: berserkActive ? 1.2 : 1.0,
-    warcryMultiplier: skillsState.warcry?.active ? 1.1 : 1.0,
+    berserkMultiplier: berserkActive ? skillsState.berserk.magnitude : 1.0,
+    warcryMultiplier: (skillsState.warcry?.active && now < skillsState.warcry.expiresAt) ? skillsState.warcry.magnitude : 1.0,
     ammoModifier: ammoDef?.damageModifier ?? null,
   };
 

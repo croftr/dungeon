@@ -423,10 +423,11 @@ function refreshMember(m) {
 
     // Check cooldown for left slot
     let lhDelaySec = (lhDef?.delay ?? 2);
-    if (skillsState.whirlwind.active && skillsState.whirlwind.actorName === m.name) {
+    const nowRef = performance.now();
+    if (skillsState.whirlwind.active && skillsState.whirlwind.actorName === m.name && nowRef < skillsState.whirlwind.expiresAt) {
       lhDelaySec *= skillsState.whirlwind.magnitude;
     }
-    if (skillsState.warDance.active) {
+    if (skillsState.warDance.active && nowRef < skillsState.warDance.expiresAt) {
       lhDelaySec *= skillsState.warDance.magnitude;
     }
     lhDelaySec *= getAttackSpeedMultiplier(m);
@@ -453,10 +454,11 @@ function refreshMember(m) {
     // Check cooldown for right slot
     const rhActualDef = lhBothHands ? lhDef : rhDef;
     let rhDelaySec = (rhActualDef?.delay ?? 2);
-    if (skillsState.whirlwind.active && skillsState.whirlwind.actorName === m.name) {
+    const nowRef2 = performance.now();
+    if (skillsState.whirlwind.active && skillsState.whirlwind.actorName === m.name && nowRef2 < skillsState.whirlwind.expiresAt) {
       rhDelaySec *= skillsState.whirlwind.magnitude;
     }
-    if (skillsState.warDance.active) {
+    if (skillsState.warDance.active && nowRef2 < skillsState.warDance.expiresAt) {
       rhDelaySec *= skillsState.warDance.magnitude;
     }
     rhDelaySec *= getAttackSpeedMultiplier(m);
@@ -1249,18 +1251,18 @@ export function updateParty(dt) {
 }
 function getActiveEffectsForMember(m) {
   const active = [];
-  if (skillsState.sanctuary.active) active.push('Sanctuary');
-  if (skillsState.warcry.active) active.push('Warcry');
-  if (skillsState.warDance.active) active.push('War Dance');
-  if (skillsState.arcaneLight.active) {
+  const now = performance.now();
+  if (skillsState.sanctuary.active && now < skillsState.sanctuary.expiresAt) active.push('Sanctuary');
+  if (skillsState.warcry.active && now < skillsState.warcry.expiresAt) active.push('Warcry');
+  if (skillsState.warDance.active && now < skillsState.warDance.expiresAt) active.push('War Dance');
+  if (skillsState.arcaneLight.active && now < skillsState.arcaneLight.expiresAt) {
     const hasMiners = m.skills?.some(s => s.name === 'Miners Light');
     active.push(hasMiners ? 'Miners Light' : 'Arcane Lantern');
   }
-  if (skillsState.berserk.active && skillsState.berserk.actorName === m.name) active.push('Berserk');
-  if (skillsState.whirlwind.active && skillsState.whirlwind.actorName === m.name) active.push('Whirlwind');
-  if (skillsState.trueShot.active && skillsState.trueShot.actorName === m.name) active.push('True Shot');
-  if (skillsState.doubleAttack.active && skillsState.doubleAttack.actorName === m.name) active.push('Double Attack');
-  const now = performance.now();
+  if (skillsState.berserk.active && skillsState.berserk.actorName === m.name && now < skillsState.berserk.expiresAt) active.push('Berserk');
+  if (skillsState.whirlwind.active && skillsState.whirlwind.actorName === m.name && now < skillsState.whirlwind.expiresAt) active.push('Whirlwind');
+  if (skillsState.trueShot.active && skillsState.trueShot.actorName === m.name && now < skillsState.trueShot.expiresAt) active.push('True Shot');
+  if (skillsState.doubleAttack.active && skillsState.doubleAttack.actorName === m.name && now < skillsState.doubleAttack.expiresAt) active.push('Double Attack');
   if (skillsState.rampart.active && skillsState.rampart.actorName === m.name && now < skillsState.rampart.expiresAt) active.push('Rampart');
   if (m.runicScholarActive) active.push('Runic Scholar');
   // Active debuffs from monster on-hit effects

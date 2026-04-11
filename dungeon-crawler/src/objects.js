@@ -2446,7 +2446,11 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, sh
             });
         }
 
+        let greetingPlayed = false;
         const greetingCallback = (options.greetingAudio?.length || options.greetingModel) ? () => {
+            if (options.playOnce && greetingPlayed) return;
+            greetingPlayed = true;
+
             if (options.greetingAudio?.length) {
                 playQuestAudio(options.greetingAudio[audioIndex % options.greetingAudio.length]);
                 audioIndex++;
