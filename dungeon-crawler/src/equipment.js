@@ -2145,7 +2145,7 @@ function onPaperdollSlotContextMenu(e) {
   if (key === 'ammo' && def?.isSpellBook) {
     e.preventDefault();
     hideTooltip();
-    _openSpellSelectionModal(activeCharIndex, key);
+    _openSpellSelectionModal(activeCharIndex);
   }
 }
 
@@ -2402,79 +2402,203 @@ function _showNodeDetail(node, m) {
 }
 
 // ─────────────────────────────────────────────
-//  SPELL SELECTION MODAL
+//  SPELLBOOK MODAL
 // ─────────────────────────────────────────────
-function _openSpellSelectionModal(charIndex, itemKey) {
-  const overlay = document.getElementById('spell-selection-overlay');
-  const grid = document.getElementById('spell-sel-grid');
 
+const _SB_SPELL_SLOTS = ['leftHand', 'rightHand', 'skill', 'skill2', 'skill3', 'skill4', 'skill5', 'skill6'];
+
+const _SB_SLOT_LABELS = {
+  leftHand: 'Left Hand', rightHand: 'Right Hand',
+  skill: 'Slot I', skill2: 'Slot II', skill3: 'Slot III',
+  skill4: 'Slot IV', skill5: 'Slot V', skill6: 'Slot VI',
+};
+
+const _SB_TYPE_LABELS = {
+  'direct-damage': 'Direct Damage', 'healing': 'Healing',
+  'buff': 'Buff', 'debuff-cure': 'Cure', 'aoe-debuff': 'AoE Debuff',
+};
+
+const _SB_TARGET_LABELS = {
+  monster: 'Single Enemy', 'monsters-aoe': 'All Nearby', 'monsters-line': 'Line',
+  'party-member': 'Party Member', party: 'Entire Party',
+};
+
+let _sbCharIndex = null;
+let _sbSelectedSpell = null;
+
+function _openSpellSelectionModal(charIndex) {
+  _sbCharIndex = charIndex;
+  _sbSelectedSpell = null;
+
+  const overlay = document.getElementById('spell-selection-overlay');
   overlay.classList.remove('spell-sel-hidden');
 
   const m = party[charIndex];
+  document.getElementById('sb-caster-name').textContent = `${m.name}'s Grimoire`;
+
+  _sbBuildRibbon(m);
+  _sbRefreshSlots(m);
+  document.getElementById('sb-detail').innerHTML = '<div class="sb-detail-empty">Select a spell above to view its details</div>';
+  document.getElementById('sb-slots-hint').textContent = 'Select a spell on the left, then click a slot to assign it.';
+  document.getElementById('sb-slots-hint').classList.remove('sb-slots-hint--active');
+  _sbSetSlotsSelectable(false);
+}
+
+function _sbBuildRibbon(m) {
+  const ribbon = document.getElementById('sb-ribbon');
+  ribbon.innerHTML = '';
   const learnedSpells = m.spells || [];
 
-  grid.innerHTML = '';
-
   if (learnedSpells.length === 0) {
-    const msg = document.createElement('div');
-    msg.style.cssText = 'color:#7a6a50; font-size:12px; padding:20px; text-align:center; grid-column:1/-1;';
-    msg.textContent = 'No spells learned. Study spell scrolls to learn spells.';
-    grid.appendChild(msg);
+    ribbon.innerHTML = '<div class="sb-ribbon-empty">No spells learned — study spell scrolls.</div>';
     return;
   }
 
-  // Show only spells this character has learned
   learnedSpells.forEach(spell => {
     const spellDef = SPELLS.find(s => s.name === spell.name);
     if (!spellDef) return;
-    // Highlight if already equipped in either hand
-    const inRH = m.equipment?.rightHand?.name === spell.name;
-    const inLH = m.equipment?.leftHand?.name === spell.name;
-    const isActive = inRH || inLH;
-    const div = document.createElement('div');
-    div.className = 'spell-sel-slot' + (isActive ? ' spell-sel-slot--active' : '');
-    div.innerHTML = `<img src="${asset(spellDef.icon)}" />`;
-    div.title = spellDef.name + (inRH ? ' (Right)' : inLH ? ' (Left)' : '');
-    div.onclick = () => {
-      // Place spell into right hand first (if empty or already has a spell), then left
-      const rhItem = m.equipment?.rightHand;
-      const lhItem = m.equipment?.leftHand;
-      if (!rhItem) {
-        m.equipment.rightHand = { name: spell.name, slot: 'spell' };
-      } else if (!lhItem || lhItem.slot === 'spell') {
-        m.equipment.leftHand = { name: spell.name, slot: 'spell' };
-      } else if (rhItem.slot === 'spell') {
-        m.equipment.rightHand = { name: spell.name, slot: 'spell' };
-      } else {
-        showMessage(`${m.name} has no free hand for a spell!`);
-        return;
-      }
-      overlay.classList.add('spell-sel-hidden');
-      renderModal(charIndex);
-      refreshPartyCards();
-    };
-    grid.appendChild(div);
-  });
 
-  // Pad with empty slots so the grid always shows at least a couple of empties
-  const totalSlots = Math.max(learnedSpells.length + 2, 6);
-  for (let i = learnedSpells.length; i < totalSlots; i++) {
-    const div = document.createElement('div');
-    div.className = 'spell-sel-slot empty';
-    div.innerHTML = 'Empty';
-    grid.appendChild(div);
-  }
+    const icon = document.createElement('div');
+    icon.className = 'sb-ribbon-icon';
+    icon.dataset.spellName = spellDef.name;
+    icon.innerHTML = `<img src="${asset(spellDef.icon)}" alt="${spellDef.name}" />`;
+    icon.title = spellDef.name;
+
+    // Gold dot if currently equipped anywhere
+    const isEquipped = _SB_SPELL_SLOTS.some(k => m.equipment?.[k]?.name === spellDef.name);
+    if (isEquipped) icon.classList.add('sb-ribbon-icon--equipped');
+
+    icon.addEventListener('click', () => {
+      ribbon.querySelectorAll('.sb-ribbon-icon').forEach(el => el.classList.remove('sb-ribbon-icon--selected'));
+      icon.classList.add('sb-ribbon-icon--selected');
+      _sbSelectedSpell = spellDef;
+      _sbRenderDetail(spellDef, m);
+      _sbSetSlotsSelectable(true);
+      const hint = document.getElementById('sb-slots-hint');
+      hint.textContent = `Click a slot on the right to assign ${spellDef.name}.`;
+      hint.classList.add('sb-slots-hint--active');
+    });
+
+    ribbon.appendChild(icon);
+  });
 }
+
+function _sbRenderDetail(spellDef, m) {
+  const detail = document.getElementById('sb-detail');
+  const typeLabel = _SB_TYPE_LABELS[spellDef.type] || spellDef.type;
+
+  let statsHtml = `
+    <div class="sb-stat">
+      <span class="sb-stat-label">MP Cost</span>
+      <span class="sb-stat-val sb-stat-val--mp">${spellDef.mpCost}</span>
+    </div>
+    <div class="sb-stat">
+      <span class="sb-stat-label">Target</span>
+      <span class="sb-stat-val">${_SB_TARGET_LABELS[spellDef.target] || spellDef.target}</span>
+    </div>
+    <div class="sb-stat">
+      <span class="sb-stat-label">Delay</span>
+      <span class="sb-stat-val">${spellDef.delay}s</span>
+    </div>`;
+
+  if (spellDef.element) {
+    statsHtml += `<div class="sb-stat"><span class="sb-stat-label">Element</span><span class="sb-stat-val sb-stat-val--element">${spellDef.element}</span></div>`;
+  }
+
+  if (spellDef.magnitudeFormula && spellDef.magnitudeScale) {
+    const statName = spellDef.magnitudeFormula.charAt(0).toUpperCase() + spellDef.magnitudeFormula.slice(1);
+    const currentStat = m.effectiveStats?.[spellDef.magnitudeFormula] ?? m.stats?.[spellDef.magnitudeFormula] ?? 0;
+    const approx = Math.round(currentStat * spellDef.magnitudeScale);
+    statsHtml += `<div class="sb-stat">
+      <span class="sb-stat-label">Power Formula</span>
+      <span class="sb-stat-val">${statName} × ${spellDef.magnitudeScale} ≈ ${approx}</span>
+    </div>`;
+  }
+
+  detail.innerHTML = `
+    <div class="sb-detail-content">
+      <div class="sb-detail-header">
+        <img class="sb-detail-icon" src="${asset(spellDef.icon)}" alt="${spellDef.name}" />
+        <div class="sb-detail-name-area">
+          <div class="sb-detail-name">${spellDef.name}</div>
+          <span class="sb-detail-type sb-detail-type--${spellDef.type}">${typeLabel}</span>
+        </div>
+      </div>
+      <div class="sb-detail-desc">${spellDef.description}</div>
+      <div class="sb-detail-stats">${statsHtml}</div>
+    </div>`;
+}
+
+function _sbRefreshSlots(m) {
+  _SB_SPELL_SLOTS.forEach(slotKey => {
+    const slotEl = document.getElementById(`sb-slot-${slotKey}`);
+    if (!slotEl) return;
+    const item = m.equipment?.[slotKey] ?? null;
+
+    // Icon
+    const iconWrap = slotEl.querySelector('.sb-slot-icon-wrap');
+    if (iconWrap) {
+      let iconSrc = null;
+      if (item) {
+        const spellDef = SPELLS.find(s => s.name === item.name);
+        const itemDef = spellDef || (item.name ? getItemDef(item.name) : null);
+        iconSrc = itemDef?.icon ?? null;
+      }
+      iconWrap.innerHTML = iconSrc
+        ? `<img src="${asset(iconSrc)}" alt="${item.name}" />`
+        : '';
+    }
+
+    // Item name label
+    const nameLabel = slotEl.querySelector('.sb-slot-item-name');
+    if (nameLabel) nameLabel.textContent = item?.name ?? '—';
+
+    slotEl.classList.toggle('sb-slot--has-spell', item?.slot === 'spell');
+    slotEl.classList.toggle('sb-slot--has-item', !!item && item.slot !== 'spell');
+  });
+}
+
+function _sbRefreshRibbonDots(m, ribbon) {
+  ribbon.querySelectorAll('.sb-ribbon-icon[data-spell-name]').forEach(iconEl => {
+    const isEquipped = _SB_SPELL_SLOTS.some(k => m.equipment?.[k]?.name === iconEl.dataset.spellName);
+    iconEl.classList.toggle('sb-ribbon-icon--equipped', isEquipped);
+  });
+}
+
+function _sbSetSlotsSelectable(on) {
+  _SB_SPELL_SLOTS.forEach(slotKey => {
+    const el = document.getElementById(`sb-slot-${slotKey}`);
+    if (el) el.classList.toggle('sb-slot--selectable', on);
+  });
+}
+
+// Slot click delegation (single listener on the overlay)
+document.getElementById('spell-selection-overlay').addEventListener('click', (e) => {
+  // Close on backdrop click
+  if (e.target.id === 'spell-selection-overlay') {
+    e.target.classList.add('spell-sel-hidden');
+    return;
+  }
+
+  // Slot assignment
+  const slotEl = e.target.closest('[data-equip-slot]');
+  if (slotEl && _sbSelectedSpell && _sbCharIndex !== null) {
+    const m = party[_sbCharIndex];
+    const slotKey = slotEl.dataset.equipSlot;
+    m.equipment[slotKey] = { name: _sbSelectedSpell.name, slot: 'spell' };
+    updateEffectiveStats(m);
+    _sbRefreshSlots(m);
+    _sbRefreshRibbonDots(m, document.getElementById('sb-ribbon'));
+    refreshPartyCards();
+    const hint = document.getElementById('sb-slots-hint');
+    hint.textContent = `${_sbSelectedSpell.name} assigned to ${_SB_SLOT_LABELS[slotKey]}.`;
+  }
+});
 
 document.getElementById('spell-sel-close').addEventListener('click', () => {
   document.getElementById('spell-selection-overlay').classList.add('spell-sel-hidden');
-});
-
-// Click outside spell selector -> close
-document.getElementById('spell-selection-overlay').addEventListener('click', (e) => {
-  if (e.target.id === 'spell-selection-overlay') {
-    e.target.classList.add('spell-sel-hidden');
-  }
+  if (_sbCharIndex !== null) renderModal(_sbCharIndex);
+  refreshPartyCards();
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

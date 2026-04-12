@@ -2724,14 +2724,84 @@
     <div id="inv-ctx-give-list"></div>
   </div>
 
-  <!-- Spell selection modal -->
+  <!-- Spellbook modal -->
   <div id="spell-selection-overlay" class="spell-sel-hidden">
-    <div id="spell-selection-modal">
-      <div id="spell-sel-header">
-        <span>Select Spell</span>
-        <button id="spell-sel-close" aria-label="Close">&times;</button>
+    <div id="spellbook-modal">
+      <!-- Left page: known spells ribbon + detail view -->
+      <div class="spellbook-page spellbook-left-page">
+        <div class="spellbook-page-content">
+          <div class="spellbook-page-title" id="sb-caster-name">Arcane Grimoire</div>
+          <div class="sb-ribbon-label">Known Spells</div>
+          <div class="sb-ribbon" id="sb-ribbon"></div>
+          <div class="sb-detail" id="sb-detail">
+            <div class="sb-detail-empty">Select a spell above to view its details</div>
+          </div>
+        </div>
+        <div class="spellbook-corner spellbook-corner--bl"></div>
       </div>
-      <div id="spell-sel-grid"></div>
+      <!-- Book spine -->
+      <div class="spellbook-spine">
+        <div class="spellbook-spine-rib"></div>
+        <div class="spellbook-spine-rib"></div>
+        <div class="spellbook-spine-rib"></div>
+        <div class="spellbook-spine-rib"></div>
+      </div>
+      <!-- Right page: slot assignments -->
+      <div class="spellbook-page spellbook-right-page">
+        <div class="spellbook-page-content">
+          <div class="spellbook-page-title">Prepared Spells</div>
+          <div class="sb-slots-hint" id="sb-slots-hint">Select a spell on the left, then click a slot to assign it.</div>
+          <!-- Hand slots -->
+          <div class="sb-hands-row">
+            <div class="sb-hand-slot" data-equip-slot="leftHand" id="sb-slot-leftHand">
+              <div class="sb-slot-icon-wrap"></div>
+              <div class="sb-slot-name-label">Left Hand</div>
+              <div class="sb-slot-item-name"></div>
+            </div>
+            <div class="sb-hand-slot" data-equip-slot="rightHand" id="sb-slot-rightHand">
+              <div class="sb-slot-icon-wrap"></div>
+              <div class="sb-slot-name-label">Right Hand</div>
+              <div class="sb-slot-item-name"></div>
+            </div>
+          </div>
+          <!-- Skill slots -->
+          <div class="sb-skill-section-title">Action Slots</div>
+          <div class="sb-skill-slots">
+            <div class="sb-skill-slot" data-equip-slot="skill" id="sb-slot-skill">
+              <div class="sb-slot-icon-wrap"></div>
+              <div class="sb-skill-roman">I</div>
+              <div class="sb-slot-item-name"></div>
+            </div>
+            <div class="sb-skill-slot" data-equip-slot="skill2" id="sb-slot-skill2">
+              <div class="sb-slot-icon-wrap"></div>
+              <div class="sb-skill-roman">II</div>
+              <div class="sb-slot-item-name"></div>
+            </div>
+            <div class="sb-skill-slot" data-equip-slot="skill3" id="sb-slot-skill3">
+              <div class="sb-slot-icon-wrap"></div>
+              <div class="sb-skill-roman">III</div>
+              <div class="sb-slot-item-name"></div>
+            </div>
+            <div class="sb-skill-slot" data-equip-slot="skill4" id="sb-slot-skill4">
+              <div class="sb-slot-icon-wrap"></div>
+              <div class="sb-skill-roman">IV</div>
+              <div class="sb-slot-item-name"></div>
+            </div>
+            <div class="sb-skill-slot" data-equip-slot="skill5" id="sb-slot-skill5">
+              <div class="sb-slot-icon-wrap"></div>
+              <div class="sb-skill-roman">V</div>
+              <div class="sb-slot-item-name"></div>
+            </div>
+            <div class="sb-skill-slot" data-equip-slot="skill6" id="sb-slot-skill6">
+              <div class="sb-slot-icon-wrap"></div>
+              <div class="sb-skill-roman">VI</div>
+              <div class="sb-slot-item-name"></div>
+            </div>
+          </div>
+          <button class="sb-close-btn" id="spell-sel-close">&times; Close</button>
+        </div>
+        <div class="spellbook-corner spellbook-corner--br"></div>
+      </div>
     </div>
   </div>
 

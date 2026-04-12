@@ -2974,14 +2974,14 @@ label.mm-setting-label {
   box-shadow: none;
 }
 
-/* ── SPELL SELECTION MODAL ── */
+/* ── SPELLBOOK MODAL ── */
 #spell-selection-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.82);
   z-index: 5000;
   display: flex;
   align-items: center;
@@ -2992,79 +2992,427 @@ label.mm-setting-label {
   display: none !important;
 }
 
-#spell-selection-modal {
-  background: #14100c;
-  border: 2px solid #6a5030;
-  padding: 15px;
-  min-width: 250px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.9);
-}
-
-#spell-sel-header {
+#spellbook-modal {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #c8a84a;
-  border-bottom: 1px solid #3a2a10;
-  padding-bottom: 10px;
-  margin-bottom: 15px;
-}
-
-#spell-sel-close {
-  background: transparent;
-  color: #c04040;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-#spell-sel-grid {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.spell-sel-slot {
-  width: 48px;
-  height: 48px;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid #3a2a10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  flex-direction: row;
+  width: 860px;
+  height: 560px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.95), 0 0 0 2px #3a2510, 0 0 0 4px #1a0e06;
   position: relative;
 }
 
-.spell-sel-slot img {
+/* Pages */
+.spellbook-page {
+  flex: 1;
+  background: linear-gradient(160deg, #1a1409 0%, #130f07 60%, #0e0b05 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.spellbook-left-page {
+  border-radius: 4px 0 0 4px;
+  border: 1px solid #3a2510;
+  border-right: none;
+}
+
+.spellbook-right-page {
+  border-radius: 0 4px 4px 0;
+  border: 1px solid #3a2510;
+  border-left: none;
+}
+
+.spellbook-page-content {
+  padding: 16px 18px 14px;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Corner decorations */
+.spellbook-corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: #6a4820;
+  border-style: solid;
+  opacity: 0.6;
+}
+.spellbook-corner--bl {
+  bottom: 6px; left: 6px;
+  border-width: 0 0 2px 2px;
+}
+.spellbook-corner--br {
+  bottom: 6px; right: 6px;
+  border-width: 0 2px 2px 0;
+}
+
+/* Book spine */
+.spellbook-spine {
+  width: 20px;
+  background: linear-gradient(to right, #0e0b05, #2a1a08 30%, #3a2510 50%, #2a1a08 70%, #0e0b05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-shrink: 0;
+  box-shadow: inset -2px 0 6px rgba(0,0,0,0.5), inset 2px 0 6px rgba(0,0,0,0.5);
+}
+
+.spellbook-spine-rib {
+  width: 10px;
+  height: 3px;
+  background: linear-gradient(to right, #6a4820, #a07030, #6a4820);
+  border-radius: 2px;
+  opacity: 0.7;
+}
+
+/* Page titles */
+.spellbook-page-title {
+  font-size: 13px;
+  font-weight: bold;
+  color: #c8a84a;
+  text-align: center;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom: 1px solid #3a2510;
+  padding-bottom: 6px;
+  flex-shrink: 0;
+  text-shadow: 0 0 8px rgba(200, 168, 74, 0.4);
+}
+
+/* ── LEFT PAGE ── */
+.sb-ribbon-label {
+  font-size: 9px;
+  color: #7a6040;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  flex-shrink: 0;
+}
+
+.sb-ribbon {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 4px 0;
+  border-bottom: 1px solid #2a1c0a;
+}
+
+.sb-ribbon-empty {
+  color: #5a4a2a;
+  font-size: 11px;
+  font-style: italic;
+  padding: 8px 0;
+}
+
+.sb-ribbon-icon {
+  width: 46px;
+  height: 46px;
+  border: 1px solid #3a2510;
+  background: rgba(0,0,0,0.4);
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.sb-ribbon-icon img {
   width: 100%;
   height: 100%;
   object-fit: contain;
   pointer-events: none;
+  display: block;
 }
 
-.spell-sel-slot:hover {
+.sb-ribbon-icon:hover {
   border-color: #c8a84a;
-  background: rgba(200, 168, 74, 0.2);
+  background: rgba(200, 168, 74, 0.12);
 }
 
-.spell-sel-slot--active {
-  border-color: #c8a84a;
-  background: rgba(200, 168, 74, 0.18);
+.sb-ribbon-icon--selected {
+  border-color: #e0c060 !important;
+  background: rgba(200, 168, 74, 0.22) !important;
   box-shadow: 0 0 8px rgba(200, 168, 74, 0.5), inset 0 0 4px rgba(200, 168, 74, 0.2);
 }
 
-.spell-sel-slot.empty {
-  color: #5a4a2a;
-  font-size: 10px;
-  text-align: center;
-  cursor: not-allowed;
+/* Small gold dot when spell is currently equipped somewhere */
+.sb-ribbon-icon--equipped::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 5px;
+  height: 5px;
+  background: #c8a84a;
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(200, 168, 74, 0.8);
 }
 
-.spell-sel-slot.empty:hover {
-  border-color: #3a2a10;
-  background: rgba(0, 0, 0, 0.5);
+/* ── SPELL DETAIL AREA ── */
+.sb-detail {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.sb-detail-empty {
+  color: #5a4a2a;
+  font-size: 11px;
+  font-style: italic;
+  text-align: center;
+  margin-top: 20px;
+}
+
+@keyframes sb-page-reveal {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.sb-detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: sb-page-reveal 0.2s ease-out;
+  overflow: hidden;
+}
+
+.sb-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sb-detail-icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border: 1px solid #3a2510;
+  background: rgba(0,0,0,0.4);
+  padding: 3px;
+  box-sizing: border-box;
+}
+
+.sb-detail-name-area {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sb-detail-name {
+  font-size: 15px;
+  font-weight: bold;
+  color: #c8a84a;
+  text-shadow: 0 0 6px rgba(200,168,74,0.4);
+}
+
+.sb-detail-type {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 1px 5px;
+  border-radius: 2px;
+  display: inline-block;
+}
+.sb-detail-type--direct-damage  { background: rgba(180,60,30,0.3);  color: #e07050; border: 1px solid #802010; }
+.sb-detail-type--healing         { background: rgba(40,160,80,0.25); color: #70d088; border: 1px solid #208040; }
+.sb-detail-type--buff            { background: rgba(60,100,200,0.25);color: #7090e0; border: 1px solid #204080; }
+.sb-detail-type--debuff-cure     { background: rgba(140,60,200,0.25);color: #c080e0; border: 1px solid #602090; }
+.sb-detail-type--aoe-debuff      { background: rgba(180,120,30,0.25);color: #e0a040; border: 1px solid #804010; }
+
+.sb-detail-desc {
+  font-size: 10.5px;
+  color: #9a8060;
+  font-style: italic;
+  line-height: 1.5;
+  border-top: 1px solid #2a1c0a;
+  padding-top: 6px;
+}
+
+.sb-detail-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sb-stat {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid #2a1c0a;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sb-stat--full {
+  /* same as base, kept for compatibility */
+}
+
+.sb-stat-label {
+  font-size: 11px;
+  color: #7a6a4a;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.sb-stat-val {
+  font-size: 13px;
+  color: #c8a84a;
+  font-weight: bold;
+}
+
+.sb-stat-val--mp    { color: #6090d0; }
+.sb-stat-val--element { color: #e07050; text-transform: capitalize; }
+
+/* ── RIGHT PAGE ── */
+.sb-slots-hint {
+  font-size: 10px;
+  color: #7a6040;
+  font-style: italic;
+  text-align: center;
+  flex-shrink: 0;
+  min-height: 14px;
+  transition: color 0.2s;
+}
+
+.sb-slots-hint--active {
+  color: #c8a84a;
+}
+
+/* Hand slots */
+.sb-hands-row {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.sb-hand-slot {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 6px 6px;
+  border: 1px solid #3a2510;
+  background: rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  position: relative;
+}
+
+.sb-hand-slot:hover,
+.sb-hand-slot.sb-slot--selectable:hover {
+  border-color: #c8a84a;
+  background: rgba(200,168,74,0.12);
+}
+
+.sb-hand-slot.sb-slot--selectable {
+  border-color: #6a5030;
+  box-shadow: 0 0 6px rgba(200,168,74,0.15);
+}
+
+.sb-slot-icon-wrap {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sb-slot-icon-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.sb-slot-name-label {
+  font-size: 9px;
+  color: #7a6040;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.sb-slot-item-name {
+  font-size: 9px;
+  color: #a08050;
+  text-align: center;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-slot--has-spell .sb-slot-item-name { color: #c8a84a; }
+.sb-slot--has-item  .sb-slot-item-name { color: #8a7850; }
+
+/* Skill slots */
+.sb-skill-section-title {
+  font-size: 9px;
+  color: #7a6040;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  flex-shrink: 0;
+}
+
+.sb-skill-slots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.sb-skill-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 4px 4px;
+  border: 1px solid #3a2510;
+  background: rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.sb-skill-slot:hover,
+.sb-skill-slot.sb-slot--selectable:hover {
+  border-color: #c8a84a;
+  background: rgba(200,168,74,0.12);
+}
+
+.sb-skill-slot.sb-slot--selectable {
+  border-color: #5a4020;
+  box-shadow: 0 0 4px rgba(200,168,74,0.1);
+}
+
+.sb-skill-roman {
+  font-size: 8px;
+  color: #6a5030;
+  letter-spacing: 0.05em;
+}
+
+/* Close button */
+.sb-close-btn {
+  margin-top: auto;
+  align-self: flex-end;
+  background: transparent;
+  border: 1px solid #4a3020;
+  color: #8a6a40;
+  font-size: 11px;
+  padding: 4px 12px;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.sb-close-btn:hover {
+  color: #c04040;
+  border-color: #c04040;
 }
 
 /* ── Skills panel ── */
