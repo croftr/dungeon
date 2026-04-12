@@ -2439,10 +2439,13 @@ function _openSpellSelectionModal(charIndex) {
   const m = party[charIndex];
   _sbBuildRibbon(m);
   _sbRefreshSlots(m);
-  document.getElementById('sb-detail').innerHTML = '<div class="sb-detail-empty">Select a spell above to view its details</div>';
   document.getElementById('sb-slots-hint').textContent = 'Select a spell on the left, then click a slot to assign it.';
   document.getElementById('sb-slots-hint').classList.remove('sb-slots-hint--active');
   _sbSetSlotsSelectable(false);
+
+  // Auto-select the first spell tab
+  const firstTab = document.querySelector('#sb-ribbon .sb-ribbon-icon');
+  if (firstTab) firstTab.click();
 }
 
 function _sbBuildRibbon(m) {
@@ -2455,39 +2458,70 @@ function _sbBuildRibbon(m) {
     return;
   }
 
+  // Group spells by type, preserving a defined order
+  const TYPE_ORDER = ['direct-damage', 'aoe-debuff', 'healing', 'buff', 'debuff-cure'];
+  const groups = {};
   learnedSpells.forEach(spell => {
     const spellDef = SPELLS.find(s => s.name === spell.name);
     if (!spellDef) return;
+    const t = spellDef.type || 'other';
+    if (!groups[t]) groups[t] = [];
+    groups[t].push(spellDef);
+  });
 
-    const icon = document.createElement('div');
-    icon.className = 'sb-ribbon-icon';
-    icon.dataset.spellName = spellDef.name;
-    icon.innerHTML = `<img src="${asset(spellDef.icon)}" alt="${spellDef.name}" />`;
-    icon.title = spellDef.name;
+  const orderedTypes = [
+    ...TYPE_ORDER.filter(t => groups[t]),
+    ...Object.keys(groups).filter(t => !TYPE_ORDER.includes(t)),
+  ];
 
-    // Gold dot if currently equipped anywhere
-    const isEquipped = _SB_SPELL_SLOTS.some(k => m.equipment?.[k]?.name === spellDef.name);
-    if (isEquipped) icon.classList.add('sb-ribbon-icon--equipped');
+  orderedTypes.forEach(type => {
+    const spells = groups[type];
+    const typeInfo = SPELL_TYPE_ICONS[type];
 
-    icon.addEventListener('click', () => {
-      ribbon.querySelectorAll('.sb-ribbon-icon').forEach(el => el.classList.remove('sb-ribbon-icon--selected'));
-      icon.classList.add('sb-ribbon-icon--selected');
-      _sbSelectedSpell = spellDef;
-      _sbRenderDetail(spellDef, m);
-      _sbSetSlotsSelectable(true);
-      const hint = document.getElementById('sb-slots-hint');
-      hint.textContent = `Click a slot on the right to assign ${spellDef.name}.`;
-      hint.classList.add('sb-slots-hint--active');
-      playItemSound('scroll');
+    const group = document.createElement('div');
+    group.className = 'sb-tab-group';
+
+    // Category marker tab
+    const catTab = document.createElement('div');
+    catTab.className = 'sb-tab-group-marker';
+    catTab.title = _SB_TYPE_LABELS[type] || type;
+    catTab.style.color = typeInfo?.color || '#8a6040';
+    catTab.textContent = typeInfo?.symbol || '?';
+    group.appendChild(catTab);
+
+    spells.forEach(spellDef => {
+      const icon = document.createElement('div');
+      icon.className = 'sb-ribbon-icon';
+      icon.dataset.spellName = spellDef.name;
+      icon.innerHTML = `<img src="${asset(spellDef.icon)}" alt="${spellDef.name}" />`;
+      icon.title = spellDef.name;
+
+      const isEquipped = _SB_SPELL_SLOTS.some(k => m.equipment?.[k]?.name === spellDef.name);
+      if (isEquipped) icon.classList.add('sb-ribbon-icon--equipped');
+
+      icon.addEventListener('click', () => {
+        ribbon.querySelectorAll('.sb-ribbon-icon').forEach(el => el.classList.remove('sb-ribbon-icon--selected'));
+        icon.classList.add('sb-ribbon-icon--selected');
+        _sbSelectedSpell = spellDef;
+        _sbRenderDetail(spellDef, m);
+        _sbSetSlotsSelectable(true);
+        const hint = document.getElementById('sb-slots-hint');
+        hint.textContent = `Click a slot on the right to assign ${spellDef.name}.`;
+        hint.classList.add('sb-slots-hint--active');
+        playItemSound('scroll');
+      });
+
+      group.appendChild(icon);
     });
 
-    ribbon.appendChild(icon);
+    ribbon.appendChild(group);
   });
 }
 
 function _sbRenderDetail(spellDef, m) {
   const detail = document.getElementById('sb-detail');
   const typeLabel = _SB_TYPE_LABELS[spellDef.type] || spellDef.type;
+  const typeIcon = SPELL_TYPE_ICONS[spellDef.type];
 
   let statsHtml = `
     <div class="sb-stat">
@@ -2523,7 +2557,7 @@ function _sbRenderDetail(spellDef, m) {
         <img class="sb-detail-icon" src="${asset(spellDef.icon)}" alt="${spellDef.name}" />
         <div class="sb-detail-name-area">
           <div class="sb-detail-name">${spellDef.name}</div>
-          <span class="sb-detail-type sb-detail-type--${spellDef.type}">${typeLabel}</span>
+          <span class="sb-detail-type sb-detail-type--${spellDef.type}">${typeIcon ? `<span class="sb-type-icon" style="color:${typeIcon.color}">${typeIcon.symbol}</span> ` : ''}${typeLabel}</span>
           <div class="sb-detail-desc">${spellDef.description}</div>
         </div>
       </div>
