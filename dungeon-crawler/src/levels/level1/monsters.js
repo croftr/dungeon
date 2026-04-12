@@ -121,7 +121,7 @@ export const level1Monsters = [
     asset('/monsters/iceMan-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb')),
 
   // Additional Goblins spread through Level 1 corridors (avoiding big rooms)
-  inst(D.goblin, 25, 16, 7,
+  inst(D.goblin, 25, 13, 1,
     asset('/monsters/goblin-animation/goblin-alert.glb'),
     asset('/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb'),
     asset('/monsters/goblin-animation/goblin-attack.wav'), 0.45, 0, 0, 1, null,

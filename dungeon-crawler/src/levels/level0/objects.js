@@ -117,10 +117,8 @@ export function spawnLevel0Objects(ctx) {
     // ── Training Console — next to the training dummy at (7, 23) ────────────
     addTrainingConsole(group, loader, 22, 7, Math.PI);
 
-    // ── Practice trap — NW corner of east room ────────────────────────────────
-    if (!monsterNpcSaved) {
-        addTrap1(group, loader, 7, 17);
-    } else {
+    // ── Relocated Monster — NW corner of east room ────────────────────────────────
+    if (monsterNpcSaved) {
         // Monster relocated here - col 17, row 7, face North (0)
         // Now using addShop with idle base and agree-gesture greeting
         addShop(group, loader, 17, 7, 0, 0, 0, 'barnaby', asset('/npcs/monster-npc/idle.glb'), {

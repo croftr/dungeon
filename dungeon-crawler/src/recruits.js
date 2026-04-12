@@ -226,11 +226,7 @@ function openRecruitModal(recruitId) {
             </div>
 
             <div style="margin-top: auto; display: flex; justify-content: flex-end; gap: 15px;">
-              <button id="btn-recruit-close" style="padding: 10px 20px; cursor: pointer; background: rgba(0,0,0,0.5); border: 1px solid #6a5030; color: #a09070; font-family: inherit; font-size: 14px; border-radius: 4px; transition: all 0.2s;">Decline</button>
-              ${canRecruit
-            ? `<button id="btn-recruit-add" style="padding: 10px 20px; cursor: pointer; background: linear-gradient(to bottom, #c8a84a, #8a6a20); color: #fff; border: 1px solid #e8c87a; font-family: inherit; font-size: 14px; font-weight: bold; border-radius: 4px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); box-shadow: 0 0 10px rgba(200, 168, 74, 0.4);">Recruit to Party</button>`
-            : `<span style="color: #cc4444; font-size: 14px; display: flex; align-items: center; border: 1px solid #cc4444; padding: 10px 20px; border-radius: 4px; background: rgba(204, 68, 68, 0.1);">Party Full!</span>`
-        }
+              <button id="btn-recruit-close" style="padding: 10px 20px; cursor: pointer; background: rgba(0,0,0,0.5); border: 1px solid #6a5030; color: #a09070; font-family: inherit; font-size: 14px; border-radius: 4px; transition: all 0.2s;">Close</button>
             </div>
         </div>
     </div>
@@ -243,15 +239,7 @@ function openRecruitModal(recruitId) {
         uiContainer.style.display = 'none';
     });
 
-    const addBtn = document.getElementById('btn-recruit-add');
-    if (addBtn) {
-        addBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            recruitCharacter(r);
-            uiContainer.style.display = 'none';
-            updateRecruitsMeshState();
-        });
-    }
+    // Hide buttons if recruited
 }
 
 
