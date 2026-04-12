@@ -37,37 +37,52 @@ export function getSkillTree(treeId) {
 }
 
 /**
- * Derives a weapon/skill expertise label from a skill tree.
- * Prioritises skill chains with "Master" in the name (e.g. "Mace Master",
- * "Shield Master" → "Mace & Shield Expert"). Falls back to the first unique
- * skill-chain base name when no Master chains exist.
+ * Derives expertise info from a skill tree.
+ * Returns { name, icon, isMagic }
+ *
+ * - Characters with "Master" chains → weapon expertise (isMagic: false)
+ *   e.g. "Mace Master" + "Shield Master" → name: "Mace & Shield Expert"
+ *        icon: mace-master.webp
+ *
+ * - Characters with only tier I/II/III chains (no Master) → magic expertise (isMagic: true)
+ *   Uses the first progression chain found.
+ *   e.g. Pyromancer I → name: "Pyromancer", icon: pyromancer.webp
  */
 export function getSkillExpertise(treeId) {
   const tree = TREES[treeId];
-  if (!tree) return 'Versatile';
+  if (!tree) return { name: 'Versatile', icon: null, isMagic: false };
 
-  const masterWeapons = new Set();
-  const allChains = new Set();
+  // masterWeapons: weapon word → icon path  (e.g. "Mace" → "mace-master.webp")
+  const masterWeapons = new Map();
+  // tierChains: base name → icon path, only for skills whose label ends with " I"
+  const tierChains = new Map();
 
   for (const node of tree.nodes) {
     if (node.type !== 'skill' || !node.benefit?.skill) continue;
-    const skillName = node.benefit.skill; // e.g. "Mace Master", "Bow Tactician"
-    // Strip tier suffix (I / II / III …) to get the base chain name
-    const baseName = skillName.replace(/\s+(I{1,3}|IV|V)$/, '').trim();
-    allChains.add(baseName);
-    if (baseName.includes('Master')) {
-      // Extract the weapon word(s) before " Master"
-      const weapon = baseName.replace(/\s*Master\s*$/, '').trim();
-      if (weapon) masterWeapons.add(weapon);
+    const skillName = node.benefit.skill;
+    const baseName  = skillName.replace(/\s+(I{1,3}|IV|V)$/, '').trim();
+    const isTierOne = /\sI$/.test(node.label); // tier suffix is on the label, not benefit.skill
+
+    if (isTierOne && !tierChains.has(baseName)) {
+      tierChains.set(baseName, node.icon ?? null);
+    }
+    if (baseName.includes('Master') && !masterWeapons.has(baseName)) {
+      masterWeapons.set(baseName, node.icon ?? null);
     }
   }
 
   if (masterWeapons.size > 0) {
-    return [...masterWeapons].join(' & ') + ' Expert';
+    // Each master skill becomes its own list entry with its own icon
+    const entries = [...masterWeapons.entries()].map(([baseName, icon]) => ({ name: baseName, icon }));
+    return { entries, isMagic: false };
   }
 
-  const [first] = allChains;
-  return first ?? 'Versatile';
+  if (tierChains.size > 0) {
+    const [[name, icon]] = tierChains;
+    return { entries: [{ name, icon }], isMagic: true };
+  }
+
+  return { entries: [{ name: 'Versatile', icon: null }], isMagic: false };
 }
 
 /**

@@ -11,6 +11,11 @@ import { asset } from './assets.js';
 
 const _recruitRaycaster = new THREE.Raycaster();
 const _recruitMouse = new THREE.Vector2();
+
+function getJobIcon(job) {
+    const jobKey = job.toLowerCase().replace(' ', '-');
+    return `/skills/jobs/${jobKey}.webp`;
+}
 import SKILLS_DATA from './data/skills.json';
 
 // Hydrate skill progression strings into full skill objects using skills.json definitions
@@ -199,9 +204,14 @@ function openRecruitModal(recruitId) {
             ${mediaHtml}
         </div>
         <div style="display: flex; flex-direction: column; justify-content: center; flex: 1;">
-            <h2 style="margin: 0 0 10px 0; color: #fff; font-size: 32px; font-weight: normal; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">${r.name}</h2>
-            <div style="margin: 0 0 20px 0; font-size: 16px; color: #c8a84a; text-transform: uppercase; letter-spacing: 2px;">
-                ${r.race} ${r.job}
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 5px;">
+                <h2 style="margin: 0; color: #fff; font-size: 32px; font-weight: normal; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">${r.name}</h2>
+                <img src="${asset(getJobIcon(r.job))}" style="width: 48px; height: 48px; border: 1px solid rgba(200, 168, 74, 0.4); border-radius: 4px; box-shadow: 0 0 15px rgba(200, 168, 74, 0.2); background: rgba(0,0,0,0.3); padding: 2px;">
+            </div>
+            <div style="margin: 0 0 20px 0; font-size: 16px; color: #c8a84a; text-transform: uppercase; letter-spacing: 2px; display: flex; align-items: center; gap: 8px;">
+                <span style="opacity: 0.8;">${r.race}</span>
+                <span style="color: #6a5030;">•</span>
+                <span style="font-weight: bold;">${r.job}</span>
             </div>
             
             <div style="margin: 0 0 30px 0; font-size: 16px; color: #d0c0a0; line-height: 1.6; font-style: italic; border-left: 3px solid #c8a84a; padding-left: 15px;">

@@ -798,9 +798,19 @@ function showCharacterSelection() {
               <div class="cs-highlight-badge-value">${r.race}</div>
             </div>
             <div class="cs-highlight-badge">
-              <div class="cs-highlight-icon">&#10022;</div>
-              <div class="cs-highlight-badge-label">WEAPON SKILLS</div>
-              <div class="cs-highlight-badge-value">${expertise}</div>
+              ${expertise.entries.length > 1
+                ? `<div class="cs-expertise-list">
+                    ${expertise.entries.map(e => `
+                      <div class="cs-expertise-item">
+                        ${e.icon ? `<img class="cs-highlight-icon-img" src="${asset(e.icon)}" alt="" />` : ''}
+                        <span class="cs-expertise-item-name">${e.name}</span>
+                      </div>`).join('')}
+                  </div>`
+                : `${expertise.entries[0]?.icon
+                    ? `<img class="cs-highlight-icon-img" src="${asset(expertise.entries[0].icon)}" alt="" />`
+                    : `<div class="cs-highlight-icon">&#10022;</div>`}
+                  <div class="cs-highlight-badge-value">${expertise.entries[0]?.name ?? ''}</div>`
+              }
             </div>
           </div>
 
