@@ -37,6 +37,40 @@ export function getSkillTree(treeId) {
 }
 
 /**
+ * Derives a weapon/skill expertise label from a skill tree.
+ * Prioritises skill chains with "Master" in the name (e.g. "Mace Master",
+ * "Shield Master" → "Mace & Shield Expert"). Falls back to the first unique
+ * skill-chain base name when no Master chains exist.
+ */
+export function getSkillExpertise(treeId) {
+  const tree = TREES[treeId];
+  if (!tree) return 'Versatile';
+
+  const masterWeapons = new Set();
+  const allChains = new Set();
+
+  for (const node of tree.nodes) {
+    if (node.type !== 'skill' || !node.benefit?.skill) continue;
+    const skillName = node.benefit.skill; // e.g. "Mace Master", "Bow Tactician"
+    // Strip tier suffix (I / II / III …) to get the base chain name
+    const baseName = skillName.replace(/\s+(I{1,3}|IV|V)$/, '').trim();
+    allChains.add(baseName);
+    if (baseName.includes('Master')) {
+      // Extract the weapon word(s) before " Master"
+      const weapon = baseName.replace(/\s*Master\s*$/, '').trim();
+      if (weapon) masterWeapons.add(weapon);
+    }
+  }
+
+  if (masterWeapons.size > 0) {
+    return [...masterWeapons].join(' & ') + ' Expert';
+  }
+
+  const [first] = allChains;
+  return first ?? 'Versatile';
+}
+
+/**
  * Returns node objects adjacent to any acquired node that aren't yet acquired.
  * @param {object} tree - tree definition
  * @param {string[]} acquiredNodes - array of acquired node IDs

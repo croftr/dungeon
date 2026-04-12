@@ -24,6 +24,7 @@ import { asset } from './assets.js';
 import { initQuests } from './quest.js';
 import { initSlashTrail } from './slash-trail.js';
 import { initEssentiary } from './essentiary.js';
+import { getSkillExpertise } from './skill-tree.js';
 import { MONSTER_DEFS } from './monster-defs.js';
 import { inst } from './monster-factory.js';
 
@@ -755,12 +756,13 @@ function showCharacterSelection() {
     const isSelected = selectedIds.has(r.id);
     const full = selectedIds.size >= 4;
     const canAdd = !isSelected && full;
+    const expertise = getSkillExpertise(r.skillTree);
     const stats = [
-      { label: 'STR', val: r.stats.strength },
-      { label: 'DEX', val: r.stats.dexterity },
-      { label: 'VIT', val: r.stats.vitality },
+      { label: 'STR', val: r.stats.strength    },
+      { label: 'DEX', val: r.stats.dexterity   },
+      { label: 'VIT', val: r.stats.vitality    },
       { label: 'INT', val: r.stats.intelligence },
-      { label: 'RES', val: r.stats.resilience },
+      { label: 'RES', val: r.stats.resilience  },
     ];
     return `
       <div class="cs-detail-content">
@@ -772,25 +774,40 @@ function showCharacterSelection() {
         <div class="cs-detail-info">
           <div class="cs-detail-hero-header">
             <div class="cs-detail-name">${r.name}</div>
-            <div class="cs-detail-class">${r.race} &middot; ${r.job}</div>
           </div>
-          <div class="cs-detail-divider"></div>
+
           <div class="cs-detail-stats">
             ${stats.map(s => `
-              <div class="cs-detail-stat-row">
+              <div class="cs-detail-stat-col">
                 <div class="cs-detail-stat-label">${s.label}</div>
-                <div class="cs-detail-stat-bar">
-                  <div class="cs-detail-stat-fill" style="width:${Math.round(s.val / 12 * 100)}%"></div>
-                </div>
-                <div class="cs-detail-stat-val">${s.val}</div>
+                <div class="cs-detail-stat-number">${s.val}</div>
               </div>
             `).join('')}
           </div>
-          <div class="cs-detail-bio">${r.bio}</div>
+
+          <div class="cs-highlight-header">Highlight Features</div>
+          <div class="cs-highlight-row">
+            <div class="cs-highlight-badge">
+              <div class="cs-highlight-icon">&#9876;</div>
+              <div class="cs-highlight-badge-label">JOB</div>
+              <div class="cs-highlight-badge-value">${r.job}</div>
+            </div>
+            <div class="cs-highlight-badge">
+              <div class="cs-highlight-icon">&#9670;</div>
+              <div class="cs-highlight-badge-label">RACE</div>
+              <div class="cs-highlight-badge-value">${r.race}</div>
+            </div>
+            <div class="cs-highlight-badge">
+              <div class="cs-highlight-icon">&#10022;</div>
+              <div class="cs-highlight-badge-label">WEAPON SKILLS</div>
+              <div class="cs-highlight-badge-value">${expertise}</div>
+            </div>
+          </div>
+
           <div class="cs-detail-actions">
             <button class="cs-detail-recruit-btn ${isSelected ? 'is-selected' : ''} ${canAdd ? 'is-full' : ''}"
                     data-detail-btn="${r.id}">
-              ${isSelected ? '✓ Remove from Party' : '+ Add to Party'}
+              ${isSelected ? '&#10003; Remove from Party' : 'Add to Party'}
             </button>
           </div>
         </div>
