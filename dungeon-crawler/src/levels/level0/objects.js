@@ -31,8 +31,13 @@ export function spawnLevel0Objects(ctx) {
     addChest(group, loader, 13.4, 10, Math.PI / 2, -0.1, [
         { name: 'Gold Coins', quantity: 10000 },
         'Potion of Invincibility', 'Potion of Unseen', "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal",
-        "Demon Blade", "Goblin Shiv", "Silver Mace", "Warden's Shield", "Trickster's Hood",
-        "Ogre Essence", "Tree Man Essence", "Life Orb", "Life Staff"
+        'Resist Poison Spellbook', 'Rejuvenate Spellbook',
+        'Scroll of Fireball', 'Scroll of Heal', 'Scroll of Regeneration', 'Scroll of Cure Poison', 'Scroll of Resist Poison',
+        'Scroll of Rejuvenate', 'Scroll of Sleep', 'Scroll of Incinerate',
+        'Minor Potions Parchment', 'Party Potions Parchment', 'Potions Parchment', 'Forge Armour Parchment', 'Forge Weapons Parchment',
+        'Ogre Helm Parchment', 'Minotaur Cuirass Parchment', 'Lizard Scale Cloak Parchment', 'Crocodilian Boots Parchment',
+        'Seers Shawl Parchment', "Trickster's Hood Parchment", "Barbarian's Loin Cloth Parchment", "Barbarian's Club Parchment",
+        'Pyro Palms Parchment', 'Demon Blade Parchment'
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in the east room (center) ────────────────────────────────────

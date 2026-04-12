@@ -1,7 +1,7 @@
 [
   {
     "name": "Minor Potions Parchment",
-    "icon": "/icons/minor_potions_parchment.webp",
+    "icon": "/icons/potions_parchment.webp",
     "description": "An ancient looking piece of parchment. It documents alchemy ingredients for creating minor potions.",
     "type": "parchment",
     "parchmentType": "minor-potions",

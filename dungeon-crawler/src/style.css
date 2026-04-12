@@ -2586,7 +2586,8 @@ label.mm-setting-label {
   flex: 1;
 }
 
-#inv-sort-btn {
+#inv-sort-btn,
+#chest-sort-btn {
   font-family: monospace;
   font-size: 9px;
   letter-spacing: 1px;
@@ -2602,7 +2603,8 @@ label.mm-setting-label {
   transition: color 0.15s, border-color 0.15s;
 }
 
-#inv-sort-btn:hover {
+#inv-sort-btn:hover,
+#chest-sort-btn:hover {
   color: #c8a84a;
   border-color: #6a5028;
 }
@@ -5539,6 +5541,12 @@ label.mm-setting-label {
 #chest-close:hover {
   border-color: #8a7040;
   color: #c8a84a;
+}
+
+#chest-body {
+  max-height: 400px;
+  overflow-y: auto;
+  min-height: 100px;
 }
 
 #chest-grid {

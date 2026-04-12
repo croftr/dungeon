@@ -4360,7 +4360,7 @@ function _startSkillCooldownUI(memberIndex, expiresAt, slotKey = 'skill') {
 // ─────────────────────────────────────────────
 //  INVENTORY SORT
 // ─────────────────────────────────────────────
-function _getItemSortPriority(item) {
+export function _getItemSortPriority(item) {
   const def = getItemDef(item.name);
   if (!def) return 99;
   const slot = def.slot;

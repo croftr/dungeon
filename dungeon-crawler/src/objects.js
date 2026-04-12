@@ -7,7 +7,7 @@ import { showMessage, drawMinimap, updateStatus } from './minimap.js';
 import { getItemDef } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refreshPartyCards, setHp, applyStatusEffect } from './party.js';
 import { addLogEntry } from './battle-log.js';
-import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playLearntSound, playSoundByUrl, playQuestAudio, fadeOutQuestAudio, playPartyHitSound } from './audio.js';
+import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playLearntSound, playSoundByUrl, playQuestAudio, fadeOutQuestAudio, playPartyHitSound, playInventorySortSound } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
 import POTION_MERCHANT_DATA from './data/potion-merchant.json';
 import POTIONS_DATA from './data/items/potions.json';
@@ -3257,8 +3257,21 @@ export function openChestModal(chestObj) {
     document.getElementById('chest-sent-label').textContent = '';
     document.getElementById('chest-title').textContent = chestObj.userData.title || 'Chest';
 
-    const slots = document.querySelectorAll('#chest-grid .chest-slot');
+    const grid = document.getElementById('chest-grid');
+    let slots = grid.querySelectorAll('.chest-slot');
     const contents = chestObj.userData.contents || [];
+    
+    // Dynamically add slots if contents exceed current slot count
+    if (contents.length > slots.length) {
+        for (let i = slots.length; i < contents.length; i++) {
+            const newSlot = document.createElement('div');
+            newSlot.className = 'chest-slot';
+            newSlot.dataset.index = i;
+            grid.appendChild(newSlot);
+        }
+        slots = grid.querySelectorAll('.chest-slot');
+    }
+
     _activeChestContents = contents;
     _activeChestSlots = slots;
 
@@ -3266,10 +3279,51 @@ export function openChestModal(chestObj) {
     _chestPartyMemberIdx = party.findIndex(m => !m.isEmpty);
     if (_chestPartyMemberIdx === -1) _chestPartyMemberIdx = 0;
 
+    const sortBtn = document.getElementById('chest-sort-btn');
+    if (sortBtn) {
+        sortBtn.onclick = (e) => {
+            e.stopPropagation();
+            _sortChest(chestObj);
+        };
+    }
+
     {
         _bindChestSlots(equip, slots, contents);
     }
     _renderChestPartyInv();
+}
+
+function _sortChest(chestObj) {
+    playInventorySortSound();
+    let contents = chestObj.userData.contents || [];
+
+    // Filter out null/empty entries, sort them, then repack
+    const items = contents.filter(item => {
+        if (!item) return false;
+        if (typeof item === 'string') return true;
+        if (typeof item === 'object' && item.name) return true;
+        return false;
+    });
+
+    items.sort((a, b) => {
+        const nameA = typeof a === 'string' ? a : a.name;
+        const nameB = typeof b === 'string' ? b : b.name;
+        const pa = equip._getItemSortPriority({ name: nameA });
+        const pb = equip._getItemSortPriority({ name: nameB });
+        if (pa !== pb) return pa - pb;
+        return nameA.localeCompare(nameB);
+    });
+
+    // Replace contents with sorted items
+    for (let i = 0; i < contents.length; i++) {
+        contents[i] = items[i] ?? null;
+    }
+
+    // Since contents was modified in place (it's the same array reference), 
+    // we just need to re-bind the slots to the DOM.
+    const grid = document.getElementById('chest-grid');
+    const slots = grid.querySelectorAll('.chest-slot');
+    _bindChestSlots(equip, slots, contents);
 }
 
 

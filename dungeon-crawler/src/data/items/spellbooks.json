@@ -1,55 +1,5 @@
 [
     {
-        "name": "Heal Spellbook",
-        "type": "spellbook",
-        "spellName": "Heal",
-        "requiredInt": 8,
-        "icon": "/icons/heal.webp",
-        "description": "A vellum scroll containing restorative prayers. Requires 8 Intelligence to decypher.",
-        "value": 450,
-        "weight": 0.5
-    },
-    {
-        "name": "Regeneration Spellbook",
-        "type": "spellbook",
-        "spellName": "Regeneration",
-        "requiredInt": 12,
-        "icon": "/icons/regeneration.webp",
-        "description": "A thick book smelling of damp earth and moss. Requires 12 Intelligence to decypher.",
-        "value": 750,
-        "weight": 1.2
-    },
-    {
-        "name": "Cure Poison Spellbook",
-        "type": "spellbook",
-        "spellName": "Cure Poison",
-        "requiredInt": 6,
-        "icon": "/icons/cure-poison.webp",
-        "description": "A small pamphlet detailed with botanical sketches. Requires 6 Intelligence to decypher.",
-        "value": 300,
-        "weight": 0.3
-    },
-    {
-        "name": "Resist Poison Spellbook",
-        "type": "spellbook",
-        "spellName": "Resist Poison",
-        "requiredInt": 6,
-        "icon": "/icons/resist-poison-scroll.webp",
-        "description": "A small pamphlet detailed with botanical sketches. Reduces poison damage. Requires 6 Intelligence to decypher.",
-        "value": 300,
-        "weight": 0.3
-    },
-    {
-        "name": "Rejuvenate Spellbook",
-        "type": "spellbook",
-        "spellName": "Rejuvenate",
-        "requiredInt": 10,
-        "icon": "/icons/scroll_rejuvenate.webp",
-        "description": "A golden-bound tome glowing with vitality. Requires 10 Intelligence to decypher.",
-        "value": 540,
-        "weight": 0.5
-    },
-    {
         "name": "Scroll of Fireball",
         "type": "spellbook",
         "spellName": "Fireball",
@@ -124,7 +74,7 @@
         "type": "spellbook",
         "spellName": "Incinerate",
         "requiredInt": 12,
-        "icon": "/icons/scroll_fireball.webp",
+        "icon": "/icons/scroll_incinerate.webp",
         "description": "Ancient parchment radiating an intense heat. Study it to learn Incinerate. Requires 12 Intelligence.",
         "value": 850,
         "weight": 0.2
