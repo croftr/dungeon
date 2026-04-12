@@ -14,7 +14,13 @@ const _recruitMouse = new THREE.Vector2();
 
 function getJobIcon(job) {
     const jobKey = job.toLowerCase().replace(' ', '-');
-    return `/skills/jobs/${jobKey}.webp`;
+    return `/skills/jobs/${jobKey}.png`;
+}
+
+function getRaceIcon(race) {
+    // Map both Wood Elf and High Elf to the generic elf icon
+    const raceKey = race.toLowerCase().includes('elf') ? 'elf' : race.toLowerCase();
+    return `/skills/race/${raceKey}.png`;
 }
 import SKILLS_DATA from './data/skills.json';
 
@@ -209,6 +215,7 @@ function openRecruitModal(recruitId) {
                 <img src="${asset(getJobIcon(r.job))}" style="width: 48px; height: 48px; border: 1px solid rgba(200, 168, 74, 0.4); border-radius: 4px; box-shadow: 0 0 15px rgba(200, 168, 74, 0.2); background: rgba(0,0,0,0.3); padding: 2px;">
             </div>
             <div style="margin: 0 0 20px 0; font-size: 16px; color: #c8a84a; text-transform: uppercase; letter-spacing: 2px; display: flex; align-items: center; gap: 8px;">
+                <img src="${asset(getRaceIcon(r.race))}" style="width: 24px; height: 24px; opacity: 0.8; filter: drop-shadow(0 0 5px rgba(200,168,74,0.3));">
                 <span style="opacity: 0.8;">${r.race}</span>
                 <span style="color: #6a5030;">•</span>
                 <span style="font-weight: bold;">${r.job}</span>

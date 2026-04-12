@@ -757,6 +757,8 @@ function showCharacterSelection() {
     const full = selectedIds.size >= 4;
     const canAdd = !isSelected && full;
     const expertise = getSkillExpertise(r.skillTree);
+    const jobIcon  = asset(`/skills/jobs/${r.job.toLowerCase().replace(/\s+/g, '-')}.png`);
+    const raceIcon = asset(`/skills/race/${r.race.toLowerCase().replace(/.*\s/, '')}.png`); // "Wood Elf" → "elf", "High Elf" → "elf"
     const stats = [
       { label: 'STR', val: r.stats.strength    },
       { label: 'DEX', val: r.stats.dexterity   },
@@ -788,31 +790,29 @@ function showCharacterSelection() {
           <div class="cs-highlight-header">Highlight Features</div>
           <div class="cs-highlight-row">
             <div class="cs-highlight-badge">
-              <div class="cs-highlight-icon">&#9876;</div>
-              <div class="cs-highlight-badge-label">JOB</div>
+              <img class="cs-highlight-icon-img" src="${jobIcon}" alt="${r.job}" />
               <div class="cs-highlight-badge-value">${r.job}</div>
             </div>
             <div class="cs-highlight-badge">
-              <div class="cs-highlight-icon">&#9670;</div>
-              <div class="cs-highlight-badge-label">RACE</div>
+              <img class="cs-highlight-icon-img" src="${raceIcon}" alt="${r.race}" />
               <div class="cs-highlight-badge-value">${r.race}</div>
             </div>
+            ${expertise.entries.length === 1 ? `
             <div class="cs-highlight-badge">
-              ${expertise.entries.length > 1
-                ? `<div class="cs-expertise-list">
-                    ${expertise.entries.map(e => `
-                      <div class="cs-expertise-item">
-                        ${e.icon ? `<img class="cs-highlight-icon-img" src="${asset(e.icon)}" alt="" />` : ''}
-                        <span class="cs-expertise-item-name">${e.name}</span>
-                      </div>`).join('')}
-                  </div>`
-                : `${expertise.entries[0]?.icon
-                    ? `<img class="cs-highlight-icon-img" src="${asset(expertise.entries[0].icon)}" alt="" />`
-                    : `<div class="cs-highlight-icon">&#10022;</div>`}
-                  <div class="cs-highlight-badge-value">${expertise.entries[0]?.name ?? ''}</div>`
-              }
-            </div>
+              ${expertise.entries[0].icon
+                ? `<img class="cs-highlight-icon-img" src="${asset(expertise.entries[0].icon)}" alt="" />`
+                : `<div class="cs-highlight-icon">&#10022;</div>`}
+              <div class="cs-highlight-badge-value">${expertise.entries[0].name}</div>
+            </div>` : ''}
           </div>
+          ${expertise.entries.length > 1 ? `
+          <div class="cs-highlight-row cs-highlight-row--expertise">
+            ${expertise.entries.map(e => `
+            <div class="cs-highlight-badge">
+              ${e.icon ? `<img class="cs-highlight-icon-img" src="${asset(e.icon)}" alt="" />` : ''}
+              <div class="cs-highlight-badge-value">${e.name}</div>
+            </div>`).join('')}
+          </div>` : ''}
 
           <div class="cs-detail-actions">
             <button class="cs-detail-recruit-btn ${isSelected ? 'is-selected' : ''} ${canAdd ? 'is-full' : ''}"
@@ -1983,6 +1983,7 @@ window.loadLevel = function (levelNum) {
     _level1FirstLoad = false;
     const overlay = document.getElementById('level-load-overlay');
     const fill = document.getElementById('level-load-bar-fill');
+    const goblinVideo = document.getElementById('goblin-run-video');
     // Show overlay immediately
     overlay.classList.add('visible');
     // Kick off progress bar on next frame so the transition triggers properly
@@ -1990,14 +1991,35 @@ window.loadLevel = function (levelNum) {
       fill.style.transition = 'width 10s linear';
       fill.style.width = '100%';
     });
-    // After 10 s fade out and release pointer events
+    // After 10 s, crossfade to the goblin-run video
     setTimeout(() => {
-      overlay.classList.remove('visible');
-      // Reset bar after the fade-out completes so it's clean if ever reused
-      setTimeout(() => {
-        fill.style.transition = 'none';
-        fill.style.width = '0%';
-      }, 400);
+      const content = document.getElementById('level-load-content');
+      if (content) content.style.transition = 'opacity 0.5s ease';
+      if (content) content.style.opacity = '0';
+
+      if (goblinVideo) {
+        goblinVideo.style.opacity = '1';
+        goblinVideo.play().catch(() => {});
+
+        const hideOverlay = () => {
+          overlay.classList.remove('visible');
+          setTimeout(() => {
+            fill.style.transition = 'none';
+            fill.style.width = '0%';
+            if (content) { content.style.opacity = ''; content.style.transition = ''; }
+            goblinVideo.style.opacity = '0';
+            goblinVideo.currentTime = 0;
+          }, 400);
+        };
+
+        goblinVideo.addEventListener('ended', hideOverlay, { once: true });
+      } else {
+        overlay.classList.remove('visible');
+        setTimeout(() => {
+          fill.style.transition = 'none';
+          fill.style.width = '0%';
+        }, 400);
+      }
     }, 10000);
   }
 
