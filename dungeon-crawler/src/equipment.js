@@ -2477,6 +2477,7 @@ function _sbBuildRibbon(m) {
       const hint = document.getElementById('sb-slots-hint');
       hint.textContent = `Click a slot on the right to assign ${spellDef.name}.`;
       hint.classList.add('sb-slots-hint--active');
+      playItemSound('scroll');
     });
 
     ribbon.appendChild(icon);
@@ -2522,9 +2523,9 @@ function _sbRenderDetail(spellDef, m) {
         <div class="sb-detail-name-area">
           <div class="sb-detail-name">${spellDef.name}</div>
           <span class="sb-detail-type sb-detail-type--${spellDef.type}">${typeLabel}</span>
+          <div class="sb-detail-desc">${spellDef.description}</div>
         </div>
       </div>
-      <div class="sb-detail-desc">${spellDef.description}</div>
       <div class="sb-detail-stats">${statsHtml}</div>
     </div>`;
 }

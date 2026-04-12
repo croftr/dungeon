@@ -3004,20 +3004,20 @@ label.mm-setting-label {
 /* Pages */
 .spellbook-page {
   flex: 1;
-  background: linear-gradient(160deg, #1a1409 0%, #130f07 60%, #0e0b05 100%);
+  background: linear-gradient(160deg, #3a2a12 0%, #2e2008 60%, #251a06 100%);
   position: relative;
   overflow: hidden;
 }
 
 .spellbook-left-page {
   border-radius: 4px 0 0 4px;
-  border: 1px solid #3a2510;
+  border: 1px solid #5a3a18;
   border-right: none;
 }
 
 .spellbook-right-page {
   border-radius: 0 4px 4px 0;
-  border: 1px solid #3a2510;
+  border: 1px solid #5a3a18;
   border-left: none;
 }
 
@@ -3076,7 +3076,7 @@ label.mm-setting-label {
   text-align: center;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  border-bottom: 1px solid #3a2510;
+  border-bottom: 1px solid #5a3a18;
   padding-bottom: 6px;
   flex-shrink: 0;
   text-shadow: 0 0 8px rgba(200, 168, 74, 0.4);
@@ -3098,7 +3098,7 @@ label.mm-setting-label {
   flex-shrink: 0;
   min-height: 44px;
   padding: 4px 0;
-  border-bottom: 1px solid #2a1c0a;
+  border-bottom: 1px solid #4a3010;
 }
 
 .sb-ribbon-empty {
@@ -3111,8 +3111,8 @@ label.mm-setting-label {
 .sb-ribbon-icon {
   width: 46px;
   height: 46px;
-  border: 1px solid #3a2510;
-  background: rgba(0,0,0,0.4);
+  border: 1px solid #5a3a18;
+  background: rgba(0,0,0,0.3);
   cursor: pointer;
   position: relative;
   flex-shrink: 0;
@@ -3175,48 +3175,52 @@ label.mm-setting-label {
 .sb-detail-content {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   animation: sb-page-reveal 0.2s ease-out;
   overflow: hidden;
 }
 
+/* Top row: big icon left, name+type+desc right */
 .sb-detail-header {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  align-items: flex-start;
+  gap: 14px;
 }
 
 .sb-detail-icon {
-  width: 48px;
-  height: 48px;
+  width: 100px;
+  height: 100px;
   object-fit: contain;
   flex-shrink: 0;
-  border: 1px solid #3a2510;
-  background: rgba(0,0,0,0.4);
-  padding: 3px;
+  border: 1px solid #5a3a18;
+  background: rgba(0,0,0,0.35);
+  padding: 5px;
   box-sizing: border-box;
 }
 
 .sb-detail-name-area {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
 }
 
 .sb-detail-name {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: bold;
   color: #c8a84a;
-  text-shadow: 0 0 6px rgba(200,168,74,0.4);
+  text-shadow: 0 0 8px rgba(200,168,74,0.4);
 }
 
 .sb-detail-type {
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  padding: 1px 5px;
+  padding: 2px 6px;
   border-radius: 2px;
   display: inline-block;
+  align-self: flex-start;
 }
 .sb-detail-type--direct-damage  { background: rgba(180,60,30,0.3);  color: #e07050; border: 1px solid #802010; }
 .sb-detail-type--healing         { background: rgba(40,160,80,0.25); color: #70d088; border: 1px solid #208040; }
@@ -3224,13 +3228,12 @@ label.mm-setting-label {
 .sb-detail-type--debuff-cure     { background: rgba(140,60,200,0.25);color: #c080e0; border: 1px solid #602090; }
 .sb-detail-type--aoe-debuff      { background: rgba(180,120,30,0.25);color: #e0a040; border: 1px solid #804010; }
 
+/* Description sits inside name-area, alongside the big icon */
 .sb-detail-desc {
-  font-size: 10.5px;
-  color: #9a8060;
+  font-size: 11px;
+  color: #b09060;
   font-style: italic;
-  line-height: 1.5;
-  border-top: 1px solid #2a1c0a;
-  padding-top: 6px;
+  line-height: 1.6;
 }
 
 .sb-detail-stats {
@@ -3240,8 +3243,8 @@ label.mm-setting-label {
 }
 
 .sb-stat {
-  background: rgba(0,0,0,0.35);
-  border: 1px solid #2a1c0a;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid #4a3010;
   padding: 6px 10px;
   display: flex;
   flex-direction: row;
@@ -3299,8 +3302,8 @@ label.mm-setting-label {
   align-items: center;
   gap: 4px;
   padding: 8px 6px 6px;
-  border: 1px solid #3a2510;
-  background: rgba(0,0,0,0.3);
+  border: 1px solid #5a3a18;
+  background: rgba(0,0,0,0.2);
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
   position: relative;
@@ -3373,8 +3376,8 @@ label.mm-setting-label {
   align-items: center;
   gap: 3px;
   padding: 6px 4px 4px;
-  border: 1px solid #3a2510;
-  background: rgba(0,0,0,0.3);
+  border: 1px solid #5a3a18;
+  background: rgba(0,0,0,0.2);
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
 }
