@@ -37,6 +37,7 @@ const ITEM_SOUNDS = {
   'Torch': asset('/sounds/items/burn.mp3'),
   'Red Crystal': asset('/sounds/items/crystal.mp3'),
   'Blue Crystal': asset('/sounds/items/crystal.mp3'),
+  'spell-assigned': asset('/sounds/actions/spell-assinged.mp3'),
 };
 
 const bufferCache = new Map();

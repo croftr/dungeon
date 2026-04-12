@@ -2995,34 +2995,36 @@ label.mm-setting-label {
 #spellbook-modal {
   display: flex;
   flex-direction: row;
-  width: 860px;
-  height: 560px;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.95), 0 0 0 2px #3a2510, 0 0 0 4px #1a0e06;
+  width: 1118px;
+  height: 710px;
+  box-shadow: 0 12px 50px rgba(0, 0, 0, 0.95), 0 0 0 2px #5a3a18, 0 0 0 5px #1a0e06;
   position: relative;
+  border-radius: 4px;
+  background-image: url('/icons/spell-book.webp');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
 }
 
-/* Pages */
+/* Pages — transparent so the book image shows through */
 .spellbook-page {
   flex: 1;
-  background: linear-gradient(160deg, #3a2a12 0%, #2e2008 60%, #251a06 100%);
+  background: transparent;
   position: relative;
   overflow: hidden;
 }
 
 .spellbook-left-page {
   border-radius: 4px 0 0 4px;
-  border: 1px solid #5a3a18;
-  border-right: none;
+  border: none;
 }
 
 .spellbook-right-page {
   border-radius: 0 4px 4px 0;
-  border: 1px solid #5a3a18;
-  border-left: none;
+  border: none;
 }
 
 .spellbook-page-content {
-  padding: 16px 18px 14px;
+  padding: 145px 48px 58px 48px;
   height: 100%;
   box-sizing: border-box;
   display: flex;
@@ -3030,125 +3032,114 @@ label.mm-setting-label {
   gap: 8px;
 }
 
-/* Corner decorations */
-.spellbook-corner {
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  border-color: #6a4820;
-  border-style: solid;
-  opacity: 0.6;
-}
-.spellbook-corner--bl {
-  bottom: 6px; left: 6px;
-  border-width: 0 0 2px 2px;
-}
-.spellbook-corner--br {
-  bottom: 6px; right: 6px;
-  border-width: 0 2px 2px 0;
-}
+.spellbook-left-page .spellbook-page-content  { padding-left: 75px; }
+.spellbook-right-page .spellbook-page-content { padding-right: 62px; }
 
-/* Book spine */
+/* Corner decorations — hidden, image provides the border */
+.spellbook-corner { display: none; }
+
+/* Spine — image provides it, CSS spine is invisible */
 .spellbook-spine {
   width: 20px;
-  background: linear-gradient(to right, #0e0b05, #2a1a08 30%, #3a2510 50%, #2a1a08 70%, #0e0b05);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-evenly;
+  background: transparent;
   flex-shrink: 0;
-  box-shadow: inset -2px 0 6px rgba(0,0,0,0.5), inset 2px 0 6px rgba(0,0,0,0.5);
 }
 
-.spellbook-spine-rib {
-  width: 10px;
-  height: 3px;
-  background: linear-gradient(to right, #6a4820, #a07030, #6a4820);
-  border-radius: 2px;
-  opacity: 0.7;
-}
+.spellbook-spine-rib { display: none; }
 
 /* Page titles */
 .spellbook-page-title {
   font-size: 13px;
   font-weight: bold;
-  color: #c8a84a;
+  color: #3a1a00;
   text-align: center;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  border-bottom: 1px solid #5a3a18;
+  border-bottom: 1px solid rgba(80,40,10,0.35);
   padding-bottom: 6px;
   flex-shrink: 0;
-  text-shadow: 0 0 8px rgba(200, 168, 74, 0.4);
+  text-shadow: 0 1px 0 rgba(255,220,150,0.4);
 }
 
-/* ── LEFT PAGE ── */
-.sb-ribbon-label {
-  font-size: 9px;
-  color: #7a6040;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  flex-shrink: 0;
-}
-
-.sb-ribbon {
+/* ── BOOKMARK TABS ── */
+#spellbook-wrapper {
   display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  flex-shrink: 0;
-  min-height: 44px;
-  padding: 4px 0;
-  border-bottom: 1px solid #4a3010;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+#sb-ribbon {
+  display: flex;
+  flex-direction: row;
+  gap: 3px;
+  padding-left: 80px; /* align roughly with left page content */
+  align-self: flex-start;
+  position: relative;
+  z-index: 1; /* sits above book top edge */
 }
 
 .sb-ribbon-empty {
-  color: #5a4a2a;
+  color: #6a4a20;
   font-size: 11px;
   font-style: italic;
-  padding: 8px 0;
+  padding: 8px 12px;
+  background: rgba(180,130,60,0.6);
+  border: 1px solid rgba(100,60,10,0.5);
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  align-self: flex-start;
 }
 
 .sb-ribbon-icon {
-  width: 46px;
-  height: 46px;
-  border: 1px solid #5a3a18;
-  background: rgba(0,0,0,0.3);
+  width: 52px;
+  height: 58px;
+  border: 1px solid rgba(100,60,10,0.55);
+  border-bottom: none;
+  background: linear-gradient(to bottom, rgba(200,155,70,0.82), rgba(170,120,45,0.75));
   cursor: pointer;
   position: relative;
   flex-shrink: 0;
-  transition: border-color 0.15s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px 4px 0 0;
+  box-shadow: -1px -2px 4px rgba(0,0,0,0.25), 1px 0 3px rgba(0,0,0,0.15);
+  transition: height 0.12s ease, background 0.15s;
 }
 
 .sb-ribbon-icon img {
-  width: 100%;
-  height: 100%;
+  width: 36px;
+  height: 36px;
   object-fit: contain;
   pointer-events: none;
   display: block;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
 }
 
 .sb-ribbon-icon:hover {
-  border-color: #c8a84a;
-  background: rgba(200, 168, 74, 0.12);
+  background: linear-gradient(to bottom, rgba(220,175,85,0.92), rgba(190,140,55,0.85));
 }
 
 .sb-ribbon-icon--selected {
-  border-color: #e0c060 !important;
-  background: rgba(200, 168, 74, 0.22) !important;
-  box-shadow: 0 0 8px rgba(200, 168, 74, 0.5), inset 0 0 4px rgba(200, 168, 74, 0.2);
+  height: 68px !important;
+  background: linear-gradient(to bottom, rgba(235,195,100,0.97), rgba(210,160,65,0.92)) !important;
+  border-color: rgba(120,75,15,0.8) !important;
+  box-shadow: -2px -3px 6px rgba(0,0,0,0.3), 2px 0 4px rgba(0,0,0,0.2) !important;
+  z-index: 2;
 }
 
 /* Small gold dot when spell is currently equipped somewhere */
 .sb-ribbon-icon--equipped::after {
   content: '';
   position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 5px;
-  height: 5px;
+  bottom: 6px;
+  right: 5px;
+  width: 6px;
+  height: 6px;
   background: #c8a84a;
   border-radius: 50%;
-  box-shadow: 0 0 4px rgba(200, 168, 74, 0.8);
+  box-shadow: 0 0 4px rgba(200, 168, 74, 0.9);
+  border: 1px solid rgba(100,60,10,0.4);
 }
 
 /* ── SPELL DETAIL AREA ── */
@@ -3160,7 +3151,7 @@ label.mm-setting-label {
 }
 
 .sb-detail-empty {
-  color: #5a4a2a;
+  color: #6a4a20;
   font-size: 11px;
   font-style: italic;
   text-align: center;
@@ -3192,10 +3183,9 @@ label.mm-setting-label {
   height: 100px;
   object-fit: contain;
   flex-shrink: 0;
-  border: 1px solid #5a3a18;
-  background: rgba(0,0,0,0.35);
-  padding: 5px;
-  box-sizing: border-box;
+  -webkit-mask-image: radial-gradient(ellipse at center, black 45%, transparent 80%);
+  mask-image: radial-gradient(ellipse at center, black 45%, transparent 80%);
+  filter: drop-shadow(0 0 6px rgba(180,130,50,0.35));
 }
 
 .sb-detail-name-area {
@@ -3209,8 +3199,8 @@ label.mm-setting-label {
 .sb-detail-name {
   font-size: 17px;
   font-weight: bold;
-  color: #c8a84a;
-  text-shadow: 0 0 8px rgba(200,168,74,0.4);
+  color: #3a1800;
+  text-shadow: 0 1px 0 rgba(255,210,130,0.4);
 }
 
 .sb-detail-type {
@@ -3222,16 +3212,16 @@ label.mm-setting-label {
   display: inline-block;
   align-self: flex-start;
 }
-.sb-detail-type--direct-damage  { background: rgba(180,60,30,0.3);  color: #e07050; border: 1px solid #802010; }
-.sb-detail-type--healing         { background: rgba(40,160,80,0.25); color: #70d088; border: 1px solid #208040; }
-.sb-detail-type--buff            { background: rgba(60,100,200,0.25);color: #7090e0; border: 1px solid #204080; }
-.sb-detail-type--debuff-cure     { background: rgba(140,60,200,0.25);color: #c080e0; border: 1px solid #602090; }
-.sb-detail-type--aoe-debuff      { background: rgba(180,120,30,0.25);color: #e0a040; border: 1px solid #804010; }
+.sb-detail-type--direct-damage  { background: rgba(180,60,30,0.15);  color: #8a1800; box-shadow: 0 0 0 1px rgba(140,40,10,0.25); }
+.sb-detail-type--healing         { background: rgba(40,160,80,0.15);  color: #1a6030; box-shadow: 0 0 0 1px rgba(20,100,50,0.25); }
+.sb-detail-type--buff            { background: rgba(60,100,200,0.15); color: #1a3a80; box-shadow: 0 0 0 1px rgba(30,60,160,0.25); }
+.sb-detail-type--debuff-cure     { background: rgba(140,60,200,0.15); color: #601080; box-shadow: 0 0 0 1px rgba(100,30,160,0.25); }
+.sb-detail-type--aoe-debuff      { background: rgba(180,120,30,0.15); color: #7a4000; box-shadow: 0 0 0 1px rgba(140,80,10,0.25); }
 
 /* Description sits inside name-area, alongside the big icon */
 .sb-detail-desc {
   font-size: 11px;
-  color: #b09060;
+  color: #4a2e10;
   font-style: italic;
   line-height: 1.6;
 }
@@ -3243,8 +3233,10 @@ label.mm-setting-label {
 }
 
 .sb-stat {
-  background: rgba(0,0,0,0.25);
-  border: 1px solid #4a3010;
+  background: rgba(20,8,0,0.12);
+  border: none;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(80,45,10,0.2), inset 0 1px 4px rgba(0,0,0,0.1);
   padding: 6px 10px;
   display: flex;
   flex-direction: row;
@@ -3259,24 +3251,24 @@ label.mm-setting-label {
 
 .sb-stat-label {
   font-size: 11px;
-  color: #7a6a4a;
+  color: #5a3a18;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
 .sb-stat-val {
   font-size: 13px;
-  color: #c8a84a;
+  color: #2a1200;
   font-weight: bold;
 }
 
-.sb-stat-val--mp    { color: #6090d0; }
-.sb-stat-val--element { color: #e07050; text-transform: capitalize; }
+.sb-stat-val--mp    { color: #1a4080; }
+.sb-stat-val--element { color: #902010; text-transform: capitalize; }
 
 /* ── RIGHT PAGE ── */
 .sb-slots-hint {
   font-size: 10px;
-  color: #7a6040;
+  color: #6a4820;
   font-style: italic;
   text-align: center;
   flex-shrink: 0;
@@ -3285,7 +3277,8 @@ label.mm-setting-label {
 }
 
 .sb-slots-hint--active {
-  color: #c8a84a;
+  color: #3a1800;
+  font-weight: bold;
 }
 
 /* Hand slots */
@@ -3293,31 +3286,39 @@ label.mm-setting-label {
   display: flex;
   gap: 10px;
   flex-shrink: 0;
+  justify-content: center;
 }
 
 .sb-hand-slot {
-  flex: 1;
+  width: 110px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
   padding: 8px 6px 6px;
-  border: 1px solid #5a3a18;
-  background: rgba(0,0,0,0.2);
+  border: none;
+  border-radius: 4px;
+  background: rgba(20,8,0,0.12);
+  box-shadow: 0 0 0 1px rgba(80,45,10,0.22), inset 0 1px 5px rgba(0,0,0,0.1);
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  transition: box-shadow 0.15s, background 0.15s;
   position: relative;
 }
 
 .sb-hand-slot:hover,
 .sb-hand-slot.sb-slot--selectable:hover {
-  border-color: #c8a84a;
-  background: rgba(200,168,74,0.12);
+  background: rgba(200,168,74,0.1);
+  box-shadow: 0 0 0 1px rgba(180,130,30,0.5), 0 0 10px rgba(200,168,74,0.18), inset 0 1px 5px rgba(0,0,0,0.08);
 }
 
 .sb-hand-slot.sb-slot--selectable {
-  border-color: #6a5030;
-  box-shadow: 0 0 6px rgba(200,168,74,0.15);
+  box-shadow: 0 0 0 1px rgba(140,100,20,0.4), 0 0 8px rgba(200,168,74,0.12), inset 0 1px 5px rgba(0,0,0,0.1);
+}
+
+.sb-hand-slot .sb-slot-icon-wrap {
+  width: 52px;
+  height: 52px;
 }
 
 .sb-slot-icon-wrap {
@@ -3336,14 +3337,14 @@ label.mm-setting-label {
 
 .sb-slot-name-label {
   font-size: 9px;
-  color: #7a6040;
+  color: #5a3010;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
 .sb-slot-item-name {
   font-size: 9px;
-  color: #a08050;
+  color: #5a3a18;
   text-align: center;
   max-width: 90px;
   overflow: hidden;
@@ -3351,71 +3352,78 @@ label.mm-setting-label {
   white-space: nowrap;
 }
 
-.sb-slot--has-spell .sb-slot-item-name { color: #c8a84a; }
-.sb-slot--has-item  .sb-slot-item-name { color: #8a7850; }
+.sb-slot--has-spell .sb-slot-item-name { color: #3a1800; font-weight: bold; }
+.sb-slot--has-item  .sb-slot-item-name { color: #6a4820; }
 
 /* Skill slots */
 .sb-skill-section-title {
   font-size: 9px;
-  color: #7a6040;
+  color: #5a3010;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   flex-shrink: 0;
+  text-align: center;
+  margin-top: 18px;
 }
 
 .sb-skill-slots {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, 75px);
   gap: 6px;
   flex-shrink: 0;
+  justify-content: center;
 }
 
 .sb-skill-slot {
+  width: 75px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 3px;
   padding: 6px 4px 4px;
-  border: 1px solid #5a3a18;
-  background: rgba(0,0,0,0.2);
+  border: none;
+  border-radius: 4px;
+  background: rgba(20,8,0,0.12);
+  box-shadow: 0 0 0 1px rgba(80,45,10,0.22), inset 0 1px 4px rgba(0,0,0,0.1);
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  transition: box-shadow 0.15s, background 0.15s;
 }
 
 .sb-skill-slot:hover,
 .sb-skill-slot.sb-slot--selectable:hover {
-  border-color: #c8a84a;
-  background: rgba(200,168,74,0.12);
+  background: rgba(200,168,74,0.1);
+  box-shadow: 0 0 0 1px rgba(180,130,30,0.5), 0 0 8px rgba(200,168,74,0.15), inset 0 1px 4px rgba(0,0,0,0.08);
 }
 
 .sb-skill-slot.sb-slot--selectable {
-  border-color: #5a4020;
-  box-shadow: 0 0 4px rgba(200,168,74,0.1);
+  box-shadow: 0 0 0 1px rgba(140,100,20,0.4), 0 0 6px rgba(200,168,74,0.1), inset 0 1px 4px rgba(0,0,0,0.1);
 }
 
 .sb-skill-roman {
   font-size: 8px;
-  color: #6a5030;
+  color: #5a3010;
   letter-spacing: 0.05em;
 }
 
 /* Close button */
 .sb-close-btn {
   margin-top: auto;
+  margin-bottom: 12px;
   align-self: flex-end;
-  background: transparent;
-  border: 1px solid #4a3020;
-  color: #8a6a40;
+  background: rgba(20,8,0,0.12);
+  border: 1px solid rgba(80,45,10,0.45);
+  color: #5a3010;
   font-size: 11px;
   padding: 4px 12px;
   cursor: pointer;
   letter-spacing: 0.05em;
-  transition: color 0.15s, border-color 0.15s;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
 
 .sb-close-btn:hover {
-  color: #c04040;
-  border-color: #c04040;
+  color: #901010;
+  border-color: rgba(140,20,20,0.6);
+  background: rgba(140,20,20,0.1);
 }
 
 /* ── Skills panel ── */

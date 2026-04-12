@@ -2049,6 +2049,7 @@ function _showSkillSwitchMenu(x, y, memberIndex, mode, hand = null) {
         m.equipment[slot] = isSpell
           ? { name: item.name, slot: 'spell' }
           : { name: item.name, slot: 'skill', icon: item.icon };
+        if (isSpell) playItemSound('spell-assigned');
       } else if (mode === 'skill') {
         const slot = _skillSwMenuCtx.hand ?? 'skill';
         m.equipment[slot] = { name: item.name, slot: 'skill', icon: item.icon };
@@ -2057,6 +2058,7 @@ function _showSkillSwitchMenu(x, y, memberIndex, mode, hand = null) {
         const targetHand = _skillSwMenuCtx.hand;
         if (targetHand && m.equipment) {
           m.equipment[targetHand] = { name: item.name, slot: 'spell' };
+          playItemSound('spell-assigned');
         }
       }
       refreshPartyCards();
@@ -2429,13 +2431,12 @@ let _sbSelectedSpell = null;
 function _openSpellSelectionModal(charIndex) {
   _sbCharIndex = charIndex;
   _sbSelectedSpell = null;
+  playItemSound('scroll');
 
   const overlay = document.getElementById('spell-selection-overlay');
   overlay.classList.remove('spell-sel-hidden');
 
   const m = party[charIndex];
-  document.getElementById('sb-caster-name').textContent = `${m.name}'s Grimoire`;
-
   _sbBuildRibbon(m);
   _sbRefreshSlots(m);
   document.getElementById('sb-detail').innerHTML = '<div class="sb-detail-empty">Select a spell above to view its details</div>';
@@ -2590,6 +2591,7 @@ document.getElementById('spell-selection-overlay').addEventListener('click', (e)
     updateEffectiveStats(m);
     _sbRefreshSlots(m);
     _sbRefreshRibbonDots(m, document.getElementById('sb-ribbon'));
+    playItemSound('spell-assigned');
     refreshPartyCards();
     const hint = document.getElementById('sb-slots-hint');
     hint.textContent = `${_sbSelectedSpell.name} assigned to ${_SB_SLOT_LABELS[slotKey]}.`;
@@ -2597,6 +2599,7 @@ document.getElementById('spell-selection-overlay').addEventListener('click', (e)
 });
 
 document.getElementById('spell-sel-close').addEventListener('click', () => {
+  playItemSound('scroll');
   document.getElementById('spell-selection-overlay').classList.add('spell-sel-hidden');
   if (_sbCharIndex !== null) renderModal(_sbCharIndex);
   refreshPartyCards();

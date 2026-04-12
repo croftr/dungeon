@@ -2726,17 +2726,17 @@
 
   <!-- Spellbook modal -->
   <div id="spell-selection-overlay" class="spell-sel-hidden">
-    <div id="spellbook-modal">
-      <!-- Left page: known spells ribbon + detail view -->
-      <div class="spellbook-page spellbook-left-page">
-        <div class="spellbook-page-content">
-          <div class="spellbook-page-title" id="sb-caster-name">Arcane Grimoire</div>
-          <div class="sb-ribbon-label">Known Spells</div>
-          <div class="sb-ribbon" id="sb-ribbon"></div>
-          <div class="sb-detail" id="sb-detail">
-            <div class="sb-detail-empty">Select a spell above to view its details</div>
+    <div id="spellbook-wrapper">
+      <!-- Bookmark tabs along the top -->
+      <div id="sb-ribbon"></div>
+      <div id="spellbook-modal">
+        <!-- Left page: spell detail view -->
+        <div class="spellbook-page spellbook-left-page">
+          <div class="spellbook-page-content">
+            <div class="sb-detail" id="sb-detail">
+              <div class="sb-detail-empty">Select a spell to view its details</div>
+            </div>
           </div>
-        </div>
         <div class="spellbook-corner spellbook-corner--bl"></div>
       </div>
       <!-- Book spine -->
@@ -2802,7 +2802,8 @@
         </div>
         <div class="spellbook-corner spellbook-corner--br"></div>
       </div>
-    </div>
+    </div><!-- end spellbook-modal -->
+    </div><!-- end spellbook-wrapper -->
   </div>
 
   <!-- Party member target picker — shown when casting a 'party-member' targeted spell -->
