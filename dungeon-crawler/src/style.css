@@ -3189,7 +3189,31 @@ label.mm-setting-label {
   gap: 10px;
   animation: sb-page-reveal 0.2s ease-out;
   overflow: hidden;
+  position: relative;
+  min-height: 100%;
 }
+
+.sb-detail-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 220px;
+  opacity: 0.07;
+  pointer-events: none;
+  z-index: 0;
+  line-height: 1;
+}
+
+.sb-detail-header, .sb-detail-stats {
+  position: relative;
+  z-index: 1;
+}
+
+.spellbook-left-page[data-spell-type="direct-damage"] { background: linear-gradient(to bottom right, rgba(180,60,30,0.15), rgba(180,60,30,0.02)); }
+.spellbook-left-page[data-spell-type="healing"] { background: linear-gradient(to bottom right, rgba(40,160,80,0.15), rgba(40,160,80,0.02)); }
+.spellbook-left-page[data-spell-type="buff"] { background: linear-gradient(to bottom right, rgba(60,100,200,0.15), rgba(60,100,200,0.02)); }
+.spellbook-left-page[data-spell-type="debuff"] { background: linear-gradient(to bottom right, rgba(140,60,200,0.15), rgba(140,60,200,0.02)); }
 
 /* Top row: big icon left, name+type+desc right */
 .sb-detail-header {

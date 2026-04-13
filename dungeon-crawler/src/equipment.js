@@ -2523,6 +2523,10 @@ function _sbRenderDetail(spellDef, m) {
   const typeLabel = _SB_TYPE_LABELS[spellDef.type] || spellDef.type;
   const typeIcon = SPELL_TYPE_ICONS[spellDef.type];
 
+  // Set spell type on the whole left page to tint it
+  const leftPage = detail.closest('.spellbook-left-page');
+  if (leftPage) leftPage.setAttribute('data-spell-type', spellDef.type);
+
   let statsHtml = `
     <div class="sb-stat">
       <span class="sb-stat-label">MP Cost</span>
@@ -2553,6 +2557,7 @@ function _sbRenderDetail(spellDef, m) {
 
   detail.innerHTML = `
     <div class="sb-detail-content">
+      ${typeIcon ? `<div class="sb-detail-watermark" style="color:${typeIcon.color}">${typeIcon.symbol}</div>` : ''}
       <div class="sb-detail-header">
         <img class="sb-detail-icon" src="${asset(spellDef.icon)}" alt="${spellDef.name}" />
         <div class="sb-detail-name-area">
