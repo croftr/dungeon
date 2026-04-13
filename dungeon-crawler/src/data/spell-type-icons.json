@@ -2,6 +2,5 @@
     "direct-damage":  { "symbol": "⚔", "color": "#e05050" },
     "healing":        { "symbol": "✚", "color": "#60c060" },
     "buff":           { "symbol": "✦", "color": "#60c0ff" },
-    "debuff-cure":    { "symbol": "✦", "color": "#a0e080" },
-    "aoe-debuff":     { "symbol": "◎", "color": "#c080e0" }
+    "debuff":         { "symbol": "◎", "color": "#c080e0" }
 }

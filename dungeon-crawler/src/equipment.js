@@ -2417,7 +2417,7 @@ const _SB_SLOT_LABELS = {
 
 const _SB_TYPE_LABELS = {
   'direct-damage': 'Direct Damage', 'healing': 'Healing',
-  'buff': 'Buff', 'debuff-cure': 'Cure', 'aoe-debuff': 'AoE Debuff',
+  'buff': 'Buff', 'debuff': 'Debuff',
 };
 
 const _SB_TARGET_LABELS = {
@@ -2459,7 +2459,7 @@ function _sbBuildRibbon(m) {
   }
 
   // Group spells by type, preserving a defined order
-  const TYPE_ORDER = ['direct-damage', 'aoe-debuff', 'healing', 'buff', 'debuff-cure'];
+  const TYPE_ORDER = ['direct-damage', 'debuff', 'healing', 'buff'];
   const groups = {};
   learnedSpells.forEach(spell => {
     const spellDef = SPELLS.find(s => s.name === spell.name);

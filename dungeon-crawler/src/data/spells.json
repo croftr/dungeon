@@ -19,7 +19,7 @@
     },
     {
         "name": "Regeneration",
-        "type": "buff",
+        "type": "healing",
         "target": "party-member",
         "slot": "spell",
         "attackType": "regenerate",
@@ -36,7 +36,7 @@
     },
     {
         "name": "Cure Poison",
-        "type": "debuff-cure",
+        "type": "healing",
         "target": "party-member",
         "slot": "spell",
         "attackType": "cure-poison",
@@ -98,7 +98,7 @@
     },
     {
         "name": "Sleep",
-        "type": "aoe-debuff",
+        "type": "debuff",
         "target": "monsters-aoe",
         "slot": "spell",
         "attackType": "sleep",
