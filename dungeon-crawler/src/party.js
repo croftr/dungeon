@@ -1308,7 +1308,12 @@ function updateStatusBanners() {
     const activeNames = getActiveEffectsForMember(m);
     const defs = [];
     activeNames.forEach(name => {
-      const def = getSkillOrSpellDef(name);
+      // Prefer STATUS_EFFECT_DEFS: timed active effects (regeneration, poison, etc.)
+      // live in activeDebuffs and are keyed there by their status-effect definition,
+      // which has the authoritative 'buff'/'debuff' type even when a same-named spell
+      // exists with a different type (e.g. the Regeneration spell is now type 'healing').
+      const statusDef = Object.values(STATUS_EFFECT_DEFS).find(d => d.name === name);
+      const def = statusDef ?? getSkillOrSpellDef(name);
       if (def && (def.type === 'buff' || def.type === 'debuff')) {
         defs.push(def);
       }

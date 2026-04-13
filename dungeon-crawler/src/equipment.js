@@ -2670,99 +2670,117 @@ document.getElementById('spell-sel-close').addEventListener('click', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  PARTY MEMBER TARGET PICKER
-//  Shown when a spell with target: 'party-member' is activated.
-//  Renders a small portrait + name button for each living party member, then
-//  dispatches execution once the player clicks one (or cancel to abort).
+//  PARTY-MEMBER CLICK-TO-TARGET MODE
+//  When a spell with target:'party-member' is activated the game enters a
+//  lightweight targeting mode instead of opening a modal:
+//    • The cursor becomes the spell's icon (32 × 32)
+//    • All party portrait cards glow, inviting a click
+//    • Clicking a live portrait fires the spell on that member
+//    • Any other input (click elsewhere, key press, right-click) cancels
 // ─────────────────────────────────────────────────────────────────────────────
 
-document.getElementById('party-target-close').addEventListener('click', _closePartyTargetPicker);
-document.getElementById('party-target-overlay').addEventListener('click', (e) => {
-  if (e.target.id === 'party-target-overlay') _closePartyTargetPicker();
-});
+let _partyTargetPending  = null;   // { caster, casterIndex, hand, spellDef }
+let _ptmMousedownRef     = null;   // saved listener refs for clean removal
+let _ptmKeydownRef       = null;
+let _ptmContextmenuRef   = null;
 
-function _closePartyTargetPicker() {
-  document.getElementById('party-target-overlay').classList.add('party-target-hidden');
+/** Draw a spell icon into a 32 × 32 canvas and return a CSS cursor value. */
+function _buildSpellCursor(iconUrl, callback) {
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement('canvas');
+    c.width = 32; c.height = 32;
+    c.getContext('2d').drawImage(img, 0, 0, 32, 32);
+    callback(`url('${c.toDataURL()}') 16 16, crosshair`);
+  };
+  img.onerror = () => callback('crosshair');
+  img.src = iconUrl;
 }
 
-function _openPartyTargetPicker(caster, casterIndex, hand, spellDef) {
-  const overlay = document.getElementById('party-target-overlay');
-  const grid = document.getElementById('party-target-grid');
-  const title = document.getElementById('party-target-title');
+function _enterPartyTargetMode(caster, casterIndex, hand, spellDef) {
+  _partyTargetPending = { caster, casterIndex, hand, spellDef };
+  document.body.classList.add('party-targeting-mode');
+  showMessage(
+    `<b>${spellDef.name}</b> — Click a party member to cast &nbsp;·&nbsp; <span style="color:#aaa">Esc or right-click to cancel</span>`,
+    30000
+  );
 
-  title.textContent = `${spellDef.name} — Choose Target`;
-  grid.innerHTML = '';
-
-  party.forEach(m => {
-    if (m.isEmpty) return;
-
-    const btn = document.createElement('button');
-    btn.className = 'party-target-btn' + (m.isDead ? ' party-target-btn--dead' : '');
-    btn.disabled = m.isDead;
-
-    // Mini portrait canvas
-    const canvas = document.createElement('canvas');
-    canvas.width = 40;
-    canvas.height = 40;
-    canvas.className = 'party-target-portrait';
-    drawPortrait(canvas, m);
-
-    // Poisoned indicator
-    const isPoisoned = m.activeDebuffs?.some(
-      d => d.effectId === 'poison' && performance.now() < d.expiresAt
-    );
-
-    const info = document.createElement('div');
-    info.className = 'party-target-info';
-
-    const label = document.createElement('span');
-    label.className = 'party-target-name';
-    label.innerHTML = m.name + (isPoisoned ? ' <span class="party-target-poisoned">☠ Poisoned</span>' : '');
-
-    // HP, MP, SP bars
-    const bars = document.createElement('div');
-    bars.className = 'party-target-bars';
-
-    const hpTrack = document.createElement('div');
-    hpTrack.className = 'bar-track';
-    const hpFill = document.createElement('div');
-    hpFill.className = 'bar-fill bar-hp';
-    hpFill.style.width = Math.max(0, Math.min(100, (m.hp / (m.hpMax || 100)) * 100)) + '%';
-    hpTrack.appendChild(hpFill);
-
-    const mpTrack = document.createElement('div');
-    mpTrack.className = 'bar-track';
-    const mpFill = document.createElement('div');
-    mpFill.className = 'bar-fill bar-mp';
-    mpFill.style.width = Math.max(0, Math.min(100, (m.mp / (m.mpMax || 100)) * 100)) + '%';
-    mpTrack.appendChild(mpFill);
-
-    const spTrack = document.createElement('div');
-    spTrack.className = 'bar-track';
-    const spFill = document.createElement('div');
-    spFill.className = 'bar-fill bar-sp';
-    spFill.style.width = Math.max(0, Math.min(100, ((m.sp ?? 100) / (m.spMax || 100)) * 100)) + '%';
-    spTrack.appendChild(spFill);
-
-    bars.appendChild(hpTrack);
-    bars.appendChild(mpTrack);
-    bars.appendChild(spTrack);
-
-    info.appendChild(label);
-    info.appendChild(bars);
-
-    btn.appendChild(canvas);
-    btn.appendChild(info);
-
-    btn.addEventListener('click', () => {
-      _closePartyTargetPicker();
-      _executePartyMemberSpell(caster, casterIndex, hand, spellDef, m);
-    });
-
-    grid.appendChild(btn);
+  // Immediate crosshair, upgraded to spell icon once the image loads
+  document.body.style.cursor = 'crosshair';
+  _buildSpellCursor(spellDef.icon, cursor => {
+    if (_partyTargetPending) document.body.style.cursor = cursor;
   });
 
-  overlay.classList.remove('party-target-hidden');
+  _ptmMousedownRef    = _ptmOnMousedown;
+  _ptmKeydownRef      = _ptmOnKeydown;
+  _ptmContextmenuRef  = _ptmOnContextmenu;
+  document.addEventListener('mousedown',   _ptmMousedownRef,   { capture: true });
+  document.addEventListener('keydown',     _ptmKeydownRef,     { capture: true });
+  document.addEventListener('contextmenu', _ptmContextmenuRef, { capture: true });
+}
+
+function _exitPartyTargetMode() {
+  _partyTargetPending = null;
+  document.body.style.cursor = '';
+  document.body.classList.remove('party-targeting-mode');
+  document.removeEventListener('mousedown',   _ptmMousedownRef,   { capture: true });
+  document.removeEventListener('keydown',     _ptmKeydownRef,     { capture: true });
+  document.removeEventListener('contextmenu', _ptmContextmenuRef, { capture: true });
+}
+
+function _ptmOnMousedown(e) {
+  if (e.button !== 0) return; // right-click handled by contextmenu
+
+  // Walk up from the click target to find a party portrait
+  const portrait = e.target.closest('.portrait');
+  const card     = portrait && portrait.closest('.member-card');
+
+  if (card) {
+    e.preventDefault();
+    e.stopPropagation();
+    // The portrait has a 'click' listener that opens inventory.
+    // mousedown stopping propagation doesn't prevent 'click' from firing,
+    // so swallow the click that will follow this mousedown/mouseup pair.
+    document.addEventListener('click', _ptmSwallowClick, { capture: true, once: true });
+    const idx    = parseInt(card.id.split('-')[1], 10);
+    const target = party[idx];
+    if (target && !target.isDead && !target.isEmpty) {
+      const { caster, casterIndex, hand, spellDef } = _partyTargetPending;
+      _exitPartyTargetMode();
+      _executePartyMemberSpell(caster, casterIndex, hand, spellDef, target);
+    } else {
+      _exitPartyTargetMode();
+      showMessage('Cannot target a fallen party member.', 1800);
+    }
+    return;
+  }
+
+  // Clicked somewhere other than a party card — cancel
+  e.preventDefault();
+  e.stopPropagation();
+  _exitPartyTargetMode();
+  showMessage('Spell cancelled.', 1800);
+}
+
+/** One-shot capture listener that eats the 'click' following a portrait mousedown. */
+function _ptmSwallowClick(e) {
+  e.stopPropagation();
+  e.preventDefault();
+}
+
+function _ptmOnKeydown(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  const wasCancelled = e.key !== 'Escape';
+  _exitPartyTargetMode();
+  if (wasCancelled) showMessage('Spell cancelled.', 1800);
+}
+
+function _ptmOnContextmenu(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  _exitPartyTargetMode();
+  showMessage('Spell cancelled.', 1800);
 }
 
 /** Dispatcher for party-wide spells — no target picker, applies to all living members. */
@@ -2793,9 +2811,10 @@ function _executePartySpell(caster, casterIndex, hand, spellDef) {
   }
 }
 
-function _executeResistPoison(caster) {
+function _executeResistPoison(caster, spellDef) {
   const targets = party.filter(m => !m.isEmpty && !m.isDead);
-  targets.forEach(m => applyStatusEffect(m.id, 'resist-poison'));
+  const duration = spellDef?.statusDuration ?? null;
+  targets.forEach(m => applyStatusEffect(m.id, 'resist-poison', null, duration));
 
   showMessage(`${caster.name} casts <b>Resist Poison</b> — the party is protected!`, 2500);
 
@@ -3217,7 +3236,7 @@ export function useHand(memberIndex, hand, silent = false) {
   // We intercept here — after cooldown/dead checks — but before the monster-targeting path.
   // Skip during auto-attack (silent mode) — these require manual targeting.
   if (def?.target === 'party-member') {
-    if (!silent) _openPartyTargetPicker(m, memberIndex, hand, def);
+    if (!silent) _enterPartyTargetMode(m, memberIndex, hand, def);
     return;
   }
 
@@ -4489,11 +4508,12 @@ function _useHealSkill(member, memberIndex) {
   // Skills that require a target picker
   // We don't deduct MP/cooldown here; we do it in _executePartyMemberSpell
   // but for skills we need to manually handle the "hand" as 'skill'
-  _openPartyTargetPicker(member, memberIndex, 'skill', {
+  _enterPartyTargetMode(member, memberIndex, 'skill', {
     name: 'Heal',
     attackType: ACTIONS.HEAL,
-    mpCost: 12, // MP cost for the skill version too? 
-    cooldown: HEAL_SKILL_COOLDOWN_MS
+    mpCost: 12,
+    cooldown: HEAL_SKILL_COOLDOWN_MS,
+    icon: '/icons/heal.webp',
   });
 }
 

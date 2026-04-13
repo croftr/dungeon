@@ -55,6 +55,7 @@
         "slot": "spell",
         "attackType": "resist-poison",
         "baseDamage": 0,
+        "statusDuration": 60,
         "delay": 4,
         "mpCost": 8,
         "icon": "/icons/resist-poison.webp",
