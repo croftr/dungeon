@@ -7,6 +7,25 @@ import { listSaves, triggerLoad, manualSave } from './save-game.js';
 let _isOpen = false;
 
 export function initMainMenu() {
+  // Initialize layout preference from localStorage
+  const savedLayout = localStorage.getItem('partyLayoutRule');
+  if (savedLayout === 'classic' || savedLayout === 'right' || savedLayout === 'split') {
+    window.partyLayoutRule = savedLayout;
+  } else if (savedLayout === 'curved') {
+    window.partyLayoutRule = 'split'; // migrate name change
+    localStorage.setItem('partyLayoutRule', 'split');
+  } else {
+    // Migrate old boolean to new format if it exists
+    const oldSaved = localStorage.getItem('classicPartyLayout');
+    if (oldSaved === 'true') {
+      window.partyLayoutRule = 'classic';
+      localStorage.removeItem('classicPartyLayout');
+    } else {
+      window.partyLayoutRule = 'split'; // default
+    }
+  }
+  _applyLayoutPreference();
+
   _buildModal();
 
   // Escape on window so document-level handlers (equip, tactics, etc.) that
@@ -17,6 +36,19 @@ export function initMainMenu() {
     if (_anyOverlayOpen()) return;
     _openMenu();
   });
+}
+
+function _applyLayoutPreference() {
+  const panel = document.getElementById('party-panel');
+  if (panel) {
+    panel.classList.remove('layout-classic', 'layout-right', 'layout-split');
+    if (window.partyLayoutRule === 'classic') {
+      panel.classList.add('layout-classic');
+    } else if (window.partyLayoutRule === 'right') {
+      panel.classList.add('layout-right');
+    }
+    // "split" is the default CSS behavior of `#party-panel` (no extra class needed, although we could add layout-split if we wanted, but not necessary since default CSS maps to it. Wait, the default CSS will just be the split layout, so no class is perfectly fine.)
+  }
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -113,6 +145,14 @@ function _buildModal() {
               <label class="mm-setting-label" for="mm-help-toggle">Inline Help</label>
               <input type="checkbox" id="mm-help-toggle" class="mm-setting-checkbox">
             </div>
+            <div class="mm-setting-row">
+              <label class="mm-setting-label" for="mm-layout-select" style="flex:1">Party Layout</label>
+              <select id="mm-layout-select" class="mm-setting-select">
+                <option value="split">Split Edges</option>
+                <option value="classic">Classic Center</option>
+                <option value="right">Compact Right</option>
+              </select>
+            </div>
           </div>
           <button id="mm-save-btn" class="mm-save-btn">Save Game</button>
           <h3 class="mm-section-title" style="margin-top:1rem">Load Game</h3>
@@ -149,6 +189,17 @@ function _openMenu() {
   if (helpChk) {
     helpChk.checked = !!window.helpEnabled;
     helpChk.onchange = () => { window.helpEnabled = helpChk.checked; };
+  }
+
+  // Sync layout select
+  const layoutSel = document.getElementById('mm-layout-select');
+  if (layoutSel) {
+    layoutSel.value = window.partyLayoutRule || 'split';
+    layoutSel.onchange = () => {
+      window.partyLayoutRule = layoutSel.value;
+      localStorage.setItem('partyLayoutRule', window.partyLayoutRule);
+      _applyLayoutPreference();
+    };
   }
 
   document.getElementById('main-menu-overlay').classList.remove('mm-hidden');

@@ -1702,6 +1702,23 @@ body {
   height: 14px;
 }
 
+.mm-setting-select {
+  background: #0d0a06;
+  border: 1px solid #4a3a20;
+  color: #c8a84a;
+  font-family: monospace;
+  font-size: 11px;
+  padding: 2px 4px;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  width: 120px;
+}
+
+.mm-setting-select:focus {
+  border-color: #8a7040;
+}
+
 label.mm-setting-label {
   cursor: pointer;
 }
@@ -1763,9 +1780,8 @@ label.mm-setting-label {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: auto auto;
-  column-gap: 230px;
-  row-gap: 6px;
-  padding: 12px;
+  padding: 16px;
+  row-gap: 12px;
   align-items: end;
   pointer-events: none;
   transition: opacity 0.3s ease, transform 0.3s ease;
@@ -1784,15 +1800,13 @@ label.mm-setting-label {
   pointer-events: auto;
 }
 
-/* Member cards */
-#member-0,
-#member-2 {
-  justify-self: end;
+/* Member cards layout */
+#member-0, #member-2 {
+  justify-self: start;
 }
 
-#member-1,
-#member-3 {
-  justify-self: start;
+#member-1, #member-3 {
+  justify-self: end;
 }
 
 #member-0 {
@@ -1813,6 +1827,108 @@ label.mm-setting-label {
 #member-3 {
   grid-column: 2;
   grid-row: 2;
+}
+
+/* Mirror the right side cards */
+#member-1 .member-main,
+#member-3 .member-main {
+  flex-direction: row-reverse;
+}
+
+#member-1 .info-row,
+#member-3 .info-row {
+  flex-direction: row-reverse;
+}
+
+#member-1 .status-banner,
+#member-3 .status-banner {
+  flex-direction: row-reverse;
+}
+
+/* Add dummy rule to keep CSS valid, or just no-op comment */
+/* Reversed rows handle the alignment intrinsically */
+
+/* Fix borders for reversed row */
+#member-1 .slot-group + .slot-group,
+#member-3 .slot-group + .slot-group {
+  margin-left: 0;
+  padding-left: 0;
+  border-left: none;
+  margin-right: 2px;
+  padding-right: 4px;
+  border-right: 1px solid #3a2e18;
+}
+
+#party-panel.layout-classic {
+  column-gap: 230px;
+  row-gap: 6px;
+  padding: 12px;
+}
+
+#party-panel.layout-classic #member-0,
+#party-panel.layout-classic #member-2 {
+  justify-self: end;
+  margin-left: 0;
+}
+
+#party-panel.layout-classic #member-1,
+#party-panel.layout-classic #member-3 {
+  justify-self: start;
+  margin-right: 0;
+}
+
+#party-panel.layout-classic #member-1 .member-main,
+#party-panel.layout-classic #member-3 .member-main,
+#party-panel.layout-classic #member-1 .info-row,
+#party-panel.layout-classic #member-3 .info-row,
+#party-panel.layout-classic #member-1 .status-banner,
+#party-panel.layout-classic #member-3 .status-banner {
+  flex-direction: row;
+}
+
+#party-panel.layout-classic #member-1 .slot-group + .slot-group,
+#party-panel.layout-classic #member-3 .slot-group + .slot-group {
+  margin-right: 0;
+  padding-right: 0;
+  border-right: none;
+  margin-left: 2px;
+  padding-left: 4px;
+  border-left: 1px solid #3a2e18;
+}
+
+#party-panel.layout-right {
+  grid-template-columns: auto auto;
+  justify-content: end;
+  column-gap: 8px;
+  row-gap: 6px;
+  padding: 16px;
+}
+
+#party-panel.layout-right #member-0,
+#party-panel.layout-right #member-1,
+#party-panel.layout-right #member-2,
+#party-panel.layout-right #member-3 {
+  justify-self: end;
+  margin: 0;
+}
+
+#party-panel.layout-right #member-1 .member-main,
+#party-panel.layout-right #member-3 .member-main,
+#party-panel.layout-right #member-1 .info-row,
+#party-panel.layout-right #member-3 .info-row,
+#party-panel.layout-right #member-1 .status-banner,
+#party-panel.layout-right #member-3 .status-banner {
+  flex-direction: row;
+}
+
+#party-panel.layout-right #member-1 .slot-group + .slot-group,
+#party-panel.layout-right #member-3 .slot-group + .slot-group {
+  margin-right: 0;
+  padding-right: 0;
+  border-right: none;
+  margin-left: 2px;
+  padding-left: 4px;
+  border-left: 1px solid #3a2e18;
 }
 
 /* ═══════════════════════════════════════════
