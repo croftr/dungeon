@@ -3094,8 +3094,9 @@ label.mm-setting-label {
 }
 
 .sb-type-icon {
-  font-size: 11px;
-  margin-right: 1px;
+  font-size: 24px;
+  margin-right: 4px;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
 }
 
 .sb-ribbon-empty {
@@ -3248,18 +3249,19 @@ label.mm-setting-label {
 }
 
 .sb-detail-type {
-  font-size: 9px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  padding: 2px 6px;
-  border-radius: 2px;
-  display: inline-block;
+  letter-spacing: 0.15em;
+  display: flex;
+  align-items: center;
   align-self: flex-start;
+  margin-top: -2px;
+  margin-bottom: 2px;
 }
-.sb-detail-type--direct-damage { background: rgba(180,60,30,0.15);  color: #8a1800; box-shadow: 0 0 0 1px rgba(140,40,10,0.25); }
-.sb-detail-type--healing       { background: rgba(40,160,80,0.15);  color: #1a6030; box-shadow: 0 0 0 1px rgba(20,100,50,0.25); }
-.sb-detail-type--buff          { background: rgba(60,100,200,0.15); color: #1a3a80; box-shadow: 0 0 0 1px rgba(30,60,160,0.25); }
-.sb-detail-type--debuff        { background: rgba(140,60,200,0.15); color: #601080; box-shadow: 0 0 0 1px rgba(100,30,160,0.25); }
+.sb-detail-type--direct-damage { color: #8a1800; }
+.sb-detail-type--healing       { color: #1a6030; }
+.sb-detail-type--buff          { color: #1a3a80; }
+.sb-detail-type--debuff        { color: #601080; }
 
 /* Description sits inside name-area, alongside the big icon */
 .sb-detail-desc {
@@ -3276,16 +3278,13 @@ label.mm-setting-label {
 }
 
 .sb-stat {
-  background: rgba(20,8,0,0.12);
-  border: none;
-  border-radius: 3px;
-  box-shadow: 0 0 0 1px rgba(80,45,10,0.2), inset 0 1px 4px rgba(0,0,0,0.1);
-  padding: 6px 10px;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  padding: 2px 0;
+  border-bottom: 1px dotted rgba(80,45,10,0.2);
 }
 
 .sb-stat--full {
@@ -3453,20 +3452,24 @@ label.mm-setting-label {
   margin-top: auto;
   margin-bottom: 12px;
   align-self: flex-end;
-  background: rgba(20,8,0,0.12);
-  border: 1px solid rgba(80,45,10,0.45);
+  background: transparent;
+  border: none;
+  font-family: 'Georgia', serif;
+  font-style: italic;
+  font-weight: bold;
   color: #5a3010;
-  font-size: 11px;
-  padding: 4px 12px;
+  font-size: 15px;
+  padding: 4px 0;
   cursor: pointer;
-  letter-spacing: 0.05em;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  letter-spacing: 0.08em;
+  transition: color 0.2s ease, transform 0.2s ease;
+  border-bottom: 1px solid transparent;
 }
 
 .sb-close-btn:hover {
-  color: #901010;
-  border-color: rgba(140,20,20,0.6);
-  background: rgba(140,20,20,0.1);
+  color: #8b2010;
+  border-bottom: 1px dashed rgba(139, 32, 16, 0.5);
+  transform: translateX(-4px);
 }
 
 /* ── Skills panel ── */

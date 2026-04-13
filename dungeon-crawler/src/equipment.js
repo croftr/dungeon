@@ -2634,6 +2634,31 @@ document.getElementById('spell-selection-overlay').addEventListener('click', (e)
     refreshPartyCards();
     const hint = document.getElementById('sb-slots-hint');
     hint.textContent = `${_sbSelectedSpell.name} assigned to ${_SB_SLOT_LABELS[slotKey]}.`;
+    return;
+  }
+
+  // Page turning navigation
+  if (!e.target.closest('.sb-close-btn')) {
+    const leftPageClick = e.target.closest('.spellbook-left-page');
+    const rightPageClick = e.target.closest('.spellbook-right-page');
+    
+    if (leftPageClick || rightPageClick) {
+      const tabs = Array.from(document.querySelectorAll('#sb-ribbon .sb-ribbon-icon'));
+      if (tabs.length === 0) return;
+
+      const currentIndex = tabs.findIndex(tab => tab.classList.contains('sb-ribbon-icon--selected'));
+      let targetIndex = currentIndex;
+
+      if (leftPageClick && currentIndex > 0) {
+        targetIndex = currentIndex - 1;
+      } else if (rightPageClick && currentIndex >= 0 && currentIndex < tabs.length - 1) {
+        targetIndex = currentIndex + 1;
+      }
+
+      if (targetIndex !== currentIndex && targetIndex >= 0) {
+        tabs[targetIndex].click();
+      }
+    }
   }
 });
 
