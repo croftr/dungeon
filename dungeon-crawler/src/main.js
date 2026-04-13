@@ -752,13 +752,13 @@ function showCharacterSelection() {
   }
 
   function detailHTML(r) {
-    const videoSrc = getVideoSrc(r.image);
     const isSelected = selectedIds.has(r.id);
     const full = selectedIds.size >= 4;
     const canAdd = !isSelected && full;
     const expertise = getSkillExpertise(r.skillTree);
     const jobIcon  = asset(`/skills/jobs/${r.job.toLowerCase().replace(/\s+/g, '-')}.png`);
-    const raceIcon = asset(`/skills/race/${r.race.toLowerCase().replace(/.*\s/, '')}.png`); // "Wood Elf" → "elf", "High Elf" → "elf"
+    const raceKey  = r.race.toLowerCase().includes('elf') ? 'elf' : r.race.toLowerCase();
+    const raceIcon = asset(`/skills/race/${raceKey}.png`);
     const stats = [
       { label: 'STR', val: r.stats.strength    },
       { label: 'DEX', val: r.stats.dexterity   },
@@ -767,60 +767,52 @@ function showCharacterSelection() {
       { label: 'RES', val: r.stats.resilience  },
     ];
     return `
-      <div class="cs-detail-content">
-        <div class="cs-detail-video-wrap">
-          <video class="cs-detail-video" autoplay loop muted playsinline>
-            <source src="${videoSrc}" type="video/mp4" />
-          </video>
+      <div class="cs-detail-hero-header">
+        <div class="cs-detail-name">${r.name}</div>
+        <div class="cs-detail-class">${r.race} - ${r.job}</div>
+      </div>
+
+      <div class="cs-detail-stats">
+        ${stats.map(s => `
+          <div class="cs-detail-stat-col">
+            <div class="cs-detail-stat-label">${s.label}</div>
+            <div class="cs-detail-stat-number">${s.val}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="cs-highlight-header">Highlight Features</div>
+      <div class="cs-highlight-row">
+        <div class="cs-highlight-badge">
+          <img class="cs-highlight-icon-img" src="${jobIcon}" alt="${r.job}" />
+          <div class="cs-highlight-badge-value">Job:<br>${r.job}</div>
         </div>
-        <div class="cs-detail-info">
-          <div class="cs-detail-hero-header">
-            <div class="cs-detail-name">${r.name}</div>
-          </div>
-
-          <div class="cs-detail-stats">
-            ${stats.map(s => `
-              <div class="cs-detail-stat-col">
-                <div class="cs-detail-stat-label">${s.label}</div>
-                <div class="cs-detail-stat-number">${s.val}</div>
-              </div>
-            `).join('')}
-          </div>
-
-          <div class="cs-highlight-header">Highlight Features</div>
-          <div class="cs-highlight-row">
-            <div class="cs-highlight-badge">
-              <img class="cs-highlight-icon-img" src="${jobIcon}" alt="${r.job}" />
-              <div class="cs-highlight-badge-value">${r.job}</div>
-            </div>
-            <div class="cs-highlight-badge">
-              <img class="cs-highlight-icon-img" src="${raceIcon}" alt="${r.race}" />
-              <div class="cs-highlight-badge-value">${r.race}</div>
-            </div>
-            ${expertise.entries.length === 1 ? `
-            <div class="cs-highlight-badge">
-              ${expertise.entries[0].icon
-                ? `<img class="cs-highlight-icon-img" src="${asset(expertise.entries[0].icon)}" alt="" />`
-                : `<div class="cs-highlight-icon">&#10022;</div>`}
-              <div class="cs-highlight-badge-value">${expertise.entries[0].name}</div>
-            </div>` : ''}
-          </div>
-          ${expertise.entries.length > 1 ? `
-          <div class="cs-highlight-row cs-highlight-row--expertise">
-            ${expertise.entries.map(e => `
-            <div class="cs-highlight-badge">
-              ${e.icon ? `<img class="cs-highlight-icon-img" src="${asset(e.icon)}" alt="" />` : ''}
-              <div class="cs-highlight-badge-value">${e.name}</div>
-            </div>`).join('')}
-          </div>` : ''}
-
-          <div class="cs-detail-actions">
-            <button class="cs-detail-recruit-btn ${isSelected ? 'is-selected' : ''} ${canAdd ? 'is-full' : ''}"
-                    data-detail-btn="${r.id}">
-              ${isSelected ? '&#10003; Remove from Party' : 'Add to Party'}
-            </button>
-          </div>
+        <div class="cs-highlight-badge">
+          <img class="cs-highlight-icon-img" src="${raceIcon}" alt="${r.race}" />
+          <div class="cs-highlight-badge-value">Race:<br>${r.race}</div>
         </div>
+        ${expertise.entries.length === 1 ? `
+        <div class="cs-highlight-badge">
+          ${expertise.entries[0].icon
+            ? `<img class="cs-highlight-icon-img" src="${asset(expertise.entries[0].icon)}" alt="" />`
+            : `<div class="cs-highlight-icon">&#10022;</div>`}
+          <div class="cs-highlight-badge-value">Weapon Skills:<br>${expertise.entries[0].name}</div>
+        </div>` : ''}
+      </div>
+      ${expertise.entries.length > 1 ? `
+      <div class="cs-highlight-row cs-highlight-row--expertise">
+        ${expertise.entries.map(e => `
+        <div class="cs-highlight-badge">
+          ${e.icon ? `<img class="cs-highlight-icon-img" src="${asset(e.icon)}" alt="" />` : ''}
+          <div class="cs-highlight-badge-value">${e.name}</div>
+        </div>`).join('')}
+      </div>` : ''}
+
+      <div class="cs-detail-actions">
+        <button class="cs-detail-recruit-btn ${isSelected ? 'is-selected' : ''} ${canAdd ? 'is-full' : ''}"
+                data-detail-btn="${r.id}">
+          ${isSelected ? '&#10003; Remove from Party' : 'Add to Party'}
+        </button>
       </div>
     `;
   }
@@ -833,13 +825,15 @@ function showCharacterSelection() {
             ${RECRUITS.map(miniCardHTML).join('')}
           </div>
         </div>
-        <div class="cs-detail-panel">
+        
+        <div class="cs-center-col" id="cs-video-container">
           <div class="cs-title-overlay">
             <h2 class="char-select-title">Choose Your Party</h2>
             <p class="char-select-subtitle">Select four heroes — front row fights, back row supports</p>
             <button id="quick-pick-btn" class="cs-quick-pick-btn">Quick Pick</button>
           </div>
-          <div class="cs-detail-empty">
+          <video class="cs-detail-video" id="cs-main-video" autoplay loop muted playsinline style="display:none;"></video>
+          <div class="cs-detail-empty" id="cs-empty-state">
             <video class="cs-detail-bg-video" autoplay loop muted playsinline>
               <source src="${asset('/videos/Haunted_Swamp_Dungeon.mp4')}" type="video/mp4" />
             </video>
@@ -849,24 +843,34 @@ function showCharacterSelection() {
             </div>
           </div>
         </div>
-      </div>
-    </div>
-    <div class="cs-party-corner" id="cs-party-corner" style="display: none;">
-      <div class="cs-corner-header">
-        <div class="cs-party-hint" id="cs-party-hint">Select 4 heroes<br>to begin</div>
-        <button id="begin-adventure-btn">Enter Dungeon</button>
-      </div>
-      <div class="cs-corner-cards">
-        <div class="cs-corner-card" data-slot="0"><span class="cs-corner-empty-icon">+</span></div>
-        <div class="cs-corner-card" data-slot="1"><span class="cs-corner-empty-icon">+</span></div>
-        <div class="cs-corner-card" data-slot="2"><span class="cs-corner-empty-icon">+</span></div>
-        <div class="cs-corner-card" data-slot="3"><span class="cs-corner-empty-icon">+</span></div>
+
+        <div class="cs-right-col" id="cs-right-panel">
+          <div class="cs-detail-info" id="cs-info-container">
+            <!-- Hero details will be injected here -->
+          </div>
+          
+          <div class="cs-party-corner" id="cs-party-corner">
+            <div class="cs-corner-header">
+              <div class="cs-party-hint" id="cs-party-hint">Select 4 heroes<br>to begin</div>
+            </div>
+            <div class="cs-corner-cards">
+              <div class="cs-corner-card" data-slot="0"><span class="cs-corner-empty-icon">+</span></div>
+              <div class="cs-corner-card" data-slot="1"><span class="cs-corner-empty-icon">+</span></div>
+              <div class="cs-corner-card" data-slot="2"><span class="cs-corner-empty-icon">+</span></div>
+              <div class="cs-corner-card" data-slot="3"><span class="cs-corner-empty-icon">+</span></div>
+            </div>
+            <button id="begin-adventure-btn">Enter Dungeon</button>
+          </div>
+        </div>
       </div>
     </div>
   `;
 
   const miniCards = charSelectScreen.querySelectorAll('.cs-mini-card');
-  const detailPanel = charSelectScreen.querySelector('.cs-detail-panel');
+  const rightPanel = charSelectScreen.querySelector('#cs-right-panel');
+  const infoContainer = charSelectScreen.querySelector('#cs-info-container');
+  const mainVideo = charSelectScreen.querySelector('#cs-main-video');
+  const emptyState = charSelectScreen.querySelector('#cs-empty-state');
   const cornerCards = charSelectScreen.querySelectorAll('.cs-corner-card');
   const beginBtn = charSelectScreen.querySelector('#begin-adventure-btn');
   const quickPickBtn = charSelectScreen.querySelector('#quick-pick-btn');
@@ -875,13 +879,28 @@ function showCharacterSelection() {
     activeRecruitId = recruitId;
     const r = RECRUITS.find(x => x.id === recruitId);
     if (!r) return;
-    detailPanel.innerHTML = detailHTML(r);
+    
+    // Update Video
+    emptyState.style.display = 'none';
+    mainVideo.style.display = 'block';
+    const newSrc = getVideoSrc(r.image);
+    // Only update if source changed to avoid flicker
+    if (mainVideo.getAttribute('src') !== newSrc) {
+      // Create a new source element
+      mainVideo.innerHTML = `<source src="${newSrc}" type="video/mp4" />`;
+      mainVideo.load();
+      mainVideo.play().catch(e => console.warn('Hero video autoplay prevented', e));
+    }
+    
+    // Update Info
+    infoContainer.style.display = 'flex';
+    infoContainer.innerHTML = detailHTML(r);
 
     miniCards.forEach(c =>
       c.classList.toggle('cc-active-view', c.dataset.recruitId === recruitId)
     );
 
-    detailPanel.querySelector('[data-detail-btn]').addEventListener('click', () => {
+    infoContainer.querySelector('[data-detail-btn]').addEventListener('click', () => {
       playSoundByUrl(asset('/sounds/select-member.mp3'), 0.4);
       toggleSelection(recruitId);
     });
@@ -899,11 +918,7 @@ function showCharacterSelection() {
 
   function updateUI() {
     const full = selectedIds.size >= 4;
-    const corner = charSelectScreen.querySelector('#cs-party-corner');
-    if (corner) {
-      corner.style.display = selectedIds.size > 0 ? 'flex' : 'none';
-    }
-
+    
     miniCards.forEach(card => {
       const id = card.dataset.recruitId;
       const isSelected = selectedIds.has(id);
@@ -926,7 +941,11 @@ function showCharacterSelection() {
     const hint = charSelectScreen.querySelector('#cs-party-hint');
     if (hint) {
       const remaining = 4 - selectedIds.size;
-      hint.innerHTML = full ? 'Party ready!' : `${remaining} more hero${remaining !== 1 ? 'es' : ''} needed`;
+      if (full) {
+        hint.innerHTML = 'Party ready!';
+      } else {
+        hint.innerHTML = `${remaining} more hero slot${remaining !== 1 ? 's' : ''}!`;
+      }
     }
 
     beginBtn.classList.toggle('ready', full);
