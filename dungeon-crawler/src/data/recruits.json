@@ -37,16 +37,14 @@
         "job": "Paladin",
         "race": "Human",
         "stats": {
-            "strength": 7,
-            "dexterity": 6,
-            "vitality": 8,
-            "intelligence": 4,
-            "resilience": 8
+            "strength": 107,
+            "dexterity": 106,
+            "vitality": 108,
+            "intelligence": 104,
+            "resilience": 108
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
-        "startingSkills": [
-            "Sanctuary"
-        ],
+        "startingSkills": [],
         "image": "/heros/human_paladin.webp",
         "leftHand": "Shield",
         "rightHand": "Sword",
@@ -196,9 +194,7 @@
             "resilience": 6
         },
         "bio": "A graceful tempest of flashing blades. Lumni dances through her enemies, turning battle into a bloody, beautiful art form.",
-        "startingSkills": [
-            "War Dance"
-        ],
+        "startingSkills": [],
         "startingInventory": [
             "Cure Poison Potion",
             "Minor Rejuvenate Potion",

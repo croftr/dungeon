@@ -242,7 +242,7 @@ function _renderList() {
     card.className = 'essentiary-card' + (locked ? ' essentiary-card-locked' : '');
     const imgExtra = LIST_IMG_CLASS[key] ? ` ${LIST_IMG_CLASS[key]}` : '';
     const tier = locked ? 1 : getMonsterTier(key);
-    const tierBadge = (!locked && tier > 1)
+    const tierBadge = !locked
       ? `<div class="essentiary-card-tier">Tier ${tier}</div>`
       : '';
     card.innerHTML = `
@@ -304,13 +304,11 @@ function _openDetail(key) {
   const victories = tier - 1;
   const tierEl = document.getElementById('essentiary-detail-tier');
   if (tierEl) {
-    if (tier > 1) {
-      const victoryWord = victories === 1 ? 'victory' : 'victories';
-      tierEl.textContent = `Tier ${tier}  ·  ${victories} ${victoryWord}`;
-      tierEl.style.display = '';
-    } else {
-      tierEl.style.display = 'none';
-    }
+    const victoryStr = victories === 0
+      ? 'not yet defeated'
+      : victories === 1 ? '1 victory' : `${victories} victories`;
+    tierEl.textContent = `Tier ${tier}  ·  ${victoryStr}`;
+    tierEl.style.display = '';
   }
 
   document.getElementById('essentiary-detail-desc').textContent = def.description ?? '';

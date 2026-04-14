@@ -2245,6 +2245,7 @@ window._arenaEnter = function (monsterId) {
     facing:  player.facing,
   };
   window._arenaMode = true;
+  window._arenaCurrentTier = tier;
 
   // Pre-load the party-hit sound buffer so it's ready instantly on first hit
   prefetchBuffer(asset('/sounds/actions/party-hit.mp3'));
@@ -2370,6 +2371,7 @@ window._arenaEnter = function (monsterId) {
 
 window._arenaExit = function (won) {
   window._arenaMode = false;
+  window._arenaCurrentTier = null;
 
   _arenaFade(() => {
     window._isRestoring = true;

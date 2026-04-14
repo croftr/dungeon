@@ -1799,8 +1799,9 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       const droppedItems = [];
       if (m.drops && m.drops.length > 0 && !m.noDrops) {
         if (window._arenaMode) {
-          // Drop 1-100 gold in the bone pile
-          const gold = Math.floor(Math.random() * 100) + 1;
+          // Drop gold scaled by arena tier (1-100 at tier 1, up to 1-100*tier)
+          const arenaTier = window._arenaCurrentTier ?? 1;
+          const gold = Math.floor(Math.random() * 100 * arenaTier) + arenaTier;
           droppedItems.push({ name: 'Gold Coins', quantity: gold });
 
           // Arena: 50% chance to drop boss essence in the bone pile
@@ -1863,8 +1864,8 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
         text: 'Well done on your first kill! Click the <strong>battle summary</strong> icon (top left) to monitor your party\'s performance. Press <strong>B</strong> to open the battle log for in-depth details.'
       });
 
-      // ── Award XP to living party members ────────
-      if (m.xp > 0) awardXP(m.xp);
+      // ── Award XP to living party members (not in arena) ────────
+      if (m.xp > 0 && !window._arenaMode) awardXP(m.xp);
 
       _playDeathAnimation(m);
     } else {

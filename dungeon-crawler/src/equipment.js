@@ -3534,12 +3534,12 @@ export function useHand(memberIndex, hand, silent = false) {
 
   if (result.crit) {
     if (result.killed) {
-      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${m.name} obliterates the ${target.name} for ${result.damage} dmg!`, 3000);
+      if (!window._arenaMode) showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${m.name} obliterates the ${target.name} for ${result.damage} dmg!`, 3000);
     } else {
       showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${m.name} inflicts a critical hit for ${result.damage} dmg!`, 1500);
     }
   } else {
-    if (result.killed) {
+    if (result.killed && !window._arenaMode) {
       showMessage(`${m.name} slays the ${target.name} for ${result.damage} dmg!`);
     }
     // Normal hit damage is shown by the red CSS2DObject popup above the monster — no toast needed
