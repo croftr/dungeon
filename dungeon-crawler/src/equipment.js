@@ -76,6 +76,7 @@ function _dispatchSpellVFX(attackType, target = null) {
       break;
     case 'cure-poison':
     case 'resist-poison':
+    case 'resist-fear':
       playSkillSound('cure');
       triggerCurePoisonEffect();
       break;
@@ -2852,7 +2853,29 @@ function _executePartySpell(caster, casterIndex, hand, spellDef) {
 
   if (spellDef.attackType === ACTIONS.RESIST_POISON) {
     _executeResistPoison(caster, spellDef);
+  } else if (spellDef.attackType === ACTIONS.RESIST_FEAR) {
+    _executeResistFear(caster, spellDef);
   }
+}
+
+function _executeResistFear(caster, spellDef) {
+  const targets = party.filter(m => !m.isEmpty && !m.isDead);
+  const duration = spellDef?.statusDuration ?? null;
+  targets.forEach(m => applyStatusEffect(m.id, 'resist-fear', null, duration));
+
+  showMessage(`${caster.name} casts <b>Resist Fear</b> — the party is protected!`, 2500);
+
+  targets.forEach(m => {
+    addLogEntry({
+      time: Date.now(),
+      type: 'skill',
+      actor: caster.name,
+      skillName: 'Resist Fear',
+      target: m.name,
+    });
+  });
+
+  refreshPartyCards();
 }
 
 function _executeResistPoison(caster, spellDef) {

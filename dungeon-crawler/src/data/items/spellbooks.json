@@ -78,5 +78,15 @@
         "description": "Ancient parchment radiating an intense heat. Study it to learn Incinerate. Requires 12 Intelligence.",
         "value": 850,
         "weight": 0.2
+    },
+    {
+        "name": "Scroll of Resist Fear",
+        "type": "spellbook",
+        "spellName": "Resist Fear",
+        "requiredInt": 10,
+        "icon": "/icons/scroll_resist_fear.webp",
+        "description": "A scroll etched with calming blue runes. Study it to learn Resist Fear. Requires 10 Intelligence.",
+        "value": 480,
+        "weight": 0.2
     }
 ]

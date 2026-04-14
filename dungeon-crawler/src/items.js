@@ -58,6 +58,7 @@ export const ACTIONS = Object.freeze({
   REJUVENATE: 'rejuvenate',
   SLEEP: 'sleep',
   INCINERATE: 'incinerate',
+  RESIST_FEAR: 'resist-fear',
 });
 
 export const ITEMS = [

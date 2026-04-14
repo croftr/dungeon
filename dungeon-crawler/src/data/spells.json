@@ -150,5 +150,20 @@
         "durationSec": 2,
         "value": 0,
         "weight": 0
+    },
+    {
+        "name": "Resist Fear",
+        "type": "buff",
+        "target": "party",
+        "slot": "spell",
+        "attackType": "resist-fear",
+        "baseDamage": 0,
+        "statusDuration": 60,
+        "delay": 4,
+        "mpCost": 8,
+        "icon": "/icons/resist-fear.webp",
+        "description": "A warding incantation that halves the chance of the entire party being afflicted by fear for 60 seconds.",
+        "value": 0,
+        "weight": 0
     }
 ]

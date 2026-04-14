@@ -136,5 +136,17 @@
     "color": "#ffff00",
     "duration": 5,
     "preventsAction": true
+  },
+  "resist-fear": {
+    "id": "resist-fear",
+    "name": "Resist Fear",
+    "description": "Reduces chance of being feared by 50% for 60 seconds.",
+    "type": "buff",
+    "icon": "/icons/resist-fear.webp",
+    "color": "#4080ff",
+    "duration": 60,
+    "statusResistances": {
+      "fear": 0.5
+    }
   }
 }

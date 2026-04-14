@@ -1151,6 +1151,12 @@ export function describeEffect(def) {
     parts.push(`Atk Spd x${def.attackSpeedMultiplier}`);
   }
   if (def.defenceModifier) parts.push(`DEF ${def.defenceModifier > 0 ? '+' : ''}${def.defenceModifier}`);
+  if (def.statusResistances) {
+    for (const [effectId, resistance] of Object.entries(def.statusResistances)) {
+      const name = effectId.charAt(0).toUpperCase() + effectId.slice(1).replace('-', ' ');
+      parts.push(`Resist ${name} +${Math.round(resistance * 100)}%`);
+    }
+  }
   parts.push(`${def.duration}s`);
   return parts.join(' \u00b7 ');
 }
