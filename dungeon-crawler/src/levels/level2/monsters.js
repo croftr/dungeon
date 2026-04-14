@@ -44,6 +44,27 @@ export const level2Monsters = [
     asset('/monsters/iceMan-animation/Meshy_AI_Animation_Dead_withSkin.glb'),
     asset('/monsters/iceMan-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb')),
 
+  // Mushroom room — west of Room B, accessed via corridor through row 8 (cols 2-4, rows 7-9)
+  inst(D.mushroom, 500, 7, 3,
+    asset('/monsters/mushroom/idle.glb'),
+    asset('/monsters/mushroom/attack.glb'),
+    null, 0.45, 0, 0, 2, null,
+    asset('/monsters/mushroom/dead.glb'),
+    null,
+    asset('/monsters/mushroom/walk.glb'),
+    null,
+    asset('/monsters/mushroom/combat-idle.glb')),
+
+  inst(D.mushroom, 501, 9, 3,
+    asset('/monsters/mushroom/idle.glb'),
+    asset('/monsters/mushroom/attack.glb'),
+    null, 0.45, 0, 0, 2, null,
+    asset('/monsters/mushroom/dead.glb'),
+    null,
+    asset('/monsters/mushroom/walk.glb'),
+    null,
+    asset('/monsters/mushroom/combat-idle.glb')),
+
   // Room C (rows 11-13, cols 5-11) — 2 Orc Warriors
   inst(D.orc_warrior, 204, 12, 6,
     asset('/monsters/orc-warrior/idle-normal.glb'),

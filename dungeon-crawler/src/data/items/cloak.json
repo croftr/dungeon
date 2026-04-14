@@ -123,5 +123,17 @@
             "resilience": 1,
             "dexterity": 1
         }
+    },
+    {
+        "name": "Heavy Ogre Drape",
+        "slot": "cloak",
+        "icon": "/icons/ogre_cloak.webp",
+        "description": "A heavy cloak woven from the hide of an ogre, bound with large iron clasps. Provides warmth and protection.",
+        "defence": 2,
+        "statBonuses": {
+            "vitality": 1
+        },
+        "value": 750,
+        "weight": 1.5
     }
 ]

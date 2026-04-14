@@ -32,7 +32,7 @@ export function spawnLevel0Objects(ctx) {
         { name: 'Gold Coins', quantity: 10000 },
         'Potion of Invincibility', 'Potion of Unseen', "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal",
         'Resist Poison Spellbook', 'Rejuvenate Spellbook', 'Scroll of Resist Fear', "Ogre's Head", "Ogre Essence",
-        "Ogre's Head", "Ogre Essence", "Leather Belt", "Life Orb", "Iron Ore", "Iron Ore", "Ogre Girdle",
+        "Ogre's Head", "Ogre Essence", "Leather Belt", "Heavy Ogre Drape", "Life Orb", "Iron Ore", "Iron Ore", "Ogre Girdle",
         'Scroll of Fireball', 'Scroll of Regeneration', 'Scroll of Cure Poison', 'Scroll of Resist Poison',
         'Scroll of Rejuvenate', 'Scroll of Sleep', 'Scroll of Incinerate', "Life Essence", "Life Essence"
     ], asset('/items/stash.glb'), true, 0, 'Stash');

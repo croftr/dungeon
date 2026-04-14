@@ -92,6 +92,31 @@
         ]
     },
     {
+        "name": "Heavy Ogre Drape",
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Travelling Cloak",
+                "quantity": 1
+            },
+            {
+                "name": "Ogre's Head",
+                "quantity": 1
+            },
+            {
+                "name": "Ogre Essence",
+                "quantity": 1
+            }
+        ]
+    },
+    {
         "name": "Minotaur Cuirass",
         "ingredients": [
             {
@@ -103,15 +128,15 @@
                 "quantity": 1
             },
             {
-                "name": "Chain Shirt",
+                "name": "Travelling Cloak",
                 "quantity": 1
             },
             {
-                "name": "Minotaur Horn",
+                "name": "Ogre's Head",
                 "quantity": 1
             },
             {
-                "name": "Minotaur Essence",
+                "name": "Ogre Essence",
                 "quantity": 1
             }
         ]
