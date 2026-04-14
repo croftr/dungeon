@@ -42,6 +42,56 @@
         ]
     },
     {
+        "name": "Ogre Head Orb",
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Life Orb",
+                "quantity": 1
+            },
+            {
+                "name": "Ogre's Head",
+                "quantity": 1
+            },
+            {
+                "name": "Ogre Essence",
+                "quantity": 1
+            }
+        ]
+    },
+    {
+        "name": "Ogre Girdle",
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Leather Belt",
+                "quantity": 1
+            },
+            {
+                "name": "Ogre's Head",
+                "quantity": 1
+            },
+            {
+                "name": "Ogre Essence",
+                "quantity": 1
+            }
+        ]
+    },
+    {
         "name": "Minotaur Cuirass",
         "ingredients": [
             {

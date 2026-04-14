@@ -20,9 +20,28 @@
         "defence": 2,
         "value": 75,
         "weight": 0.5,
-        "skillBonuses": {},
+        "skillBonuses": {
+            "all": 1
+        },
         "statusResistances": {
             "poison": 0.25
+        }
+    },
+    {
+        "name": "Ogre Girdle",
+        "slot": "belt",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/ogre_girdle.webp",
+        "description": "A thick, heavy girdle fashioned from ogre leather and reinforced with iron plates. Its brutal weight grants the wearer exceptional resilience.",
+        "defence": 2,
+        "value": 75,
+        "weight": 0.5,
+        "statBonuses": {
+            "resilience": 1
+        },
+        "statusResistances": {
+            "fear": 0.25
         }
     }
 ]

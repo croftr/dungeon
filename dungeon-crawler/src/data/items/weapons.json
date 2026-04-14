@@ -564,6 +564,29 @@
         }
     },
     {
+        "name": "Ogre Head Orb",
+        "slot": "hand",
+        "leftHandOnly": true,
+        "type": "weapon",
+        "attackType": "orb",
+        "weaponType": "orb",
+        "staminaDrain": 0,
+        "baseDamage": 0,
+        "delay": 3.2,
+        "statWeights": {
+            "intelligence": 1.0
+        },
+        "icon": "/icons/ogre_head_orb.webp",
+        "description": "A gruesome orb made from an ogre's head. It pulses with raw, untamed power, granting the wielder enhanced strength and resilience.",
+        "value": 2000,
+        "weight": 0.8,
+        "statBonuses": {
+            "hp": 5,
+            "mp": 2,
+            "vitality": 1
+        }
+    },
+    {
         "name": "Storm-Reaver Greataxe",
         "slot": "bothHands",
         "type": "weapon",

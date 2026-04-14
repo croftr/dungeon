@@ -554,6 +554,21 @@ function renderModal(memberIndex) {
   const defEl = document.getElementById('stat-total-defence');
   if (defEl) defEl.textContent = totalDef;
 
+  const resEl = document.getElementById('status-resistances');
+  if (resEl) {
+    resEl.innerHTML = '';
+    const resistances = m.statusResistances || {};
+    Object.entries(resistances).forEach(([effectId, value]) => {
+      if (value <= 0) return;
+      const def = STATUS_EFFECT_DEFS[effectId];
+      const name = def?.name ?? effectId;
+      const row = document.createElement('div');
+      row.className = 'stat-row';
+      row.innerHTML = `<span class="stat-name" style="font-size: 0.85em; opacity: 0.8;">Resist ${name}</span><span class="stat-value" style="font-size: 0.85em;">${Math.round(value * 100)}%</span>`;
+      resEl.appendChild(row);
+    });
+  }
+
   // ── Stat bars (HP/MP/SP) ──
   const pctHelper = (val, max) => Math.max(0, Math.min(100, (val / max) * 100)).toFixed(1) + '%';
 
