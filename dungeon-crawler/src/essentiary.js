@@ -6,6 +6,7 @@ import MONSTER_FAMILIES from './data/monster-families.json';
 import STATUS_EFFECTS from './data/status-effects.json';
 import { asset } from './assets.js';
 import { getSeenEssences } from './objects.js';
+import { registerSaveHandler } from './save-registry.js';
 
 const _EFFECT_CHIP_CLASS = {
   fear:   'effect-chip-fear',
@@ -15,6 +16,43 @@ const _EFFECT_CHIP_CLASS = {
   frozen: 'effect-chip-frozen',
   stun:   'effect-chip-stun',
 };
+
+// ── Arena tier progression ────────────────────────────────────────────────────
+// Tracks how many times the player has beaten each monster in the Essentiary.
+// Tier starts at 1 and increments by 1 on each victory; defeats leave it unchanged.
+
+let _arenaMonsterTiers = {};  // { [monsterId]: number }
+
+export function getMonsterTier(monsterId) {
+  return _arenaMonsterTiers[monsterId] ?? 1;
+}
+
+export function recordArenaVictory(monsterId) {
+  _arenaMonsterTiers[monsterId] = getMonsterTier(monsterId) + 1;
+}
+
+/**
+ * Returns a new def object with stats/hp/defence scaled for the given tier.
+ * Tier 1 = no scaling. Each additional tier adds 20% to base values.
+ * The original def object is never mutated.
+ */
+export function applyTierScaling(def, tier) {
+  if (tier <= 1) return def;
+  const m = 1 + (tier - 1) * 0.2;
+  return {
+    ...def,
+    hp:      Math.round(def.hp      * m),
+    defence: Math.round(def.defence * m),
+    xp:      Math.round(def.xp      * m),
+    stats: def.stats ? {
+      strength:    Math.round((def.stats.strength    ?? 0) * m),
+      dexterity:   Math.round((def.stats.dexterity   ?? 0) * m),
+      vitality:    Math.round((def.stats.vitality    ?? 0) * m),
+      intelligence:Math.round((def.stats.intelligence ?? 0) * m),
+      resilience:  Math.round((def.stats.resilience  ?? 0) * m),
+    } : def.stats,
+  };
+}
 
 function _renderSpecialAttack(atk) {
   const badges = [];
@@ -203,6 +241,10 @@ function _renderList() {
     const card = document.createElement('div');
     card.className = 'essentiary-card' + (locked ? ' essentiary-card-locked' : '');
     const imgExtra = LIST_IMG_CLASS[key] ? ` ${LIST_IMG_CLASS[key]}` : '';
+    const tier = locked ? 1 : getMonsterTier(key);
+    const tierBadge = (!locked && tier > 1)
+      ? `<div class="essentiary-card-tier">Tier ${tier}</div>`
+      : '';
     card.innerHTML = `
       <div class="essentiary-card-img-wrap">
         <img src="${asset(def.image)}" alt="${locked ? '???' : def.name}" class="essentiary-card-img${imgExtra}" loading="lazy">
@@ -211,6 +253,7 @@ function _renderList() {
         <div class="essentiary-card-name">${locked ? '???' : def.name}</div>
         <div class="essentiary-card-family">${locked ? '' : (MONSTER_FAMILIES[def.family]?.name ?? def.family)}</div>
         <div class="essentiary-card-desc">${locked ? 'Present its essence to Barnaby to unlock.' : (def.description ?? '')}</div>
+        ${tierBadge}
       </div>
     `;
     if (!locked) card.addEventListener('click', () => _openDetail(key));
@@ -256,6 +299,19 @@ function _openDetail(key) {
   const familyEl = document.getElementById('essentiary-detail-family');
   familyEl.innerHTML = `${familyIcon}${familyName}`;
   familyEl.title = familyDef?.description ?? '';
+
+  const tier = getMonsterTier(key);
+  const victories = tier - 1;
+  const tierEl = document.getElementById('essentiary-detail-tier');
+  if (tierEl) {
+    if (tier > 1) {
+      const victoryWord = victories === 1 ? 'victory' : 'victories';
+      tierEl.textContent = `Tier ${tier}  ·  ${victories} ${victoryWord}`;
+      tierEl.style.display = '';
+    } else {
+      tierEl.style.display = 'none';
+    }
+  }
 
   document.getElementById('essentiary-detail-desc').textContent = def.description ?? '';
 
@@ -326,3 +382,13 @@ function _openDetail(key) {
 
   _showDetailScreen();
 }
+
+// ── Save / restore ────────────────────────────────────────────────────────────
+registerSaveHandler('essentiary', {
+  serialize() {
+    return { arenaMonsterTiers: { ..._arenaMonsterTiers } };
+  },
+  restore(data) {
+    _arenaMonsterTiers = data.arenaMonsterTiers ?? {};
+  },
+});

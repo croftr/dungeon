@@ -23,7 +23,7 @@ import { showHelpDialog } from './help.js';
 import { asset } from './assets.js';
 import { initQuests } from './quest.js';
 import { initSlashTrail } from './slash-trail.js';
-import { initEssentiary } from './essentiary.js';
+import { initEssentiary, getMonsterTier, recordArenaVictory, applyTierScaling } from './essentiary.js';
 import { getSkillExpertise } from './skill-tree.js';
 import { MONSTER_DEFS } from './monster-defs.js';
 import { inst } from './monster-factory.js';
@@ -1451,19 +1451,20 @@ const _ARENA_INTRO_VIDEOS = {
   'treeman':           { overlay: 'treeman-arena-video-overlay',         video: 'treeman-arena-video',         skip: 'skip-treeman-arena-btn',         src: '/videos/treeman-arena.mp4' },
 };
 
-function _playArenaIntroVideo(monsterId) {
+function _playArenaIntroVideo(monsterId, onFinish) {
   const cfg = _ARENA_INTRO_VIDEOS[monsterId];
-  if (!cfg) return;
+  if (!cfg) { onFinish?.(); return; }
   const overlay = document.getElementById(cfg.overlay);
   const vid     = document.getElementById(cfg.video);
   const skipBtn = document.getElementById(cfg.skip);
-  if (!overlay || !vid) return;
+  if (!overlay || !vid) { onFinish?.(); return; }
 
   function finish() {
     overlay.style.opacity = '0';
     setTimeout(() => {
       vid.pause();
       overlay.classList.add('hidden');
+      onFinish?.();
     }, 500);
     if (skipBtn) skipBtn.onclick = null;
     vid.onended = null;
@@ -2233,6 +2234,8 @@ function _showArenaResult(text, className) {
 window._arenaEnter = function (monsterId) {
   const def = MONSTER_DEFS[monsterId];
   if (!def) { console.warn('Arena: unknown monster key', monsterId); return; }
+  const tier = getMonsterTier(monsterId);
+  const scaledDef = applyTierScaling(def, tier);
 
   // Save state to restore after the fight
   window._preArenaState = {
@@ -2289,7 +2292,7 @@ window._arenaEnter = function (monsterId) {
     let arenaMonster = null;
     if (template) {
       arenaMonster = inst(
-        def, 9999, 1, 4,
+        scaledDef, 9999, 1, 4,
         template.glbIdle, template.glbAttack, template.attackSound,
         template.scale, 0, 0, ARENA_LEVEL,
         null, template.glbDeath, template.glbHit,
@@ -2339,7 +2342,10 @@ window._arenaEnter = function (monsterId) {
           if (loadFill) { loadFill.style.transition = 'width 0.15s ease'; loadFill.style.width = '100%'; }
           setTimeout(() => {
             loadOverlay.classList.remove('visible');
-            _playArenaIntroVideo(monsterId);
+            _playArenaIntroVideo(monsterId, () => {
+              const tierLabel = tier > 1 ? ` — Tier ${tier}` : '';
+              _showArenaResult(`Fighting ${def.name}${tierLabel} · Let the battle begin!`, 'result-intro');
+            });
             setTimeout(() => {
               if (loadFill) { loadFill.style.transition = 'none'; loadFill.style.width = '0%'; }
             }, 400);
@@ -2351,6 +2357,7 @@ window._arenaEnter = function (monsterId) {
 
   // Callbacks fired by monster.js (victory) and party.js (defeat)
   window._arenaVictory = (row, col) => {
+    recordArenaVictory(monsterId);
     _showArenaResult('Victory!', 'result-victory');
     // Spawn a blue portal at the arena start location (7, 4) so it doesn't overlap loot.
     if (spawnArenaPortal) spawnArenaPortal(7, 4);

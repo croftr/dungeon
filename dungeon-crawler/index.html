@@ -2057,6 +2057,20 @@
       overflow: hidden;
     }
 
+    .essentiary-card-tier {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 2px 8px;
+      background: rgba(212, 160, 23, 0.15);
+      border: 1px solid rgba(212, 160, 23, 0.45);
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: bold;
+      color: #d4a017;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
     /* ── Detail Screen ── */
     #essentiary-detail {
       width: 100%;
@@ -2250,6 +2264,15 @@
     #essentiary-name-family #essentiary-detail-family {
       color: #a07838;
       text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
+    }
+
+    #essentiary-detail-tier {
+      font-size: 12px;
+      font-weight: bold;
+      color: #d4a017;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: 6px;
     }
 
     .essentiary-family-icon {
@@ -2601,6 +2624,12 @@
     #arena-result-banner.result-defeat {
       color: #cc4444;
     }
+
+    #arena-result-banner.result-intro {
+      color: #c8a84b;
+      font-size: clamp(16px, 2.8vw, 32px);
+      letter-spacing: 0.08em;
+    }
   </style>
 
   <div id="essentiary-overlay" class="essentiary-hidden">
@@ -2642,6 +2671,7 @@
 
         <!-- Column 2: Stats (description + table + on-hit effects + challenge) -->
         <div id="essentiary-col-stats">
+          <div id="essentiary-detail-tier" style="display:none"></div>
           <div id="essentiary-detail-desc"></div>
           <div id="essentiary-detail-stats"></div>
           <button id="essentiary-challenge">

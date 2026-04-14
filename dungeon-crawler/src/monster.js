@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
-import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createCrocodileSparkle, createHellSpawn, createBloodSplatter } from './particles.js';
+import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createCrocodileSparkle, createHellSpawn, createBloodSplatter, createGreenBloodSplatter } from './particles.js';
 import { CELL, isPassable } from './map.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
@@ -473,6 +473,28 @@ _applyMultiAttacks('Night Goblin', [
     damageTimings: [0.5],
     weight: 2,
     damageMultiplier: 0,  // no damage — pure status
+    specialAttack: true,
+    specialOnHitEffects: [{ effectId: 'poison', chance: 0.20 }],
+  },
+]);
+
+_applyMultiAttacks('Mushroom', [
+  {
+    name: 'sporeAttack',
+    glb: asset('/monsters/mushroom/attack.glb'),
+    sound: asset('/monsters/mushroom/standard-attack.mp3'),
+    soundTimings: [0.45],
+    damageTimings: [0.45],
+    weight: 4,
+  },
+  {
+    name: 'poisonCloud',
+    glb: asset('/monsters/mushroom/special-attack.glb'),
+    sound: asset('/monsters/mushroom/hiss.mp3'),
+    soundTimings: [0.5],
+    damageTimings: [0.5],
+    weight: 2,
+    damageMultiplier: 0,
     specialAttack: true,
     specialOnHitEffects: [{ effectId: 'poison', chance: 0.20 }],
   },
@@ -2474,17 +2496,21 @@ function _playHitAnimation(m, attackType, killer) {
   if (attackType === 'fireball' || attackType === 'banishment' || attackType === 'incinerate') {
     createHitSpark(mesh.position);
   } else if (!m.name.includes('Skeleton')) {
-    let yOffset;
-    if (m.name.includes('Treekin')) {
-      yOffset = 0.05;
-    } else if (['Goblin', 'Demon Spawn', 'Zombie'].some(n => m.name.includes(n))) {
-      yOffset = 0.45;
-    } else if (['Mummy', 'Orc', 'Ghoul', 'Iceman'].some(n => m.name.includes(n))) {
-      yOffset = 0.65;
+    if (m.name.includes('Mushroom')) {
+      createGreenBloodSplatter(mesh.position, 0.45);
     } else {
-      yOffset = 0.9;
+      let yOffset;
+      if (m.name.includes('Treekin')) {
+        yOffset = 0.05;
+      } else if (['Goblin', 'Demon Spawn', 'Zombie'].some(n => m.name.includes(n))) {
+        yOffset = 0.45;
+      } else if (['Mummy', 'Orc', 'Ghoul', 'Iceman'].some(n => m.name.includes(n))) {
+        yOffset = 0.65;
+      } else {
+        yOffset = 0.9;
+      }
+      createBloodSplatter(mesh.position, yOffset);
     }
-    createBloodSplatter(mesh.position, yOffset);
   }
 
   // Standard hit flash and knockback logic below...
