@@ -57,7 +57,7 @@
     "name": "Resist Poison",
     "description": "Reduces chance of being poisoned by 50% for 60 seconds.",
     "type": "buff",
-    "icon": "/icons/cure-poison.webp",
+    "icon": "/icons/resist-poison.webp",
     "color": "#80ff80",
     "duration": 60,
     "statusResistances": {

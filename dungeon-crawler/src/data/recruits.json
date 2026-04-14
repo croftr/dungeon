@@ -44,7 +44,9 @@
             "resilience": 8
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
-        "startingSkills": [],
+        "startingSkills": [
+            "Sanctuary"
+        ],
         "image": "/heros/human_paladin.webp",
         "leftHand": "Shield",
         "rightHand": "Sword",
@@ -194,7 +196,9 @@
             "resilience": 6
         },
         "bio": "A graceful tempest of flashing blades. Lumni dances through her enemies, turning battle into a bloody, beautiful art form.",
-        "startingSkills": [],
+        "startingSkills": [
+            "War Dance"
+        ],
         "startingInventory": [
             "Cure Poison Potion",
             "Minor Rejuvenate Potion",
@@ -218,7 +222,7 @@
             "strength": 4,
             "dexterity": 6,
             "vitality": 6,
-            "intelligence": 109,
+            "intelligence": 19,
             "resilience": 8
         },
         "bio": "A devoted healer whose presence brings hope to the darkest depths. Seraphina draws upon pure light to mend flesh and soul.",

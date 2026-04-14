@@ -2476,7 +2476,7 @@ function _playHitAnimation(m, attackType, killer) {
   } else if (!m.name.includes('Skeleton')) {
     let yOffset;
     if (m.name.includes('Treekin')) {
-      yOffset = 0.2;
+      yOffset = 0.05;
     } else if (['Goblin', 'Demon Spawn', 'Zombie'].some(n => m.name.includes(n))) {
       yOffset = 0.45;
     } else if (['Mummy', 'Orc', 'Ghoul', 'Iceman'].some(n => m.name.includes(n))) {

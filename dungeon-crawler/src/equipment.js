@@ -2684,14 +2684,57 @@ let _ptmMousedownRef     = null;   // saved listener refs for clean removal
 let _ptmKeydownRef       = null;
 let _ptmContextmenuRef   = null;
 
-/** Draw a spell icon into a 32 × 32 canvas and return a CSS cursor value. */
+/**
+ * Draw a spell icon into a 40 × 40 canvas with a magical sparkle effect
+ * and return a CSS cursor value.  The icon sits centred at (4,4)→(36,36)
+ * with a purple glow; five 4-pointed stars are scattered around its edges
+ * to evoke active spellcasting rather than dragging an icon.
+ */
 function _buildSpellCursor(iconUrl, callback) {
   const img = new Image();
   img.onload = () => {
+    const SIZE = 40, ICON = 32, OFF = 4;
     const c = document.createElement('canvas');
-    c.width = 32; c.height = 32;
-    c.getContext('2d').drawImage(img, 0, 0, 32, 32);
-    callback(`url('${c.toDataURL()}') 16 16, crosshair`);
+    c.width = SIZE; c.height = SIZE;
+    const ctx = c.getContext('2d');
+
+    // Icon with a soft arcane glow
+    ctx.save();
+    ctx.shadowColor = 'rgba(180, 120, 255, 0.85)';
+    ctx.shadowBlur  = 7;
+    ctx.drawImage(img, OFF, OFF, ICON, ICON);
+    ctx.restore();
+
+    // 4-pointed diamond sparkle at (x, y) with arm-radius r and opacity a
+    function sparkle(x, y, r, a) {
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.translate(x, y);
+      ctx.fillStyle   = '#ffffff';
+      ctx.shadowColor = '#d0a0ff';
+      ctx.shadowBlur  = 6;
+      ctx.beginPath();
+      for (let i = 0; i < 8; i++) {
+        const angle = (i * Math.PI) / 4 - Math.PI / 4;
+        const len   = i % 2 === 0 ? r : r * 0.22;
+        i === 0
+          ? ctx.moveTo(Math.cos(angle) * len, Math.sin(angle) * len)
+          : ctx.lineTo(Math.cos(angle) * len, Math.sin(angle) * len);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Five sparkles scattered around the icon perimeter
+    sparkle( 2,  2, 3.8, 0.92);  // top-left  corner
+    sparkle(38,  3, 2.8, 0.80);  // top-right corner
+    sparkle( 4, 38, 2.8, 0.78);  // bottom-left corner
+    sparkle(38, 37, 3.2, 0.88);  // bottom-right corner
+    sparkle(20,  0, 2.2, 0.72);  // top-centre edge
+
+    // Hotspot at icon centre (OFF + ICON/2 = 20)
+    callback(`url('${c.toDataURL()}') 20 20, crosshair`);
   };
   img.onerror = () => callback('crosshair');
   img.src = iconUrl;
@@ -2731,11 +2774,12 @@ function _exitPartyTargetMode() {
 function _ptmOnMousedown(e) {
   if (e.button !== 0) return; // right-click handled by contextmenu
 
-  // Walk up from the click target to find a party portrait
-  const portrait = e.target.closest('.portrait');
-  const card     = portrait && portrait.closest('.member-card');
+  // Walk up from the click target to find a party card.
+  // Any area of the card is valid except clickable action/equip slots.
+  const card       = e.target.closest('.member-card');
+  const isEquipSlot = e.target.closest('.equip-slot');
 
-  if (card) {
+  if (card && !isEquipSlot) {
     e.preventDefault();
     e.stopPropagation();
     // The portrait has a 'click' listener that opens inventory.
@@ -4074,6 +4118,7 @@ function _useSanctuary(member, memberIndex) {
   }, sanctuaryDurationMs);
 
   _startSkillCooldownUI(memberIndex, _sanctuaryCooldownEnd);
+  refreshPartyCards(); // update status-effect banners immediately
 }
 
 // ── Holy Radiance (Alaric) ────────────────────────────────────────────────

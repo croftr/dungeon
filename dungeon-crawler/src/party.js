@@ -633,6 +633,11 @@ function refreshAll() {
     }
     refreshMember(member);
   });
+  // Sync status-effect banners on every full refresh so skill buffs like
+  // Sanctuary appear immediately when cast (and clear when they expire),
+  // not only on the next status-tick. updateStatusBanners has a key-based
+  // early-exit so calling it here is cheap when nothing has changed.
+  updateStatusBanners();
 }
 
 // ─────────────────────────────────────────────
@@ -1306,32 +1311,38 @@ function updateStatusBanners() {
     }
 
     const activeNames = getActiveEffectsForMember(m);
-    const defs = [];
+    // Build entries preserving the display name and the tooltip shape to use.
+    // STATUS_EFFECT_DEFS entries (poison, regeneration, etc.) use the status-effect
+    // tooltip path (shows duration).  Skill/spell buffs use the inventory skill
+    // tooltip path (shows cooldown + description) — the same tooltip the player
+    // sees when hovering the skill slot in the inventory modal.
+    const entries = [];
     activeNames.forEach(name => {
-      // Prefer STATUS_EFFECT_DEFS: timed active effects (regeneration, poison, etc.)
-      // live in activeDebuffs and are keyed there by their status-effect definition,
-      // which has the authoritative 'buff'/'debuff' type even when a same-named spell
-      // exists with a different type (e.g. the Regeneration spell is now type 'healing').
       const statusDef = Object.values(STATUS_EFFECT_DEFS).find(d => d.name === name);
       const def = statusDef ?? getSkillOrSpellDef(name);
       if (def && (def.type === 'buff' || def.type === 'debuff')) {
-        defs.push(def);
+        entries.push({ name, def, fromStatusEffects: !!statusDef });
       }
     });
 
-    // Build a key string so we only rebuild the DOM when the set of effects changes
-    const key = defs.map(d => d.name || d.id).join('|');
+    const key = activeNames.join('|');
     if (banner._prevKeys === key) return;
     banner._prevKeys = key;
 
     banner.innerHTML = '';
     hideTooltip();
-    defs.forEach(def => {
+    entries.forEach(({ name, def, fromStatusEffects }) => {
       const img = document.createElement('img');
       img.src = asset(def.icon);
       img.className = 'buff-icon';
-      img.alt = def.name;
-      attachTooltipListeners(img, () => ({ ...def, isStatusEffect: true }), true);
+      img.alt = name;
+      // Match the tooltip shape used in the inventory:
+      //   status effects  → isStatusEffect (shows duration)
+      //   skills / spells → isSkill        (shows cooldown + description)
+      const tooltipData = fromStatusEffects
+        ? { ...def, isStatusEffect: true }
+        : { ...def, name, isSkill: true };
+      attachTooltipListeners(img, () => tooltipData, true);
       banner.appendChild(img);
     });
   });
