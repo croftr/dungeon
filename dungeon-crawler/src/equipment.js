@@ -5210,6 +5210,29 @@ function _readParchment(memberIndex, invIndex, def) {
       html += `<p>${def.description || 'The parchment is blank.'}</p>`;
     }
     body.innerHTML = html;
+  } else if ((def.parchmentType === 'essence-armour' || def.parchmentType === 'essence-weapons') && def.essenceName) {
+    const isWeapons = def.parchmentType === 'essence-weapons';
+    const weaponNames = new Set(WEAPONS.map(w => w.name));
+    const label = isWeapons ? 'weapons' : 'armour';
+    let html = `<p style="margin-bottom: 20px;"><em>The following ancient monster-crafted ${label} recipes have been deciphered:</em></p>`;
+    FORGE
+      .filter(item => item.ingredients.some(i => i.name === def.essenceName))
+      .filter(item => isWeapons ? weaponNames.has(item.name) : !weaponNames.has(item.name))
+      .forEach(item => {
+        html += `<div style="margin-bottom: 15px;">`;
+        html += `<strong style="font-size: 1.1em; color: #5a2a1a;">${item.name}</strong><br/>`;
+        if (item.ingredients && item.ingredients.length > 0) {
+          html += `<div style="margin: 5px 0;">`;
+          item.ingredients.forEach(ing => {
+            html += `• ${ing.quantity}x ${ing.name}<br/>`;
+          });
+          html += `</div>`;
+        } else {
+          html += `• Unknown ingredients<br/>`;
+        }
+        html += `</div>`;
+      });
+    body.innerHTML = html;
   } else {
     body.innerHTML = `<p>${def.description || 'The parchment is blank.'}</p>`;
   }

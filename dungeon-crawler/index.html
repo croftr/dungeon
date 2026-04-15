@@ -1574,55 +1574,73 @@
     <div id="alchemy-modal">
       <div id="alchemy-header" class="chest-header-style">
         <div id="alchemy-title-wrap">
-          <img data-src="/icons/alchemy_workshop.webp" id="alchemy-header-icon" alt="Alchemy">
+          <img data-src="/icons/alchemy1.png" id="alchemy-header-icon" alt="Alchemy">
           <span id="alchemy-title">Alchemy Workshop</span>
         </div>
         <button id="alchemy-close" aria-label="Close">&times;</button>
       </div>
-      <div id="alchemy-body">
-        <div id="alchemy-container">
-          <!-- Left: Ingredients (8 slots) -->
-          <div id="alchemy-ingredients">
-            <h4 class="alchemy-section-title">Ingredients</h4>
-            <div id="alchemy-ingredient-grid">
-              <div class="chest-slot alchemy-slot" data-index="0"></div>
-              <div class="chest-slot alchemy-slot" data-index="1"></div>
-              <div class="chest-slot alchemy-slot" data-index="2"></div>
-              <div class="chest-slot alchemy-slot" data-index="3"></div>
-              <div class="chest-slot alchemy-slot" data-index="4"></div>
-              <div class="chest-slot alchemy-slot" data-index="5"></div>
-              <div class="chest-slot alchemy-slot" data-index="6"></div>
-              <div class="chest-slot alchemy-slot" data-index="7"></div>
+      <div class="workbench-layout">
+        <!-- Known Recipes sidebar -->
+        <div id="alchemy-known-recipes-section" class="workbench-sidebar">
+          <div class="bench-sidebar-header">
+            <h4 class="alchemy-section-title bench-known-title">Known Recipes</h4>
+            <div class="bench-filter-tabs" id="alchemy-filter-tabs">
+              <button class="bench-filter-tab active" data-filter="all">All</button>
+              <button class="bench-filter-tab" data-filter="craftable">✓ Can Craft</button>
+            </div>
+          </div>
+          <div id="alchemy-known-recipes-list"></div>
+        </div>
+
+        <div class="workbench-main">
+          <!-- Crafting area at top -->
+          <div id="alchemy-body">
+            <div id="alchemy-container">
+              <!-- Left: Ingredients (8 slots) -->
+              <div id="alchemy-ingredients">
+                <h4 class="alchemy-section-title">Ingredients</h4>
+                <div id="alchemy-ingredient-grid">
+                  <div class="chest-slot alchemy-slot" data-index="0"></div>
+                  <div class="chest-slot alchemy-slot" data-index="1"></div>
+                  <div class="chest-slot alchemy-slot" data-index="2"></div>
+                  <div class="chest-slot alchemy-slot" data-index="3"></div>
+                  <div class="chest-slot alchemy-slot" data-index="4"></div>
+                  <div class="chest-slot alchemy-slot" data-index="5"></div>
+                  <div class="chest-slot alchemy-slot" data-index="6"></div>
+                  <div class="chest-slot alchemy-slot" data-index="7"></div>
+                </div>
+              </div>
+
+              <!-- Middle: Transmute Button -->
+              <div id="alchemy-controls">
+                <button id="alchemy-transmute-btn">TRANSMUTE</button>
+                <div id="alchemy-arrow">→</div>
+              </div>
+
+              <!-- Right: Result Area -->
+              <div id="alchemy-result">
+                <h4 class="alchemy-section-title">Result</h4>
+                <div id="alchemy-result-slot" class="chest-slot alchemy-slot" data-index="8"></div>
+              </div>
             </div>
           </div>
 
-          <!-- Middle: Transmute Button -->
-          <div id="alchemy-controls">
-            <button id="alchemy-transmute-btn">TRANSMUTE</button>
-            <div id="alchemy-arrow">→</div>
+          <!-- Decorative image (lower half) -->
+          <div class="workbench-deco workbench-deco-alchemy">
+            <img data-src="/icons/alchemy1.png" alt="" class="workbench-deco-img">
           </div>
 
-          <!-- Right: Result Area -->
-          <div id="alchemy-result">
-            <h4 class="alchemy-section-title">Result</h4>
-            <div id="alchemy-result-slot" class="chest-slot alchemy-slot" data-index="8"></div>
+          <!-- Alchemy message bar -->
+          <div id="alchemy-message-bar">
+            <span id="alchemy-message-icon">⚗</span>
+            <span id="alchemy-message-text"></span>
+          </div>
+
+          <!-- Submit Parchment at bottom center -->
+          <div class="bench-parchment-bottom">
+            <button id="alchemy-parchment-btn">📜 Submit Parchment</button>
           </div>
         </div>
-        <div id="alchemy-parchment-bar">
-          <button id="alchemy-parchment-btn">📜 Submit Parchment</button>
-        </div>
-      </div>
-
-      <!-- Known Recipes Section -->
-      <div id="alchemy-known-recipes-section">
-        <h4 class="alchemy-section-title bench-known-title">Known Recipes</h4>
-        <div id="alchemy-known-recipes-list"></div>
-      </div>
-
-      <!-- Alchemy message bar — shows feedback from transmutation -->
-      <div id="alchemy-message-bar">
-        <span id="alchemy-message-icon">⚗</span>
-        <span id="alchemy-message-text"></span>
       </div>
     </div>
 
@@ -1650,55 +1668,73 @@
     <div id="anvil-modal">
       <div id="anvil-header" class="chest-header-style">
         <div id="anvil-title-wrap">
-          <img data-src="/icons/anvil.svg" id="anvil-header-icon" alt="Anvil">
+          <img data-src="/icons/forge1.png" id="anvil-header-icon" alt="Forge">
           <span id="anvil-title">Blacksmith's Forge</span>
         </div>
         <button id="anvil-close" aria-label="Close">&times;</button>
       </div>
-      <div id="anvil-body">
-        <div id="anvil-container">
-          <!-- Left: Ingredients (8 slots) -->
-          <div id="anvil-ingredients">
-            <h4 class="anvil-section-title">Materials</h4>
-            <div id="anvil-ingredient-grid">
-              <div class="chest-slot anvil-slot" data-index="0"></div>
-              <div class="chest-slot anvil-slot" data-index="1"></div>
-              <div class="chest-slot anvil-slot" data-index="2"></div>
-              <div class="chest-slot anvil-slot" data-index="3"></div>
-              <div class="chest-slot anvil-slot" data-index="4"></div>
-              <div class="chest-slot anvil-slot" data-index="5"></div>
-              <div class="chest-slot anvil-slot" data-index="6"></div>
-              <div class="chest-slot anvil-slot" data-index="7"></div>
+      <div class="workbench-layout">
+        <!-- Known Recipes sidebar -->
+        <div id="anvil-known-recipes-section" class="workbench-sidebar">
+          <div class="bench-sidebar-header">
+            <h4 class="anvil-section-title bench-known-title">Known Recipes</h4>
+            <div class="bench-filter-tabs" id="anvil-filter-tabs">
+              <button class="bench-filter-tab active" data-filter="all">All</button>
+              <button class="bench-filter-tab" data-filter="craftable">✓ Can Craft</button>
+            </div>
+          </div>
+          <div id="anvil-known-recipes-list"></div>
+        </div>
+
+        <div class="workbench-main">
+          <!-- Crafting area at top -->
+          <div id="anvil-body">
+            <div id="anvil-container">
+              <!-- Left: Materials (8 slots) -->
+              <div id="anvil-ingredients">
+                <h4 class="anvil-section-title">Materials</h4>
+                <div id="anvil-ingredient-grid">
+                  <div class="chest-slot anvil-slot" data-index="0"></div>
+                  <div class="chest-slot anvil-slot" data-index="1"></div>
+                  <div class="chest-slot anvil-slot" data-index="2"></div>
+                  <div class="chest-slot anvil-slot" data-index="3"></div>
+                  <div class="chest-slot anvil-slot" data-index="4"></div>
+                  <div class="chest-slot anvil-slot" data-index="5"></div>
+                  <div class="chest-slot anvil-slot" data-index="6"></div>
+                  <div class="chest-slot anvil-slot" data-index="7"></div>
+                </div>
+              </div>
+
+              <!-- Middle: Forge Button -->
+              <div id="anvil-controls">
+                <button id="anvil-forge-btn">FORGE</button>
+                <div id="anvil-arrow">→</div>
+              </div>
+
+              <!-- Right: Result Area -->
+              <div id="anvil-result">
+                <h4 class="anvil-section-title">Result</h4>
+                <div id="anvil-result-slot" class="chest-slot anvil-slot" data-index="8"></div>
+              </div>
             </div>
           </div>
 
-          <!-- Middle: Forge Button -->
-          <div id="anvil-controls">
-            <button id="anvil-forge-btn">FORGE</button>
-            <div id="anvil-arrow">→</div>
+          <!-- Decorative forge image (lower half) -->
+          <div class="workbench-deco workbench-deco-forge">
+            <img data-src="/icons/forge1.png" alt="" class="workbench-deco-img">
           </div>
 
-          <!-- Right: Result Area -->
-          <div id="anvil-result">
-            <h4 class="anvil-section-title">Result</h4>
-            <div id="anvil-result-slot" class="chest-slot anvil-slot" data-index="8"></div>
+          <!-- Forge message bar -->
+          <div id="anvil-message-bar">
+            <span id="anvil-message-icon">⚒</span>
+            <span id="anvil-message-text"></span>
+          </div>
+
+          <!-- Submit Parchment at bottom center -->
+          <div class="bench-parchment-bottom">
+            <button id="anvil-parchment-btn">📜 Submit Parchment</button>
           </div>
         </div>
-        <div id="anvil-parchment-bar">
-          <button id="anvil-parchment-btn">📜 Submit Parchment</button>
-        </div>
-      </div>
-
-      <!-- Known Recipes Section -->
-      <div id="anvil-known-recipes-section">
-        <h4 class="anvil-section-title bench-known-title">Known Recipes</h4>
-        <div id="anvil-known-recipes-list"></div>
-      </div>
-
-      <!-- Forge message bar -->
-      <div id="anvil-message-bar">
-        <span id="anvil-message-icon">⚒</span>
-        <span id="anvil-message-text"></span>
       </div>
     </div>
 

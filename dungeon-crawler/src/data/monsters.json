@@ -429,6 +429,10 @@
         "chance": 1
       },
       {
+        "item": "Ancient Heartwood",
+        "chance": 1
+      },
+      {
         "item": "Life Staff",
         "chance": 0.1
       }
@@ -790,9 +794,18 @@
       "resilience": 6
     },
     "drops": [
-      { "item": "Life Essence", "chance": 0.5 },
-      { "item": "Poison Vial", "chance": 0.5 },
-      { "item": "Fermented Sugar", "chance": 0.2 }
+      {
+        "item": "Life Essence",
+        "chance": 0.5
+      },
+      {
+        "item": "Poison Vial",
+        "chance": 0.5
+      },
+      {
+        "item": "Fermented Sugar",
+        "chance": 0.2
+      }
     ]
   },
   "giant": {
@@ -856,8 +869,14 @@
       }
     ],
     "uniqueArenaItem": [
-      { "item": "Giant's Club", "chance": 0.25 },
-      { "item": "Giant's Loin Cloth", "chance": 0.25 }
+      {
+        "item": "Giant's Club",
+        "chance": 0.25
+      },
+      {
+        "item": "Giant's Loin Cloth",
+        "chance": 0.25
+      }
     ]
   },
   "demon": {

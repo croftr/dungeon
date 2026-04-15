@@ -4,7 +4,7 @@ import { CELL, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld, buildLevel,
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, isInFrontOfPlayer, player, FACING_ANGLES, setPlayerFrozen } from './player.js';
 import { showMessage, drawMinimap, updateStatus } from './minimap.js';
-import { getItemDef } from './items.js';
+import { getItemDef, ITEMS } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refreshPartyCards, setHp, applyStatusEffect } from './party.js';
 import { addLogEntry } from './battle-log.js';
 import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playLearntSound, playSoundByUrl, playQuestAudio, fadeOutQuestAudio, playPartyHitSound, playInventorySortSound } from './audio.js';
@@ -174,24 +174,58 @@ let _seenEssences = new Set();
 let _unlockedRecipes = new Set();
 let _monsterNpcStock = [...BARNABY_DATA.stock]; // Array of parchment item names
 
-const ESSENCE_TO_PARCHMENTS = {
-    "Aqua Man Essence": ["Trickster's Hood Parchment"],
-    "Crocodile Warrior Essence": ["Crocodilian Boots Parchment"],
-    "Demon Essence": ["Seers Shawl Parchment"],
-    "Giant Essence": ["Barbarian's Loin Cloth Parchment", "Barbarian's Club Parchment"],
-    "Lizard Man Essence": ["Lizard Scale Cloak Parchment"],
-    "Minotaur Essence": ["Minotaur Cuirass Parchment"],
-    "Ogre Essence": ["Ogre Helm Parchment"],
-    "Demon Ogre Essence": ["Demon Blade Parchment"],
-    "Tree Man Essence": ["Pyro Palms Parchment"]
-};
 
 const FORGE_SLOTS = 9; // 8 materials + 1 result
 const _forgeContents = Array(FORGE_SLOTS).fill(null);
 let _forgeModalOpen = false;
 const _knownForgeRecipes = new Set(); // result item names learned by the party
+let _forgeRecipeFilter = 'all';   // 'all' | 'craftable'
+let _alchemyRecipeFilter = 'all'; // 'all' | 'craftable'
 
 const _FORGE_WEAPON_NAMES = new Set(WEAPONS_DATA.map(w => w.name));
+
+// Dynamically generate essence parchment item defs from forge.json and inject into ITEMS,
+// so getItemDef() can resolve them without manual entries in parchments.json.
+(function _buildEssenceParchments() {
+    const essenceToRecipes = {};
+    FORGE_DATA.forEach(recipe => {
+        recipe.ingredients.forEach(ing => {
+            if (ing.name.endsWith(' Essence') && ing.name !== 'Life Essence') {
+                (essenceToRecipes[ing.name] ??= []).push(recipe.name);
+            }
+        });
+    });
+    Object.entries(essenceToRecipes).forEach(([essence, recipeNames]) => {
+        const baseName = essence.replace(' Essence', '');
+        const uniqueNames = [...new Set(recipeNames)];
+        const hasArmour = uniqueNames.some(r => !_FORGE_WEAPON_NAMES.has(r));
+        const hasWeapons = uniqueNames.some(r => _FORGE_WEAPON_NAMES.has(r));
+        if (hasArmour) {
+            ITEMS.push({
+                name: `${baseName} Armour Parchment`,
+                icon: '/icons/forge-armour.webp',
+                description: `An ancient looking piece of parchment. It documents the secrets of forging ${baseName} armour.`,
+                type: 'parchment',
+                parchmentType: 'essence-armour',
+                essenceName: essence,
+                value: 25,
+                weight: 0.1,
+            });
+        }
+        if (hasWeapons) {
+            ITEMS.push({
+                name: `${baseName} Weapons Parchment`,
+                icon: '/icons/forge-weapons.webp',
+                description: `An ancient looking piece of parchment. It documents the secrets of forging ${baseName} weapons.`,
+                type: 'parchment',
+                parchmentType: 'essence-weapons',
+                essenceName: essence,
+                value: 25,
+                weight: 0.1,
+            });
+        }
+    });
+})();
 
 /**
  * Returns true if the current party is holding a monster essence that the NPC has NOT seen yet.
@@ -1335,6 +1369,28 @@ export function initObjects(scene, camera) {
     if (anvilParchmentPickerClose) {
         anvilParchmentPickerClose.onclick = (e) => { e.stopPropagation(); _hideAnvilParchmentPicker(); };
     }
+
+    // Alchemy recipe filter tabs
+    document.querySelectorAll('#alchemy-filter-tabs .bench-filter-tab').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            _alchemyRecipeFilter = btn.dataset.filter;
+            document.querySelectorAll('#alchemy-filter-tabs .bench-filter-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            _renderKnownAlchemyRecipes();
+        });
+    });
+
+    // Forge recipe filter tabs
+    document.querySelectorAll('#anvil-filter-tabs .bench-filter-tab').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            _forgeRecipeFilter = btn.dataset.filter;
+            document.querySelectorAll('#anvil-filter-tabs .bench-filter-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            _renderKnownForgeRecipes();
+        });
+    });
 
     // Stop ALL clicks inside the weapon rack overlay from reaching the window listener
     const weaponRackOverlayEl = document.getElementById('weapon-rack-overlay');
@@ -3785,14 +3841,14 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
                 if (!_seenEssences.has(essence)) {
                     _seenEssences.add(essence);
                     playNewAudio = true;
-
-                    const parchments = ESSENCE_TO_PARCHMENTS[essence] || [];
-                    parchments.forEach(p => {
-                        if (!_monsterNpcStock.includes(p)) {
-                            _monsterNpcStock.push(p);
-                            showMessage(`Barnaby recognises the ${essence}! A ${p} is now available in his shop.`);
+                    const baseName = essence.replace(' Essence', '');
+                    for (const suffix of ['Armour Parchment', 'Weapons Parchment']) {
+                        const pName = `${baseName} ${suffix}`;
+                        if (getItemDef(pName) && !_monsterNpcStock.includes(pName)) {
+                            _monsterNpcStock.push(pName);
+                            showMessage(`Barnaby recognises the ${essence}! A ${pName} is now available in his shop.`);
                         }
-                    });
+                    }
                 }
             });
 
@@ -3854,14 +3910,16 @@ function _renderMerchantShop() {
             slot.className = 'merch-slot';
 
             // Add "eye" icon for parchments in the monster shop to view ingredients
-            if (_activeMerchantAvailable === _monsterNpcStock && itemDef.type === 'parchment' && itemDef.recipeName) {
+            if (_activeMerchantAvailable === _monsterNpcStock && itemDef.type === 'parchment'
+                    && (itemDef.recipeName || itemDef.essenceName)) {
                 const eye = document.createElement('div');
                 eye.className = 'merchant-slot-inspect';
                 eye.innerHTML = '👁';
                 eye.title = 'View Ingredients';
                 eye.onclick = (e) => {
                     e.stopPropagation();
-                    _showParchmentViewer(itemDef.recipeName);
+                    const recipes = _getForgeRecipesForParchment(itemDef.parchmentType, itemDef.recipeName, itemDef.essenceName);
+                    _showParchmentViewer(recipes);
                 };
                 slot.appendChild(eye);
             }
@@ -4904,6 +4962,15 @@ export function setWorldFlags(flags) {
     _seenEssences = new Set(flags.seenEssences ?? []);
     _unlockedRecipes = new Set(flags.unlockedRecipes ?? []);
     _monsterNpcStock = flags.monsterNpcStock ?? [];
+    // Migration: old saves used per-item parchment names (e.g. "Ogre Helm Parchment").
+    // If essences were seen but no new-style grouped parchments are in stock, reset
+    // _seenEssences so Barnaby re-offers the correct grouped parchments on next visit.
+    const hasNewStyleParchment = _monsterNpcStock.some(
+        n => n.endsWith(' Armour Parchment') || n.endsWith(' Weapons Parchment')
+    );
+    if (_seenEssences.size > 0 && !hasNewStyleParchment) {
+        _seenEssences.clear();
+    }
     if (_level2HoleClosed) level2Map[17][23] = CELL_FLOOR;
     if (_level1HoleRoomSpawned) {
         for (let r = 24; r <= 26; r++) {
@@ -4971,6 +5038,17 @@ export function setPendingContainerOverrides(overrides) {
 //  KNOWN RECIPES — RENDER
 // ─────────────────────────────────────────────
 
+function _countPartyItem(itemName) {
+    let count = 0;
+    for (const member of party) {
+        if (member.isEmpty) continue;
+        for (const item of member.inventory) {
+            if (item && item.name === itemName) count++;
+        }
+    }
+    return count;
+}
+
 function _renderKnownAlchemyRecipes() {
     const list = document.getElementById('alchemy-known-recipes-list');
     if (!list) return;
@@ -4979,14 +5057,36 @@ function _renderKnownAlchemyRecipes() {
         list.innerHTML = '<div class="bench-no-recipes">No recipes discovered yet.</div>';
         return;
     }
-    [..._knownAlchemyRecipes].reverse().forEach(resultName => {
+    const allNames = [..._knownAlchemyRecipes].reverse();
+    const filtered = _alchemyRecipeFilter === 'craftable'
+        ? allNames.filter(name => {
+              const r = POTIONS_DATA.find(p => p.name === name);
+              return r && r.ingredients.every(ing => _countPartyItem(ing.name) >= ing.quantity);
+          })
+        : allNames;
+    if (filtered.length === 0) {
+        list.innerHTML = '<div class="bench-no-recipes">No craftable recipes available.</div>';
+        return;
+    }
+    filtered.forEach(resultName => {
         const recipe = POTIONS_DATA.find(p => p.name === resultName);
         if (!recipe) return;
         const entry = document.createElement('div');
         entry.className = 'bench-recipe-entry';
         entry.title = 'Click to load ingredients';
-        entry.innerHTML = `<span class="bench-recipe-name">${resultName}</span>`
-            + recipe.ingredients.map(ing => `<span class="bench-recipe-ing">• ${ing.quantity}× ${ing.name}</span>`).join('');
+
+        let canCraft = true;
+        let ingredientsHtml = '';
+        for (const ing of recipe.ingredients) {
+            const hasQty = _countPartyItem(ing.name);
+            const isSufficient = hasQty >= ing.quantity;
+            if (!isSufficient) canCraft = false;
+
+            const colorClass = isSufficient ? 'bench-ing-have' : 'bench-ing-missing';
+            ingredientsHtml += `<span class="bench-recipe-ing ${colorClass}">• ${ing.quantity}× ${ing.name}</span>`;
+        }
+
+        entry.innerHTML = `<span class="bench-recipe-name ${canCraft ? 'recipe-ready' : ''}">${resultName}</span>` + ingredientsHtml;
         entry.onclick = () => _autoPopulateAlchemySlots(recipe);
         list.appendChild(entry);
     });
@@ -5000,14 +5100,36 @@ function _renderKnownForgeRecipes() {
         list.innerHTML = '<div class="bench-no-recipes">No recipes discovered yet.</div>';
         return;
     }
-    [..._knownForgeRecipes].reverse().forEach(resultName => {
+    const allNames = [..._knownForgeRecipes].reverse();
+    const filtered = _forgeRecipeFilter === 'craftable'
+        ? allNames.filter(name => {
+              const r = FORGE_DATA.find(r => r.name === name);
+              return r && r.ingredients.every(ing => _countPartyItem(ing.name) >= ing.quantity);
+          })
+        : allNames;
+    if (filtered.length === 0) {
+        list.innerHTML = '<div class="bench-no-recipes">No craftable recipes available.</div>';
+        return;
+    }
+    filtered.forEach(resultName => {
         const recipe = FORGE_DATA.find(r => r.name === resultName);
         if (!recipe) return;
         const entry = document.createElement('div');
         entry.className = 'bench-recipe-entry';
         entry.title = 'Click to load materials';
-        entry.innerHTML = `<span class="bench-recipe-name">${resultName}</span>`
-            + recipe.ingredients.map(ing => `<span class="bench-recipe-ing">• ${ing.quantity}× ${ing.name}</span>`).join('');
+
+        let canCraft = true;
+        let ingredientsHtml = '';
+        for (const ing of recipe.ingredients) {
+            const hasQty = _countPartyItem(ing.name);
+            const isSufficient = hasQty >= ing.quantity;
+            if (!isSufficient) canCraft = false;
+
+            const colorClass = isSufficient ? 'bench-ing-have' : 'bench-ing-missing';
+            ingredientsHtml += `<span class="bench-recipe-ing ${colorClass}">• ${ing.quantity}× ${ing.name}</span>`;
+        }
+
+        entry.innerHTML = `<span class="bench-recipe-name ${canCraft ? 'recipe-ready' : ''}">${resultName}</span>` + ingredientsHtml;
         entry.onclick = () => _autoPopulateForgeSlots(recipe);
         list.appendChild(entry);
     });
@@ -5094,7 +5216,7 @@ function _autoPopulateForgeSlots(recipe) {
 // ─────────────────────────────────────────────
 
 const _ALCHEMY_PARCHMENT_TYPES = new Set(['minor-potions', 'party-potions', 'potions']);
-const _FORGE_PARCHMENT_TYPES = new Set(['forge-armour', 'forge-weapons']);
+const _FORGE_PARCHMENT_TYPES = new Set(['forge-armour', 'forge-weapons', 'essence-armour', 'essence-weapons', 'essence-recipe']);
 
 function _getAlchemyRecipesForParchment(parchmentType) {
     return POTIONS_DATA.filter(p => {
@@ -5105,9 +5227,17 @@ function _getAlchemyRecipesForParchment(parchmentType) {
     }).map(p => p.name);
 }
 
-function _getForgeRecipesForParchment(parchmentType, recipeName) {
+function _getForgeRecipesForParchment(parchmentType, recipeName, essenceName) {
     if (parchmentType === 'essence-recipe' && recipeName) {
         return [recipeName];
+    }
+    if ((parchmentType === 'essence-armour' || parchmentType === 'essence-weapons') && essenceName) {
+        return [...new Set(FORGE_DATA
+            .filter(item => item.ingredients.some(i => i.name === essenceName))
+            .filter(item => parchmentType === 'essence-weapons'
+                ? _FORGE_WEAPON_NAMES.has(item.name)
+                : !_FORGE_WEAPON_NAMES.has(item.name))
+            .map(item => item.name))];
     }
     return FORGE_DATA.filter(item => {
         if (parchmentType === 'forge-weapons') return _FORGE_WEAPON_NAMES.has(item.name);
@@ -5134,7 +5264,7 @@ function _submitParchmentToAlchemy(parchmentDef, memberIdx, invIdx) {
 }
 
 function _submitParchmentToForge(parchmentDef, memberIdx, invIdx) {
-    const names = _getForgeRecipesForParchment(parchmentDef.parchmentType, parchmentDef.recipeName);
+    const names = _getForgeRecipesForParchment(parchmentDef.parchmentType, parchmentDef.recipeName, parchmentDef.essenceName);
     const newCount = names.filter(n => !_knownForgeRecipes.has(n)).length;
     names.forEach(n => {
         _knownForgeRecipes.delete(n);
@@ -5206,16 +5336,17 @@ function _hideAlchemyParchmentPicker() {
 }
 
 /**
- * Shows the visual parchment viewer for a specific recipe.
+ * Shows the visual parchment viewer for one or more forge recipes.
+ * @param {string[]} recipeNames - array of recipe names to display
  */
-function _showParchmentViewer(recipeName) {
+function _showParchmentViewer(recipeNames) {
     const overlay = document.getElementById('parchment-viewer-overlay');
     const content = document.getElementById('parchment-viewer-content');
     if (!overlay || !content) return;
 
     content.innerHTML = '';
-    const recipe = FORGE_DATA.find(r => r.name === recipeName);
-    if (!recipe) return;
+    const recipes = recipeNames.map(n => FORGE_DATA.find(r => r.name === n)).filter(Boolean);
+    if (recipes.length === 0) return;
 
     const wrapper = document.createElement('div');
     wrapper.className = 'essence-parchment-wrapper';
@@ -5223,34 +5354,42 @@ function _showParchmentViewer(recipeName) {
     const parchment = document.createElement('div');
     parchment.className = 'essence-parchment';
 
-    const headerContainer = document.createElement('div');
-    headerContainer.className = 'parchment-header';
-    headerContainer.innerHTML = `
-        <h3 class="parchment-title">${recipe.name}</h3>
-        <div class="parchment-subtitle">Ancient Crafting Recipe</div>
-    `;
-    parchment.appendChild(headerContainer);
-
-    const ingredientsList = document.createElement('div');
-    ingredientsList.className = 'parchment-ingredients';
-
-    recipe.ingredients.forEach(ing => {
-        const itemDef = getItemDef(ing.name);
-        if (!itemDef) return;
-
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'parchment-item';
-        itemDiv.innerHTML = `
-            <img src="${asset(itemDef.icon)}" alt="${ing.name}">
-            <div class="parchment-item-info">
-                <span class="parchment-item-name">${ing.name}</span>
-                <span class="parchment-item-qty">Quantity: ${ing.quantity}</span>
-            </div>
+    recipes.forEach((recipe, i) => {
+        const headerContainer = document.createElement('div');
+        headerContainer.className = 'parchment-header';
+        headerContainer.innerHTML = `
+            <h3 class="parchment-title">${recipe.name}</h3>
+            <div class="parchment-subtitle">Ancient Crafting Recipe</div>
         `;
-        ingredientsList.appendChild(itemDiv);
-    });
+        parchment.appendChild(headerContainer);
 
-    parchment.appendChild(ingredientsList);
+        const ingredientsList = document.createElement('div');
+        ingredientsList.className = 'parchment-ingredients';
+
+        recipe.ingredients.forEach(ing => {
+            const itemDef = getItemDef(ing.name);
+            if (!itemDef) return;
+
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'parchment-item';
+            itemDiv.innerHTML = `
+                <img src="${asset(itemDef.icon)}" alt="${ing.name}">
+                <div class="parchment-item-info">
+                    <span class="parchment-item-name">${ing.name}</span>
+                    <span class="parchment-item-qty">Quantity: ${ing.quantity}</span>
+                </div>
+            `;
+            ingredientsList.appendChild(itemDiv);
+        });
+
+        parchment.appendChild(ingredientsList);
+
+        if (i < recipes.length - 1) {
+            const divider = document.createElement('hr');
+            divider.className = 'parchment-divider';
+            parchment.appendChild(divider);
+        }
+    });
 
     const footer = document.createElement('div');
     footer.className = 'parchment-footer';
@@ -5274,7 +5413,7 @@ function _showAnvilParchmentPicker(x, y) {
             if (!item) return;
             const def = getItemDef(item.name);
             if (!def || def.type !== 'parchment') return;
-            if (_FORGE_PARCHMENT_TYPES.has(def.parchmentType) || def.parchmentType === 'essence-recipe') {
+            if (_FORGE_PARCHMENT_TYPES.has(def.parchmentType)) {
                 found = true;
                 const slot = document.createElement('div');
                 slot.className = 'picker-slot';

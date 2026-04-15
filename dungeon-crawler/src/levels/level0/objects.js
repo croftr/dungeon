@@ -30,11 +30,31 @@ export function spawnLevel0Objects(ctx) {
     // ── Starter Stash in the starter room ─────────────────────────────────────────────
     addChest(group, loader, 13.4, 10, Math.PI / 2, -0.1, [
         { name: 'Gold Coins', quantity: 10000 },
-        'Potion of Invincibility', 'Potion of Unseen', "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal",
-        'Resist Poison Spellbook', 'Rejuvenate Spellbook', 'Scroll of Resist Fear', "Ogre's Head", "Ogre Essence",
-        "Ogre's Head", "Ogre Essence", "Leather Belt", "Heavy Ogre Drape", "Life Orb", "Iron Ore", "Iron Ore", "Ogre Girdle",
-        'Scroll of Fireball', 'Scroll of Regeneration', 'Scroll of Cure Poison', 'Scroll of Resist Poison',
-        'Scroll of Rejuvenate', 'Scroll of Sleep', 'Scroll of Incinerate', "Life Essence", "Life Essence"
+        'Potion of Invincibility', 'Potion of Unseen',
+        "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal",
+        'Resist Poison Spellbook', 'Rejuvenate Spellbook', 'Scroll of Resist Fear',
+        // Essences (2 of each)
+        "Life Essence", "Life Essence",
+        "Crocodile Warrior Essence", "Crocodile Warrior Essence",
+        "Tree Man Essence", "Tree Man Essence",
+        "Ogre Essence", "Ogre Essence",
+        "Minotaur Essence", "Minotaur Essence",
+        "Aqua Man Essence", "Aqua Man Essence",
+        "Lizard Man Essence", "Lizard Man Essence",
+        "Giant Essence", "Giant Essence",
+        "Demon Essence", "Demon Essence",
+        "Demon Ogre Essence", "Demon Ogre Essence",
+        // Unique Arena Items (2 of each)
+        "Crocodile Hide", "Crocodile Hide",
+        "Ancient Heartwood", "Ancient Heartwood",
+        "Ogre's Head", "Ogre's Head",
+        "Minotaur Horn", "Minotaur Horn",
+        "Aqua Man Flipper", "Aqua Man Flipper",
+        "Lizard Scale", "Lizard Scale",
+        "Giant's Club", "Giant's Club",
+        "Giant's Loin Cloth", "Giant's Loin Cloth",
+        "Demon's Eyes", "Demon's Eyes",
+        "Leather Belt", "Iron Ore", "Iron Ore"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in the east room (center) ────────────────────────────────────
