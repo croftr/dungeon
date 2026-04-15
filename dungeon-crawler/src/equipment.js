@@ -961,6 +961,14 @@ function populateTooltip(obj, showBuyPrice = false) {
       descText = descText.replace(/\d+/, def.effect.value);
     }
     descEl.textContent = descText;
+
+    let valueDisplay;
+    if (obj.name === 'Gold Coins' && obj.quantity) {
+      valueDisplay = obj.quantity;
+    } else {
+      valueDisplay = showBuyPrice ? def.value : Math.max(1, Math.ceil(def.value / 10));
+    }
+
     statsEl.innerHTML = `
       <div class="detail-stat-row" id="detail-row-weight">
           <span>Weight</span>
@@ -968,7 +976,7 @@ function populateTooltip(obj, showBuyPrice = false) {
       </div>
       <div class="detail-stat-row" id="detail-row-value">
           <span>${showBuyPrice ? 'Buy Price' : 'Sell Value'}</span>
-          <span id="item-detail-value">${showBuyPrice ? def.value : Math.max(1, Math.ceil(def.value / 10))} gp</span>
+          <span id="item-detail-value">${valueDisplay} gp</span>
       </div>
     `;
     return;

@@ -76,7 +76,7 @@
         "slot": "loot",
         "icon": "/icons/gold_coins.webp",
         "description": "A pile of glittering gold coins.",
-        "value": 3,
+        "value": 1,
         "weight": 0,
         "sellable": false
     },
