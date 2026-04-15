@@ -54,7 +54,7 @@ export function spawnLevel0Objects(ctx) {
         "Giant's Club", "Giant's Club",
         "Giant's Loin Cloth", "Giant's Loin Cloth",
         "Demon's Eyes", "Demon's Eyes",
-        "Leather Belt", "Iron Ore", "Iron Ore"
+        "Leather Belt", "Iron Ore", "Iron Ore", "Potions Parchment", "Minor Potions Parchment", "Party Potions Parchment", "Ogre Helm Parchment", "Minotaur Cuirass Parchment", "Lizard Scale Cloak Parchment", "Crocodilian Boots Parchment", "Seers Shawl Parchment", "Trickster's Hood Parchment", "Barbarian's Loin Cloth Parchment", "Barbarian's Club Parchment", "Pyro Palms Parchment", "Demon Blade Parchment"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in the east room (center) ────────────────────────────────────
