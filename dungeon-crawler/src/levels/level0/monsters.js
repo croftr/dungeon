@@ -23,14 +23,4 @@ _dummy.originalStats = { ...D.dummy.stats };
 _dummy.originalAttackSpeed = D.dummy.attackSpeed;
 
 
-const _mushroom = inst(D.mushroom, 11, 10, 20,
-    asset('/monsters/mushroom/idle.glb'),
-    asset('/monsters/mushroom/attack.glb'),
-    null, 0.45, 0, 0, 0, null,
-    asset('/monsters/mushroom/dead.glb'),
-    null,
-    asset('/monsters/mushroom/walk.glb'),
-    null,
-    asset('/monsters/mushroom/combat-idle.glb'));
-
-export const level0Monsters = [_dummy, _mushroom];
+export const level0Monsters = [_dummy];

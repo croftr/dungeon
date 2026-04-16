@@ -3527,6 +3527,14 @@ function _forge() {
         return;
     }
 
+    playSoundByUrl(asset('/sounds/forge-fire.mp3'));
+    const _forgeImgs = [
+        document.getElementById('anvil-header-icon'),
+        document.querySelector('.workbench-deco-forge .workbench-deco-img'),
+    ].filter(Boolean);
+    const _forgeFlame = asset('/icons/forge-flame.png');
+    _forgeImgs.forEach(img => { img._origSrc = img.src; img.src = _forgeFlame; });
+    setTimeout(() => _forgeImgs.forEach(img => { img.src = img._origSrc; }), 2000);
     const recipes = _getForgeRecipes();
 
     let matchedResult = null;
@@ -3552,20 +3560,25 @@ function _forge() {
     if (matchedResult) {
         const usedMaterials = [...materials];
         for (let i = 0; i < 8; i++) _forgeContents[i] = null;
-        _forgeContents[8] = matchedResult;
         const isNew = !_knownForgeRecipes.has(matchedResult);
         _knownForgeRecipes.delete(matchedResult);
         _knownForgeRecipes.add(matchedResult);
-        const msg = isNew
-            ? `Forging complete! You discovered the recipe for ${matchedResult}!`
-            : `Forging complete! You crafted a ${matchedResult}.`;
-        showForgeMessage(msg, 'success');
         addLogEntry({ type: 'item', subtype: 'forge', itemName: matchedResult, materials: usedMaterials, time: Date.now() });
-        playSuccessSound();
         _renderKnownForgeRecipes();
+        setTimeout(() => {
+            _forgeContents[8] = matchedResult;
+            const msg = isNew
+                ? `Forging complete! You discovered the recipe for ${matchedResult}!`
+                : `Forging complete! You crafted a ${matchedResult}.`;
+            showForgeMessage(msg, 'success');
+            playSuccessSound();
+            _renderForgeSlots();
+        }, 2000);
     } else {
-        showForgeMessage('These materials cannot be forged into anything.', 'fail');
-        playAnvilSound();
+        setTimeout(() => {
+            showForgeMessage('These materials cannot be forged into anything.', 'fail');
+            playAnvilSound();
+        }, 2000);
     }
 
     _renderForgeSlots();
@@ -4441,6 +4454,14 @@ function _transmute() {
         return;
     }
 
+    playAlchemySound();
+    const _alchemyImgs = [
+        document.getElementById('alchemy-header-icon'),
+        document.querySelector('.workbench-deco-alchemy .workbench-deco-img'),
+    ].filter(Boolean);
+    const _alchemyFlame = asset('/icons/alchemy2.png');
+    _alchemyImgs.forEach(img => { img._origSrc = img.src; img.src = _alchemyFlame; });
+    setTimeout(() => _alchemyImgs.forEach(img => { img.src = img._origSrc; }), 2000);
     const recipes = _getAlchemyRecipes();
 
     // Try each recipe — quantity-aware matching
@@ -4468,21 +4489,23 @@ function _transmute() {
         // Consume all ingredients only on success
         const usedIngredients = [...ingredients];
         for (let i = 0; i < 8; i++) _alchemyContents[i] = null;
-        _alchemyContents[8] = matchedResult;
         const isNew = !_knownAlchemyRecipes.has(matchedResult);
         _knownAlchemyRecipes.delete(matchedResult);
         _knownAlchemyRecipes.add(matchedResult);
-        const msg = isNew
-            ? `Transmutation successful! You discovered the recipe for ${matchedResult}!`
-            : `Transmutation successful! You created a ${matchedResult}.`;
-        showAlchemyMessage(msg, 'success');
         addLogEntry({ type: 'item', subtype: 'alchemy', itemName: matchedResult, ingredients: usedIngredients, time: Date.now() });
-        playAlchemySound();
         _renderKnownAlchemyRecipes();
+        setTimeout(() => {
+            _alchemyContents[8] = matchedResult;
+            const msg = isNew
+                ? `Transmutation successful! You discovered the recipe for ${matchedResult}!`
+                : `Transmutation successful! You created a ${matchedResult}.`;
+            showAlchemyMessage(msg, 'success');
+            playSuccessSound();
+            _renderAlchemySlots();
+        }, 2000);
     } else {
         // Ingredients are preserved — nothing is consumed
         showAlchemyMessage('The ingredients do not react — nothing happens.', 'fail');
-        playAlchemyFailSound();
     }
 
     _renderAlchemySlots();
