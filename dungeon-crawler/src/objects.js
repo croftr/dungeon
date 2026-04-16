@@ -247,8 +247,30 @@ function _hasNewEssencesForNpc(questNpcId) {
 // ─────────────────────────────────────────────
 //  SAVE GAME — container tracking
 // ─────────────────────────────────────────────
-let _nextContainerId = 0;
-let _pendingContainerOverrides = null;
+// When true, every container spawned by addChest/addPortalActivatorStatue/
+// addWeaponRack/addSpellCabinet/addAnvil/addBonePile spawns with empty contents.
+// Toggled by loadLevel when entering a previously-cleared dungeon level.
+let _emptyAllContainers = false;
+export function setEmptyAllContainers(v) { _emptyAllContainers = !!v; }
+
+// Starter stash persistence — the single chest on Level 0 tagged with title='Stash'
+// is a true persistent bank. Its contents live in this module between level visits
+// and are captured/restored by the save-checkpoint module.
+let _persistedStarterStashItems = null;
+export function getPersistedStarterStashItems() { return _persistedStarterStashItems; }
+export function setPersistedStarterStashItems(items) {
+    _persistedStarterStashItems = Array.isArray(items) ? [...items] : null;
+}
+/** Snapshot the current starter-stash chest contents into the persisted field.
+ *  Call this just before leaving Level 0 so the scene's live state is preserved. */
+export function snapshotStarterStash() {
+    for (const obj of interactables) {
+        if (obj.userData?.isStarterStash) {
+            _persistedStarterStashItems = JSON.parse(JSON.stringify(obj.userData.contents ?? []));
+            return;
+        }
+    }
+}
 
 // ─────────────────────────────────────────────
 //  TRAP STATE
@@ -1556,9 +1578,11 @@ export function initObjects(scene, camera) {
 }
 
 export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = [], modelPath = asset('/items/Meshy_AI_Treasure_Chest_0221184131_texture.glb'), interactive = true, offsetX = 0, title = 'Chest', scale = 0.3) {
-    const cid = interactive ? _nextContainerId++ : -1;
-    if (interactive && _pendingContainerOverrides && cid in _pendingContainerOverrides) {
-        contents = _pendingContainerOverrides[cid];
+    const isStarterStash = title === 'Stash';
+    if (interactive && isStarterStash && _persistedStarterStashItems !== null) {
+        contents = [..._persistedStarterStashItems];
+    } else if (interactive && _emptyAllContainers && !isStarterStash) {
+        contents = [];
     }
     loader.load(modelPath, (gltf) => {
         const model = gltf.scene;
@@ -1576,7 +1600,7 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
                     child.userData.gridCol = col;
                     child.userData.contents = contents;
                     child.userData.title = title;
-                    child.userData.containerId = cid;
+                    if (isStarterStash) child.userData.isStarterStash = true;
                     interactables.push(child);
                 }
 
@@ -2138,7 +2162,6 @@ function addStairs(scene, loader, col, row, rotY = 0, scale = 0.7, offsetX = 0, 
 export function spawnObjectsForLevel() {
     const level = window.currentLevel ?? 0;
     objects.length = 0; // clear logical array
-    _nextContainerId = 0; // reset container IDs for deterministic save/load
 
     // Check if the minotaur (id 300) has been defeated — used to activate the egg portal
     const minotaur = monsters.find(m => m.id === 300);
@@ -2436,11 +2459,7 @@ function _applyEggGlow(model, contents) {
 
 function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.45, initialContents = ['Red Crystal'], offsetX = 0, offsetZ = 0) {
     _statueGridCells.add(`${row},${col}`); // block player movement through this cell
-    const cid = _nextContainerId++;
-    let contents = [...initialContents];
-    if (_pendingContainerOverrides && cid in _pendingContainerOverrides) {
-        contents = _pendingContainerOverrides[cid];
-    }
+    let contents = _emptyAllContainers ? [] : [...initialContents];
     loader.load(asset('/items/ethereal_egg.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(scale);
@@ -2454,7 +2473,6 @@ function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.4
                 child.userData.isPortalActivatorStatue = true;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
-                child.userData.containerId = cid;
                 child.userData.contents = contents;
                 child.userData.eggModel = model;
                 interactables.push(child);
@@ -2553,10 +2571,7 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, sh
 
 
 function addWeaponRack(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, contents = []) {
-    const cid = _nextContainerId++;
-    if (_pendingContainerOverrides && cid in _pendingContainerOverrides) {
-        contents = _pendingContainerOverrides[cid];
-    }
+    if (_emptyAllContainers) contents = [];
     loader.load(asset('/items/weapon-rack.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.46);
@@ -2571,7 +2586,6 @@ function addWeaponRack(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, 
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = contents;
-                child.userData.containerId = cid;
                 interactables.push(child);
 
                 if (child.material) {
@@ -2594,10 +2608,7 @@ function addWeaponRack(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, 
 }
 
 function addSpellCabinet(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, contents = []) {
-    const cid = _nextContainerId++;
-    if (_pendingContainerOverrides && cid in _pendingContainerOverrides) {
-        contents = _pendingContainerOverrides[cid];
-    }
+    if (_emptyAllContainers) contents = [];
     loader.load(asset('/items/spell-cabinet.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
@@ -2612,7 +2623,6 @@ function addSpellCabinet(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = contents;
-                child.userData.containerId = cid;
                 interactables.push(child);
 
                 if (child.material) {
@@ -2907,10 +2917,7 @@ export function isDummyCombatActive() {
 }
 
 function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, contents = []) {
-    const cid = _nextContainerId++;
-    if (_pendingContainerOverrides && cid in _pendingContainerOverrides) {
-        contents = _pendingContainerOverrides[cid];
-    }
+    if (_emptyAllContainers) contents = [];
     loader.load(asset('/items/forge.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
@@ -2925,7 +2932,6 @@ function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, c
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = contents;
-                child.userData.containerId = cid;
                 interactables.push(child);
 
                 if (child.material) {
@@ -4756,10 +4762,7 @@ function _hideChestCtxMenu() {
 }
 
 function addBonePile(scene, loader, col, row, contents = []) {
-    const cid = _nextContainerId++;
-    if (_pendingContainerOverrides && cid in _pendingContainerOverrides) {
-        contents = _pendingContainerOverrides[cid];
-    }
+    if (_emptyAllContainers) contents = [];
     loader.load(asset('/items/Meshy_AI_Bone_pile_0221211647_texture.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.4);
@@ -4774,7 +4777,6 @@ function addBonePile(scene, loader, col, row, contents = []) {
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = contents;
-                child.userData.containerId = cid;
                 interactables.push(child);
 
                 if (child.material) {
@@ -5037,25 +5039,6 @@ export function getPotionMerchantStock() { return [..._potionMerchantAvailable];
 
 /** Restores potion merchant stock. */
 export function setPotionMerchantStock(stock) { if (stock) _potionMerchantAvailable = [...stock]; }
-
-/** Returns container contents keyed by containerId. */
-export function getContainerStates() {
-    const result = {};
-    const seen = new Set();
-    for (const obj of interactables) {
-        const ud = obj.userData;
-        if (ud.containerId === undefined || !ud.contents) continue;
-        if (seen.has(ud.containerId)) continue;
-        seen.add(ud.containerId);
-        result[ud.containerId] = JSON.parse(JSON.stringify(ud.contents));
-    }
-    return result;
-}
-
-/** Sets container content overrides. Call BEFORE spawnObjectsForLevel(). */
-export function setPendingContainerOverrides(overrides) {
-    _pendingContainerOverrides = overrides ?? null;
-}
 
 // ─────────────────────────────────────────────
 //  KNOWN RECIPES — RENDER
@@ -5483,25 +5466,29 @@ function _hideAnvilParchmentPicker() {
 }
 
 // ─────────────────────────────────────────────
-//  SAVE REGISTRY
+//  SAVE / RESTORE
 // ─────────────────────────────────────────────
-import { registerSaveHandler } from './save-registry.js';
 
-registerSaveHandler('world', {
-    serialize() {
-        return {
-            flags: getWorldFlags(),
-            merchantStock: getMerchantStock(),
-            potionMerchantStock: getPotionMerchantStock(),
-            knownAlchemyRecipes: [..._knownAlchemyRecipes],
-            knownForgeRecipes: [..._knownForgeRecipes],
-        };
-    },
-    restore(data) {
-        setWorldFlags(data.flags ?? null);
-        if (data.merchantStock) setMerchantStock(data.merchantStock);
-        if (data.potionMerchantStock) setPotionMerchantStock(data.potionMerchantStock);
-        if (data.knownAlchemyRecipes) data.knownAlchemyRecipes.forEach(r => _knownAlchemyRecipes.add(r));
-        if (data.knownForgeRecipes) data.knownForgeRecipes.forEach(r => _knownForgeRecipes.add(r));
-    },
-});
+/**
+ * Capture the non-derived world state. Per-level gate flags (derived from the
+ * "cleared" rule) are handled separately by save-level-state.js and are baked
+ * into the final flag payload during restore.
+ */
+export function captureWorldState() {
+    return {
+        flags: getWorldFlags(),
+        merchantStock: getMerchantStock(),
+        potionMerchantStock: getPotionMerchantStock(),
+        knownAlchemyRecipes: [..._knownAlchemyRecipes],
+        knownForgeRecipes: [..._knownForgeRecipes],
+    };
+}
+
+export function restoreWorldState(data) {
+    if (!data) return;
+    setWorldFlags(data.flags ?? null);
+    if (data.merchantStock) setMerchantStock(data.merchantStock);
+    if (data.potionMerchantStock) setPotionMerchantStock(data.potionMerchantStock);
+    if (data.knownAlchemyRecipes) data.knownAlchemyRecipes.forEach(r => _knownAlchemyRecipes.add(r));
+    if (data.knownForgeRecipes) data.knownForgeRecipes.forEach(r => _knownForgeRecipes.add(r));
+}

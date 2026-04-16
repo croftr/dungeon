@@ -10,14 +10,15 @@ import { initParty, updateParty, party, refreshPartyCards, autoAttack, autoRange
 import { getItemDef } from './items.js';
 import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
+import { killAllMonstersOnLevel } from './save-level-state.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
-import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, getContainerStates, setPendingContainerOverrides, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal } from './objects.js';
+import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, setEmptyAllContainers, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
-import { consumePendingLoad, autoSave } from './save-game.js';
-import { registerSaveHandler, restoreAll } from './save-registry.js';
+import { consumePendingLoad } from './save-game.js';
+import { autoSaveCheckpoint, loadCheckpoint } from './save-checkpoint.js';
 import { initQuarks, updateQuarks } from './quarks-intro.js';
 import { showHelpDialog } from './help.js';
 import { asset } from './assets.js';
@@ -227,26 +228,25 @@ let prepVideoTimer = null;
 // Bridge video flags to save system via window._saveFlags
 window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenMinotaurDeathVideo, hasSeenDemonVideo, hasSeenAquaManVideo };
 
-registerSaveHandler('video', {
-  serialize() {
-    return {
-      hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo,
-      hasSeenMinotaurDeathVideo, hasSeenDemonVideo, hasSeenAquaManVideo,
-      hasSeenTreemanVideo: window.hasSeenTreemanVideo,
-    };
-  },
-  restore(data) {
-    if (!data) return;
-    hasSeenOgreVideo = data.hasSeenOgreVideo ?? false;
-    hasSeenPrepVideo = data.hasSeenPrepVideo ?? false;
-    hasSeenMinotaurVideo = data.hasSeenMinotaurVideo ?? false;
-    hasSeenMinotaurDeathVideo = data.hasSeenMinotaurDeathVideo ?? false;
-    hasSeenDemonVideo = data.hasSeenDemonVideo ?? false;
-    hasSeenAquaManVideo = data.hasSeenAquaManVideo ?? false;
-    window.hasSeenTreemanVideo = data.hasSeenTreemanVideo ?? false;
-    window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenMinotaurDeathVideo, hasSeenDemonVideo, hasSeenAquaManVideo };
-  },
-});
+function captureVideoFlags() {
+  return {
+    hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo,
+    hasSeenMinotaurDeathVideo, hasSeenDemonVideo, hasSeenAquaManVideo,
+    hasSeenTreemanVideo: window.hasSeenTreemanVideo,
+  };
+}
+
+function restoreVideoFlags(data) {
+  if (!data) return;
+  hasSeenOgreVideo = data.hasSeenOgreVideo ?? false;
+  hasSeenPrepVideo = data.hasSeenPrepVideo ?? false;
+  hasSeenMinotaurVideo = data.hasSeenMinotaurVideo ?? false;
+  hasSeenMinotaurDeathVideo = data.hasSeenMinotaurDeathVideo ?? false;
+  hasSeenDemonVideo = data.hasSeenDemonVideo ?? false;
+  hasSeenAquaManVideo = data.hasSeenAquaManVideo ?? false;
+  window.hasSeenTreemanVideo = data.hasSeenTreemanVideo ?? false;
+  window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenMinotaurDeathVideo, hasSeenDemonVideo, hasSeenAquaManVideo };
+}
 
 setCallbacks({
   moved() {
@@ -1966,34 +1966,11 @@ function handleFirstInteraction() {
 // ─────────────────────────────────────────────
 let _level1FirstLoad = true; // shows loading screen on first entry to level 1
 
-// Container states keyed by level number — persists looted state across level transitions
-let _visitedLevelContainers = {};
-
-// Levels the player has entered via portal for the first time (persisted)
+// In-memory only — tracks which levels have had their "announce on portal" title
+// overlay shown, so we don't show it repeatedly on re-entry within a single session.
 let _portalVisitedLevels = new Set();
 
-registerSaveHandler('level', {
-  serialize() {
-    // Capture current level's container state before serializing
-    _visitedLevelContainers[window.currentLevel] = getContainerStates();
-    return {
-      currentLevel: window.currentLevel,
-      visitedLevelContainers: JSON.parse(JSON.stringify(_visitedLevelContainers)),
-      portalVisitedLevels: [..._portalVisitedLevels],
-    };
-  },
-  restore(data) {
-    _visitedLevelContainers = data.visitedLevelContainers ?? {};
-    _portalVisitedLevels = new Set(data.portalVisitedLevels ?? []);
-  },
-});
-
 window.loadLevel = function (levelNum) {
-  // Auto-save before leaving removed.
-  if (!window._isRestoring) {
-    // autoSave(levelNum); // removed
-  }
-
   // Lazily load videos needed for this level
   loadVideosForLevel(levelNum);
 
@@ -2044,6 +2021,32 @@ window.loadLevel = function (levelNum) {
   }
 
   const oldLevel = window.currentLevel;
+
+  // Snapshot the starter-stash contents before L0 is torn down. The stash is
+  // the only persistent bank — all other containers empty on level clear.
+  if (oldLevel === 0 && levelNum !== 0) {
+    snapshotStarterStash();
+  }
+
+  // Advance the "highest dungeon level reached" watermark. Dungeon levels are
+  // 1..5; level 0 is the hub and does not count. Once advanced, any future
+  // return to a lower dungeon level rebuilds it in end state (gates open,
+  // monsters dead, chests empty).
+  if (levelNum >= 1 && levelNum <= 5) {
+    const prevReached = window.currentLevelReached ?? 0;
+    if (levelNum > prevReached) window.currentLevelReached = levelNum;
+  }
+
+  // Auto-save on dungeon-level transitions. Arena entry/exit and restore
+  // flows are excluded.
+  if (!window._isRestoring
+      && oldLevel !== undefined
+      && oldLevel !== levelNum
+      && levelNum !== ARENA_LEVEL
+      && oldLevel !== ARENA_LEVEL) {
+    autoSaveCheckpoint();
+  }
+
   window.currentLevel = levelNum;
 
   // Switch ambient music to match the new level
@@ -2101,8 +2104,17 @@ window.loadLevel = function (levelNum) {
 
   // 3. Clear and respawn level objects
   clearObjects(scene);
-  setPendingContainerOverrides(_visitedLevelContainers[levelNum] ?? null);
+
+  // End-state rule: a dungeon level below the "highest reached" watermark
+  // is rebuilt in cleared state — empty chests, no live monsters. Applies on
+  // both within-session revisits and on save-load.
+  const reached = window.currentLevelReached ?? 0;
+  const isCleared = levelNum >= 1 && levelNum <= 5 && levelNum < reached;
+  setEmptyAllContainers(isCleared);
+  if (isCleared) killAllMonstersOnLevel(levelNum);
+
   spawnObjectsForLevel();
+  setEmptyAllContainers(false);
   updateRecruitsMeshState();
 
   // 5. Load monster models for this level (skips dead monsters)
@@ -2401,8 +2413,12 @@ window._arenaExit = function (won) {
     changeMapArray(maps[pre.level] ?? level0Map);
     buildLevel(scene);
     clearObjects(scene);
-    setPendingContainerOverrides(_visitedLevelContainers[pre.level] ?? null);
+    const reached = window.currentLevelReached ?? 0;
+    const isCleared = pre.level >= 1 && pre.level <= 5 && pre.level < reached;
+    setEmptyAllContainers(isCleared);
+    if (isCleared) killAllMonstersOnLevel(pre.level);
     spawnObjectsForLevel();
+    setEmptyAllContainers(false);
     updateRecruitsMeshState();
     loadMonstersForLevel(scene, pre.level);
     setAmbientLevel(pre.level);
@@ -2529,27 +2545,12 @@ console.log('Map: 0=floor 1=wall 2=start 3=exit | Controls: W/S=move  Q/E=turn  
   const save = _pendingSave;
   if (!save) return;
 
-  // Restore all registered state via the save registry
-  restoreAll(save);
-
-  // Sync camera to restored player position
-  const w = cellToWorld(player.gridRow, player.gridCol);
-  camera.position.set(w.x, w.y, w.z);
-  camera.rotation.order = 'YXZ';
-  camera.rotation.y = FACING_ANGLES[player.facing];
-
-  // Load the target level
-  const targetLevel = save.targetLevel ?? 0;
-  window._isRestoring = true;
-  window.loadLevel(targetLevel);
-  window._isRestoring = false;
-
-  // Refresh HUD
-  refreshPartyCards();
-  drawMinimap();
-  updateStatus();
-
-  // Skip the intro overlay so the player is dropped straight into the game
-  finishIntro();
+  loadCheckpoint(save, {
+    scene,
+    camera,
+    loadLevel: window.loadLevel,
+    restoreVideoFlags,
+    finishIntro,
+  });
 })();
 

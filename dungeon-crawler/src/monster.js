@@ -2669,9 +2669,11 @@ export function restoreMonsterStates(saved) {
 }
 
 // ── Save / Restore ────────────────────────────────────────────────────────────
-import { registerSaveHandler } from './save-registry.js';
+export function captureMonsterState() {
+  return { droppedBossEssences: [..._droppedBossEssences] };
+}
 
-registerSaveHandler('monsters', {
-  serialize: () => ({ droppedBossEssences: [..._droppedBossEssences] }),
-  restore: (data) => { _droppedBossEssences = new Set(data.droppedBossEssences ?? []); },
-});
+export function restoreMonsterState(data) {
+  if (!data) return;
+  _droppedBossEssences = new Set(data.droppedBossEssences ?? []);
+}

@@ -465,12 +465,3 @@ export function initQuests() {
     });
 }
 
-// ─────────────────────────────────────────────
-//  SAVE REGISTRY
-// ─────────────────────────────────────────────
-import { registerSaveHandler } from './save-registry.js';
-
-registerSaveHandler('quests', {
-    serialize() { return getQuestLog(); },
-    restore(data) { setQuestLog(data); },
-});

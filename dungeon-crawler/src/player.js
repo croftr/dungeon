@@ -254,18 +254,3 @@ export function initInput(camera) {
   });
 }
 
-// ─────────────────────────────────────────────
-//  SAVE REGISTRY
-// ─────────────────────────────────────────────
-import { registerSaveHandler } from './save-registry.js';
-
-registerSaveHandler('player', {
-  serialize() {
-    return { gridRow: player.gridRow, gridCol: player.gridCol, facing: player.facing };
-  },
-  restore(data) {
-    player.gridRow = data.gridRow;
-    player.gridCol = data.gridCol;
-    player.facing = data.facing;
-  },
-});

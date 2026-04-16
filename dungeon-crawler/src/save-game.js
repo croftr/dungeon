@@ -1,78 +1,59 @@
 // ─────────────────────────────────────────────────────────────────────────────
-//  SAVE GAME  — registry-based save/load (v6)
+//  SAVE GAME  — v7 checkpoint-based
+//
+//  Thin shim over save-checkpoint.js. Kept as a separate module so older
+//  import sites (main.js, main-menu.js) don't all need to rewire at once.
+//
+//  The actual save logic lives in save-checkpoint.js. This module handles:
+//   • purging stale <v7 saves on startup
+//   • the sessionStorage "pending load" handoff across page reload
+//   • the listSaves / triggerLoad / deleteSave helpers used by the menu
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { serializeAll } from './save-registry.js';
+import {
+  SAVE_VERSION,
+  listCheckpoints,
+  deleteCheckpoint,
+} from './save-checkpoint.js';
 
 const LOAD_KEY = 'dungeon-pending-load';
-const SAVE_PREFIX = 'dungeon-save-';
-const SAVE_VERSION = 6;
+const SAVE_PREFIX_NEW = 'dungeon-save-lvl-'; // v7 slots (keyed by currentLevelReached)
+const SAVE_PREFIX_OLD = 'dungeon-save-';     // v6 and earlier (keyed by level+timestamp)
 
-const LEVEL_NAMES = {
-  0: 'Starter Room',
-  1: 'Western Dungeon',
-  2: 'Deep Passage',
-  3: 'Abyssal Crypts',
-  4: 'Forgotten Vault',
-  5: 'Hall of Heroes',
-};
-
-// Wipe all pre-v6 saves on first load
+// Purge all pre-v7 saves (including v6). The schema changed too broadly to
+// migrate. Precedent: pre-v6 saves were wiped the same way.
 (function _purgeOldSaves() {
   const keys = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (!key || !key.startsWith(SAVE_PREFIX)) continue;
-    try {
-      const { version } = JSON.parse(localStorage.getItem(key));
-      if (version < SAVE_VERSION) keys.push(key);
-    } catch { keys.push(key); }
+    if (!key) continue;
+    // v7 keys live under SAVE_PREFIX_NEW. Any other SAVE_PREFIX_OLD keys
+    // that aren't also v7 are stale and must be dropped.
+    const isNew = key.startsWith(SAVE_PREFIX_NEW);
+    const isOldFamily = key.startsWith(SAVE_PREFIX_OLD);
+    if (!isOldFamily) continue;
+    if (isNew) {
+      // double-check the payload is actually v7
+      try {
+        const { version } = JSON.parse(localStorage.getItem(key));
+        if (version !== SAVE_VERSION) keys.push(key);
+      } catch { keys.push(key); }
+    } else {
+      // legacy v6 key — drop it
+      keys.push(key);
+    }
   }
   keys.forEach(k => localStorage.removeItem(k));
 })();
 
-/** Core save — used by both autoSave and manualSave. */
-function _save(targetLevel) {
-  const levelName = LEVEL_NAMES[targetLevel] ?? `Level ${targetLevel}`;
-  const key = `${SAVE_PREFIX}${targetLevel}-${Date.now()}`;
-  const save = {
-    version: SAVE_VERSION,
-    savedAt: new Date().toISOString(),
-    targetLevel,
-    levelName,
-    ...serializeAll(),
-  };
-  localStorage.setItem(key, JSON.stringify(save));
-}
-
-/** Auto-save disabled as per user request (only manual saves from the Esc menu are allowed). */
-export function autoSave(targetLevel) {
-  // auto-save removed
-}
-
-/** Manual save from the Esc menu. */
-export function manualSave() {
-  _save(window.currentLevel);
-}
-
-/** Returns all v6 saves sorted newest-first. */
+/** Lists all v7 checkpoints, newest-first. */
 export function listSaves() {
-  const results = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (!key || !key.startsWith(SAVE_PREFIX)) continue;
-    try {
-      const { version, savedAt, levelName, targetLevel } = JSON.parse(localStorage.getItem(key));
-      if (version !== SAVE_VERSION) continue;
-      results.push({ key, savedAt, levelName, targetLevel });
-    } catch { /* skip corrupt entries */ }
-  }
-  return results.sort((a, b) => b.savedAt.localeCompare(a.savedAt));
-}
-
-/** Remove a single save by key. */
-export function deleteSave(key) {
-  localStorage.removeItem(key);
+  return listCheckpoints().map(s => ({
+    key: s.key,
+    savedAt: s.savedAt,
+    levelName: s.levelName,
+    targetLevel: s.currentLevel,
+  }));
 }
 
 /** Copy save to sessionStorage and reload the page. */
@@ -83,18 +64,21 @@ export function triggerLoad(key) {
   window.location.reload();
 }
 
-/**
- * Called once on startup. Returns parsed save or null.
- */
+/** Called once on startup. Returns parsed save or null. */
 export function consumePendingLoad() {
   const raw = sessionStorage.getItem(LOAD_KEY);
   if (!raw) return null;
   sessionStorage.removeItem(LOAD_KEY);
   try {
     const save = JSON.parse(raw);
-    if (!save.version || save.version !== SAVE_VERSION) return null;
+    if (save.version !== SAVE_VERSION) return null;
     return save;
   } catch {
     return null;
   }
+}
+
+/** Remove a single save by key. */
+export function deleteSave(key) {
+  deleteCheckpoint(key);
 }

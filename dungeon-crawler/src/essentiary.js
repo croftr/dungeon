@@ -6,7 +6,6 @@ import MONSTER_FAMILIES from './data/monster-families.json';
 import STATUS_EFFECTS from './data/status-effects.json';
 import { asset } from './assets.js';
 import { getSeenEssences } from './objects.js';
-import { registerSaveHandler } from './save-registry.js';
 
 const _EFFECT_CHIP_CLASS = {
   fear:   'effect-chip-fear',
@@ -382,11 +381,11 @@ function _openDetail(key) {
 }
 
 // ── Save / restore ────────────────────────────────────────────────────────────
-registerSaveHandler('essentiary', {
-  serialize() {
-    return { arenaMonsterTiers: { ..._arenaMonsterTiers } };
-  },
-  restore(data) {
-    _arenaMonsterTiers = data.arenaMonsterTiers ?? {};
-  },
-});
+export function captureEssentiary() {
+  return { arenaMonsterTiers: { ..._arenaMonsterTiers } };
+}
+
+export function restoreEssentiary(data) {
+  if (!data) return;
+  _arenaMonsterTiers = data.arenaMonsterTiers ?? {};
+}

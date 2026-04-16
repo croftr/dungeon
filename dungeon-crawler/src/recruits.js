@@ -298,18 +298,15 @@ export function recruitCharacter(r) {
 }
 
 // ─────────────────────────────────────────────
-//  SAVE REGISTRY
+//  SAVE / RESTORE
 // ─────────────────────────────────────────────
-import { registerSaveHandler } from './save-registry.js';
+export function captureRecruits() {
+  return Object.fromEntries(RECRUITS.map(r => [r.id, !!r.isRecruited]));
+}
 
-registerSaveHandler('recruits', {
-  serialize() {
-    return Object.fromEntries(RECRUITS.map(r => [r.id, !!r.isRecruited]));
-  },
-  restore(data) {
-    if (!data) return;
-    for (const r of RECRUITS) {
-      if (r.id in data) r.isRecruited = data[r.id];
-    }
-  },
-});
+export function restoreRecruits(data) {
+  if (!data) return;
+  for (const r of RECRUITS) {
+    if (r.id in data) r.isRecruited = data[r.id];
+  }
+}

@@ -1366,31 +1366,29 @@ function updateStatusBanners() {
 }
 
 // ─────────────────────────────────────────────
-//  SAVE REGISTRY
+//  SAVE / RESTORE
 // ─────────────────────────────────────────────
-import { registerSaveHandler } from './save-registry.js';
+export function capturePartyState() {
+  return {
+    members: party.map(m => JSON.parse(JSON.stringify(m, (k, v) =>
+      k === 'cooldownTimers' ? undefined : v))),
+    gold: partyGold,
+    autoAttack,
+    autoRangeAttack,
+  };
+}
 
-registerSaveHandler('party', {
-  serialize() {
-    return {
-      members: party.map(m => JSON.parse(JSON.stringify(m, (k, v) =>
-        k === 'cooldownTimers' ? undefined : v))),
-      gold: partyGold,
-      autoAttack,
-      autoRangeAttack,
-    };
-  },
-  restore(data) {
-    for (let i = 0; i < 4; i++) {
-      const src = data.members[i];
-      const dest = party[i];
-      for (const k of Object.keys(dest)) delete dest[k];
-      Object.assign(dest, JSON.parse(JSON.stringify(src)));
-      dest.cooldownTimers = {};
-      if (!dest.isEmpty) updateEffectiveStats(dest);
-    }
-    setPartyGold(data.gold ?? 0);
-    if (data.autoAttack !== undefined) setAutoAttack(data.autoAttack);
-    if (data.autoRangeAttack !== undefined) setAutoRangeAttack(data.autoRangeAttack);
-  },
-});
+export function restorePartyState(data) {
+  if (!data) return;
+  for (let i = 0; i < 4; i++) {
+    const src = data.members[i];
+    const dest = party[i];
+    for (const k of Object.keys(dest)) delete dest[k];
+    Object.assign(dest, JSON.parse(JSON.stringify(src)));
+    dest.cooldownTimers = {};
+    if (!dest.isEmpty) updateEffectiveStats(dest);
+  }
+  setPartyGold(data.gold ?? 0);
+  if (data.autoAttack !== undefined) setAutoAttack(data.autoAttack);
+  if (data.autoRangeAttack !== undefined) setAutoRangeAttack(data.autoRangeAttack);
+}
