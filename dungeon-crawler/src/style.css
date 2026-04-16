@@ -8533,8 +8533,8 @@ body.cursor-interact #renderer-canvas {
   background-color: transparent;
   border-radius: 2px;
   margin-left: -32px;
-  margin-top: -6px;
-  padding: 15px 22px 16px 46px;
+  margin-top: -10px;
+  padding: 17px 26px 18px 50px;
   cursor: pointer;
   transition: filter 0.15s, transform 0.12s;
 }
@@ -8550,7 +8550,7 @@ body.cursor-interact #renderer-canvas {
 }
 
 .bench-recipe-name {
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 700;
   color: #2c1206;
   flex: 0 0 100%;
@@ -8563,8 +8563,8 @@ body.cursor-interact #renderer-canvas {
 }
 
 .bench-recipe-ing {
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 11.5px;
+  font-weight: 600;
 }
 
 .bench-ing-have {
