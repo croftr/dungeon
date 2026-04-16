@@ -295,5 +295,14 @@
         "value": 0,
         "weight": 0.1,
         "sellable": false
+    },
+    {
+        "name": "Rage Cap",
+        "slot": "loot",
+        "icon": "/icons/ingredients/rage_cap.png",
+        "description": "A rare mushroom that grows in areas of intense magical energy. It pulses with a faint red glow and smells faintly of ozone.",
+        "value": 0,
+        "weight": 0.1,
+        "sellable": false
     }
 ]
