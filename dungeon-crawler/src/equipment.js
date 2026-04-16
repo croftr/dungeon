@@ -1,4 +1,4 @@
-import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getAttackSpeedMultiplier, hasEffectFlag, breakPartyUnseen } from './party.js';
+import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getAttackSpeedMultiplier, hasEffectFlag, breakPartyUnseen, showMemberHeal, showMemberSpHeal } from './party.js';
 import { showInlineHelp } from './help.js';
 import { getItemDef } from './items.js';
 import { SPELLS } from './spells.js';
@@ -1581,6 +1581,8 @@ function _applyPotionEffect(m, item) {
 
   const results = [];
   let mainSound = 'heal';
+  const memberIndex = party.indexOf(m);
+  let hpRestored = 0, spRestored = 0;
 
   effects.forEach(eff => {
     const { type, value } = eff;
@@ -1590,6 +1592,7 @@ function _applyPotionEffect(m, item) {
         const oldHp = m.hp;
         const newHp = Math.min(m.hpMax, m.hp + (value || 0));
         setHp(m.id, newHp);
+        hpRestored += newHp - oldHp;
         results.push(`${newHp - oldHp} HP`);
         mainSound = 'heal';
         break;
@@ -1606,6 +1609,7 @@ function _applyPotionEffect(m, item) {
         const oldSp = m.sp;
         const newSp = Math.min(m.spMax ?? 100, m.sp + (value || 0));
         setSp(m.id, newSp);
+        spRestored += newSp - oldSp;
         results.push(`${newSp - oldSp} SP`);
         mainSound = 'magic';
         break;
@@ -1622,11 +1626,12 @@ function _applyPotionEffect(m, item) {
 
   if (results.length === 0) return false;
 
+  if (hpRestored > 0) showMemberHeal(memberIndex, hpRestored);
+  if (spRestored > 0) showMemberSpHeal(memberIndex, spRestored);
+
   const msg = results.some(r => r.includes('HP') || r.includes('MP') || r.includes('SP'))
     ? `restores ${results.join(' and ')}`
     : results.join(' and ');
-
-  showMessage(`${m.name} drinks ${item.name} and ${msg}.`);
   addLogEntry({
     time: Date.now(),
     type: 'potion',
@@ -1655,16 +1660,6 @@ function _applyPartyPotionEffect(m, item, def) {
     applyStatusEffect(member.id, effectType, null, duration);
   });
 
-  let message = '';
-  if (effectType === 'invincibility') {
-    message = `${m.name} raises the <b>${item.name}</b> — the entire party glows with golden light! No damage for ${duration}s!`;
-  } else if (effectType === 'unseen') {
-    message = `${m.name} uncorks the <b>${item.name}</b> — shadows swallow the party! Unseen for ${duration}s (broken by action)!`;
-  } else {
-    message = `${m.name} uses ${item.name} for the party!`;
-  }
-
-  showMessage(message);
   addLogEntry({
     time: Date.now(),
     type: 'potion',
@@ -2767,10 +2762,6 @@ function _buildSpellCursor(iconUrl, callback) {
 function _enterPartyTargetMode(caster, casterIndex, hand, spellDef) {
   _partyTargetPending = { caster, casterIndex, hand, spellDef };
   document.body.classList.add('party-targeting-mode');
-  showMessage(
-    `<b>${spellDef.name}</b> — Click a party member to cast &nbsp;·&nbsp; <span style="color:#aaa">Esc or right-click to cancel</span>`,
-    30000
-  );
 
   // Immediate crosshair, upgraded to spell icon once the image loads
   document.body.style.cursor = 'crosshair';
@@ -2818,7 +2809,7 @@ function _ptmOnMousedown(e) {
       _executePartyMemberSpell(caster, casterIndex, hand, spellDef, target);
     } else {
       _exitPartyTargetMode();
-      showMessage('Cannot target a fallen party member.', 1800);
+      // fallen member — silently ignore click
     }
     return;
   }
@@ -3098,7 +3089,7 @@ function _executeRejuvenate(caster, spellDef, target) {
   setSp(target.id, target.sp + amount);
   const actualHeal = target.sp - oldSp;
 
-  showMessage(`${caster.name} casts <b>Rejuvenate</b> on ${target.name} — restored ${actualHeal} SP!`, 2500);
+  if (actualHeal > 0) showMemberSpHeal(party.indexOf(target), actualHeal);
 
   addLogEntry({
     time: Date.now(),
@@ -3136,7 +3127,7 @@ function _executeHeal(caster, spellDef, target) {
   setHp(target.id, target.hp + amount);
   const actualHeal = target.hp - oldHp;
 
-  showMessage(`${caster.name} casts <b>Heal</b> on ${target.name} — restored ${actualHeal} HP!`, 2500);
+  if (actualHeal > 0) showMemberHeal(party.indexOf(target), actualHeal);
 
   addLogEntry({
     time: Date.now(),
@@ -3540,18 +3531,10 @@ export function useHand(memberIndex, hand, silent = false) {
   }
 
 
-  if (result.crit) {
-    if (result.killed) {
-      if (!window._arenaMode) showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${m.name} obliterates the ${target.name} for ${result.damage} dmg!`, 3000);
-    } else {
-      showMessage(`<span style="color:#ff8800">⚡ CRITICAL!</span> ${m.name} inflicts a critical hit for ${result.damage} dmg!`, 1500);
-    }
-  } else {
-    if (result.killed && !window._arenaMode) {
-      showMessage(`${m.name} slays the ${target.name} for ${result.damage} dmg!`);
-    }
-    // Normal hit damage is shown by the red CSS2DObject popup above the monster — no toast needed
+  if (result.killed && !window._arenaMode) {
+    showMessage(`${m.name} ${result.crit ? 'obliterates' : 'slays'} the ${target.name} for ${result.damage} dmg!`);
   }
+  // Hit/crit feedback is shown by CSS2DObject popups above the monster — no toast needed
 }
 
 // ─────────────────────────────────────────────
@@ -4183,9 +4166,12 @@ function _useHolyRadiance(member, memberIndex) {
 
   const holyRadianceHeal = resolveSkillMagnitude('Holy Radiance', SKILLS_DATA['Holy Radiance'], member);
   let healed = 0;
-  party.forEach((m) => {
+  party.forEach((m, i) => {
     if (!m.isEmpty && !m.isDead && m.hp < m.hpMax) {
+      const before = m.hp;
       setHp(m.id, Math.min(m.hp + holyRadianceHeal, m.hpMax));
+      const actualHeal = m.hp - before;
+      if (actualHeal > 0) showMemberHeal(i, actualHeal);
       healed++;
     }
   });
@@ -4193,13 +4179,7 @@ function _useHolyRadiance(member, memberIndex) {
   if (healed > 0) {
     playSkillSound('holy');
     triggerHolyRadianceEffect();
-    showMessage(
-      `<span style="color:#f8f8a0">✦ Holy Radiance</span> — ${member.name} calls down divine light! Each member heals ${holyRadianceHeal} HP.`,
-      3000
-    );
     addLogEntry({ type: 'skill', actor: member.name, skillName: 'Holy Radiance' });
-  } else {
-    showMessage(`<span style="color:#f8f8a0">Holy Radiance</span> — the party is already at full health.`, 2000);
   }
 
   _startSkillCooldownUI(memberIndex, _holyRadianceCooldownEnd);

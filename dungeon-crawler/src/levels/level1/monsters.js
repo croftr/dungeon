@@ -85,13 +85,14 @@ export const level1Monsters = [
 
   // Ogre in the north-west room — on patrol
   inst(D.ogre, 21, 2, 2,
-    asset('/monsters/ogre/Meshy_AI_Animation_Walking_withSkin.glb'),
-    asset('/monsters/ogre/Meshy_AI_Animation_Attack_withSkin.glb'),
+    asset('/monsters/ogre/Meshy_AI_Animation_Idle_withSkin.glb'),
+    asset('/monsters/ogre/Meshy_AI_Animation_Punch_Combo_withSkin.glb'),
     asset('/monsters/ogre/ogre.mp3'), 0.7, 0, 0, 1,
     { bounds: { minRow: 1, maxRow: 5, minCol: 1, maxCol: 5 }, speed: 0.5, waitTime: 2.0 },
     asset('/monsters/ogre/Meshy_AI_Animation_Dead_withSkin.glb'),
     asset('/monsters/ogre/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
-    null, null,
+    asset('/monsters/ogre/Meshy_AI_Animation_Walking_withSkin.glb'),
+    asset('/monsters/ogre/Meshy_AI_Animation_Idle_03_withSkin.glb'),
     asset('/monsters/ogre/combat-idle.glb')),
 
   // Goblin guard in the vertical passage leading to the Northwest room

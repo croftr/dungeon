@@ -338,6 +338,15 @@ export function pickRandomFrontLineTarget(party) {
   return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
+// Returns the primary slot member if alive, otherwise the fallback partner.
+function _liveOrPartner(party, primaryIdx, fallbackIdx) {
+  const primary = party[primaryIdx];
+  if (primary && !primary.isEmpty && !primary.isDead) return primary;
+  const fallback = party[fallbackIdx];
+  if (fallback && !fallback.isEmpty && !fallback.isDead) return fallback;
+  return null;
+}
+
 // Player facing → forward unit vector in grid space { dr, dc }
 // (row increases South, col increases East)
 const _FWD = [
@@ -386,14 +395,25 @@ export function pickDirectionalTarget(party, monster, facing, playerRow, playerC
   const dotRight = dr * right.dr + dc * right.dc;
 
   // Which axis dominates?  Tie goes to front/back.
-  let slots;
+  let pool;
   if (Math.abs(dotFwd) >= Math.abs(dotRight)) {
-    slots = dotFwd >= 0 ? [0, 1] : [2, 3]; // front or back
+    if (dotFwd >= 0) {
+      // Front attack: prefer slots 0,1 — substitute back partner if front is dead
+      pool = [
+        _liveOrPartner(party, 0, 2),
+        _liveOrPartner(party, 1, 3),
+      ].filter(Boolean);
+    } else {
+      // Back attack: prefer slots 2,3 — substitute front partner if back is dead
+      pool = [
+        _liveOrPartner(party, 2, 0),
+        _liveOrPartner(party, 3, 1),
+      ].filter(Boolean);
+    }
   } else {
-    slots = dotRight > 0 ? [1, 3] : [0, 2]; // right or left flank
+    const slots = dotRight > 0 ? [1, 3] : [0, 2]; // right or left flank
+    pool = slots.map(i => party[i]).filter(m => m && !m.isEmpty && !m.isDead);
   }
-
-  const pool = slots.map(i => party[i]).filter(m => m && !m.isEmpty && !m.isDead);
 
   // Fallback: any surviving member (so combat never silently stalls)
   if (!pool.length) {

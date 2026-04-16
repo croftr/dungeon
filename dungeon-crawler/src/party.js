@@ -912,7 +912,7 @@ export function showMemberDamage(memberIndex, damage, isCrit) {
   setTimeout(() => popup.remove(), 900);
 }
 
-/** Float a green text above the member's portrait to indicate healing. */
+/** Float a green text above the member's portrait to indicate HP healing. */
 export function showMemberHeal(memberIndex, amount) {
   const memberTop = document.querySelector(`#member-${memberIndex} .member-main`);
   if (!memberTop) return;
@@ -920,7 +920,18 @@ export function showMemberHeal(memberIndex, amount) {
   popup.className = 'damage-popup damage-popup--heal damage-popup--incoming';
   popup.textContent = '+' + amount;
   memberTop.appendChild(popup);
-  setTimeout(() => popup.remove(), 900);
+  setTimeout(() => popup.remove(), 3000);
+}
+
+/** Float a teal text above the member's portrait to indicate SP restoration. */
+export function showMemberSpHeal(memberIndex, amount) {
+  const memberTop = document.querySelector(`#member-${memberIndex} .member-main`);
+  if (!memberTop) return;
+  const popup = document.createElement('span');
+  popup.className = 'damage-popup damage-popup--sp-heal damage-popup--incoming';
+  popup.textContent = '+' + amount;
+  memberTop.appendChild(popup);
+  setTimeout(() => popup.remove(), 1800);
 }
 
 export function setMp(index, value) {

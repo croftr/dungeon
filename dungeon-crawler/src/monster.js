@@ -228,10 +228,18 @@ _applyMultiAttacks('TreeKin', [
 _applyMultiAttacks('Ogre', [
   {
     name: 'normalAttack',
+    glb: asset('/monsters/ogre/Meshy_AI_Animation_Punch_Combo_withSkin.glb'),
+    sound: asset('/monsters/ogre/ogre.mp3'),
+    soundTimings: [0.3, 0.6],
+    damageTimings: [0.3, 0.6],
+    weight: 8,
+  },
+  {
+    name: 'slamAttack',
     glb: asset('/monsters/ogre/Meshy_AI_Animation_Attack_withSkin.glb'),
     sound: asset('/monsters/ogre/ogre.mp3'),
-    soundTimings: [0.3],
-    damageTimings: [0.3],
+    soundTimings: [0.4],
+    damageTimings: [0.4],
     weight: 8,
   },
   {
@@ -240,7 +248,7 @@ _applyMultiAttacks('Ogre', [
     sound: asset('/monsters/ogre/ogre.mp3'),
     soundTimings: [0.3, 0.7],
     damageTimings: [0.3, 0.7],
-    weight: 2,
+    weight: 8,
     specialAttack: true,
     damageMultiplier: 0.375,
     specialOnHitEffects: [{ effectId: 'fear', chance: 0.75, durationSec: 10 }],
@@ -840,6 +848,10 @@ function _loadMonster(m, scene) {
 
       m.getIdleAction = function () {
         if (!m.actions.idleAlt) return m.actions.idle;
+        if (m.name === 'Ogre') {
+          m._lastIdleIdx = (m._lastIdleIdx === 1) ? 0 : 1;
+          return (m._lastIdleIdx === 0) ? m.actions.idle : m.actions.idleAlt;
+        }
         return (Math.random() < 0.25) ? m.actions.idle : m.actions.idleAlt;
       };
 
@@ -986,6 +998,21 @@ function _loadMonster(m, scene) {
     sunderLabel.visible = false;
     model.add(sunderLabel);
     m.sunderLabel = sunderLabel;
+
+    // ── Critical hit indicator (three burst exclamation marks) ────────────
+    const critDiv = document.createElement('div');
+    critDiv.className = 'monster-crit-indicator';
+    ['!', '!', '!'].forEach((bang, i) => {
+      const s = document.createElement('span');
+      s.className = `crit-bang crit-bang--${i}`;
+      s.textContent = bang;
+      critDiv.appendChild(s);
+    });
+    const critLabel = new CSS2DObject(critDiv);
+    critLabel.position.set(0, 2.2, 0);
+    critLabel.visible = false;
+    model.add(critLabel);
+    m.critLabel = critLabel;
 
     // Load attack animation(s)
     if (m.attacks && m.attacks.length > 0) {
@@ -1676,6 +1703,25 @@ export function showMonsterDamage(monsterId, damage, isCrit, attackType = '') {
   }, 850);
 }
 
+export function showCritIndicator(monsterId) {
+  const m = monsters.find(x => x.id === monsterId);
+  if (!m || !m.critLabel) return;
+  // Reset animation by toggling visibility off/on and forcing reflow
+  const el = m.critLabel.element;
+  m.critLabel.visible = false;
+  void el.offsetWidth; // force reflow so animation restarts
+  el.querySelectorAll('.crit-bang').forEach(s => {
+    s.style.animation = 'none';
+    void s.offsetWidth;
+    s.style.animation = '';
+  });
+  m.critLabel.visible = true;
+  clearTimeout(m._critLabelTimer);
+  m._critLabelTimer = setTimeout(() => {
+    if (m.critLabel) m.critLabel.visible = false;
+  }, 1200);
+}
+
 export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, killer = null) {
   const m = monsters.find((x) => x.id === monsterId && x.alive);
   if (!m) return { hit: false, damage: 0, killed: false, monsterHp: 0 };
@@ -1773,6 +1819,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
 
     if (isCrit) {
       playCritSound(attackType);
+      showCritIndicator(monsterId);
     }
 
     showMonsterDamage(monsterId, damage, isCrit, attackType);
@@ -1994,7 +2041,6 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     if (Math.random() < SHIELD_BASH_STUN_CHANCE) {
       stunned = true;
       m.stunUntil = performance.now() + SHIELD_BASH_STUN_DURATION_MS;
-      showMessage(`${m.name} is stunned by the shield bash!`);
       if (m.statsLabel?.visible) _updateStatsPanel(m);
       setTimeout(() => { if (m.statsLabel?.visible) _updateStatsPanel(m); }, SHIELD_BASH_STUN_DURATION_MS); // refresh UI when it drops
     }
@@ -2054,7 +2100,14 @@ export function triggerMonsterAttack(monsterId) {
   let attackAction, soundTimings, damageTimings, attackSound, activeVariant;
 
   if (m.attackVariants && m.attackVariants.length > 0) {
-    const variant = _pickWeightedVariant(m.attackVariants);
+    let variant;
+    if (m.name === 'Ogre' && m.attackVariants.length >= 2) {
+      if (m._lastAttackIdx === undefined) m._lastAttackIdx = -1;
+      m._lastAttackIdx = (m._lastAttackIdx + 1) % m.attackVariants.length;
+      variant = m.attackVariants[m._lastAttackIdx];
+    } else {
+      variant = _pickWeightedVariant(m.attackVariants);
+    }
     if (variant) {
       attackAction = variant.action;
       soundTimings = variant.soundTimings;

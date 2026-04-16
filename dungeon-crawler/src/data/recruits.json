@@ -37,11 +37,11 @@
         "job": "Paladin",
         "race": "Human",
         "stats": {
-            "strength": 107,
-            "dexterity": 106,
-            "vitality": 108,
-            "intelligence": 104,
-            "resilience": 108
+            "strength": 7,
+            "dexterity": 6,
+            "vitality": 8,
+            "intelligence": 4,
+            "resilience": 8
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
         "startingSkills": [],
@@ -218,7 +218,7 @@
             "strength": 4,
             "dexterity": 6,
             "vitality": 6,
-            "intelligence": 9,
+            "intelligence": 19,
             "resilience": 8
         },
         "bio": "A devoted healer whose presence brings hope to the darkest depths. Seraphina draws upon pure light to mend flesh and soul.",
@@ -229,7 +229,9 @@
         ],
         "startingInventory": [
             "Minor Mana Potion",
-            "Minor Mana Potion"
+            "Minor Mana Potion",
+            "Scroll of Regeneration",
+            "Scroll of Rejuvenate"
         ],
         "image": "/heros/white-mage.webp",
         "leftHand": "Heal",
