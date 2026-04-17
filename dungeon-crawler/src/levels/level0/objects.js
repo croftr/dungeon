@@ -32,7 +32,7 @@ export function spawnLevel0Objects(ctx) {
         { name: 'Gold Coins', quantity: 10000 },
         'Potion of Invincibility', 'Potion of Unseen', "Rage Cap",
         "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal",
-        'Resist Poison Spellbook', 'Rejuvenate Spellbook', 'Scroll of Resist Fear',
+        'Resist Poison Spellbook', 'Rejuvenate Spellbook', 'Scroll of Resist Fear', 'Seraphic Spellbook',
         // Essences (2 of each)
         "Life Essence", "Life Essence",
         "Crocodile Warrior Essence", "Crocodile Warrior Essence",
