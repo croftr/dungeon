@@ -104,6 +104,7 @@ let _level1HoleRoomSpawned = false;
 let _monsterNpcSaved = false;
 let _level1BtnPortcullisOpened = false;
 let _level1OgrePortcullisOpened = false;
+let _level1ShrineGateOpened = false;
 
 let _npcMixer = null;
 let _npcIdleAction = null;
@@ -947,6 +948,9 @@ export function initObjects(scene, camera) {
                                     openPortcullis(p);
                                     if (window.currentLevel === 2 && p.gridRow === 23 && p.gridCol === 7) {
                                         _level2PortcullisOpened = true;
+                                    }
+                                    if (window.currentLevel === 1 && p.gridRow === 10 && p.gridCol === 17) {
+                                        _level1ShrineGateOpened = true;
                                     }
                                 }, 400);
                                 refreshPartyCards();
@@ -2204,6 +2208,7 @@ export function spawnObjectsForLevel() {
         level1HoleRoomSpawned: _level1HoleRoomSpawned,
         level1BtnPortcullisOpened: _level1BtnPortcullisOpened,
         level1OgrePortcullisOpened: _level1OgrePortcullisOpened,
+        level1ShrineGateOpened: _level1ShrineGateOpened,
         monsterNpcSaved: _monsterNpcSaved,
         // Level 2 state flags
         level2PortcullisOpened: _level2PortcullisOpened,
@@ -5050,6 +5055,7 @@ export function getWorldFlags() {
         level1HoleRoomSpawned: _level1HoleRoomSpawned,
         level1BtnPortcullisOpened: _level1BtnPortcullisOpened,
         level1OgrePortcullisOpened: _level1OgrePortcullisOpened,
+        level1ShrineGateOpened: _level1ShrineGateOpened,
         monsterNpcSaved: _monsterNpcSaved,
         disarmedTraps: [..._trapDisarmedSet],
         crystalShrineState: _crystalShrineState,
@@ -5076,6 +5082,7 @@ export function setWorldFlags(flags) {
     _level1HoleRoomSpawned = flags.level1HoleRoomSpawned ?? false;
     _level1BtnPortcullisOpened = flags.level1BtnPortcullisOpened ?? false;
     _level1OgrePortcullisOpened = flags.level1OgrePortcullisOpened ?? false;
+    _level1ShrineGateOpened = flags.level1ShrineGateOpened ?? false;
     _monsterNpcSaved = flags.monsterNpcSaved ?? false;
     _crystalShrineState = flags.crystalShrineState ?? 0;
     _level3PortalEnabled = flags.level3PortalEnabled ?? false;

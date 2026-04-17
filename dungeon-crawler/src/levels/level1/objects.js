@@ -12,7 +12,7 @@ export function spawnLevel1Objects(ctx) {
         group, loader,
         addChest, addWeaponRack, addSpellCabinet,
         addBonePile, addDecoration,
-        addPortal, addPortcullis,
+        addPortal, addPortcullis, addKeyhole,
         addStatue, addPortalActivatorStatue,
         addTrap1, addCustomNPC, addDialogueNPC, addPitLadder, addShop,
         createWallButton,
@@ -22,6 +22,7 @@ export function spawnLevel1Objects(ctx) {
         level1HoleRoomSpawned,
         level1BtnPortcullisOpened,
         level1OgrePortcullisOpened,
+        level1ShrineGateOpened,
         monsterNpcSaved,
         interactables,
     } = ctx;
@@ -142,10 +143,13 @@ export function spawnLevel1Objects(ctx) {
     mummyBtn.position.set(21 * CELL - 1.0, 1.25, 3 * CELL);
     group.add(mummyBtn);
 
-    // ── Shrine passage portcullis ─────────────────────────────────────────────
-    // Blocks the passage north of the goblin room until the Red Crystal is placed
-    // in the crystal shrine on Level 0 (crystalShrineState >= 1)
-    addPortcullis(group, loader, 17, 10, 0, crystalShrineState >= 1);
+    // ── Goblin room passage portcullis (Bronze Key) ────────────────────────────
+    // Blocks the passage at col 17, row 10 leading north to the goblin room area.
+    // Opened by inserting a Bronze Key into the keyhole on the east wall.
+    addPortcullis(group, loader, 17, 10, 0, level1ShrineGateOpened);
+
+    // Keyhole on south face of north wall at col 18, row 11 — visible from inside the goblin room
+    addKeyhole(group, loader, 18, 11, 0, 0, -0.85, 10, 17, 'Bronze Key');
 
     // ── Statues ───────────────────────────────────────────────────────────────
     // Statue in the center of the 5x5 room

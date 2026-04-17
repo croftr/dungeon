@@ -474,8 +474,8 @@
     },
     "drops": [
       {
-        "item": "Life Essence",
-        "chance": 0.5
+        "item": "Bronze Key",
+        "chance": 1
       },
       {
         "item": "Life Berry",

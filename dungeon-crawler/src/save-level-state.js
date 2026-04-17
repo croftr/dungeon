@@ -24,6 +24,7 @@ function getEndStateFlagsForLevel(levelNum) {
       mummyEscapeGateOpened: true,
       level1BtnPortcullisOpened: true,
       level1OgrePortcullisOpened: true,
+      level1ShrineGateOpened: true,
       level1HoleRoomSpawned: true,
       monsterNpcSaved: true,
     };
