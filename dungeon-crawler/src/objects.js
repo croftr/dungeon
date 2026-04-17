@@ -103,6 +103,7 @@ let _level2HoleClosed = false;
 let _level1HoleRoomSpawned = false;
 let _monsterNpcSaved = false;
 let _level1BtnPortcullisOpened = false;
+let _level1OgrePortcullisOpened = false;
 
 let _npcMixer = null;
 let _npcIdleAction = null;
@@ -459,6 +460,21 @@ export function initObjects(scene, camera) {
                             o.gridRow === obj.userData.portcullisRow &&
                             o.gridCol === obj.userData.portcullisCol);
                         if (p) openPortcullis(p);
+                    } else {
+                        showMessage("You can't reach that from here.");
+                    }
+                } else if (obj.userData.target === 'portcullis_ogre_room') {
+                    // Button on east face of col-2 wall at row 7 — player at (7,1) facing east
+                    if (isInFrontOfPlayer(7, 2, 1)) {
+                        playButtonClickSound();
+                        _animateButtonPress(obj);
+                        const p = objects.find(o => o.name === 'Portcullis' && o.gridRow === 6 && o.gridCol === 1);
+                        if (p && !_level1OgrePortcullisOpened) {
+                            openPortcullis(p);
+                            _level1OgrePortcullisOpened = true;
+                            // Trigger the ogre encounter video when the gate opens
+                            if (window.playOgreVideo) window.playOgreVideo();
+                        }
                     } else {
                         showMessage("You can't reach that from here.");
                     }
@@ -2187,6 +2203,7 @@ export function spawnObjectsForLevel() {
         crystalShrineState: _crystalShrineState,
         level1HoleRoomSpawned: _level1HoleRoomSpawned,
         level1BtnPortcullisOpened: _level1BtnPortcullisOpened,
+        level1OgrePortcullisOpened: _level1OgrePortcullisOpened,
         monsterNpcSaved: _monsterNpcSaved,
         // Level 2 state flags
         level2PortcullisOpened: _level2PortcullisOpened,
@@ -5032,6 +5049,7 @@ export function getWorldFlags() {
         level2HoleClosed: _level2HoleClosed,
         level1HoleRoomSpawned: _level1HoleRoomSpawned,
         level1BtnPortcullisOpened: _level1BtnPortcullisOpened,
+        level1OgrePortcullisOpened: _level1OgrePortcullisOpened,
         monsterNpcSaved: _monsterNpcSaved,
         disarmedTraps: [..._trapDisarmedSet],
         crystalShrineState: _crystalShrineState,
@@ -5057,6 +5075,7 @@ export function setWorldFlags(flags) {
     _level2HoleClosed = flags.level2HoleClosed ?? false;
     _level1HoleRoomSpawned = flags.level1HoleRoomSpawned ?? false;
     _level1BtnPortcullisOpened = flags.level1BtnPortcullisOpened ?? false;
+    _level1OgrePortcullisOpened = flags.level1OgrePortcullisOpened ?? false;
     _monsterNpcSaved = flags.monsterNpcSaved ?? false;
     _crystalShrineState = flags.crystalShrineState ?? 0;
     _level3PortalEnabled = flags.level3PortalEnabled ?? false;

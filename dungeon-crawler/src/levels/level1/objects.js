@@ -21,6 +21,7 @@ export function spawnLevel1Objects(ctx) {
         crystalShrineState,
         level1HoleRoomSpawned,
         level1BtnPortcullisOpened,
+        level1OgrePortcullisOpened,
         monsterNpcSaved,
         interactables,
     } = ctx;
@@ -110,7 +111,16 @@ export function spawnLevel1Objects(ctx) {
     // ── Traps ─────────────────────────────────────────────────────────────────
     addTrap1(group, loader, 21, 10);  // long south corridor
 
-    // ── Portcullises & Gates ──────────────────────────────────────────────────
+    // ── Ogre Room Portcullis & Button ────────────────────────────────────────
+    // Portcullis at col 1, row 6 — blocks the passage leading into the NW ogre room.
+    // Opened by a wall button; the ogre encounter video plays when it opens.
+    addPortcullis(group, loader, 1, 6, 0, level1OgrePortcullisOpened);
+
+    // Button on east face of col-2 wall at row 7 — player at (7,1) faces east to press it
+    const { group: ogrePortcullisBtn } = createWallButton(-1, { target: 'portcullis_ogre_room' });
+    ogrePortcullisBtn.position.set(2 * CELL - 1.0, 1.25, 7 * CELL);
+    group.add(ogrePortcullisBtn);
+
     // Portcullis at col 7, row 7 (opened by wall button). Persists via level1BtnPortcullisOpened.
     addPortcullis(group, loader, 7, 7, 0, level1BtnPortcullisOpened);
 

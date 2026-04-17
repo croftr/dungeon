@@ -292,11 +292,6 @@ setCallbacks({
         setZoneMusic(null);
       }
 
-      if (!hasSeenOgreVideo && player.gridRow === 6 && player.gridCol === 1) {
-        hasSeenOgreVideo = true; window._saveFlags.hasSeenOgreVideo = true;
-        playOgreVideo();
-      }
-
       // Prep video triggers ONLY when confirming the NPC modal now,
       // so we remove the position-based trigger entirely.
     } else if (window.currentLevel === 2) {
@@ -992,6 +987,8 @@ const skipOgreBtn = document.getElementById('skip-ogre-btn');
 
 function playOgreVideo() {
   if (!ogreOverlay || !ogreVideo) return;
+  hasSeenOgreVideo = true;
+  window._saveFlags.hasSeenOgreVideo = true;
   ogreOverlay.classList.remove('hidden');
 
   // Give the browser a moment to process the display change before animating opacity
@@ -1025,6 +1022,9 @@ function finishOgreVideo() {
 
 if (skipOgreBtn) skipOgreBtn.addEventListener('click', (e) => { e.stopPropagation(); finishOgreVideo(); });
 if (ogreVideo) ogreVideo.addEventListener('ended', finishOgreVideo);
+
+// Expose so objects.js button handler can fire the video on gate open
+window.playOgreVideo = playOgreVideo;
 
 // ─────────────────────────────────────────────
 //  NECTAR QUEST VIDEO OVERLAY
