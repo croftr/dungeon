@@ -711,7 +711,7 @@ export async function playAnvilSound() {
 }
 
 export async function playSoundByUrl(url, volume = 0.8) {
-  const buffer = await getBuffer(url);
+  const buffer = await getBuffer(asset(url));
   if (!buffer) return;
   try {
     const ctx = getCtx();
@@ -754,7 +754,7 @@ export async function playQuestAudio(url, volume = 0.8) {
 
   if (currentSpeechId !== _questSpeechId) return;
 
-  const buffer = await getBuffer(url);
+  const buffer = await getBuffer(asset(url));
   if (!buffer) return;
   if (currentSpeechId !== _questSpeechId) return;
 

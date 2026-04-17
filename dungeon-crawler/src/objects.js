@@ -1584,7 +1584,7 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
     } else if (interactive && _emptyAllContainers && !isStarterStash) {
         contents = [];
     }
-    loader.load(modelPath, (gltf) => {
+    loader.load(asset(modelPath), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(scale);
         model.position.set(col * CELL + offsetX, 0.0, row * CELL + offsetZ);
@@ -1661,7 +1661,7 @@ function addStatue(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) 
 
 export function addDecoration(scene, loader, col, row, rotY = 0, modelPath, scale = 0.5, blockCell = true, offsetX = 0, offsetZ = 0, offsetY = 0.5) {
     if (blockCell) _statueGridCells.add(`${row},${col}`);
-    loader.load(modelPath, (gltf) => {
+    loader.load(asset(modelPath), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(scale);
         model.position.set(col * CELL + offsetX, offsetY, row * CELL + offsetZ);
@@ -1699,7 +1699,7 @@ function addCrystalShrine(scene, loader, col, row, rotY, scale, offsetX, offsetZ
     _crystalShrineLoader = loader;
     _crystalShrineParams = { col, row, rotY, scale, offsetX, offsetZ, offsetY };
 
-    loader.load(modelPath, (gltf) => {
+    loader.load(asset(modelPath), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(scale);
         model.position.set(col * CELL + offsetX, offsetY, row * CELL + offsetZ);
@@ -2486,7 +2486,7 @@ function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.4
 
 function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, shopType = 'weapons', modelPath = null, options = {}) {
     _shopGridCells.add(`${row},${col}`); // block player movement through this cell
-    loader.load(modelPath ?? asset('/npcs/merchant1/merchant-idle.glb'), (gltf) => {
+    loader.load(asset(modelPath ?? '/npcs/merchant1/merchant-idle.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(options.scale ?? 0.5);
         model.position.set(col * CELL + offsetX, 0, row * CELL + offsetZ);
@@ -2505,7 +2505,7 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, sh
         }
 
         if (options.greetingModel && mixer) {
-            loader.load(options.greetingModel, (greetGltf) => {
+            loader.load(asset(options.greetingModel), (greetGltf) => {
                 if (greetGltf.animations && greetGltf.animations.length > 0) {
                     greetingAction = mixer.clipAction(greetGltf.animations[0]);
                     greetingAction.setLoop(THREE.LoopOnce, 1);
@@ -3480,7 +3480,7 @@ export function openArmorStandModal(armorStandObj) {
 }
 
 export function addArmorStand(scene, loader, col, row, rotY, modelPath = asset('/items/armour-stand1.glb'), scale = 0.4, offsetX = 0, offsetZ = 0, contents = {}, title = 'Armor Stand', offsetY = 0) {
-    loader.load(modelPath, (gltf) => {
+    loader.load(asset(modelPath), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(scale);
         model.position.set(col * CELL + offsetX, 0.3 + offsetY, row * CELL + offsetZ);
