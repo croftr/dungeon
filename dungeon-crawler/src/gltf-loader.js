@@ -6,4 +6,6 @@ const _draco = new DRACOLoader();
 _draco.setDecoderPath(asset('/draco/'));
 
 export const gltfLoader = new GLTFLoader();
+gltfLoader.setCrossOrigin('anonymous');
+
 gltfLoader.setDRACOLoader(_draco);

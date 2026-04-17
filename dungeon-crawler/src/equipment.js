@@ -2435,7 +2435,9 @@ function _setDetailIcon(iconPath, textFallback = '') {
   el.innerHTML = '';
   if (iconPath) {
     const img = document.createElement('img');
+    img.crossOrigin = 'anonymous';
     img.src = asset(iconPath);
+
     img.alt = '';
     el.appendChild(img);
     el.classList.add('has-icon');
@@ -2787,6 +2789,7 @@ let _ptmContextmenuRef   = null;
  */
 function _buildSpellCursor(iconUrl, callback) {
   const img = new Image();
+  img.crossOrigin = 'anonymous';
   img.onload = () => {
     const SIZE = 40, ICON = 32, OFF = 4;
     const c = document.createElement('canvas');

@@ -5,6 +5,8 @@ let proton;
 let sceneRef;
 let cameraRef;
 let textureLoader = new THREE.TextureLoader();
+textureLoader.setCrossOrigin('anonymous');
+
 
 // A simple circular gradient texture for sparks
 let sparkTexture;

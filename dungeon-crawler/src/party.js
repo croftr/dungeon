@@ -175,6 +175,7 @@ export function drawPortrait(canvas, member) {
 
   if (member.image) {
     const img = new Image();
+    img.crossOrigin = 'anonymous';
     img.onload = () => {
       ctx.clearRect(0, 0, W, H);
       ctx.drawImage(img, 0, 0, W, H);

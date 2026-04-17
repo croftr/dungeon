@@ -87,6 +87,7 @@ export function initRecruits(scene, camera) {
 
         // Load image, desaturate via canvas filter, then apply as texture
         const img = new Image();
+        img.crossOrigin = 'anonymous';
         img.onload = () => {
             const grayCanvas = document.createElement('canvas');
             grayCanvas.width = img.naturalWidth || 256;

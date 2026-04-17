@@ -4933,6 +4933,7 @@ export function spawnDroppedItem(col, row, itemName, quantity = 1) {
         const sprite = new THREE.Sprite(spriteMat);
 
         const img = new Image();
+        img.crossOrigin = 'anonymous';
         img.src = asset('/icons/gold_coins.webp');
         img.onload = () => {
             const canvas = document.createElement('canvas');

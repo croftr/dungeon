@@ -50,6 +50,8 @@ function mulberry32(seed) {
 //  TEXTURES
 // ─────────────────────────────────────────────
 const textureLoader = new THREE.TextureLoader();
+textureLoader.setCrossOrigin('anonymous');
+
 
 const stoneWallTex = textureLoader.load(asset('/textures/wall1.jpg'));
 stoneWallTex.wrapS = stoneWallTex.wrapT = THREE.RepeatWrapping;
@@ -372,6 +374,8 @@ export function buildLevel(scene) {
 
 export function buildTextureZone(scene, wallCells, floorCells, wallTexPath, floorTexPath) {
   const loader = new THREE.TextureLoader();
+  loader.setCrossOrigin('anonymous');
+
   const wTex = loader.load(wallTexPath); wTex.wrapS = wTex.wrapT = THREE.RepeatWrapping; wTex.anisotropy = 16;
   const fTex = loader.load(floorTexPath); fTex.wrapS = fTex.wrapT = THREE.RepeatWrapping; fTex.anisotropy = 16;
   const wM = new THREE.MeshLambertMaterial({ map: wTex, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });

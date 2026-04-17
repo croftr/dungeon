@@ -72,7 +72,7 @@ document.querySelectorAll('img[data-src]').forEach(img => {
 // Map of level number → video element IDs to preload when entering that level
 const _VIDEO_LEVELS = {
   0: ['battle-prep-video', 'hero-door-video', 'nectar-quest-video', 'crystal-shrine-red-video', 'crystal-shrine-red-blue-video', 'portal-video'],
-  1: ['ogre-video', 'mummy-video'],
+  1: ['ogre-video', 'mummy-video', 'goblin-run-video'],
   2: ['treeman-video', 'demon-video', 'giant-video', 'aqua-man-video', 'stairs-video'],
   3: ['minotaur-video', 'minotaur-death-video', 'statue-portal-video', 'egg-video'],
   4: ['stairs-video', 'demon-ogre-video', 'lizard-man-video'],
