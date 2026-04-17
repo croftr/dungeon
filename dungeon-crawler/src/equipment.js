@@ -2782,71 +2782,75 @@ let _ptmKeydownRef       = null;
 let _ptmContextmenuRef   = null;
 
 /**
- * Draw a spell icon into a 40 × 40 canvas with a magical sparkle effect
- * and return a CSS cursor value.  The icon sits centred at (4,4)→(36,36)
- * with a purple glow; five 4-pointed stars are scattered around its edges
- * to evoke active spellcasting rather than dragging an icon.
+ * Build a generic magical-sparkle cursor for party-member targeting.
+ * Returns a CSS cursor data-URL string — always the same regardless of spell.
+ * The cursor is a 40×40 canvas with:
+ *   • A large central 4-pointed star (the "wand tip") in bright white/purple
+ *   • Four smaller corner sparkles for a magical feel
+ *   • A soft purple outer glow
+ * Hotspot is at the centre (20,20).
  */
-function _buildSpellCursor(iconUrl, callback) {
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = () => {
-    const SIZE = 40, ICON = 32, OFF = 4;
-    const c = document.createElement('canvas');
-    c.width = SIZE; c.height = SIZE;
-    const ctx = c.getContext('2d');
+function _buildSpellCursor() {
+  const SIZE = 40;
+  const CX = 20, CY = 20;      // centre / hotspot
+  const c = document.createElement('canvas');
+  c.width = SIZE; c.height = SIZE;
+  const ctx = c.getContext('2d');
 
-    // Icon with a soft arcane glow
+  // ── helper: draw a 4-pointed diamond star ────────────────────────────────
+  function star(x, y, r, a, color = '#ffffff', glow = '#c080ff', blur = 8) {
     ctx.save();
-    ctx.shadowColor = 'rgba(180, 120, 255, 0.85)';
-    ctx.shadowBlur  = 7;
-    ctx.drawImage(img, OFF, OFF, ICON, ICON);
-    ctx.restore();
-
-    // 4-pointed diamond sparkle at (x, y) with arm-radius r and opacity a
-    function sparkle(x, y, r, a) {
-      ctx.save();
-      ctx.globalAlpha = a;
-      ctx.translate(x, y);
-      ctx.fillStyle   = '#ffffff';
-      ctx.shadowColor = '#d0a0ff';
-      ctx.shadowBlur  = 6;
-      ctx.beginPath();
-      for (let i = 0; i < 8; i++) {
-        const angle = (i * Math.PI) / 4 - Math.PI / 4;
-        const len   = i % 2 === 0 ? r : r * 0.22;
-        i === 0
-          ? ctx.moveTo(Math.cos(angle) * len, Math.sin(angle) * len)
-          : ctx.lineTo(Math.cos(angle) * len, Math.sin(angle) * len);
-      }
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
+    ctx.globalAlpha = a;
+    ctx.translate(x, y);
+    ctx.shadowColor = glow;
+    ctx.shadowBlur  = blur;
+    ctx.fillStyle   = color;
+    ctx.beginPath();
+    for (let i = 0; i < 8; i++) {
+      const angle = (i * Math.PI) / 4 - Math.PI / 4;
+      const len   = i % 2 === 0 ? r : r * 0.20;
+      i === 0
+        ? ctx.moveTo(Math.cos(angle) * len, Math.sin(angle) * len)
+        : ctx.lineTo(Math.cos(angle) * len, Math.sin(angle) * len);
     }
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
 
-    // Five sparkles scattered around the icon perimeter
-    sparkle( 2,  2, 3.8, 0.92);  // top-left  corner
-    sparkle(38,  3, 2.8, 0.80);  // top-right corner
-    sparkle( 4, 38, 2.8, 0.78);  // bottom-left corner
-    sparkle(38, 37, 3.2, 0.88);  // bottom-right corner
-    sparkle(20,  0, 2.2, 0.72);  // top-centre edge
+  // ── outer purple halo ─────────────────────────────────────────────────────
+  ctx.save();
+  const grad = ctx.createRadialGradient(CX, CY, 2, CX, CY, 16);
+  grad.addColorStop(0,   'rgba(200,150,255,0.28)');
+  grad.addColorStop(0.6, 'rgba(140, 80,220,0.12)');
+  grad.addColorStop(1,   'rgba(100, 40,180,0)');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(CX, CY, 16, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
 
-    // Hotspot at icon centre (OFF + ICON/2 = 20)
-    callback(`url('${c.toDataURL()}') 20 20, crosshair`);
-  };
-  img.onerror = () => callback('crosshair');
-  img.src = iconUrl;
+  // ── central big star ──────────────────────────────────────────────────────
+  star(CX, CY, 13, 1.00, '#ffffff', '#bf80ff', 10);
+  // inner bright core (slightly smaller, fully opaque)
+  star(CX, CY,  8, 0.95, '#e8d0ff', '#9050e0',  6);
+
+  // ── four corner sparkles ──────────────────────────────────────────────────
+  star( 5,  5, 4.5, 0.88, '#ffffff', '#c090ff', 7);
+  star(35,  5, 3.5, 0.78, '#ffffff', '#c090ff', 6);
+  star( 5, 35, 3.5, 0.75, '#ffffff', '#c090ff', 6);
+  star(35, 35, 4.0, 0.82, '#ffffff', '#c090ff', 7);
+
+  // Hotspot at centre
+  return `url('${c.toDataURL()}') 20 20, crosshair`;
 }
 
 function _enterPartyTargetMode(caster, casterIndex, hand, spellDef) {
   _partyTargetPending = { caster, casterIndex, hand, spellDef };
   document.body.classList.add('party-targeting-mode');
 
-  // Immediate crosshair, upgraded to spell icon once the image loads
-  document.body.style.cursor = 'crosshair';
-  _buildSpellCursor(spellDef.icon, cursor => {
-    if (_partyTargetPending) document.body.style.cursor = cursor;
-  });
+  // Generic sparkle cursor — same for every party-member spell
+  document.body.style.cursor = _buildSpellCursor();
 
   _ptmMousedownRef    = _ptmOnMousedown;
   _ptmKeydownRef      = _ptmOnKeydown;
