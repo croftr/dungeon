@@ -756,9 +756,9 @@ function showCharacterSelection() {
     const full = selectedIds.size >= 4;
     const canAdd = !isSelected && full;
     const expertise = getSkillExpertise(r.skillTree);
-    const jobIcon  = asset(`/skills/jobs/${r.job.toLowerCase().replace(/\s+/g, '-')}.png`);
+    const jobIcon  = asset(`/skills/jobs/${r.job.toLowerCase().replace(/\s+/g, '-')}.webp`);
     const raceKey  = r.race.toLowerCase().includes('elf') ? 'elf' : r.race.toLowerCase();
-    const raceIcon = asset(`/skills/race/${raceKey}.png`);
+    const raceIcon = asset(`/skills/race/${raceKey}.webp`);
     const stats = [
       { label: 'STR', val: r.stats.strength    },
       { label: 'DEX', val: r.stats.dexterity   },
