@@ -202,8 +202,8 @@ function openRecruitModal(recruitId) {
     const canRecruit = !!freeSlot;
 
     const mediaHtml = r.recruitVideo
-        ? `<video src="${asset(r.recruitVideo)}" autoplay loop muted playsinline style="width: 250px; height: 350px; object-fit: cover; border-radius: 4px; border: 1px solid #c8a84a; box-shadow: 0 0 15px rgba(200, 168, 74, 0.3); background: #000;"></video>`
-        : `<img src="${asset(r.image)}" style="width: 250px; height: 350px; object-fit: cover; border-radius: 4px; border: 1px solid #c8a84a; box-shadow: 0 0 15px rgba(200, 168, 74, 0.3); image-rendering: pixelated; background: #000;">`;
+        ? `<video src="${asset(r.recruitVideo)}" crossorigin="anonymous" autoplay loop muted playsinline style="width: 250px; height: 350px; object-fit: cover; border-radius: 4px; border: 1px solid #c8a84a; box-shadow: 0 0 15px rgba(200, 168, 74, 0.3); background: #000;"></video>`
+        : `<img src="${asset(r.image)}" crossorigin="anonymous" style="width: 250px; height: 350px; object-fit: cover; border-radius: 4px; border: 1px solid #c8a84a; box-shadow: 0 0 15px rgba(200, 168, 74, 0.3); image-rendering: pixelated; background: #000;">`;
 
     uiContainer.innerHTML = `
     <div style="display: flex; gap: 30px;">

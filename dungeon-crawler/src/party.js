@@ -46,7 +46,7 @@ export function setPartyGold(amount) {
 
 function updateGoldDisplay() {
   const el = document.getElementById('tactics-gold');
-  if (el) el.innerHTML = `<img src="${asset('/icons/gold_coins.webp')}" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}`;
+  if (el) el.innerHTML = `<img src="${asset('/icons/gold_coins.webp')}" crossorigin="anonymous" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}`;
 }
 
 export const lastAttackTimes = {};

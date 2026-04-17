@@ -4153,6 +4153,7 @@ function _renderMerchantPartyItems() {
                 slot.appendChild(tag);
 
                 const img = document.createElement('img');
+                img.crossOrigin = 'anonymous';
                 img.src = asset(def.icon);
                 slot.appendChild(img);
 
@@ -4202,6 +4203,7 @@ function _renderMerchantSellBasket() {
             slot.className = 'merch-slot';
 
             const img = document.createElement('img');
+            img.crossOrigin = 'anonymous';
             img.src = asset(def.icon);
             slot.appendChild(img);
 
@@ -4298,6 +4300,7 @@ function _bindArmorStandSlots(equip, contents) {
             if (itemDef) {
                 slot.classList.add('occupied');
                 const img = document.createElement('img');
+                img.crossOrigin = 'anonymous';
                 img.src = asset(itemDef.icon);
                 slot.appendChild(img);
 
@@ -4540,7 +4543,11 @@ function _transmute() {
         document.querySelector('.workbench-deco-alchemy .workbench-deco-img'),
     ].filter(Boolean);
     const _alchemyFlame = asset('/icons/alchemy2.webp');
-    _alchemyImgs.forEach(img => { img._origSrc = img.src; img.src = _alchemyFlame; });
+    _alchemyImgs.forEach(img => {
+        img._origSrc = img.src;
+        img.crossOrigin = 'anonymous';
+        img.src = _alchemyFlame;
+    });
     setTimeout(() => _alchemyImgs.forEach(img => { img.src = img._origSrc; }), 500);
     const recipes = _getAlchemyRecipes();
 
@@ -4747,6 +4754,7 @@ function _showAlchemyItemPicker(x, y, slotIdx) {
                 slot.className = 'picker-slot';
 
                 const img = document.createElement('img');
+                img.crossOrigin = 'anonymous';
                 img.src = asset(def.icon);
                 slot.appendChild(img);
 
