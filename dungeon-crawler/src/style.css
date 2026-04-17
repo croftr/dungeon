@@ -8634,7 +8634,7 @@ body.cursor-interact #renderer-canvas {
   flex-wrap: wrap;
   align-items: baseline;
   gap: 3px 8px;
-  background-image: url('/icons/potions/known-recepie-parchment.png');
+  background-image: url('/icons/potions/known-recepie-parchment.webp');
   background-size: 100% 100%;
   background-repeat: no-repeat;
   background-color: transparent;
