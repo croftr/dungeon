@@ -6,7 +6,8 @@
         "description": "A glowing orb of pure life energy. Prized by alchemists for crafting.",
         "value": 0,
         "weight": 0.1,
-        "sellable": false
+        "sellable": false,
+        "stackCount": 10
     },
     {
         "name": "Poison Vial",
@@ -15,7 +16,8 @@
         "description": "A small vial of concentrated poison harvested from slain creatures.",
         "value": 20,
         "weight": 0.2,
-        "sellable": true
+        "sellable": true,
+        "stackCount": 10
     },
     {
         "name": "Life Berry",
@@ -24,7 +26,8 @@
         "description": "A magical berry that pulses with natural life energy. Rare and valuable.",
         "value": 30,
         "weight": 0.1,
-        "sellable": true
+        "sellable": true,
+        "stackCount": 10
     },
     {
         "name": "Mana Berry",
@@ -33,7 +36,8 @@
         "description": "A vibrant blue berry infused with arcane essence. Used in many magical concoctions.",
         "value": 45,
         "weight": 0.1,
-        "sellable": true
+        "sellable": true,
+        "stackCount": 10
     },
     {
         "name": "Fermented Sugar",
@@ -42,7 +46,8 @@
         "description": "A sticky, golden substance with a pungent sweet aroma. A volatile alchemical base.",
         "value": 25,
         "weight": 0.2,
-        "sellable": true
+        "sellable": true,
+        "stackCount": 10
     },
     {
         "name": "Starlight Nectar",
@@ -123,7 +128,8 @@
         "description": "A heavy chunk of raw iron ore. Can be smelted and forged into powerful gear.",
         "value": 50,
         "weight": 2.0,
-        "sellable": true
+        "sellable": true,
+        "stackCount": 10
     },
     {
         "name": "Lizard Scale",
@@ -222,7 +228,8 @@
         "description": "A shimmering blue-green orb containing the core essence of an Aqua Man.",
         "value": 0,
         "weight": 0.1,
-        "sellable": false
+        "sellable": false,
+        "stackCount": 10
     },
     {
         "name": "Crocodile Warrior Essence",
@@ -231,7 +238,8 @@
         "description": "A tough, swampy orb containing the core essence of a Crocodile Warrior.",
         "value": 0,
         "weight": 0.1,
-        "sellable": false
+        "sellable": false,
+        "stackCount": 10
     },
     {
         "name": "Demon Ogre Essence",
@@ -240,7 +248,8 @@
         "description": "A chaotic, fiery orb containing the core essence of a Demon Ogre.",
         "value": 0,
         "weight": 0.1,
-        "sellable": false
+        "sellable": false,
+        "stackCount": 10
     },
     {
         "name": "Demon Essence",
@@ -249,7 +258,8 @@
         "description": "A malicious, glowing orb containing the core essence of a Demon.",
         "value": 0,
         "weight": 0.1,
-        "sellable": false
+        "sellable": false,
+        "stackCount": 10
     },
     {
         "name": "Giant Essence",
@@ -258,7 +268,8 @@
         "description": "A massive, earthy orb containing the core essence of a Giant.",
         "value": 0,
         "weight": 0.1,
-        "sellable": false
+        "sellable": false,
+        "stackCount": 10
     },
     {
         "name": "Lizard Man Essence",
@@ -267,7 +278,8 @@
         "description": "A reptilian, vibrant orb containing the core essence of a Lizard Man.",
         "value": 0,
         "weight": 0.1,
-        "sellable": false
+        "sellable": false,
+        "stackCount": 10
     },
     {
         "name": "Minotaur Essence",
@@ -276,7 +288,8 @@
         "description": "A powerful, blood-orange orb containing the core essence of a Minotaur.",
         "value": 0,
         "weight": 0.1,
-        "sellable": false
+        "sellable": false,
+        "stackCount": 10
     },
     {
         "name": "Ogre Essence",
@@ -285,7 +298,8 @@
         "description": "A brutish, mossy orb containing the core essence of an Ogre.",
         "value": 0,
         "weight": 0.1,
-        "sellable": false
+        "sellable": false,
+        "stackCount": 10
     },
     {
         "name": "Tree Man Essence",
@@ -294,7 +308,8 @@
         "description": "A nature-infused, wood-like orb containing the core essence of a Tree Man.",
         "value": 0,
         "weight": 0.1,
-        "sellable": false
+        "sellable": false,
+        "stackCount": 10
     },
     {
         "name": "Rage Cap",

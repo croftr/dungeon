@@ -129,7 +129,45 @@ const SLOT_KEYS = [
 // Add new type strings here when new quickslottable item categories are introduced.
 const QUICKSLOT_TYPES = ['potion'];
 
-const INVENTORY_SIZE = 20; // 4 cols × 5 rows
+const INVENTORY_SIZE = 40; // 4 cols × 10 rows (visible ~5 rows; scrolls beyond)
+
+// ─────────────────────────────────────────────
+//  STACKING HELPERS (data-driven via item def stackCount)
+// ─────────────────────────────────────────────
+function getStackMax(nameOrDef) {
+  const def = typeof nameOrDef === 'string' ? getItemDef(nameOrDef) : nameOrDef;
+  const n = def?.stackCount;
+  return (typeof n === 'number' && n > 1) ? n : 1;
+}
+function isStackable(nameOrDef) { return getStackMax(nameOrDef) > 1; }
+function itemCount(item) { return item ? (item.count ?? 1) : 0; }
+
+/** Decrement `qty` from inventory slot; nulls the slot when it hits 0. Returns actually-consumed count. */
+export function consumeItemAt(m, invIndex, qty = 1) {
+  const item = m?.inventory?.[invIndex];
+  if (!item || qty <= 0) return 0;
+  const have = itemCount(item);
+  const take = Math.min(have, qty);
+  if (have <= take) {
+    m.inventory[invIndex] = null;
+  } else {
+    item.count = have - take;
+  }
+  return take;
+}
+
+/** Remove up to `qty` of `itemName` from party member m; splits across stacks. Returns count removed. */
+export function removeItemsByName(m, itemName, qty = 1) {
+  if (!m?.inventory) return 0;
+  let removed = 0;
+  for (let i = 0; i < m.inventory.length && removed < qty; i++) {
+    const it = m.inventory[i];
+    if (it && it.name === itemName) {
+      removed += consumeItemAt(m, i, qty - removed);
+    }
+  }
+  return removed;
+}
 
 // Human-readable slot labels for the detail panel
 const SLOT_LABELS = {
@@ -383,7 +421,7 @@ export function extendPartyData() {
 // ─────────────────────────────────────────────
 //  RENDER
 // ─────────────────────────────────────────────
-export function renderItemIcon(item, containerEl) {
+export function renderItemIcon(item, containerEl, opts = {}) {
   if (!item) {
     containerEl.innerHTML = '';
     return;
@@ -396,6 +434,15 @@ export function renderItemIcon(item, containerEl) {
     containerEl.innerHTML = `<img src="${asset(iconSrc)}" draggable="false" style="width: 100%; height: 100%; object-fit: contain; pointer-events: none;" />`;
   } else {
     containerEl.innerHTML = `<span>${item.name}</span>`;
+  }
+  if (opts.showCount !== false) {
+    const count = itemCount(item);
+    if (count > 1) {
+      const badge = document.createElement('div');
+      badge.className = 'inv-count-badge';
+      badge.textContent = count;
+      containerEl.appendChild(badge);
+    }
   }
 }
 
@@ -485,6 +532,26 @@ function renderModal(memberIndex) {
   if (skbEl) {
     skbEl.classList.toggle('occupied', !!m.loadoutB.skill);
     renderItemIcon(m.loadoutB.skill, skbEl.querySelector('.pd-item') || skbEl);
+  }
+
+  // ── Slot-count header ──
+  const slotCountEl = document.getElementById('inv-slot-count');
+  if (slotCountEl) {
+    const used = m.inventory.filter(it => it !== null).length;
+    slotCountEl.textContent = `${used}/${INVENTORY_SIZE}`;
+  }
+
+  // ── Cap grid visual height to 5 rows (scroll beyond) ──
+  const gridEl = document.getElementById('inventory-grid');
+  if (gridEl) {
+    setTimeout(() => {
+      const firstCell = gridEl.querySelector('.inv-cell');
+      const cellH = firstCell?.getBoundingClientRect().height ?? 0;
+      if (cellH > 0) {
+        const visibleRows = 5, gap = 5, padding = 10;
+        gridEl.style.maxHeight = `${visibleRows * cellH + (visibleRows - 1) * gap + 2 * padding}px`;
+      }
+    }, 0);
   }
 
   // ── Inventory cells ──
@@ -1707,15 +1774,21 @@ function onInventoryCellClick(e) {
     const def = getItemDef(item.name);
     if (def?.slot === 'loot') {
       if (addItemToAlchemy(item.name)) {
-        m.inventory[invIndex] = null;
+        consumeItemAt(m, invIndex, 1);
         renderModal(activeCharIndex);
       }
       return;
     }
   }
 
-  // Shift + Click = Quick Giving to next member (original shortcut kept)
+  // Shift + Click:
+  //   - If item is a stack (count > 1), split 1 unit into a new inventory slot.
+  //   - Otherwise keep the old "quick-give to next member" shortcut.
   if (e.shiftKey) {
+    if (itemCount(item) > 1) {
+      _splitStack(activeCharIndex, invIndex);
+      return;
+    }
     let nextIdx = (activeCharIndex + 1) % 4;
     let attempts = 0;
     while (party[nextIdx].isEmpty && attempts < 4) {
@@ -1887,7 +1960,7 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
         const item = m.inventory[_ctxInvIndex];
         if (item) {
           if (addItemToAlchemy(item.name)) {
-            m.inventory[_ctxInvIndex] = null;
+            consumeItemAt(m, _ctxInvIndex, 1);
             renderModal(activeCharIndex);
           }
         }
@@ -2205,7 +2278,10 @@ let _dropPendingInvIndex = null;
 function _showDropConfirm(charIndex, invIndex, itemName) {
   _dropPendingCharIndex = charIndex;
   _dropPendingInvIndex = invIndex;
-  document.getElementById('drop-confirm-item-name').textContent = itemName;
+  const item = party[charIndex]?.inventory?.[invIndex];
+  const count = itemCount(item);
+  const label = count > 1 ? `${itemName} ×${count}` : itemName;
+  document.getElementById('drop-confirm-item-name').textContent = label;
   document.getElementById('drop-confirm-overlay').classList.remove('chest-hidden');
 }
 
@@ -4658,25 +4734,80 @@ export function _getItemSortPriority(item) {
   return 7;
 }
 
+/**
+ * Consolidate any stackable items in this member's inventory into the fewest
+ * possible slots (up to each item's stackCount maximum).
+ */
+function _stackInventoryFor(m) {
+  if (!m?.inventory) return;
+  const stackTotals = new Map();
+  const stackOrder = new Map();
+  const singles = [];
+  for (let i = 0; i < m.inventory.length; i++) {
+    const it = m.inventory[i];
+    if (!it) continue;
+    if (isStackable(it.name)) {
+      if (!stackOrder.has(it.name)) stackOrder.set(it.name, i);
+      stackTotals.set(it.name, (stackTotals.get(it.name) ?? 0) + itemCount(it));
+    } else {
+      singles.push({ item: it, order: i });
+    }
+  }
+  for (let i = 0; i < m.inventory.length; i++) m.inventory[i] = null;
+
+  const entries = [];
+  for (const [name, total] of stackTotals) {
+    entries.push({ kind: 'stack', name, total, order: stackOrder.get(name) });
+  }
+  for (const s of singles) entries.push({ kind: 'single', item: s.item, order: s.order });
+  entries.sort((a, b) => a.order - b.order);
+
+  let slot = 0;
+  for (const e of entries) {
+    if (slot >= m.inventory.length) break;
+    if (e.kind === 'stack') {
+      const def = getItemDef(e.name);
+      const stackMax = getStackMax(def);
+      let remaining = e.total;
+      while (remaining > 0 && slot < m.inventory.length) {
+        const add = Math.min(stackMax, remaining);
+        m.inventory[slot++] = { name: e.name, slot: def.slot, count: add };
+        remaining -= add;
+      }
+    } else {
+      m.inventory[slot++] = e.item;
+    }
+  }
+}
+
 function _sortInventory() {
   if (activeCharIndex === null) return;
   playInventorySortSound();
   const m = party[activeCharIndex];
-
-  // Collect all non-null items, sort by type then name, then repack from index 0
-  const items = m.inventory.filter(item => item !== null);
-  items.sort((a, b) => {
-    const pa = _getItemSortPriority(a);
-    const pb = _getItemSortPriority(b);
-    if (pa !== pb) return pa - pb;
-    return a.name.localeCompare(b.name);
-  });
-
-  for (let i = 0; i < m.inventory.length; i++) {
-    m.inventory[i] = items[i] ?? null;
-  }
-
+  _stackInventoryFor(m);
   renderModal(activeCharIndex);
+}
+
+/**
+ * Take 1 unit out of a stack and place it in the first free inventory slot.
+ * Refuses if count <= 1 or inventory has no free slot.
+ */
+function _splitStack(memberIndex, invIndex) {
+  const m = party[memberIndex];
+  const item = m?.inventory?.[invIndex];
+  if (!item) return false;
+  if (itemCount(item) <= 1) return false;
+  const free = m.inventory.indexOf(null);
+  if (free === -1) {
+    showMessage('Inventory full — cannot unstack.');
+    return false;
+  }
+  const def = getItemDef(item.name);
+  item.count = itemCount(item) - 1;
+  m.inventory[free] = { name: item.name, slot: def?.slot ?? item.slot, count: 1 };
+  renderModal(memberIndex);
+  refreshPartyCards();
+  return true;
 }
 
 function buildInventoryGrid() {
@@ -4969,22 +5100,49 @@ document.getElementById('equip-char-dev').addEventListener('click', () => {
 
 
 /**
- * Public helper to add an item to a specific character's inventory.
- * Returns true if successful, false if inventory is full.
+ * Public helper to add `qty` of `itemName` to a specific character's inventory.
+ * For stackable items, merges into existing stacks (respecting stackCount max)
+ * before opening new slots. Returns true if ALL units were placed, false otherwise.
  */
-export function addItemToInventory(charIndex, itemName) {
+export function addItemToInventory(charIndex, itemName, qty = 1) {
   const m = party[charIndex];
   if (!m || m.isEmpty) return false;
 
-  // Item definitions expect a name and its default slot
   const def = getItemDef(itemName);
   if (!def) return false;
 
-  const freeIndex = m.inventory.indexOf(null);
-  if (freeIndex === -1) return false;
+  const stackMax = getStackMax(def);
+  let remaining = qty;
 
-  m.inventory[freeIndex] = { name: itemName, slot: def.slot };
+  if (stackMax > 1) {
+    for (let i = 0; i < m.inventory.length && remaining > 0; i++) {
+      const it = m.inventory[i];
+      if (!it || it.name !== itemName) continue;
+      const have = itemCount(it);
+      const space = stackMax - have;
+      if (space <= 0) continue;
+      const add = Math.min(space, remaining);
+      it.count = have + add;
+      remaining -= add;
+    }
+  }
+
+  while (remaining > 0) {
+    const freeIndex = m.inventory.indexOf(null);
+    if (freeIndex === -1) return false;
+    const add = Math.min(stackMax, remaining);
+    const slotEntry = { name: itemName, slot: def.slot };
+    if (stackMax > 1) slotEntry.count = add;
+    m.inventory[freeIndex] = slotEntry;
+    remaining -= add;
+  }
+
   return true;
+}
+
+/** Returns number of free inventory slots (null slots only, not stacks with headroom). */
+export function inventoryFreeSlots(m) {
+  return (m?.inventory || []).filter(it => it === null).length;
 }
 
 // ─────────────────────────────────────────────

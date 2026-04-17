@@ -3217,17 +3217,33 @@ function _renderChestPartyInv() {
 
                 // Left-click → deposit into chest
                 slot.addEventListener('click', () => {
-                    if (!_activeChestContents) return;
-                    // Scan all 25 chest positions (array may be shorter than 25 if not all slots used)
-                    const CHEST_SIZE = 25;
+                    if (!_activeChestContents || !_activeChestSlots) return;
+
+                    // Scan all currently available chest slots for a hole
                     let freeIdx = -1;
-                    for (let ci = 0; ci < CHEST_SIZE; ci++) {
-                        if (_activeChestContents[ci] == null) { freeIdx = ci; break; }
+                    for (let ci = 0; ci < _activeChestSlots.length; ci++) {
+                        if (_activeChestContents[ci] == null) {
+                            freeIdx = ci;
+                            break;
+                        }
                     }
+
+                    // If no empty slot found among existing ones, grow the chest
                     if (freeIdx === -1) {
-                        showMessage('The stash is full!');
-                        return;
+                        freeIdx = _activeChestContents.length;
+                        
+                        // Dynamically add a new slot to the DOM to match
+                        const grid = document.getElementById('chest-grid');
+                        if (grid) {
+                            const newSlot = document.createElement('div');
+                            newSlot.className = 'chest-slot';
+                            newSlot.dataset.index = freeIdx;
+                            grid.appendChild(newSlot);
+                            // Refresh our reference to the slots
+                            _activeChestSlots = grid.querySelectorAll('.chest-slot');
+                        }
                     }
+
                     _activeChestContents[freeIdx] = item.name;
                     m.inventory[invIdx] = null;
                     equip.updateEffectiveStats(m);
@@ -4098,7 +4114,8 @@ function _renderMerchantPartyItems() {
                 const def = getItemDef(item.name);
                 if (!def) return;
 
-                const sellPrice = _getMerchantSellPrice(item.name);
+                const stackQty = item.count ?? 1;
+                const sellPrice = _getMerchantSellPrice(item.name) * stackQty;
 
                 const slot = document.createElement('div');
                 slot.className = 'merch-slot';
@@ -4111,6 +4128,13 @@ function _renderMerchantPartyItems() {
                 const img = document.createElement('img');
                 img.src = asset(def.icon);
                 slot.appendChild(img);
+
+                if (stackQty > 1) {
+                    const badge = document.createElement('div');
+                    badge.className = 'inv-count-badge';
+                    badge.textContent = stackQty;
+                    slot.appendChild(badge);
+                }
 
                 const price = document.createElement('div');
                 price.className = 'merch-price';
@@ -4143,7 +4167,9 @@ function _renderMerchantSellBasket() {
             const def = getItemDef(entry.name);
             if (!def) return;
 
-            const sellPrice = _getMerchantSellPrice(entry.name);
+            const invItem = party[entry.charIndex]?.inventory?.[entry.invIndex];
+            const stackQty = invItem?.count ?? 1;
+            const sellPrice = _getMerchantSellPrice(entry.name) * stackQty;
 
             const slot = document.createElement('div');
             slot.className = 'merch-slot';
@@ -4151,6 +4177,13 @@ function _renderMerchantSellBasket() {
             const img = document.createElement('img');
             img.src = asset(def.icon);
             slot.appendChild(img);
+
+            if (stackQty > 1) {
+                const badge = document.createElement('div');
+                badge.className = 'inv-count-badge';
+                badge.textContent = stackQty;
+                slot.appendChild(badge);
+            }
 
             const price = document.createElement('div');
             price.className = 'merch-price';
@@ -4175,7 +4208,11 @@ function _renderMerchantSellBasket() {
 }
 
 function _updateMerchantSellTotals() {
-    const total = _merchantSellBasket.reduce((sum, e) => sum + _getMerchantSellPrice(e.name), 0);
+    const total = _merchantSellBasket.reduce((sum, e) => {
+        const invItem = party[e.charIndex]?.inventory?.[e.invIndex];
+        const stackQty = invItem?.count ?? 1;
+        return sum + _getMerchantSellPrice(e.name) * stackQty;
+    }, 0);
 
     document.getElementById('merchant-sell-total-val').textContent = total;
     document.getElementById('merchant-sell-gold-val').textContent = partyGold;
@@ -4187,12 +4224,17 @@ function _updateMerchantSellTotals() {
 function _sellItems() {
     if (_merchantSellBasket.length === 0) return;
 
-    const total = _merchantSellBasket.reduce((sum, e) => sum + _getMerchantSellPrice(e.name), 0);
-    const soldNames = _merchantSellBasket.map(e => e.name);
+    // Snapshot stack counts up front so price & per-item log entries agree.
+    const entries = _merchantSellBasket.map(e => {
+        const invItem = party[e.charIndex]?.inventory?.[e.invIndex];
+        return { ...e, stackQty: invItem?.count ?? 1 };
+    });
+    const total = entries.reduce((sum, e) => sum + _getMerchantSellPrice(e.name) * e.stackQty, 0);
+    const totalUnits = entries.reduce((sum, e) => sum + e.stackQty, 0);
 
-    // Remove items from inventory (process in reverse index order per character to avoid index shifting)
+    // Remove items from inventory (whole stack per slot; reverse order to keep indices stable).
     const byChar = {};
-    for (const entry of _merchantSellBasket) {
+    for (const entry of entries) {
         if (!byChar[entry.charIndex]) byChar[entry.charIndex] = [];
         byChar[entry.charIndex].push(entry.invIndex);
     }
@@ -4204,9 +4246,9 @@ function _sellItems() {
     }
 
     addGold(total);
-    showMessage(`Sold ${soldNames.length} item${soldNames.length > 1 ? 's' : ''} for ${total} gold.`);
-    for (const name of soldNames) {
-        addLogEntry({ type: 'item', subtype: 'sell', itemName: name, gold: _getMerchantSellPrice(name), time: Date.now() });
+    showMessage(`Sold ${totalUnits} item${totalUnits > 1 ? 's' : ''} for ${total} gold.`);
+    for (const e of entries) {
+        addLogEntry({ type: 'item', subtype: 'sell', itemName: e.name, gold: _getMerchantSellPrice(e.name) * e.stackQty, time: Date.now() });
     }
 
     _merchantSellBasket = [];
@@ -5049,7 +5091,7 @@ function _countPartyItem(itemName) {
     for (const member of party) {
         if (member.isEmpty) continue;
         for (const item of member.inventory) {
-            if (item && item.name === itemName) count++;
+            if (item && item.name === itemName) count += (item.count ?? 1);
         }
     }
     return count;
@@ -5163,20 +5205,22 @@ function _autoPopulateAlchemySlots(recipe) {
             }
         }
     }
-    // Fill slots from party inventory, ingredient by ingredient
+    // Fill slots from party inventory, ingredient by ingredient.
+    // Stacked slots (count > 1) may feed multiple alchemy slots from one inventory entry.
     let slotIdx = 0;
     for (const needed of recipe.ingredients) {
         let remaining = needed.quantity;
         outer: for (const member of party) {
             if (member.isEmpty) continue;
             for (let invIdx = 0; invIdx < member.inventory.length; invIdx++) {
-                if (remaining === 0) break outer;
-                if (slotIdx >= 8) break outer;
-                const item = member.inventory[invIdx];
-                if (!item || item.name !== needed.name) continue;
-                _alchemyContents[slotIdx++] = item.name;
-                member.inventory[invIdx] = null;
-                remaining--;
+                while (remaining > 0 && slotIdx < 8) {
+                    const item = member.inventory[invIdx];
+                    if (!item || item.name !== needed.name) break;
+                    _alchemyContents[slotIdx++] = item.name;
+                    equip.consumeItemAt(member, invIdx, 1);
+                    remaining--;
+                }
+                if (remaining === 0 || slotIdx >= 8) break outer;
             }
         }
     }
@@ -5197,20 +5241,22 @@ function _autoPopulateForgeSlots(recipe) {
             }
         }
     }
-    // Fill slots from party inventory, ingredient by ingredient
+    // Fill slots from party inventory, ingredient by ingredient.
+    // Stacked slots (count > 1) may feed multiple forge slots from one inventory entry.
     let slotIdx = 0;
     for (const needed of recipe.ingredients) {
         let remaining = needed.quantity;
         outer: for (const member of party) {
             if (member.isEmpty) continue;
             for (let invIdx = 0; invIdx < member.inventory.length; invIdx++) {
-                if (remaining === 0) break outer;
-                if (slotIdx >= 8) break outer;
-                const item = member.inventory[invIdx];
-                if (!item || item.name !== needed.name) continue;
-                _forgeContents[slotIdx++] = item.name;
-                member.inventory[invIdx] = null;
-                remaining--;
+                while (remaining > 0 && slotIdx < 8) {
+                    const item = member.inventory[invIdx];
+                    if (!item || item.name !== needed.name) break;
+                    _forgeContents[slotIdx++] = item.name;
+                    equip.consumeItemAt(member, invIdx, 1);
+                    remaining--;
+                }
+                if (remaining === 0 || slotIdx >= 8) break outer;
             }
         }
     }

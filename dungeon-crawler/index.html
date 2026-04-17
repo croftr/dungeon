@@ -17,6 +17,9 @@
   <title>Grid Dungeon Crawler</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="apple-touch-icon" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 
@@ -650,7 +653,8 @@
         <section id="equip-inventory">
           <div class="equip-inv-header">
             <h4 class="equip-section-title">Inventory</h4>
-            <button id="inv-sort-btn" title="Sort items by type, filling from top-left">Sort</button>
+            <span id="inv-slot-count" class="inv-slot-count" title="Slots used / total slots">0/0</span>
+            <button id="inv-sort-btn" title="Stack and compact items">Sort</button>
           </div>
           <div id="inventory-grid">
             <!-- cells injected by equipment.js -->
@@ -1084,43 +1088,45 @@
         <button id="chest-sort-btn" title="Sort items">Sort</button>
         <button id="chest-close" aria-label="Close">&times;</button>
       </div>
-      <div id="chest-body">
-        <div id="chest-grid">
-          <!-- 25 slots (5×5) -->
-          <div class="chest-slot" data-index="0"></div>
-          <div class="chest-slot" data-index="1"></div>
-          <div class="chest-slot" data-index="2"></div>
-          <div class="chest-slot" data-index="3"></div>
-          <div class="chest-slot" data-index="4"></div>
-          <div class="chest-slot" data-index="5"></div>
-          <div class="chest-slot" data-index="6"></div>
-          <div class="chest-slot" data-index="7"></div>
-          <div class="chest-slot" data-index="8"></div>
-          <div class="chest-slot" data-index="9"></div>
-          <div class="chest-slot" data-index="10"></div>
-          <div class="chest-slot" data-index="11"></div>
-          <div class="chest-slot" data-index="12"></div>
-          <div class="chest-slot" data-index="13"></div>
-          <div class="chest-slot" data-index="14"></div>
-          <div class="chest-slot" data-index="15"></div>
-          <div class="chest-slot" data-index="16"></div>
-          <div class="chest-slot" data-index="17"></div>
-          <div class="chest-slot" data-index="18"></div>
-          <div class="chest-slot" data-index="19"></div>
-          <div class="chest-slot" data-index="20"></div>
-          <div class="chest-slot" data-index="21"></div>
-          <div class="chest-slot" data-index="22"></div>
-          <div class="chest-slot" data-index="23"></div>
-          <div class="chest-slot" data-index="24"></div>
+      <div id="chest-main-content">
+        <div id="chest-body">
+          <div id="chest-grid">
+            <!-- 25 slots (5×5) -->
+            <div class="chest-slot" data-index="0"></div>
+            <div class="chest-slot" data-index="1"></div>
+            <div class="chest-slot" data-index="2"></div>
+            <div class="chest-slot" data-index="3"></div>
+            <div class="chest-slot" data-index="4"></div>
+            <div class="chest-slot" data-index="5"></div>
+            <div class="chest-slot" data-index="6"></div>
+            <div class="chest-slot" data-index="7"></div>
+            <div class="chest-slot" data-index="8"></div>
+            <div class="chest-slot" data-index="9"></div>
+            <div class="chest-slot" data-index="10"></div>
+            <div class="chest-slot" data-index="11"></div>
+            <div class="chest-slot" data-index="12"></div>
+            <div class="chest-slot" data-index="13"></div>
+            <div class="chest-slot" data-index="14"></div>
+            <div class="chest-slot" data-index="15"></div>
+            <div class="chest-slot" data-index="16"></div>
+            <div class="chest-slot" data-index="17"></div>
+            <div class="chest-slot" data-index="18"></div>
+            <div class="chest-slot" data-index="19"></div>
+            <div class="chest-slot" data-index="20"></div>
+            <div class="chest-slot" data-index="21"></div>
+            <div class="chest-slot" data-index="22"></div>
+            <div class="chest-slot" data-index="23"></div>
+            <div class="chest-slot" data-index="24"></div>
+          </div>
         </div>
-      </div>
-      <!-- Party inventory deposit panel -->
-      <div id="chest-party-inv">
-        <div id="chest-party-inv-header">
-          <span id="chest-party-inv-label">Inventory</span>
-          <div id="chest-party-tabs"></div>
+        <!-- Party inventory deposit panel -->
+        <div id="chest-party-inv">
+          <div id="chest-party-inv-header">
+            <span id="chest-party-inv-label">Inventory</span>
+            <div id="chest-party-tabs"></div>
+          </div>
+          <div id="chest-party-inv-grid"></div>
         </div>
-        <div id="chest-party-inv-grid"></div>
       </div>
     </div>
   </div>

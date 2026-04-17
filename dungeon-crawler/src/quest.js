@@ -7,6 +7,7 @@ import { playSoundByUrl, playQuestAudio, playItemSound, playSuccessSound } from 
 import { party, addGold } from './party.js';
 import { getItemDef } from './items.js';
 import { showMessage } from './minimap.js';
+import { addItemToInventory, consumeItemAt } from './equipment.js';
 import QUESTS from './data/quests.json';
 
 // ── State ────────────────────────────────────────────────────────────────────
@@ -40,15 +41,9 @@ export function isQuestModalOpen() {
 function _giveRewardItems(itemNames) {
     for (const name of itemNames) {
         let placed = false;
-        for (const m of party) {
-            if (m.isEmpty) continue;
-            const slot = m.inventory.indexOf(null);
-            if (slot !== -1) {
-                const def = getItemDef(name);
-                m.inventory[slot] = { name: def?.name ?? name, slot: def?.slot };
-                placed = true;
-                break;
-            }
+        for (let i = 0; i < party.length; i++) {
+            if (party[i].isEmpty) continue;
+            if (addItemToInventory(i, name, 1)) { placed = true; break; }
         }
         if (placed) {
             playItemSound(name);
@@ -257,14 +252,15 @@ function _checkQuestRequirements(quest) {
 }
 
 function _completeQuest(body, npcQuests, quest) {
-    // 1. Remove required items (unless quest flags them as kept)
+    // 1. Remove required items (unless quest flags them as kept).
+    //    Stacked items are decremented by 1 rather than having the whole stack removed.
     if (quest.requiredItems && !quest.keepRequiredItems) {
         for (const reqItemName of quest.requiredItems) {
             for (const m of party) {
                 if (m.isEmpty) continue;
                 const idx = m.inventory.findIndex(it => it && it.name === reqItemName);
                 if (idx !== -1) {
-                    m.inventory[idx] = null;
+                    consumeItemAt(m, idx, 1);
                     break;
                 }
             }
