@@ -14,13 +14,13 @@ const _recruitMouse = new THREE.Vector2();
 
 function getJobIcon(job) {
     const jobKey = job.toLowerCase().replace(' ', '-');
-    return `/skills/jobs/${jobKey}.png`;
+    return `/skills/jobs/${jobKey}.webp`;
 }
 
 function getRaceIcon(race) {
     // Map both Wood Elf and High Elf to the generic elf icon
     const raceKey = race.toLowerCase().includes('elf') ? 'elf' : race.toLowerCase();
-    return `/skills/race/${raceKey}.png`;
+    return `/skills/race/${raceKey}.webp`;
 }
 import SKILLS_DATA from './data/skills.json';
 

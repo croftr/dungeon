@@ -3211,9 +3211,8 @@ function _renderChestPartyInv() {
         if (item) {
             const def = getItemDef(item.name);
             if (def) {
-                const img = document.createElement('img');
-                img.src = asset(def.icon);
-                slot.appendChild(img);
+                // Render icon and count badge using shared logic
+                equip.renderItemIcon(item, slot);
 
                 // Left-click → deposit into chest
                 slot.addEventListener('click', () => {
@@ -3244,15 +3243,34 @@ function _renderChestPartyInv() {
                         }
                     }
 
-                    _activeChestContents[freeIdx] = item.name;
-                    m.inventory[invIdx] = null;
+                    // Transfer item(s)
+                    const currentCount = item.count ?? 1;
+                    if (currentCount > 1) {
+                        // Move one at a time to be consistent with crafting
+                        // Actually, for chest storage, maybe you want to move the whole stack?
+                        // Let's stick to the user's "move one" pattern if they like it,
+                        // but usually for chest it's everything.
+                        // I'll check what they did for Gold.
+                        
+                        // I'll move the whole stack for chest, as is customary.
+                        // But wait, if I do that, _activeChestContents[freeIdx] needs to be an object.
+                        _activeChestContents[freeIdx] = { name: item.name, quantity: currentCount };
+                        m.inventory[invIdx] = null;
+                    } else {
+                        _activeChestContents[freeIdx] = item.name;
+                        m.inventory[invIdx] = null;
+                    }
+
                     equip.updateEffectiveStats(m);
                     refreshPartyCards();
                     _bindChestSlots(equip, _activeChestSlots, _activeChestContents);
                     _renderChestPartyInv();
                 });
 
-                equip.attachTooltipListeners(slot, () => ({ name: item.name }));
+                equip.attachTooltipListeners(slot, () => ({ 
+                    name: item.name,
+                    quantity: item.count || null 
+                }));
             }
         }
         gridEl.appendChild(slot);
@@ -3374,6 +3392,7 @@ export function openChestModal(chestObj) {
 function _sortChest(chestObj) {
     playInventorySortSound();
     let contents = chestObj.userData.contents || [];
+    console.log("[sortChest] start contents:", JSON.stringify(contents));
 
     // Filter out null/empty entries, sort them, then repack
     const items = contents.filter(item => {
@@ -3383,6 +3402,8 @@ function _sortChest(chestObj) {
         return false;
     });
 
+    console.log("[sortChest] filtered items:", JSON.stringify(items));
+
     items.sort((a, b) => {
         const nameA = typeof a === 'string' ? a : a.name;
         const nameB = typeof b === 'string' ? b : b.name;
@@ -3391,6 +3412,8 @@ function _sortChest(chestObj) {
         if (pa !== pb) return pa - pb;
         return nameA.localeCompare(nameB);
     });
+
+    console.log("[sortChest] sorted items:", JSON.stringify(items));
 
     // Replace contents with sorted items
     for (let i = 0; i < contents.length; i++) {
@@ -3554,9 +3577,9 @@ function _forge() {
         document.getElementById('anvil-header-icon'),
         document.querySelector('.workbench-deco-forge .workbench-deco-img'),
     ].filter(Boolean);
-    const _forgeFlame = asset('/icons/forge-flame.png');
+    const _forgeFlame = asset('/icons/forge-flame.webp');
     _forgeImgs.forEach(img => { img._origSrc = img.src; img.src = _forgeFlame; });
-    setTimeout(() => _forgeImgs.forEach(img => { img.src = img._origSrc; }), 2000);
+    setTimeout(() => _forgeImgs.forEach(img => { img.src = img._origSrc; }), 500);
     const recipes = _getForgeRecipes();
 
     let matchedResult = null;
@@ -3595,12 +3618,12 @@ function _forge() {
             showForgeMessage(msg, 'success');
             playSuccessSound();
             _renderForgeSlots();
-        }, 2000);
+        }, 500);
     } else {
         setTimeout(() => {
             showForgeMessage('These materials cannot be forged into anything.', 'fail');
             playAnvilSound();
-        }, 2000);
+        }, 500);
     }
 
     _renderForgeSlots();
@@ -3738,18 +3761,22 @@ function _showForgeItemPicker(x, y, slotIdx) {
             img.src = asset(def.icon);
             slot.appendChild(img);
 
-            const owner = document.createElement('div');
-            owner.className = 'picker-slot-owner';
-            const canvas = document.createElement('canvas');
-            canvas.width = 14;
-            canvas.height = 14;
-            drawPortrait(canvas, member);
-            owner.appendChild(canvas);
-            slot.appendChild(owner);
+            const count = item.count ?? 1;
+            if (count > 1) {
+                const badge = document.createElement('div');
+                badge.className = 'inv-count-badge';
+                badge.textContent = count;
+                slot.appendChild(badge);
+            }
 
             slot.onclick = () => {
                 _forgeContents[slotIdx] = itemName;
-                member.inventory[invIdx] = null;
+                const currentCount = item.count ?? 1;
+                if (currentCount > 1) {
+                    item.count = currentCount - 1;
+                } else {
+                    member.inventory[invIdx] = null;
+                }
                 _renderForgeSlots();
                 _hideForgeItemPicker();
                 equip.hideTooltip();
@@ -4321,9 +4348,13 @@ function _bindChestSlots(equip, slots, contents) {
             const itemDef = getItemDef(itemName);
             if (itemDef) {
                 slot.classList.add('occupied');
-                const img = document.createElement('img');
-                img.src = asset(itemDef.icon);
-                slot.appendChild(img);
+                
+                // Construct a temporary item object for the shared renderer
+                const tempItem = { 
+                    name: itemName, 
+                    count: typeof entry === 'object' ? entry.quantity : 1 
+                };
+                equip.renderItemIcon(tempItem, slot);
 
                 // Left-click → send to the currently selected party member tab
                 slot.onclick = () => {
@@ -4375,7 +4406,8 @@ function _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx) {
     }
 
     const target = party[targetIdx];
-    const success = equip.addItemToInventory(targetIdx, itemDef.name);
+    const itemQuantity = typeof entry === 'object' && entry.quantity ? entry.quantity : 1;
+    const success = equip.addItemToInventory(targetIdx, itemDef.name, itemQuantity);
     if (success) {
         addLogEntry({ type: 'item', subtype: 'loot', itemName: itemDef.name, time: Date.now() });
         playItemSound(itemDef.name);
@@ -4507,9 +4539,9 @@ function _transmute() {
         document.getElementById('alchemy-header-icon'),
         document.querySelector('.workbench-deco-alchemy .workbench-deco-img'),
     ].filter(Boolean);
-    const _alchemyFlame = asset('/icons/alchemy2.png');
+    const _alchemyFlame = asset('/icons/alchemy2.webp');
     _alchemyImgs.forEach(img => { img._origSrc = img.src; img.src = _alchemyFlame; });
-    setTimeout(() => _alchemyImgs.forEach(img => { img.src = img._origSrc; }), 2000);
+    setTimeout(() => _alchemyImgs.forEach(img => { img.src = img._origSrc; }), 500);
     const recipes = _getAlchemyRecipes();
 
     // Try each recipe — quantity-aware matching
@@ -4550,7 +4582,7 @@ function _transmute() {
             showAlchemyMessage(msg, 'success');
             playSuccessSound();
             _renderAlchemySlots();
-        }, 2000);
+        }, 500);
     } else {
         // Ingredients are preserved — nothing is consumed
         showAlchemyMessage('The ingredients do not react — nothing happens.', 'fail');
@@ -4718,20 +4750,22 @@ function _showAlchemyItemPicker(x, y, slotIdx) {
                 img.src = asset(def.icon);
                 slot.appendChild(img);
 
-                // Mini portrait of owner
-                const owner = document.createElement('div');
-                owner.className = 'picker-slot-owner';
-                const canvas = document.createElement('canvas');
-                canvas.width = 14;
-                canvas.height = 14;
-                drawPortrait(canvas, member);
-                owner.appendChild(canvas);
-                slot.appendChild(owner);
+                const count = item.count ?? 1;
+                if (count > 1) {
+                    const badge = document.createElement('div');
+                    badge.className = 'inv-count-badge';
+                    badge.textContent = count;
+                    slot.appendChild(badge);
+                }
 
                 slot.onclick = () => {
-                    // Move item: store string name in alchemy, clear inventory slot
                     _alchemyContents[slotIdx] = itemName;
-                    member.inventory[invIdx] = null;
+                    const currentCount = item.count ?? 1;
+                    if (currentCount > 1) {
+                        item.count = currentCount - 1;
+                    } else {
+                        member.inventory[invIdx] = null;
+                    }
                     _renderAlchemySlots();
                     _hideAlchemyItemPicker();
                     equip.hideTooltip();

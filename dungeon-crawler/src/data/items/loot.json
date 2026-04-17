@@ -170,7 +170,7 @@
     {
         "name": "Ancient Heartwood",
         "slot": "loot",
-        "icon": "/icons/ingredients/ancient_heartwood.png",
+        "icon": "/icons/ingredients/ancient_heartwood.webp",
         "description": "A dense, pulsing core of living wood carved from deep within the Treeman. Ancient beyond reckoning, it hums with primordial forest energy.",
         "value": 300,
         "weight": 2.0,
@@ -314,7 +314,7 @@
     {
         "name": "Rage Cap",
         "slot": "loot",
-        "icon": "/icons/ingredients/rage_cap.png",
+        "icon": "/icons/ingredients/rage_cap.webp",
         "description": "A rare mushroom that grows in areas of intense magical energy. It pulses with a faint red glow and smells faintly of ozone.",
         "value": 0,
         "weight": 0.1,
