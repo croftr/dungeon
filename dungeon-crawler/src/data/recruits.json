@@ -229,9 +229,7 @@
         ],
         "startingInventory": [
             "Minor Mana Potion",
-            "Minor Mana Potion",
-            "Scroll of Regeneration",
-            "Scroll of Rejuvenate"
+            "Minor Mana Potion"
         ],
         "image": "/heros/white-mage.webp",
         "leftHand": "Heal",
