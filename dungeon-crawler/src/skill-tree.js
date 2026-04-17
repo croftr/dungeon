@@ -432,7 +432,7 @@ export function renderSkillTree(m, container, onNodeClick) {
         m.detailFocusNodeId = nodeId;
         if (isAvail && !isAcq) {
           m.pendingNodeChoice = nodeId;
-          playSoundByUrl('/sounds/actions/skills/skill-choose.mp3', 0.8);
+          playSoundByUrl(asset('/sounds/actions/skills/skill-choose.mp3'), 0.8);
         }
         // Always re-render so detail-focus and pending classes update
         renderSkillTree(m, container, onNodeClick);

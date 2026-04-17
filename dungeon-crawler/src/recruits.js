@@ -102,7 +102,7 @@ export function initRecruits(scene, camera) {
             picMat.map = map;
             picMat.needsUpdate = true;
         };
-        img.src = asset(r.image) + '?cors';
+        img.src = asset(r.image);
 
         const mesh = new THREE.Mesh(frameGeo, picMat);
 
