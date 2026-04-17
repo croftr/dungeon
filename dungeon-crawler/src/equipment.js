@@ -431,7 +431,7 @@ export function renderItemIcon(item, containerEl, opts = {}) {
   // on the item object (used by skills such as Hunter's Eye).
   const iconSrc = def?.icon || item.icon || null;
   if (iconSrc) {
-    containerEl.innerHTML = `<img src="${asset(iconSrc)}" crossorigin="anonymous" draggable="false" style="width: 100%; height: 100%; object-fit: contain; pointer-events: none;" />`;
+    containerEl.innerHTML = `<img src="${asset(iconSrc)}" draggable="false" style="width: 100%; height: 100%; object-fit: contain; pointer-events: none;" />`;
   } else {
     containerEl.innerHTML = `<span>${item.name}</span>`;
   }

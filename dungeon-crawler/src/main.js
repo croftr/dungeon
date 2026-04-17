@@ -55,7 +55,6 @@ const ARENA_MAP = [
 // Patch hardcoded asset paths in index.html to use CDN base URL.
 // Uses data-src (no src) so the browser preloader never fetches from localhost.
 document.querySelectorAll('img[data-src]').forEach(img => {
-  img.crossOrigin = 'anonymous';
   img.src = asset(img.getAttribute('data-src'));
 });
 
@@ -747,7 +746,7 @@ function showCharacterSelection() {
   function miniCardHTML(r) {
     return `
       <div class="cs-mini-card" data-recruit-id="${r.id}">
-        <img class="cs-mini-portrait" src="${asset(r.image)}" alt="${r.name}" crossorigin="anonymous" />
+        <img class="cs-mini-portrait" src="${asset(r.image)}" alt="${r.name}" />
       </div>
     `;
   }
@@ -833,9 +832,9 @@ function showCharacterSelection() {
             <p class="char-select-subtitle">Select four heroes — front row fights, back row supports</p>
             <button id="quick-pick-btn" class="cs-quick-pick-btn">Quick Pick</button>
           </div>
-          <video class="cs-detail-video" id="cs-main-video" crossorigin="anonymous" autoplay loop muted playsinline style="display:none;"></video>
+          <video class="cs-detail-video" id="cs-main-video" autoplay loop muted playsinline style="display:none;"></video>
           <div class="cs-detail-empty" id="cs-empty-state">
-            <video class="cs-detail-bg-video" crossorigin="anonymous" autoplay loop muted playsinline>
+            <video class="cs-detail-bg-video" autoplay loop muted playsinline>
               <source src="${asset('/videos/Haunted_Swamp_Dungeon.mp4')}" type="video/mp4" />
             </video>
             <div class="cs-detail-empty-prompt">
@@ -888,7 +887,7 @@ function showCharacterSelection() {
     // Only update if source changed to avoid flicker
     if (mainVideo.getAttribute('src') !== newSrc) {
       // Create a new source element
-      mainVideo.innerHTML = `<source src="${newSrc}" type="video/mp4" crossorigin="anonymous" />`;
+      mainVideo.innerHTML = `<source src="${newSrc}" type="video/mp4" />`;
       mainVideo.load();
       mainVideo.play().catch(e => console.warn('Hero video autoplay prevented', e));
     }

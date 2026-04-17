@@ -69,7 +69,7 @@ function _renderSpecialAttack(atk) {
       const cls = _EFFECT_CHIP_CLASS[e.effectId] ?? '';
       const effectDef = STATUS_EFFECTS[e.effectId];
       const name = effectDef?.name ?? e.effectId;
-      const icon = effectDef?.icon ? `<img src="${asset(effectDef.icon)}" crossorigin="anonymous" class="essentiary-effect-icon" alt="">` : '';
+      const icon = effectDef?.icon ? `<img src="${asset(effectDef.icon)}" class="essentiary-effect-icon" alt="">` : '';
       const pct = Math.round(e.chance * 100);
       const dur = e.durationSec ? ` &middot; ${e.durationSec}s` : '';
       footer.push(`<span class="essentiary-effect-chip ${cls}">${icon}${name} ${pct}%${dur}</span>`);
@@ -246,7 +246,7 @@ function _renderList() {
       : '';
     card.innerHTML = `
       <div class="essentiary-card-img-wrap">
-        <img src="${asset(def.image)}" crossorigin="anonymous" alt="${locked ? '???' : def.name}" class="essentiary-card-img${imgExtra}" loading="lazy">
+        <img src="${asset(def.image)}" alt="${locked ? '???' : def.name}" class="essentiary-card-img${imgExtra}" loading="lazy">
       </div>
       <div class="essentiary-card-info">
         <div class="essentiary-card-name">${locked ? '???' : def.name}</div>
@@ -284,7 +284,6 @@ function _openDetail(key) {
 
   // Populate detail
   const img = document.getElementById('essentiary-detail-img');
-  img.crossOrigin = 'anonymous';
   img.src = asset(def.image ?? '');
   img.alt = def.name;
   img.classList.toggle('img-upscale', UPSCALE_MONSTERS.has(key));
@@ -294,7 +293,7 @@ function _openDetail(key) {
   // Family lookup
   const familyDef = MONSTER_FAMILIES[def.family];
   const familyName = familyDef?.name ?? def.family;
-  const familyIcon = familyDef?.icon ? `<img src="${asset(familyDef.icon)}" crossorigin="anonymous" class="essentiary-family-icon" alt="">` : '';
+  const familyIcon = familyDef?.icon ? `<img src="${asset(familyDef.icon)}" class="essentiary-family-icon" alt="">` : '';
   
   const familyEl = document.getElementById('essentiary-detail-family');
   familyEl.innerHTML = `${familyIcon}${familyName}`;
@@ -341,7 +340,7 @@ function _openDetail(key) {
       const effectsHtml = def.onHitEffects.map(e => {
         const effectDef = STATUS_EFFECTS[e.effectId];
         const name = effectDef?.name ?? e.effectId;
-        const icon = effectDef?.icon ? `<img src="${asset(effectDef.icon)}" crossorigin="anonymous" class="essentiary-effect-icon" alt="">` : '';
+        const icon = effectDef?.icon ? `<img src="${asset(effectDef.icon)}" class="essentiary-effect-icon" alt="">` : '';
         return `<span class="essentiary-effect-tag">${icon}${name} (${Math.round(e.chance * 100)}%)</span>`;
       }).join('');
       const effectsSection = document.createElement('div');
