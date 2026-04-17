@@ -637,9 +637,7 @@ body {
   display: flex;
   flex-direction: column;
   padding: 24px 24px 20px 24px;
-  background: 
-    linear-gradient(160deg, rgba(20, 14, 8, 0.95) 0%, rgba(10, 6, 2, 0.98) 100%),
-    url('/source/black-store.jpg') center/cover;
+  background: linear-gradient(160deg, rgba(20, 14, 8, 0.95) 0%, rgba(10, 6, 2, 0.98) 100%);
   border-left: 2px solid #2a2010;
   box-shadow: inset 8px 0 24px rgba(0, 0, 0, 0.9), inset 1px 0 0 rgba(232, 200, 122, 0.2);
   z-index: 5;
