@@ -5,6 +5,7 @@
 
 import RULES from './data/combat-rules.json';
 import SKILLS_DATA from './data/skills.json';
+import { getHqWeaponDamageBonus } from './crafting.js';
 
 // ── Utility ───────────────────────────────────────────────────────────────────
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
@@ -124,7 +125,7 @@ export function monsterHitChance(monster, character) {
  * @param {object} monster    Monster (needs defence, stats.vitality, stats.resilience)
  * @returns {number}          Final damage (minimum 1)
  */
-export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef = null) {
+export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef = null, weaponIsHQ = false) {
   // Stat weights on the weapon determine how much STR vs DEX contributes to damage.
   // Defaults to pure STR (bare-hand punch or any weapon without the field).
   const strW = weaponDef?.statWeights?.str ?? 1.0;
@@ -167,7 +168,8 @@ export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef 
     }
   }
 
-  let raw = (weaponDef?.baseDamage ?? 0) + statBonus + passiveBonus + familyBonus;
+  const hqBonus = weaponIsHQ ? getHqWeaponDamageBonus(weaponDef) : 0;
+  let raw = (weaponDef?.baseDamage ?? 0) + hqBonus + statBonus + passiveBonus + familyBonus;
   if (ammoDef && ammoDef.damageModifier) {
     raw = Math.round(raw * ammoDef.damageModifier);
   }
@@ -186,10 +188,11 @@ export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef 
  * @param {object} monster    Monster (needs stats.vitality, stats.resilience)
  * @returns {number}          Final damage (minimum 1)
  */
-export function calcPlayerMagicDamage(character, weaponDef, monster) {
+export function calcPlayerMagicDamage(character, weaponDef, monster, weaponIsHQ = false) {
+  const hqBonus = weaponIsHQ ? getHqWeaponDamageBonus(weaponDef) : 0;
   let raw = weaponDef?.magnitudeFormula
-    ? resolveSpellMagnitude(weaponDef.name, weaponDef, character)
-    : (weaponDef?.baseDamage ?? 0) + (character.stats?.intelligence ?? 10);
+    ? resolveSpellMagnitude(weaponDef.name, weaponDef, character) + hqBonus
+    : (weaponDef?.baseDamage ?? 0) + hqBonus + (character.stats?.intelligence ?? 10);
   // Apply Pyromancer passive skill bonus per instance of the skill
   if (character.skills) {
     character.skills.forEach(skill => {

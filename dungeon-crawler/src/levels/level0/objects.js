@@ -31,10 +31,9 @@ export function spawnLevel0Objects(ctx) {
     addChest(group, loader, 13.4, 10, Math.PI / 2, -0.1, [
         { name: 'Gold Coins', quantity: 10000 },
         'Potion of Invincibility', 'Potion of Unseen', "Rage Cap", "Elixir of Rage",
-        "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal",
-        'Resist Poison Spellbook', 'Rejuvenate Spellbook', 'Scroll of Resist Fear', 'Seraphic Spellbook',
+        "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Ice Cap",
         // Essences (2 of each)
-        "Life Essence", "Life Essence",
+        "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence",
         "Crocodile Warrior Essence", "Crocodile Warrior Essence",
         "Tree Man Essence", "Tree Man Essence",
         "Ogre Essence", "Ogre Essence",
@@ -46,15 +45,8 @@ export function spawnLevel0Objects(ctx) {
         "Demon Ogre Essence", "Demon Ogre Essence",
         // Unique Arena Items (2 of each)
         "Crocodile Hide", "Crocodile Hide",
-        "Ancient Heartwood", "Ancient Heartwood",
         "Ogre's Head", "Ogre's Head",
-        "Minotaur Horn", "Minotaur Horn",
-        "Aqua Man Flipper", "Aqua Man Flipper",
-        "Lizard Scale", "Lizard Scale",
-        "Giant's Club", "Giant's Club",
-        "Giant's Loin Cloth", "Giant's Loin Cloth",
-        "Demon's Eyes", "Demon's Eyes",
-        "Leather Belt", "Iron Ore", "Iron Ore", "Potions Parchment", "Minor Potions Parchment", "Party Potions Parchment", "Ogre Helm Parchment", "Minotaur Cuirass Parchment", "Lizard Scale Cloak Parchment", "Crocodilian Boots Parchment", "Seers Shawl Parchment", "Trickster's Hood Parchment", "Barbarian's Loin Cloth Parchment", "Barbarian's Club Parchment", "Pyro Palms Parchment", "Demon Blade Parchment"
+        "Iron Ore", "Iron Ore", "Ogre Helm Parchment", "Crocodilian Boots Parchment", "Leather Boots", "Iron Helm"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in the east room (center) ────────────────────────────────────

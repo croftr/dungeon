@@ -7,11 +7,12 @@ import { showMessage, drawMinimap, updateStatus } from './minimap.js';
 import { getItemDef, ITEMS } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refreshPartyCards, setHp, applyStatusEffect } from './party.js';
 import { addLogEntry } from './battle-log.js';
-import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playLearntSound, playSoundByUrl, playQuestAudio, fadeOutQuestAudio, playPartyHitSound, playInventorySortSound } from './audio.js';
+import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playLearntSound, playSoundByUrl, playQuestAudio, fadeOutQuestAudio, playPartyHitSound, playInventorySortSound, playCraftFailSound, playCraftHqSound } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
 import POTION_MERCHANT_DATA from './data/potion-merchant.json';
 import POTIONS_DATA from './data/items/potions.json';
 import FORGE_DATA from './data/forge.json';
+import { rollCraftOutcome, isEssenceIngredient, hqDisplayName } from './crafting.js';
 import BARNABY_DATA from './data/barnaby.json';
 import WEAPONS_DATA from './data/items/weapons.json';
 import { triggerMummyAmbush, monsters } from './monster.js';
@@ -3625,22 +3626,43 @@ function _forge() {
     }
 
     if (matchedResult) {
+        const outcome = rollCraftOutcome('forge');
         const usedMaterials = [...materials];
-        for (let i = 0; i < 8; i++) _forgeContents[i] = null;
-        const isNew = !_knownForgeRecipes.has(matchedResult);
-        _knownForgeRecipes.delete(matchedResult);
-        _knownForgeRecipes.add(matchedResult);
-        addLogEntry({ type: 'item', subtype: 'forge', itemName: matchedResult, materials: usedMaterials, time: Date.now() });
-        _renderKnownForgeRecipes();
-        setTimeout(() => {
-            _forgeContents[8] = matchedResult;
-            const msg = isNew
-                ? `Forging complete! You discovered the recipe for ${matchedResult}!`
-                : `Forging complete! You crafted a ${matchedResult}.`;
-            showForgeMessage(msg, 'success');
-            playSuccessSound();
-            _renderForgeSlots();
-        }, 500);
+
+        if (outcome === 'fail') {
+            for (let i = 0; i < 8; i++) {
+                if (_forgeContents[i] && isEssenceIngredient(_forgeContents[i])) {
+                    _forgeContents[i] = null;
+                }
+            }
+            addLogEntry({ type: 'item', subtype: 'forge-fail', materials: usedMaterials, time: Date.now() });
+            setTimeout(() => {
+                showForgeMessage('The forge sputters — the essences are ruined.', 'fail');
+                playCraftFailSound();
+                _renderForgeSlots();
+            }, 500);
+        } else {
+            const isHQ = outcome === 'hq';
+            for (let i = 0; i < 8; i++) _forgeContents[i] = null;
+            const isNew = !_knownForgeRecipes.has(matchedResult);
+            _knownForgeRecipes.delete(matchedResult);
+            _knownForgeRecipes.add(matchedResult);
+            addLogEntry({ type: 'item', subtype: 'forge', itemName: matchedResult, hq: isHQ, materials: usedMaterials, time: Date.now() });
+            _renderKnownForgeRecipes();
+            setTimeout(() => {
+                _forgeContents[8] = { name: matchedResult, hq: isHQ };
+                const displayName = isHQ ? hqDisplayName(matchedResult) : matchedResult;
+                const msg = isHQ
+                    ? `Forging complete! You crafted an ${displayName}!`
+                    : (isNew
+                        ? `Forging complete! You discovered the recipe for ${matchedResult}!`
+                        : `Forging complete! You crafted a ${matchedResult}.`);
+                showForgeMessage(msg, 'success');
+                if (isHQ) playCraftHqSound();
+                else playSuccessSound();
+                _renderForgeSlots();
+            }, 500);
+        }
     } else {
         setTimeout(() => {
             showForgeMessage('These materials cannot be forged into anything.', 'fail');
@@ -3659,8 +3681,8 @@ function _renderForgeSlots() {
         slot.onclick = null;
         slot.oncontextmenu = null;
 
-        const itemName = _forgeContents[i];
-        if (!itemName) {
+        const entry = _forgeContents[i];
+        if (!entry) {
             if (i < 8) {
                 slot.onclick = (e) => _showForgeItemPicker(e.clientX, e.clientY, i);
                 equip.attachTooltipListeners(slot, () => ({ name: "Empty Material Slot", description: "Click to select a material from your party's inventory." }));
@@ -3668,19 +3690,19 @@ function _renderForgeSlots() {
             return;
         }
 
+        const itemName = typeof entry === 'string' ? entry : entry.name;
+        const isHQ = typeof entry === 'object' && !!entry.hq;
         const itemDef = getItemDef(itemName);
         if (!itemDef) return;
 
         slot.classList.add('occupied');
-        const img = document.createElement('img');
-        img.src = asset(itemDef.icon);
-        slot.appendChild(img);
+        equip.renderItemIcon({ name: itemName, hq: isHQ }, slot, { showCount: false });
 
         // Left-click → return to first available party member
         slot.onclick = () => {
             const defaultIdx = party.findIndex(m => !m.isEmpty);
             if (defaultIdx !== -1) {
-                const success = equip.addItemToInventory(defaultIdx, itemName);
+                const success = equip.addItemToInventory(defaultIdx, itemName, 1, { hq: isHQ });
                 if (success) {
                     _forgeContents[i] = null;
                     _renderForgeSlots();
@@ -3694,22 +3716,23 @@ function _renderForgeSlots() {
         // Right-click → pick recipient
         slot.oncontextmenu = (e) => {
             e.preventDefault();
-            _showForgeCtxMenu(e.clientX, e.clientY, equip, i, itemDef);
+            _showForgeCtxMenu(e.clientX, e.clientY, equip, i, itemDef, isHQ);
         };
 
+        const displayName = isHQ ? hqDisplayName(itemName) : itemName;
         if (i === 8) {
             equip.attachTooltipListeners(slot, () => _forgeContents[8]
-                ? { name: _forgeContents[8], description: 'Click to take into your inventory. Right-click to choose who receives it.' }
+                ? { name: displayName, description: 'Click to take into your inventory. Right-click to choose who receives it.' }
                 : null);
         } else {
             equip.attachTooltipListeners(slot, () => _forgeContents[i]
-                ? { name: _forgeContents[i], description: 'Click to return to inventory. Right-click to choose who receives it.' }
+                ? { name: displayName, description: 'Click to return to inventory. Right-click to choose who receives it.' }
                 : null);
         }
     });
 }
 
-function _showForgeCtxMenu(x, y, equip, slotIdx, itemDef) {
+function _showForgeCtxMenu(x, y, equip, slotIdx, itemDef, isHQ = false) {
     const menu = document.getElementById('chest-ctx-menu');
     const list = document.getElementById('chest-ctx-list');
     list.innerHTML = '';
@@ -3730,7 +3753,7 @@ function _showForgeCtxMenu(x, y, equip, slotIdx, itemDef) {
         row.appendChild(canvas);
         row.appendChild(nameSpan);
         row.addEventListener('click', () => {
-            const success = equip.addItemToInventory(targetIdx, itemDef.name);
+            const success = equip.addItemToInventory(targetIdx, itemDef.name, 1, { hq: isHQ });
             if (success) {
                 _forgeContents[slotIdx] = null;
                 _renderForgeSlots();
@@ -4588,23 +4611,44 @@ function _transmute() {
     }
 
     if (matchedResult) {
-        // Consume all ingredients only on success
+        const outcome = rollCraftOutcome('alchemy');
         const usedIngredients = [...ingredients];
-        for (let i = 0; i < 8; i++) _alchemyContents[i] = null;
-        const isNew = !_knownAlchemyRecipes.has(matchedResult);
-        _knownAlchemyRecipes.delete(matchedResult);
-        _knownAlchemyRecipes.add(matchedResult);
-        addLogEntry({ type: 'item', subtype: 'alchemy', itemName: matchedResult, ingredients: usedIngredients, time: Date.now() });
-        _renderKnownAlchemyRecipes();
-        setTimeout(() => {
-            _alchemyContents[8] = matchedResult;
-            const msg = isNew
-                ? `Transmutation successful! You discovered the recipe for ${matchedResult}!`
-                : `Transmutation successful! You created a ${matchedResult}.`;
-            showAlchemyMessage(msg, 'success');
-            playSuccessSound();
-            _renderAlchemySlots();
-        }, 500);
+
+        if (outcome === 'fail') {
+            // Lose only essence ingredients; everything else stays in its slot
+            for (let i = 0; i < 8; i++) {
+                if (_alchemyContents[i] && isEssenceIngredient(_alchemyContents[i])) {
+                    _alchemyContents[i] = null;
+                }
+            }
+            addLogEntry({ type: 'item', subtype: 'alchemy-fail', ingredients: usedIngredients, time: Date.now() });
+            setTimeout(() => {
+                showAlchemyMessage('The reaction fails — the essences are spoiled.', 'fail');
+                playCraftFailSound();
+                _renderAlchemySlots();
+            }, 500);
+        } else {
+            const isHQ = outcome === 'hq';
+            for (let i = 0; i < 8; i++) _alchemyContents[i] = null;
+            const isNew = !_knownAlchemyRecipes.has(matchedResult);
+            _knownAlchemyRecipes.delete(matchedResult);
+            _knownAlchemyRecipes.add(matchedResult);
+            addLogEntry({ type: 'item', subtype: 'alchemy', itemName: matchedResult, hq: isHQ, ingredients: usedIngredients, time: Date.now() });
+            _renderKnownAlchemyRecipes();
+            setTimeout(() => {
+                _alchemyContents[8] = { name: matchedResult, hq: isHQ };
+                const displayName = isHQ ? hqDisplayName(matchedResult) : matchedResult;
+                const msg = isHQ
+                    ? `Transmutation successful! You created an ${displayName}!`
+                    : (isNew
+                        ? `Transmutation successful! You discovered the recipe for ${matchedResult}!`
+                        : `Transmutation successful! You created a ${matchedResult}.`);
+                showAlchemyMessage(msg, 'success');
+                if (isHQ) playCraftHqSound();
+                else playSuccessSound();
+                _renderAlchemySlots();
+            }, 500);
+        }
     } else {
         // Ingredients are preserved — nothing is consumed
         showAlchemyMessage('The ingredients do not react — nothing happens.', 'fail');
@@ -4637,8 +4681,8 @@ function _renderAlchemySlots() {
             slot.onclick = null;
             slot.oncontextmenu = null;
 
-            const itemName = _alchemyContents[i];
-            if (!itemName) {
+            const entry = _alchemyContents[i];
+            if (!entry) {
                 // Empty slot hint
                 if (i < 8) { // Only for ingredient slots, not result
                     slot.onclick = (e) => _showAlchemyItemPicker(e.clientX, e.clientY, i);
@@ -4647,19 +4691,19 @@ function _renderAlchemySlots() {
                 return;
             }
 
+            const itemName = typeof entry === 'string' ? entry : entry.name;
+            const isHQ = typeof entry === 'object' && !!entry.hq;
             const itemDef = getItemDef(itemName);
             if (!itemDef) return;
 
             slot.classList.add('occupied');
-            const img = document.createElement('img');
-            img.src = asset(itemDef.icon);
-            slot.appendChild(img);
+            equip.renderItemIcon({ name: itemName, hq: isHQ }, slot, { showCount: false });
 
             // Left-click → send to first available party member (remove from academy)
             slot.onclick = () => {
                 const defaultIdx = party.findIndex(m => !m.isEmpty);
                 if (defaultIdx !== -1) {
-                    const success = equip.addItemToInventory(defaultIdx, itemName);
+                    const success = equip.addItemToInventory(defaultIdx, itemName, 1, { hq: isHQ });
                     if (success) {
                         _alchemyContents[i] = null;
                         _renderAlchemySlots();
@@ -4673,17 +4717,18 @@ function _renderAlchemySlots() {
             // Right-click → pick recipient
             slot.oncontextmenu = (e) => {
                 e.preventDefault();
-                _showAlchemyCtxMenu(e.clientX, e.clientY, equip, i, itemDef);
+                _showAlchemyCtxMenu(e.clientX, e.clientY, equip, i, itemDef, isHQ);
             };
 
             // Hover tooltip — result slot gets a "take it" hint
+            const displayName = isHQ ? hqDisplayName(itemName) : itemName;
             if (i === 8) {
                 equip.attachTooltipListeners(slot, () => _alchemyContents[8]
-                    ? { name: _alchemyContents[8], description: 'Click to take into your inventory. Right-click to choose who receives it.' }
+                    ? { name: displayName, description: 'Click to take into your inventory. Right-click to choose who receives it.' }
                     : null);
             } else {
                 equip.attachTooltipListeners(slot, () => _alchemyContents[i]
-                    ? { name: _alchemyContents[i], description: 'Click to return to inventory. Right-click to choose who receives it.' }
+                    ? { name: displayName, description: 'Click to return to inventory. Right-click to choose who receives it.' }
                     : null);
             }
         });
@@ -4693,7 +4738,7 @@ function _renderAlchemySlots() {
 /**
  * Shows a context menu to pick which party member takes the item from alchemy.
  */
-function _showAlchemyCtxMenu(x, y, equip, slotIdx, itemDef) {
+function _showAlchemyCtxMenu(x, y, equip, slotIdx, itemDef, isHQ = false) {
     const menu = document.getElementById('chest-ctx-menu');
     const list = document.getElementById('chest-ctx-list');
     list.innerHTML = '';
@@ -4714,7 +4759,7 @@ function _showAlchemyCtxMenu(x, y, equip, slotIdx, itemDef) {
         row.appendChild(canvas);
         row.appendChild(nameSpan);
         row.addEventListener('click', () => {
-            const success = equip.addItemToInventory(targetIdx, itemDef.name);
+            const success = equip.addItemToInventory(targetIdx, itemDef.name, 1, { hq: isHQ });
             if (success) {
                 _alchemyContents[slotIdx] = null;
                 _renderAlchemySlots();

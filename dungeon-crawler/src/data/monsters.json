@@ -808,6 +808,36 @@
       }
     ]
   },
+  "ice_mushroom": {
+    "name": "Ice Mushroom",
+    "family": "fungal",
+    "description": "Ancient fungi that have absorbed decades of dungeon magic. Their spores carry a virulent poison that can fell hardened warriors.",
+    "hp": 200,
+    "defence": 3,
+    "xp": 120,
+    "attackSpeed": 1,
+    "stats": {
+      "strength": 13,
+      "dexterity": 14,
+      "vitality": 12,
+      "intelligence": 6,
+      "resilience": 6
+    },
+    "drops": [
+      {
+        "item": "Life Essence",
+        "chance": 0.2
+      },
+      {
+        "item": "Poison Vial",
+        "chance": 0.5
+      },
+      {
+        "item": "Ice Cap",
+        "chance": 0.2
+      }
+    ]
+  },
   "giant": {
     "name": "Giant",
     "family": "giant",

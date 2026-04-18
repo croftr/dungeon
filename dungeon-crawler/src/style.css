@@ -2912,6 +2912,26 @@ label.mm-setting-label {
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.9);
 }
 
+/* High Quality (HQ) crafted item badge — gold gem overlay, top-right */
+.hq-badge {
+  position: absolute;
+  top: 1px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  font-size: 13px;
+  line-height: 14px;
+  text-align: center;
+  color: #ffe17a;
+  pointer-events: none;
+  text-shadow:
+    0 0 2px #8a5a10,
+    0 0 4px #ffb733,
+    0 0 6px rgba(255, 210, 74, 0.9);
+  filter: drop-shadow(0 0 2px rgba(255, 210, 74, 0.8));
+  z-index: 2;
+}
+
 /* Slot count indicator in the inventory header (e.g. "8/40") */
 .inv-slot-count {
   font-family: monospace;

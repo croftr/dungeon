@@ -1,0 +1,24 @@
+{
+  "alchemy": {
+    "failChance": 0.50,
+    "hqChance": 0.50
+  },
+  "forge": {
+    "failChance": 0.05,
+    "hqChance": 0.05
+  },
+  "hqBonuses": {
+    "weapon": {
+      "baseDamage": 1
+    },
+    "shield": {
+      "defence": 1
+    },
+    "armor": {
+      "defence": 1
+    },
+    "potion": {
+      "valueMultiplier": 1.25
+    }
+  }
+}

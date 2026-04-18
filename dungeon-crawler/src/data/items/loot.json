@@ -319,5 +319,14 @@
         "value": 0,
         "weight": 0.1,
         "sellable": false
+    },
+    {
+        "name": "Ice Cap",
+        "slot": "loot",
+        "icon": "/icons/ingredients/ice_cap.webp",
+        "description": "A rare mushroom that grows in areas of intense cold. It pulses with a faint blue glow and smells faintly of ozone.",
+        "value": 0,
+        "weight": 0.1,
+        "sellable": false
     }
 ]

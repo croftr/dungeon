@@ -734,6 +734,40 @@ export async function playAnvilSound() {
   }
 }
 
+export async function playCraftFailSound() {
+  const buffer = await getBuffer(asset('/sounds/actions/craft-fail.mp3'));
+  if (!buffer) return;
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.85;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playCraftFailSound failed:', err);
+  }
+}
+
+export async function playCraftHqSound() {
+  const buffer = await getBuffer(asset('/sounds/actions/craft-hq.mp3'));
+  if (!buffer) return;
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.9;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playCraftHqSound failed:', err);
+  }
+}
+
 export async function playSoundByUrl(url, volume = 0.8) {
   const buffer = await getBuffer(asset(url));
   if (!buffer) return;

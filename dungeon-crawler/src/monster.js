@@ -1923,7 +1923,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
   return { hit: true, damage, killed: killedByThisHit, monsterHp: m.hp };
 }
 
-export function attackMonster(monsterId, character, weaponDef, attackType, ammoDef = null) {
+export function attackMonster(monsterId, character, weaponDef, attackType, ammoDef = null, weaponIsHQ = false) {
   const m = monsters.find((x) => x.id === monsterId && x.alive);
   if (!m) return { hit: false, damage: 0, killed: false, monsterHp: 0, crit: false, hitChance: 0, formula: null, monsterName: '' };
 
@@ -1967,8 +1967,8 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   };
 
   const preCritDamage = isMagic
-    ? calcPlayerMagicDamage(effChar, weaponDef, mSunder)
-    : calcPlayerPhysicalDamage(effChar, weaponDef, mSunder, ammoDef);
+    ? calcPlayerMagicDamage(effChar, weaponDef, mSunder, weaponIsHQ)
+    : calcPlayerPhysicalDamage(effChar, weaponDef, mSunder, ammoDef, weaponIsHQ);
 
   // 5% chance to critically hit — triples the calculated damage
   const isCrit = Math.random() < CRIT_CHANCE;

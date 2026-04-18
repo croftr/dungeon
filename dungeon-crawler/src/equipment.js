@@ -1,6 +1,7 @@
 import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getAttackSpeedMultiplier, hasEffectFlag, breakPartyUnseen, showMemberHeal, showMemberSpHeal, getEffectiveStats } from './party.js';
 import { showInlineHelp } from './help.js';
 import { getItemDef } from './items.js';
+import { getHqDefenceBonus, scaleHqPotionEffect, getHqEffectBonus, hqDisplayName } from './crafting.js';
 import { SPELLS } from './spells.js';
 import { STATUS_EFFECT_DEFS } from './status-effects.js';
 import { ACTIONS } from './items.js';
@@ -444,6 +445,12 @@ export function renderItemIcon(item, containerEl, opts = {}) {
       containerEl.appendChild(badge);
     }
   }
+  if (item.hq) {
+    const hqBadge = document.createElement('div');
+    hqBadge.className = 'hq-badge';
+    hqBadge.textContent = '★';
+    containerEl.appendChild(hqBadge);
+  }
 }
 
 function renderModal(memberIndex) {
@@ -605,6 +612,7 @@ function renderModal(memberIndex) {
       if (def?.defence) {
         totalDef += def.defence;
       }
+      if (item.hq) totalDef += getHqDefenceBonus(def);
       if (def?.weaponType === 'shield') hasShieldForDef = true;
     }
   });
@@ -918,7 +926,7 @@ function populateTooltip(obj, showBuyPrice = false) {
   if (obj.name === 'Gold Coins' && obj.quantity) {
     nameEl.textContent = `${obj.quantity} ${obj.name}`;
   } else {
-    nameEl.textContent = obj.name;
+    nameEl.textContent = obj.hq ? hqDisplayName(obj.name) : obj.name;
   }
 
   if (isStatusEffect) {
@@ -1310,7 +1318,7 @@ function _equipItem(memberIndex, invIndex) {
 
     displaced.forEach((d) => {
       const fi = m.inventory.indexOf(null);
-      if (fi !== -1) m.inventory[fi] = { name: d.name, slot: d.slot };
+      if (fi !== -1) m.inventory[fi] = d.hq ? { name: d.name, slot: d.slot, hq: true } : { name: d.name, slot: d.slot };
     });
   } else if (item.slot === 'hand') {
     // ── Either-hand items: prefer right hand, fall back to left ─────────
@@ -1360,7 +1368,7 @@ function _equipItem(memberIndex, invIndex) {
 
     displaced.forEach((d) => {
       const fi = m.inventory.indexOf(null);
-      if (fi !== -1) m.inventory[fi] = { name: d.name, slot: d.slot };
+      if (fi !== -1) m.inventory[fi] = d.hq ? { name: d.name, slot: d.slot, hq: true } : { name: d.name, slot: d.slot };
     });
   } else if (SLOT_KEYS.includes(item.slot)) {
     // ── Smart ring-slot assignment ──────────────────────────────────────────
@@ -1396,7 +1404,7 @@ function _equipItem(memberIndex, invIndex) {
 
     displaced.forEach((d) => {
       const fi = m.inventory.indexOf(null);
-      if (fi !== -1) m.inventory[fi] = { name: d.name, slot: d.slot };
+      if (fi !== -1) m.inventory[fi] = d.hq ? { name: d.name, slot: d.slot, hq: true } : { name: d.name, slot: d.slot };
     });
   } else {
     // This item is not equippable (e.g. loot, potion, or unrecognized slot).
@@ -1566,6 +1574,7 @@ function _assignLoadoutBLeft(memberIndex, invIndex) {
   if ((slot === 'hand' && !def?.rightHandOnly) || slot === 'bothHands') {
     const displaced = m.loadoutB.leftHand;
     const itemObj = { name: item.name, slot };
+    if (item.hq) itemObj.hq = true;
     // For bothHands items also clear B rightHand since mirror will be set on rotate
     if (slot === 'bothHands') {
       m.loadoutB.rightHand = null;
@@ -1591,7 +1600,9 @@ function _assignLoadoutBRight(memberIndex, invIndex) {
   const slot = def?.slot ?? 'hand';
   if (slot === 'hand' && !def?.leftHandOnly) {
     const displaced = m.loadoutB.rightHand;
-    m.loadoutB.rightHand = { name: item.name, slot };
+    const newRight = { name: item.name, slot };
+    if (item.hq) newRight.hq = true;
+    m.loadoutB.rightHand = newRight;
     m.inventory[invIndex] = displaced;
     showMessage(`${item.name} assigned to Loadout B right hand.`);
     renderModal(memberIndex);
@@ -1609,7 +1620,9 @@ function _assignLoadoutBPotion(memberIndex, invIndex) {
   const item = m.inventory[invIndex];
   if (!item) return;
   const displaced = m.loadoutB.potion;
-  m.loadoutB.potion = { name: item.name, slot: 'quickslot' };
+  const newPotion = { name: item.name, slot: 'quickslot' };
+  if (item.hq) newPotion.hq = true;
+  m.loadoutB.potion = newPotion;
   m.inventory[invIndex] = displaced;
   showMessage(`${item.name} assigned to Loadout B potion slot.`);
   renderModal(memberIndex);
@@ -1644,12 +1657,19 @@ function _applyPotionEffect(m, item) {
     return _applyPartyPotionEffect(m, item, def);
   }
 
-  const effects = [];
-  if (def.effect) effects.push(def.effect);
-  if (def.effect2) effects.push(def.effect2);
-  if (def.effect3) effects.push(def.effect3);
+  const rawEffects = [];
+  if (def.effect) rawEffects.push(def.effect);
+  if (def.effect2) rawEffects.push(def.effect2);
+  if (def.effect3) rawEffects.push(def.effect3);
 
-  if (effects.length === 0) return false;
+  if (rawEffects.length === 0) return false;
+
+  let effects = rawEffects;
+  if (item.hq) {
+    effects = rawEffects.map(scaleHqPotionEffect);
+    const bonus = getHqEffectBonus(def);
+    if (bonus) effects.push(bonus);
+  }
 
   const results = [];
   let mainSound = 'heal';
@@ -1746,8 +1766,9 @@ function _applyPotionEffect(m, item) {
  * Applies the status effect to every alive party member simultaneously.
  */
 function _applyPartyPotionEffect(m, item, def) {
-  const eff = def.effect;
-  if (!eff) return false;
+  const rawEff = def.effect;
+  if (!rawEff) return false;
+  const eff = item.hq ? scaleHqPotionEffect(rawEff) : rawEff;
 
   const effectType = eff.type; // 'invincibility' | 'unseen'
   const duration = eff.duration ?? 60;
@@ -2252,7 +2273,7 @@ function onPaperdollSlotClick(e) {
 
   displaced.forEach(d => {
     const fi = m.inventory.indexOf(null);
-    if (fi !== -1) m.inventory[fi] = { name: d.name, slot: d.slot };
+    if (fi !== -1) m.inventory[fi] = d.hq ? { name: d.name, slot: d.slot, hq: true } : { name: d.name, slot: d.slot };
   });
 
   updateEffectiveStats(m);
@@ -3557,7 +3578,7 @@ export function useHand(memberIndex, hand, silent = false) {
   // Pass character object + weapon def; hit chance and damage are resolved in combat-rules.js
   const ammoItem = m.equipment?.ammo;
   const ammoDef = ammoItem ? getItemDef(ammoItem.name) : null;
-  const result = attackMonster(target.id, m, def, attackType, ammoDef);
+  const result = attackMonster(target.id, m, def, attackType, ammoDef, !!item?.hq);
 
   addLogEntry({
     time: Date.now(),
@@ -3604,13 +3625,13 @@ export function useHand(memberIndex, hand, silent = false) {
         // Find a new target if the first one died
         daTarget = _closestMonsterInFront(maxRange);
         if (daTarget) {
-          daResult = attackMonster(daTarget.id, m, def, attackType, ammoDef);
+          daResult = attackMonster(daTarget.id, m, def, attackType, ammoDef, !!item?.hq);
           playAction(attackType, hand, memberIndex);
           if (isSpell || isBuff) _dispatchSpellVFX(attackType, daTarget);
         }
       } else {
         daTarget = target;
-        daResult = attackMonster(target.id, m, def, attackType, ammoDef);
+        daResult = attackMonster(target.id, m, def, attackType, ammoDef, !!item?.hq);
         playAction(attackType, hand, memberIndex);
         if (isSpell || isBuff) _dispatchSpellVFX(attackType, daTarget);
       }
@@ -4787,7 +4808,8 @@ function _stackInventoryFor(m) {
   for (let i = 0; i < m.inventory.length; i++) {
     const it = m.inventory[i];
     if (!it) continue;
-    if (isStackable(it.name)) {
+    // HQ items never stack — treat them as singles even if the base item is stackable
+    if (isStackable(it.name) && !it.hq) {
       if (!stackOrder.has(it.name)) stackOrder.set(it.name, i);
       stackTotals.set(it.name, (stackTotals.get(it.name) ?? 0) + itemCount(it));
     } else {
@@ -5144,8 +5166,11 @@ document.getElementById('equip-char-dev').addEventListener('click', () => {
  * Public helper to add `qty` of `itemName` to a specific character's inventory.
  * For stackable items, merges into existing stacks (respecting stackCount max)
  * before opening new slots. Returns true if ALL units were placed, false otherwise.
+ *
+ * opts.hq: when true, each added item is an HQ variant. HQ items never stack
+ * (neither with regular nor with other HQ) — one cell each.
  */
-export function addItemToInventory(charIndex, itemName, qty = 1) {
+export function addItemToInventory(charIndex, itemName, qty = 1, opts = {}) {
   const m = party[charIndex];
   if (!m || m.isEmpty) return false;
 
@@ -5153,12 +5178,14 @@ export function addItemToInventory(charIndex, itemName, qty = 1) {
   if (!def) return false;
 
   const stackMax = getStackMax(def);
+  const isHQ = !!opts.hq;
   let remaining = qty;
 
-  if (stackMax > 1) {
+  // Merge into existing stacks only for non-HQ adds, and never merge into HQ cells.
+  if (!isHQ && stackMax > 1) {
     for (let i = 0; i < m.inventory.length && remaining > 0; i++) {
       const it = m.inventory[i];
-      if (!it || it.name !== itemName) continue;
+      if (!it || it.name !== itemName || it.hq) continue;
       const have = itemCount(it);
       const space = stackMax - have;
       if (space <= 0) continue;
@@ -5171,11 +5198,17 @@ export function addItemToInventory(charIndex, itemName, qty = 1) {
   while (remaining > 0) {
     const freeIndex = m.inventory.indexOf(null);
     if (freeIndex === -1) return false;
-    const add = Math.min(stackMax, remaining);
-    const slotEntry = { name: itemName, slot: def.slot };
-    if (stackMax > 1) slotEntry.count = add;
-    m.inventory[freeIndex] = slotEntry;
-    remaining -= add;
+    if (isHQ) {
+      const slotEntry = { name: itemName, slot: def.slot, hq: true };
+      m.inventory[freeIndex] = slotEntry;
+      remaining -= 1;
+    } else {
+      const add = Math.min(stackMax, remaining);
+      const slotEntry = { name: itemName, slot: def.slot };
+      if (stackMax > 1) slotEntry.count = add;
+      m.inventory[freeIndex] = slotEntry;
+      remaining -= add;
+    }
   }
 
   return true;
