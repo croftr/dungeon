@@ -287,5 +287,35 @@
         ],
         "value": 50,
         "weight": 0.3
+    },
+    {
+        "name": "Elixir of Enlightenment",
+        "icon": "/icons/potions/elixir_of_enlightenment.svg",
+        "description": "A swirling blue brew that smells of ozone. For 60 seconds, INT and RES are increased by 5.",
+        "type": "potion",
+        "effect": {
+            "type": "stat-boost",
+            "stats": {
+                "intelligence": 5,
+                "resilience": 5
+            },
+            "duration": 60
+        },
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Ice Cap",
+                "quantity": 1
+            },
+            {
+                "name": "Mana Berry",
+                "quantity": 1
+            }
+        ],
+        "value": 50,
+        "weight": 0.3
     }
 ]

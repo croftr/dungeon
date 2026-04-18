@@ -31,7 +31,7 @@ export function spawnLevel0Objects(ctx) {
     addChest(group, loader, 13.4, 10, Math.PI / 2, -0.1, [
         { name: 'Gold Coins', quantity: 10000 },
         'Potion of Invincibility', 'Potion of Unseen', "Rage Cap", "Elixir of Rage",
-        "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Ice Cap",
+        "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Ice Cap", "Elixir of Enlightenment",
         // Essences (2 of each)
         "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence",
         "Crocodile Warrior Essence", "Crocodile Warrior Essence",
