@@ -1,5 +1,5 @@
 import { getItemDef } from './items.js';
-import { renderItemIcon, attachTooltipListeners, hideTooltip, rotateLoadout, clearAutoAttackTimers, clearAutoRangeAttackTimers, updateEffectiveStats } from './equipment.js';
+import { renderItemIcon, attachTooltipListeners, hideTooltip, rotateLoadout, clearAutoAttackTimers, clearAutoRangeAttackTimers, updateEffectiveStats, refreshEquipmentModal } from './equipment.js';
 import { addLogEntry } from './battle-log.js';
 import { isInCombat, playGoldSound, playPartyHitSound } from './audio.js';
 import { showMessage } from './minimap.js';
@@ -1018,6 +1018,7 @@ export function applyStatusEffect(memberId, effectId, customTickValue = null, du
   // Refresh UI immediately
   refreshMember(m);
   updateStatusBanners();
+  refreshEquipmentModal();
 }
 
 export function applyRegeneration() {
@@ -1060,7 +1061,7 @@ export function getEffectiveStats(member) {
   const now = performance.now();
   (member.activeDebuffs ?? []).forEach(d => {
     if (now >= d.expiresAt) return;
-    const def = STATUS_EFFECT_DEFS[d.effectId];
+    const def = STATUS_EFFECT_DEFS[d.effectId] ?? d.inlineDef;
     const mods = def?.statModifiers;
     if (!mods) return;
     for (const [stat, val] of Object.entries(mods)) {
@@ -1270,6 +1271,7 @@ export function updateParty(dt) {
   });
 
   updateStatusBanners();
+  refreshEquipmentModal();
 }
 function getActiveEffectsForMember(m) {
   const active = [];
@@ -1287,10 +1289,10 @@ function getActiveEffectsForMember(m) {
   if (skillsState.doubleAttack.active && skillsState.doubleAttack.actorName === m.name && now < skillsState.doubleAttack.expiresAt) active.push('Double Attack');
   if (skillsState.rampart.active && skillsState.rampart.actorName === m.name && now < skillsState.rampart.expiresAt) active.push('Rampart');
   if (m.runicScholarActive) active.push('Runic Scholar');
-  // Active debuffs from monster on-hit effects
+  // Active debuffs from monster on-hit effects, plus inline stat-boost entries
   m.activeDebuffs?.forEach(d => {
     if (now < d.expiresAt) {
-      const def = STATUS_EFFECT_DEFS[d.effectId];
+      const def = STATUS_EFFECT_DEFS[d.effectId] ?? d.inlineDef;
       if (def) active.push(def.name);
     }
   });
@@ -1334,11 +1336,15 @@ function updateStatusBanners() {
     // tooltip path (shows cooldown + description) — the same tooltip the player
     // sees when hovering the skill slot in the inventory modal.
     const entries = [];
+    const bannerNow = performance.now();
     activeNames.forEach(name => {
       const statusDef = Object.values(STATUS_EFFECT_DEFS).find(d => d.name === name);
-      const def = statusDef ?? getSkillOrSpellDef(name);
+      const inlineDef = !statusDef
+        ? m.activeDebuffs?.find(d => d.inlineDef?.name === name && bannerNow < d.expiresAt)?.inlineDef
+        : null;
+      const def = statusDef ?? inlineDef ?? getSkillOrSpellDef(name);
       if (def && (def.type === 'buff' || def.type === 'debuff')) {
-        entries.push({ name, def, fromStatusEffects: !!statusDef });
+        entries.push({ name, def, fromStatusEffects: !!(statusDef || inlineDef) });
       }
     });
 

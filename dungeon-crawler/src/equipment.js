@@ -1,4 +1,4 @@
-import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getAttackSpeedMultiplier, hasEffectFlag, breakPartyUnseen, showMemberHeal, showMemberSpHeal } from './party.js';
+import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getAttackSpeedMultiplier, hasEffectFlag, breakPartyUnseen, showMemberHeal, showMemberSpHeal, getEffectiveStats } from './party.js';
 import { showInlineHelp } from './help.js';
 import { getItemDef } from './items.js';
 import { SPELLS } from './spells.js';
@@ -582,10 +582,15 @@ function renderModal(memberIndex) {
   });
 
   // ── Character stats ──
-  const stats = m.stats ?? {};
+  const effStats = getEffectiveStats(m);
   ['strength', 'dexterity', 'vitality', 'intelligence', 'resilience'].forEach((key) => {
     const el = document.getElementById(`stat-${key}`);
-    if (el) el.textContent = stats[key] ?? '—';
+    if (el) {
+      const baseVal = m.stats?.[key] ?? 0;
+      const effVal = effStats[key] ?? 0;
+      el.textContent = effVal;
+      el.style.color = (effVal > baseVal) ? '#60c060' : (effVal < baseVal ? '#c06060' : '');
+    }
   });
 
   // ── Total Defence ──
@@ -1688,6 +1693,32 @@ function _applyPotionEffect(m, item) {
         mainSound = 'cure';
         break;
       }
+      case 'stat-boost': {
+        const { stats, duration = 60 } = eff;
+        if (!stats || Object.keys(stats).length === 0) break;
+        if (!m.activeDebuffs) m.activeDebuffs = [];
+        const effectId = `_stat_boost_${item.name.replace(/\s+/g, '_')}`;
+        const expiresAt = performance.now() + duration * 1000;
+        const inlineDef = {
+          name: item.name,
+          icon: def.icon,
+          type: 'buff',
+          statModifiers: stats,
+          duration,
+        };
+        const existing = m.activeDebuffs.find(d => d.effectId === effectId);
+        if (existing) {
+          existing.expiresAt = expiresAt;
+          existing.inlineDef = inlineDef;
+        } else {
+          m.activeDebuffs.push({ effectId, expiresAt, tickAccum: 0, customTickValue: null, inlineDef });
+        }
+        const STAT_ABBR = { strength: 'STR', dexterity: 'DEX', vitality: 'VIT', intelligence: 'INT', resilience: 'RES' };
+        const statParts = Object.entries(stats).map(([s, v]) => `${STAT_ABBR[s] ?? s.toUpperCase()} ${v > 0 ? '+' : ''}${v}`);
+        results.push(`${statParts.join(', ')} for ${duration}s`);
+        mainSound = 'magic';
+        break;
+      }
     }
   });
 
@@ -2266,7 +2297,10 @@ function closeModal() {
   activeCharIndex = null;
   // Sync party card HUD to reflect any equipment changes (weapons, torch, etc.)
   refreshPartyCards();
+}
 
+export function refreshEquipmentModal() {
+  if (activeCharIndex !== null) renderModal(activeCharIndex);
 }
 
 // ─────────────────────────────────────────────

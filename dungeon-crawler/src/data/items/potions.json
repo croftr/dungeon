@@ -257,5 +257,35 @@
         ],
         "value": 1200,
         "weight": 0.3
+    },
+    {
+        "name": "Elixir of Rage",
+        "icon": "/icons/potions/elixir_of_rage.svg",
+        "description": "A swirling red brew that smells of blood and sweat. For 60 seconds, STR and DEX are increased by 5.",
+        "type": "potion",
+        "effect": {
+            "type": "stat-boost",
+            "stats": {
+                "strength": 5,
+                "dexterity": 5
+            },
+            "duration": 60
+        },
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Rage Cap",
+                "quantity": 1
+            },
+            {
+                "name": "Life Berry",
+                "quantity": 1
+            }
+        ],
+        "value": 50,
+        "weight": 0.3
     }
 ]
