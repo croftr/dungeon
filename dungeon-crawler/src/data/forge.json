@@ -1,22 +1,5 @@
 [
     {
-        "name": "Iron Helm",
-        "ingredients": [
-            {
-                "name": "Life Essence",
-                "quantity": 1
-            },
-            {
-                "name": "Iron Ore",
-                "quantity": 1
-            },
-            {
-                "name": "Shawl",
-                "quantity": 1
-            }
-        ]
-    },
-    {
         "name": "Ogre Helm",
         "ingredients": [
             {

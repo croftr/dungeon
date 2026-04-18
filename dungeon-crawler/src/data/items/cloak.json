@@ -11,16 +11,6 @@
         "weight": 1
     },
     {
-        "name": "Shadow Cloak",
-        "slot": "cloak",
-        "attackType": null,
-        "baseDamage": null,
-        "description": "A dark cloak woven with shadow-silk. Hard to see in dim light.",
-        "defence": 1,
-        "value": 240,
-        "weight": 0.4
-    },
-    {
         "name": "Amethyst Wardancer Cloak",
         "slot": "cloak",
         "attackType": null,
