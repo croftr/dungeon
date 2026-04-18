@@ -36,10 +36,6 @@
         "chance": 0.15
       },
       {
-        "item": "Iron Ore",
-        "chance": 0.1
-      },
-      {
         "item": "Goblin Shiv",
         "chance": 0.05
       }
@@ -66,7 +62,7 @@
         "chance": 0.4
       },
       {
-        "item": "Worn Boots",
+        "item": "Leather Boots",
         "chance": 0.05
       },
       {
@@ -80,10 +76,6 @@
       {
         "item": "Life Berry",
         "chance": 0.1
-      },
-      {
-        "item": "Fermented Sugar",
-        "chance": 0.2
       }
     ]
   },
@@ -119,11 +111,11 @@
       },
       {
         "item": "Mana Berry",
-        "chance": 0.15
+        "chance": 0.1
       },
       {
-        "item": "Fermented Sugar",
-        "chance": 0.25
+        "item": "Life Berry",
+        "chance": 0.1
       }
     ]
   },
@@ -159,7 +151,7 @@
       },
       {
         "item": "Iron Ore",
-        "chance": 0.3
+        "chance": 0.2
       },
       {
         "item": "Life Berry",
@@ -202,7 +194,7 @@
       },
       {
         "item": "Iron Ore",
-        "chance": 0.5
+        "chance": 0.1
       },
       {
         "item": "Padded Vest",
@@ -218,7 +210,7 @@
       },
       {
         "item": "Iron Ore",
-        "chance": 0.3
+        "chance": 0.1
       },
       {
         "item": "Goblin Shiv",
@@ -653,10 +645,6 @@
         "chance": 0.3
       },
       {
-        "item": "Travelling Cloak",
-        "chance": 0.1
-      },
-      {
         "item": "Aqua Man Flipper",
         "chance": 0.3
       },
@@ -720,10 +708,6 @@
       {
         "item": "Fermented Sugar",
         "chance": 0.25
-      },
-      {
-        "item": "Iron Ore",
-        "chance": 0.4
       },
       {
         "item": "Lizard Scale",

@@ -24,7 +24,7 @@
         "slot": "loot",
         "icon": "/icons/ingredients/life_berry.svg",
         "description": "A magical berry that pulses with natural life energy. Rare and valuable.",
-        "value": 30,
+        "value": 40,
         "weight": 0.1,
         "sellable": true,
         "stackCount": 10
@@ -34,7 +34,7 @@
         "slot": "loot",
         "icon": "/icons/ingredients/mana_berry.svg",
         "description": "A vibrant blue berry infused with arcane essence. Used in many magical concoctions.",
-        "value": 45,
+        "value": 40,
         "weight": 0.1,
         "sellable": true,
         "stackCount": 10
@@ -44,7 +44,7 @@
         "slot": "loot",
         "icon": "/icons/ingredients/fermented_sugar.svg",
         "description": "A sticky, golden substance with a pungent sweet aroma. A volatile alchemical base.",
-        "value": 25,
+        "value": 40,
         "weight": 0.2,
         "sellable": true,
         "stackCount": 10
@@ -316,17 +316,17 @@
         "slot": "loot",
         "icon": "/icons/ingredients/rage_cap.webp",
         "description": "A rare mushroom that grows in areas of intense magical energy. It pulses with a faint red glow and smells faintly of ozone.",
-        "value": 0,
+        "value": 20,
         "weight": 0.1,
-        "sellable": false
+        "sellable": true
     },
     {
         "name": "Ice Cap",
         "slot": "loot",
         "icon": "/icons/ingredients/ice_cap.webp",
         "description": "A rare mushroom that grows in areas of intense cold. It pulses with a faint blue glow and smells faintly of ozone.",
-        "value": 0,
+        "value": 20,
         "weight": 0.1,
-        "sellable": false
+        "sellable": true
     }
 ]
