@@ -1,11 +1,20 @@
 {
     "stock": [
-        "Torch",
         "Minor Rejuvenate Potion",
         "Minor Healing Potion",
         "Minor Mana Potion",
         "Cure Poison Potion",
         "Cure Poison Potion",
+        "Elixir of Rage",
+        "Elixir of Enlightenment",
+        {
+            "name": "Elixir of Rage",
+            "hq": true
+        },
+        {
+            "name": "Elixir of Enlightenment",
+            "hq": true
+        },
         "Life Berry",
         "Life Berry",
         "Life Berry",
@@ -19,6 +28,8 @@
         "Rage Cap",
         "Rage Cap",
         "Rage Cap",
-        "Elixir of Rage"
+        "Ice Cap",
+        "Ice Cap",
+        "Ice Cap"
     ]
 }

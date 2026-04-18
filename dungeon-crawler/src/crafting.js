@@ -58,8 +58,10 @@ export function getHqDefenceBonus(def) {
   return baseline + bespoke;
 }
 
-// Returns a shallow-copied effect with `value` (and `duration`, for timed party
-// potions) scaled by the HQ potion multiplier. Original eff is not mutated.
+// Returns a shallow-copied effect with `value`, `duration`, and any
+// `stats: { statName: n }` map scaled by the HQ potion multiplier. Original
+// eff is not mutated. Stat-boost elixirs use `stats`, simple potions use
+// `value`, timed party effects use `duration` — this handles all three shapes.
 export function scaleHqPotionEffect(eff) {
   if (!eff) return eff;
   const mult = CRAFTING_CONFIG.hqBonuses.potion?.valueMultiplier ?? 1;
@@ -69,6 +71,13 @@ export function scaleHqPotionEffect(eff) {
   }
   if (typeof scaled.duration === 'number') {
     scaled.duration = Math.floor(scaled.duration * mult);
+  }
+  if (scaled.stats && typeof scaled.stats === 'object') {
+    const scaledStats = {};
+    for (const [k, v] of Object.entries(scaled.stats)) {
+      scaledStats[k] = typeof v === 'number' ? Math.floor(v * mult) : v;
+    }
+    scaled.stats = scaledStats;
   }
   return scaled;
 }

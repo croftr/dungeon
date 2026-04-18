@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
-import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createCrocodileSparkle, createHellSpawn, createBloodSplatter, createGreenBloodSplatter } from './particles.js';
+import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createIceCloud, createCrocodileSparkle, createHellSpawn, createBloodSplatter, createGreenBloodSplatter } from './particles.js';
 import { CELL, isPassable } from './map.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
@@ -505,6 +505,28 @@ _applyMultiAttacks('Mushroom', [
     damageMultiplier: 0,
     specialAttack: true,
     specialOnHitEffects: [{ effectId: 'poison', chance: 0.20 }],
+  },
+]);
+
+_applyMultiAttacks('Ice Mushroom', [
+  {
+    name: 'sporeAttack',
+    glb: asset('/monsters/ice-mushroom/standard-attack.glb'),
+    sound: asset('/monsters/ice-mushroom/standard-attack.mp3'),
+    soundTimings: [0.45],
+    damageTimings: [0.45],
+    weight: 4,
+  },
+  {
+    name: 'iceCloud',
+    glb: asset('/monsters/ice-mushroom/special-attack.glb'),
+    sound: asset('/monsters/ice-mushroom/hiss.mp3'),
+    soundTimings: [0.5],
+    damageTimings: [0.5],
+    weight: 2,
+    damageMultiplier: 0,
+    specialAttack: true,
+    specialOnHitEffects: [{ effectId: 'frozen', chance: 0.25 }],
   },
 ]);
 
@@ -2168,6 +2190,12 @@ export function triggerMonsterAttack(monsterId) {
         const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
         setTimeout(() => { if (m.alive) createPoisonCloud(m.mesh.position); }, duration * pts * 1000);
         showMessage(`<b>${m.name}</b> releases a toxic poison cloud!`, 2000);
+      }
+      if (variant.name === 'iceCloud' && m.mesh) {
+        const duration = attackAction.getClip().duration;
+        const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
+        setTimeout(() => { if (m.alive) createIceCloud(m.mesh.position); }, duration * pts * 1000);
+        showMessage(`<b>${m.name}</b> releases a freezing ice cloud!`, 2000);
       }
       if (variant.name === 'hellSpawn' && m.mesh) {
         const duration = attackAction.getClip().duration;

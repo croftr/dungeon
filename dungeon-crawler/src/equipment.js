@@ -405,14 +405,21 @@ export function extendPartyData() {
 
     // Spellbook is now in the ammo slot; spells go directly into hand slots.
 
-    // 20-slot inventory, all empty (or with starting items)
+    // 20-slot inventory, all empty (or with starting items).
+    // Entries in startingInventory can be plain strings ("Healing Potion") or
+    // objects ({ name: "Healing Potion", hq: true }) — the object form seeds
+    // the HQ variant (gold star badge, stat/restore bonus, no stacking).
     m.inventory = Array(INVENTORY_SIZE).fill(null);
     if (m.startingInventory) {
       const itemsToSeed = [...m.startingInventory];
       // Clear it before seeding so we don't re-seed if equipment modal is opened/closed
       delete m.startingInventory;
-      itemsToSeed.forEach((itemName) => {
-        addItemToInventory(party.indexOf(m), itemName);
+      itemsToSeed.forEach((entry) => {
+        if (typeof entry === 'string') {
+          addItemToInventory(party.indexOf(m), entry);
+        } else if (entry && entry.name) {
+          addItemToInventory(party.indexOf(m), entry.name, entry.quantity ?? 1, { hq: !!entry.hq });
+        }
       });
     }
     updateEffectiveStats(m);
@@ -718,10 +725,33 @@ function renderModal(memberIndex) {
   const spellsContainer = document.getElementById('char-spells-container');
   if (spellsContainer) spellsContainer.remove();
 
-  updatePartyBar(memberIndex);
+  syncPartyBarActiveState(memberIndex);
 }
 
-function updatePartyBar(activeIndex) {
+// Only update the active highlight — called every render frame.
+// Full rebuild (buildPartyBar) only happens when the modal first opens.
+function syncPartyBarActiveState(activeIndex) {
+  const portraits = document.getElementById('equip-party-portraits');
+  if (!portraits) return;
+  portraits.querySelectorAll('.equip-party-member').forEach(btn => {
+    const idx = parseInt(btn.dataset.memberIndex, 10);
+    btn.classList.toggle('active', idx === activeIndex);
+  });
+  // Also rebuild the XP bar since that changes with active member
+  _rebuildXpBar(activeIndex);
+}
+
+function _rebuildXpBar(activeIndex) {
+  const bar = document.getElementById('equip-party-bar');
+  if (!bar) return;
+  const existing = document.getElementById('equip-xp-wrap');
+  if (existing) existing.remove();
+  const m = party[activeIndex];
+  if (!m || m.isEmpty) return;
+  _appendXpBar(bar, m);
+}
+
+function buildPartyBar(activeIndex) {
   const bar = document.getElementById('equip-party-bar');
   if (!bar) return;
   bar.innerHTML = '';
@@ -730,25 +760,29 @@ function updatePartyBar(activeIndex) {
   const portraits = document.createElement('div');
   portraits.id = 'equip-party-portraits';
   party.forEach((m, i) => {
-    const memEl = document.createElement('div');
+    const memEl = document.createElement('button');
+    memEl.type = 'button';
     memEl.className = 'equip-party-member';
+    memEl.dataset.memberIndex = i;
     if (m.isEmpty) memEl.classList.add('empty');
     if (i === activeIndex) memEl.classList.add('active');
     memEl.title = m.isEmpty ? 'Empty Slot' : m.name;
 
     if (!m.isEmpty) {
-      const canvas = document.createElement('canvas');
-      canvas.width = 64;
-      canvas.height = 64;
-      drawPortrait(canvas, m);
-      memEl.appendChild(canvas);
-
-      memEl.onclick = () => {
-        if (i !== activeIndex) openModal(i);
-      };
+      if (m.image) {
+        const img = document.createElement('img');
+        img.src = asset(m.image);
+        img.alt = m.name;
+        memEl.appendChild(img);
+      } else {
+        const canvas = document.createElement('canvas');
+        canvas.width = 64;
+        canvas.height = 64;
+        drawPortrait(canvas, m);
+        memEl.appendChild(canvas);
+      }
 
       memEl.addEventListener('dragover', (e) => {
-        if (i === activeIndex) return;
         e.preventDefault();
         memEl.classList.add('transfer-target');
       });
@@ -767,48 +801,48 @@ function updatePartyBar(activeIndex) {
     portraits.appendChild(memEl);
   });
   bar.appendChild(portraits);
+  _appendXpBar(bar, party[activeIndex]);
+}
 
-  // ── XP bar (right) ──
-  const m = party[activeIndex];
-  if (m && !m.isEmpty) {
-    const xpWrap = document.createElement('div');
-    xpWrap.id = 'equip-xp-wrap';
+function _appendXpBar(bar, m) {
+  if (!m || m.isEmpty) return;
+  const xpWrap = document.createElement('div');
+  xpWrap.id = 'equip-xp-wrap';
 
-    const labelRow = document.createElement('div');
-    labelRow.id = 'equip-xp-label-row';
+  const labelRow = document.createElement('div');
+  labelRow.id = 'equip-xp-label-row';
 
-    const nameLevel = document.createElement('span');
-    nameLevel.id = 'equip-xp-name';
-    const nextXP = getNextLevelXP(m);
-    const currXPThreshold = getCurrentLevelThreshold(m);
-    nameLevel.textContent = `${m.name}  ·  Lv.${m.level ?? 0}`;
+  const nameLevel = document.createElement('span');
+  nameLevel.id = 'equip-xp-name';
+  const nextXP = getNextLevelXP(m);
+  const currXPThreshold = getCurrentLevelThreshold(m);
+  nameLevel.textContent = `${m.name}  ·  Lv.${m.level ?? 0}`;
 
-    const xpText = document.createElement('span');
-    xpText.id = 'equip-xp-text';
-    if (nextXP !== null) {
-      const currentProgress = (m.xp ?? 0) - currXPThreshold;
-      const neededForNext = nextXP - currXPThreshold;
-      xpText.textContent = `${currentProgress} / ${neededForNext} XP`;
-    } else {
-      xpText.textContent = `${m.xp ?? 0} XP  ·  MAX LEVEL`;
-    }
-
-    labelRow.appendChild(nameLevel);
-    labelRow.appendChild(xpText);
-
-    const track = document.createElement('div');
-    track.id = 'equip-xp-bar-track';
-
-    const fill = document.createElement('div');
-    fill.id = 'equip-xp-bar-fill';
-    const pct = nextXP ? Math.min(100, (((m.xp ?? 0) - currXPThreshold) / (nextXP - currXPThreshold)) * 100) : 100;
-    fill.style.width = pct + '%';
-
-    track.appendChild(fill);
-    xpWrap.appendChild(labelRow);
-    xpWrap.appendChild(track);
-    bar.appendChild(xpWrap);
+  const xpText = document.createElement('span');
+  xpText.id = 'equip-xp-text';
+  if (nextXP !== null) {
+    const currentProgress = (m.xp ?? 0) - currXPThreshold;
+    const neededForNext = nextXP - currXPThreshold;
+    xpText.textContent = `${currentProgress} / ${neededForNext} XP`;
+  } else {
+    xpText.textContent = `${m.xp ?? 0} XP  ·  MAX LEVEL`;
   }
+
+  labelRow.appendChild(nameLevel);
+  labelRow.appendChild(xpText);
+
+  const track = document.createElement('div');
+  track.id = 'equip-xp-bar-track';
+
+  const fill = document.createElement('div');
+  fill.id = 'equip-xp-bar-fill';
+  const pct = nextXP ? Math.min(100, (((m.xp ?? 0) - currXPThreshold) / (nextXP - currXPThreshold)) * 100) : 100;
+  fill.style.width = pct + '%';
+
+  track.appendChild(fill);
+  xpWrap.appendChild(labelRow);
+  xpWrap.appendChild(track);
+  bar.appendChild(xpWrap);
 }
 
 
@@ -1035,10 +1069,31 @@ function populateTooltip(obj, showBuyPrice = false) {
   if (isConsumable) {
     slotEl.textContent = '';
     actionEl.textContent = '';
-    // Show description with live effect value substituted in for potions
+    // Show description with live effect numbers substituted in for potions.
+    // Handles three potion shapes:
+    //   • simple restore:  { value: 25 }                  → one number
+    //   • timed party:     { duration: 60 }               → one number
+    //   • stat-boost:      { duration: 60, stats: {…:5} } → two numbers (duration, then stat)
+    // Numbers are replaced left-to-right so descriptions like "For 60 seconds,
+    // INT and RES are increased by 5." render correctly.
     let descText = def.description ?? '';
-    if (def.type === 'potion' && def.effect?.value) {
-      descText = descText.replace(/\d+/, def.effect.value);
+    if (def.type === 'potion' && def.effect) {
+      const scaledEff = obj.hq ? scaleHqPotionEffect(def.effect) : def.effect;
+      const numbers = [];
+      if (typeof scaledEff.duration === 'number') numbers.push(scaledEff.duration);
+      if (scaledEff.stats && typeof scaledEff.stats === 'object') {
+        const firstVal = Object.values(scaledEff.stats).find(v => typeof v === 'number');
+        if (typeof firstVal === 'number') numbers.push(firstVal);
+      } else if (typeof scaledEff.value === 'number') {
+        numbers.push(scaledEff.value);
+      }
+      if (numbers.length > 0) {
+        let idx = 0;
+        descText = descText.replace(/\d+/g, (match) => {
+          if (idx < numbers.length) return String(numbers[idx++]);
+          return match;
+        });
+      }
     }
     descEl.textContent = descText;
 
@@ -2301,9 +2356,12 @@ function onPaperdollSlotContextMenu(e) {
 function openModal(memberIndex) {
   // Close char-dev if it's open — never show both modals simultaneously
   if (activeCharDevIndex !== null) closeCharDevModal();
+  const wasOpen = activeCharIndex !== null;
   activeCharIndex = memberIndex;
   hideTooltip();
   document.getElementById('equip-overlay').classList.remove('equip-hidden');
+  // Rebuild portrait tabs only when modal first opens; otherwise just update active state
+  if (!wasOpen) buildPartyBar(memberIndex);
   renderModal(memberIndex);
 
   showInlineHelp('first-inventory-open', {
@@ -3872,13 +3930,23 @@ function openActionSlotPicker(memberIndex, slotKey) {
       const def = item.slot === 'spell' ? null : getItemDef(item.name);
       const iconSrc = item.icon || def?.icon || null;
       if (iconSrc) {
+        // Wrap in a relatively-positioned container so the HQ badge can overlay the icon.
+        const iconWrap = document.createElement('div');
+        iconWrap.className = 'asp-item-icon';
         const img = document.createElement('img');
         img.src = asset(iconSrc);
         img.alt = item.name;
-        row.appendChild(img);
+        iconWrap.appendChild(img);
+        if (item.hq) {
+          const badge = document.createElement('div');
+          badge.className = 'hq-badge';
+          badge.textContent = '★';
+          iconWrap.appendChild(badge);
+        }
+        row.appendChild(iconWrap);
       }
       const nameSpan = document.createElement('span');
-      nameSpan.textContent = item.name;
+      nameSpan.textContent = item.hq ? hqDisplayName(item.name) : item.name;
       row.appendChild(nameSpan);
       row.addEventListener('click', () => {
         const ctx = _pickerCtx;
@@ -5073,6 +5141,15 @@ function attachOverlayListeners() {
   if (aspOverlay) aspOverlay.addEventListener('click', (e) => {
     if (e.target === aspOverlay) closeActionSlotPicker();
   });
+
+  // Portrait tab delegation — persists across updatePartyBar re-renders
+  document.getElementById('equip-party-bar')
+    .addEventListener('click', (e) => {
+      const btn = e.target.closest('.equip-party-member');
+      if (!btn || btn.classList.contains('empty')) return;
+      const idx = parseInt(btn.dataset.memberIndex, 10);
+      if (!isNaN(idx)) openModal(idx);
+    });
 
   // Close button
   document.getElementById('equip-close')

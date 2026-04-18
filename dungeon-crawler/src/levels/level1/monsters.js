@@ -225,6 +225,27 @@ export const level1Monsters = [
     null,
     asset('/monsters/zombie-animation/zombie-combat-idle.glb')),
 
+  // Ice Mushrooms guarding the Scroll of Resist Fear cabinet (rows 11-12, col 11)
+  inst(D.ice_mushroom, 70, 11, 11,
+    asset('/monsters/ice-mushroom/idle.glb'),
+    asset('/monsters/ice-mushroom/standard-attack.glb'),
+    asset('/monsters/ice-mushroom/standard-attack.mp3'), 0.45, 0, 0, 1, null,
+    asset('/monsters/ice-mushroom/dead.glb'),
+    null,
+    asset('/monsters/ice-mushroom/walk.glb'),
+    null,
+    asset('/monsters/ice-mushroom/combat-idle.glb')),
+
+  inst(D.ice_mushroom, 71, 11, 13,
+    asset('/monsters/ice-mushroom/idle.glb'),
+    asset('/monsters/ice-mushroom/standard-attack.glb'),
+    asset('/monsters/ice-mushroom/standard-attack.mp3'), 0.45, 0, 0, 1, null,
+    asset('/monsters/ice-mushroom/dead.glb'),
+    null,
+    asset('/monsters/ice-mushroom/walk.glb'),
+    null,
+    asset('/monsters/ice-mushroom/combat-idle.glb')),
+
   // Mummy in the Level 1 pit arrival room (24, 1)
   inst(D.mummy, 104, 24, 1,
     asset('/monsters/mummy-annimation/Meshy_AI_Animation_Idle_withSkin.glb'),

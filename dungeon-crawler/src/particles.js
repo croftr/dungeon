@@ -754,6 +754,49 @@ export function createPoisonCloud(position) {
     }, 800);
 }
 
+export function createIceCloud(position) {
+    if (!proton) return;
+
+    const emitter = new Proton.Emitter();
+
+    // Slow billowing ice cloud — large, lingering, icy blue
+    emitter.rate = new Proton.Rate(new Proton.Span(20, 30), new Proton.Span(0.04));
+
+    emitter.addInitialize(new Proton.Mass(1));
+    emitter.addInitialize(new Proton.Radius(0.6, 1.4));
+    emitter.addInitialize(new Proton.Life(1.5, 3.0));
+
+    // Slow outward drift upward — cloud rising
+    emitter.addInitialize(new Proton.V(0.6, new Proton.Vector3D(0, 1, 0), 180));
+
+    const material = new THREE.SpriteMaterial({
+        map: sparkTexture,
+        color: 0xffffff,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        depthWrite: false,
+    });
+    emitter.addInitialize(new Proton.Body(new THREE.Sprite(material)));
+
+    if (position) {
+        emitter.addInitialize(new Proton.Position(new Proton.PointZone(position.x, position.y + 0.5, position.z)));
+    }
+
+    // Deep icy blue — starts vivid, fades out
+    emitter.addBehaviour(new Proton.Alpha(0.9, 0.0));
+    emitter.addBehaviour(new Proton.Scale(1.5, 0.3));
+    emitter.addBehaviour(new Proton.Color('#0088ff', '#003399'));
+    emitter.addBehaviour(new Proton.RandomDrift(1.5, 1.0, 1.5, 0.05));
+
+    emitter.emit();
+    proton.addEmitter(emitter);
+
+    setTimeout(() => {
+        emitter.stopEmit();
+        setTimeout(() => { proton.removeEmitter(emitter); }, 3500);
+    }, 800);
+}
+
 export function createCrocodileSparkle(position) {
     if (!proton) return;
 

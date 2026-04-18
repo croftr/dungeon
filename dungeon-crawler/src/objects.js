@@ -151,8 +151,17 @@ export function isStatueAt(r, c) {
 // ─────────────────────────────────────────────
 //  MERCHANT STOCK & PRICES
 // ─────────────────────────────────────────────
-const MERCHANT_STOCK = MERCHANT_DATA.stock;
-const POTION_MERCHANT_STOCK = POTION_MERCHANT_DATA.stock;
+// A stock entry can be a plain string ("Healing Potion") or an object
+// ({ name: "Healing Potion", hq: true }). _normStock converts both forms into
+// the canonical { name, hq } shape so downstream code only has to handle one.
+function _normStock(entry) {
+  if (!entry) return null;
+  if (typeof entry === 'string') return { name: entry, hq: false };
+  if (typeof entry === 'object' && entry.name) return { name: entry.name, hq: !!entry.hq };
+  return null;
+}
+const MERCHANT_STOCK = MERCHANT_DATA.stock.map(_normStock).filter(Boolean);
+const POTION_MERCHANT_STOCK = POTION_MERCHANT_DATA.stock.map(_normStock).filter(Boolean);
 
 // Items still available for sale (items bought are removed permanently)
 let _merchantAvailable = [...MERCHANT_STOCK];
@@ -175,7 +184,7 @@ const _knownAlchemyRecipes = new Set(); // result item names learned by the part
 // Monster NPC Special Shop State
 let _seenEssences = new Set();
 let _unlockedRecipes = new Set();
-let _monsterNpcStock = [...BARNABY_DATA.stock]; // Array of parchment item names
+let _monsterNpcStock = BARNABY_DATA.stock.map(_normStock).filter(Boolean); // parchments (HQ n/a)
 
 
 const FORGE_SLOTS = 9; // 8 materials + 1 result
@@ -3266,18 +3275,15 @@ function _renderChestPartyInv() {
                         }
                     }
 
-                    // Transfer item(s)
+                    // Transfer item(s). HQ items are stored as { name, hq: true }
+                    // so the flag survives the chest round-trip; stacks keep their
+                    // quantity shape. HQ never stacks so the two branches don't overlap.
                     const currentCount = item.count ?? 1;
                     if (currentCount > 1) {
-                        // Move one at a time to be consistent with crafting
-                        // Actually, for chest storage, maybe you want to move the whole stack?
-                        // Let's stick to the user's "move one" pattern if they like it,
-                        // but usually for chest it's everything.
-                        // I'll check what they did for Gold.
-                        
-                        // I'll move the whole stack for chest, as is customary.
-                        // But wait, if I do that, _activeChestContents[freeIdx] needs to be an object.
                         _activeChestContents[freeIdx] = { name: item.name, quantity: currentCount };
+                        m.inventory[invIdx] = null;
+                    } else if (item.hq) {
+                        _activeChestContents[freeIdx] = { name: item.name, hq: true };
                         m.inventory[invIdx] = null;
                     } else {
                         _activeChestContents[freeIdx] = item.name;
@@ -3951,8 +3957,8 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
                     const baseName = essence.replace(' Essence', '');
                     for (const suffix of ['Armour Parchment', 'Weapons Parchment']) {
                         const pName = `${baseName} ${suffix}`;
-                        if (getItemDef(pName) && !_monsterNpcStock.includes(pName)) {
-                            _monsterNpcStock.push(pName);
+                        if (getItemDef(pName) && !_monsterNpcStock.some(e => e.name === pName)) {
+                            _monsterNpcStock.push({ name: pName, hq: false });
                             showMessage(`Barnaby recognises the ${essence}! A ${pName} is now available in his shop.`);
                         }
                     }
@@ -3997,19 +4003,34 @@ function _switchMerchantTab(mode) {
     }
 }
 
+// HQ items cost double the base item's buy price. Change HQ_PRICE_MULT to
+// tune (or move into crafting.json if you want it data-driven).
+const HQ_PRICE_MULT = 2;
+function _entryPrice(entry) {
+    const base = getItemDef(entry.name)?.value ?? 0;
+    return entry.hq ? base * HQ_PRICE_MULT : base;
+}
+
+// Find the first stock entry that matches a basket entry by both name and hq,
+// so HQ and regular copies are tracked independently.
+function _findStockIdx(stockArr, target) {
+    return stockArr.findIndex(e => e.name === target.name && !!e.hq === !!target.hq);
+}
+
 function _renderMerchantShop() {
     const grid = document.getElementById('merchant-grid');
     grid.innerHTML = '';
 
     {
         // Build display list: remove one entry per basket item (not all copies)
-        const displayAvailable = [..._activeMerchantAvailable];
+        const displayAvailable = _activeMerchantAvailable.map(e => ({ ...e }));
         for (const basketItem of _merchantBasket) {
-            const idx = displayAvailable.indexOf(basketItem);
+            const idx = _findStockIdx(displayAvailable, basketItem);
             if (idx > -1) displayAvailable.splice(idx, 1);
         }
 
-        displayAvailable.forEach(name => {
+        displayAvailable.forEach(entry => {
+            const { name, hq } = entry;
             const itemDef = getItemDef(name);
             if (!itemDef) return;
 
@@ -4031,25 +4052,28 @@ function _renderMerchantShop() {
                 slot.appendChild(eye);
             }
 
-            const img = document.createElement('img');
-            img.src = asset(itemDef.icon);
-            slot.appendChild(img);
+            // Render icon into a sub-container so the eye icon / price appended
+            // to the outer slot aren't wiped by renderItemIcon's innerHTML reset.
+            const iconBox = document.createElement('div');
+            iconBox.className = 'merch-icon-box';
+            slot.appendChild(iconBox);
+            equip.renderItemIcon({ name, hq }, iconBox, { showCount: false });
 
             const price = document.createElement('div');
             price.className = 'merch-price';
-            price.textContent = `${getItemDef(name)?.value ?? '?'}g`;
+            price.textContent = `${_entryPrice(entry)}g`;
             slot.appendChild(price);
 
             slot.addEventListener('click', () => {
                 playItemSound(name);
-                _merchantBasket.push(name);
+                _merchantBasket.push({ name, hq });
                 equip.hideTooltip();
                 _renderMerchantShop();
                 _renderMerchantBasket();
                 _updateMerchantTotals();
             });
 
-            equip.attachTooltipListeners(slot, () => ({ name }), false, true);
+            equip.attachTooltipListeners(slot, () => ({ name, hq }), false, true);
 
             grid.appendChild(slot);
         });
@@ -4061,20 +4085,22 @@ function _renderMerchantBasket() {
     grid.innerHTML = '';
 
     {
-        _merchantBasket.forEach((name, idx) => {
+        _merchantBasket.forEach((entry, idx) => {
+            const { name, hq } = entry;
             const itemDef = getItemDef(name);
             if (!itemDef) return;
 
             const slot = document.createElement('div');
             slot.className = 'merch-slot';
 
-            const img = document.createElement('img');
-            img.src = asset(itemDef.icon);
-            slot.appendChild(img);
+            const iconBox = document.createElement('div');
+            iconBox.className = 'merch-icon-box';
+            slot.appendChild(iconBox);
+            equip.renderItemIcon({ name, hq }, iconBox, { showCount: false });
 
             const price = document.createElement('div');
             price.className = 'merch-price';
-            price.textContent = `${getItemDef(name)?.value ?? '?'}g`;
+            price.textContent = `${_entryPrice(entry)}g`;
             slot.appendChild(price);
 
             // Click basket item → return it to the shop
@@ -4087,7 +4113,7 @@ function _renderMerchantBasket() {
                 _updateMerchantTotals();
             });
 
-            equip.attachTooltipListeners(slot, () => ({ name }), false, true);
+            equip.attachTooltipListeners(slot, () => ({ name, hq }), false, true);
 
             grid.appendChild(slot);
         });
@@ -4095,7 +4121,7 @@ function _renderMerchantBasket() {
 }
 
 function _updateMerchantTotals() {
-    const total = _merchantBasket.reduce((sum, name) => sum + (getItemDef(name)?.value ?? 0), 0);
+    const total = _merchantBasket.reduce((sum, e) => sum + _entryPrice(e), 0);
 
     document.getElementById('merchant-total-val').textContent = total;
     document.getElementById('merchant-gold-val').textContent = partyGold;
@@ -4105,7 +4131,7 @@ function _updateMerchantTotals() {
 }
 
 function _buyItems() {
-    const total = _merchantBasket.reduce((sum, name) => sum + (getItemDef(name)?.value ?? 0), 0);
+    const total = _merchantBasket.reduce((sum, e) => sum + _entryPrice(e), 0);
     if (partyGold < total) return;
 
     {
@@ -4113,30 +4139,31 @@ function _buyItems() {
         const failedItems = [];
 
         // Try to add each item to inventory
-        for (const itemName of _merchantBasket) {
+        for (const entry of _merchantBasket) {
             let added = false;
             // Try to find a slot in any party member's inventory
             for (let i = 0; i < 4; i++) {
                 if (party[i].isEmpty) continue;
-                if (equip.addItemToInventory(i, itemName)) {
+                if (equip.addItemToInventory(i, entry.name, 1, { hq: entry.hq })) {
                     added = true;
-                    boughtItems.push(itemName);
+                    boughtItems.push(entry);
                     break;
                 }
             }
             if (!added) {
-                failedItems.push(itemName);
+                failedItems.push(entry);
             }
         }
 
         // Calculate cost of successfully bought items
-        const spent = boughtItems.reduce((sum, name) => sum + (getItemDef(name)?.value ?? 0), 0);
+        const spent = boughtItems.reduce((sum, e) => sum + _entryPrice(e), 0);
 
         if (spent > 0) {
             removeGold(spent);
             showMessage(`Bought ${boughtItems.length} items for ${spent} gold.`);
-            for (const name of boughtItems) {
-                addLogEntry({ type: 'item', subtype: 'buy', itemName: name, gold: getItemDef(name)?.value ?? 0, time: Date.now() });
+            for (const entry of boughtItems) {
+                const displayName = entry.hq ? `HQ ${entry.name}` : entry.name;
+                addLogEntry({ type: 'item', subtype: 'buy', itemName: displayName, gold: _entryPrice(entry), time: Date.now() });
             }
         }
 
@@ -4144,9 +4171,9 @@ function _buyItems() {
             showMessage(`Could not carry ${failedItems.length} items (inventory full).`);
         }
 
-        // Remove bought items from available stock
-        for (const item of boughtItems) {
-            const stockIdx = _activeMerchantAvailable.indexOf(item);
+        // Remove bought items from available stock (match on name + hq).
+        for (const entry of boughtItems) {
+            const stockIdx = _findStockIdx(_activeMerchantAvailable, entry);
             if (stockIdx > -1) _activeMerchantAvailable.splice(stockIdx, 1);
         }
 
@@ -4161,10 +4188,13 @@ function _buyItems() {
 
 // ── Sell-side helpers ────────────────────────────────────────────────────
 
-function _getMerchantSellPrice(name) {
+// Sell price is 1/10th of the item's buy value, ceiled. HQ items sell for
+// HQ_PRICE_MULT× more to match the buy-side multiplier.
+function _getMerchantSellPrice(name, isHQ = false) {
     const def = getItemDef(name);
     if (!def) return 0;
-    return Math.ceil((def.value ?? 0) / 10);
+    const base = Math.ceil((def.value ?? 0) / 10);
+    return isHQ ? base * HQ_PRICE_MULT : base;
 }
 
 function _renderMerchantPartyItems() {
@@ -4187,7 +4217,7 @@ function _renderMerchantPartyItems() {
                 if (!def) return;
 
                 const stackQty = item.count ?? 1;
-                const sellPrice = _getMerchantSellPrice(item.name) * stackQty;
+                const sellPrice = _getMerchantSellPrice(item.name, !!item.hq) * stackQty;
 
                 const slot = document.createElement('div');
                 slot.className = 'merch-slot';
@@ -4197,16 +4227,13 @@ function _renderMerchantPartyItems() {
                 tag.textContent = CHARACTER_LABELS[ci];
                 slot.appendChild(tag);
 
-                const img = document.createElement('img');
-                img.src = asset(def.icon);
-                slot.appendChild(img);
-
-                if (stackQty > 1) {
-                    const badge = document.createElement('div');
-                    badge.className = 'inv-count-badge';
-                    badge.textContent = stackQty;
-                    slot.appendChild(badge);
-                }
+                // Render icon into a sub-container so the char tag / price
+                // aren't wiped by renderItemIcon's innerHTML reset. The shared
+                // renderer draws the icon, count badge, and HQ star overlay.
+                const iconBox = document.createElement('div');
+                iconBox.className = 'merch-icon-box';
+                slot.appendChild(iconBox);
+                equip.renderItemIcon(item, iconBox);
 
                 const price = document.createElement('div');
                 price.className = 'merch-price';
@@ -4215,14 +4242,14 @@ function _renderMerchantPartyItems() {
 
                 slot.addEventListener('click', () => {
                     playItemSound(item.name);
-                    _merchantSellBasket.push({ charIndex: ci, invIndex: invIdx, name: item.name });
+                    _merchantSellBasket.push({ charIndex: ci, invIndex: invIdx, name: item.name, hq: !!item.hq });
                     equip.hideTooltip();
                     _renderMerchantPartyItems();
                     _renderMerchantSellBasket();
                     _updateMerchantSellTotals();
                 });
 
-                equip.attachTooltipListeners(slot, () => ({ name: item.name }));
+                equip.attachTooltipListeners(slot, () => ({ name: item.name, hq: !!item.hq }));
 
                 grid.appendChild(slot);
             });
@@ -4241,21 +4268,19 @@ function _renderMerchantSellBasket() {
 
             const invItem = party[entry.charIndex]?.inventory?.[entry.invIndex];
             const stackQty = invItem?.count ?? 1;
-            const sellPrice = _getMerchantSellPrice(entry.name) * stackQty;
+            const sellPrice = _getMerchantSellPrice(entry.name, !!entry.hq) * stackQty;
 
             const slot = document.createElement('div');
             slot.className = 'merch-slot';
 
-            const img = document.createElement('img');
-            img.src = asset(def.icon);
-            slot.appendChild(img);
-
-            if (stackQty > 1) {
-                const badge = document.createElement('div');
-                badge.className = 'inv-count-badge';
-                badge.textContent = stackQty;
-                slot.appendChild(badge);
-            }
+            // Prefer the live inventory entry so render picks up the actual
+            // stack count and HQ flag; fall back to the basket entry if the
+            // inventory slot was somehow cleared between renders.
+            const renderItem = invItem ?? { name: entry.name, hq: !!entry.hq, count: stackQty };
+            const iconBox = document.createElement('div');
+            iconBox.className = 'merch-icon-box';
+            slot.appendChild(iconBox);
+            equip.renderItemIcon(renderItem, iconBox);
 
             const price = document.createElement('div');
             price.className = 'merch-price';
@@ -4272,7 +4297,7 @@ function _renderMerchantSellBasket() {
                 _updateMerchantSellTotals();
             });
 
-            equip.attachTooltipListeners(slot, () => ({ name: entry.name }));
+            equip.attachTooltipListeners(slot, () => ({ name: entry.name, hq: !!entry.hq }));
 
             grid.appendChild(slot);
         });
@@ -4283,7 +4308,7 @@ function _updateMerchantSellTotals() {
     const total = _merchantSellBasket.reduce((sum, e) => {
         const invItem = party[e.charIndex]?.inventory?.[e.invIndex];
         const stackQty = invItem?.count ?? 1;
-        return sum + _getMerchantSellPrice(e.name) * stackQty;
+        return sum + _getMerchantSellPrice(e.name, !!e.hq) * stackQty;
     }, 0);
 
     document.getElementById('merchant-sell-total-val').textContent = total;
@@ -4301,7 +4326,7 @@ function _sellItems() {
         const invItem = party[e.charIndex]?.inventory?.[e.invIndex];
         return { ...e, stackQty: invItem?.count ?? 1 };
     });
-    const total = entries.reduce((sum, e) => sum + _getMerchantSellPrice(e.name) * e.stackQty, 0);
+    const total = entries.reduce((sum, e) => sum + _getMerchantSellPrice(e.name, !!e.hq) * e.stackQty, 0);
     const totalUnits = entries.reduce((sum, e) => sum + e.stackQty, 0);
 
     // Remove items from inventory (whole stack per slot; reverse order to keep indices stable).
@@ -4320,7 +4345,8 @@ function _sellItems() {
     addGold(total);
     showMessage(`Sold ${totalUnits} item${totalUnits > 1 ? 's' : ''} for ${total} gold.`);
     for (const e of entries) {
-        addLogEntry({ type: 'item', subtype: 'sell', itemName: e.name, gold: _getMerchantSellPrice(e.name) * e.stackQty, time: Date.now() });
+        const displayName = e.hq ? `HQ ${e.name}` : e.name;
+        addLogEntry({ type: 'item', subtype: 'sell', itemName: displayName, gold: _getMerchantSellPrice(e.name, !!e.hq) * e.stackQty, time: Date.now() });
     }
 
     _merchantSellBasket = [];
@@ -4389,15 +4415,17 @@ function _bindChestSlots(equip, slots, contents) {
 
         const entry = contents[i];
         const itemName = typeof entry === 'string' ? entry : entry?.name;
+        const isHQ = typeof entry === 'object' && !!entry?.hq;
         if (itemName) {
             const itemDef = getItemDef(itemName);
             if (itemDef) {
                 slot.classList.add('occupied');
-                
+
                 // Construct a temporary item object for the shared renderer
-                const tempItem = { 
-                    name: itemName, 
-                    count: typeof entry === 'object' ? entry.quantity : 1 
+                const tempItem = {
+                    name: itemName,
+                    hq: isHQ,
+                    count: typeof entry === 'object' ? entry.quantity : 1
                 };
                 equip.renderItemIcon(tempItem, slot);
 
@@ -4425,6 +4453,7 @@ function _bindChestSlots(equip, slots, contents) {
             const isObj = typeof entry === 'object';
             return {
                 name: itemName,
+                hq: isObj && !!entry.hq,
                 quantity: isObj && entry.quantity ? entry.quantity : null
             };
         });
@@ -4452,7 +4481,8 @@ function _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx) {
 
     const target = party[targetIdx];
     const itemQuantity = typeof entry === 'object' && entry.quantity ? entry.quantity : 1;
-    const success = equip.addItemToInventory(targetIdx, itemDef.name, itemQuantity);
+    const isHQ = typeof entry === 'object' && !!entry.hq;
+    const success = equip.addItemToInventory(targetIdx, itemDef.name, itemQuantity, { hq: isHQ });
     if (success) {
         addLogEntry({ type: 'item', subtype: 'loot', itemName: itemDef.name, time: Date.now() });
         playItemSound(itemDef.name);
@@ -5108,7 +5138,7 @@ export function getWorldFlags() {
         level4PortalEnabled: _level4PortalEnabled,
         seenEssences: [..._seenEssences],
         unlockedRecipes: [..._unlockedRecipes],
-        monsterNpcStock: [..._monsterNpcStock],
+        monsterNpcStock: _monsterNpcStock.map(e => ({ ...e })),
     };
 }
 
@@ -5134,12 +5164,12 @@ export function setWorldFlags(flags) {
     _level4PortalEnabled = flags.level4PortalEnabled ?? false;
     _seenEssences = new Set(flags.seenEssences ?? []);
     _unlockedRecipes = new Set(flags.unlockedRecipes ?? []);
-    _monsterNpcStock = flags.monsterNpcStock ?? [];
+    _monsterNpcStock = (flags.monsterNpcStock ?? []).map(_normStock).filter(Boolean);
     // Migration: old saves used per-item parchment names (e.g. "Ogre Helm Parchment").
     // If essences were seen but no new-style grouped parchments are in stock, reset
     // _seenEssences so Barnaby re-offers the correct grouped parchments on next visit.
     const hasNewStyleParchment = _monsterNpcStock.some(
-        n => n.endsWith(' Armour Parchment') || n.endsWith(' Weapons Parchment')
+        e => e.name.endsWith(' Armour Parchment') || e.name.endsWith(' Weapons Parchment')
     );
     if (_seenEssences.size > 0 && !hasNewStyleParchment) {
         _seenEssences.clear();
@@ -5177,16 +5207,16 @@ function addPitLadder(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, s
 }
 
 /** Returns a snapshot of merchant stock. */
-export function getMerchantStock() { return [..._merchantAvailable]; }
+export function getMerchantStock() { return _merchantAvailable.map(e => ({ ...e })); }
 
-/** Restores merchant stock. */
-export function setMerchantStock(stock) { if (stock) _merchantAvailable = [...stock]; }
+/** Restores merchant stock. Accepts legacy string-array saves via _normStock. */
+export function setMerchantStock(stock) { if (stock) _merchantAvailable = stock.map(_normStock).filter(Boolean); }
 
 /** Returns a snapshot of potion merchant stock. */
-export function getPotionMerchantStock() { return [..._potionMerchantAvailable]; }
+export function getPotionMerchantStock() { return _potionMerchantAvailable.map(e => ({ ...e })); }
 
-/** Restores potion merchant stock. */
-export function setPotionMerchantStock(stock) { if (stock) _potionMerchantAvailable = [...stock]; }
+/** Restores potion merchant stock. Accepts legacy string-array saves via _normStock. */
+export function setPotionMerchantStock(stock) { if (stock) _potionMerchantAvailable = stock.map(_normStock).filter(Boolean); }
 
 // ─────────────────────────────────────────────
 //  KNOWN RECIPES — RENDER

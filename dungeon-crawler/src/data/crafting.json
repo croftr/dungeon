@@ -1,7 +1,7 @@
 {
   "alchemy": {
     "failChance": 0.05,
-    "hqChance": 0.05
+    "hqChance": 0.95
   },
   "forge": {
     "failChance": 0.05,

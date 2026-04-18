@@ -51,7 +51,12 @@
         "startingInventory": [
             "Cure Poison Potion",
             "Minor Rejuvenate Potion",
-            "Minor Healing Potion"
+            "Minor Healing Potion",
+            "Elixir of Rage",
+            {
+                "name": "Elixir of Rage",
+                "hq": true
+            }
         ],
         "gridCol": 10,
         "gridRow": 8,
@@ -229,7 +234,11 @@
         ],
         "startingInventory": [
             "Minor Mana Potion",
-            "Minor Mana Potion"
+            "Minor Mana Potion",
+            {
+                "name": "Elixir of Enlightenment",
+                "hq": true
+            }
         ],
         "image": "/heros/white-mage.webp",
         "leftHand": "Heal",

@@ -22,5 +22,4 @@ _dummy.drainStamina = false;
 _dummy.originalStats = { ...D.dummy.stats };
 _dummy.originalAttackSpeed = D.dummy.attackSpeed;
 
-
 export const level0Monsters = [_dummy];
