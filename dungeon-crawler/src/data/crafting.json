@@ -1,10 +1,10 @@
 {
   "alchemy": {
-    "failChance": 0.05,
-    "hqChance": 0.95
+    "failChance": 0.02,
+    "hqChance": 0.05
   },
   "forge": {
-    "failChance": 0.05,
+    "failChance": 0.02,
     "hqChance": 0.05
   },
   "hqBonuses": {
