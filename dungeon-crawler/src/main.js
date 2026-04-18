@@ -13,7 +13,7 @@ import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttac
 import { killAllMonstersOnLevel } from './save-level-state.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, setEmptyAllContainers, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems } from './objects.js';
-import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound } from './audio.js';
+import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound, prefetchActionSounds } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
@@ -104,6 +104,7 @@ const _themeTunePreload = prefetchBuffer(asset('/sounds/backing/theme-tune.mp3')
 prefetchBuffer(asset('/sounds/browse-member.mp3'));
 prefetchBuffer(asset('/sounds/select-member.mp3'));
 prefetchBuffer(asset('/sounds/party-confirmed.mp3'));
+prefetchActionSounds();
 
 // Autoplay the side video as soon as it can play.
 {

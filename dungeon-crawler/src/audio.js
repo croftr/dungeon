@@ -7,6 +7,13 @@
 
 import { asset } from './assets.js';
 
+export function prefetchActionSounds() {
+  prefetchBuffer(asset('/sounds/actions/swipe.mp3'));
+  prefetchBuffer(asset('/sounds/actions/bash.mp3'));
+  prefetchBuffer(asset('/sounds/actions/shoot.mp3'));
+  prefetchBuffer(asset('/sounds/crit1.mp3'));
+}
+
 let audioCtx = null;
 function getCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -117,6 +124,7 @@ export async function playActionSound(attackType) {
 /**
  * Play a critical-hit version of the attack sound — same buffer but at 1.5× playback rate,
  * giving a sharper, punchier crack without needing a separate audio file.
+ * Additionally, plays the dedicated crit1.mp3 success sound for non-ranged attacks.
  * @param {string|null} attackType — 'swipe' | 'bash' | 'shoot' | 'punch' | 'fireball' | null
  */
 export async function playCritSound(attackType) {
@@ -136,6 +144,22 @@ export async function playCritSound(attackType) {
     source.connect(gainNode);
     gainNode.connect(ctx.destination);
     source.start(0, def.offset || 0);
+
+    // Also play the dedicated crit1 sound for non-ranged attacks.
+    // The user suspects bows/crossbows might already have a crit sound;
+    // they play a pitched-up 'shoot' sound, so we leave them as-is.
+    if (attackType !== 'shoot') {
+      const critBuffer = await getBuffer(asset('/sounds/crit1.mp3'));
+      if (critBuffer) {
+        const critSource = ctx.createBufferSource();
+        critSource.buffer = critBuffer;
+        const critGain = ctx.createGain();
+        critGain.gain.value = 0.8;
+        critSource.connect(critGain);
+        critGain.connect(ctx.destination);
+        critSource.start(0);
+      }
+    }
   } catch (err) {
     console.warn('[audio] playCritSound failed:', err);
   }

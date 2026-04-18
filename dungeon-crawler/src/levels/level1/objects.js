@@ -109,6 +109,11 @@ export function spawnLevel1Objects(ctx) {
         'Minor Potions Parchment'
     ]);
 
+    // New room north of the mushroom section
+    addSpellCabinet(group, loader, 12, 11, 0, 0, -0.7, [
+        'Scroll of Resist Fear'
+    ]);
+
     // ── Traps ─────────────────────────────────────────────────────────────────
     addTrap1(group, loader, 21, 10);  // long south corridor
 
