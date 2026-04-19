@@ -217,10 +217,23 @@ export function drawMinimap() {
 // ─────────────────────────────────────────────
 const elPos    = document.getElementById('st-pos');
 const elFacing = document.getElementById('st-facing');
+const elLevel  = document.getElementById('st-level');
+
+const LEVEL_NAMES = {
+  0: 'Starter Room',
+  1: 'Dungeon Level 1',
+  2: 'Dungeon Level 2',
+  3: 'Dungeon Level 3',
+  4: 'Dungeon Level 4',
+  5: 'Hall of Heroes',
+  99: 'The Arena'
+};
 
 export function updateStatus() {
   elPos.textContent    = `(${player.gridCol}, ${player.gridRow})`;
   elFacing.textContent = FACING_NAMES[player.facing];
+  const lv = window.currentLevel ?? 0;
+  elLevel.textContent  = LEVEL_NAMES[lv] ?? `Level ${lv}`;
 }
 
 // ─────────────────────────────────────────────

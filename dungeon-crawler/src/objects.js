@@ -290,6 +290,12 @@ export function snapshotStarterStash() {
 const _trapDisarmedSet = new Set();
 let _activeTrapObj = null; // the trap mesh currently showing the disarm modal
 
+// Container persistence — tracks the contents of every chest, spell cabinet, etc.
+// so items taken/deposited survive level transitions. Keyed by "level,col,row".
+let _containerContentsPersistence = {};
+// Legacy tracking for Ethereal Egg emptied state
+let _eggEmptiedSet = new Set();
+
 let objectsGroup = new THREE.Group();
 
 
@@ -1613,10 +1619,16 @@ export function initObjects(scene, camera) {
 
 export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = [], modelPath = asset('/items/Meshy_AI_Treasure_Chest_0221184131_texture.glb'), interactive = true, offsetX = 0, title = 'Chest', scale = 0.3) {
     const isStarterStash = title === 'Stash';
-    if (interactive && isStarterStash && _persistedStarterStashItems !== null) {
-        contents = [..._persistedStarterStashItems];
-    } else if (interactive && _emptyAllContainers && !isStarterStash) {
-        contents = [];
+    const persistenceKey = `${window.currentLevel},${col},${row}`;
+
+    if (interactive) {
+        if (isStarterStash && _persistedStarterStashItems !== null) {
+            contents = [..._persistedStarterStashItems];
+        } else if (_containerContentsPersistence[persistenceKey]) {
+            contents = _containerContentsPersistence[persistenceKey];
+        } else if (_emptyAllContainers && !isStarterStash) {
+            contents = [];
+        }
     }
     loader.load(asset(modelPath), (gltf) => {
         const model = gltf.scene;
@@ -1633,6 +1645,7 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
                     child.userData.gridRow = row;
                     child.userData.gridCol = col;
                     child.userData.contents = contents;
+                    child.userData.persistenceKey = persistenceKey;
                     child.userData.title = title;
                     if (isStarterStash) child.userData.isStarterStash = true;
                     interactables.push(child);
@@ -2490,7 +2503,11 @@ function _applyEggGlow(model, contents) {
 
 function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.45, initialContents = ['Red Crystal'], offsetX = 0, offsetZ = 0) {
     _statueGridCells.add(`${row},${col}`); // block player movement through this cell
+    const persistenceKey = `${window.currentLevel},${col},${row}`;
     let contents = _emptyAllContainers ? [] : [...initialContents];
+    if (_containerContentsPersistence[persistenceKey]) {
+        contents = _containerContentsPersistence[persistenceKey];
+    }
     loader.load(asset('/items/ethereal_egg.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(scale);
@@ -2505,6 +2522,7 @@ function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.4
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = contents;
+                child.userData.persistenceKey = persistenceKey;
                 child.userData.eggModel = model;
                 interactables.push(child);
             }
@@ -2602,7 +2620,12 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, sh
 
 
 function addWeaponRack(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, contents = []) {
-    if (_emptyAllContainers) contents = [];
+    const persistenceKey = `${window.currentLevel},${col},${row}`;
+    if (_containerContentsPersistence[persistenceKey]) {
+        contents = _containerContentsPersistence[persistenceKey];
+    } else if (_emptyAllContainers) {
+        contents = [];
+    }
     loader.load(asset('/items/weapon-rack.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.46);
@@ -2617,6 +2640,7 @@ function addWeaponRack(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, 
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = contents;
+                child.userData.persistenceKey = persistenceKey;
                 interactables.push(child);
 
                 if (child.material) {
@@ -2639,7 +2663,12 @@ function addWeaponRack(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, 
 }
 
 function addSpellCabinet(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, contents = []) {
-    if (_emptyAllContainers) contents = [];
+    const persistenceKey = `${window.currentLevel},${col},${row}`;
+    if (_containerContentsPersistence[persistenceKey]) {
+        contents = _containerContentsPersistence[persistenceKey];
+    } else if (_emptyAllContainers) {
+        contents = [];
+    }
     loader.load(asset('/items/spell-cabinet.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
@@ -2654,6 +2683,7 @@ function addSpellCabinet(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = contents;
+                child.userData.persistenceKey = persistenceKey;
                 interactables.push(child);
 
                 if (child.material) {
@@ -2948,7 +2978,12 @@ export function isDummyCombatActive() {
 }
 
 function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, contents = []) {
-    if (_emptyAllContainers) contents = [];
+    const persistenceKey = `${window.currentLevel},${col},${row}`;
+    if (_containerContentsPersistence[persistenceKey]) {
+        contents = _containerContentsPersistence[persistenceKey];
+    } else if (_emptyAllContainers) {
+        contents = [];
+    }
     loader.load(asset('/items/forge.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
@@ -2963,6 +2998,7 @@ function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, c
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = contents;
+                child.userData.persistenceKey = persistenceKey;
                 interactables.push(child);
 
                 if (child.material) {
@@ -3293,6 +3329,11 @@ function _renderChestPartyInv() {
                     refreshPartyCards();
                     _bindChestSlots(equip, _activeChestSlots, _activeChestContents);
                     _renderChestPartyInv();
+
+                    // Save state immediately if it's a persistent container
+                    if (_activeShrineLootObj?.userData.persistenceKey) {
+                        _containerContentsPersistence[_activeShrineLootObj.userData.persistenceKey] = _activeChestContents;
+                    }
                 });
 
                 equip.attachTooltipListeners(slot, () => ({ 
@@ -3364,6 +3405,11 @@ function _renderArmorStandPartyInv() {
                     refreshPartyCards();
                     _bindArmorStandSlots(equip, contents);
                     _renderArmorStandPartyInv();
+
+                    // Save state immediately
+                    if (_activeShrineLootObj?.userData.persistenceKey) {
+                        _containerContentsPersistence[_activeShrineLootObj.userData.persistenceKey] = contents;
+                    }
                 });
 
                 equip.attachTooltipListeners(slot, () => ({ name: item.name }));
@@ -3374,6 +3420,7 @@ function _renderArmorStandPartyInv() {
 }
 
 export function openChestModal(chestObj) {
+    _activeShrineLootObj = chestObj;
     playChestOpenSound();
     _activeSentLabelId = 'chest-sent-label';
     const overlay = document.getElementById('chest-overlay');
@@ -3457,6 +3504,7 @@ function _sortChest(chestObj) {
 
 
 export function openWeaponRackModal(rackObj) {
+    _activeShrineLootObj = rackObj;
     playWeaponRackSound();
     _activeSentLabelId = 'weapon-rack-sent-label';
     const overlay = document.getElementById('weapon-rack-overlay');
@@ -3472,6 +3520,7 @@ export function openWeaponRackModal(rackObj) {
 }
 
 export function openSpellCabinetModal(cabinetObj) {
+    _activeShrineLootObj = cabinetObj;
     playSpellCabinetSound();
     _activeSentLabelId = 'cabinet-sent-label';
     const overlay = document.getElementById('cabinet-overlay');
@@ -3508,6 +3557,10 @@ export function openArmorStandModal(armorStandObj) {
 }
 
 export function addArmorStand(scene, loader, col, row, rotY, modelPath = asset('/items/armour-stand1.glb'), scale = 0.4, offsetX = 0, offsetZ = 0, contents = {}, title = 'Armor Stand', offsetY = 0) {
+    const persistenceKey = `${window.currentLevel},${col},${row}`;
+    if (_containerContentsPersistence[persistenceKey]) {
+        contents = _containerContentsPersistence[persistenceKey];
+    }
     loader.load(asset(modelPath), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(scale);
@@ -3522,6 +3575,7 @@ export function addArmorStand(scene, loader, col, row, rotY, modelPath = asset('
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = contents;
+                child.userData.persistenceKey = persistenceKey;
                 child.userData.title = title;
                 interactables.push(child);
 
@@ -3873,6 +3927,7 @@ export function isForgeModalOpen() {
 }
 
 export function openCorpseModal(corpseObj) {
+    _activeShrineLootObj = corpseObj;
     _activeSentLabelId = 'corpse-sent-label';
     const overlay = document.getElementById('corpse-overlay');
     overlay.classList.remove('chest-hidden');
@@ -4477,8 +4532,12 @@ function _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx) {
             _applyEggGlow(_activeShrineLootObj.userData.eggModel, contents);
             if (contents.filter(c => c !== null).length === 0) {
                 const ud = _activeShrineLootObj.userData;
-                _eggEmptiedSet.add(`${_currentLevelIndex},${ud.gridRow},${ud.gridCol}`);
+                _eggEmptiedSet.add(`${window.currentLevel},${ud.gridRow},${ud.gridCol}`);
             }
+        }
+        // Save state immediately
+        if (_activeShrineLootObj?.userData.persistenceKey) {
+            _containerContentsPersistence[_activeShrineLootObj.userData.persistenceKey] = contents;
         }
         return;
     }
@@ -4506,8 +4565,12 @@ function _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx) {
             // If empty, mark as emptied in persistence
             if (contents.filter(c => c !== null).length === 0) {
                 const ud = _activeShrineLootObj.userData;
-                _eggEmptiedSet.add(`${_currentLevelIndex},${ud.gridRow},${ud.gridCol}`);
+                _eggEmptiedSet.add(`${window.currentLevel},${ud.gridRow},${ud.gridCol}`);
             }
+        }
+        // Save state immediately
+        if (_activeShrineLootObj?.userData.persistenceKey) {
+            _containerContentsPersistence[_activeShrineLootObj.userData.persistenceKey] = contents;
         }
         // Refresh the deposit panel so the received item shows up
         if (targetIdx === _chestPartyMemberIdx) _renderChestPartyInv();
@@ -4945,7 +5008,12 @@ function _hideChestCtxMenu() {
 }
 
 function addBonePile(scene, loader, col, row, contents = []) {
-    if (_emptyAllContainers) contents = [];
+    const persistenceKey = `${window.currentLevel},${col},${row}`;
+    if (_containerContentsPersistence[persistenceKey]) {
+        contents = _containerContentsPersistence[persistenceKey];
+    } else if (_emptyAllContainers) {
+        contents = [];
+    }
     loader.load(asset('/items/Meshy_AI_Bone_pile_0221211647_texture.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.4);
@@ -4960,6 +5028,7 @@ function addBonePile(scene, loader, col, row, contents = []) {
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = contents;
+                child.userData.persistenceKey = persistenceKey;
                 interactables.push(child);
 
                 if (child.material) {
@@ -5669,6 +5738,7 @@ export function captureWorldState() {
         knownAlchemyRecipes: [..._knownAlchemyRecipes],
         knownForgeRecipes: [..._knownForgeRecipes],
         eggEmptied: Array.from(_eggEmptiedSet),
+        containerContents: _containerContentsPersistence,
     };
 }
 
@@ -5680,4 +5750,5 @@ export function restoreWorldState(data) {
     if (data.knownAlchemyRecipes) data.knownAlchemyRecipes.forEach(r => _knownAlchemyRecipes.add(r));
     if (data.knownForgeRecipes) data.knownForgeRecipes.forEach(r => _knownForgeRecipes.add(r));
     if (data.eggEmptied) _eggEmptiedSet = new Set(data.eggEmptied);
+    if (data.containerContents) _containerContentsPersistence = data.containerContents;
 }

@@ -1001,7 +1001,7 @@ function _loadMonster(m, scene) {
     turtleSpan.textContent = '🐢';
     entangleDiv.appendChild(turtleSpan);
     const entangleLabel = new CSS2DObject(entangleDiv);
-    entangleLabel.position.set(0, 2.8, 0);
+    entangleLabel.position.set(0, 2.2, 0);
     entangleLabel.visible = false;
     model.add(entangleLabel);
     m.entangleLabel = entangleLabel;
