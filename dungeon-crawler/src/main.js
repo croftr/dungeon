@@ -12,7 +12,7 @@ import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAtta
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { killAllMonstersOnLevel } from './save-level-state.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
-import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, setEmptyAllContainers, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems } from './objects.js';
+import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, getWorldFlags, spawnArenaPortal, setEmptyAllContainers, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound, prefetchActionSounds } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
@@ -2015,18 +2015,10 @@ window.loadLevel = function (levelNum) {
     const wallCells = [];
     const floorCells = [];
     level4Map.forEach((row, r) => row.forEach((cell, c) => {
-      if (r <= 5) {
-        // Vault, lizard den, east room — all cells
+      if (r <= 11) {
+        // Everything north of the entry room (rows 0-11) uses demon-vault textures
         if (cell === 1 || cell === 7) wallCells.push([r, c]);
         else if (cell !== CELL_HOLE) floorCells.push([r, c]);
-      } else if (r <= 11) {
-        // Passage corridor: only the single-cell column (col 10) and its walls
-        if (c === 10 && cell !== CELL_HOLE) floorCells.push([r, c]);
-        else if ((cell === 1 || cell === 7) && c >= 6 && c <= 14) wallCells.push([r, c]);
-        // Demon alcove floor (rows 6–7, cols 18–19)
-        else if (r <= 7 && (c === 18 || c === 19) && cell !== CELL_HOLE) floorCells.push([r, c]);
-        // South wall of the demon alcove (row 8, cols 18–19)
-        else if (r === 8 && (c === 18 || c === 19) && (cell === 1 || cell === 7)) wallCells.push([r, c]);
       }
     }));
     buildTextureZone(scene, wallCells, floorCells,
