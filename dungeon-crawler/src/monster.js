@@ -250,7 +250,6 @@ _applyMultiAttacks('Ogre', [
     damageTimings: [0.3, 0.7],
     weight: 8,
     specialAttack: true,
-    damageMultiplier: 0.375,
     specialOnHitEffects: [{ effectId: 'fear', chance: 0.75, durationSec: 10 }],
   },
 ]);
@@ -480,7 +479,7 @@ _applyMultiAttacks('Night Goblin', [
     soundTimings: [0.5],
     damageTimings: [0.5],
     weight: 2,
-    damageMultiplier: 0,  // no damage — pure status
+    damageMultiplier: 0.5,
     specialAttack: true,
     specialOnHitEffects: [{ effectId: 'poison', chance: 0.20 }],
   },
@@ -502,7 +501,7 @@ _applyMultiAttacks('Mushroom', [
     soundTimings: [0.5],
     damageTimings: [0.5],
     weight: 2,
-    damageMultiplier: 0,
+    damageMultiplier: 0.5,
     specialAttack: true,
     specialOnHitEffects: [{ effectId: 'poison', chance: 0.20 }],
   },
@@ -524,7 +523,7 @@ _applyMultiAttacks('Ice Mushroom', [
     soundTimings: [0.5],
     damageTimings: [0.5],
     weight: 2,
-    damageMultiplier: 0,
+    damageMultiplier: 0.5,
     specialAttack: true,
     specialOnHitEffects: [{ effectId: 'frozen', chance: 0.25 }],
   },
@@ -1047,6 +1046,7 @@ function _loadMonster(m, scene) {
             const action = m.mixer.clipAction(clip);
             action.setLoop(THREE.LoopOnce, 1);
             action.clampWhenFinished = true;
+            const _jsonSpecial = m.specialAttacks?.find(s => s.name === atkDef.name);
             m.attackVariants[idx] = {
               action,
               name: atkDef.name,
@@ -1056,7 +1056,7 @@ function _loadMonster(m, scene) {
               weight: atkDef.weight ?? 1,
               specialAttack: atkDef.specialAttack ?? false,
               specialOnHitEffects: atkDef.specialOnHitEffects ?? null,
-              damageMultiplier: atkDef.damageMultiplier ?? null,
+              damageMultiplier: _jsonSpecial?.damageMultiplier ?? atkDef.damageMultiplier ?? null,
               specialAttackType: atkDef.specialAttackType ?? null,
               displayName: atkDef.displayName ?? null,
             };
@@ -2012,7 +2012,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   if (berserkActive) {
     damage = Math.round(damage * skillsState.berserk.magnitude);
   }
-  
+
   // Warcry — applies a damage multiplier to all party members
   if (skillsState.warcry?.active && now < skillsState.warcry.expiresAt) {
     damage = Math.round(damage * skillsState.warcry.magnitude);

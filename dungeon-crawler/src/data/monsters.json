@@ -442,7 +442,7 @@
         "displayName": "Furious Double Strike",
         "description": "A ferocious two-hit combo that hammers all party members. Each blow carries a very high chance to inflict fear, potentially routing the entire party.",
         "aoe": true,
-        "damageMultiplier": 0.375,
+        "damageMultiplier": 0.4,
         "hits": 2,
         "onHitEffects": [
           {
@@ -724,6 +724,22 @@
     "name": "Night Goblin",
     "family": "goblinoid",
     "description": "Cousins to the common goblin, Night Goblins dwell in lightless depths and have grown both more vicious and more cunning for it. They strike from shadow and vanish before dawn.",
+    "specialAttacks": [
+      {
+        "name": "poisonCloud",
+        "displayName": "Poison Cloud",
+        "description": "Releases a billowing cloud of toxic vapour that engulfs the entire party, with a chance to poison each member.",
+        "aoe": true,
+        "damageMultiplier": 0.5,
+        "hits": 1,
+        "onHitEffects": [
+          {
+            "effectId": "poison",
+            "chance": 0.20
+          }
+        ]
+      }
+    ],
     "hp": 120,
     "defence": 4,
     "xp": 120,
@@ -766,6 +782,22 @@
     "name": "Mushroom",
     "family": "fungal",
     "description": "Ancient fungi that have absorbed decades of dungeon magic. Their spores carry a virulent poison that can fell hardened warriors.",
+    "specialAttacks": [
+      {
+        "name": "poisonCloud",
+        "displayName": "Poison Cloud",
+        "description": "Exhales a toxic cloud of spores that blankets the entire party, with a chance to poison each member.",
+        "aoe": true,
+        "damageMultiplier": 0.5,
+        "hits": 1,
+        "onHitEffects": [
+          {
+            "effectId": "poison",
+            "chance": 0.20
+          }
+        ]
+      }
+    ],
     "hp": 200,
     "defence": 3,
     "xp": 120,
@@ -796,6 +828,22 @@
     "name": "Ice Mushroom",
     "family": "fungal",
     "description": "Ancient fungi that have absorbed decades of dungeon magic. Their spores carry a virulent poison that can fell hardened warriors.",
+    "specialAttacks": [
+      {
+        "name": "iceCloud",
+        "displayName": "Ice Cloud",
+        "description": "Exhales a freezing cloud of spores that engulfs the entire party, with a chance to freeze each member solid.",
+        "aoe": true,
+        "damageMultiplier": 0.5,
+        "hits": 1,
+        "onHitEffects": [
+          {
+            "effectId": "frozen",
+            "chance": 0.25
+          }
+        ]
+      }
+    ],
     "hp": 200,
     "defence": 3,
     "xp": 120,
