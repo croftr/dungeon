@@ -6,6 +6,7 @@
 import RULES from './data/combat-rules.json';
 import SKILLS_DATA from './data/skills.json';
 import { getHqWeaponDamageBonus } from './crafting.js';
+import { getMonsterHitChanceReduction, getStanceDamageMultiplier, getMagicDamageMultiplier } from './stance.js';
 
 // ── Utility ───────────────────────────────────────────────────────────────────
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
@@ -111,7 +112,9 @@ export function playerHitChance(character, monster, weaponDef = null) {
  */
 export function monsterHitChance(monster, character) {
   const dexDiff = (monster.stats?.dexterity ?? 10) - (character.stats?.dexterity ?? 10);
-  return clamp(BASE_MONSTER_HIT_CHANCE + dexDiff * DEX_HIT_MODIFIER, MIN_HIT_CHANCE, MAX_HIT_CHANCE);
+  let chance = BASE_MONSTER_HIT_CHANCE + dexDiff * DEX_HIT_MODIFIER;
+  chance -= getMonsterHitChanceReduction(character);
+  return clamp(chance, MIN_HIT_CHANCE, MAX_HIT_CHANCE);
 }
 
 // ── Damage functions ──────────────────────────────────────────────────────────
@@ -176,7 +179,9 @@ export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef 
   const statMitigation = Math.floor(
     ((monster.stats?.resilience ?? 0) + (monster.stats?.vitality ?? 0)) * RESILIENCE_DAMAGE_FACTOR / 2
   );
-  return Math.max(1, raw - statMitigation - (monster.defence ?? 0));
+  const afterMit = Math.max(1, raw - statMitigation - (monster.defence ?? 0));
+  const stanceMult = getStanceDamageMultiplier(character, monster);
+  return stanceMult === 1 ? afterMit : Math.max(1, Math.round(afterMit * stanceMult));
 }
 
 /**
@@ -212,7 +217,9 @@ export function calcPlayerMagicDamage(character, weaponDef, monster, weaponIsHQ 
   const statMitigation = Math.floor(
     ((monster.stats?.resilience ?? 0) + (monster.stats?.vitality ?? 0)) * RESILIENCE_DAMAGE_FACTOR / 2
   );
-  return Math.max(1, raw - statMitigation);
+  const afterMit = Math.max(1, raw - statMitigation);
+  const stanceMult = getStanceDamageMultiplier(character, monster) * getMagicDamageMultiplier(character);
+  return stanceMult === 1 ? afterMit : Math.max(1, Math.round(afterMit * stanceMult));
 }
 
 /**
@@ -255,7 +262,10 @@ export function calcMonsterDamage(monster, character, characterDefence = 0) {
  */
 export function calcOnHitChance(rawChance, resilience, statusResistances, effectId) {
   const resMultiplier = ON_HIT_EFFECT_BASE / (ON_HIT_EFFECT_BASE + resilience);
-  const itemResistance = Math.min(0.9, statusResistances?.[effectId] ?? 0);
+  // "all" applies to every effect (e.g. Inquisitor stance); adds on top of per-effect resistance.
+  const specific = statusResistances?.[effectId] ?? 0;
+  const blanket = statusResistances?.all ?? 0;
+  const itemResistance = Math.min(0.9, specific + blanket);
   return Math.max(ON_HIT_EFFECT_MIN_CHANCE, rawChance * resMultiplier * (1 - itemResistance));
 }
 

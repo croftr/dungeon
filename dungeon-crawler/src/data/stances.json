@@ -1,0 +1,103 @@
+{
+  "viper": {
+    "id": "viper",
+    "name": "Viper Stance",
+    "description": "Poison ticks deal +2 damage when attacking with a poison weapon.",
+    "icon": "/heros/high-elf-poison.webp",
+    "portrait": "/heros/high-elf-poison.webp",
+    "effects": {
+      "poisonTickBonus": 2,
+      "requiresPoisonWeapon": true,
+      "preventsSpRegen": true,
+      "preventsMpRegen": true
+    }
+  },
+  "ghost": {
+    "id": "ghost",
+    "name": "Ghost Stance",
+    "description": "Harder for enemies to hit — monster hit chance reduced by 15%.",
+    "icon": "/heros/high-elf-evade.webp",
+    "portrait": "/heros/high-elf-evade.webp",
+    "effects": {
+      "monsterHitChanceReduction": 0.15,
+      "preventsSpRegen": true,
+      "preventsMpRegen": true
+    }
+  },
+  "inquisitor": {
+    "id": "inquisitor",
+    "name": "Inquisitor Stance",
+    "description": "+40% resistance to all on-hit status effects.",
+    "icon": "/heros/human_paladin_Inquisitor.webp",
+    "portrait": "/heros/human_paladin_Inquisitor.webp",
+    "effects": {
+      "statusResistances": {
+        "all": 0.4
+      },
+      "preventsSpRegen": true,
+      "preventsMpRegen": true
+    }
+  },
+  "holy": {
+    "id": "holy",
+    "name": "Holy Stance",
+    "description": "+25% damage dealt to undead monsters.",
+    "icon": "/heros/human_paladin_holy.webp",
+    "portrait": "/heros/human_paladin_holy.webp",
+    "effects": {
+      "damageFamilyMultiplier": {
+        "undead": 1.25
+      },
+      "preventsSpRegen": true,
+      "preventsMpRegen": true
+    }
+  },
+  "heartseeker": {
+    "id": "heartseeker",
+    "name": "Heartseeker Stance",
+    "description": "+10% critical hit chance on attacks.",
+    "icon": "/heros/elf_ranger_heartseeker.webp",
+    "portrait": "/heros/elf_ranger_heartseeker.webp",
+    "effects": {
+      "critChanceBonus": 0.15,
+      "preventsSpRegen": true,
+      "preventsMpRegen": true
+    }
+  },
+  "vengeance": {
+    "id": "vengeance",
+    "name": "Vengeance Stance",
+    "description": "+50% damage on damage-dealing spells.",
+    "icon": "/heros/white-mage-vengeance.webp",
+    "portrait": "/heros/white-mage-vengeance.webp",
+    "effects": {
+      "magicDamageMultiplier": 1.5,
+      "preventsSpRegen": true,
+      "preventsMpRegen": true
+    }
+  },
+  "spellsurge": {
+    "id": "spellsurge",
+    "name": "SpellSurge Stance",
+    "description": "-30% cooldown on all spells.",
+    "icon": "/heros/white-mage-spellsurge.webp",
+    "portrait": "/heros/white-mage-spellsurge.webp",
+    "effects": {
+      "spellCooldownMultiplier": 0.7,
+      "preventsSpRegen": true,
+      "preventsMpRegen": true
+    }
+  },
+  "retribution": {
+    "id": "retribution",
+    "name": "Retribution Stance",
+    "description": "Reflects 25% of incoming damage back onto the attacker.",
+    "icon": "/heros/human_paladin_retribution.webp",
+    "portrait": "/heros/human_paladin_retribution.webp",
+    "effects": {
+      "reflectDamagePercent": 0.25,
+      "preventsSpRegen": true,
+      "preventsMpRegen": true
+    }
+  }
+}

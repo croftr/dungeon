@@ -20,7 +20,6 @@ export function spawnLevel0Objects(ctx) {
         starterPortalEnabled, starterGateOpened,
         level3PortalEnabled, level4PortalEnabled,
         setStarterGate,
-        monsterNpcSaved,
         interactables,
     } = ctx;
 
@@ -126,20 +125,7 @@ export function spawnLevel0Objects(ctx) {
     // ── Training Console — next to the training dummy at (7, 23) ────────────
     addTrainingConsole(group, loader, 22, 7, Math.PI);
 
-    // ── Relocated Monster — NW corner of east room ────────────────────────────────
-    if (monsterNpcSaved) {
-        // Monster relocated here - col 17, row 7, face North (0)
-        // Now using addShop with idle base and agree-gesture greeting
-        addShop(group, loader, 17, 7, 0, 0, 0, 'barnaby', asset('/npcs/monster-npc/idle.glb'), {
-            questNpcId: 'monster-npc',
-            scale: 0.6,
-            greetingModel: asset('/npcs/monster-npc/agree-gesture.glb'),
-            greetingAudio: [
-                asset('/npcs/monster-npc/greeting1.mp3'),
-                asset('/npcs/monster-npc/greeting2.mp3')
-            ]
-        });
-    }
+
 
     // ── Button on the west wall of the starter room ──────────────────────────
     // Press while facing west (toward col 8) to teleport to level 4 (egg room).

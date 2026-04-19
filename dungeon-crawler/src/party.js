@@ -8,6 +8,8 @@ import { SPELLS } from './spells.js';
 import SKILLS_DATA from './data/skills.json';
 import { STATUS_EFFECT_DEFS } from './status-effects.js';
 import { asset } from './assets.js';
+import STANCES from './data/stances.json';
+import { getStancePortraitPath } from './stance.js';
 
 // ─────────────────────────────────────────────
 //  PARTY DATA  — 4 members
@@ -173,7 +175,9 @@ export function drawPortrait(canvas, member) {
     return;
   }
 
-  if (member.image) {
+  // Active stance can swap the portrait art (recruits can override per-stance art).
+  const portraitPath = getStancePortraitPath(member) ?? member.image;
+  if (portraitPath) {
     const img = new Image();
     img.onload = () => {
       ctx.clearRect(0, 0, W, H);
@@ -186,7 +190,7 @@ export function drawPortrait(canvas, member) {
       ctx.fillStyle = vigGrad;
       ctx.fillRect(0, 0, W, H);
     };
-    img.src = asset(member.image);
+    img.src = asset(portraitPath);
     return;
   }
 
@@ -1052,6 +1056,13 @@ export function getEffectiveStatusResistances(member) {
       combined[effectId] = Math.min(0.9, (combined[effectId] ?? 0) + resistance);
     }
   });
+  // Merge active stance resistances (supports "all" blanket key — applied in calcOnHitChance).
+  const stanceRes = member.stance ? STANCES[member.stance]?.effects?.statusResistances : null;
+  if (stanceRes) {
+    for (const [effectId, resistance] of Object.entries(stanceRes)) {
+      combined[effectId] = Math.min(0.9, (combined[effectId] ?? 0) + resistance);
+    }
+  }
   return combined;
 }
 
@@ -1083,13 +1094,16 @@ export function getAttackSpeedMultiplier(member) {
   return mult;
 }
 
-/** Returns true if any active effect has the given boolean flag (e.g. 'preventsSpRegen'). */
+/** Returns true if any active effect has the given boolean flag (e.g. 'preventsSpRegen').
+ *  Checks both active debuffs/buffs AND the member's active stance effects. */
 export function hasEffectFlag(member, flagName) {
   const now = performance.now();
-  return (member.activeDebuffs ?? []).some(d => {
+  const fromDebuff = (member.activeDebuffs ?? []).some(d => {
     if (now >= d.expiresAt) return false;
     return !!STATUS_EFFECT_DEFS[d.effectId]?.[flagName];
   });
+  if (fromDebuff) return true;
+  return !!(member.stance && STANCES[member.stance]?.effects?.[flagName]);
 }
 
 /** Returns true if any alive party member currently has the invincibility buff active. */

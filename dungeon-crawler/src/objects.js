@@ -101,8 +101,7 @@ let _starterGate = null; // portcullis behind the party-confirm NPC; opens only 
 let _level2PortcullisOpened = false;
 let _level2GiantPortcullisOpened = false;
 let _level2HoleClosed = false;
-let _level1HoleRoomSpawned = false;
-let _monsterNpcSaved = false;
+
 let _level1BtnPortcullisOpened = false;
 let _level1OgrePortcullisOpened = false;
 let _level1ShrineGateOpened = false;
@@ -628,7 +627,12 @@ export function initObjects(scene, camera) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 2 && distCol <= 2) {
-                    openShrineLootModal(obj);
+                    const contents = obj.userData.contents || [];
+                    if (contents.filter(c => c !== null).length > 0) {
+                        openShrineLootModal(obj);
+                    } else {
+                        showMessage("The ethereal egg is empty and dormant.");
+                    }
                 } else {
                     showMessage("The ancient statue watches you.");
                 }
@@ -2215,11 +2219,7 @@ export function spawnObjectsForLevel() {
         mummyGateOpened: _mummyGateOpened,
         mummyEscapeGateOpened: _mummyEscapeGateOpened,
         crystalShrineState: _crystalShrineState,
-        level1HoleRoomSpawned: _level1HoleRoomSpawned,
-        level1BtnPortcullisOpened: _level1BtnPortcullisOpened,
-        level1OgrePortcullisOpened: _level1OgrePortcullisOpened,
-        level1ShrineGateOpened: _level1ShrineGateOpened,
-        monsterNpcSaved: _monsterNpcSaved,
+
         // Level 2 state flags
         level2PortcullisOpened: _level2PortcullisOpened,
         level2GiantPortcullisOpened: _level2GiantPortcullisOpened,
@@ -2231,7 +2231,6 @@ export function spawnObjectsForLevel() {
         minotaurDead,
         // State setters (values written back to objects.js module scope)
         setStarterGate: (g) => { _starterGate = g; },
-        setLevel1HoleRoomSpawned: (val) => { _level1HoleRoomSpawned = val; },
         // Shared refs for custom object loading code in level files
         interactables,
     };
@@ -4474,8 +4473,13 @@ function _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx) {
         slot.onclick = null;
         slot.oncontextmenu = null;
         equip.hideTooltip();
-        if (_activeShrineLootObj?.userData.isPortalActivatorStatue)
+        if (_activeShrineLootObj?.userData.isPortalActivatorStatue) {
             _applyEggGlow(_activeShrineLootObj.userData.eggModel, contents);
+            if (contents.filter(c => c !== null).length === 0) {
+                const ud = _activeShrineLootObj.userData;
+                _eggEmptiedSet.add(`${_currentLevelIndex},${ud.gridRow},${ud.gridCol}`);
+            }
+        }
         return;
     }
 
@@ -4497,8 +4501,14 @@ function _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx) {
         slot.onclick = null;
         slot.oncontextmenu = null;
         equip.hideTooltip();
-        if (_activeShrineLootObj?.userData.isPortalActivatorStatue)
+        if (_activeShrineLootObj?.userData.isPortalActivatorStatue) {
             _applyEggGlow(_activeShrineLootObj.userData.eggModel, contents);
+            // If empty, mark as emptied in persistence
+            if (contents.filter(c => c !== null).length === 0) {
+                const ud = _activeShrineLootObj.userData;
+                _eggEmptiedSet.add(`${_currentLevelIndex},${ud.gridRow},${ud.gridCol}`);
+            }
+        }
         // Refresh the deposit panel so the received item shows up
         if (targetIdx === _chestPartyMemberIdx) _renderChestPartyInv();
     } else {
@@ -5127,11 +5137,8 @@ export function getWorldFlags() {
         level2PortcullisOpened: _level2PortcullisOpened,
         level2GiantPortcullisOpened: _level2GiantPortcullisOpened,
         level2HoleClosed: _level2HoleClosed,
-        level1HoleRoomSpawned: _level1HoleRoomSpawned,
-        level1BtnPortcullisOpened: _level1BtnPortcullisOpened,
         level1OgrePortcullisOpened: _level1OgrePortcullisOpened,
         level1ShrineGateOpened: _level1ShrineGateOpened,
-        monsterNpcSaved: _monsterNpcSaved,
         disarmedTraps: [..._trapDisarmedSet],
         crystalShrineState: _crystalShrineState,
         level3PortalEnabled: _level3PortalEnabled,
@@ -5142,7 +5149,7 @@ export function getWorldFlags() {
     };
 }
 
-export function setLevel1HoleRoomSpawned(val) { _level1HoleRoomSpawned = val; }
+
 
 /** Restores gate/portal flags. Call BEFORE spawnObjectsForLevel(). */
 export function setWorldFlags(flags) {
@@ -5154,11 +5161,9 @@ export function setWorldFlags(flags) {
     _level2PortcullisOpened = flags.level2PortcullisOpened ?? false;
     _level2GiantPortcullisOpened = flags.level2GiantPortcullisOpened ?? false;
     _level2HoleClosed = flags.level2HoleClosed ?? false;
-    _level1HoleRoomSpawned = flags.level1HoleRoomSpawned ?? false;
     _level1BtnPortcullisOpened = flags.level1BtnPortcullisOpened ?? false;
     _level1OgrePortcullisOpened = flags.level1OgrePortcullisOpened ?? false;
     _level1ShrineGateOpened = flags.level1ShrineGateOpened ?? false;
-    _monsterNpcSaved = flags.monsterNpcSaved ?? false;
     _crystalShrineState = flags.crystalShrineState ?? 0;
     _level3PortalEnabled = flags.level3PortalEnabled ?? false;
     _level4PortalEnabled = flags.level4PortalEnabled ?? false;
@@ -5663,6 +5668,7 @@ export function captureWorldState() {
         potionMerchantStock: getPotionMerchantStock(),
         knownAlchemyRecipes: [..._knownAlchemyRecipes],
         knownForgeRecipes: [..._knownForgeRecipes],
+        eggEmptied: Array.from(_eggEmptiedSet),
     };
 }
 
@@ -5673,4 +5679,5 @@ export function restoreWorldState(data) {
     if (data.potionMerchantStock) setPotionMerchantStock(data.potionMerchantStock);
     if (data.knownAlchemyRecipes) data.knownAlchemyRecipes.forEach(r => _knownAlchemyRecipes.add(r));
     if (data.knownForgeRecipes) data.knownForgeRecipes.forEach(r => _knownForgeRecipes.add(r));
+    if (data.eggEmptied) _eggEmptiedSet = new Set(data.eggEmptied);
 }

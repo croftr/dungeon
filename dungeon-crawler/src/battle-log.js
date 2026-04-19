@@ -141,6 +141,10 @@ function _downloadCsv() {
       action = e.effectName || '';
       damage = e.amount != null ? e.amount : '';
       result = e.amount < 0 ? 'Regen' : 'Poison';
+    } else if (type === 'reflect') {
+      action = 'Reflect';
+      damage = e.amount != null ? e.amount : '';
+      result = 'Reflected';
     } else if (type === 'item') {
       const st = e.subtype || 'loot';
       if (st === 'loot') { action = 'Looted'; result = e.itemName || ''; }
@@ -206,6 +210,7 @@ function _getCat(entry) {
   if (entry.actor === 'player' && SPELL_ATTACK_TYPES.has(entry.attackType)) return 'magic';
   if (entry.type === 'status-effect') return 'effect';
   if (entry.type === 'tick') return 'effect'; // both poison ticks and regen ticks
+  if (entry.type === 'reflect') return 'attack';
   if (entry.type === 'potion') return 'item';
   if (entry.type === 'item') return 'item';
   return 'attack';
@@ -227,6 +232,7 @@ function _prependRow(entry) {
   }
   else if (entry.type === 'status-effect') typeClass = 'bl--status-effect';
   else if (entry.type === 'tick') typeClass = entry.amount > 0 ? 'bl--tick-dmg' : 'bl--tick-heal';
+  else if (entry.type === 'reflect') typeClass = 'bl--reflect';
   else if (entry.type === 'potion') typeClass = 'bl--potion';
   else if (entry.type === 'item') {
     const st = entry.subtype || 'loot';
@@ -303,6 +309,12 @@ function _buildRowHtml(e) {
     const dir = e.actor === 'monster' ? '↓' : '↑';
     return `<span class="bl-badge">☠</span>` +
       `<span class="bl-who" style="max-width: none; flex: 1;">${dir} <b>${e.target}</b> afflicted: <b>${e.effectName}</b> by ${e.attacker}</span>`;
+  }
+
+  // ── Retribution reflect damage ─────────────────────────────────────────────
+  if (e.type === 'reflect') {
+    return `<span class="bl-badge">⟲</span>` +
+      `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.attacker}</b> reflects <b>${e.amount}</b> dmg → <b>${e.target}</b></span>`;
   }
 
   // ── Status effect tick (poison damage / regen heal) ────────────────────────

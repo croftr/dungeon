@@ -18,6 +18,7 @@ import SPELL_TYPE_ICONS from './data/spell-type-icons.json';
 import { isInFrontOfPlayer, player } from './player.js';
 import { isAlchemyModalOpen, addItemToAlchemy } from './objects.js';
 import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude, calcOnHitChance } from './combat-rules.js';
+import { showStanceMenu, getAvailableStances, getSpellCooldownMultiplier } from './stance.js';
 import { playCritSound, playSkillSound, playItemSound, playLevelUpConfirmSound, playInventorySortSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { skillsState } from './skills-state.js';
@@ -3053,7 +3054,7 @@ function _executePartySpell(caster, casterIndex, hand, spellDef) {
   lastAttackTimes[timeKey] = performance.now();
 
   if (isSkillHand) {
-    const cd = (spellDef.delay ?? 15) * 1000;
+    const cd = (spellDef.delay ?? 15) * 1000 * getSpellCooldownMultiplier(caster);
     _startSkillCooldownUI(casterIndex, performance.now() + cd, hand);
   }
 
@@ -3128,7 +3129,7 @@ function _executeAoEDebuffSpell(caster, casterIndex, hand, spellDef) {
   lastAttackTimes[timeKey] = performance.now();
 
   if (isSkillHand) {
-    const cd = (spellDef.delay ?? 15) * 1000;
+    const cd = (spellDef.delay ?? 15) * 1000 * getSpellCooldownMultiplier(caster);
     _startSkillCooldownUI(casterIndex, performance.now() + cd, hand);
   }
 
@@ -3193,7 +3194,7 @@ function _executeLineSpell(caster, casterIndex, hand, spellDef) {
   lastAttackTimes[timeKey] = performance.now();
 
   if (isSkillHand) {
-    const cd = (spellDef.delay ?? 15) * 1000;
+    const cd = (spellDef.delay ?? 15) * 1000 * getSpellCooldownMultiplier(caster);
     _startSkillCooldownUI(casterIndex, performance.now() + cd, hand);
   }
 
@@ -3256,7 +3257,7 @@ function _executePartyMemberSpell(caster, casterIndex, hand, spellDef, target) {
   lastAttackTimes[timeKey] = performance.now();
 
   if (isSkillHand) {
-    const cd = (spellDef.delay ?? 15) * 1000;
+    const cd = (spellDef.delay ?? 15) * 1000 * getSpellCooldownMultiplier(caster);
     const ends = performance.now() + cd;
     if (spellDef.name === 'Heal') _healSkillCooldownEnds[casterIndex] = ends;
     _startSkillCooldownUI(casterIndex, ends, hand);
@@ -3487,6 +3488,11 @@ export function useHand(memberIndex, hand, silent = false) {
 
   // Status effect attack speed penalty (e.g. Slow debuff)
   delaySec *= getAttackSpeedMultiplier(m);
+
+  // SpellSurge stance: reduce cooldown for any spell (mana cost > 0)
+  if ((def?.mpCost ?? 0) > 0) {
+    delaySec *= getSpellCooldownMultiplier(m);
+  }
 
   // Check cooldown timer
   // A 'bothHands' weapon is driven by the left or right hand click but acts as
@@ -5023,6 +5029,15 @@ function attachCardListeners() {
       portrait.addEventListener('click', (e) => {
         e.stopPropagation();
         openModal(i);
+      });
+      // Right-click the portrait → stance selector (only for members with stances).
+      portrait.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const m = party[i];
+        if (!m || m.isEmpty || m.isDead) return;
+        if (!getAvailableStances(m).length) return;
+        showStanceMenu(e.clientX, e.clientY, i);
       });
     }
 

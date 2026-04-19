@@ -8,6 +8,7 @@ import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { party, setHp, addGold, flashPortraitHit, showMemberDamage, showMemberHeal, refreshPartyCards, applyStatusEffect, getEffectiveStats, getEffectiveStatusResistances, getDefenceModifier, describeEffect, isPartyInvincible, isPartyUnseen } from './party.js';
 import { STATUS_EFFECT_DEFS } from './status-effects.js';
 import { showMessage } from './minimap.js';
+import { getPoisonTickBonus, getReflectDamage, getCritChanceBonus } from './stance.js';
 import {
   playerHitChance, monsterHitChance,
   calcPlayerPhysicalDamage, calcPlayerMagicDamage, calcMonsterDamage,
@@ -1506,7 +1507,9 @@ export function updateMonsters(dt, playerCamera, scene) {
         d.tickAccum += dt;
         if (d.tickAccum >= def.tickInterval) {
           d.tickAccum -= def.tickInterval;
-          const dmg = def.tickDamage || 0;
+          const baseDmg = def.tickDamage || 0;
+          // Stance/debuff bonuses are additive and only amplify damage ticks (not heals).
+          const dmg = baseDmg > 0 ? baseDmg + (d.tickDamageBonus ?? 0) : baseDmg;
           if (dmg > 0) hitMonster(m.id, dmg, d.effectId + '-dot', false, d.caster ?? null);
           if (dmg < 0) m.hp = Math.min(m.hpMax, m.hp - dmg); // heal
           panelDirty = true;
@@ -1684,7 +1687,7 @@ export function updateMonsters(dt, playerCamera, scene) {
  * durationSec optionally overrides the duration defined in status-effects.json
  * (used by spells that store their own duration in spells.json).
  */
-export function applyMonsterStatusEffect(monsterId, effectId, caster = null, durationSec = null) {
+export function applyMonsterStatusEffect(monsterId, effectId, caster = null, durationSec = null, tickDamageBonus = 0) {
   const m = monsters.find(x => x.id === monsterId && x.alive);
   if (!m) return;
   const def = STATUS_EFFECT_DEFS[effectId];
@@ -1697,12 +1700,15 @@ export function applyMonsterStatusEffect(monsterId, effectId, caster = null, dur
   if (existing) {
     existing.expiresAt = performance.now() + duration * 1000;
     if (caster) existing.caster = caster; // refresh caster on re-apply
+    // Re-apply keeps the strongest bonus so a later unbuffed reapply can't weaken an active stack.
+    if (tickDamageBonus > (existing.tickDamageBonus ?? 0)) existing.tickDamageBonus = tickDamageBonus;
   } else {
     m.activeDebuffs.push({
       effectId,
       caster,
       expiresAt: performance.now() + duration * 1000,
       tickAccum: def.tickInterval ? def.tickInterval * 0.95 : 0, // fast first tick
+      tickDamageBonus,
     });
   }
   if (m.statsLabel?.visible) _updateStatsPanel(m);
@@ -2008,7 +2014,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     : calcPlayerPhysicalDamage(effChar, weaponDef, mSunder, ammoDef, weaponIsHQ);
 
   // 5% chance to critically hit — triples the calculated damage
-  const isCrit = Math.random() < CRIT_CHANCE;
+  const isCrit = Math.random() < (CRIT_CHANCE + getCritChanceBonus(character));
   let damage = isCrit ? Math.round(preCritDamage * CRIT_MULTIPLIER) : preCritDamage;
 
   // Runic Scholar — doubles final spell damage after ALL other modifiers (including crit)
@@ -2092,7 +2098,11 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     ];
     allOnHit.forEach(effect => {
       if (Math.random() < calcOnHitChance(effect.chance, m.stats?.resilience ?? 0, null, effect.effectId)) {
-        applyMonsterStatusEffect(monsterId, effect.effectId, character.name);
+        // Stance modifier: only poison-family ticks get the stance bonus,
+        // and only when the attacker's stance actually applies to this weapon.
+        const isPoisonTick = effect.effectId === 'poison' || effect.effectId === 'deadly_poison';
+        const tickBonus = isPoisonTick ? getPoisonTickBonus(character, weaponDef) : 0;
+        applyMonsterStatusEffect(monsterId, effect.effectId, character.name, null, tickBonus);
         if (effect.effectId !== 'lifesteal') {
           const def = STATUS_EFFECT_DEFS[effect.effectId];
           showMessage(`${m.name} is afflicted with <b>${def?.name ?? effect.effectId}</b>!`);
@@ -2487,6 +2497,22 @@ function _applyMonsterDamage(monster, opts = {}) {
   flashPortraitHit(target.id);
   playPartyHitSound();
   if (isCrit) playCritSound('bash');
+
+  // Retribution stance: reflect a portion of the damage back onto the attacker.
+  const reflected = getReflectDamage(target, damage);
+  if (reflected > 0 && monster.alive) {
+    const result = hitMonster(monster.id, reflected, 'reflect', false, target.name);
+    if (!result?.blocked) {
+      addLogEntry({
+        time: Date.now(),
+        type: 'reflect',
+        actor: 'player',
+        attacker: target.name,
+        target: monster.name,
+        amount: result?.damage ?? reflected,
+      });
+    }
+  }
 
   // Track damage taken for battle summary
   recordDamageTaken(target.name, damage);

@@ -14,6 +14,13 @@
             "resilience": 6
         },
         "bio": "A swift and silent guardian of the deep woods. Elrond's bow strikes with the fury of nature itself.",
+        "stances": ["viper", "heartseeker"],
+        "stanceOverrides": {
+            "viper": {
+                "icon": "/heros/elf_ranger_viper.webp",
+                "portrait": "/heros/elf_ranger_viper.webp"
+            }
+        },
         "startingInventory": [
             "Cure Poison Potion",
             "Minor Rejuvenate Potion",
@@ -44,6 +51,7 @@
             "resilience": 8
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
+        "stances": ["inquisitor", "holy", "retribution"],
         "startingSkills": [],
         "image": "/heros/human_paladin.webp",
         "leftHand": "Shield",
@@ -194,6 +202,7 @@
             "resilience": 6
         },
         "bio": "A graceful tempest of flashing blades. Lumni dances through her enemies, turning battle into a bloody, beautiful art form.",
+        "stances": ["viper", "ghost"],
         "startingSkills": [],
         "startingInventory": [
             "Cure Poison Potion",
@@ -222,6 +231,7 @@
             "resilience": 8
         },
         "bio": "A devoted healer whose presence brings hope to the darkest depths. Seraphina draws upon pure light to mend flesh and soul.",
+        "stances": ["vengeance", "spellsurge"],
         "startingSkills": [],
         "startingSpells": [
             "Heal",
