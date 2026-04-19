@@ -1020,15 +1020,25 @@ function _loadMonster(m, scene) {
     model.add(sunderLabel);
     m.sunderLabel = sunderLabel;
 
-    // ── Critical hit indicator (three burst exclamation marks) ────────────
+    // ── Critical hit indicator (comic-book starburst with damage number) ──
     const critDiv = document.createElement('div');
     critDiv.className = 'monster-crit-indicator';
-    ['!', '!', '!'].forEach((bang, i) => {
-      const s = document.createElement('span');
-      s.className = `crit-bang crit-bang--${i}`;
-      s.textContent = bang;
-      critDiv.appendChild(s);
-    });
+    const critSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    critSvg.setAttribute('class', 'crit-star');
+    critSvg.setAttribute('viewBox', '-56 -56 112 112');
+    const critPoly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    critPoly.setAttribute('class', 'crit-star-shape');
+    critPoly.setAttribute('points', '0,-46 3.5,-17.6 14.5,-35.1 11.1,-16.6 35.4,-35.4 13.3,-8.9 29.6,-12.2 21.6,-4.3 44,0 17.6,3.5 44.4,18.4 16.6,11.1 25.5,25.5 8.9,13.3 16.1,38.8 3.9,19.6 0,50 -3.5,17.6 -13.0,31.4 -12.2,18.3 -32.5,32.5 -13.3,8.9 -37.0,15.3 -19.6,3.9 -52,0 -17.6,-3.5 -27.7,-11.5 -18.3,-12.2 -31.1,-31.1 -8.9,-13.3 -14.5,-35.1 -3.9,-19.6');
+    const critText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    critText.setAttribute('class', 'crit-star-text');
+    critText.setAttribute('x', '0');
+    critText.setAttribute('y', '0');
+    critText.setAttribute('text-anchor', 'middle');
+    critText.setAttribute('dominant-baseline', 'central');
+    critText.textContent = '0';
+    critSvg.appendChild(critPoly);
+    critSvg.appendChild(critText);
+    critDiv.appendChild(critSvg);
     const critLabel = new CSS2DObject(critDiv);
     critLabel.position.set(0, 2.2, 0);
     critLabel.visible = false;
@@ -1728,23 +1738,25 @@ export function showMonsterDamage(monsterId, damage, isCrit, attackType = '') {
   }, 850);
 }
 
-export function showCritIndicator(monsterId) {
+export function showCritIndicator(monsterId, damage) {
   const m = monsters.find(x => x.id === monsterId);
   if (!m || !m.critLabel) return;
-  // Reset animation by toggling visibility off/on and forcing reflow
   const el = m.critLabel.element;
+  const svg = el.querySelector('.crit-star');
+  const textEl = el.querySelector('.crit-star-text');
+  if (textEl) textEl.textContent = damage ?? '';
   m.critLabel.visible = false;
-  void el.offsetWidth; // force reflow so animation restarts
-  el.querySelectorAll('.crit-bang').forEach(s => {
-    s.style.animation = 'none';
-    void s.offsetWidth;
-    s.style.animation = '';
-  });
+  void el.offsetWidth;
+  if (svg) {
+    svg.style.animation = 'none';
+    void svg.offsetWidth;
+    svg.style.animation = '';
+  }
   m.critLabel.visible = true;
   clearTimeout(m._critLabelTimer);
   m._critLabelTimer = setTimeout(() => {
     if (m.critLabel) m.critLabel.visible = false;
-  }, 1200);
+  }, 1400);
 }
 
 export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, killer = null) {
@@ -1844,7 +1856,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
 
     if (isCrit) {
       playCritSound(attackType);
-      showCritIndicator(monsterId);
+      showCritIndicator(monsterId, finalDamage);
     }
 
     showMonsterDamage(monsterId, damage, isCrit, attackType);

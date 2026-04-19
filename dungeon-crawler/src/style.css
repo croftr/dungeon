@@ -5651,31 +5651,37 @@ body.party-targeting-mode .member-card--dead .portrait {
 
 /* ── Critical hit indicator ──────────────────────────────────────────── */
 .monster-crit-indicator {
-  display: flex;
-  gap: 3px;
-  align-items: center;
   pointer-events: none;
   transform: translateX(-50%);
 }
 
-.crit-bang {
-  font-size: 22px;
-  font-weight: bold;
-  color: #ffaa00;
-  text-shadow: 0 0 10px rgba(255, 140, 0, 1.0), 0 0 4px rgba(255, 60, 0, 0.8), 1px 1px 2px rgba(0, 0, 0, 0.9);
-  display: inline-block;
-  animation: crit-bang-burst 1.2s ease-out forwards;
+.crit-star {
+  width: 86px;
+  height: 86px;
+  animation: crit-star-burst 1.4s ease-out forwards;
+  filter: drop-shadow(0 0 8px rgba(255, 120, 0, 0.95)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+  overflow: visible;
 }
 
-.crit-bang--0 { animation-delay: 0s; }
-.crit-bang--1 { animation-delay: 0.1s; }
-.crit-bang--2 { animation-delay: 0.2s; }
+.crit-star-shape {
+  fill: #FFE000;
+  stroke: #CC3300;
+  stroke-width: 2.5;
+}
 
-@keyframes crit-bang-burst {
-  0%   { transform: translateY(0px) scale(0.2); opacity: 0; }
-  20%  { transform: translateY(-5px) scale(1.6); opacity: 1; }
-  60%  { transform: translateY(-8px) scale(1.2); opacity: 1; }
-  100% { transform: translateY(-12px) scale(0.8); opacity: 0; }
+.crit-star-text {
+  font-family: 'Arial Black', 'Arial Bold', Arial, sans-serif;
+  font-size: 21px;
+  font-weight: 900;
+  fill: #1a0000;
+}
+
+@keyframes crit-star-burst {
+  0%   { transform: scale(0.05) rotate(-20deg); opacity: 0; }
+  18%  { transform: scale(1.35) rotate(6deg);   opacity: 1; }
+  32%  { transform: scale(1.0)  rotate(0deg);   opacity: 1; }
+  72%  { transform: scale(1.0)  rotate(0deg);   opacity: 1; }
+  100% { transform: scale(0.75) rotate(4deg) translateY(-8px); opacity: 0; }
 }
 
 .monster-entangle-indicator {
