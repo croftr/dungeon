@@ -1056,6 +1056,9 @@ function _loadMonster(m, scene) {
               weight: atkDef.weight ?? 1,
               specialAttack: atkDef.specialAttack ?? false,
               specialOnHitEffects: atkDef.specialOnHitEffects ?? null,
+              damageMultiplier: atkDef.damageMultiplier ?? null,
+              specialAttackType: atkDef.specialAttackType ?? null,
+              displayName: atkDef.displayName ?? null,
             };
             // Keep m.actions.attack pointing to first variant for backward compat
             if (idx === 0) m.actions.attack = action;
