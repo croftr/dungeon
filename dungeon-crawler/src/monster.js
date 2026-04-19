@@ -2075,6 +2075,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     berserkMultiplier: berserkActive ? skillsState.berserk.magnitude : 1.0,
     warcryMultiplier: (skillsState.warcry?.active && now < skillsState.warcry.expiresAt) ? skillsState.warcry.magnitude : 1.0,
     ammoModifier: ammoDef?.damageModifier ?? null,
+    damageReduction: m.damageReduction ?? 0,
   };
 
   const result = hitMonster(monsterId, damage, attackType, isCrit, character.name);

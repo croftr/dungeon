@@ -176,6 +176,8 @@ export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef 
   if (ammoDef && ammoDef.damageModifier) {
     raw = Math.round(raw * ammoDef.damageModifier);
   }
+  const dr = monster.damageReduction ?? 0;
+  if (dr) raw = Math.round(raw * (1 - dr));
   const statMitigation = Math.floor(
     ((monster.stats?.resilience ?? 0) + (monster.stats?.vitality ?? 0)) * RESILIENCE_DAMAGE_FACTOR / 2
   );
@@ -214,6 +216,8 @@ export function calcPlayerMagicDamage(character, weaponDef, monster, weaponIsHQ 
     raw *= 2;
   }
 
+  const dr = monster.damageReduction ?? 0;
+  if (dr) raw = Math.round(raw * (1 - dr));
   const statMitigation = Math.floor(
     ((monster.stats?.resilience ?? 0) + (monster.stats?.vitality ?? 0)) * RESILIENCE_DAMAGE_FACTOR / 2
   );

@@ -408,14 +408,16 @@ function _formula(e) {
     const stat = ['fireball', 'banishment', 'incinerate'].includes(e.attackType) ? 'INT' : (e.statLabel ?? 'STR');
     const mit = ['fireball', 'banishment', 'incinerate'].includes(e.attackType) ? 'RES' : 'DEF';
     const ammoLine = e.ammoModifier && e.ammoModifier !== 1 ? ` ×${e.ammoModifier}ammo` : '';
-    const raw = e.statBonus + e.weaponBase - e.mitigation;
+    const drText = e.damageReduction ? ` ×${Math.round((1 - e.damageReduction) * 100)}%dr` : '';
+    const rawBase = e.damageReduction ? Math.round((e.statBonus + e.weaponBase) * (1 - e.damageReduction)) : (e.statBonus + e.weaponBase);
+    const raw = rawBase - e.mitigation;
     const crit = e.crit ? ` ×${e.critMultiplier}` : '';
     const berserkText = (e.berserkMultiplier && e.berserkMultiplier !== 1.0) ? ` (Berserk ×${e.berserkMultiplier})` : '';
     const warcryText = (e.warcryMultiplier && e.warcryMultiplier !== 1.0) ? ` (Warcry ×${e.warcryMultiplier})` : '';
     const stunText = e.stunned ? ' (Stunned!)' : '';
     const poisonText = e.poisoned ? ' (Poisoned!)' : '';
     const sunderText = e.sundered ? ' (Sundered!)' : '';
-    return `(${stat}${e.statBonus}+base${e.weaponBase}${ammoLine}−${mit}${e.mitigation}=${raw}${crit})${berserkText}${warcryText}${stunText}${poisonText}${sunderText}`;
+    return `(${stat}${e.statBonus}+base${e.weaponBase}${ammoLine}${drText}−${mit}${e.mitigation}=${raw}${crit})${berserkText}${warcryText}${stunText}${poisonText}${sunderText}`;
   }
 
   // monster attack
