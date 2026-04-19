@@ -12,7 +12,7 @@ import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAtta
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { killAllMonstersOnLevel } from './save-level-state.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
-import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, getWorldFlags, spawnArenaPortal, setEmptyAllContainers, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems } from './objects.js';
+import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, setEmptyAllContainers, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound, prefetchActionSounds } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
@@ -346,8 +346,75 @@ setCallbacks({
 
     // --- Special Grid Logic (Teleports) ---
     const cell = dungeonMap[player.gridRow][player.gridCol];
-    // Check for level transitions...
+    if (window.currentLevel === 1 && player.gridRow === 1 && player.gridCol === 15) {
+      tweenGroup.removeAll();
+      player.moving = false;
 
+      const blackout = document.getElementById('fall-blackout');
+      if (blackout) {
+        blackout.classList.remove('hidden');
+        blackout.offsetHeight;
+        blackout.classList.add('visible');
+      }
+
+      playFallSequence();
+      showMessage("Aaaaaah! You fall through the hole!");
+      window._cutscenePlaying = true;
+
+      // Fall damage
+      party.forEach((m, i) => {
+        if (m.isEmpty || m.isDead) return;
+        const dmg = 8 + Math.floor(Math.random() * 8); // 8–15
+        setHp(i, m.hp - dmg);
+        showMemberDamage(i, dmg, false);
+        flashPortraitHit(i);
+      });
+      playPartyHitSound();
+
+      setTimeout(() => {
+        // Spawn the secret room now that we've fallen
+        setLevel1HoleRoomSpawned(true);
+
+        // Transform the walls into a room
+        for (let r = 24; r <= 26; r++) {
+          for (let c = 1; c <= 3; c++) {
+            level1Map[r][c] = 0;
+          }
+        }
+
+        // Rebuild the map and objects to include the NPC and new floor
+        changeMapArray(level1Map);
+        clearObjects(scene);
+        buildLevel(scene);
+        spawnObjectsForLevel();
+
+        // Teleport to the secret room (row 25, col 2)
+        player.gridRow = 25;
+        player.gridCol = 2;
+        const w = cellToWorld(25, 2);
+        camera.position.set(w.x, w.y, w.z);
+        // Face South (2)
+        player.facing = 2;
+        camera.rotation.order = 'YXZ';
+        camera.rotation.y = FACING_ANGLES[player.facing];
+        drawMinimap();
+        updateStatus();
+
+        // Play the help audio once upon falling – if he's not yet saved
+        const flags = getWorldFlags();
+        if (!flags.monsterNpcSaved) {
+          playSoundByUrl(asset('/npcs/monster-npc/help.mp3'), 1.0);
+        }
+
+        // Hide the blackout
+        if (blackout) {
+          blackout.classList.remove('visible');
+          setTimeout(() => blackout.classList.add('hidden'), 500);
+        }
+
+        window._cutscenePlaying = false;
+      }, 1000);
+    }
     if (window.currentLevel === 2) {
       if (cell === CELL_HOLE) {
         tweenGroup.removeAll();

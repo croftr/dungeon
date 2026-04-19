@@ -19,14 +19,34 @@ export function spawnLevel1Objects(ctx) {
         mummyGateOpened,
         mummyEscapeGateOpened,
         crystalShrineState,
+        level1HoleRoomSpawned,
         level1BtnPortcullisOpened,
         level1OgrePortcullisOpened,
         level1ShrineGateOpened,
+        monsterNpcSaved,
         interactables,
     } = ctx;
 
+    // ── Monster NPC ──────────────────────────────────────────────────────────
+    // In the hidden basement arrival room at (26, 2).
+    if (level1HoleRoomSpawned && !monsterNpcSaved) {
+        // Monster here - col 2, row 26, face South (Math.PI)
+        // Using addShop (questType: 'none') to support model swapping and greeting audio
+        addShop(group, loader, 2, 26, Math.PI, 0, 0, 'barnaby', '/npcs/monster-npc/idle.glb', {
+            questNpcId: 'monster-npc',
+            scale: 0.6,
+            greetingModel: '/npcs/monster-npc/agree-gesture.glb',
+            greetingAudio: ['/npcs/monster-npc/thank-you.mp3'],
+            playOnce: true
+        });
+    }
 
-
+    // ── Pit Ladder ───────────────────────────────────────────────────────────
+    if (level1HoleRoomSpawned) {
+        // Place ladder against the north wall – where the player fell from
+        // Rotated Math.PI / 2 to be flat on the wall, and more north (offsetZ -0.8)
+        addPitLadder(group, loader, 2, 24, Math.PI / 2, 0, -0.8, 1.3);
+    }
 
 
     // ── Chests ───────────────────────────────────────────────────────────────
@@ -63,7 +83,8 @@ export function spawnLevel1Objects(ctx) {
         "Travelling Cloak", "Travelling Cloak", "Cloth Trousers"
     ], undefined, true, 0.7);
 
-
+    // ── Bone pile ────────────────────────────────────────────────────────────
+    addBonePile(group, loader, 1, 27);
 
     // ── Weapon Racks ─────────────────────────────────────────────────────────
     // Mummy room dead-end passage
