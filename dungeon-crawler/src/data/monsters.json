@@ -852,16 +852,16 @@
         ]
       }
     ],
-    "hp": 200,
-    "defence": 3,
-    "xp": 120,
+    "hp": 240,
+    "defence": 4,
+    "xp": 140,
     "attackSpeed": 1,
     "stats": {
-      "strength": 13,
-      "dexterity": 14,
-      "vitality": 12,
-      "intelligence": 6,
-      "resilience": 6
+      "strength": 14,
+      "dexterity": 15,
+      "vitality": 13,
+      "intelligence": 7,
+      "resilience": 8
     },
     "drops": [
       {

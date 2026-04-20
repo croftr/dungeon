@@ -93,7 +93,12 @@ body {
   position: relative;
   overflow: hidden;
   border-radius: 2px;
-  /* width/height set dynamically by JS — always square */
+  aspect-ratio: 1 / 1;
+  cursor: grab;
+}
+
+#mm-viewport.is-dragging {
+  cursor: grabbing;
 }
 
 #minimap {

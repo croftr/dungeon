@@ -19,6 +19,7 @@ let zoomLevel = 1.0;
 let displaySize = 200;   // normal viewport size (px)
 let vpSize = 200;        // current active viewport size (may differ in fullscreen)
 let isFullscreen = false;
+let panOffset = { x: 0, y: 0 };
 
 const SIZE_MIN  = 120;
 const SIZE_MAX  = 400;
@@ -41,7 +42,7 @@ function _updateCellSize() {
   canvas.height = Math.round(ROWS * MM_CELL);
 }
 
-// Position canvas inside viewport so player is centered
+// Position canvas inside viewport: player-centered + pan offset
 function _centerCanvas() {
   const canvas = document.getElementById('minimap');
   const vp     = document.getElementById('mm-viewport');
@@ -50,19 +51,25 @@ function _centerCanvas() {
   const px = player.gridCol * MM_CELL + MM_CELL / 2;
   const py = player.gridRow * MM_CELL + MM_CELL / 2;
 
-  // X axis
+  let left = vpSize / 2 - px + panOffset.x;
+  let top  = vpSize / 2 - py + panOffset.y;
+
+  // X axis — clamp, or center when map is smaller than viewport
   if (canvas.width <= vpSize) {
-    canvas.style.left = ((vpSize - canvas.width)  / 2) + 'px';
+    left = (vpSize - canvas.width) / 2;
   } else {
-    canvas.style.left = Math.max(vpSize - canvas.width,  Math.min(0, vpSize / 2 - px)) + 'px';
+    left = Math.max(vpSize - canvas.width, Math.min(0, left));
   }
 
   // Y axis
   if (canvas.height <= vpSize) {
-    canvas.style.top  = ((vpSize - canvas.height) / 2) + 'px';
+    top = (vpSize - canvas.height) / 2;
   } else {
-    canvas.style.top  = Math.max(vpSize - canvas.height, Math.min(0, vpSize / 2 - py)) + 'px';
+    top = Math.max(vpSize - canvas.height, Math.min(0, top));
   }
+
+  canvas.style.left = left + 'px';
+  canvas.style.top  = top  + 'px';
 }
 
 export function initMinimap() {
@@ -76,6 +83,62 @@ export function initMinimap() {
   document.getElementById('mm-size-up')   ?.addEventListener('click', () => changeSize( SIZE_STEP));
   document.getElementById('mm-size-down') ?.addEventListener('click', () => changeSize(-SIZE_STEP));
   document.getElementById('mm-fullscreen')?.addEventListener('click', () => toggleFullscreen());
+
+  _initPanDrag();
+}
+
+function _initPanDrag() {
+  const vp = document.getElementById('mm-viewport');
+  if (!vp) return;
+
+  let dragging = false;
+  let dragStart = { x: 0, y: 0 };
+  let dragStartPan = { x: 0, y: 0 };
+
+  vp.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    dragging = true;
+    dragStart = { x: e.clientX, y: e.clientY };
+    dragStartPan = { ...panOffset };
+    vp.classList.add('is-dragging');
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    panOffset.x = dragStartPan.x + (e.clientX - dragStart.x);
+    panOffset.y = dragStartPan.y + (e.clientY - dragStart.y);
+    _centerCanvas();
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    vp.classList.remove('is-dragging');
+  });
+
+  vp.addEventListener('touchstart', (e) => {
+    const t = e.touches[0];
+    dragging = true;
+    dragStart = { x: t.clientX, y: t.clientY };
+    dragStartPan = { ...panOffset };
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!dragging) return;
+    const t = e.touches[0];
+    panOffset.x = dragStartPan.x + (t.clientX - dragStart.x);
+    panOffset.y = dragStartPan.y + (t.clientY - dragStart.y);
+    _centerCanvas();
+  });
+
+  document.addEventListener('touchend', () => { dragging = false; });
+}
+
+export function resetPan() {
+  panOffset = { x: 0, y: 0 };
+  drawMinimap();
 }
 
 export function changeZoom(delta) {
