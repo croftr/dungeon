@@ -134,13 +134,13 @@
       }
     ],
     "hp": 250,
-    "defence": 8,
-    "damageReduction": 0.08,
+    "defence": 10,
+    "damageReduction": 0.09,
     "xp": 150,
-    "attackSpeed": 1.2,
+    "attackSpeed": 1.5,
     "stats": {
       "strength": 20,
-      "dexterity": 12,
+      "dexterity": 15,
       "vitality": 18,
       "intelligence": 8,
       "resilience": 12
@@ -458,7 +458,7 @@
       }
     ],
     "hp": 280,
-    "defence": 11,
+    "defence": 10,
     "damageReduction": 0.10,
     "xp": 500,
     "attackSpeed": 1,
@@ -541,13 +541,13 @@
         ]
       }
     ],
-    "hp": 470,
+    "hp": 450,
     "defence": 14,
     "damageReduction": 0.12,
     "xp": 1200,
     "attackSpeed": 1.8,
     "stats": {
-      "strength": 38,
+      "strength": 34,
       "dexterity": 30,
       "vitality": 30,
       "intelligence": 10,
@@ -977,8 +977,8 @@
     "xp": 220,
     "attackSpeed": 1.3,
     "stats": {
-      "strength": 25,
-      "dexterity": 25,
+      "strength": 26,
+      "dexterity": 26,
       "vitality": 18,
       "intelligence": 14,
       "resilience": 18
@@ -1032,17 +1032,17 @@
         "damageMultiplier": 0.5
       }
     ],
-    "hp": 105,
-    "defence": 4,
-    "xp": 115,
-    "attackSpeed": 1,
+    "hp": 200,
+    "defence": 8,
+    "xp": 200,
+    "attackSpeed": 1.5,
     "aggroRange": 4,
     "stats": {
-      "strength": 13,
-      "dexterity": 14,
-      "vitality": 8,
+      "strength": 18,
+      "dexterity": 18,
+      "vitality": 10,
       "intelligence": 6,
-      "resilience": 5
+      "resilience": 8
     },
     "drops": [
       {

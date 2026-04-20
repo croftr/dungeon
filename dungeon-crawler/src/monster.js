@@ -42,6 +42,21 @@ import { asset } from './assets.js';
 let _huntersEyeTargetId = null;
 let _droppedBossEssences = new Set();
 
+// Boss monsters (those with an `image` field in monster-defs) that have been
+// killed. Persisted across level revisits and saves: non-boss monsters
+// respawn on level revisit, but killed bosses stay dead. Keyed by
+// `${level}:${id}` since monster IDs overlap across levels.
+let _killedBosses = new Set();
+
+/** True if this monster instance is a "boss" — marked in its def with an image. */
+function _isBossMonster(m) {
+  return !!m.image;
+}
+
+function _bossKey(m) {
+  return `${m.level ?? 1}:${m.id}`;
+}
+
 /** Returns the id of the monster currently targeted by Hunter's Eye, or null. */
 export function getHuntersEyeTargetId() { return _huntersEyeTargetId; }
 
@@ -608,6 +623,7 @@ function _spawnTreekin(parentMonster, scene, offsetRow, offsetCol) {
 
   m.engaged = true;   // immediately hostile
   m.noDrops = true;   // summoned mid-fight — never drops anything
+  m.summoned = true;  // skip in respawn logic — summons don't come back
   monsters.push(m);
   _loadMonster(m, scene);
 
@@ -1835,6 +1851,9 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
 
   if (killedByThisHit) {
     m.alive = false;
+    if (_isBossMonster(m) && !window._arenaMode) {
+      _killedBosses.add(_bossKey(m));
+    }
     // In arena mode, fire the victory callback once all arena monsters are dead
     if (window._arenaMode) {
       const arenaLevel = window.currentLevel;
@@ -2740,10 +2759,54 @@ export function restoreMonsterStates(saved) {
 
 // ── Save / Restore ────────────────────────────────────────────────────────────
 export function captureMonsterState() {
-  return { droppedBossEssences: [..._droppedBossEssences] };
+  return {
+    droppedBossEssences: [..._droppedBossEssences],
+    killedBosses: [..._killedBosses],
+  };
 }
 
 export function restoreMonsterState(data) {
   if (!data) return;
   _droppedBossEssences = new Set(data.droppedBossEssences ?? []);
+  _killedBosses = new Set(data.killedBosses ?? []);
+}
+
+/**
+ * Apply the end-state rule for a cleared level's monsters:
+ *   • non-boss monsters respawn to full HP
+ *   • boss monsters stay dead only if we have recorded them in _killedBosses
+ *   • summoned monsters (e.g. Treeman treekin) are skipped entirely
+ *
+ * Replaces the old "kill everything on cleared levels" behaviour. Safe to call
+ * before loadMonstersForLevel — that function loads meshes for any alive
+ * monster without a mesh.
+ */
+export function applyClearedLevelMonsters(levelNum) {
+  for (const m of monsters) {
+    if ((m.level ?? 1) !== levelNum) continue;
+    if (m.summoned) continue;
+
+    if (_isBossMonster(m)) {
+      if (_killedBosses.has(_bossKey(m))) {
+        m.alive = false;
+        m.hp = 0;
+      } else {
+        _resetMonsterToSpawnState(m);
+      }
+    } else {
+      _resetMonsterToSpawnState(m);
+    }
+  }
+}
+
+/** Reset a monster's live combat state so it behaves like a freshly spawned instance. */
+function _resetMonsterToSpawnState(m) {
+  m.alive = true;
+  m.hp = m.hpMax;
+  m.engaged = false;
+  m._awakeningUsed = false;
+  m.activeDebuffs = [];
+  m._ps = null;
+  m._cs = null;
+  if (m.hpBarFill) m.hpBarFill.style.width = '100%';
 }

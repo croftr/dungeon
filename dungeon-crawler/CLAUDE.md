@@ -5,16 +5,17 @@
 Saves fire automatically on dungeon-level transitions. No manual save, no mid-level save. The saved payload describes *progression*, not a snapshot of every game object — world state is rebuilt by re-running the level spawn code with the right flags.
 
 ### Core model
-- Dungeon levels 1–5 have two canonical states: **start** (pristine) and **end** (all gates open, no monsters, all chests empty).
+- Dungeon levels 1–5 have two canonical states: **start** (pristine) and **end** (all gates open, all chests empty; non-boss monsters respawned to full HP; bosses stay dead only if previously killed — see "Boss monsters" below).
 - Level 0 is the hub and never "clears." The Level 0 starter stash is the only persistent bank.
 - `currentLevelReached` is the highest dungeon level the player has entered. On load, every dungeon level `< currentLevelReached` (and ≠ `currentLevel`) is rebuilt in end state; `currentLevel` is rebuilt in start state and the player spawns at its entry portal (`findCell(CELL_START)`).
 - Items left in chests on a level that flips to end state are **lost** (by design).
 
 ### Key files
 - `src/save-checkpoint.js` — `captureCheckpoint`, `loadCheckpoint`, `autoSaveCheckpoint`, `SAVE_VERSION = 7`
-- `src/save-level-state.js` — `buildEndStateFlags(clearedLevels)`, `killAllMonstersOnLevel(n)`, per-level flag whitelist
+- `src/save-level-state.js` — `buildEndStateFlags(clearedLevels)`, per-level flag whitelist
+- `src/monster.js` — `applyClearedLevelMonsters(n)` implements the cleared-level monster transform
 - `src/save-game.js` — thin shim: `listSaves`, `triggerLoad`, `consumePendingLoad`, `deleteSave` + startup purge of pre-v7 keys
-- `src/main.js` — `loadLevel()` calls `autoSaveCheckpoint()` on transitions; `setEmptyAllContainers` + `killAllMonstersOnLevel` apply the end-state transform on cleared levels
+- `src/main.js` — `loadLevel()` calls `autoSaveCheckpoint()` on transitions; `setEmptyAllContainers` + `applyClearedLevelMonsters` apply the end-state transform on cleared levels
 - `src/objects.js` — `setEmptyAllContainers` sentinel + `snapshotStarterStash` / `getPersistedStarterStashItems` for the stash bank
 
 ### How state is captured
@@ -24,7 +25,7 @@ Instead of a registry, `captureCheckpoint()` calls explicit `capture*` / `restor
 | `party.js` | `capturePartyState` / `restorePartyState` — members, gold, autoAttack flags |
 | `quest.js` | `getQuestLog` / `setQuestLog` |
 | `recruits.js` | `captureRecruits` / `restoreRecruits` — recruit isRecruited map |
-| `monster.js` | `captureMonsterState` / `restoreMonsterState` — droppedBossEssences |
+| `monster.js` | `captureMonsterState` / `restoreMonsterState` — droppedBossEssences, killedBosses |
 | `essentiary.js` | `captureEssentiary` / `restoreEssentiary` — arena monster tiers |
 | `objects.js` | `captureWorldState` / `restoreWorldState` — flags, merchant/potion stock, known recipes |
 | `main.js` | `captureVideoFlags` / `restoreVideoFlags` — cutscene seen flags |
@@ -42,7 +43,7 @@ Keyed by `currentLevelReached` (`dungeon-save-lvl-<n>`). Each new checkpoint ove
 ### What NOT to save
 - Per-level gate flags — derived from the end-state rule.
 - Container contents outside the starter stash — chests on cleared levels are forced empty; chests on the current level are re-spawned fresh.
-- Monster HP / alive on cleared levels — `killAllMonstersOnLevel` sets them dead on load.
+- Per-monster HP / alive on cleared levels — `applyClearedLevelMonsters` respawns non-bosses and leaves killed bosses dead on load. Only the global `killedBosses` set is persisted.
 - Player position — derived from `findCell(CELL_START)` on current level.
 
 ### Save-load flow
@@ -51,8 +52,11 @@ Keyed by `currentLevelReached` (`dungeon-save-lvl-<n>`). Each new checkpoint ove
 3. On reload, main.js reads `consumePendingLoad()` → hydrates recruits pre-init → `loadCheckpoint(save)` after init:
    - Restore party / quests / recruits / monster / essentiary / video.
    - Build flag payload = saved `worldFlags` ∪ `buildEndStateFlags(cleared levels)`; apply with `setWorldFlags`.
-   - `killAllMonstersOnLevel(l)` for each cleared level.
+   - `applyClearedLevelMonsters(l)` for each cleared level.
    - `window.loadLevel(save.currentLevel)` — spawns start state.
+
+### Boss monsters
+A monster is a "boss" iff its entry in `src/data/monsters.json` has an `image` field. On kill, `_applyDamage` in `monster.js` adds its `${level}:${id}` to the global `_killedBosses` set (captured in the save). On cleared-level rebuild, bosses in that set stay dead; all other monsters respawn to full HP. Summoned monsters (e.g. Treeman treekin, flagged `m.summoned = true`) are skipped entirely.
 
 ## Architecture Quick Reference
 

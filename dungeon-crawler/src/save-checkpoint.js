@@ -12,7 +12,8 @@
 //      shrine state.
 //    • Any dungeon level below `currentLevelReached` (and ≠ the level the
 //      player is on) is rebuilt in "end state" — gates open, monsters dead,
-//      chests empty — via buildEndStateFlags() + killAllMonstersOnLevel().
+//      chests empty, non-boss monsters respawned, killed bosses dead —
+//      via buildEndStateFlags() + applyClearedLevelMonsters().
 //    • The level the player was on is rebuilt in "start state"; they spawn
 //      at its entry portal (findCell(CELL_START)).
 //
@@ -25,14 +26,14 @@ import {
 } from './party.js';
 import { getQuestLog, setQuestLog } from './quest.js';
 import { captureRecruits, restoreRecruits, RECRUITS } from './recruits.js';
-import { captureMonsterState, restoreMonsterState } from './monster.js';
+import { captureMonsterState, restoreMonsterState, applyClearedLevelMonsters } from './monster.js';
 import { captureEssentiary, restoreEssentiary } from './essentiary.js';
 import {
   captureWorldState, restoreWorldState,
   snapshotStarterStash, getPersistedStarterStashItems, setPersistedStarterStashItems,
   setWorldFlags, getWorldFlags,
 } from './objects.js';
-import { buildEndStateFlags, killAllMonstersOnLevel } from './save-level-state.js';
+import { buildEndStateFlags } from './save-level-state.js';
 
 export const SAVE_VERSION = 7;
 const SAVE_PREFIX = 'dungeon-save-lvl-';
@@ -128,7 +129,8 @@ export function autoSaveCheckpoint() {
  * Apply a loaded checkpoint. Order matters:
  *   1) restore party/quests/recruits/essentiary/monster caches
  *   2) merge end-state flag deltas on top of saved flags; setWorldFlags()
- *   3) kill monsters on every cleared level (sets m.alive = false)
+ *   3) apply end-state monster layout on every cleared level
+ *      (non-bosses respawn; killed bosses stay dead)
  *   4) persist the stash snapshot so L0 spawn uses saved contents
  *   5) loadLevel() — which reads currentLevelReached and rebuilds cleared
  *      levels in end state automatically via the setEmptyAllContainers hook
@@ -176,8 +178,9 @@ export function loadCheckpoint(save, { loadLevel, restoreVideoFlags, finishIntro
     knownForgeRecipes: save.knownForgeRecipes,
   });
 
-  // 4. Kill monsters on every cleared level so loadLevel skips their meshes
-  for (const lvl of clearedLevels) killAllMonstersOnLevel(lvl);
+  // 4. Apply end-state monster layout for every cleared level (respawn
+  //    non-bosses, keep killed bosses dead) so loadLevel sees correct state.
+  for (const lvl of clearedLevels) applyClearedLevelMonsters(lvl);
 
   // 5. currentLevelReached watermark (before loadLevel so it sees the right value)
   window.currentLevelReached = reached;

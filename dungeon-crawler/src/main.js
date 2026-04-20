@@ -9,8 +9,7 @@ import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.j
 import { initParty, updateParty, party, refreshPartyCards, autoAttack, autoRangeAttack, setHp, flashPortraitHit, showMemberDamage, isPartyUnseen, resurrectAll } from './party.js';
 import { getItemDef } from './items.js';
 import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
-import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
-import { killAllMonstersOnLevel } from './save-level-state.js';
+import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt, applyClearedLevelMonsters } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, setEmptyAllContainers, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound, prefetchActionSounds } from './audio.js';
@@ -2103,7 +2102,7 @@ window.loadLevel = function (levelNum) {
   const reached = window.currentLevelReached ?? 0;
   const isCleared = levelNum >= 1 && levelNum <= 5 && levelNum < reached;
   setEmptyAllContainers(isCleared);
-  if (isCleared) killAllMonstersOnLevel(levelNum);
+  if (isCleared) applyClearedLevelMonsters(levelNum);
 
   spawnObjectsForLevel();
   setEmptyAllContainers(false);
@@ -2408,7 +2407,7 @@ window._arenaExit = function (won) {
     const reached = window.currentLevelReached ?? 0;
     const isCleared = pre.level >= 1 && pre.level <= 5 && pre.level < reached;
     setEmptyAllContainers(isCleared);
-    if (isCleared) killAllMonstersOnLevel(pre.level);
+    if (isCleared) applyClearedLevelMonsters(pre.level);
     spawnObjectsForLevel();
     setEmptyAllContainers(false);
     updateRecruitsMeshState();

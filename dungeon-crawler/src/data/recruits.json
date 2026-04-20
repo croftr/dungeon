@@ -29,7 +29,9 @@
             "Minor Rejuvenate Potion",
             "Minor Rejuvenate Potion"
         ],
-        "startingSkills": [],
+        "startingSkills": [
+            "Entangle"
+        ],
         "image": "/heros/elf_ranger_head.jpg",
         "leftHand": "Torch",
         "rightHand": "Short Bow",

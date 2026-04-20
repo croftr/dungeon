@@ -3,14 +3,13 @@
 //
 //  Dungeon levels 1–5 have two canonical states:
 //    • start — pristine, gates closed, monsters alive, chests full
-//    • end   — all gates open, no monsters, all chests empty
+//    • end   — all gates open, all chests empty; non-boss monsters respawned
+//              to full HP; killed bosses (tracked globally) stay dead.
 //
 //  After a save is loaded, every dungeon level below currentLevelReached
 //  (and not equal to currentLevel) is rebuilt in end state. Level 0 is the
 //  hub and never "cleared."
 // ─────────────────────────────────────────────────────────────────────────────
-
-import { monsters } from './monster.js';
 
 /**
  * Flag deltas that force level N into its "end state" when merged into the
@@ -68,19 +67,6 @@ export function buildEndStateFlags(clearedLevels) {
   }
   if (disarmedTraps.size) flags.disarmedTraps = [...disarmedTraps];
   return flags;
-}
-
-/**
- * Kills every monster with m.level === levelNum. Safe to call repeatedly:
- * already-dead monsters stay dead. Called before loadMonstersForLevel so that
- * mesh loading is skipped (see loadMonstersForLevel in monster.js).
- */
-export function killAllMonstersOnLevel(levelNum) {
-  for (const m of monsters) {
-    if ((m.level ?? 1) !== levelNum) continue;
-    m.alive = false;
-    m.hp = 0;
-  }
 }
 
 /**
