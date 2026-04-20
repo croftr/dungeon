@@ -12,7 +12,7 @@ import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAtta
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt, applyClearedLevelMonsters } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, setEmptyAllContainers, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems } from './objects.js';
-import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound, prefetchActionSounds } from './audio.js';
+import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound, prefetchActionSounds, checkNpcDialogueProximity } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
@@ -252,6 +252,7 @@ setCallbacks({
   moved() {
     drawMinimap();
     updateStatus();
+    checkNpcDialogueProximity(player.gridRow, player.gridCol);
     // ── Level 0/1 walk-through transitions ───────────────────────────────────
     // Level 0 → Level 1: stepping west to (row 13, col 7) after gate is open
     if (window.currentLevel === 0 && player.gridRow === 13 && player.gridCol === 7) {

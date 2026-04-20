@@ -792,6 +792,11 @@ let _questAudioGain   = null;
 let _questSpeechId    = 0;
 let _questSpeechEndTime = 0;
 
+// Active NPC dialogue tracking
+let _activeNpcId  = null;
+let _activeNpcRow = null;
+let _activeNpcCol = null;
+
 /**
  * Play NPC quest speech audio. Replaces any currently playing quest audio.
  * Returns the source so callers can attach onended.
@@ -844,6 +849,9 @@ export async function playQuestAudio(url, volume = 0.8) {
  * @param {number} durationSec  Fade duration in seconds (default 0.6s)
  */
 export function fadeOutQuestAudio(durationSec = 0.6) {
+  _activeNpcId  = null;
+  _activeNpcRow = null;
+  _activeNpcCol = null;
   if (!_questAudioSource || !_questAudioGain) return;
   const source   = _questAudioSource;
   const gainNode = _questAudioGain;
@@ -855,6 +863,79 @@ export function fadeOutQuestAudio(durationSec = 0.6) {
   gainNode.gain.setValueAtTime(gainNode.gain.value, now);
   gainNode.gain.linearRampToValueAtTime(0, now + durationSec);
   try { source.stop(now + durationSec); } catch (_) {}
+}
+
+/**
+ * Play NPC dialogue audio. If the same NPC is already speaking, the call is ignored
+ * (prevents double-click audio stacking). If a different NPC is speaking, their audio
+ * stops immediately and the new NPC's audio starts.
+ */
+export async function playNpcDialogue(row, col, url, volume = 0.8) {
+  const npcId = `${row},${col}`;
+  if (npcId === _activeNpcId) return; // same NPC already talking — ignore
+
+  // Stop any currently playing NPC audio immediately
+  if (_questAudioSource) {
+    fadeOutQuestAudio(0.3);
+  }
+
+  _activeNpcId  = npcId;
+  _activeNpcRow = row;
+  _activeNpcCol = col;
+  const speechId = ++_questSpeechId;
+  _questSpeechEndTime = 0;
+
+  const buffer = await getBuffer(asset(url));
+  if (!buffer) {
+    if (_activeNpcId === npcId) { _activeNpcId = null; _activeNpcRow = null; _activeNpcCol = null; }
+    return;
+  }
+  if (_questSpeechId !== speechId) return; // superseded
+
+  try {
+    const ctx = getCtx();
+    const source   = ctx.createBufferSource();
+    source.buffer  = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = volume;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.addEventListener('ended', () => {
+      if (_questAudioSource === source) {
+        _questAudioSource = null;
+        _questAudioGain   = null;
+        _activeNpcId  = null;
+        _activeNpcRow = null;
+        _activeNpcCol = null;
+      }
+    });
+    source.start(0);
+    _questAudioSource = source;
+    _questAudioGain   = gainNode;
+    return source;
+  } catch (err) {
+    console.warn(`[audio] playNpcDialogue failed for ${url}:`, err);
+  }
+}
+
+/** Returns true if audio is currently playing for the NPC at (row, col). */
+export function isNpcDialoguePlaying(row, col) {
+  return `${row},${col}` === _activeNpcId;
+}
+
+/**
+ * Call on each player move. Fades out NPC dialogue if the player has moved
+ * farther than maxDist cells from the active NPC.
+ */
+export function checkNpcDialogueProximity(playerRow, playerCol, maxDist = 4) {
+  if (_activeNpcRow === null || !_questAudioSource) return;
+  const dist = Math.max(
+    Math.abs(playerRow - _activeNpcRow),
+    Math.abs(playerCol - _activeNpcCol)
+  );
+  if (dist > maxDist) {
+    fadeOutQuestAudio(0.5);
+  }
 }
 
 export async function playFallSequence() {

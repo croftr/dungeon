@@ -7,7 +7,7 @@ import { showMessage, drawMinimap, updateStatus } from './minimap.js';
 import { getItemDef, ITEMS } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refreshPartyCards, setHp, applyStatusEffect } from './party.js';
 import { addLogEntry } from './battle-log.js';
-import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playLearntSound, playSoundByUrl, playQuestAudio, fadeOutQuestAudio, playPartyHitSound, playInventorySortSound, playCraftFailSound, playCraftHqSound } from './audio.js';
+import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playLearntSound, playSoundByUrl, playQuestAudio, fadeOutQuestAudio, playPartyHitSound, playInventorySortSound, playCraftFailSound, playCraftHqSound, playNpcDialogue, isNpcDialoguePlaying } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
 import POTION_MERCHANT_DATA from './data/potion-merchant.json';
 import POTIONS_DATA from './data/items/potions.json';
@@ -753,20 +753,25 @@ export function initObjects(scene, camera) {
                     }
                     
                     if (obj.userData.clickAudio) {
-                        playSoundByUrl(asset(obj.userData.clickAudio), 0.8);
-                        
-                        // Otter NPC level 4 first-click video sequence trigger
-                        if (obj.userData.clickAudio.includes('post-minotaur.mp3') && window.playOtterVideoSequence) {
-                            setTimeout(() => {
-                                window.playOtterVideoSequence();
-                            }, 10000);
-                        }
+                        const npcRow = obj.userData.gridRow;
+                        const npcCol = obj.userData.gridCol;
+                        if (!isNpcDialoguePlaying(npcRow, npcCol)) {
+                            const url = obj.userData.clickAudio;
 
-                        if (obj.userData.fallbackClickAudio) {
-                            // After playing the primary audio once, swap to the fallback for future clicks
-                            obj.userData.clickAudio = obj.userData.fallbackClickAudio;
-                        } else {
-                            obj.userData.clickAudio = null; // Only play once
+                            if (obj.userData.fallbackClickAudio) {
+                                obj.userData.clickAudio = obj.userData.fallbackClickAudio;
+                            } else {
+                                obj.userData.clickAudio = null;
+                            }
+
+                            playNpcDialogue(npcRow, npcCol, url);
+
+                            // Otter NPC level 4 first-click video sequence trigger
+                            if (url.includes('post-minotaur.mp3') && window.playOtterVideoSequence) {
+                                setTimeout(() => {
+                                    window.playOtterVideoSequence();
+                                }, 10000);
+                            }
                         }
                     }
                     
@@ -1070,9 +1075,9 @@ export function initObjects(scene, camera) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 2 && distCol <= 2) {
-                    const audio = new Audio(asset('/sounds/npcs/welcome-adventure.mp3'));
-                    audio.volume = 0.7;
-                    audio.play().catch(e => console.error("Audio play failed:", e));
+                    if (!isNpcDialoguePlaying(obj.userData.gridRow, obj.userData.gridCol)) {
+                        playNpcDialogue(obj.userData.gridRow, obj.userData.gridCol, '/sounds/npcs/welcome-adventure.mp3', 0.7);
+                    }
                     showMessage("The Jester greets you with a cackle!");
 
                     // Walk up to the root model (which holds mixer / animations)
@@ -1130,21 +1135,20 @@ export function initObjects(scene, camera) {
                         _npcTalkAction.reset().fadeIn(0.3).play();
                     }
                     const partyFull = party.every(m => !m.isEmpty);
-                    if (partyFull) {
-                        const npcAudio = new Audio(asset('/sounds/npcs/party-chosen.mp3'));
-                        npcAudio.volume = 0.8;
-                        npcAudio.addEventListener('loadedmetadata', () => {
-                            const delay = Math.max(0, (npcAudio.duration - 0.8) * 1000);
-                            setTimeout(() => {
-                                const overlay = document.getElementById('party-confirm-overlay');
-                                if (overlay) overlay.classList.remove('chest-hidden');
-                            }, delay);
-                        });
-                        npcAudio.play().catch(e => console.warn("NPC audio failed:", e));
-                    } else {
-                        const npcAudio = new Audio(asset('/sounds/npcs/incomplete-party.mp3'));
-                        npcAudio.volume = 0.8;
-                        npcAudio.play().catch(e => console.warn("NPC audio failed:", e));
+                    if (!isNpcDialoguePlaying(data.gridRow, data.gridCol)) {
+                        if (partyFull) {
+                            playNpcDialogue(data.gridRow, data.gridCol, '/sounds/npcs/party-chosen.mp3').then(source => {
+                                if (source?.buffer) {
+                                    const delay = Math.max(0, (source.buffer.duration - 0.8) * 1000);
+                                    setTimeout(() => {
+                                        const overlay = document.getElementById('party-confirm-overlay');
+                                        if (overlay) overlay.classList.remove('chest-hidden');
+                                    }, delay);
+                                }
+                            });
+                        } else {
+                            playNpcDialogue(data.gridRow, data.gridCol, '/sounds/npcs/incomplete-party.mp3');
+                        }
                     }
                 } else {
                     showMessage("The mysterious figure beckons you from afar.");
@@ -2581,8 +2585,10 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, sh
             greetingPlayed = true;
 
             if (options.greetingAudio?.length) {
-                playQuestAudio(options.greetingAudio[audioIndex % options.greetingAudio.length]);
-                audioIndex++;
+                if (!isNpcDialoguePlaying(row, col)) {
+                    playNpcDialogue(row, col, options.greetingAudio[audioIndex % options.greetingAudio.length]);
+                    audioIndex++;
+                }
             }
             if (mixer && idleAction && greetingAction) {
                 idleAction.stop();
