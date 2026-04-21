@@ -5265,7 +5265,10 @@ export function setWorldFlags(flags) {
     if (_seenEssences.size > 0 && !hasNewStyleParchment) {
         _seenEssences.clear();
     }
-    if (_level2HoleClosed) level2Map[17][23] = CELL_FLOOR;
+    // The Aqua Man pit lives at (32, 23) on level 2. Restoring the "hole closed"
+    // flag must mutate that cell so the pit stops swallowing the party after a
+    // save+refresh. (Previously wrote to [17][23] by mistake — giant room, not the pit.)
+    if (_level2HoleClosed) level2Map[32][23] = CELL_FLOOR;
     if (_level1HoleRoomSpawned) {
         for (let r = 24; r <= 26; r++) {
             for (let c = 1; c <= 3; c++) {

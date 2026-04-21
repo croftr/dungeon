@@ -16,7 +16,7 @@ import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequenc
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
-import { consumePendingLoad } from './save-game.js';
+import { consumePendingLoad, renderSavesList } from './save-game.js';
 import { autoSaveCheckpoint, loadCheckpoint } from './save-checkpoint.js';
 import { initQuarks, updateQuarks } from './quarks-intro.js';
 import { showHelpDialog } from './help.js';
@@ -444,14 +444,22 @@ setCallbacks({
 
         // 1. Trigger the Aqua Man video immediately so the fade-in (1.5s) begins
         // while the scream/blackout is still covering the screen.
-        if (!hasSeenAquaManVideo) {
+        // Only play the video the first time the party falls AND the Aqua Man
+        // is still alive — once she's dead the narrative reveal is moot.
+        const aquaMan = monsters.find(m => m.name === 'Aqua Man' && (m.level ?? 1) === 2);
+        const shouldPlayAquaManVideo = !hasSeenAquaManVideo && !!aquaMan?.alive;
+        if (shouldPlayAquaManVideo) {
           hasSeenAquaManVideo = true;
           window._saveFlags.hasSeenAquaManVideo = true;
+          playAquaManVideo(() => {
+            // Once the video and its fade-out are complete, release cutscene lock
+            window._cutscenePlaying = false;
+          });
+        } else {
+          // No video — release the cutscene lock shortly after the scream/land
+          // sequence completes (the fall setTimeout below also runs at 1000ms).
+          setTimeout(() => { window._cutscenePlaying = false; }, 1500);
         }
-        playAquaManVideo(() => {
-          // Once the video and its fade-out are complete, release cutscene lock
-          window._cutscenePlaying = false;
-        });
 
         // 2. Wait 1 second for the scream/land sound sequence before teleporting the party.
         setTimeout(() => {
@@ -645,6 +653,9 @@ const splashScreen = document.getElementById('splash-screen');
 const charSelectScreen = document.getElementById('char-select-screen');
 const introVideo = document.getElementById('intro-video');
 const preStartBtn = document.getElementById('pre-start-btn');
+const preLoadBtn = document.getElementById('pre-load-btn');
+const loadGameScreen = document.getElementById('load-game-screen');
+const loadGameCancelBtn = document.getElementById('load-game-cancel-btn');
 const startBtn = document.getElementById('start-adventure-btn');
 
 window.easyMode = false;
@@ -704,6 +715,23 @@ if (preStartBtn) {
         if (barWrap) barWrap.style.opacity = '0';
       }, 4300);
     }
+  });
+}
+
+// ── Screen 1 → Load Game Screen ──
+if (preLoadBtn) {
+  preLoadBtn.addEventListener('click', async () => {
+    await handleFirstInteraction();
+    preStartScreen.style.display = 'none';
+    loadGameScreen.style.display = 'flex';
+    renderSavesList('#load-game-list');
+  });
+}
+
+if (loadGameCancelBtn) {
+  loadGameCancelBtn.addEventListener('click', () => {
+    loadGameScreen.style.display = 'none';
+    preStartScreen.style.display = 'flex';
   });
 }
 
@@ -2058,6 +2086,25 @@ window.loadLevel = function (levelNum) {
 
   // 2. Rebuild map meshes for walls/floors
   buildLevel(scene);
+
+  // Level 1: ogre room (rows 0–6, cols 0–6, NW corner) uses ogre-wall texture
+  if (levelNum === 1) {
+    buildTextureZone(
+      scene,
+      [
+        [0,0],[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],
+        [1,0],[1,6],
+        [2,0],[2,6],
+        [3,0],[3,6],
+        [4,0],[4,6],
+        [5,0],[5,6],
+        [6,0],[6,2],[6,3],[6,4],[6,5],[6,6],
+      ],
+      [],
+      asset('/textures/ogre-wall.png'),
+      null
+    );
+  }
 
   // Level 2: overlay pit-corridor (rows 37–41, col 3) with wet-wall / black-stone textures
   if (levelNum === 2) {

@@ -47,7 +47,7 @@ export const RECRUITS = RECRUITS_DATA.map(r => ({
     startingSpells: r.startingSpells || [],
 }));
 
-let uiContainer = null;
+let stanceVideoContainer = null;
 
 export function initRecruits(scene, camera) {
     const loader = new THREE.TextureLoader();
@@ -133,32 +133,24 @@ export function initRecruits(scene, camera) {
         r.box = mesh; // solid mesh can be used for raycaster directly
     });
 
-    // Setup UI container
-    uiContainer = document.createElement('div');
-    uiContainer.id = 'recruit-modal';
-    uiContainer.style.display = 'none';
-    // inline styles for now
-    uiContainer.style.position = 'fixed';
-    uiContainer.style.top = '50%';
-    uiContainer.style.left = '50%';
-    uiContainer.style.transform = 'translate(-50%, -50%)';
-    uiContainer.style.background = 'radial-gradient(circle at center, rgba(30, 20, 15, 0.95), rgba(10, 7, 4, 0.98))';
-    uiContainer.style.border = '2px solid rgba(200, 168, 74, 0.4)';
-    uiContainer.style.boxShadow = '0 0 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(200, 168, 74, 0.1)';
-    uiContainer.style.padding = '30px';
-    uiContainer.style.borderRadius = '8px';
-    uiContainer.style.color = '#e8c87a';
-    uiContainer.style.zIndex = '2000';
-    uiContainer.style.fontFamily = 'Georgia, serif';
-    uiContainer.style.width = '600px';
-    uiContainer.style.boxSizing = 'border-box';
-    document.body.appendChild(uiContainer);
+    // Setup video UI container
+    stanceVideoContainer = document.createElement('div');
+    stanceVideoContainer.id = 'stance-video-modal';
+    stanceVideoContainer.style.display = 'none';
+    stanceVideoContainer.style.position = 'fixed';
+    stanceVideoContainer.style.top = '0';
+    stanceVideoContainer.style.left = '0';
+    stanceVideoContainer.style.width = '100vw';
+    stanceVideoContainer.style.height = '100vh';
+    stanceVideoContainer.style.backgroundColor = 'black';
+    stanceVideoContainer.style.zIndex = '3000';
+    stanceVideoContainer.style.flexDirection = 'column';
+    stanceVideoContainer.style.justifyContent = 'center';
+    stanceVideoContainer.style.alignItems = 'center';
+    document.body.appendChild(stanceVideoContainer);
 
     window.addEventListener('click', (e) => {
-        // If the click was inside the recruitment modal, ignore it here
-        if (uiContainer.contains(e.target)) return;
-
-        if (uiContainer.style.display === 'block') {
+        if (stanceVideoContainer.contains(e.target) || stanceVideoContainer.style.display === 'flex') {
             return;
         }
 
@@ -175,7 +167,13 @@ export function initRecruits(scene, camera) {
                 const r = RECRUITS.find(x => x.id === recruitId);
                 // Only allow interaction if the player is directly facing the recruit
                 if (r && isInFrontOfPlayer(r.gridRow, r.gridCol, 1)) {
-                    openRecruitModal(recruitId);
+                    if (recruitId === 'recruit_7') {
+                        playStanceVideo('/videos/stances/viper-stance.mp4', 'Viper');
+                    } else if (recruitId === 'recruit_1') {
+                        playStanceVideo('/videos/stances/hearseeker-stance.mp4', 'HeartSeeker');
+                    } else if (recruitId === 'recruit_8') {
+                        playStanceVideo('/videos/stances/vengeance-stance.mp4', 'Vengeance');
+                    }
                 }
                 break;
             }
@@ -194,53 +192,41 @@ export function updateRecruitsMeshState() {
     });
 }
 
-function openRecruitModal(recruitId) {
-    const r = RECRUITS.find(x => x.id === recruitId);
-    if (!r || r.isRecruited) return;
-
-    const freeSlot = party.find(m => m.isEmpty);
-    const canRecruit = !!freeSlot;
-
-    const mediaHtml = r.recruitVideo
-        ? `<video src="${asset(r.recruitVideo)}" autoplay loop muted playsinline style="width: 250px; height: 350px; object-fit: cover; border-radius: 4px; border: 1px solid #c8a84a; box-shadow: 0 0 15px rgba(200, 168, 74, 0.3); background: #000;"></video>`
-        : `<img src="${asset(r.image)}" style="width: 250px; height: 350px; object-fit: cover; border-radius: 4px; border: 1px solid #c8a84a; box-shadow: 0 0 15px rgba(200, 168, 74, 0.3); image-rendering: pixelated; background: #000;">`;
-
-    uiContainer.innerHTML = `
-    <div style="display: flex; gap: 30px;">
-        <div style="flex-shrink: 0;">
-            ${mediaHtml}
+function playStanceVideo(videoUrl, stanceName) {
+    stanceVideoContainer.innerHTML = `
+        <video id="stance-video" src="${asset(videoUrl)}" autoplay style="max-width: 100%; max-height: 80%; border-radius: 8px; box-shadow: 0 0 20px rgba(200, 168, 74, 0.5);"></video>
+        <div id="stance-text-container" style="text-align: center; margin-top: 30px; opacity: 0; transition: opacity 2s ease-in;">
+            <div style="color: #c8a84a; font-size: 32px; font-family: Georgia, serif; letter-spacing: 2px;">Stance unlocked</div>
+            <div style="color: white; font-size: 56px; font-family: Georgia, serif; font-weight: bold; letter-spacing: 4px; text-shadow: 0 0 15px #c8a84a; margin-top: 10px;">${stanceName}</div>
         </div>
-        <div style="display: flex; flex-direction: column; justify-content: center; flex: 1;">
-            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 5px;">
-                <h2 style="margin: 0; color: #fff; font-size: 32px; font-weight: normal; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">${r.name}</h2>
-                <img src="${asset(getJobIcon(r.job))}" style="width: 48px; height: 48px; border: 1px solid rgba(200, 168, 74, 0.4); border-radius: 4px; box-shadow: 0 0 15px rgba(200, 168, 74, 0.2); background: rgba(0,0,0,0.3); padding: 2px;">
-            </div>
-            <div style="margin: 0 0 20px 0; font-size: 16px; color: #c8a84a; text-transform: uppercase; letter-spacing: 2px; display: flex; align-items: center; gap: 8px;">
-                <img src="${asset(getRaceIcon(r.race))}" style="width: 24px; height: 24px; opacity: 0.8; filter: drop-shadow(0 0 5px rgba(200,168,74,0.3));">
-                <span style="opacity: 0.8;">${r.race}</span>
-                <span style="color: #6a5030;">•</span>
-                <span style="font-weight: bold;">${r.job}</span>
-            </div>
-            
-            <div style="margin: 0 0 30px 0; font-size: 16px; color: #d0c0a0; line-height: 1.6; font-style: italic; border-left: 3px solid #c8a84a; padding-left: 15px;">
-                "${r.bio || 'A mysterious adventurer looking for glory.'}"
-            </div>
+    `;
+    stanceVideoContainer.style.display = 'flex';
+    
+    const video = document.getElementById('stance-video');
+    const textContainer = document.getElementById('stance-text-container');
+    
+    let textShown = false;
 
-            <div style="margin-top: auto; display: flex; justify-content: flex-end; gap: 15px;">
-              <button id="btn-recruit-close" style="padding: 10px 20px; cursor: pointer; background: rgba(0,0,0,0.5); border: 1px solid #6a5030; color: #a09070; font-family: inherit; font-size: 14px; border-radius: 4px; transition: all 0.2s;">Close</button>
-            </div>
-        </div>
-    </div>
-  `;
+    const showText = () => {
+        if (textShown) return;
+        textContainer.style.opacity = '1';
+        textShown = true;
+        new Audio(asset('/sounds/actions/stance-change.mp3')).play().catch(e => console.warn('Audio play failed:', e));
+    };
 
-    uiContainer.style.display = 'block';
-
-    document.getElementById('btn-recruit-close').addEventListener('click', (e) => {
-        e.stopPropagation();
-        uiContainer.style.display = 'none';
-    });
-
-    // Hide buttons if recruited
+    video.onended = () => {
+        showText();
+    };
+    
+    stanceVideoContainer.onclick = () => {
+        if (textShown) {
+            stanceVideoContainer.style.display = 'none';
+            stanceVideoContainer.innerHTML = '';
+        } else {
+            video.pause();
+            showText();
+        }
+    };
 }
 
 

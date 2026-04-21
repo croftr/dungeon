@@ -377,15 +377,18 @@ export function buildTextureZone(scene, wallCells, floorCells, wallTexPath, floo
   loader.setCrossOrigin('anonymous');
 
   const wTex = loader.load(wallTexPath); wTex.wrapS = wTex.wrapT = THREE.RepeatWrapping; wTex.anisotropy = 16;
-  const fTex = loader.load(floorTexPath); fTex.wrapS = fTex.wrapT = THREE.RepeatWrapping; fTex.anisotropy = 16;
   const wM = new THREE.MeshLambertMaterial({ map: wTex, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
-  const fM = new THREE.MeshLambertMaterial({ map: fTex });
+  let fM = null;
+  if (floorCells && floorCells.length > 0 && floorTexPath) {
+    const fTex = loader.load(floorTexPath); fTex.wrapS = fTex.wrapT = THREE.RepeatWrapping; fTex.anisotropy = 16;
+    fM = new THREE.MeshLambertMaterial({ map: fTex });
+  }
 
   for (const [r, c] of wallCells) {
     const m = new THREE.Mesh(wallGeo, wM);
     m.position.set(c * CELL, WALL_H / 2, r * CELL); scene.add(m); currentMapMeshes.push(m);
   }
-  for (const [r, c] of floorCells) {
+  if (fM) for (const [r, c] of floorCells) {
     const m = new THREE.Mesh(tileGeo, fM);
     m.rotation.set(-Math.PI / 2, 0, 0); m.position.set(c * CELL, 0.002, r * CELL);
     scene.add(m); currentMapMeshes.push(m);

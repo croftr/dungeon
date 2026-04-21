@@ -2,7 +2,7 @@
 //  MAIN MENU  — opened/closed with Escape key
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { listSaves, triggerLoad } from './save-game.js';
+import { renderSavesList } from './save-game.js';
 
 let _isOpen = false;
 
@@ -62,24 +62,7 @@ function _anyOverlayOpen() {
 }
 
 function _renderSavesList() {
-  const list = document.getElementById('mm-saves-list');
-  const saves = listSaves();
-  if (saves.length === 0) {
-    list.innerHTML = '<div class="mm-no-saves">No saved games.</div>';
-    return;
-  }
-  list.innerHTML = saves.map(s => {
-    const d = new Date(s.savedAt);
-    const date = d.toLocaleDateString([], { month: 'short', day: 'numeric' });
-    const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    return `<div class="mm-save-entry" data-key="${s.key}">
-      <span class="mm-save-level">${s.levelName}</span>
-      <span class="mm-save-meta"><span class="mm-save-date">${date}</span><span class="mm-save-time">${time}</span></span>
-    </div>`;
-  }).join('');
-  list.querySelectorAll('.mm-save-entry').forEach(el => {
-    el.addEventListener('click', () => triggerLoad(el.dataset.key));
-  });
+  renderSavesList('#mm-saves-list');
 }
 
 // ── DOM ───────────────────────────────────────────────────────────────────────

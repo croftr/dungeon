@@ -285,7 +285,7 @@ body {
   animation-delay: 2.5s;
 }
 
-#pre-start-btn {
+#pre-start-btn, #pre-load-btn, #load-game-cancel-btn {
   background: linear-gradient(180deg, rgba(65, 44, 18, 0.97) 0%, rgba(24, 15, 5, 0.99) 100%);
   border: 1px solid rgba(200, 158, 80, 0.9);
   outline: 1px solid rgba(200, 158, 80, 0.35);
@@ -306,7 +306,7 @@ body {
     inset 0 1px 0 rgba(255, 220, 140, 0.08);
 }
 
-#pre-start-btn:hover {
+#pre-start-btn:hover, #pre-load-btn:hover, #load-game-cancel-btn:hover {
   background: linear-gradient(180deg, rgba(90, 62, 24, 1) 0%, rgba(38, 24, 8, 1) 100%);
   border-color: rgba(232, 200, 122, 1);
   outline-color: rgba(232, 200, 122, 0.45);
@@ -1605,7 +1605,9 @@ body {
 
 .mm-save-entry {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   gap: 4px;
   padding: 10px 12px;
   border: 1px solid rgba(232, 200, 122, 0.18);
@@ -1614,6 +1616,30 @@ body {
   transition: background 0.15s, border-color 0.15s;
   flex-shrink: 0;
 }
+
+.mm-save-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.mm-save-delete-btn {
+  background: none;
+  border: none;
+  color: rgba(220, 80, 80, 0.7);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.15s, transform 0.15s;
+  flex-shrink: 0;
+}
+
+.mm-save-delete-btn:hover {
+  color: rgba(240, 100, 100, 1);
+  transform: scale(1.1);
+}
+
 
 .mm-save-entry:hover {
   background: rgba(232, 200, 122, 0.08);

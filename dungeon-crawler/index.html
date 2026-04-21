@@ -32,6 +32,16 @@
     <div id="pre-start-screen">
       <h1 id="pre-start-title">DUNGEON CRAWLER</h1>
       <button id="pre-start-btn">Start Game</button>
+      <button id="pre-load-btn" style="margin-top: 15px;">Load Game</button>
+    </div>
+
+    <!-- New Screen: Load Game (hidden until Load Game clicked on pre-start) -->
+    <div id="load-game-screen" style="display:none; flex-direction:column; align-items:center; justify-content:center; gap: 24px; position:absolute; inset:0; background: #0c0906; z-index:3;">
+      <h2 style="color: #e8c87a; font-family: Georgia, serif; font-size: 36px; letter-spacing: 8px; text-transform: uppercase; text-shadow: 0 0 20px rgba(232,200,122,0.4); margin-bottom: 10px;">Load Game</h2>
+      <div id="load-game-list-container" style="text-align: left; width: 600px; max-width: 90%; max-height: 50vh; overflow-y: auto; background: rgba(16, 12, 8, 0.95); padding: 24px; border-radius: 8px; border: 2px solid rgba(232, 200, 122, 0.4); box-shadow: 0 0 40px rgba(0,0,0,0.8);">
+        <div id="load-game-list" class="mm-saves-list"></div>
+      </div>
+      <button id="load-game-cancel-btn" style="margin-top: 20px;">Back</button>
     </div>
 
     <!-- Screen 2: Splash with options (hidden until pre-start clicked) -->
