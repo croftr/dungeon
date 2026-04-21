@@ -8,7 +8,7 @@ import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { party, setHp, addGold, flashPortraitHit, showMemberDamage, showMemberHeal, refreshPartyCards, applyStatusEffect, getEffectiveStats, getEffectiveStatusResistances, getDefenceModifier, describeEffect, isPartyInvincible, isPartyUnseen } from './party.js';
 import { STATUS_EFFECT_DEFS } from './status-effects.js';
 import { showMessage } from './minimap.js';
-import { getPoisonTickBonus, getReflectDamage, getCritChanceBonus } from './stance.js';
+import { getPoisonTickBonus, getReflectDamage, getCritChanceBonus, getStanceBerserkMultiplier } from './stance.js';
 import {
   playerHitChance, monsterHitChance,
   calcPlayerPhysicalDamage, calcPlayerMagicDamage, calcMonsterDamage,
@@ -2046,8 +2046,11 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
 
   // Berserk — applies a magnitude-based damage multiplier after everything else
   const berserkActive = skillsState.berserk?.active && skillsState.berserk?.actorName === character.name && now < skillsState.berserk.expiresAt;
-  if (berserkActive) {
-    damage = Math.round(damage * skillsState.berserk.magnitude);
+  const stanceBerserkMult = getStanceBerserkMultiplier(character);
+  const totalBerserkMult = (berserkActive ? skillsState.berserk.magnitude : 1.0) * stanceBerserkMult;
+  
+  if (totalBerserkMult !== 1.0) {
+    damage = Math.round(damage * totalBerserkMult);
   }
 
   // Warcry — applies a damage multiplier to all party members
@@ -2091,7 +2094,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     preCritDamage,
     critMultiplier: isCrit ? CRIT_MULTIPLIER : 1,
     runicScholar: runicActive,
-    berserkMultiplier: berserkActive ? skillsState.berserk.magnitude : 1.0,
+    berserkMultiplier: totalBerserkMult,
     warcryMultiplier: (skillsState.warcry?.active && now < skillsState.warcry.expiresAt) ? skillsState.warcry.magnitude : 1.0,
     ammoModifier: ammoDef?.damageModifier ?? null,
     damageReduction: m.damageReduction ?? 0,

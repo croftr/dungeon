@@ -144,6 +144,39 @@ export function getReflectDamage(target, incomingDamage) {
   return Math.max(0, reflected);
 }
 
+/**
+ * Bonus HP restored by cure and heal spells from `caster`'s active stance.
+ */
+export function getStanceCureHealBonus(caster) {
+  const stance = getActiveStance(caster);
+  return stance?.effects?.cureHealBonus ?? 0;
+}
+
+/**
+ * Bonus HP per tick for Regeneration from `caster`'s active stance.
+ */
+export function getStanceRegenBonus(caster) {
+  const stance = getActiveStance(caster);
+  return stance?.effects?.regenMagnitude ?? 0;
+}
+
+/**
+ * Damage multiplier from `attacker`'s active stance that acts like Berserk (after all calc).
+ * Returns 1 if no bonus.
+ */
+export function getStanceBerserkMultiplier(attacker) {
+  const stance = getActiveStance(attacker);
+  return stance?.effects?.berserkMultiplier ?? 1;
+}
+
+/**
+ * Returns true if the attacker's active stance grants double attacks.
+ */
+export function hasStanceDoubleAttack(attacker) {
+  const stance = getActiveStance(attacker);
+  return !!stance?.effects?.doubleAttack;
+}
+
 // ── Context menu ────────────────────────────────────────────────────────────
 
 let _stanceMenuEl = null;

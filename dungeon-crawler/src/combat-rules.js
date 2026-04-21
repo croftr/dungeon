@@ -6,7 +6,7 @@
 import RULES from './data/combat-rules.json';
 import SKILLS_DATA from './data/skills.json';
 import { getHqWeaponDamageBonus } from './crafting.js';
-import { getMonsterHitChanceReduction, getStanceDamageMultiplier, getMagicDamageMultiplier } from './stance.js';
+import { getMonsterHitChanceReduction, getStanceDamageMultiplier, getMagicDamageMultiplier, getStanceCureHealBonus, getStanceRegenBonus } from './stance.js';
 
 // ── Utility ───────────────────────────────────────────────────────────────────
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
@@ -561,6 +561,12 @@ export function resolveSpellMagnitude(spellName, spellDef, caster) {
         }
       }
     });
+  }
+
+  if (spellName === 'Regeneration') {
+    bonus += getStanceRegenBonus(caster);
+  } else if (spellName === 'Heal' || spellName === 'Cure Poison') {
+    bonus += getStanceCureHealBonus(caster);
   }
 
   if (bonus === 0) return base;

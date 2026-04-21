@@ -99,5 +99,42 @@
       "preventsSpRegen": true,
       "preventsMpRegen": true
     }
+  },
+  "curatio": {
+    "id": "curatio",
+    "name": "Curatio Stance",
+    "description": "Increases HP restored by cure and heal spells by 6, and increases Regeneration healing by 3 HP per tick.",
+    "icon": "/heros/human_wizard_curatio.webp",
+    "portrait": "/heros/human_wizard_curatio.webp",
+    "effects": {
+      "cureHealBonus": 6,
+      "regenMagnitude": 3,
+      "preventsSpRegen": true,
+      "preventsMpRegen": true
+    }
+  },
+  "slayer": {
+    "id": "slayer",
+    "name": "Slayer Stance",
+    "description": "Enters a state of roaring fury, boosting all damage dealt by 80%.",
+    "icon": "/heros/dwarf_barbarian_slayer.webp",
+    "portrait": "/heros/dwarf_barbarian_slayer.webp",
+    "effects": {
+      "berserkMultiplier": 1.8,
+      "preventsSpRegen": true,
+      "preventsMpRegen": true
+    }
+  },
+  "talon": {
+    "id": "talon",
+    "name": "Talon Stance",
+    "description": "Enters a state of focused aggression, allowing the character to strike twice with every attack.",
+    "icon": "/heros/human_barbarian_talon.webp",
+    "portrait": "/heros/human_barbarian_talon.webp",
+    "effects": {
+      "doubleAttack": true,
+      "preventsSpRegen": true,
+      "preventsMpRegen": true
+    }
   }
 }

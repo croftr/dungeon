@@ -18,7 +18,7 @@ import SPELL_TYPE_ICONS from './data/spell-type-icons.json';
 import { isInFrontOfPlayer, player } from './player.js';
 import { isAlchemyModalOpen, addItemToAlchemy } from './objects.js';
 import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude, calcOnHitChance } from './combat-rules.js';
-import { showStanceMenu, getAvailableStances, getSpellCooldownMultiplier } from './stance.js';
+import { showStanceMenu, getAvailableStances, getSpellCooldownMultiplier, getStanceCureHealBonus, hasStanceDoubleAttack } from './stance.js';
 import { playCritSound, playSkillSound, playItemSound, playLevelUpConfirmSound, playInventorySortSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { skillsState } from './skills-state.js';
@@ -3354,6 +3354,8 @@ function _executeCurePoison(caster, target) {
     });
   }
 
+  amount += getStanceCureHealBonus(caster);
+
   if (amount > 0) {
     setHp(target.id, target.hp + amount);
   }
@@ -3673,7 +3675,8 @@ export function useHand(memberIndex, hand, silent = false) {
 
   // Double Attack Effect
   const da = skillsState.doubleAttack;
-  if (da.active && da.actorName === m.name && now < da.expiresAt) {
+  const hasDA = (da.active && da.actorName === m.name && now < da.expiresAt) || hasStanceDoubleAttack(m);
+  if (hasDA) {
     // For ranged attacks the 150ms rapid-fire feel is fine; melee animations run
     // ~400ms so we wait long enough for the first swing to visually complete.
     const daDelay = attackType === ACTIONS.SHOOT ? 150 : 450;
