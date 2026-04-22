@@ -8,7 +8,7 @@ import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { party, setHp, addGold, flashPortraitHit, showMemberDamage, showMemberHeal, refreshPartyCards, applyStatusEffect, getEffectiveStats, getEffectiveStatusResistances, getDefenceModifier, describeEffect, isPartyInvincible, isPartyUnseen } from './party.js';
 import { STATUS_EFFECT_DEFS } from './status-effects.js';
 import { showMessage } from './minimap.js';
-import { getPoisonTickBonus, getReflectDamage, getCritChanceBonus, getStanceBerserkMultiplier } from './stance.js';
+import { getPoisonTickBonus, getReflectDamage, getCritChanceBonus, getStanceBerserkMultiplier, getStanceLifestealAmount } from './stance.js';
 import {
   playerHitChance, monsterHitChance,
   calcPlayerPhysicalDamage, calcPlayerMagicDamage, calcMonsterDamage,
@@ -2139,12 +2139,13 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
       ...(weaponDef?.onHitEffects ?? []),
       ...(ammoDef?.onHitEffects ?? []),
     ].filter(e => e.effectId === 'lifesteal');
-    if (lifestealEffects.length > 0) {
+    const stanceLifesteal = getStanceLifestealAmount(character);
+    if (lifestealEffects.length > 0 || stanceLifesteal > 0) {
       const pIndex = party.findIndex(p => p.name === character.name);
       if (pIndex !== -1) {
         const p = party[pIndex];
         if (p && !p.isDead && p.hp < p.hpMax) {
-          const heal = lifestealEffects.reduce((sum, e) => sum + (e.amount ?? 1), 0);
+          const heal = lifestealEffects.reduce((sum, e) => sum + (e.amount ?? 1), 0) + stanceLifesteal;
           setHp(pIndex, p.hp + heal);
           showMemberHeal(pIndex, heal);
         }

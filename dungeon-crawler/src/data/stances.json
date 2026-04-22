@@ -148,5 +148,17 @@
       "preventsSpRegen": true,
       "preventsMpRegen": true
     }
+  },
+  "bloodgrudge": {
+    "id": "bloodgrudge",
+    "name": "Bloodgrudge Stance",
+    "description": "Steals 10 HP from enemies on successful hits at the cost of stamina and focus.",
+    "icon": "/heros/dwarf-ranger-bloodgrudge.webp",
+    "portrait": "/heros/dwarf-ranger-bloodgrudge.webp",
+    "effects": {
+      "lifestealAmount": 10,
+      "preventsSpRegen": true,
+      "preventsMpRegen": true
+    }
   }
 }

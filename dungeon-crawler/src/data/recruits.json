@@ -191,7 +191,8 @@
         },
         "bio": "A keen-eyed marksman who traded the mines for the open hunt. Baldur's crossbow never misses its mark.",
         "stances": [
-            "overclock"
+            "overclock",
+            "bloodgrudge"
         ],
         "startingSkills": [],
         "image": "/heros/dwarf-ranger.webp",

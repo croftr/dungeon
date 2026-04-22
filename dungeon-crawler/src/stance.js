@@ -177,6 +177,14 @@ export function hasStanceDoubleAttack(attacker) {
   return !!stance?.effects?.doubleAttack;
 }
 
+/**
+ * Returns the amount of lifesteal from the attacker's active stance.
+ */
+export function getStanceLifestealAmount(attacker) {
+  const stance = getActiveStance(attacker);
+  return stance?.effects?.lifestealAmount ?? 0;
+}
+
 // ── Context menu ────────────────────────────────────────────────────────────
 
 let _stanceMenuEl = null;
