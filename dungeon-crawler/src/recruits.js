@@ -173,6 +173,12 @@ export function initRecruits(scene, camera) {
                         playStanceVideo('/videos/stances/hearseeker-stance.mp4', 'HeartSeeker');
                     } else if (recruitId === 'recruit_8') {
                         playStanceVideo('/videos/stances/vengeance-stance.mp4', 'Vengeance');
+                    } else if (recruitId === 'recruit_6') {
+                        playStanceVideo('/videos/stances/overclocked-stance.mp4', 'Overclocked');
+                    } else if (recruitId === 'recruit_4') {
+                        playStanceVideo('/videos/stances/curatio-stance.mp4', 'Curatio');
+                    } else if (recruitId === 'recruit_5') {
+                        playStanceVideo('/videos/stances/talon-stance.mp4', 'Talon');
                     }
                 }
                 break;

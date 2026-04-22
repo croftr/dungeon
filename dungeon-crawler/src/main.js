@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import { buildLevel, buildTextureZone, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures } from './map.js';
+import { buildLevel, buildTextureZone, buildInnerTextureZone, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures } from './map.js';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles, invalidateParticleTextures } from './particles.js';
@@ -2103,6 +2103,21 @@ window.loadLevel = function (levelNum) {
       [],
       asset('/textures/ogre-wall.png'),
       null
+    );
+
+    // Level 1: Mushroom area (inner walls only)
+    const mFloors = [
+      [11,11], [11,12], [11,13],
+      [12,11], [12,12], [12,13],
+      [13,12], [14,12],
+      [15,9], [15,10], [15,11], [15,12], [15,13], [15,14],
+      [16,9], [17,9], [18,9], [19,9],
+      [16,13], [17,11], [17,12], [17,13], [18,11], [19,11], [19,12], [19,13]
+    ];
+    buildInnerTextureZone(
+      scene,
+      mFloors,
+      asset('/textures/fungus-wall.png')
     );
   }
 

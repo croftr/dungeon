@@ -136,5 +136,17 @@
       "preventsSpRegen": true,
       "preventsMpRegen": true
     }
+  },
+  "overclock": {
+    "id": "overclock",
+    "name": "Overclock Stance",
+    "description": "Doubles attack speed at the cost of stamina and focus.",
+    "icon": "/heros/dwarf-ranger-overclock.webp",
+    "portrait": "/heros/dwarf-ranger-overclock.webp",
+    "effects": {
+      "attackSpeedMultiplier": 0.5,
+      "preventsSpRegen": true,
+      "preventsMpRegen": true
+    }
   }
 }

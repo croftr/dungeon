@@ -394,3 +394,51 @@ export function buildTextureZone(scene, wallCells, floorCells, wallTexPath, floo
     scene.add(m); currentMapMeshes.push(m);
   }
 }
+
+export function buildInnerTextureZone(scene, floorCells, wallTexPath) {
+  const loader = new THREE.TextureLoader();
+  loader.setCrossOrigin('anonymous');
+  const wTex = loader.load(wallTexPath);
+  wTex.wrapS = wTex.wrapT = THREE.RepeatWrapping;
+  wTex.anisotropy = 16;
+  const wM = new THREE.MeshLambertMaterial({ map: wTex, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+
+  const planeGeo = new THREE.PlaneGeometry(CELL, WALL_H);
+
+  const isWall = (r, c) => {
+    if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return true;
+    const cell = dungeonMap[r][c];
+    return cell === CELL_WALL || cell === CELL_BLACK_WALL || cell === CELL_PORTCULLIS;
+  };
+
+  for (const [r, c] of floorCells) {
+    // North Wall
+    if (isWall(r - 1, c)) {
+      const m = new THREE.Mesh(planeGeo, wM);
+      m.position.set(c * CELL, WALL_H / 2, (r - 0.5) * CELL + 0.01);
+      m.rotation.set(0, 0, 0);
+      scene.add(m); currentMapMeshes.push(m);
+    }
+    // South Wall
+    if (isWall(r + 1, c)) {
+      const m = new THREE.Mesh(planeGeo, wM);
+      m.position.set(c * CELL, WALL_H / 2, (r + 0.5) * CELL - 0.01);
+      m.rotation.set(0, Math.PI, 0);
+      scene.add(m); currentMapMeshes.push(m);
+    }
+    // West Wall
+    if (isWall(r, c - 1)) {
+      const m = new THREE.Mesh(planeGeo, wM);
+      m.position.set((c - 0.5) * CELL + 0.01, WALL_H / 2, r * CELL);
+      m.rotation.set(0, Math.PI / 2, 0);
+      scene.add(m); currentMapMeshes.push(m);
+    }
+    // East Wall
+    if (isWall(r, c + 1)) {
+      const m = new THREE.Mesh(planeGeo, wM);
+      m.position.set((c + 0.5) * CELL - 0.01, WALL_H / 2, r * CELL);
+      m.rotation.set(0, -Math.PI / 2, 0);
+      scene.add(m); currentMapMeshes.push(m);
+    }
+  }
+}

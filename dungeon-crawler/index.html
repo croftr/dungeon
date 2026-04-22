@@ -19,7 +19,9 @@
   <link rel="apple-touch-icon" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Outfit:wght@400;600;800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 
@@ -31,14 +33,18 @@
     <!-- Screen 1: Pre-start (triggers audio context) -->
     <div id="pre-start-screen">
       <h1 id="pre-start-title">DUNGEON CRAWLER</h1>
-      <button id="pre-start-btn">Start Game</button>
+      <button id="pre-start-btn">New Game</button>
       <button id="pre-load-btn" style="margin-top: 15px;">Load Game</button>
     </div>
 
     <!-- New Screen: Load Game (hidden until Load Game clicked on pre-start) -->
-    <div id="load-game-screen" style="display:none; flex-direction:column; align-items:center; justify-content:center; gap: 24px; position:absolute; inset:0; background: #0c0906; z-index:3;">
-      <h2 style="color: #e8c87a; font-family: Georgia, serif; font-size: 36px; letter-spacing: 8px; text-transform: uppercase; text-shadow: 0 0 20px rgba(232,200,122,0.4); margin-bottom: 10px;">Load Game</h2>
-      <div id="load-game-list-container" style="text-align: left; width: 600px; max-width: 90%; max-height: 50vh; overflow-y: auto; background: rgba(16, 12, 8, 0.95); padding: 24px; border-radius: 8px; border: 2px solid rgba(232, 200, 122, 0.4); box-shadow: 0 0 40px rgba(0,0,0,0.8);">
+    <div id="load-game-screen"
+      style="display:none; flex-direction:column; align-items:center; justify-content:center; gap: 24px; position:absolute; inset:0; background: #0c0906; z-index:3;">
+      <h2
+        style="color: #e8c87a; font-family: Georgia, serif; font-size: 36px; letter-spacing: 8px; text-transform: uppercase; text-shadow: 0 0 20px rgba(232,200,122,0.4); margin-bottom: 10px;">
+        Load Game</h2>
+      <div id="load-game-list-container"
+        style="text-align: left; width: 600px; max-width: 90%; max-height: 50vh; overflow-y: auto; background: rgba(16, 12, 8, 0.95); padding: 24px; border-radius: 8px; border: 2px solid rgba(232, 200, 122, 0.4); box-shadow: 0 0 40px rgba(0,0,0,0.8);">
         <div id="load-game-list" class="mm-saves-list"></div>
       </div>
       <button id="load-game-cancel-btn" style="margin-top: 20px;">Back</button>
@@ -2827,72 +2833,73 @@
               <div class="sb-detail-empty">Select a spell to view its details</div>
             </div>
           </div>
-        <div class="spellbook-corner spellbook-corner--bl"></div>
-      </div>
-      <!-- Book spine -->
-      <div class="spellbook-spine">
-        <div class="spellbook-spine-rib"></div>
-        <div class="spellbook-spine-rib"></div>
-        <div class="spellbook-spine-rib"></div>
-        <div class="spellbook-spine-rib"></div>
-      </div>
-      <!-- Right page: slot assignments -->
-      <div class="spellbook-page spellbook-right-page">
-        <div class="spellbook-page-content">
-          <div class="spellbook-page-title">Prepared Spells</div>
-          <div class="sb-slots-hint" id="sb-slots-hint">Select a spell on the left, then click a slot to assign it.</div>
-          <!-- Hand slots -->
-          <div class="sb-hands-row">
-            <div class="sb-hand-slot" data-equip-slot="leftHand" id="sb-slot-leftHand">
-              <div class="sb-slot-icon-wrap"></div>
-              <div class="sb-slot-name-label">Left Hand</div>
-              <div class="sb-slot-item-name"></div>
-            </div>
-            <div class="sb-hand-slot" data-equip-slot="rightHand" id="sb-slot-rightHand">
-              <div class="sb-slot-icon-wrap"></div>
-              <div class="sb-slot-name-label">Right Hand</div>
-              <div class="sb-slot-item-name"></div>
-            </div>
-          </div>
-          <!-- Skill slots -->
-          <div class="sb-skill-section-title">Action Slots</div>
-          <div class="sb-skill-slots">
-            <div class="sb-skill-slot" data-equip-slot="skill" id="sb-slot-skill">
-              <div class="sb-slot-icon-wrap"></div>
-              <div class="sb-skill-roman">I</div>
-              <div class="sb-slot-item-name"></div>
-            </div>
-            <div class="sb-skill-slot" data-equip-slot="skill2" id="sb-slot-skill2">
-              <div class="sb-slot-icon-wrap"></div>
-              <div class="sb-skill-roman">II</div>
-              <div class="sb-slot-item-name"></div>
-            </div>
-            <div class="sb-skill-slot" data-equip-slot="skill3" id="sb-slot-skill3">
-              <div class="sb-slot-icon-wrap"></div>
-              <div class="sb-skill-roman">III</div>
-              <div class="sb-slot-item-name"></div>
-            </div>
-            <div class="sb-skill-slot" data-equip-slot="skill4" id="sb-slot-skill4">
-              <div class="sb-slot-icon-wrap"></div>
-              <div class="sb-skill-roman">IV</div>
-              <div class="sb-slot-item-name"></div>
-            </div>
-            <div class="sb-skill-slot" data-equip-slot="skill5" id="sb-slot-skill5">
-              <div class="sb-slot-icon-wrap"></div>
-              <div class="sb-skill-roman">V</div>
-              <div class="sb-slot-item-name"></div>
-            </div>
-            <div class="sb-skill-slot" data-equip-slot="skill6" id="sb-slot-skill6">
-              <div class="sb-slot-icon-wrap"></div>
-              <div class="sb-skill-roman">VI</div>
-              <div class="sb-slot-item-name"></div>
-            </div>
-          </div>
-          <button class="sb-close-btn" id="spell-sel-close">&times; Close</button>
+          <div class="spellbook-corner spellbook-corner--bl"></div>
         </div>
-        <div class="spellbook-corner spellbook-corner--br"></div>
-      </div>
-    </div><!-- end spellbook-modal -->
+        <!-- Book spine -->
+        <div class="spellbook-spine">
+          <div class="spellbook-spine-rib"></div>
+          <div class="spellbook-spine-rib"></div>
+          <div class="spellbook-spine-rib"></div>
+          <div class="spellbook-spine-rib"></div>
+        </div>
+        <!-- Right page: slot assignments -->
+        <div class="spellbook-page spellbook-right-page">
+          <div class="spellbook-page-content">
+            <div class="spellbook-page-title">Prepared Spells</div>
+            <div class="sb-slots-hint" id="sb-slots-hint">Select a spell on the left, then click a slot to assign it.
+            </div>
+            <!-- Hand slots -->
+            <div class="sb-hands-row">
+              <div class="sb-hand-slot" data-equip-slot="leftHand" id="sb-slot-leftHand">
+                <div class="sb-slot-icon-wrap"></div>
+                <div class="sb-slot-name-label">Left Hand</div>
+                <div class="sb-slot-item-name"></div>
+              </div>
+              <div class="sb-hand-slot" data-equip-slot="rightHand" id="sb-slot-rightHand">
+                <div class="sb-slot-icon-wrap"></div>
+                <div class="sb-slot-name-label">Right Hand</div>
+                <div class="sb-slot-item-name"></div>
+              </div>
+            </div>
+            <!-- Skill slots -->
+            <div class="sb-skill-section-title">Action Slots</div>
+            <div class="sb-skill-slots">
+              <div class="sb-skill-slot" data-equip-slot="skill" id="sb-slot-skill">
+                <div class="sb-slot-icon-wrap"></div>
+                <div class="sb-skill-roman">I</div>
+                <div class="sb-slot-item-name"></div>
+              </div>
+              <div class="sb-skill-slot" data-equip-slot="skill2" id="sb-slot-skill2">
+                <div class="sb-slot-icon-wrap"></div>
+                <div class="sb-skill-roman">II</div>
+                <div class="sb-slot-item-name"></div>
+              </div>
+              <div class="sb-skill-slot" data-equip-slot="skill3" id="sb-slot-skill3">
+                <div class="sb-slot-icon-wrap"></div>
+                <div class="sb-skill-roman">III</div>
+                <div class="sb-slot-item-name"></div>
+              </div>
+              <div class="sb-skill-slot" data-equip-slot="skill4" id="sb-slot-skill4">
+                <div class="sb-slot-icon-wrap"></div>
+                <div class="sb-skill-roman">IV</div>
+                <div class="sb-slot-item-name"></div>
+              </div>
+              <div class="sb-skill-slot" data-equip-slot="skill5" id="sb-slot-skill5">
+                <div class="sb-slot-icon-wrap"></div>
+                <div class="sb-skill-roman">V</div>
+                <div class="sb-slot-item-name"></div>
+              </div>
+              <div class="sb-skill-slot" data-equip-slot="skill6" id="sb-slot-skill6">
+                <div class="sb-slot-icon-wrap"></div>
+                <div class="sb-skill-roman">VI</div>
+                <div class="sb-slot-item-name"></div>
+              </div>
+            </div>
+            <button class="sb-close-btn" id="spell-sel-close">&times; Close</button>
+          </div>
+          <div class="spellbook-corner spellbook-corner--br"></div>
+        </div>
+      </div><!-- end spellbook-modal -->
     </div><!-- end spellbook-wrapper -->
   </div>
 

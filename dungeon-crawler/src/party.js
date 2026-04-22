@@ -1091,6 +1091,14 @@ export function getAttackSpeedMultiplier(member) {
     const def = STATUS_EFFECT_DEFS[d.effectId];
     if (def?.attackSpeedMultiplier) mult *= def.attackSpeedMultiplier;
   });
+
+  if (member.stance) {
+    const stance = STANCES[member.stance];
+    if (stance?.effects?.attackSpeedMultiplier) {
+      mult *= stance.effects.attackSpeedMultiplier;
+    }
+  }
+
   return mult;
 }
 
