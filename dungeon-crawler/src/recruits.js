@@ -179,6 +179,10 @@ export function initRecruits(scene, camera) {
                         playStanceVideo('/videos/stances/curatio-stance.mp4', 'Curatio');
                     } else if (recruitId === 'recruit_5') {
                         playStanceVideo('/videos/stances/talon-stance.mp4', 'Talon');
+                    } else if (recruitId === 'recruit_2') {
+                        playStanceVideo('/videos/stances/retribution-stance.mp4', 'Retribution');
+                    } else if (recruitId === 'recruit_3') {
+                        playStanceVideo('/videos/stances/slayer-stamce.mp4', 'Slayer');
                     }
                 }
                 break;
