@@ -53,7 +53,7 @@ const textureLoader = new THREE.TextureLoader();
 textureLoader.setCrossOrigin('anonymous');
 
 
-const stoneWallTex = textureLoader.load(asset('/textures/wall1.jpg'));
+const stoneWallTex = textureLoader.load(asset('/textures/wall.png'));
 stoneWallTex.wrapS = stoneWallTex.wrapT = THREE.RepeatWrapping;
 stoneWallTex.anisotropy = 16;
 

@@ -2136,6 +2136,18 @@ window.loadLevel = function (levelNum) {
       asset('/textures/wet-wall.png'),
       asset('/textures/black-stone2.png')
     );
+
+    // Level 2: Ice area (inner walls only)
+    const iceFloors = [
+      [7, 2], [7, 3], [7, 4], [7, 9], [7, 10], [7, 11], [7, 12], [7, 13], [7, 14],
+      [8, 2], [8, 3], [8, 4], [8, 5], [8, 6], [8, 7], [8, 8], [8, 9], [8, 10], [8, 11], [8, 12], [8, 13], [8, 14],
+      [9, 2], [9, 3], [9, 4], [9, 9], [9, 10], [9, 11], [9, 12], [9, 13], [9, 14]
+    ];
+    buildInnerTextureZone(
+      scene,
+      iceFloors,
+      asset('/textures/ice-wall.png')
+    );
   }
 
   // Level 4: vault area (rows 0–5) and the passage corridor (rows 6–11) use demon-wall / black-stone2.
