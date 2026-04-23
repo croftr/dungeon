@@ -83,12 +83,12 @@
     "name": "Mummy",
     "family": "undead",
     "description": "Bound in cursed wrappings and seething with ancient plague, the Mummy's touch rots flesh to blackened ruin. They wander burial halls in eternal unrest, despising all warmth and life.",
-    "hp": 100,
-    "defence": 6,
-    "xp": 100,
+    "hp": 120,
+    "defence": 7,
+    "xp": 110,
     "attackSpeed": 1,
     "stats": {
-      "strength": 13,
+      "strength": 14,
       "dexterity": 13,
       "vitality": 10,
       "intelligence": 5,
@@ -457,8 +457,8 @@
         ]
       }
     ],
-    "hp": 280,
-    "defence": 10,
+    "hp": 220,
+    "defence": 9,
     "damageReduction": 0.10,
     "xp": 500,
     "attackSpeed": 1,
