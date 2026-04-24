@@ -45,6 +45,12 @@ export function getStancePortraitPath(member) {
 export function getAvailableStances(member) {
   if (!member) return [];
   if (Array.isArray(member.availableStances)) return member.availableStances;
+  return Array.isArray(member.unlockedStances) ? member.unlockedStances : [];
+}
+
+/** The full pool of stances a character is eligible to unlock, from their recruit definition. */
+export function getEligibleStances(member) {
+  if (!member) return [];
   const recruit = RECRUITS_DATA.find(r => r.name === member.name);
   return recruit?.stances ?? [];
 }

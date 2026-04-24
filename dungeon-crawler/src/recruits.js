@@ -6,8 +6,22 @@ import { CELL, WALL_H, findCell } from './map.js';
 import { isInFrontOfPlayer } from './player.js';
 import { interactables } from './objects.js';
 import RECRUITS_DATA from './data/recruits.json';
+import STANCES from './data/stances.json';
 import { checkLevelUp } from './leveling.js';
 import { asset } from './assets.js';
+
+// Stance id → video filename (without extension). Some files have historical typos
+// ("hearseeker-stance", "slayer-stamce") — preserve them because the assets exist under those names.
+const STANCE_VIDEO_FILENAMES = {
+  viper: 'viper-stance',
+  heartseeker: 'hearseeker-stance',
+  vengeance: 'vengeance-stance',
+  overclock: 'overclocked-stance',
+  curatio: 'curatio-stance',
+  talon: 'talon-stance',
+  retribution: 'retribution-stance',
+  slayer: 'slayer-stamce',
+};
 
 const _recruitRaycaster = new THREE.Raycaster();
 const _recruitMouse = new THREE.Vector2();
@@ -45,6 +59,7 @@ export const RECRUITS = RECRUITS_DATA.map(r => ({
     ...r,
     startingSkills: (r.startingSkills || []).map(hydrateSkillName),
     startingSpells: r.startingSpells || [],
+    unlockedStances: [],
 }));
 
 let stanceVideoContainer = null;
@@ -167,23 +182,9 @@ export function initRecruits(scene, camera) {
                 const r = RECRUITS.find(x => x.id === recruitId);
                 // Only allow interaction if the player is directly facing the recruit
                 if (r && isInFrontOfPlayer(r.gridRow, r.gridCol, 1)) {
-                    if (recruitId === 'recruit_7') {
-                        playStanceVideo('/videos/stances/viper-stance.mp4', 'Viper');
-                    } else if (recruitId === 'recruit_1') {
-                        playStanceVideo('/videos/stances/hearseeker-stance.mp4', 'HeartSeeker');
-                    } else if (recruitId === 'recruit_8') {
-                        playStanceVideo('/videos/stances/vengeance-stance.mp4', 'Vengeance');
-                    } else if (recruitId === 'recruit_6') {
-                        playStanceVideo('/videos/stances/overclocked-stance.mp4', 'Overclocked');
-                    } else if (recruitId === 'recruit_4') {
-                        playStanceVideo('/videos/stances/curatio-stance.mp4', 'Curatio');
-                    } else if (recruitId === 'recruit_5') {
-                        playStanceVideo('/videos/stances/talon-stance.mp4', 'Talon');
-                    } else if (recruitId === 'recruit_2') {
-                        playStanceVideo('/videos/stances/retribution-stance.mp4', 'Retribution');
-                    } else if (recruitId === 'recruit_3') {
-                        playStanceVideo('/videos/stances/slayer-stamce.mp4', 'Slayer');
-                    }
+                    // Preview: play the first stance this recruit has a video for.
+                    const previewStance = (r.stances ?? []).find(id => STANCE_VIDEO_FILENAMES[id]);
+                    if (previewStance) playStanceVideo(previewStance);
                 }
                 break;
             }
@@ -202,7 +203,16 @@ export function updateRecruitsMeshState() {
     });
 }
 
-function playStanceVideo(videoUrl, stanceName) {
+export function playStanceVideo(stanceId) {
+    const filename = STANCE_VIDEO_FILENAMES[stanceId];
+    if (!filename || !stanceVideoContainer) return false;
+
+    // Play learning sound immediately as the video starts
+    new Audio(asset('/sounds/actions/learn-stance.mp3')).play().catch(e => console.warn('Audio play failed:', e));
+
+    const stanceDef = STANCES[stanceId];
+    const stanceName = stanceDef?.name?.replace(/\s*Stance\s*$/i, '') ?? stanceId;
+    const videoUrl = `/videos/stances/${filename}.mp4`;
     stanceVideoContainer.innerHTML = `
         <video id="stance-video" src="${asset(videoUrl)}" autoplay style="max-width: 100%; max-height: 80%; border-radius: 8px; box-shadow: 0 0 20px rgba(200, 168, 74, 0.5);"></video>
         <div id="stance-text-container" style="text-align: center; margin-top: 30px; opacity: 0; transition: opacity 2s ease-in;">
@@ -237,6 +247,11 @@ function playStanceVideo(videoUrl, stanceName) {
             showText();
         }
     };
+    return true;
+}
+
+export function hasStanceVideo(stanceId) {
+    return !!STANCE_VIDEO_FILENAMES[stanceId];
 }
 
 
@@ -252,6 +267,7 @@ export function recruitCharacter(r) {
         id: freeIndex,
         isEmpty: false,
         name: r.name,
+        job: r.job,
         stats: { ...r.stats },
         // Leveling: characters start at level 0 with no skills
         // startXp in recruits.json can be set to a non-zero value for testing
@@ -264,6 +280,8 @@ export function recruitCharacter(r) {
         pendingNodeChoice: null,
         skills: r.startingSkills ? JSON.parse(JSON.stringify(r.startingSkills)) : [],
         spells: r.startingSpells ? r.startingSpells.map(name => ({name})) : [],
+        unlockedStances: [...(r.unlockedStances ?? [])],
+        stance: null,
         leftHand: r.leftHand,
         rightHand: r.rightHand,
         ammo: r.ammo,
@@ -299,12 +317,23 @@ export function recruitCharacter(r) {
 //  SAVE / RESTORE
 // ─────────────────────────────────────────────
 export function captureRecruits() {
-  return Object.fromEntries(RECRUITS.map(r => [r.id, !!r.isRecruited]));
+  return Object.fromEntries(RECRUITS.map(r => [r.id, {
+    isRecruited: !!r.isRecruited,
+    unlockedStances: [...(r.unlockedStances ?? [])],
+  }]));
 }
 
 export function restoreRecruits(data) {
   if (!data) return;
   for (const r of RECRUITS) {
-    if (r.id in data) r.isRecruited = data[r.id];
+    if (!(r.id in data)) continue;
+    const entry = data[r.id];
+    if (typeof entry === 'boolean') {
+      r.isRecruited = entry;
+      r.unlockedStances = [];
+    } else if (entry && typeof entry === 'object') {
+      r.isRecruited = !!entry.isRecruited;
+      r.unlockedStances = Array.isArray(entry.unlockedStances) ? [...entry.unlockedStances] : [];
+    }
   }
 }

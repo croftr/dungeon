@@ -25,6 +25,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { SPELLS } from './spells.js';
+import RECRUITS_DATA from './data/recruits.json';
 import POTIONS from './data/items/potions.json';
 import LOOT from './data/items/loot.json';
 import HEAD from './data/items/head.json';
@@ -42,6 +43,7 @@ import AMMO from './data/items/ammo.json';
 import SKILLS from './data/items/skill-items.json';
 import SPELLBOOKS from './data/items/spellbooks.json';
 import PARCHMENTS from './data/items/parchments.json';
+import STANCE_TOMES from './data/items/stance-tomes.json';
 
 export const ACTIONS = Object.freeze({
   SWIPE: 'swipe',
@@ -79,6 +81,7 @@ export const ITEMS = [
   ...SKILLS,
   ...SPELLBOOKS,
   ...PARCHMENTS,
+  ...STANCE_TOMES,
   ...SPELLS,
 ];
 
@@ -89,4 +92,38 @@ export const ITEMS = [
 
 export function getItemDef(name) {
   return ITEMS.find((item) => item.name === name) ?? null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  JOB-BASED RESTRICTIONS (tomes, weapons, armor)
+//
+//  Items can opt into a class restriction by adding a `job` field. Accepts
+//  either a single key ("paladin") or an array (["paladin", "warrior"]).
+//  Job keys match the lowercase-hyphenated forms in public/skills/jobs/*.
+//  Canonical keys: barbarian, hunter, paladin, ranger, war-dancer, warrior,
+//  white-mage, wizard.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function normalizeJob(job) {
+  if (!job) return '';
+  return String(job).toLowerCase().replace(/\s+/g, '-');
+}
+
+export function getMemberJob(member) {
+  if (!member) return '';
+  if (member.job) return normalizeJob(member.job);
+  const recruit = RECRUITS_DATA.find(r => r.name === member.name);
+  return normalizeJob(recruit?.job);
+}
+
+/**
+ * Returns true if `member` is allowed to use `itemDef` based on its job field.
+ * Items without a `job` field are unrestricted (returns true).
+ */
+export function canUseItemByJob(member, itemDef) {
+  if (!itemDef?.job) return true;
+  const memberJob = getMemberJob(member);
+  if (!memberJob) return false;
+  const allowed = Array.isArray(itemDef.job) ? itemDef.job : [itemDef.job];
+  return allowed.some(j => normalizeJob(j) === memberJob);
 }

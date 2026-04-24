@@ -1,6 +1,6 @@
 import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getAttackSpeedMultiplier, hasEffectFlag, breakPartyUnseen, showMemberHeal, showMemberSpHeal, getEffectiveStats } from './party.js';
 import { showInlineHelp } from './help.js';
-import { getItemDef } from './items.js';
+import { getItemDef, canUseItemByJob } from './items.js';
 import { getHqDefenceBonus, scaleHqPotionEffect, getHqEffectBonus, hqDisplayName } from './crafting.js';
 import { SPELLS } from './spells.js';
 import { STATUS_EFFECT_DEFS } from './status-effects.js';
@@ -18,7 +18,8 @@ import SPELL_TYPE_ICONS from './data/spell-type-icons.json';
 import { isInFrontOfPlayer, player } from './player.js';
 import { isAlchemyModalOpen, addItemToAlchemy } from './objects.js';
 import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude, calcOnHitChance } from './combat-rules.js';
-import { showStanceMenu, getAvailableStances, getSpellCooldownMultiplier, getStanceCureHealBonus, hasStanceDoubleAttack } from './stance.js';
+import { showStanceMenu, getAvailableStances, getEligibleStances, getSpellCooldownMultiplier, getStanceCureHealBonus, hasStanceDoubleAttack } from './stance.js';
+import { playStanceVideo, RECRUITS } from './recruits.js';
 import { playCritSound, playSkillSound, playItemSound, playLevelUpConfirmSound, playInventorySortSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { skillsState } from './skills-state.js';
@@ -1093,7 +1094,7 @@ function populateTooltip(obj, showBuyPrice = false) {
   const def = getItemDef(obj.name);
 
   // ── Potions & loot: simplified tooltip (description + value + weight only) ──
-  const isConsumable = def?.type === 'potion' || def?.slot === 'loot';
+  const isConsumable = def?.type === 'potion' || def?.slot === 'loot' || def?.type === 'stance-tome';
   if (isConsumable) {
     slotEl.textContent = '';
     actionEl.textContent = '';
@@ -1891,6 +1892,50 @@ function _usePotion(memberIndex, invIndex) {
   refreshPartyCards();
 }
 
+function _useStanceTome(memberIndex, invIndex) {
+  const m = party[memberIndex];
+  if (!m || m.isEmpty || m.isDead) return;
+  if (hasEffectFlag(m, 'preventsAction')) {
+    showMessage(`${m.name} cannot use items!`);
+    return;
+  }
+  const item = m.inventory[invIndex];
+  if (!item) return;
+  const def = getItemDef(item.name);
+  if (def?.type !== 'stance-tome' || !def.stanceId) return;
+
+  if (!canUseItemByJob(m, def)) {
+    showMessage(`Only ${Array.isArray(def.job) ? def.job.join('/') : def.job}s can study ${def.name}.`);
+    return;
+  }
+
+  const eligible = getEligibleStances(m);
+  if (!eligible.includes(def.stanceId)) {
+    showMessage(`${m.name} cannot learn ${def.name}.`);
+    return;
+  }
+
+  if (!Array.isArray(m.unlockedStances)) m.unlockedStances = [];
+  if (m.unlockedStances.includes(def.stanceId)) {
+    showMessage(`${m.name} already knows that stance.`);
+    return;
+  }
+
+  m.unlockedStances.push(def.stanceId);
+  const recruit = RECRUITS.find(r => r.name === m.name);
+  if (recruit) {
+    if (!Array.isArray(recruit.unlockedStances)) recruit.unlockedStances = [];
+    if (!recruit.unlockedStances.includes(def.stanceId)) {
+      recruit.unlockedStances.push(def.stanceId);
+    }
+  }
+
+  m.inventory[invIndex] = null;
+  playStanceVideo(def.stanceId);
+  refreshPartyCards();
+  renderModal(memberIndex);
+}
+
 /**
  * Left-click: equip immediately.
  * Shift+click: quick-give to the next party member.
@@ -1944,6 +1989,11 @@ function onInventoryCellClick(e) {
     return;
   }
 
+  if (def?.type === 'stance-tome') {
+    showMessage(`Right-click ${item.name} to study it.`);
+    return;
+  }
+
   if (item.name === 'Gold Coins') {
     const goldVal = def?.value ?? 0;
     addGold(goldVal);
@@ -1985,6 +2035,7 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
   const equipBtn = document.getElementById('inv-ctx-equip');
   const learnBtn = document.getElementById('inv-ctx-learn');
   const readBtn = document.getElementById('inv-ctx-read');
+  const studyBtn = document.getElementById('inv-ctx-study');
   const m = party[activeCharIndex];
   const item = m.inventory[invIndex];
   const def = item ? getItemDef(item.name) : null;
@@ -1998,6 +2049,7 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
   equipBtn.style.display = 'none';
   learnBtn.style.display = 'none';
   if (readBtn) readBtn.style.display = 'none';
+  if (studyBtn) studyBtn.style.display = 'none';
   if (dropBtn) dropBtn.style.display = 'none';
 
   // ── Loadout B equip buttons ──
@@ -2024,6 +2076,15 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
       useBtn.style.display = 'block';
       useBtn.onclick = () => {
         _usePotion(activeCharIndex, _ctxInvIndex);
+        _hideContextMenu();
+      };
+    }
+  } else if (def?.type === 'stance-tome') {
+    // Job-restricted: only show Study if this member's job can read the tome.
+    if (studyBtn && canUseItemByJob(m, def)) {
+      studyBtn.style.display = 'block';
+      studyBtn.onclick = () => {
+        _useStanceTome(activeCharIndex, _ctxInvIndex);
         _hideContextMenu();
       };
     }

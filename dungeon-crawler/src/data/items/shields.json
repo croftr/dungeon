@@ -27,6 +27,10 @@
         "weaponType": "shield",
         "staminaDrain": 1,
         "baseDamage": 2,
+        "job": [
+            "paladin",
+            "warrior"
+        ],
         "statWeights": {
             "str": 1,
             "dex": 0

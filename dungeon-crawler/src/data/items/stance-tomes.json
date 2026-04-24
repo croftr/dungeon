@@ -1,0 +1,132 @@
+[
+    {
+        "name": "Tome of the Viper",
+        "icon": "/icons/tomes/war-dancer.webp",
+        "job": "war-dancer",
+        "description": "Ancient serpent-lore bound in scaled leather. Teaches the Viper Stance to an eligible warrior — poison ticks deal +2 damage when attacking with a poison weapon.",
+        "type": "stance-tome",
+        "stanceId": "viper",
+        "value": 1,
+        "weight": 0.5
+    },
+    {
+        "name": "Tome of the Ghost",
+        "job": "war-dancer",
+        "icon": "/icons/tomes/war-dancer.webp",
+        "description": "A whisper-thin manuscript that seems to fade from sight. Teaches the Ghost Stance — monster hit chance reduced by 15%.",
+        "type": "stance-tome",
+        "stanceId": "ghost",
+        "value": 1,
+        "weight": 0.5
+    },
+    {
+        "name": "Tome of the Inquisitor",
+        "job": "paladin",
+        "icon": "/icons/tomes/paladin.webp",
+        "description": "Heavy tome clasped in iron. Teaches the Inquisitor Stance — +40% resistance to all on-hit status effects.",
+        "type": "stance-tome",
+        "stanceId": "inquisitor",
+        "value": 1,
+        "weight": 0.5
+    },
+    {
+        "name": "Tome of the Holy",
+        "job": "paladin",
+        "icon": "/icons/tomes/paladin.webp",
+        "description": "Pages gleaming with sanctified light. Teaches the Holy Stance — +25% damage dealt to undead monsters.",
+        "type": "stance-tome",
+        "stanceId": "holy",
+        "value": 1,
+        "weight": 0.5
+    },
+    {
+        "name": "Tome of the Heartseeker",
+        "job": "hunter",
+        "icon": "/icons/tomes/hunter.webp",
+        "description": "A tattered hunter's log of vital strikes. Teaches the Heartseeker Stance — +10% critical hit chance on attacks.",
+        "type": "stance-tome",
+        "stanceId": "heartseeker",
+        "value": 1,
+        "weight": 0.5
+    },
+    {
+        "name": "Tome of Vengeance",
+        "job": "white-mage",
+        "icon": "/icons/tomes/white-mage.webp",
+        "description": "Pages still crackling with arcane wrath. Teaches the Vengeance Stance — +50% damage on damage-dealing spells.",
+        "type": "stance-tome",
+        "stanceId": "vengeance",
+        "value": 1,
+        "weight": 0.5
+    },
+    {
+        "name": "Tome of SpellSurge",
+        "job": "white-mage",
+        "icon": "/icons/tomes/white-mage.webp",
+        "description": "A scholar's treatise on accelerated casting. Teaches the SpellSurge Stance — -30% cooldown on all spells.",
+        "type": "stance-tome",
+        "stanceId": "spellsurge",
+        "value": 1,
+        "weight": 0.5
+    },
+    {
+        "name": "Tome of Retribution",
+        "job": "paladin",
+        "icon": "/icons/tomes/paladin.webp",
+        "description": "A knightly codex bound in mirrored steel. Teaches the Retribution Stance — reflects 25% of incoming damage back onto the attacker.",
+        "type": "stance-tome",
+        "stanceId": "retribution",
+        "value": 1,
+        "weight": 0.5
+    },
+    {
+        "name": "Tome of Curatio",
+        "job": "wizard",
+        "icon": "/icons/tomes/wizard.webp",
+        "description": "A healer's bestiary of restorative incantations. Teaches the Curatio Stance — cure and heal spells restore +6 HP; Regeneration heals +3 HP per tick.",
+        "type": "stance-tome",
+        "stanceId": "curatio",
+        "value": 1,
+        "weight": 0.5
+    },
+    {
+        "name": "Tome of the Slayer",
+        "job": "warrior",
+        "icon": "/icons/tomes/warrior.webp",
+        "description": "A blood-spattered war-chant carved into stone. Teaches the Slayer Stance — enters a state of roaring fury, boosting all damage dealt by 80%.",
+        "type": "stance-tome",
+        "stanceId": "slayer",
+        "value": 1,
+        "weight": 0.5
+    },
+    {
+        "name": "Tome of the Talon",
+        "job": "barbarian",
+        "icon": "/icons/tomes/barbarian.webp",
+        "description": "A predator's meditation on striking twice. Teaches the Talon Stance — strike twice with every attack.",
+        "type": "stance-tome",
+        "stanceId": "talon",
+        "value": 1,
+        "weight": 0.5
+    },
+    {
+        "name": "Tome of Overclock",
+        "job": "ranger",
+        "icon": "/icons/tomes/ranger.webp",
+        "description": "A frantic mechanist's journal. Teaches the Overclock Stance — doubles attack speed at the cost of stamina and focus.",
+        "type": "stance-tome",
+        "stanceId": "overclock",
+        "value": 1,
+        "weight": 0.5
+    },
+    {
+        "name": "Tome of Bloodgrudge",
+        "job": "ranger",
+        "icon": "/icons/tomes/ranger.webp",
+        "description": "A vengeful ledger of wounds repaid. Teaches the Bloodgrudge Stance — steal 10 HP from enemies on successful hits.",
+        "type": "stance-tome",
+        "stanceId": "bloodgrudge",
+        "value": 1,
+        "weight": 0.5
+    }
+]
