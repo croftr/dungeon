@@ -1,6 +1,6 @@
 import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getAttackSpeedMultiplier, hasEffectFlag, breakPartyUnseen, showMemberHeal, showMemberSpHeal, getEffectiveStats } from './party.js';
 import { showInlineHelp } from './help.js';
-import { getItemDef, canUseItemByJob } from './items.js';
+import { getItemDef, canUseItemByJob, normalizeJob } from './items.js';
 import { getHqDefenceBonus, scaleHqPotionEffect, getHqEffectBonus, hqDisplayName } from './crafting.js';
 import { SPELLS } from './spells.js';
 import { STATUS_EFFECT_DEFS } from './status-effects.js';
@@ -972,6 +972,17 @@ function positionTooltip(mouseX, mouseY, preferAbove = false) {
   panel.style.top = y + 'px';
 }
 
+function _prettyJob(key) {
+  const n = normalizeJob(key);
+  if (!n) return '';
+  return n.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+}
+
+function _formatJobList(job) {
+  const list = Array.isArray(job) ? job : [job];
+  return list.map(_prettyJob).filter(Boolean).join(' / ');
+}
+
 function populateTooltip(obj, showBuyPrice = false) {
   if (!obj) return;
   const isSkill = !!obj.isSkill;
@@ -1077,6 +1088,10 @@ function populateTooltip(obj, showBuyPrice = false) {
             <span>${showBuyPrice ? 'Buy Price' : 'Sell Value'}</span>
             <span id="item-detail-value">—</span>
         </div>
+        <div class="detail-stat-row" id="detail-row-job">
+            <span>Class</span>
+            <span id="item-detail-job">—</span>
+        </div>
         <div id="detail-row-skillbonus" class="detail-skillbonus-list"></div>
         <div id="detail-row-onhit" class="detail-onhit-list"></div>
         <div id="detail-row-familybonus" class="detail-familybonus-list"></div>
@@ -1133,6 +1148,12 @@ function populateTooltip(obj, showBuyPrice = false) {
       valueDisplay = showBuyPrice ? def.value : Math.max(1, Math.ceil(def.value / 10));
     }
 
+    const jobRow = def.job
+      ? `<div class="detail-stat-row" id="detail-row-job">
+          <span>Class</span>
+          <span id="item-detail-job">${_formatJobList(def.job)}</span>
+      </div>`
+      : '';
     statsEl.innerHTML = `
       <div class="detail-stat-row" id="detail-row-weight">
           <span>Weight</span>
@@ -1142,6 +1163,7 @@ function populateTooltip(obj, showBuyPrice = false) {
           <span>${showBuyPrice ? 'Buy Price' : 'Sell Value'}</span>
           <span id="item-detail-value">${valueDisplay} gp</span>
       </div>
+      ${jobRow}
     `;
     return;
   }
@@ -1174,6 +1196,11 @@ function populateTooltip(obj, showBuyPrice = false) {
   document.getElementById('detail-row-scaling').style.display = hasScaling ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-mod').style.display = isAmmo ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-type').style.display = isAmmo ? 'flex' : 'none';
+  const hasJob = !!def?.job;
+  document.getElementById('detail-row-job').style.display = hasJob ? 'flex' : 'none';
+  if (hasJob) {
+    document.getElementById('item-detail-job').textContent = _formatJobList(def.job);
+  }
 
   const slotLabelEl = document.getElementById('detail-row-statchange').querySelector('span:first-child');
   slotLabelEl.textContent = isSpellbook ? 'Requires' : 'Stat Change';
@@ -1377,6 +1404,13 @@ function _equipItem(memberIndex, invIndex) {
   }
   let item = m.inventory[invIndex];
   if (!item) return;
+
+  const def = getItemDef(item.name);
+  if (def && !canUseItemByJob(m, def)) {
+    const jobs = Array.isArray(def.job) ? def.job.join('/') : def.job;
+    showMessage(`Only ${jobs}s can equip ${item.name}.`);
+    return;
+  }
 
   m.inventory[invIndex] = null;
 
@@ -1654,6 +1688,11 @@ function _assignLoadoutBLeft(memberIndex, invIndex) {
   const item = m.inventory[invIndex];
   if (!item) return;
   const def = getItemDef(item.name);
+  if (def && !canUseItemByJob(m, def)) {
+    const jobs = Array.isArray(def.job) ? def.job.join('/') : def.job;
+    showMessage(`Only ${jobs}s can equip ${item.name}.`);
+    return;
+  }
   const slot = def?.slot ?? 'hand';
   if ((slot === 'hand' && !def?.rightHandOnly) || slot === 'bothHands') {
     const displaced = m.loadoutB.leftHand;
@@ -1681,6 +1720,11 @@ function _assignLoadoutBRight(memberIndex, invIndex) {
   const item = m.inventory[invIndex];
   if (!item) return;
   const def = getItemDef(item.name);
+  if (def && !canUseItemByJob(m, def)) {
+    const jobs = Array.isArray(def.job) ? def.job.join('/') : def.job;
+    showMessage(`Only ${jobs}s can equip ${item.name}.`);
+    return;
+  }
   const slot = def?.slot ?? 'hand';
   if (slot === 'hand' && !def?.leftHandOnly) {
     const displaced = m.loadoutB.rightHand;
@@ -1724,6 +1768,11 @@ function _assignLoadoutBSkill(memberIndex, invIndex) {
   if (!item) return;
   const def = getItemDef(item.name);
   if (def?.slot !== 'skill') return;
+  if (!canUseItemByJob(m, def)) {
+    const jobs = Array.isArray(def.job) ? def.job.join('/') : def.job;
+    showMessage(`Only ${jobs}s can equip ${item.name}.`);
+    return;
+  }
   const displaced = m.loadoutB.skill;
   m.loadoutB.skill = { name: item.name, slot: 'skill', type: def.type, delay: (def.cooldownMs ?? 0) / 1000 };
   m.inventory[invIndex] = displaced;
@@ -2039,6 +2088,7 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
   const m = party[activeCharIndex];
   const item = m.inventory[invIndex];
   const def = item ? getItemDef(item.name) : null;
+  const jobOk = def ? canUseItemByJob(m, def) : true;
 
   // ── Drop button (all inventory items) ──
   const dropBtn = document.getElementById('inv-ctx-drop');
@@ -2103,48 +2153,54 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
       _hideContextMenu();
     };
   } else if (def?.slot === 'skill') {
-    equipBtn.style.display = 'block';
-    equipBtn.onclick = () => {
-      _equipItem(activeCharIndex, _ctxInvIndex);
-      _hideContextMenu();
-    };
-    if (lbSkillBtn) {
-      lbSkillBtn.style.display = 'block';
-      lbSkillBtn.onclick = () => {
-        _assignLoadoutBSkill(activeCharIndex, _ctxInvIndex);
+    if (jobOk) {
+      equipBtn.style.display = 'block';
+      equipBtn.onclick = () => {
+        _equipItem(activeCharIndex, _ctxInvIndex);
         _hideContextMenu();
       };
-    }
-  } else if (def?.slot && def.slot !== 'loot' && def.slot !== 'skill' && def.slot !== 'spell' && def.type !== 'spellbook') {
-    equipBtn.style.display = 'block';
-    equipBtn.onclick = () => {
-      _equipItem(activeCharIndex, _ctxInvIndex);
-      _hideContextMenu();
-    };
-    // Show B-slot options for hand items
-    const handSlots = ['hand', 'bothHands'];
-    if (handSlots.includes(def.slot)) {
-      if (lbLeftBtn && !def.rightHandOnly && !def.leftHandOnly) {
-        lbLeftBtn.style.display = 'block';
-        lbLeftBtn.onclick = () => {
-          _assignLoadoutBLeft(activeCharIndex, _ctxInvIndex);
+      if (lbSkillBtn) {
+        lbSkillBtn.style.display = 'block';
+        lbSkillBtn.onclick = () => {
+          _assignLoadoutBSkill(activeCharIndex, _ctxInvIndex);
           _hideContextMenu();
         };
       }
-      if (lbRightBtn && def.slot !== 'bothHands' && !def.leftHandOnly) {
-        lbRightBtn.style.display = 'block';
-        lbRightBtn.onclick = () => {
-          _assignLoadoutBRight(activeCharIndex, _ctxInvIndex);
-          _hideContextMenu();
-        };
+    }
+  } else if (def?.slot && def.slot !== 'loot' && def.slot !== 'skill' && def.slot !== 'spell' && def.type !== 'spellbook') {
+    if (jobOk) {
+      equipBtn.style.display = 'block';
+      equipBtn.onclick = () => {
+        _equipItem(activeCharIndex, _ctxInvIndex);
+        _hideContextMenu();
+      };
+      // Show B-slot options for hand items
+      const handSlots = ['hand', 'bothHands'];
+      if (handSlots.includes(def.slot)) {
+        if (lbLeftBtn && !def.rightHandOnly && !def.leftHandOnly) {
+          lbLeftBtn.style.display = 'block';
+          lbLeftBtn.onclick = () => {
+            _assignLoadoutBLeft(activeCharIndex, _ctxInvIndex);
+            _hideContextMenu();
+          };
+        }
+        if (lbRightBtn && def.slot !== 'bothHands' && !def.leftHandOnly) {
+          lbRightBtn.style.display = 'block';
+          lbRightBtn.onclick = () => {
+            _assignLoadoutBRight(activeCharIndex, _ctxInvIndex);
+            _hideContextMenu();
+          };
+        }
       }
     }
   } else {
-    equipBtn.style.display = 'block';
-    equipBtn.onclick = () => {
-      _equipItem(activeCharIndex, _ctxInvIndex);
-      _hideContextMenu();
-    };
+    if (jobOk) {
+      equipBtn.style.display = 'block';
+      equipBtn.onclick = () => {
+        _equipItem(activeCharIndex, _ctxInvIndex);
+        _hideContextMenu();
+      };
+    }
   }
 
   // ── Alchemy Workshop button ──
