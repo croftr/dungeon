@@ -1118,5 +1118,90 @@
       }
     ],
     "uniqueArenaItem": "Demon's Eyes"
+  },
+  "summoned_skeleton": {
+    "name": "Summoned Skeleton",
+    "family": "undead",
+    "description": "Dragged from cold earth by fell magic, these shambling remnants fight with reckless abandon and collapse just as quickly. Individually feeble — but they rarely rise alone.",
+    "hp": 65,
+    "defence": 6,
+    "xp": 70,
+    "attackSpeed": 1.2,
+    "stats": {
+      "strength": 12,
+      "dexterity": 10,
+      "vitality": 6,
+      "intelligence": 3,
+      "resilience": 5
+    },
+    "drops": [
+      {
+        "item": "Life Essence",
+        "chance": 1
+      },
+      {
+        "item": "Mana Berry",
+        "chance": 0.3
+      }
+    ]
+  },
+  "crow_wizard": {
+    "name": "Crow Wizard",
+    "family": "avian",
+    "description": "A sinister sorcerer wrapped in corvid flesh, the Crow Wizard commands fire and shadow with equal cruelty. Its cawing incantations carry the stench of old magic — and those who hear its shriek often find their courage deserting them entirely.",
+    "hp": 280,
+    "defence": 12,
+    "damageReduction": 0.10,
+    "xp": 320,
+    "attackSpeed": 1.3,
+    "stats": {
+      "strength": 18,
+      "dexterity": 22,
+      "vitality": 16,
+      "intelligence": 26,
+      "resilience": 14
+    },
+    "specialAttacks": [
+      {
+        "name": "crowFireAoe",
+        "displayName": "Inferno Blast",
+        "description": "Channels dark arcane fire into a devastating blast, scorching the entire party for half damage.",
+        "aoe": true,
+        "damageMultiplier": 0.5
+      },
+      {
+        "name": "crowSpecial",
+        "displayName": "Shadow Talon",
+        "description": "Lashes out with shadow-infused talons at the front two party members with a chance to inflict fear.",
+        "aoe": false,
+        "specialAttackType": "frontTwo",
+        "damageMultiplier": 1.0,
+        "onHitEffects": [
+          {
+            "effectId": "fear",
+            "chance": 0.35,
+            "durationSec": 10
+          }
+        ]
+      }
+    ],
+    "drops": [
+      {
+        "item": "Life Essence",
+        "chance": 1
+      },
+      {
+        "item": "Mana Berry",
+        "chance": 0.5
+      },
+      {
+        "item": "Crow Feather",
+        "chance": 0.6
+      },
+      {
+        "item": "Crow Wizard Essence",
+        "chance": 1
+      }
+    ]
   }
 }

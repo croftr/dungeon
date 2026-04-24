@@ -1024,6 +1024,7 @@ export function initObjects(scene, camera) {
                             blueMember.inventory[blueIdx] = null;
                             _crystalShrineState = 2;
                             _swapCrystalShrine();
+                            playSoundByUrl(asset('/items/crystal-shrine/crystal-portal.mp3'), 0.9);
                             showMessage("The portal opens!");
                             if (window.playCrystalShrineRedBlueVideo) {
                                 window.playCrystalShrineRedBlueVideo(() => {
@@ -1060,6 +1061,7 @@ export function initObjects(scene, camera) {
                             redMember.inventory[redIdx] = null;
                             _crystalShrineState = 1;
                             _swapCrystalShrine();
+                            playSoundByUrl(asset('/items/crystal-shrine/crystal-portal.mp3'), 0.9);
                             if (window.playCrystalShrineRedVideo) {
                                 window.playCrystalShrineRedVideo(() => { });
                             }

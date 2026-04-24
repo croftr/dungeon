@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
-import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createIceCloud, createCrocodileSparkle, createHellSpawn, createBloodSplatter, createGreenBloodSplatter } from './particles.js';
+import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createIceCloud, createCrocodileSparkle, createHellSpawn, createBloodSplatter, createGreenBloodSplatter, createCrowWizardFireAoe, createCrowWizardCure, createCrowWizardFear } from './particles.js';
 import { CELL, isPassable } from './map.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
@@ -545,6 +545,57 @@ _applyMultiAttacks('Ice Mushroom', [
   },
 ]);
 
+_applyMultiAttacks('Summoned Skeleton', [
+  {
+    name: 'skeletonSlash',
+    glb: asset('/monsters/summoned-skeleton/attack.glb'),
+    sound: asset('/monsters/summoned-skeleton/skeleton-attack.mp3'),
+    soundTimings: [0.45],
+    damageTimings: [0.45],
+    weight: 1,
+  },
+]);
+
+_applyMultiAttacks('Crow Wizard', [
+  {
+    name: 'crowStrike',
+    glb: asset('/monsters/crow-wizard/standard-attack.glb'),
+    sound: asset('/monsters/crow-wizard/standard-attack.mp3'),
+    soundTimings: [0.4],
+    damageTimings: [0.4],
+    weight: 6,
+  },
+  {
+    name: 'crowFireAoe',
+    glb: asset('/monsters/crow-wizard/aoe-spell.glb'),
+    sound: asset('/monsters/crow-wizard/special-attack.mp3'),
+    soundTimings: [0.5],
+    damageTimings: [0.5],
+    weight: 2,
+    damageMultiplier: 0.5,
+    specialAttack: true,
+  },
+  {
+    name: 'crowSpecial',
+    glb: asset('/monsters/crow-wizard/special-attack.glb'),
+    sound: asset('/monsters/crow-wizard/special-attack.mp3'),
+    soundTimings: [0.45],
+    damageTimings: [0.45],
+    weight: 2,
+    specialAttackType: 'frontTwo',
+    specialAttack: true,
+    specialOnHitEffects: [{ effectId: 'fear', chance: 0.35, durationSec: 10 }],
+  },
+  {
+    name: 'crowCure',
+    glb: asset('/monsters/crow-wizard/cure-spell.glb'),
+    sound: asset('/monsters/crow-wizard/standard-attack.mp3'),
+    soundTimings: [0.5],
+    damageTimings: [0.5],
+    weight: 0,  // never picked randomly — triggered by half-HP only
+  },
+]);
+
 _applyMultiAttacks('Demon Spawn', [
   {
     name: 'demonSpawnAttack',
@@ -706,6 +757,98 @@ function _triggerTreemanAwakening(treeman, scene) {
     if (!treeman.alive) return;
     _applyMonsterSpecialAttack(treeman, variant);
   }, duration * pts * 1000);
+}
+
+/**
+ * Triggers the Crow Wizard's "Restoration" — forces the cure animation,
+ * plays the healing particle effect, and fully restores HP. Called once when
+ * HP drops below 50%.
+ */
+function _triggerCrowWizardCure(crowWizard) {
+  if (crowWizard._cureUsed) return;
+
+  const variant = crowWizard.attackVariants?.find(v => v && v.name === 'crowCure');
+  if (!variant || !variant.action) {
+    crowWizard._cureRetries = (crowWizard._cureRetries ?? 0) + 1;
+    if (crowWizard._cureRetries <= 10) {
+      setTimeout(() => _triggerCrowWizardCure(crowWizard), 300);
+    } else {
+      // Animation never loaded — apply cure immediately so the mechanic still fires
+      crowWizard._cureUsed = true;
+      showMessage(`<b>${crowWizard.name}</b> channels a powerful Restoration!`, 3000);
+      playSoundByUrl(asset('/sounds/actions/skills/cure.mp3'), 0.8);
+      if (crowWizard.mesh) createCrowWizardCure(crowWizard.mesh.position);
+      crowWizard.hp = crowWizard.hpMax;
+      if (crowWizard.hpBarFill) crowWizard.hpBarFill.style.width = '100%';
+    }
+    return;
+  }
+
+  crowWizard._cureUsed = true;
+
+  const attackAction = variant.action;
+  attackAction.reset();
+  attackAction.setEffectiveTimeScale(1);
+  attackAction.setEffectiveWeight(1);
+  attackAction.play();
+  const fromAction = (crowWizard.actions.walk && crowWizard._animState === 'walk')
+    ? crowWizard.actions.walk : crowWizard.actions.idle;
+  if (fromAction) fromAction.crossFadeTo(attackAction, 0.2, true);
+
+  showMessage(`<b>${crowWizard.name}</b> channels a powerful Restoration!`, 3000);
+
+  const duration = attackAction.getClip().duration;
+  const pts = (variant.damageTimings && variant.damageTimings.length > 0) ? variant.damageTimings[0] : 0.5;
+  setTimeout(() => {
+    playSoundByUrl(asset('/sounds/actions/skills/cure.mp3'), 0.8);
+    if (crowWizard.mesh) createCrowWizardCure(crowWizard.mesh.position);
+    if (crowWizard.alive) {
+      crowWizard.hp = crowWizard.hpMax;
+      if (crowWizard.hpBarFill) crowWizard.hpBarFill.style.width = '100%';
+    }
+  }, duration * pts * 1000);
+}
+
+/**
+ * Triggers a dormant skeleton's rise-from-floor sequence.
+ * Plays the stand-up animation and raise sound, then activates the monster.
+ * Retries if the animation hasn't finished loading yet.
+ */
+function _triggerSkeletonRise(m) {
+  const riseAction = m.actions.standUp;
+  if (!riseAction) {
+    m._riseRetries = (m._riseRetries ?? 0) + 1;
+    if (m._riseRetries <= 15) {
+      setTimeout(() => _triggerSkeletonRise(m), 200);
+    } else {
+      // Animation never loaded — activate immediately
+      m._dormant = false;
+      m.engaged = true;
+    }
+    return;
+  }
+
+  m._rising = true;
+  playSoundByUrl(asset('/monsters/summoned-skeleton/raise-skeleon.mp3'), 0.8);
+
+  if (m.actions.idle) m.actions.idle.stop();
+  riseAction.reset();
+  riseAction.setEffectiveTimeScale(1);
+  riseAction.setEffectiveWeight(1);
+  riseAction.setLoop(THREE.LoopOnce, 1);
+  riseAction.clampWhenFinished = true;
+  riseAction.play();
+
+  const duration = riseAction.getClip().duration;
+  setTimeout(() => {
+    m._dormant = false;
+    m._rising = false;
+    m.engaged = true;
+    if (m.actions.idle) {
+      m.actions.idle.reset().play();
+      riseAction.crossFadeTo(m.actions.idle, 0.3, true);
+    }
+  }, duration * 1000);
 }
 
 /** Triggers the mummies to start chasing the player immediately. */
@@ -941,6 +1084,14 @@ function _loadMonster(m, scene) {
             if (!m.actions.idleAlt) return m.actions.idle;
             return (Math.random() < 0.25) ? m.actions.idle : m.actions.idleAlt;
           };
+        }
+      });
+    }
+
+    if (m.glbStandUp) {
+      _gltfLoader.load(m.glbStandUp, (standGltf) => {
+        if (standGltf.animations && standGltf.animations.length > 0) {
+          m.actions.standUp = m.mixer.clipAction(standGltf.animations[0]);
         }
       });
     }
@@ -1463,6 +1614,25 @@ export function updateMonsters(dt, playerCamera, scene) {
     // If dead and mesh is already gone, skip
     if (!m.alive && !m.mesh) return;
 
+    // Dormant monsters are hidden until the player enters their trigger bounds
+    if (m._dormant) {
+      if (m._rising) {
+        // Rise animation playing — update mixer but skip all combat logic
+        if (m.mesh) m.mesh.visible = true;
+        if (m.mixer) m.mixer.update(dt);
+      } else {
+        if (m.mesh) m.mesh.visible = false;
+        if (m._triggerBounds) {
+          const { minRow, maxRow, minCol, maxCol } = m._triggerBounds;
+          if (player.gridRow >= minRow && player.gridRow <= maxRow
+              && player.gridCol >= minCol && player.gridCol <= maxCol) {
+            _triggerSkeletonRise(m);
+          }
+        }
+      }
+      return;
+    }
+
     // Distance cull: skip full update for monsters beyond fog range
     if (m.mesh && playerPos && m.alive) {
       const dx = m.mesh.position.x - playerPos.x;
@@ -1847,6 +2017,12 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
   if (m.name === 'Treeman' && !m._awakeningUsed && m.alive
     && hpBefore > m.hpMax / 2 && hpAfter <= m.hpMax / 2 && _sceneRef) {
     _triggerTreemanAwakening(m, _sceneRef);
+  }
+
+  // Crow Wizard "Restoration" — triggers once when HP drops below 50%, fully heals
+  if (m.name === 'Crow Wizard' && !m._cureUsed && m.alive
+    && hpBefore > m.hpMax / 2 && hpAfter <= m.hpMax / 2) {
+    _triggerCrowWizardCure(m);
   }
 
   if (killedByThisHit) {
@@ -2252,6 +2428,18 @@ export function triggerMonsterAttack(monsterId) {
         setTimeout(() => { if (m.alive) createHellSpawn(m.mesh.position); }, duration * pts * 1000);
         showMessage(`<b>${m.name}</b> unleashes the Hell Spawn!`, 2000);
       }
+      if (variant.name === 'crowFireAoe' && m.mesh) {
+        const duration = attackAction.getClip().duration;
+        const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
+        setTimeout(() => { if (m.alive) createCrowWizardFireAoe(m.mesh.position); }, duration * pts * 1000);
+        showMessage(`<b>${m.name}</b> unleashes an Inferno Blast!`, 2000);
+      }
+      if (variant.name === 'crowSpecial' && m.mesh) {
+        const duration = attackAction.getClip().duration;
+        const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.45;
+        setTimeout(() => { if (m.alive) createCrowWizardFear(m.mesh.position); }, duration * pts * 1000);
+        showMessage(`<b>${m.name}</b> strikes with Shadow Talons!`, 2000);
+      }
     }
   }
   // Legacy fallback
@@ -2361,6 +2549,19 @@ function _applyMonsterSpecialAttack(monster, variant) {
       damageMultiplier: variant.damageMultiplier ?? 1,
       specialName,
       isAoe: false,
+    });
+  } else if (variant.specialAttackType === 'frontTwo') {
+    // Hit front-row members (party indices 0 and 1); fall back to all alive if both are down
+    const frontTargets = party.filter((m, i) => m && !m.isEmpty && !m.isDead && i < 2);
+    const pool = frontTargets.length > 0 ? frontTargets : aliveMembers;
+    pool.forEach(target => {
+      _applyMonsterDamage(monster, {
+        forceTarget: target,
+        onHitEffectsOverride: effectsOverride,
+        damageMultiplier: variant.damageMultiplier ?? 1,
+        specialName,
+        isAoe: false,
+      });
     });
   } else {
     // Default AoE: hit all alive members

@@ -273,6 +273,7 @@ export function recruitCharacter(r) {
         irisColor: '#2a6a3a',
         inventory: null,
         startingInventory: r.startingInventory ? [...r.startingInventory] : null,
+        startingActionSlots: r.startingActionSlots ? [...r.startingActionSlots] : null,
         equipment: null
     };
 

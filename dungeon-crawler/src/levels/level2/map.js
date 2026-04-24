@@ -2,7 +2,9 @@
 // NEW: Rows 0–14 = pre-treeman dungeon (Room A: treekin, Room B: iceman, Room C: orcs)
 // Start (2) at row 1, col 7 (portal entrance)
 // Passage: row 1 → Room A (rows 3-5, cols 3-8) → east corridor (row 4, cols 9-13)
-//          → Room B (rows 7-9, cols 9-14) → south corridor (col 11, row 10)
+//          → Room B (rows 7-9, cols 9-14) → east corridor (row 8, cols 15-19)
+//          → Crow Wizard room (rows 7-9, cols 20-25)
+//          → Room B → south corridor (col 11, row 10)
 //          → Room C (rows 11-13, cols 5-11) → south passage (col 7, row 14)
 // EXISTING (shifted +15 from original):
 // Main room cols 3-8, rows 16-20. Passage at col 7, rows 21-28.
@@ -18,9 +20,9 @@ export const level2Map = [
   [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 4  ← Room A + east corridor (cols 3-13)
   [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 5  ← Room A south + col 13 continues
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 6  ← col 13 corridor south
-  [1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 7  ← Room B (iceman, cols 9-14); mushroom room cols 2-4
-  [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 8  ← Room B + westward corridor (cols 2-8)
-  [1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 9  ← Room B; mushroom room cols 2-4
+  [1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1], // row 7  ← Room B (iceman, cols 9-14); mushroom room cols 2-4; crow room cols 20-25
+  [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1], // row 8  ← Room B + west corridor (cols 2-8) + east corridor (cols 15-19) + crow room (cols 20-25)
+  [1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1], // row 9  ← Room B; mushroom room cols 2-4; crow room cols 20-25
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 10 ← col 11 corridor south
   [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 11 ← Room C (orc warriors, cols 5-11)
   [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 12 ← Room C

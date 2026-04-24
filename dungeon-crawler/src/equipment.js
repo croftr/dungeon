@@ -404,6 +404,20 @@ export function extendPartyData() {
       }
     }
 
+    // Hydrate spells with full definitions from SPELLS
+    m.spells = m.spells.map(spellObj => {
+      const spellDef = SPELLS.find(s => s.name === spellObj.name);
+      if (spellDef) {
+        return {
+          ...spellObj,
+          icon: spellDef.icon,
+          type: spellDef.type,
+          description: spellDef.description
+        };
+      }
+      return spellObj;
+    });
+
     // Spellbook is now in the ammo slot; spells go directly into hand slots.
 
     // 20-slot inventory, all empty (or with starting items).
@@ -420,6 +434,19 @@ export function extendPartyData() {
           addItemToInventory(party.indexOf(m), entry);
         } else if (entry && entry.name) {
           addItemToInventory(party.indexOf(m), entry.name, entry.quantity ?? 1, { hq: !!entry.hq });
+        }
+      });
+    }
+    if (m.startingActionSlots) {
+      const actionSlotItems = [...m.startingActionSlots];
+      delete m.startingActionSlots;
+      const slotKeys = ['skill4', 'skill5', 'skill6'];
+      actionSlotItems.forEach((itemName, i) => {
+        if (!itemName || i >= slotKeys.length) return;
+        const invIdx = m.inventory.findIndex(inv => inv && inv.name === itemName);
+        if (invIdx !== -1) {
+          m.equipment[slotKeys[i]] = m.inventory[invIdx];
+          m.inventory[invIdx] = null;
         }
       });
     }

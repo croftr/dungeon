@@ -34,15 +34,7 @@ export function spawnLevel0Objects(ctx) {
         "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Ice Cap", "Elixir of Enlightenment", "Ice Cap", "Ice Cap",
         // Essences (2 of each)
         "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence",
-        "Crocodile Warrior Essence", "Crocodile Warrior Essence",
-        "Tree Man Essence", "Tree Man Essence",
-        "Ogre Essence", "Ogre Essence",
-        "Minotaur Essence", "Minotaur Essence",
-        "Aqua Man Essence", "Aqua Man Essence",
-        "Lizard Man Essence", "Lizard Man Essence",
-        "Giant Essence", "Giant Essence",
-        "Demon Essence", "Demon Essence",
-        "Demon Ogre Essence", "Demon Ogre Essence",
+        "Scroll of Fireball",
         // Unique Arena Items (2 of each)
         "Crocodile Hide", "Crocodile Hide",
         "Ogre's Head", "Ogre's Head",
@@ -141,16 +133,5 @@ export function spawnLevel0Objects(ctx) {
         });
     }
 
-    // ── Button on the west wall of the starter room ──────────────────────────
-    // Press while facing west (toward col 8) to teleport to level 4 (egg room).
-    const { group: btn4 } = createWallButton(+1, { target: 'teleport_level4' }, 'x');
-    btn4.position.set(8 * CELL + 1.0, 1.25, 11 * CELL);
-    group.add(btn4);
-
-    // ── Essentiary button (all monsters unlocked) ───────────────────────────
-    // Adjacent button — opens Essentiary with every monster available.
-    const { group: btnEss } = createWallButton(+1, { target: 'essentiary_unlock_all' }, 'x');
-    btnEss.position.set(8 * CELL + 1.0, 1.25, 12 * CELL);
-    group.add(btnEss);
 
 }

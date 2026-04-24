@@ -48,7 +48,7 @@ export function setPartyGold(amount) {
 
 function updateGoldDisplay() {
   const el = document.getElementById('tactics-gold');
-  if (el) el.innerHTML = `<img src="${asset('/icons/gold_coins.webp')}" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}`;
+  if (el) el.innerHTML = `<img src="${asset('/icons/gold_coins.webp')}" class="gold-icon-click">${partyGold}`;
 }
 
 export const lastAttackTimes = {};
@@ -662,6 +662,7 @@ function buildTacticsOverlay() {
         <button id="tactics-close" aria-label="Close">&times;</button>
       </div>
       <div id="tactics-body">
+        <span id="tactics-gold"></span>
         <div class="tactics-row-label">Front Row &mdash; Melee &amp; Ranged</div>
         <div class="tactics-row" id="tactics-front"></div>
         <button id="tactics-swap-rows">&#8597; Swap Rows</button>
@@ -676,7 +677,6 @@ function buildTacticsOverlay() {
           <input type="checkbox" id="tactics-auto-range-attack">
           Auto Range Attack <span class="tactics-toggle-hint">(bow/crossbow users attack automatically)</span>
         </label>
-        <span id="tactics-gold" style="margin-top:10px; display:flex; justify-content:center; align-items:center; font-size:1.1em; color:#ffd700; text-shadow:1px 1px 0 #000;"><img src="${asset('/icons/gold_coins.webp')}" class="gold-icon-click" style="width:16px; height:16px; margin-right:4px; cursor:pointer;">${partyGold}</span>
       </div>
     </div>
   `;
@@ -764,6 +764,7 @@ function handleTacticsSlotClick(index) {
 export function openTacticsModal() {
   tacticsSel = null;
   renderTacticsSlots();
+  updateGoldDisplay();
   const cb = document.getElementById('tactics-auto-attack');
   if (cb) cb.checked = autoAttack;
   const cbRange = document.getElementById('tactics-auto-range-attack');
@@ -1414,7 +1415,23 @@ export function restorePartyState(data) {
     for (const k of Object.keys(dest)) delete dest[k];
     Object.assign(dest, JSON.parse(JSON.stringify(src)));
     dest.cooldownTimers = {};
-    if (!dest.isEmpty) updateEffectiveStats(dest);
+    if (!dest.isEmpty) {
+      if (dest.spells && SPELLS) {
+        dest.spells = dest.spells.map(spellObj => {
+          const def = SPELLS.find(s => s.name === spellObj.name);
+          if (def) {
+            return {
+              ...spellObj,
+              icon: def.icon,
+              type: def.type,
+              description: def.description
+            };
+          }
+          return spellObj;
+        });
+      }
+      updateEffectiveStats(dest);
+    }
   }
   setPartyGold(data.gold ?? 0);
   if (data.autoAttack !== undefined) setAutoAttack(data.autoAttack);

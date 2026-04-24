@@ -2015,11 +2015,48 @@ label.mm-setting-label {
 }
 
 #tactics-body {
-  padding: 30px 40px 32px;
+  padding: 0 40px 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
+}
+
+#tactics-gold {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: linear-gradient(to right, 
+    rgba(255, 215, 0, 0) 0%, 
+    rgba(255, 215, 0, 0.08) 25%, 
+    rgba(255, 215, 0, 0.15) 50%, 
+    rgba(255, 215, 0, 0.08) 75%, 
+    rgba(255, 215, 0, 0) 100%
+  );
+  border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'Georgia', serif;
+  font-size: 24px;
+  color: #ffd700;
+  text-shadow: 0 0 15px rgba(255, 215, 0, 0.4), 1px 1px 2px #000;
+  letter-spacing: 3px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+#tactics-gold img {
+  width: 32px;
+  height: 32px;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#tactics-gold img:hover {
+  transform: scale(1.25) rotate(15deg);
 }
 
 .tactics-row-label {

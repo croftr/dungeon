@@ -2101,7 +2101,7 @@ window.loadLevel = function (levelNum) {
         [6,0],[6,2],[6,3],[6,4],[6,5],[6,6],
       ],
       [],
-      asset('/textures/ogre-wall.png'),
+      asset('/textures/ogre-wall.webp'),
       null
     );
 
@@ -2117,7 +2117,7 @@ window.loadLevel = function (levelNum) {
     buildInnerTextureZone(
       scene,
       mFloors,
-      asset('/textures/fungus-wall.png')
+      asset('/textures/fungus-wall.webp')
     );
   }
 
@@ -2133,8 +2133,8 @@ window.loadLevel = function (levelNum) {
       ],
       // Floor cells: the walkable corridor column
       [[37, 3], [38, 3], [39, 3], [40, 3], [41, 3]],
-      asset('/textures/wet-wall.png'),
-      asset('/textures/black-stone2.png')
+      asset('/textures/wet-wall.webp'),
+      asset('/textures/black-stone2.webp')
     );
 
     // Level 2: Ice area (inner walls only)
@@ -2146,7 +2146,7 @@ window.loadLevel = function (levelNum) {
     buildInnerTextureZone(
       scene,
       iceFloors,
-      asset('/textures/ice-wall.png')
+      asset('/textures/ice-wall.webp')
     );
   }
 
@@ -2163,8 +2163,8 @@ window.loadLevel = function (levelNum) {
       }
     }));
     buildTextureZone(scene, wallCells, floorCells,
-      asset('/textures/demon-wall.png'),
-      asset('/textures/black-stone2.png')
+      asset('/textures/demon-wall.webp'),
+      asset('/textures/black-stone2.webp')
     );
   }
 
@@ -2352,8 +2352,8 @@ window._arenaEnter = function (monsterId) {
       else floorCells.push([r, c]);
     }));
     buildTextureZone(scene, wallCells, floorCells,
-      asset('/textures/arena-wall.jpg'),
-      asset('/textures/arena-floor.jpg'));
+      asset('/textures/arena-wall.webp'),
+      asset('/textures/arena-floor.webp'));
 
     clearObjects(scene);
     spawnObjectsForLevel();

@@ -952,3 +952,159 @@ export function createHellSpawn(position) {
         }, 3000);
     }, 1200);
 }
+
+export function createCrowWizardFireAoe(position) {
+    if (!proton) return;
+
+    const px = position ? position.x : 0;
+    const py = position ? position.y : 0;
+    const pz = position ? position.z : 0;
+
+    // Erupting fire column — intense orange/red core
+    const fireCore = new Proton.Emitter();
+    fireCore.rate = new Proton.Rate(new Proton.Span(20, 30), new Proton.Span(0.02));
+    fireCore.addInitialize(new Proton.Mass(1));
+    fireCore.addInitialize(new Proton.Radius(0.4, 1.0));
+    fireCore.addInitialize(new Proton.Life(0.6, 1.4));
+    fireCore.addInitialize(new Proton.V(2.8, new Proton.Vector3D(0, 1, 0), 160));
+    fireCore.addInitialize(new Proton.Body(new THREE.Sprite(
+        new THREE.SpriteMaterial({ map: sparkTexture, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })
+    )));
+    fireCore.addInitialize(new Proton.Position(new Proton.PointZone(px, py + 0.2, pz)));
+    fireCore.addBehaviour(new Proton.Alpha(1.0, 0.0));
+    fireCore.addBehaviour(new Proton.Scale(2.2, 0.3));
+    fireCore.addBehaviour(new Proton.Color('#ff6600', '#cc2200'));
+    fireCore.addBehaviour(new Proton.RandomDrift(1.4, 0.8, 1.4, 0.05));
+
+    // Ember scatter — small fast sparks bursting outward
+    const embers = new Proton.Emitter();
+    embers.rate = new Proton.Rate(new Proton.Span(16, 24), new Proton.Span(0.025));
+    embers.addInitialize(new Proton.Mass(1));
+    embers.addInitialize(new Proton.Radius(0.15, 0.45));
+    embers.addInitialize(new Proton.Life(0.4, 1.0));
+    embers.addInitialize(new Proton.V(3.2, new Proton.Vector3D(0, 0.3, 1), 180));
+    embers.addInitialize(new Proton.Body(new THREE.Sprite(
+        new THREE.SpriteMaterial({ map: sparkTexture, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })
+    )));
+    embers.addInitialize(new Proton.Position(new Proton.PointZone(px, py + 0.5, pz)));
+    embers.addBehaviour(new Proton.Alpha(0.9, 0.0));
+    embers.addBehaviour(new Proton.Scale(1.0, 0.05));
+    embers.addBehaviour(new Proton.Color('#ffaa00', '#ff4400'));
+    embers.addBehaviour(new Proton.RandomDrift(2.0, 0.6, 2.0, 0.06));
+
+    fireCore.emit(); proton.addEmitter(fireCore);
+    embers.emit();   proton.addEmitter(embers);
+
+    setTimeout(() => { fireCore.stopEmit(); }, 500);
+    setTimeout(() => {
+        embers.stopEmit();
+        setTimeout(() => {
+            proton.removeEmitter(fireCore);
+            proton.removeEmitter(embers);
+        }, 2000);
+    }, 700);
+}
+
+export function createCrowWizardCure(position) {
+    if (!proton) return;
+
+    const px = position ? position.x : 0;
+    const py = position ? position.y : 0;
+    const pz = position ? position.z : 0;
+
+    // Radiant gold-green healing aura rising upward
+    const aura = new Proton.Emitter();
+    aura.rate = new Proton.Rate(new Proton.Span(18, 28), new Proton.Span(0.025));
+    aura.addInitialize(new Proton.Mass(1));
+    aura.addInitialize(new Proton.Radius(0.3, 0.8));
+    aura.addInitialize(new Proton.Life(1.0, 2.2));
+    aura.addInitialize(new Proton.V(1.5, new Proton.Vector3D(0, 1, 0), 130));
+    aura.addInitialize(new Proton.Body(new THREE.Sprite(
+        new THREE.SpriteMaterial({ map: sparkTexture, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })
+    )));
+    aura.addInitialize(new Proton.Position(new Proton.PointZone(px, py + 0.3, pz)));
+    aura.addBehaviour(new Proton.Alpha(0.8, 0.0));
+    aura.addBehaviour(new Proton.Scale(1.6, 0.2));
+    aura.addBehaviour(new Proton.Color('#88ff44', '#ffdd00'));
+    aura.addBehaviour(new Proton.RandomDrift(1.0, 0.8, 1.0, 0.04));
+
+    // Gold sparkle motes circling overhead
+    const sparkles = new Proton.Emitter();
+    sparkles.rate = new Proton.Rate(new Proton.Span(10, 16), new Proton.Span(0.04));
+    sparkles.addInitialize(new Proton.Mass(1));
+    sparkles.addInitialize(new Proton.Radius(0.1, 0.3));
+    sparkles.addInitialize(new Proton.Life(1.5, 3.0));
+    sparkles.addInitialize(new Proton.V(0.8, new Proton.Vector3D(0, 0.5, 1), 180));
+    sparkles.addInitialize(new Proton.Body(new THREE.Sprite(
+        new THREE.SpriteMaterial({ map: sparkTexture, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })
+    )));
+    sparkles.addInitialize(new Proton.Position(new Proton.PointZone(px, py + 1.0, pz)));
+    sparkles.addBehaviour(new Proton.Alpha(1.0, 0.0));
+    sparkles.addBehaviour(new Proton.Scale(0.6, 0.05));
+    sparkles.addBehaviour(new Proton.Color('#ffffff', '#aaff66'));
+    sparkles.addBehaviour(new Proton.RandomDrift(1.5, 1.0, 1.5, 0.05));
+
+    aura.emit();     proton.addEmitter(aura);
+    sparkles.emit(); proton.addEmitter(sparkles);
+
+    setTimeout(() => { aura.stopEmit(); }, 900);
+    setTimeout(() => {
+        sparkles.stopEmit();
+        setTimeout(() => {
+            proton.removeEmitter(aura);
+            proton.removeEmitter(sparkles);
+        }, 3500);
+    }, 1400);
+}
+
+export function createCrowWizardFear(position) {
+    if (!proton) return;
+
+    const px = position ? position.x : 0;
+    const py = position ? position.y : 0;
+    const pz = position ? position.z : 0;
+
+    // Dark swirling shadow wisps — ominous purple/black tendrils
+    const shadows = new Proton.Emitter();
+    shadows.rate = new Proton.Rate(new Proton.Span(16, 24), new Proton.Span(0.03));
+    shadows.addInitialize(new Proton.Mass(1));
+    shadows.addInitialize(new Proton.Radius(0.4, 1.0));
+    shadows.addInitialize(new Proton.Life(0.8, 1.8));
+    shadows.addInitialize(new Proton.V(2.0, new Proton.Vector3D(0, 0.4, 1), 170));
+    shadows.addInitialize(new Proton.Body(new THREE.Sprite(
+        new THREE.SpriteMaterial({ map: sparkTexture, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })
+    )));
+    shadows.addInitialize(new Proton.Position(new Proton.PointZone(px, py + 0.4, pz)));
+    shadows.addBehaviour(new Proton.Alpha(0.75, 0.0));
+    shadows.addBehaviour(new Proton.Scale(1.8, 0.2));
+    shadows.addBehaviour(new Proton.Color('#440066', '#220033'));
+    shadows.addBehaviour(new Proton.RandomDrift(1.6, 0.9, 1.6, 0.055));
+
+    // Dark energy crackle — quick white-purple flickers
+    const crackle = new Proton.Emitter();
+    crackle.rate = new Proton.Rate(new Proton.Span(10, 16), new Proton.Span(0.02));
+    crackle.addInitialize(new Proton.Mass(1));
+    crackle.addInitialize(new Proton.Radius(0.1, 0.35));
+    crackle.addInitialize(new Proton.Life(0.2, 0.6));
+    crackle.addInitialize(new Proton.V(3.5, new Proton.Vector3D(0, 0.2, 1), 180));
+    crackle.addInitialize(new Proton.Body(new THREE.Sprite(
+        new THREE.SpriteMaterial({ map: sparkTexture, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })
+    )));
+    crackle.addInitialize(new Proton.Position(new Proton.PointZone(px, py + 0.6, pz)));
+    crackle.addBehaviour(new Proton.Alpha(1.0, 0.0));
+    crackle.addBehaviour(new Proton.Scale(0.9, 0.05));
+    crackle.addBehaviour(new Proton.Color('#cc88ff', '#6600aa'));
+    crackle.addBehaviour(new Proton.RandomDrift(2.2, 0.7, 2.2, 0.04));
+
+    shadows.emit(); proton.addEmitter(shadows);
+    crackle.emit(); proton.addEmitter(crackle);
+
+    setTimeout(() => { crackle.stopEmit(); }, 400);
+    setTimeout(() => {
+        shadows.stopEmit();
+        setTimeout(() => {
+            proton.removeEmitter(shadows);
+            proton.removeEmitter(crackle);
+        }, 2500);
+    }, 700);
+}

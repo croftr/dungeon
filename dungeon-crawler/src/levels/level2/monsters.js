@@ -44,6 +44,45 @@ export const level2Monsters = [
     asset('/monsters/iceMan-animation/Meshy_AI_Animation_Dead_withSkin.glb'),
     asset('/monsters/iceMan-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb')),
 
+  // Crow Wizard room — east of Room B, accessed via corridor (row 8, cols 15-19); room rows 7-9 cols 20-25
+  // Two summoned skeletons flank the entrance — dormant until the player enters
+  Object.assign(inst(D.summoned_skeleton, 401, 7, 20,
+    asset('/monsters/summoned-skeleton/idle.glb'),
+    asset('/monsters/summoned-skeleton/attack.glb'),
+    asset('/monsters/summoned-skeleton/skeleton-attack.mp3'),
+    0.45, 0, 0, 2, null,
+    asset('/monsters/summoned-skeleton/dead.glb'),
+    asset('/monsters/summoned-skeleton/getting-hit.glb'),
+    asset('/monsters/summoned-skeleton/walking.glb')), {
+    _dormant: true,
+    _triggerBounds: { minRow: 7, maxRow: 9, minCol: 18, maxCol: 25 },
+    glbStandUp: asset('/monsters/summoned-skeleton/standing-up.glb'),
+  }),
+
+  Object.assign(inst(D.summoned_skeleton, 402, 9, 20,
+    asset('/monsters/summoned-skeleton/idle.glb'),
+    asset('/monsters/summoned-skeleton/attack.glb'),
+    asset('/monsters/summoned-skeleton/skeleton-attack.mp3'),
+    0.45, 0, 0, 2, null,
+    asset('/monsters/summoned-skeleton/dead.glb'),
+    asset('/monsters/summoned-skeleton/getting-hit.glb'),
+    asset('/monsters/summoned-skeleton/walking.glb')), {
+    _dormant: true,
+    _triggerBounds: { minRow: 7, maxRow: 9, minCol: 18, maxCol: 25 },
+    glbStandUp: asset('/monsters/summoned-skeleton/standing-up.glb'),
+  }),
+
+  inst(D.crow_wizard, 400, 8, 22,
+    asset('/monsters/crow-wizard/idle.glb'),
+    asset('/monsters/crow-wizard/standard-attack.glb'),
+    asset('/monsters/crow-wizard/standard-attack.mp3'),
+    0.5, 0, 0, 2, null,
+    asset('/monsters/crow-wizard/dead.glb'),
+    asset('/monsters/crow-wizard/getting-hit.glb'),
+    asset('/monsters/crow-wizard/walking.glb'),
+    null,
+    asset('/monsters/crow-wizard/combat-idle.glb')),
+
   // Ice Mushroom room — west of Room B, accessed via corridor through row 8 (cols 2-4, rows 7-9)
   inst(D.ice_mushroom, 500, 7, 3,
     asset('/monsters/ice-mushroom/idle.glb'),

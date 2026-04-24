@@ -53,32 +53,32 @@ const textureLoader = new THREE.TextureLoader();
 textureLoader.setCrossOrigin('anonymous');
 
 
-const stoneWallTex = textureLoader.load(asset('/textures/wall.png'));
+const stoneWallTex = textureLoader.load(asset('/textures/wall.webp'));
 stoneWallTex.wrapS = stoneWallTex.wrapT = THREE.RepeatWrapping;
 stoneWallTex.anisotropy = 16;
 
-const floorPatternTex = textureLoader.load(asset('/textures/floor1.jpg'));
+const floorPatternTex = textureLoader.load(asset('/textures/floor1.webp'));
 floorPatternTex.wrapS = floorPatternTex.wrapT = THREE.RepeatWrapping;
 floorPatternTex.anisotropy = 16;
 
-const ceilPatternTex = textureLoader.load(asset('/textures/ceiling.png'));
+const ceilPatternTex = textureLoader.load(asset('/textures/ceiling.webp'));
 ceilPatternTex.wrapS = ceilPatternTex.wrapT = THREE.RepeatWrapping;
 ceilPatternTex.anisotropy = 16;
 
 // Detail overlays
-const detailAtlasTex = textureLoader.load(asset('/textures/detail-atlas1.png'));
+const detailAtlasTex = textureLoader.load(asset('/textures/detail-atlas1.webp'));
 detailAtlasTex.wrapS = detailAtlasTex.wrapT = THREE.ClampToEdgeWrapping;
 detailAtlasTex.anisotropy = 16;
 
-const detailAtlas2Tex = textureLoader.load(asset('/textures/detail-atlas2.png'));
+const detailAtlas2Tex = textureLoader.load(asset('/textures/detail-atlas2.webp'));
 detailAtlas2Tex.wrapS = detailAtlas2Tex.wrapT = THREE.ClampToEdgeWrapping;
 detailAtlas2Tex.anisotropy = 16;
 
-const detailAtlas3Tex = textureLoader.load(asset('/textures/detail-atlas3.png'));
+const detailAtlas3Tex = textureLoader.load(asset('/textures/detail-atlas3.webp'));
 detailAtlas3Tex.wrapS = detailAtlas3Tex.wrapT = THREE.ClampToEdgeWrapping;
 detailAtlas3Tex.anisotropy = 16;
 
-const detailAtlas4Tex = textureLoader.load(asset('/textures/detail-atlas4.png'));
+const detailAtlas4Tex = textureLoader.load(asset('/textures/detail-atlas4.webp'));
 detailAtlas4Tex.wrapS = detailAtlas4Tex.wrapT = THREE.ClampToEdgeWrapping;
 detailAtlas4Tex.anisotropy = 16;
 
