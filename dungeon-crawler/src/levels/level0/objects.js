@@ -35,7 +35,7 @@ export function spawnLevel0Objects(ctx) {
         "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Ice Cap", "Elixir of Enlightenment", "Ice Cap", "Ice Cap",
         // Essences (2 of each)
         "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence",
-        "Scroll of Fireball",
+        "Scroll of Fireball", "Tome of the Viperseeker",
         // Unique Arena Items (2 of each)
         "Crocodile Hide", "Crocodile Hide",
         "Ogre's Head", "Ogre's Head",
@@ -89,7 +89,7 @@ export function spawnLevel0Objects(ctx) {
     });
 
     // ── Decorative chest beside the weapons merchant ───────────────────────────
-    addChest(group, loader, 23, 9, -Math.PI / 2, 0.7, [], asset('/items/chest1.glb'), false);
+    addChest(group, loader, 23, 11, -Math.PI / 2, 0.7, [], asset('/items/chest1.glb'), false);
 
     // ── Dropped torch beside the weapons merchant ──────────────────────────────
     addDroppedTorch(group, loader, 23, 11, -Math.PI / 2, 0.8, -0.7);
@@ -119,21 +119,21 @@ export function spawnLevel0Objects(ctx) {
     // ── Training Console — next to the training dummy at (7, 23) ────────────
     addTrainingConsole(group, loader, 22, 7, Math.PI);
 
-    // ── Stance NPC + shelf — both controlled by stanceNpcDeparted
-    // TODO: restore the stanceNpcDeparted guard once testing is complete
-    addShop(group, loader, 23, 13, -Math.PI / 2 + 0.45, 0, 0, 'stances',
-        asset('/npcs/stance-npc/Meshy_AI_Dragonborn_Magier_mit_biped_Animation_Stand_and_Chat_withSkin.glb'),
-        {
-            scale: 0.55,
-            greetingAudio: [
-                asset('/npcs/stance-npc/bark1.mp3'),
-                asset('/npcs/stance-npc/bark2.mp3'),
-                asset('/npcs/stance-npc/bark3.mp3'),
-            ],
-        }
-    );
-    // Stance shelf — to the NPC's right (north), facing west toward the player
-    addDecoration(group, loader, 23, 12, -Math.PI / 2, asset('/items/stance-shelf.glb'), 1.0, true, 0.8, 0.5, 0);
+    // ── Stance NPC + shelf — only appear after completing the level 2 dialogue
+    if (stanceNpcDeparted) {
+        addShop(group, loader, 23, 13, -Math.PI / 2 + 0.45, 0, 0, 'stances',
+            asset('/npcs/stance-npc/Meshy_AI_Dragonborn_Magier_mit_biped_Animation_Stand_and_Chat_withSkin.glb'),
+            {
+                scale: 0.55,
+                greetingAudio: [
+                    asset('/npcs/stance-npc/bark1.mp3'),
+                    asset('/npcs/stance-npc/bark2.mp3'),
+                    asset('/npcs/stance-npc/bark3.mp3'),
+                ],
+            }
+        );
+        addDecoration(group, loader, 23, 12, -Math.PI / 2, asset('/items/stance-shelf.glb'), 1.0, true, 0.8, 0.5, 0);
+    }
 
     // ── Relocated Monster — NW corner of east room ────────────────────────────────
     if (monsterNpcSaved) {

@@ -23,7 +23,11 @@
             "Minor Rejuvenate Potion",
             "Minor Rejuvenate Potion"
         ],
-        "startingActionSlots": ["Cure Poison Potion", "Minor Rejuvenate Potion", "Minor Rejuvenate Potion"],
+        "startingActionSlots": [
+            "Cure Poison Potion",
+            "Minor Rejuvenate Potion",
+            "Minor Rejuvenate Potion"
+        ],
         "startingSkills": [],
         "image": "/heros/elf_ranger_head.jpg",
         "leftHand": "Torch",
@@ -42,11 +46,11 @@
         "job": "Paladin",
         "race": "Human",
         "stats": {
-            "strength": 7,
-            "dexterity": 6,
-            "vitality": 8,
-            "intelligence": 4,
-            "resilience": 8
+            "strength": 107,
+            "dexterity": 106,
+            "vitality": 108,
+            "intelligence": 104,
+            "resilience": 108
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
         "stances": [
@@ -63,7 +67,11 @@
             "Minor Rejuvenate Potion",
             "Minor Healing Potion"
         ],
-        "startingActionSlots": ["Cure Poison Potion", "Minor Rejuvenate Potion", "Minor Healing Potion"],
+        "startingActionSlots": [
+            "Cure Poison Potion",
+            "Minor Rejuvenate Potion",
+            "Minor Healing Potion"
+        ],
         "gridCol": 10,
         "gridRow": 8,
         "facing": "front",
@@ -96,7 +104,11 @@
             "Minor Rejuvenate Potion",
             "Minor Healing Potion"
         ],
-        "startingActionSlots": ["Cure Poison Potion", "Minor Rejuvenate Potion", "Minor Healing Potion"],
+        "startingActionSlots": [
+            "Cure Poison Potion",
+            "Minor Rejuvenate Potion",
+            "Minor Healing Potion"
+        ],
         "gridCol": 12,
         "gridRow": 8,
         "facing": "front",
@@ -131,7 +143,11 @@
             "Minor Mana Potion",
             "Minor Mana Potion"
         ],
-        "startingActionSlots": ["Cure Poison Potion", "Minor Mana Potion", "Minor Mana Potion"],
+        "startingActionSlots": [
+            "Cure Poison Potion",
+            "Minor Mana Potion",
+            "Minor Mana Potion"
+        ],
         "image": "/heros/human_wizard_head.webp",
         "leftHand": "Fireball",
         "rightHand": "Heal",
@@ -167,7 +183,11 @@
             "Cure Poison Potion",
             "Minor Healing Potion"
         ],
-        "startingActionSlots": ["Cure Poison Potion", "Minor Healing Potion", null],
+        "startingActionSlots": [
+            "Cure Poison Potion",
+            "Minor Healing Potion",
+            null
+        ],
         "gridCol": 11,
         "gridRow": 8,
         "facing": "front",
@@ -202,7 +222,11 @@
             "Minor Rejuvenate Potion",
             "Minor Healing Potion"
         ],
-        "startingActionSlots": ["Cure Poison Potion", "Minor Rejuvenate Potion", "Minor Healing Potion"],
+        "startingActionSlots": [
+            "Cure Poison Potion",
+            "Minor Rejuvenate Potion",
+            "Minor Healing Potion"
+        ],
         "gridCol": 14,
         "gridRow": 9,
         "facing": "left",
@@ -233,7 +257,11 @@
             "Minor Rejuvenate Potion",
             "Minor Healing Potion"
         ],
-        "startingActionSlots": ["Cure Poison Potion", "Minor Rejuvenate Potion", "Minor Healing Potion"],
+        "startingActionSlots": [
+            "Cure Poison Potion",
+            "Minor Rejuvenate Potion",
+            "Minor Healing Potion"
+        ],
         "image": "/heros/high-elf.webp",
         "leftHand": "Dagger",
         "rightHand": "Dagger",
@@ -270,7 +298,11 @@
             "Minor Mana Potion",
             "Minor Mana Potion"
         ],
-        "startingActionSlots": ["Cure Poison Potion", "Minor Mana Potion", "Minor Mana Potion"],
+        "startingActionSlots": [
+            "Cure Poison Potion",
+            "Minor Mana Potion",
+            "Minor Mana Potion"
+        ],
         "image": "/heros/white-mage.webp",
         "leftHand": "Heal",
         "rightHand": "Banishment",

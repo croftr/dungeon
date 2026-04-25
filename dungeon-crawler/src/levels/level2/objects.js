@@ -113,7 +113,7 @@ export function spawnLevel2Objects(ctx) {
             '/npcs/stance-npc/Meshy_AI_Dragonborn_Magier_mit_biped_Animation_Stand_and_Chat_withSkin.glb',
             null,        // no text dialogue
             0.55,        // scale
-            0,           // rotY — face south, toward the entrance
+            0.4,         // rotY — face south, angled slightly left (toward east)
             0,           // offsetX
             0,           // offsetZ
             null,        // no proximity audio

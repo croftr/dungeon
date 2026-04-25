@@ -41,6 +41,7 @@ const ITEM_SOUNDS = {
   'Gold Coins': asset('/sounds/items/gold-coins.mp3'),
   'potion': asset('/sounds/items/alchemy-bubbles.mp3'),
   'scroll': asset('/sounds/items/scroll.mp3'),
+  'tome': asset('/sounds/book.mp3'),
   'Torch': asset('/sounds/items/burn.mp3'),
   'Red Crystal': asset('/sounds/items/crystal.mp3'),
   'Blue Crystal': asset('/sounds/items/crystal.mp3'),
@@ -509,6 +510,10 @@ export async function playItemSound(itemName, slot = '') {
 
   if (!url && (lowerName.includes('potion') || slot === 'potion')) {
     url = ITEM_SOUNDS['potion'];
+  }
+
+  if (!url && lowerName.includes('tome')) {
+    url = ITEM_SOUNDS['tome'];
   }
 
   if (!url && itemName === 'Gold Coins') {
