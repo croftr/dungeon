@@ -2137,6 +2137,21 @@ window.loadLevel = function (levelNum) {
       asset('/textures/black-stone2.webp')
     );
 
+    // Level 2: Crow Wizard room (rows 7–9, cols 20–25) + approach corridor (row 8, cols 15–19)
+    buildTextureZone(
+      scene,
+      [
+        [7,15],[7,16],[7,17],[7,18],[7,19],
+        [9,15],[9,16],[9,17],[9,18],[9,19],
+        [6,20],[6,21],[6,22],[6,23],[6,24],[6,25],
+        [10,20],[10,21],[10,22],[10,23],[10,24],[10,25],
+        [7,26],[8,26],[9,26],
+      ],
+      [],
+      asset('/textures/crow-wall.png'),
+      null
+    );
+
     // Level 2: Ice area (inner walls only)
     const iceFloors = [
       [7, 2], [7, 3], [7, 4], [7, 9], [7, 10], [7, 11], [7, 12], [7, 13], [7, 14],

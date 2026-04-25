@@ -50,6 +50,16 @@
         "weight": 0.5
     },
     {
+        "name": "Tome of the Viperseeker",
+        "job": "hunter",
+        "icon": "/icons/tomes/hunter.webp",
+        "description": "A tattered hunter's log of vital strikes. Teaches the Viperseeker Stance — +50% critical hit chance and +2 poison damage per tick.",
+        "type": "stance-tome",
+        "stanceId": "viperseeker",
+        "value": 1,
+        "weight": 0.5
+    },
+    {
         "name": "Tome of Vengeance",
         "job": "white-mage",
         "icon": "/icons/tomes/white-mage.webp",

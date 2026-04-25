@@ -15,15 +15,9 @@
         },
         "bio": "A swift and silent guardian of the deep woods. Elrond's bow strikes with the fury of nature itself.",
         "stances": [
-            "viper",
+            "viperseeker",
             "heartseeker"
         ],
-        "stanceOverrides": {
-            "viper": {
-                "icon": "/heros/elf_ranger_viper.webp",
-                "portrait": "/heros/elf_ranger_viper.webp"
-            }
-        },
         "startingInventory": [
             "Cure Poison Potion",
             "Minor Rejuvenate Potion",

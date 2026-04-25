@@ -1980,7 +1980,7 @@ function _useStanceTome(memberIndex, invIndex) {
   }
 
   m.inventory[invIndex] = null;
-  playStanceVideo(def.stanceId);
+  playStanceVideo(def.stanceId, m);
   refreshPartyCards();
   renderModal(memberIndex);
 }

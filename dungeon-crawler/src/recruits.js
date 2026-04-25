@@ -9,19 +9,11 @@ import RECRUITS_DATA from './data/recruits.json';
 import STANCES from './data/stances.json';
 import { checkLevelUp } from './leveling.js';
 import { asset } from './assets.js';
+import { getStanceDef } from './stance.js';
 
-// Stance id → video filename (without extension). Some files have historical typos
-// ("hearseeker-stance", "slayer-stamce") — preserve them because the assets exist under those names.
-const STANCE_VIDEO_FILENAMES = {
-  viper: 'viper-stance',
-  heartseeker: 'hearseeker-stance',
-  vengeance: 'vengeance-stance',
-  overclock: 'overclocked-stance',
-  curatio: 'curatio-stance',
-  talon: 'talon-stance',
-  retribution: 'retribution-stance',
-  slayer: 'slayer-stamce',
-};
+// All stance videos have been replaced with static images as per user request.
+// The STANCE_VIDEO_FILENAMES mapping is no longer needed.
+
 
 const _recruitRaycaster = new THREE.Raycaster();
 const _recruitMouse = new THREE.Vector2();
@@ -182,9 +174,9 @@ export function initRecruits(scene, camera) {
                 const r = RECRUITS.find(x => x.id === recruitId);
                 // Only allow interaction if the player is directly facing the recruit
                 if (r && isInFrontOfPlayer(r.gridRow, r.gridCol, 1)) {
-                    // Preview: play the first stance this recruit has a video for.
-                    const previewStance = (r.stances ?? []).find(id => STANCE_VIDEO_FILENAMES[id]);
-                    if (previewStance) playStanceVideo(previewStance);
+                    // Preview: play the first stance this recruit has an image for.
+                    const previewStance = (r.stances ?? []).find(id => getStanceDef(id, r)?.splashImage);
+                    if (previewStance) playStanceVideo(previewStance, r);
                 }
                 break;
             }
@@ -203,28 +195,27 @@ export function updateRecruitsMeshState() {
     });
 }
 
-export function playStanceVideo(stanceId) {
-    const filename = STANCE_VIDEO_FILENAMES[stanceId];
-    if (!filename || !stanceVideoContainer) return false;
+export function playStanceVideo(stanceId, member = null) {
+    const stanceDef = getStanceDef(stanceId, member);
+    const splashImage = stanceDef?.splashImage;
 
-    // Play learning sound immediately as the video starts
-    new Audio(asset('/sounds/actions/learn-stance.mp3')).play().catch(e => console.warn('Audio play failed:', e));
+    if (!splashImage || !stanceVideoContainer) return false;
 
-    const stanceDef = STANCES[stanceId];
+    // We no longer play the learning sound immediately for images as per user request.
+
     const stanceName = stanceDef?.name?.replace(/\s*Stance\s*$/i, '') ?? stanceId;
-    const videoUrl = `/videos/stances/${filename}.mp4`;
+    
     stanceVideoContainer.innerHTML = `
-        <video id="stance-video" src="${asset(videoUrl)}" autoplay style="max-width: 100%; max-height: 80%; border-radius: 8px; box-shadow: 0 0 20px rgba(200, 168, 74, 0.5);"></video>
+        <img id="stance-image" src="${asset(splashImage)}" style="max-width: 100%; max-height: 80%; border-radius: 8px; box-shadow: 0 0 20px rgba(200, 168, 74, 0.5);" />
         <div id="stance-text-container" style="text-align: center; margin-top: 30px; opacity: 0; transition: opacity 2s ease-in;">
             <div style="color: #c8a84a; font-size: 32px; font-family: Georgia, serif; letter-spacing: 2px;">Stance unlocked</div>
             <div style="color: white; font-size: 56px; font-family: Georgia, serif; font-weight: bold; letter-spacing: 4px; text-shadow: 0 0 15px #c8a84a; margin-top: 10px;">${stanceName}</div>
         </div>
     `;
+    
     stanceVideoContainer.style.display = 'flex';
     
-    const video = document.getElementById('stance-video');
     const textContainer = document.getElementById('stance-text-container');
-    
     let textShown = false;
 
     const showText = () => {
@@ -234,16 +225,14 @@ export function playStanceVideo(stanceId) {
         new Audio(asset('/sounds/actions/stance-change.mp3')).play().catch(e => console.warn('Audio play failed:', e));
     };
 
-    video.onended = () => {
-        showText();
-    };
+    // Kick in after 1 second as per experiment results
+    setTimeout(showText, 1000);
     
     stanceVideoContainer.onclick = () => {
         if (textShown) {
             stanceVideoContainer.style.display = 'none';
             stanceVideoContainer.innerHTML = '';
         } else {
-            video.pause();
             showText();
         }
     };
@@ -251,7 +240,7 @@ export function playStanceVideo(stanceId) {
 }
 
 export function hasStanceVideo(stanceId) {
-    return !!STANCE_VIDEO_FILENAMES[stanceId];
+    return !!STANCES[stanceId]?.splashImage;
 }
 
 
