@@ -205,8 +205,11 @@ export function playStanceVideo(stanceId, member = null) {
 
     const stanceName = stanceDef?.name?.replace(/\s*Stance\s*$/i, '') ?? stanceId;
     
+    // Play the start audio immediately
+    new Audio(asset('/sounds/actions/stance-start.mp3')).play().catch(e => console.warn('Audio play failed:', e));
+
     stanceVideoContainer.innerHTML = `
-        <img id="stance-image" src="${asset(splashImage)}" style="max-width: 100%; max-height: 80%; border-radius: 8px; box-shadow: 0 0 20px rgba(200, 168, 74, 0.5);" />
+        <img id="stance-image" src="${asset(splashImage)}" style="max-width: 100%; max-height: 80%; border-radius: 8px; box-shadow: 0 0 20px rgba(200, 168, 74, 0.5); opacity: 0; transition: opacity 0.5s ease-in;" />
         <div id="stance-text-container" style="text-align: center; margin-top: 30px; opacity: 0; transition: opacity 2s ease-in;">
             <div style="color: #c8a84a; font-size: 32px; font-family: Georgia, serif; letter-spacing: 2px;">Stance unlocked</div>
             <div style="color: white; font-size: 56px; font-family: Georgia, serif; font-weight: bold; letter-spacing: 4px; text-shadow: 0 0 15px #c8a84a; margin-top: 10px;">${stanceName}</div>
@@ -215,24 +218,37 @@ export function playStanceVideo(stanceId, member = null) {
     
     stanceVideoContainer.style.display = 'flex';
     
+    const imgElement = document.getElementById('stance-image');
     const textContainer = document.getElementById('stance-text-container');
+    let imageShown = false;
     let textShown = false;
 
+    const showImage = () => {
+        if (imageShown) return;
+        imgElement.style.opacity = '1';
+        imageShown = true;
+    };
+
     const showText = () => {
+        showImage(); // Ensure image is shown if they click early
         if (textShown) return;
         textContainer.style.opacity = '1';
         textShown = true;
         new Audio(asset('/sounds/actions/stance-change.mp3')).play().catch(e => console.warn('Audio play failed:', e));
     };
 
-    // Kick in after 1 second as per experiment results
-    setTimeout(showText, 1000);
+    // Show image after 1 second
+    let imageTimer = setTimeout(showImage, 1000);
+    // Show text 1 second after the image is shown
+    let textTimer = setTimeout(showText, 2000);
     
     stanceVideoContainer.onclick = () => {
         if (textShown) {
             stanceVideoContainer.style.display = 'none';
             stanceVideoContainer.innerHTML = '';
         } else {
+            clearTimeout(imageTimer);
+            clearTimeout(textTimer);
             showText();
         }
     };
