@@ -2091,7 +2091,8 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
 
           // Arena: 50% chance to drop boss essence in the bone pile
           for (const drop of m.drops) {
-            if (drop.item.endsWith(' Essence') && drop.item !== 'Life Essence') {
+            const itemName = typeof drop.item === 'string' ? drop.item : drop.item?.name;
+            if (itemName && itemName.endsWith(' Essence') && itemName !== 'Life Essence') {
               if (Math.random() < 0.5) {
                 droppedItems.push(drop.item);
               }
@@ -2113,9 +2114,10 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
           for (const drop of m.drops) {
             if (Math.random() < drop.chance) {
               // Boss essences only drop on first kill
-              if (drop.item.endsWith(' Essence') && drop.item !== 'Life Essence') {
-                if (_droppedBossEssences.has(drop.item)) continue;
-                _droppedBossEssences.add(drop.item);
+              const itemName = typeof drop.item === 'string' ? drop.item : drop.item?.name;
+              if (itemName && itemName.endsWith(' Essence') && itemName !== 'Life Essence') {
+                if (_droppedBossEssences.has(itemName)) continue;
+                _droppedBossEssences.add(itemName);
               }
               droppedItems.push(drop.item);
             }

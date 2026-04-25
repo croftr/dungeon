@@ -169,6 +169,13 @@
       {
         "item": "Crocodile Warrior Essence",
         "chance": 1
+      },
+      {
+        "item": {
+          "name": "Gold Coins",
+          "quantity": 5
+        },
+        "chance": 0.3
       }
     ],
     "uniqueArenaItem": "Crocodile Hide"
@@ -501,6 +508,13 @@
       {
         "item": "Ogre Essence",
         "chance": 1
+      },
+      {
+        "item": {
+          "name": "Gold Coins",
+          "quantity": 5
+        },
+        "chance": 0.3
       }
     ],
     "uniqueArenaItem": "Ogre's Head"
@@ -1192,14 +1206,13 @@
       },
       {
         "item": "Mana Berry",
-        "chance": 0.5
+        "chance": 1
       },
       {
-        "item": "Crow Feather",
-        "chance": 0.6
-      },
-      {
-        "item": "Crow Wizard Essence",
+        "item": {
+          "name": "Gold Coins",
+          "quantity": 20
+        },
         "chance": 1
       }
     ]

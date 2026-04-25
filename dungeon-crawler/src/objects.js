@@ -10,6 +10,7 @@ import { addLogEntry } from './battle-log.js';
 import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playLearntSound, playSoundByUrl, playQuestAudio, fadeOutQuestAudio, playPartyHitSound, playInventorySortSound, playCraftFailSound, playCraftHqSound, playNpcDialogue, isNpcDialoguePlaying } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
 import POTION_MERCHANT_DATA from './data/potion-merchant.json';
+import STANCE_MERCHANT_DATA from './data/stance-npc-merchant.json';
 import POTIONS_DATA from './data/items/potions.json';
 import FORGE_DATA from './data/forge.json';
 import { rollCraftOutcome, isEssenceIngredient, hqDisplayName } from './crafting.js';
@@ -103,6 +104,7 @@ let _level2GiantPortcullisOpened = false;
 let _level2HoleClosed = false;
 let _level1HoleRoomSpawned = false;
 let _monsterNpcSaved = false;
+let _stanceNpcDeparted = false;
 let _level1BtnPortcullisOpened = false;
 let _level1OgrePortcullisOpened = false;
 let _level1ShrineGateOpened = false;
@@ -162,10 +164,12 @@ function _normStock(entry) {
 }
 const MERCHANT_STOCK = MERCHANT_DATA.stock.map(_normStock).filter(Boolean);
 const POTION_MERCHANT_STOCK = POTION_MERCHANT_DATA.stock.map(_normStock).filter(Boolean);
+const STANCE_MERCHANT_STOCK = STANCE_MERCHANT_DATA.stock.map(_normStock).filter(Boolean);
 
 // Items still available for sale (items bought are removed permanently)
 let _merchantAvailable = [...MERCHANT_STOCK];
 let _potionMerchantAvailable = [...POTION_MERCHANT_STOCK];
+let _stanceMerchantAvailable = [...STANCE_MERCHANT_STOCK];
 
 // Points to whichever stock array is active for the currently open merchant
 let _activeMerchantAvailable = _merchantAvailable;
@@ -764,7 +768,15 @@ export function initObjects(scene, camera) {
                                 obj.userData.clickAudio = null;
                             }
 
-                            playNpcDialogue(npcRow, npcCol, url);
+                            // Consume the one-shot onAudioEnd callback and clear it from all sibling meshes
+                            const onAudioEnd = obj.userData.onAudioEnd ?? null;
+                            if (onAudioEnd) {
+                                let modelRoot = obj;
+                                while (modelRoot.parent && modelRoot.parent !== objectsGroup) modelRoot = modelRoot.parent;
+                                modelRoot.traverse(c => { if (c.userData) c.userData.onAudioEnd = null; });
+                            }
+
+                            playNpcDialogue(npcRow, npcCol, url, 0.8, onAudioEnd);
 
                             // Otter NPC level 4 first-click video sequence trigger
                             if (url.includes('post-minotaur.mp3') && window.playOtterVideoSequence) {
@@ -2244,6 +2256,8 @@ export function spawnObjectsForLevel() {
         level1OgrePortcullisOpened: _level1OgrePortcullisOpened,
         level1ShrineGateOpened: _level1ShrineGateOpened,
         monsterNpcSaved: _monsterNpcSaved,
+        stanceNpcDeparted: _stanceNpcDeparted,
+        setStanceNpcDeparted: (val) => { _stanceNpcDeparted = val; },
         // Level 2 state flags
         level2PortcullisOpened: _level2PortcullisOpened,
         level2GiantPortcullisOpened: _level2GiantPortcullisOpened,
@@ -3164,6 +3178,7 @@ function addCustomNPC(scene, loader, col, row, glbPath, dialogue, scale = 0.55, 
                 child.userData.proximityRange = proximityRange;
                 child.userData.clickAudio = arguments[12]; // Support for clickAudio in 13th arg
                 child.userData.fallbackClickAudio = arguments[14]; // Support for fallbackClickAudio in 15th arg
+                child.userData.onAudioEnd = arguments[15]; // optional one-shot callback after click audio ends
                 interactables.push(child);
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];
@@ -3212,6 +3227,9 @@ function addCustomNPC(scene, loader, col, row, glbPath, dialogue, scale = 0.55, 
         }
 
         scene.add(model);
+
+        const onModelLoaded = arguments[16];
+        if (typeof onModelLoaded === 'function') onModelLoaded(model);
     });
 }
 
@@ -3959,10 +3977,13 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
     _merchantBasket = [];
     _merchantSellBasket = [];
     _merchantMode = 'buy';
-    _activeMerchantAvailable = shopType === 'potions' ? _potionMerchantAvailable : _merchantAvailable;
+    if (shopType === 'potions') _activeMerchantAvailable = _potionMerchantAvailable;
+    else if (shopType === 'stances') _activeMerchantAvailable = _stanceMerchantAvailable;
+    else _activeMerchantAvailable = _merchantAvailable;
 
     let title = 'Merchant';
     if (shopType === 'potions') title = 'Apothecary';
+    else if (shopType === 'stances') title = 'Stance Master';
     else if (shopType === 'none' || shopType === 'barnaby') title = 'Barnaby';
 
     document.getElementById('merchant-title').textContent = title;
@@ -5225,6 +5246,7 @@ export function getWorldFlags() {
         level1OgrePortcullisOpened: _level1OgrePortcullisOpened,
         level1ShrineGateOpened: _level1ShrineGateOpened,
         monsterNpcSaved: _monsterNpcSaved,
+        stanceNpcDeparted: _stanceNpcDeparted,
         disarmedTraps: [..._trapDisarmedSet],
         crystalShrineState: _crystalShrineState,
         level3PortalEnabled: _level3PortalEnabled,
@@ -5236,6 +5258,7 @@ export function getWorldFlags() {
 }
 
 export function setLevel1HoleRoomSpawned(val) { _level1HoleRoomSpawned = val; }
+export function setStanceNpcDeparted(val) { _stanceNpcDeparted = val; }
 
 /** Restores gate/portal flags. Call BEFORE spawnObjectsForLevel(). */
 export function setWorldFlags(flags) {
@@ -5252,6 +5275,7 @@ export function setWorldFlags(flags) {
     _level1OgrePortcullisOpened = flags.level1OgrePortcullisOpened ?? false;
     _level1ShrineGateOpened = flags.level1ShrineGateOpened ?? false;
     _monsterNpcSaved = flags.monsterNpcSaved ?? false;
+    _stanceNpcDeparted = flags.stanceNpcDeparted ?? false;
     _crystalShrineState = flags.crystalShrineState ?? 0;
     _level3PortalEnabled = flags.level3PortalEnabled ?? false;
     _level4PortalEnabled = flags.level4PortalEnabled ?? false;
@@ -5313,6 +5337,12 @@ export function getPotionMerchantStock() { return _potionMerchantAvailable.map(e
 
 /** Restores potion merchant stock. Accepts legacy string-array saves via _normStock. */
 export function setPotionMerchantStock(stock) { if (stock) _potionMerchantAvailable = stock.map(_normStock).filter(Boolean); }
+
+/** Returns a snapshot of stance merchant stock. */
+export function getStanceMerchantStock() { return _stanceMerchantAvailable.map(e => ({ ...e })); }
+
+/** Restores stance merchant stock. */
+export function setStanceMerchantStock(stock) { if (stock) _stanceMerchantAvailable = stock.map(_normStock).filter(Boolean); }
 
 // ─────────────────────────────────────────────
 //  KNOWN RECIPES — RENDER
@@ -5757,6 +5787,7 @@ export function captureWorldState() {
         flags: getWorldFlags(),
         merchantStock: getMerchantStock(),
         potionMerchantStock: getPotionMerchantStock(),
+        stanceMerchantStock: getStanceMerchantStock(),
         knownAlchemyRecipes: [..._knownAlchemyRecipes],
         knownForgeRecipes: [..._knownForgeRecipes],
         eggEmptied: Array.from(_eggEmptiedSet),
@@ -5769,6 +5800,7 @@ export function restoreWorldState(data) {
     setWorldFlags(data.flags ?? null);
     if (data.merchantStock) setMerchantStock(data.merchantStock);
     if (data.potionMerchantStock) setPotionMerchantStock(data.potionMerchantStock);
+    if (data.stanceMerchantStock) setStanceMerchantStock(data.stanceMerchantStock);
     if (data.knownAlchemyRecipes) data.knownAlchemyRecipes.forEach(r => _knownAlchemyRecipes.add(r));
     if (data.knownForgeRecipes) data.knownForgeRecipes.forEach(r => _knownForgeRecipes.add(r));
     if (data.eggEmptied) _eggEmptiedSet = new Set(data.eggEmptied);

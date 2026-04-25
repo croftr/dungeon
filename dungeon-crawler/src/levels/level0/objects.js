@@ -21,6 +21,7 @@ export function spawnLevel0Objects(ctx) {
         level3PortalEnabled, level4PortalEnabled,
         setStarterGate,
         monsterNpcSaved,
+        stanceNpcDeparted,
         interactables,
     } = ctx;
 
@@ -78,7 +79,7 @@ export function spawnLevel0Objects(ctx) {
     }
 
     // ── Weapons & Armour merchant (east wall, centre) ─────────────────────────
-    addShop(group, loader, 23, 11, -Math.PI / 2, -0.2, 0, 'weapons', null, {
+    addShop(group, loader, 23, 9, -Math.PI / 2, -0.2, 0, 'weapons', null, {
         greetingAudio: [
             asset('/npcs/merchant1/quality-steel.mp3'),
             asset('/npcs/merchant1/shield-dents.mp3'),
@@ -88,7 +89,7 @@ export function spawnLevel0Objects(ctx) {
     });
 
     // ── Decorative chest beside the weapons merchant ───────────────────────────
-    addChest(group, loader, 23, 11, -Math.PI / 2, 0.7, [], asset('/items/chest1.glb'), false);
+    addChest(group, loader, 23, 9, -Math.PI / 2, 0.7, [], asset('/items/chest1.glb'), false);
 
     // ── Dropped torch beside the weapons merchant ──────────────────────────────
     addDroppedTorch(group, loader, 23, 11, -Math.PI / 2, 0.8, -0.7);
@@ -117,6 +118,22 @@ export function spawnLevel0Objects(ctx) {
 
     // ── Training Console — next to the training dummy at (7, 23) ────────────
     addTrainingConsole(group, loader, 22, 7, Math.PI);
+
+    // ── Stance NPC + shelf — both controlled by stanceNpcDeparted
+    // TODO: restore the stanceNpcDeparted guard once testing is complete
+    addShop(group, loader, 23, 13, -Math.PI / 2 + 0.45, 0, 0, 'stances',
+        asset('/npcs/stance-npc/Meshy_AI_Dragonborn_Magier_mit_biped_Animation_Stand_and_Chat_withSkin.glb'),
+        {
+            scale: 0.55,
+            greetingAudio: [
+                asset('/npcs/stance-npc/bark1.mp3'),
+                asset('/npcs/stance-npc/bark2.mp3'),
+                asset('/npcs/stance-npc/bark3.mp3'),
+            ],
+        }
+    );
+    // Stance shelf — to the NPC's right (north), facing west toward the player
+    addDecoration(group, loader, 23, 12, -Math.PI / 2, asset('/items/stance-shelf.glb'), 1.0, true, 0.8, 0.5, 0);
 
     // ── Relocated Monster — NW corner of east room ────────────────────────────────
     if (monsterNpcSaved) {

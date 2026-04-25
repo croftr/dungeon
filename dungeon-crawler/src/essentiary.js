@@ -98,7 +98,8 @@ function _renderSpecialAttack(atk) {
 function _getEssenceName(def) {
   if (!def.drops) return null;
   for (const d of def.drops) {
-    if (d.item.endsWith(' Essence') && d.item !== 'Life Essence') return d.item;
+    const itemName = typeof d.item === 'string' ? d.item : d.item?.name;
+    if (itemName && itemName.endsWith(' Essence') && itemName !== 'Life Essence') return itemName;
   }
   return null;
 }

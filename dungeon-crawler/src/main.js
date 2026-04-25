@@ -72,7 +72,7 @@ document.querySelectorAll('img[data-src]').forEach(img => {
 const _VIDEO_LEVELS = {
   0: ['battle-prep-video', 'hero-door-video', 'nectar-quest-video', 'crystal-shrine-red-video', 'crystal-shrine-red-blue-video', 'portal-video'],
   1: ['ogre-video', 'mummy-video', 'goblin-run-video'],
-  2: ['treeman-video', 'demon-video', 'giant-video', 'aqua-man-video', 'stairs-video'],
+  2: ['treeman-video', 'demon-video', 'giant-video', 'aqua-man-video', 'stairs-video', 'crow-wizard-video'],
   3: ['minotaur-video', 'minotaur-death-video', 'statue-portal-video', 'egg-video'],
   4: ['stairs-video', 'demon-ogre-video', 'lizard-man-video'],
 };
@@ -222,16 +222,18 @@ let hasSeenMinotaurVideo = false;
 let hasSeenMinotaurDeathVideo = false;
 let hasSeenDemonVideo = false;
 let hasSeenAquaManVideo = false;
+let hasSeenCrowWizardVideo = false;
 window.hasSeenTreemanVideo = false;
 let prepVideoTimer = null;
 
 // Bridge video flags to save system via window._saveFlags
-window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenMinotaurDeathVideo, hasSeenDemonVideo, hasSeenAquaManVideo };
+window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenMinotaurDeathVideo, hasSeenDemonVideo, hasSeenAquaManVideo, hasSeenCrowWizardVideo };
 
 function captureVideoFlags() {
   return {
     hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo,
     hasSeenMinotaurDeathVideo, hasSeenDemonVideo, hasSeenAquaManVideo,
+    hasSeenCrowWizardVideo,
     hasSeenTreemanVideo: window.hasSeenTreemanVideo,
   };
 }
@@ -244,8 +246,9 @@ function restoreVideoFlags(data) {
   hasSeenMinotaurDeathVideo = data.hasSeenMinotaurDeathVideo ?? false;
   hasSeenDemonVideo = data.hasSeenDemonVideo ?? false;
   hasSeenAquaManVideo = data.hasSeenAquaManVideo ?? false;
+  hasSeenCrowWizardVideo = data.hasSeenCrowWizardVideo ?? false;
   window.hasSeenTreemanVideo = data.hasSeenTreemanVideo ?? false;
-  window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenMinotaurDeathVideo, hasSeenDemonVideo, hasSeenAquaManVideo };
+  window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenMinotaurDeathVideo, hasSeenDemonVideo, hasSeenAquaManVideo, hasSeenCrowWizardVideo };
 }
 
 setCallbacks({
@@ -323,6 +326,12 @@ setCallbacks({
       if (!window.hasSeenTreemanVideo && player.gridRow === 16 && player.gridCol === 7) {
         window.hasSeenTreemanVideo = true;
         if (window.playTreemanVideo) window.playTreemanVideo();
+      }
+
+      // Crow Wizard video: fires at the corridor mouth (row 8, col 19) just before the room
+      if (!hasSeenCrowWizardVideo && player.gridRow === 8 && player.gridCol === 19) {
+        hasSeenCrowWizardVideo = true; window._saveFlags.hasSeenCrowWizardVideo = true;
+        playCrowWizardVideo();
       }
 
       // Demon video: fires in the passage at row 28, col 7 — just before the demon room
@@ -1418,6 +1427,53 @@ if (skipDemonBtn) skipDemonBtn.addEventListener('click', (e) => { e.stopPropagat
 if (demonVideo) demonVideo.addEventListener('ended', finishDemonVideo);
 
 // ─────────────────────────────────────────────
+//  CROW WIZARD VIDEO
+// ─────────────────────────────────────────────
+const crowWizardOverlay = document.getElementById('crow-wizard-video-overlay');
+const crowWizardVideo = document.getElementById('crow-wizard-video');
+const skipCrowWizardBtn = document.getElementById('skip-crow-wizard-btn');
+
+function playCrowWizardVideo() {
+  if (!crowWizardOverlay || !crowWizardVideo) return;
+  crowWizardOverlay.classList.remove('hidden');
+
+  setTimeout(() => {
+    crowWizardOverlay.style.opacity = '1';
+    crowWizardVideo.muted = false;
+    crowWizardVideo.volume = 1;
+    crowWizardVideo.play().catch(e => {
+      console.warn("Crow Wizard video play failed:", e);
+      finishCrowWizardVideo();
+    });
+  }, 50);
+}
+
+function finishCrowWizardVideo() {
+  if (!crowWizardOverlay) return;
+  crowWizardOverlay.style.opacity = '0';
+
+  const startVol = crowWizardVideo.volume;
+  const fadeInterval = setInterval(() => {
+    if (crowWizardVideo.volume > 0.05) {
+      crowWizardVideo.volume -= 0.05;
+    } else {
+      crowWizardVideo.volume = 0;
+      clearInterval(fadeInterval);
+    }
+  }, 50);
+
+  setTimeout(() => {
+    crowWizardVideo.pause();
+    clearInterval(fadeInterval);
+    crowWizardVideo.volume = startVol;
+    crowWizardOverlay.classList.add('hidden');
+  }, 1500);
+}
+
+if (skipCrowWizardBtn) skipCrowWizardBtn.addEventListener('click', (e) => { e.stopPropagation(); finishCrowWizardVideo(); });
+if (crowWizardVideo) crowWizardVideo.addEventListener('ended', finishCrowWizardVideo);
+
+// ─────────────────────────────────────────────
 //  OTTER VIDEO SEQUENCE
 // ─────────────────────────────────────────────
 window.playOtterVideoSequence = function() {
@@ -2138,14 +2194,25 @@ window.loadLevel = function (levelNum) {
     );
 
     // Level 2: Crow Wizard room (rows 7–9, cols 20–25) + approach corridor (row 8, cols 15–19)
+    // + north exit corridor (col 24, rows 4–6) + annex room (rows 1–3, cols 22–26)
     buildTextureZone(
       scene,
       [
+        // approach corridor walls
         [7,15],[7,16],[7,17],[7,18],[7,19],
         [9,15],[9,16],[9,17],[9,18],[9,19],
-        [6,20],[6,21],[6,22],[6,23],[6,24],[6,25],
+        // crow room perimeter ([6,24] omitted — now the north doorway)
+        [6,20],[6,21],[6,22],[6,23],[6,25],
         [10,20],[10,21],[10,22],[10,23],[10,24],[10,25],
         [7,26],[8,26],[9,26],
+        // north exit corridor sides (col 24, rows 4–6)
+        [4,23],[4,25],
+        [5,23],[5,25],
+        // annex room perimeter
+        [0,22],[0,23],[0,24],[0,25],[0,26],   // north (map edge)
+        [1,21],[2,21],[3,21],                  // west wall
+        [1,27],[2,27],[3,27],                  // east wall
+        [3,22],[3,23],[3,25],[3,26],           // south wall (doorway at [3,24])
       ],
       [],
       asset('/textures/crow-wall.png'),

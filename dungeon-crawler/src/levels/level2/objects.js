@@ -1,5 +1,7 @@
+import * as THREE from 'three';
 import { CELL } from '../../map.js';
 import { asset } from '../../assets.js';
+import { playNpcDialogue } from '../../audio.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  LEVEL 2 – The Deep Passage
@@ -17,6 +19,8 @@ export function spawnLevel2Objects(ctx) {
         createWallButton, addCustomNPC,
         level2PortcullisOpened,
         level2GiantPortcullisOpened,
+        stanceNpcDeparted,
+        setStanceNpcDeparted,
     } = ctx;
 
 
@@ -97,4 +101,71 @@ export function spawnLevel2Objects(ctx) {
     // ── Traps ─────────────────────────────────────────────────────────────────
     addTrap1(group, loader, 32, 10);  // long east passage (row 32, col 10)
     addTrap1(group, loader, 32, 17);  // corridor further along east passage (row 32, col 17)
+
+    // ── Stance NPC (crow annex room, back wall) ───────────────────────────────
+    // Only spawn on level 2 if he hasn't departed yet
+    if (!stanceNpcDeparted) {
+        addCustomNPC(
+            group,
+            loader,
+            24,          // col — centre of annex room
+            1,           // row — back (north) wall
+            '/npcs/stance-npc/Meshy_AI_Dragonborn_Magier_mit_biped_Animation_Stand_and_Chat_withSkin.glb',
+            null,        // no text dialogue
+            0.55,        // scale
+            0,           // rotY — face south, toward the entrance
+            0,           // offsetX
+            0,           // offsetZ
+            null,        // no proximity audio
+            2,           // proximityRange
+            '/npcs/stance-npc/intro.mp3',   // arg[12]: click audio (intro)
+            '/npcs/stance-npc/Meshy_AI_Dragonborn_Magier_mit_biped_Animation_Talk_with_Left_Hand_on_Hip_withSkin.glb', // arg[13]: talk anim
+            null,        // arg[14]: no fallback audio
+            null,        // arg[15]: onAudioEnd — set via onModelLoaded below
+            (model) => { // arg[16]: onModelLoaded
+                model.traverse(child => {
+                    if (!child.userData?.isDialogueNPC) return;
+                    child.userData.onAudioEnd = () => {
+                        // Re-enter talking animation for the outro
+                        if (model.userData.talkAction && model.userData.idleAction) {
+                            model.userData.idleAction.fadeOut(0.2);
+                            model.userData.talkAction.reset().fadeIn(0.2).play();
+                        }
+                        // Play outro, then flash-despawn
+                        playNpcDialogue(1, 24, '/npcs/stance-npc/outro.mp3', 0.8, () => {
+                            _despawnWithFlash(model, group, () => {
+                                setStanceNpcDeparted(true);
+                            });
+                        });
+                    };
+                });
+            }
+        );
+    }
+}
+
+function _despawnWithFlash(model, scene, onComplete) {
+    const light = new THREE.PointLight(0xffffff, 14, 7);
+    light.position.copy(model.position);
+    light.position.y += 1.2;
+    scene.add(light);
+
+    const startScale = model.scale.x;
+    const start = performance.now();
+    const duration = 600;
+
+    function tick() {
+        if (!model.parent) return; // guard: level changed mid-animation
+        const t = Math.min((performance.now() - start) / duration, 1);
+        model.scale.setScalar(startScale * (1 - t));
+        light.intensity = 14 * (1 - t);
+        if (t < 1) {
+            requestAnimationFrame(tick);
+        } else {
+            model.visible = false;
+            if (light.parent) scene.remove(light);
+            if (onComplete) onComplete();
+        }
+    }
+    requestAnimationFrame(tick);
 }

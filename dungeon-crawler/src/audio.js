@@ -870,7 +870,7 @@ export function fadeOutQuestAudio(durationSec = 0.6) {
  * (prevents double-click audio stacking). If a different NPC is speaking, their audio
  * stops immediately and the new NPC's audio starts.
  */
-export async function playNpcDialogue(row, col, url, volume = 0.8) {
+export async function playNpcDialogue(row, col, url, volume = 0.8, onEnded = null) {
   const npcId = `${row},${col}`;
   if (npcId === _activeNpcId) return; // same NPC already talking — ignore
 
@@ -908,6 +908,7 @@ export async function playNpcDialogue(row, col, url, volume = 0.8) {
         _activeNpcRow = null;
         _activeNpcCol = null;
       }
+      if (onEnded) onEnded();
     });
     source.start(0);
     _questAudioSource = source;
