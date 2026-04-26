@@ -14,6 +14,13 @@
             "resilience": 6
         },
         "bio": "A swift and silent guardian of the deep woods. Elrond's bow strikes with the fury of nature itself.",
+        "baseElementalResistances": {
+            "holy": 0,
+            "dark": 0,
+            "fire:": 0,
+            "ice": 0,
+            "lightning": 0
+        },
         "stances": [
             "viperseeker",
             "heartseeker"
@@ -53,6 +60,13 @@
             "resilience": 8
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
+        "baseElementalResistances": {
+            "holy": 0,
+            "dark": 0,
+            "fire:": 0,
+            "ice": 0,
+            "lightning": 0
+        },
         "stances": [
             "inquisitor",
             "holy",
@@ -92,6 +106,13 @@
             "resilience": 10
         },
         "bio": "A stout and hearty fighter from the mountainous deeps. Thorek believes every problem can be solved with a sharp axe and enough ale.",
+        "baseElementalResistances": {
+            "holy": 0,
+            "dark": 0,
+            "fire:": 0,
+            "ice": 0,
+            "lightning": 0
+        },
         "stances": [
             "slayer"
         ],
@@ -129,6 +150,13 @@
             "resilience": 5
         },
         "bio": "An eccentric scholar weaving arcane tapestries. Ashar's thirst for forbidden knowledge is matched only by his formidable spellcraft.",
+        "baseElementalResistances": {
+            "holy": 0,
+            "dark": 0,
+            "fire:": 0,
+            "ice": 0,
+            "lightning": 0
+        },
         "stances": [
             "curatio"
         ],
@@ -172,6 +200,13 @@
             "resilience": 6
         },
         "bio": "A raging storm of muscle and steel. Korg thrives in the heat of battle, leaving devastation in his wake.",
+        "baseElementalResistances": {
+            "holy": 0,
+            "dark": 0,
+            "fire:": 0,
+            "ice": 0,
+            "lightning": 0
+        },
         "stances": [
             "talon"
         ],
@@ -208,6 +243,13 @@
             "resilience": 7
         },
         "bio": "A keen-eyed marksman who traded the mines for the open hunt. Baldur's crossbow never misses its mark.",
+        "baseElementalResistances": {
+            "holy": 0,
+            "dark": 0,
+            "fire:": 0,
+            "ice": 0,
+            "lightning": 0
+        },
         "stances": [
             "overclock",
             "bloodgrudge"
@@ -247,6 +289,13 @@
             "resilience": 6
         },
         "bio": "A graceful tempest of flashing blades. Lumni dances through her enemies, turning battle into a bloody, beautiful art form.",
+        "baseElementalResistances": {
+            "holy": 0,
+            "dark": 0,
+            "fire:": 0,
+            "ice": 0,
+            "lightning": 0
+        },
         "stances": [
             "viper",
             "ghost"
@@ -284,6 +333,13 @@
             "resilience": 8
         },
         "bio": "A devoted healer whose presence brings hope to the darkest depths. Seraphina draws upon pure light to mend flesh and soul.",
+        "baseElementalResistances": {
+            "holy": 0,
+            "dark": 0,
+            "fire:": 0,
+            "ice": 0,
+            "lightning": 0
+        },
         "stances": [
             "vengeance",
             "spellsurge"

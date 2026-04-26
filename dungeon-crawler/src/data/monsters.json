@@ -308,11 +308,16 @@
     "xp": 265,
     "attackSpeed": 1,
     "stats": {
-      "strength": 15,
+      "strength": 10,
       "dexterity": 8,
       "vitality": 12,
       "intelligence": 10,
       "resilience": 10
+    },
+    "elementalDamage": { "ice": 5 },
+    "elementalResistances": {
+      "ice": "immune",
+      "fire": "weak"
     },
     "onHitEffects": [
       {
@@ -871,11 +876,16 @@
     "xp": 140,
     "attackSpeed": 1,
     "stats": {
-      "strength": 14,
+      "strength": 10,
       "dexterity": 15,
       "vitality": 13,
       "intelligence": 7,
       "resilience": 8
+    },
+    "elementalDamage": { "ice": 4 },
+    "elementalResistances": {
+      "ice": "immune",
+      "fire": "weak"
     },
     "drops": [
       {

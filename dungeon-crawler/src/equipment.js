@@ -227,11 +227,23 @@ export function updateEffectiveStats(m) {
   let directHpBonus = 0, directMpBonus = 0, directSpBonus = 0;
   const countedItems = new Set();
 
+  // Innate elemental resistances from recruits.json (data-driven per character —
+  // edit the value there and it applies on next aggregation, no save migration).
+  // Looked up by name; missing recruits or missing field → no contribution.
+  const recruitData = RECRUITS_DATA.find(r => r.name === m.name);
+  if (recruitData?.baseElementalResistances) {
+    Object.entries(recruitData.baseElementalResistances).forEach(([elem, val]) => {
+      const sum = (newElementalResistances[elem] ?? 0) + val;
+      newElementalResistances[elem] = sum > 0.9 ? 0.9 : sum;
+    });
+  }
+
   // Permanent skill-node grants (persisted on the member). Folded in alongside
   // equipment so they appear in the inventory display and survive save/load.
   if (m.elementalResistanceBonuses) {
     Object.entries(m.elementalResistanceBonuses).forEach(([elem, val]) => {
-      newElementalResistances[elem] = (newElementalResistances[elem] ?? 0) + val;
+      const sum = (newElementalResistances[elem] ?? 0) + val;
+      newElementalResistances[elem] = sum > 0.9 ? 0.9 : sum;
     });
   }
 

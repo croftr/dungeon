@@ -218,6 +218,7 @@ _applyMultiAttacks('IceMan', [
     damageTimings: [0.5],
     weight: 1,
     specialAttack: true,       // hits all party members
+    damageType: 'ice',         // whole-hit ice — full damage routes through party ice resistance
     specialOnHitEffects: [{ effectId: 'frozen', chance: 0.20 }],
   },
 ]);
@@ -543,6 +544,7 @@ _applyMultiAttacks('Ice Mushroom', [
     weight: 2,
     damageMultiplier: 0.5,
     specialAttack: true,
+    damageType: 'ice',
     specialOnHitEffects: [{ effectId: 'frozen', chance: 0.25 }],
   },
 ]);
@@ -2564,6 +2566,7 @@ function _applyMonsterSpecialAttack(monster, variant) {
       specialName,
       isAoe: false,
       damageType: variant.damageType ?? null,
+      elementalDamage: variant.elementalDamage ?? null,
     });
   } else if (variant.specialAttackType === 'frontTwo') {
     // Hit front-row members (party indices 0 and 1); fall back to all alive if both are down
@@ -2577,6 +2580,7 @@ function _applyMonsterSpecialAttack(monster, variant) {
         specialName,
         isAoe: false,
         damageType: variant.damageType ?? null,
+      elementalDamage: variant.elementalDamage ?? null,
       });
     });
   } else {
@@ -2589,6 +2593,7 @@ function _applyMonsterSpecialAttack(monster, variant) {
         specialName,
         isAoe: true,
         damageType: variant.damageType ?? null,
+      elementalDamage: variant.elementalDamage ?? null,
       });
     });
   }
@@ -2601,7 +2606,8 @@ function _applyMonsterDamage(monster, opts = {}) {
   // opts.specialName — display name of the special attack (for battle log)
   // opts.isAoe — whether this hit is part of an AoE special attack
   // opts.damageType — element of this attack (e.g. "fire"). Falls back to monster.damageType for basic attacks. null/"physical" = no element.
-  const { forceTarget, onHitEffectsOverride, damageMultiplier, specialName, isAoe, damageType } = opts;
+  // opts.elementalDamage — additive elemental rider map for special attacks. Basic attacks fall back to monster.elementalDamage.
+  const { forceTarget, onHitEffectsOverride, damageMultiplier, specialName, isAoe, damageType, elementalDamage } = opts;
   const isSpecial = forceTarget !== undefined;
 
   // Target whoever is on the face of the formation the monster is attacking from.
@@ -2704,9 +2710,11 @@ function _applyMonsterDamage(monster, opts = {}) {
     charDefence *= (skillsState.rampart.magnitude || 2);
   }
 
-  // Resolve the attack's element: special-attack opts override; otherwise fall
-  // back to the monster's basic-attack damageType (defaults to physical).
-  const attackElement = damageType ?? monster.damageType ?? null;
+  // Resolve the attack's element: special variants supply their own damageType
+  // (e.g. iceCast → "ice"); only basic attacks inherit monster.damageType so a
+  // generic special (e.g. ogre slam) doesn't accidentally pick up a monster's
+  // basic-attack element.
+  const attackElement = damageType ?? (isSpecial ? null : monster.damageType) ?? null;
   const elementResistance = (attackElement && attackElement !== 'physical')
     ? (getEffectiveElementalResistances(target)[attackElement] ?? 0)
     : 0;
@@ -2718,6 +2726,26 @@ function _applyMonsterDamage(monster, opts = {}) {
   // 5% chance to critically hit — triples the calculated damage (standard attacks only)
   const isCrit = !isSpecial && Math.random() < CRIT_CHANCE;
   let damage = isCrit ? Math.round(preCritDamage * CRIT_MULTIPLIER) : preCritDamage;
+
+  // Elemental rider damage on top of the physical/main hit. Basic attacks
+  // inherit monster.elementalDamage (e.g. IceMan's icy touch); special variants
+  // only use riders they explicitly carry, so a themed special like iceCast
+  // (whole-damage ice) doesn't double-count by also inheriting basic riders.
+  // Each (element, value) is reduced by the player's effective resistance and
+  // added separately so the breakdown can be shown in the battle log.
+  const incomingRiders = elementalDamage ?? (isSpecial ? null : monster.elementalDamage) ?? null;
+  const incomingBreakdown = {};
+  if (incomingRiders) {
+    const playerResists = getEffectiveElementalResistances(target);
+    for (const [element, value] of Object.entries(incomingRiders)) {
+      if (!value) continue;
+      const resist = playerResists[element] ?? 0;
+      const rider = Math.max(0, Math.round(value * (1 - resist)));
+      if (rider === 0) continue;
+      incomingBreakdown[element] = rider;
+      damage += rider;
+    }
+  }
 
   // Sanctuary buff — reduces all incoming party damage by a percentage.
   // magnitude is stored as a percentage (e.g. 10 = 10% reduction), capped at 100%.
@@ -2784,6 +2812,7 @@ function _applyMonsterDamage(monster, opts = {}) {
     isAoe: isAoe ?? false,
     attackElement: (attackElement && attackElement !== 'physical') ? attackElement : null,
     elementResistance: elementResistance || 0,
+    elementalBreakdown: Object.keys(incomingBreakdown).length > 0 ? incomingBreakdown : null,
   });
 
   // Apply on-hit status effects defined on this monster type (or override for special attacks)

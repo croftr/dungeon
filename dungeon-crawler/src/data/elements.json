@@ -11,7 +11,7 @@
         "name": "Dark",
         "icon": "/icons/element/dark.webp",
         "color": "#a86bd6",
-        "symbol": "●"
+        "symbol": "☀"
     },
     "fire": {
         "id": "fire",
