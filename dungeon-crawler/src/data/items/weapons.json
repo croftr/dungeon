@@ -101,7 +101,7 @@
         "attackType": "swipe",
         "weaponType": "dagger",
         "staminaDrain": 1,
-        "baseDamage": 6,
+        "baseDamage": 7,
         "onHitEffects": [
             {
                 "effectId": "lifesteal",
@@ -629,9 +629,11 @@
         "attackType": "swipe",
         "weaponType": "axe",
         "staminaDrain": 1,
-        "baseDamage": 18,
+        "baseDamage": 13,
         "damageType": "fire",
-        "elementalDamage": { "fire": 6 },
+        "elementalDamage": {
+            "fire": 6
+        },
         "delay": 2,
         "statWeights": {
             "str": 0.8,
@@ -650,7 +652,9 @@
         "staminaDrain": 1,
         "baseDamage": 12,
         "damageType": "fire",
-        "elementalDamage": { "fire": 4 },
+        "elementalDamage": {
+            "fire": 4
+        },
         "delay": 1.8,
         "statWeights": {
             "str": 0.2,
@@ -667,9 +671,11 @@
         "attackType": "swipe",
         "weaponType": "axe",
         "staminaDrain": 1,
-        "baseDamage": 18,
+        "baseDamage": 13,
         "damageType": "ice",
-        "elementalDamage": { "ice": 6 },
+        "elementalDamage": {
+            "ice": 6
+        },
         "delay": 2,
         "statWeights": {
             "str": 0.8,
@@ -686,9 +692,11 @@
         "attackType": "swipe",
         "weaponType": "dagger",
         "staminaDrain": 1,
-        "baseDamage": 12,
+        "baseDamage": 8,
         "damageType": "ice",
-        "elementalDamage": { "ice": 4 },
+        "elementalDamage": {
+            "ice": 4
+        },
         "delay": 1.8,
         "statWeights": {
             "str": 0.2,
@@ -705,9 +713,11 @@
         "attackType": "swipe",
         "weaponType": "twoHanded",
         "staminaDrain": 2,
-        "baseDamage": 35,
+        "baseDamage": 25,
         "damageType": "fire",
-        "elementalDamage": { "fire": 10 },
+        "elementalDamage": {
+            "fire": 10
+        },
         "delay": 5,
         "statWeights": {
             "str": 0.8,
@@ -724,9 +734,11 @@
         "attackType": "swipe",
         "weaponType": "twoHanded",
         "staminaDrain": 2,
-        "baseDamage": 35,
+        "baseDamage": 25,
         "damageType": "ice",
-        "elementalDamage": { "ice": 10 },
+        "elementalDamage": {
+            "ice": 10
+        },
         "delay": 5,
         "statWeights": {
             "str": 0.8,

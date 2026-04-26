@@ -17,8 +17,8 @@
         "baseElementalResistances": {
             "holy": 0,
             "dark": 0,
-            "fire:": 0,
-            "ice": 0,
+            "fire": 0,
+            "ice": 0.9,
             "lightning": 0
         },
         "stances": [
@@ -63,8 +63,8 @@
         "baseElementalResistances": {
             "holy": 0,
             "dark": 0,
-            "fire:": 0,
-            "ice": 0,
+            "fire": 0,
+            "ice": 1.0,
             "lightning": 0
         },
         "stances": [
@@ -109,7 +109,7 @@
         "baseElementalResistances": {
             "holy": 0,
             "dark": 0,
-            "fire:": 0,
+            "fire": 0,
             "ice": 0,
             "lightning": 0
         },
@@ -153,7 +153,7 @@
         "baseElementalResistances": {
             "holy": 0,
             "dark": 0,
-            "fire:": 0,
+            "fire": 0,
             "ice": 0,
             "lightning": 0
         },
@@ -203,7 +203,7 @@
         "baseElementalResistances": {
             "holy": 0,
             "dark": 0,
-            "fire:": 0,
+            "fire": 0,
             "ice": 0,
             "lightning": 0
         },
@@ -246,7 +246,7 @@
         "baseElementalResistances": {
             "holy": 0,
             "dark": 0,
-            "fire:": 0,
+            "fire": 0,
             "ice": 0,
             "lightning": 0
         },
@@ -292,7 +292,7 @@
         "baseElementalResistances": {
             "holy": 0,
             "dark": 0,
-            "fire:": 0,
+            "fire": 0,
             "ice": 0,
             "lightning": 0
         },
@@ -336,7 +336,7 @@
         "baseElementalResistances": {
             "holy": 0,
             "dark": 0,
-            "fire:": 0,
+            "fire": 0,
             "ice": 0,
             "lightning": 0
         },

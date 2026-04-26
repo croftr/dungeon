@@ -18,6 +18,24 @@
         "weight": 0
     },
     {
+        "name": "Frostbolt",
+        "type": "direct-damage",
+        "target": "monster",
+        "slot": "spell",
+        "element": "ice",
+        "attackType": "frostbolt",
+        "baseDamage": 0,
+        "magnitudeFormula": "intelligence",
+        "magnitudeScale": 1.5,
+        "magnitudeBonusMode": "flat",
+        "delay": 4,
+        "mpCost": 11,
+        "icon": "/icons/frostbolt.svg",
+        "description": "A shard of concentrated magical ice. Cast to freeze and shatter your enemies.",
+        "value": 0,
+        "weight": 0
+    },
+    {
         "name": "Regeneration",
         "type": "healing",
         "target": "party-member",

@@ -10,6 +10,16 @@
         "weight": 0.2
     },
     {
+        "name": "Scroll of Frostbolt",
+        "type": "spellbook",
+        "spellName": "Frostbolt",
+        "requiredInt": 10,
+        "icon": "/icons/scroll_frostbolt.png",
+        "description": "Ancient parchment covered in glistening frost runes. Study it to learn Frostbolt. Requires 10 Intelligence.",
+        "value": 620,
+        "weight": 0.2
+    },
+    {
         "name": "Scroll of Heal",
         "type": "spellbook",
         "spellName": "Heal",
