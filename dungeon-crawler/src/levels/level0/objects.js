@@ -31,8 +31,8 @@ export function spawnLevel0Objects(ctx) {
     // ── Starter Stash in the starter room ─────────────────────────────────────────────
     addChest(group, loader, 13.4, 10, Math.PI / 2, -0.1, [
         { name: 'Gold Coins', quantity: 10000 },
-        'Potion of Invincibility', 'Potion of Unseen', "Rage Cap", "Elixir of Rage", "Rage Cap", "Rage Cap", "Heartwood Greaves",
-        "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Ice Cap", "Elixir of Enlightenment", "Ice Cap", "Ice Cap",
+        'Potion of Invincibility', 'Potion of Unseen', "Rage Cap", "Elixir of Rage", "Elixir of Rage", "Elixir of Rage", "Elixir of Rage", "Rage Cap", "Rage Cap", "Heartwood Greaves",
+        "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Elixir of Enlightenment",
         // Essences (2 of each)
         "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence",
         "Scroll of Fireball", "Tome of the Viperseeker",
@@ -89,7 +89,7 @@ export function spawnLevel0Objects(ctx) {
     });
 
     // ── Decorative chest beside the weapons merchant ───────────────────────────
-    addChest(group, loader, 23, 11, -Math.PI / 2, 0.7, [], asset('/items/chest1.glb'), false);
+    addChest(group, loader, 23, 10, -Math.PI / 2, -1.0, [], asset('/items/chest1.glb'), false);
 
     // ── Dropped torch beside the weapons merchant ──────────────────────────────
     addDroppedTorch(group, loader, 23, 11, -Math.PI / 2, 0.8, -0.7);
