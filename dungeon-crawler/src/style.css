@@ -5109,6 +5109,18 @@ label.mm-setting-label {
   font-size: 10px;
 }
 
+/* Elemental damage list — bonus damage per element on top of base damage */
+.detail-elemdmg-list {
+  display: none;
+  /* shown via JS when hasElementalDamage */
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  margin-top: 1px;
+  border-top: 1px solid #3a2a10;
+  padding-top: 5px;
+}
+
 /* Family bonus list — extra damage vs a monster family */
 .detail-familybonus-list {
   display: none;
@@ -8171,6 +8183,20 @@ body.party-targeting-mode .member-card--dead .portrait {
   min-width: 76px;
   text-align: right;
   flex-shrink: 0;
+}
+
+/* Inline elemental badge in battle log dmg column (e.g. "🔥+6" after a hit) */
+.bl-elem {
+  font-size: 10px;
+  font-weight: 700;
+  margin: 0 1px;
+  white-space: nowrap;
+}
+
+.bl-elem-resist {
+  color: #5ec4e8;
+  font-size: 9px;
+  opacity: 0.8;
 }
 
 .bl-calc {

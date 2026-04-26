@@ -5,13 +5,14 @@ import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, crea
 import { CELL, isPassable } from './map.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
-import { party, setHp, addGold, flashPortraitHit, showMemberDamage, showMemberHeal, refreshPartyCards, applyStatusEffect, getEffectiveStats, getEffectiveStatusResistances, getDefenceModifier, describeEffect, isPartyInvincible, isPartyUnseen } from './party.js';
+import { party, setHp, addGold, flashPortraitHit, showMemberDamage, showMemberHeal, refreshPartyCards, applyStatusEffect, getEffectiveStats, getEffectiveStatusResistances, getEffectiveElementalResistances, getDefenceModifier, describeEffect, isPartyInvincible, isPartyUnseen } from './party.js';
 import { STATUS_EFFECT_DEFS } from './status-effects.js';
 import { showMessage } from './minimap.js';
 import { getPoisonTickBonus, getReflectDamage, getCritChanceBonus, getStanceBerserkMultiplier, getStanceLifestealAmount } from './stance.js';
 import {
   playerHitChance, monsterHitChance,
   calcPlayerPhysicalDamage, calcPlayerMagicDamage, calcMonsterDamage,
+  getElementalRiderBreakdown,
   calcOnHitChance,
   pickRandomFrontLineTarget, pickDirectionalTarget,
   CRIT_CHANCE, CRIT_MULTIPLIER,
@@ -2264,6 +2265,14 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     statLabel = labels.join('+') || 'NONE';
   }
 
+  // Elemental info for the battle log: physical attacks expose a per-element
+  // rider breakdown (already accounts for monster weak/resist multipliers and
+  // stance bonus); magic spells expose the spell's element.
+  const elementalBreakdown = isMagic
+    ? null
+    : getElementalRiderBreakdown(effChar, mSunder, weaponDef, ammoDef).breakdown;
+  const spellElement = isMagic ? (weaponDef?.element ?? null) : null;
+
   const formula = {
     weaponBase: weaponDef?.baseDamage ?? 0,
     statBonus: formulaStatBonus,
@@ -2276,6 +2285,8 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     warcryMultiplier: (skillsState.warcry?.active && now < skillsState.warcry.expiresAt) ? skillsState.warcry.magnitude : 1.0,
     ammoModifier: ammoDef?.damageModifier ?? null,
     damageReduction: m.damageReduction ?? 0,
+    elementalBreakdown,
+    spellElement,
   };
 
   const result = hitMonster(monsterId, damage, attackType, isCrit, character.name);
@@ -2551,6 +2562,7 @@ function _applyMonsterSpecialAttack(monster, variant) {
       damageMultiplier: variant.damageMultiplier ?? 1,
       specialName,
       isAoe: false,
+      damageType: variant.damageType ?? null,
     });
   } else if (variant.specialAttackType === 'frontTwo') {
     // Hit front-row members (party indices 0 and 1); fall back to all alive if both are down
@@ -2563,6 +2575,7 @@ function _applyMonsterSpecialAttack(monster, variant) {
         damageMultiplier: variant.damageMultiplier ?? 1,
         specialName,
         isAoe: false,
+        damageType: variant.damageType ?? null,
       });
     });
   } else {
@@ -2574,6 +2587,7 @@ function _applyMonsterSpecialAttack(monster, variant) {
         damageMultiplier: variant.damageMultiplier ?? 1,
         specialName,
         isAoe: true,
+        damageType: variant.damageType ?? null,
       });
     });
   }
@@ -2585,7 +2599,8 @@ function _applyMonsterDamage(monster, opts = {}) {
   // opts.damageMultiplier — multiply base damage (e.g. 2 for ogre double combo)
   // opts.specialName — display name of the special attack (for battle log)
   // opts.isAoe — whether this hit is part of an AoE special attack
-  const { forceTarget, onHitEffectsOverride, damageMultiplier, specialName, isAoe } = opts;
+  // opts.damageType — element of this attack (e.g. "fire"). Falls back to monster.damageType for basic attacks. null/"physical" = no element.
+  const { forceTarget, onHitEffectsOverride, damageMultiplier, specialName, isAoe, damageType } = opts;
   const isSpecial = forceTarget !== undefined;
 
   // Target whoever is on the face of the formation the monster is attacking from.
@@ -2688,7 +2703,13 @@ function _applyMonsterDamage(monster, opts = {}) {
     charDefence *= (skillsState.rampart.magnitude || 2);
   }
 
-  const baseDamage = calcMonsterDamage(monster, effTarget, charDefence);
+  // Resolve the attack's element: special-attack opts override; otherwise fall
+  // back to the monster's basic-attack damageType (defaults to physical).
+  const attackElement = damageType ?? monster.damageType ?? null;
+  const elementResistance = (attackElement && attackElement !== 'physical')
+    ? (getEffectiveElementalResistances(target)[attackElement] ?? 0)
+    : 0;
+  const baseDamage = calcMonsterDamage(monster, effTarget, charDefence, elementResistance);
   const preCritDamage = damageMultiplier ? Math.round(baseDamage * damageMultiplier) : baseDamage;
   const resVit = (effTarget.stats?.resilience ?? 0) + (effTarget.stats?.vitality ?? 0);
   const resMitigation = Math.round(100 * resVit / (100 + resVit));
@@ -2760,6 +2781,8 @@ function _applyMonsterDamage(monster, opts = {}) {
     critMultiplier: isCrit ? CRIT_MULTIPLIER : 1,
     specialName: specialName ?? null,
     isAoe: isAoe ?? false,
+    attackElement: (attackElement && attackElement !== 'physical') ? attackElement : null,
+    elementResistance: elementResistance || 0,
   });
 
   // Apply on-hit status effects defined on this monster type (or override for special attacks)

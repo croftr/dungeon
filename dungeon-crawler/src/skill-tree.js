@@ -116,6 +116,13 @@ export function applyNodeBenefit(m, node) {
     for (const [stat, val] of Object.entries(node.benefit)) {
       m.statBonuses[stat] = (m.statBonuses[stat] ?? 0) + val;
     }
+  } else if (node.type === 'resistance') {
+    // Elemental resistance grant — folded into m.elementalResistanceBonuses, then
+    // picked up by updateEffectiveStats so it stacks with equipment.
+    if (!m.elementalResistanceBonuses) m.elementalResistanceBonuses = {};
+    for (const [elem, val] of Object.entries(node.benefit ?? {})) {
+      m.elementalResistanceBonuses[elem] = (m.elementalResistanceBonuses[elem] ?? 0) + val;
+    }
   } else if (node.type === 'skill') {
     const skillName = node.benefit.skill;
     const skill = hydrateSkill(skillName);

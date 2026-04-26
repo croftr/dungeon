@@ -1,4 +1,5 @@
-import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getAttackSpeedMultiplier, hasEffectFlag, breakPartyUnseen, showMemberHeal, showMemberSpHeal, getEffectiveStats } from './party.js';
+import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getAttackSpeedMultiplier, hasEffectFlag, breakPartyUnseen, showMemberHeal, showMemberSpHeal, getEffectiveStats, getEffectiveElementalResistances } from './party.js';
+import { ELEMENTS, ELEMENT_IDS } from './elements.js';
 import { showInlineHelp } from './help.js';
 import { getItemDef, canUseItemByJob, normalizeJob } from './items.js';
 import { getHqDefenceBonus, scaleHqPotionEffect, getHqEffectBonus, hqDisplayName } from './crafting.js';
@@ -221,9 +222,18 @@ export function updateEffectiveStats(m) {
   // Keys: "all" (every skill), or a skill type string e.g. "healing", "buff", "debuff".
   const newSkillBonuses = {};
   const newStatusResistances = {};
+  const newElementalResistances = {};
   let newSkillDurationBonusMs = 0;
   let directHpBonus = 0, directMpBonus = 0, directSpBonus = 0;
   const countedItems = new Set();
+
+  // Permanent skill-node grants (persisted on the member). Folded in alongside
+  // equipment so they appear in the inventory display and survive save/load.
+  if (m.elementalResistanceBonuses) {
+    Object.entries(m.elementalResistanceBonuses).forEach(([elem, val]) => {
+      newElementalResistances[elem] = (newElementalResistances[elem] ?? 0) + val;
+    });
+  }
 
   Object.values(m.equipment || {}).forEach(item => {
     if (item && !countedItems.has(item)) {
@@ -267,12 +277,23 @@ export function updateEffectiveStats(m) {
           newStatusResistances[effectId] = Math.min(0.9, (newStatusResistances[effectId] ?? 0) + resistance);
         });
       }
+
+      // elementalResistances: percentage reduction of incoming elemental damage.
+      // Additive across pieces; upper-capped at 0.9 (90%). Negative values
+      // (vulnerabilities) pass through unbounded.
+      if (def.elementalResistances) {
+        Object.entries(def.elementalResistances).forEach(([elem, resistance]) => {
+          const sum = (newElementalResistances[elem] ?? 0) + resistance;
+          newElementalResistances[elem] = sum > 0.9 ? 0.9 : sum;
+        });
+      }
     }
   });
 
   m.stats = newStats;
   m.skillBonuses = newSkillBonuses;
   m.statusResistances = newStatusResistances;
+  m.elementalResistances = newElementalResistances;
   m.skillDurationBonusMs = newSkillDurationBonusMs;
 
   // Recalculate hpMax/mpMax/spMax from the (now equipment-boosted) stats,
@@ -669,6 +690,23 @@ function renderModal(memberIndex) {
   const defEl = document.getElementById('stat-total-defence');
   if (defEl) defEl.textContent = totalDef;
 
+  const elemEl = document.getElementById('elemental-resistances');
+  if (elemEl) {
+    elemEl.innerHTML = '';
+    const elemResist = getEffectiveElementalResistances(m);
+    ELEMENT_IDS.forEach(id => {
+      const def = ELEMENTS[id];
+      const value = elemResist[id] ?? 0;
+      const pct = Math.round(value * 100);
+      const row = document.createElement('div');
+      row.className = 'stat-row';
+      // Color the value when non-zero so the eye picks up active resistances/vulnerabilities.
+      const valueColor = pct > 0 ? def.color : (pct < 0 ? '#e84a1f' : '#5a4a30');
+      row.innerHTML = `<span class="stat-name" style="font-size: 0.85em; opacity: 0.85;"><span style="color:${def.color};">${def.symbol}</span> ${def.name}</span><span class="stat-value" style="font-size: 0.85em; color:${valueColor};">${pct}%</span>`;
+      elemEl.appendChild(row);
+    });
+  }
+
   const resEl = document.getElementById('status-resistances');
   if (resEl) {
     resEl.innerHTML = '';
@@ -1047,6 +1085,7 @@ function populateTooltip(obj, showBuyPrice = false) {
         <div id="detail-row-skillbonus" class="detail-skillbonus-list"></div>
         <div id="detail-row-onhit" class="detail-onhit-list"></div>
         <div id="detail-row-familybonus" class="detail-familybonus-list"></div>
+        <div id="detail-row-elemdmg" class="detail-elemdmg-list"></div>
     `;
 
   if (isCustom) {
@@ -1133,6 +1172,7 @@ function populateTooltip(obj, showBuyPrice = false) {
   const hasTrapDisarmBonus = def?.trapDisarmBonus != null && def.trapDisarmBonus !== 0;
   const hasOnHitEffects = def?.onHitEffects && def.onHitEffects.length > 0;
   const hasFamilyBonus = def?.familyBonus && (Array.isArray(def.familyBonus) ? def.familyBonus.length > 0 : Object.keys(def.familyBonus).length > 0);
+  const hasElementalDamage = def?.elementalDamage && Object.keys(def.elementalDamage).length > 0;
   const hasBonusList = hasStatBonus || hasSkillBonus || hasSkillDurationBonus || hasTrapDisarmBonus;
 
   // Hide/show rows based on item type and available stats
@@ -1145,6 +1185,7 @@ function populateTooltip(obj, showBuyPrice = false) {
   document.getElementById('detail-row-skillbonus').style.display = hasBonusList ? 'flex' : 'none';
   document.getElementById('detail-row-onhit').style.display = hasOnHitEffects ? 'flex' : 'none';
   document.getElementById('detail-row-familybonus').style.display = hasFamilyBonus ? 'flex' : 'none';
+  document.getElementById('detail-row-elemdmg').style.display = hasElementalDamage ? 'flex' : 'none';
   document.getElementById('detail-row-scaling').style.display = hasScaling ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-mod').style.display = isAmmo ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-type').style.display = isAmmo ? 'flex' : 'none';
@@ -1261,6 +1302,22 @@ function populateTooltip(obj, showBuyPrice = false) {
       return `<div class="detail-familybonus-item">
         <span>vs. ${label}</span>
         <span>${sign}${bonus} dmg</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Elemental damage rider — extra damage on top of base, per element.
+  if (hasElementalDamage) {
+    const listEl = document.getElementById('detail-row-elemdmg');
+    listEl.innerHTML = Object.entries(def.elementalDamage).map(([elem, value]) => {
+      const elemDef = ELEMENTS[elem];
+      const color = elemDef?.color ?? '#c8b080';
+      const symbol = elemDef?.symbol ?? '';
+      const label = elemDef?.name ?? elem.charAt(0).toUpperCase() + elem.slice(1);
+      const sign = value >= 0 ? '+' : '';
+      return `<div class="detail-onhit-item" style="--onhit-color:${color}">
+        <span><span style="color:${color};">${symbol}</span> ${label}</span>
+        <span>${sign}${value} dmg</span>
       </div>`;
     }).join('');
   }
@@ -3342,6 +3399,7 @@ function _executeLineSpell(caster, casterIndex, hand, spellDef) {
         statLabel: result.formula?.statLabel ?? 'STR', mitigation: result.formula?.mitigation ?? 0,
         preCritDamage: result.formula?.preCritDamage ?? 0, finalDamage: result.damage,
         critMultiplier: result.formula?.critMultiplier ?? 1,
+        spellElement: result.formula?.spellElement ?? null,
       });
       _logAppliedEffects(caster.name, result.monsterName || target.name, result.stunned, result.appliedEffects);
     });
@@ -3783,6 +3841,8 @@ export function useHand(memberIndex, hand, silent = false) {
     ammoModifier: result.formula?.ammoModifier ?? null,
     berserkMultiplier: result.formula?.berserkMultiplier ?? 1.0,
     warcryMultiplier: result.formula?.warcryMultiplier ?? 1.0,
+    elementalBreakdown: result.formula?.elementalBreakdown ?? null,
+    spellElement: result.formula?.spellElement ?? null,
   });
 
   // Log any status effects applied to the monster as separate entries → Effects tab

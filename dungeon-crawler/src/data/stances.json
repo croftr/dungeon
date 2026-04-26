@@ -44,13 +44,16 @@
   "holy": {
     "id": "holy",
     "name": "Holy Stance",
-    "description": "+25% damage dealt to undead monsters.",
+    "description": "+25% damage dealt to undead monsters and a +25% Holy damage rider.",
     "icon": "/heros/human_paladin_holy.webp",
     "portrait": "/heros/human_paladin_holy.webp",
     "splashImage": "/heros/human_paladin_holy-full.png",
     "effects": {
       "damageFamilyMultiplier": {
         "undead": 1.25
+      },
+      "damageElementMultiplier": {
+        "holy": 1.25
       },
       "preventsSpRegen": true,
       "preventsMpRegen": true

@@ -6,7 +6,8 @@
 import RULES from './data/combat-rules.json';
 import SKILLS_DATA from './data/skills.json';
 import { getHqWeaponDamageBonus } from './crafting.js';
-import { getMonsterHitChanceReduction, getStanceDamageMultiplier, getMagicDamageMultiplier, getStanceCureHealBonus, getStanceRegenBonus } from './stance.js';
+import { getMonsterHitChanceReduction, getStanceDamageMultiplier, getMagicDamageMultiplier, getStanceCureHealBonus, getStanceRegenBonus, getStanceElementMultiplier } from './stance.js';
+import { getMonsterElementMultiplier } from './elements.js';
 
 // ── Utility ───────────────────────────────────────────────────────────────────
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
@@ -183,7 +184,47 @@ export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef 
   );
   const afterMit = Math.max(1, raw - statMitigation - (monster.defence ?? 0));
   const stanceMult = getStanceDamageMultiplier(character, monster);
-  return stanceMult === 1 ? afterMit : Math.max(1, Math.round(afterMit * stanceMult));
+  const physicalFinal = stanceMult === 1 ? afterMit : Math.max(1, Math.round(afterMit * stanceMult));
+
+  // Elemental riders are added on top of the physical portion. Each rider is
+  // calculated independently against the monster's per-element multiplier and
+  // (optionally) the attacker's stance element multiplier. Riders ignore physical
+  // mitigation/defence — they're a separate damage stream.
+  const { total: elementalTotal } = getElementalRiderBreakdown(character, monster, weaponDef, ammoDef);
+  return Math.max(1, physicalFinal + elementalTotal);
+}
+
+/**
+ * Computes elemental rider damage from a weapon + ammo against a monster, and
+ * returns both a per-element breakdown and the summed total.
+ *
+ * Each (element, value) is multiplied by the monster's elemental multiplier
+ * (categorical → 0/0.5/1/1.5/2) and the attacker's stance element multiplier.
+ * Rounded per-element so individual riders show clean numbers in the battle log.
+ *
+ * Used by both calcPlayerPhysicalDamage (for the total) and attackMonster
+ * (for the per-element battle-log breakdown).
+ *
+ * @returns {{ breakdown: Record<string, number>, total: number }}
+ */
+export function getElementalRiderBreakdown(character, monster, weaponDef, ammoDef) {
+  const breakdown = {};
+  let total = 0;
+  const sources = [weaponDef?.elementalDamage, ammoDef?.elementalDamage];
+  for (const src of sources) {
+    if (!src) continue;
+    for (const [element, value] of Object.entries(src)) {
+      if (!value) continue;
+      const monMult = getMonsterElementMultiplier(monster, element);
+      if (monMult === 0) continue;
+      const stanceMult = getStanceElementMultiplier(character, element);
+      const rider = Math.round(value * monMult * stanceMult);
+      if (rider === 0) continue;
+      breakdown[element] = (breakdown[element] ?? 0) + rider;
+      total += rider;
+    }
+  }
+  return { breakdown, total };
 }
 
 /**
@@ -211,9 +252,15 @@ export function calcPlayerMagicDamage(character, weaponDef, monster, weaponIsHQ 
     });
   }
 
-  // Banishment deals double damage against Undead monsters
-  if (weaponDef?.name === 'Banishment' && monster?.family === 'undead') {
-    raw *= 2;
+  // Apply per-element multiplier: family/monster resistance categories drive the
+  // multiplier (e.g. undead is "vulnerable" to holy → 2×). Spells with no element
+  // are treated as raw arcane and skip this step. Holy stance's
+  // damageElementMultiplier also applies here when the spell has an element.
+  const element = weaponDef?.element ?? null;
+  if (element) {
+    const monMult = getMonsterElementMultiplier(monster, element);
+    const stanceElemMult = getStanceElementMultiplier(character, element);
+    raw = Math.round(raw * monMult * stanceElemMult);
   }
 
   const dr = monster.damageReduction ?? 0;
@@ -229,19 +276,23 @@ export function calcPlayerMagicDamage(character, weaponDef, monster, weaponIsHQ 
 /**
  * Damage dealt by a monster's attack on a party member.
  * Scales with monster STR; reduced by the character's RES and VIT (50-50 split)
- * and DEF (physical defence from equipped armour).
+ * and DEF (physical defence from equipped armour). If the attack carries an
+ * element, the caller passes a pre-resolved `elementResistance` (0..1) which is
+ * applied as a final multiplicative reduction.
  *
  * @param {object} monster              Monster (needs stats.strength)
  * @param {object} character            Party member (needs stats.resilience, stats.vitality)
  * @param {number} [characterDefence=0] Total physical defence from equipment
+ * @param {number} [elementResistance=0] Pre-resolved player resistance (0..0.9) for the attack's element. Caller passes 0 for non-elemental.
  * @returns {number}                    Final damage (minimum 1)
  */
-export function calcMonsterDamage(monster, character, characterDefence = 0) {
+export function calcMonsterDamage(monster, character, characterDefence = 0, elementResistance = 0) {
   const raw = (monster.stats?.strength ?? 10) + MONSTER_BASE_ATTACK;
   const resVit = (character.stats?.resilience ?? 0) + (character.stats?.vitality ?? 0);
   const resFactor = 100 / (100 + resVit);
   const afterRes = Math.floor(raw * resFactor);
-  const dmg = Math.max(1, afterRes - characterDefence);
+  let dmg = Math.max(1, afterRes - characterDefence);
+  if (elementResistance) dmg = Math.max(1, Math.round(dmg * (1 - elementResistance)));
   return window.easyMode ? Math.max(1, Math.floor(dmg * 0.5)) : dmg;
 }
 

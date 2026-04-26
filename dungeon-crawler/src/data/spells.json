@@ -118,6 +118,7 @@
         "type": "direct-damage",
         "target": "monster",
         "slot": "spell",
+        "element": "holy",
         "attackType": "banishment",
         "baseDamage": 0,
         "magnitudeFormula": "intelligence",

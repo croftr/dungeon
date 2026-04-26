@@ -114,6 +114,18 @@ export function getStanceStatusResistances(member) {
 }
 
 /**
+ * Damage multiplier from `attacker`'s active stance for an outgoing elemental attack
+ * (e.g. Holy stance boosting Holy damage). Returns 1 if no bonus or no element.
+ */
+export function getStanceElementMultiplier(attacker, element) {
+  if (!element) return 1;
+  const stance = getActiveStance(attacker);
+  const table = stance?.effects?.damageElementMultiplier;
+  if (!table) return 1;
+  return table[element] ?? 1;
+}
+
+/**
  * Flat crit chance bonus (0..1) from `attacker`'s active stance. Added to the base crit roll.
  */
 export function getCritChanceBonus(attacker) {

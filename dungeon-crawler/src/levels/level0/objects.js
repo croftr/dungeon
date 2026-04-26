@@ -36,6 +36,9 @@ export function spawnLevel0Objects(ctx) {
         // Essences (2 of each)
         "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence",
         "Scroll of Fireball", "Tome of the Viperseeker",
+        "Flame Axe", "Flame Dagger", "Flame Arrows",
+        "Ice Axe", "Ice Dagger", "Ice Arrows",
+        "Flame Greataxe", "Ice Greataxe",
         // Unique Arena Items (2 of each)
         "Crocodile Hide", "Crocodile Hide",
         "Ogre's Head", "Ogre's Head",

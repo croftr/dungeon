@@ -1063,6 +1063,37 @@ export function applyRegeneration() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
+ * Returns a combined elementalResistances map for a member, merging:
+ *   1. Equipment + skill-node grants (m.elementalResistances, built by updateEffectiveStats)
+ *   2. Active buff/debuff status effects with elementalResistances on the def
+ *   3. The current stance's elementalResistances effect
+ * Positive values capped at 0.9; negatives (vulnerabilities) pass through.
+ */
+export function getEffectiveElementalResistances(member) {
+  const combined = { ...(member.elementalResistances ?? {}) };
+  const add = (elem, val) => {
+    const sum = (combined[elem] ?? 0) + val;
+    combined[elem] = sum > 0.9 ? 0.9 : sum;
+  };
+  const now = performance.now();
+  (member.activeDebuffs ?? []).forEach(d => {
+    if (now >= d.expiresAt) return;
+    const def = STATUS_EFFECT_DEFS[d.effectId] ?? d.inlineDef;
+    if (!def?.elementalResistances) return;
+    for (const [elem, resistance] of Object.entries(def.elementalResistances)) {
+      add(elem, resistance);
+    }
+  });
+  const stanceRes = member.stance ? STANCES[member.stance]?.effects?.elementalResistances : null;
+  if (stanceRes) {
+    for (const [elem, resistance] of Object.entries(stanceRes)) {
+      add(elem, resistance);
+    }
+  }
+  return combined;
+}
+
+/**
  * Returns a combined statusResistances map for a member, merging:
  *   1. Item-based resistances (from m.statusResistances, built by updateEffectiveStats)
  *   2. Resistances from active buff effects (e.g. resist-poison spell)

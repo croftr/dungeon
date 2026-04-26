@@ -622,5 +622,119 @@
         "description": "A devastating war club crafted from giant timber and reinforced with crude iron bands.",
         "value": 1500,
         "weight": 15.0
+    },
+    {
+        "name": "Flame Axe",
+        "slot": "hand",
+        "attackType": "swipe",
+        "weaponType": "axe",
+        "staminaDrain": 1,
+        "baseDamage": 18,
+        "damageType": "fire",
+        "elementalDamage": { "fire": 6 },
+        "delay": 2,
+        "statWeights": {
+            "str": 0.8,
+            "dex": 0.2
+        },
+        "icon": "/icons/flame_axe.png",
+        "description": "A heavy battle axe that glows with internal heat. Its blade is perpetually wreathed in flames.",
+        "value": 650,
+        "weight": 3.0
+    },
+    {
+        "name": "Flame Dagger",
+        "slot": "hand",
+        "attackType": "swipe",
+        "weaponType": "dagger",
+        "staminaDrain": 1,
+        "baseDamage": 12,
+        "damageType": "fire",
+        "elementalDamage": { "fire": 4 },
+        "delay": 1.8,
+        "statWeights": {
+            "str": 0.2,
+            "dex": 0.8
+        },
+        "icon": "/icons/flame_dagger.png",
+        "description": "A razor-sharp dagger forged in the heart of a volcano. It leaves a trail of embers with every strike.",
+        "value": 450,
+        "weight": 0.5
+    },
+    {
+        "name": "Ice Axe",
+        "slot": "hand",
+        "attackType": "swipe",
+        "weaponType": "axe",
+        "staminaDrain": 1,
+        "baseDamage": 18,
+        "damageType": "ice",
+        "elementalDamage": { "ice": 6 },
+        "delay": 2,
+        "statWeights": {
+            "str": 0.8,
+            "dex": 0.2
+        },
+        "icon": "/icons/ice_axe.png",
+        "description": "A battle axe forged from eternal ice. Its blade is freezing to the touch.",
+        "value": 650,
+        "weight": 3.0
+    },
+    {
+        "name": "Ice Dagger",
+        "slot": "hand",
+        "attackType": "swipe",
+        "weaponType": "dagger",
+        "staminaDrain": 1,
+        "baseDamage": 12,
+        "damageType": "ice",
+        "elementalDamage": { "ice": 4 },
+        "delay": 1.8,
+        "statWeights": {
+            "str": 0.2,
+            "dex": 0.8
+        },
+        "icon": "/icons/ice_dagger.png",
+        "description": "A shard of magically hardened ice, sharpened to a lethal edge.",
+        "value": 450,
+        "weight": 0.5
+    },
+    {
+        "name": "Flame Greataxe",
+        "slot": "bothHands",
+        "attackType": "swipe",
+        "weaponType": "twoHanded",
+        "staminaDrain": 2,
+        "baseDamage": 35,
+        "damageType": "fire",
+        "elementalDamage": { "fire": 10 },
+        "delay": 5,
+        "statWeights": {
+            "str": 0.8,
+            "dex": 0.2
+        },
+        "icon": "/icons/flame_greataxe.png",
+        "description": "A massive two-handed axe that burns with an inextinguishable flame. Its heavy head is wreathed in fire.",
+        "value": 1200,
+        "weight": 6.5
+    },
+    {
+        "name": "Ice Greataxe",
+        "slot": "bothHands",
+        "attackType": "swipe",
+        "weaponType": "twoHanded",
+        "staminaDrain": 2,
+        "baseDamage": 35,
+        "damageType": "ice",
+        "elementalDamage": { "ice": 10 },
+        "delay": 5,
+        "statWeights": {
+            "str": 0.8,
+            "dex": 0.2
+        },
+        "icon": "/icons/ice_greataxe.png",
+        "description": "A massive two-handed axe carved from a single block of magical ice. It emits a constant aura of frost.",
+        "value": 1200,
+        "weight": 6.5
     }
 ]

@@ -35,6 +35,10 @@
         "statBonuses": {
             "intelligence": 2,
             "resilience": 1
+        },
+        "elementalResistances": {
+            "holy": 0.15,
+            "dark": 0.15
         }
     },
     {
@@ -44,7 +48,10 @@
         "description": "A heavy cloak woven from the fur of a dire bear, bound with large iron clasps. Provides warmth and protection.",
         "defence": 2,
         "value": 750,
-        "weight": 1.5
+        "weight": 1.5,
+        "elementalResistances": {
+            "ice": 0.25
+        }
     },
     {
         "name": "Sylvan Elderwood Cloak",
@@ -77,6 +84,9 @@
         },
         "skillBonuses": {
             "fire": 2
+        },
+        "elementalResistances": {
+            "fire": 0.2
         }
     },
     {

@@ -1,0 +1,37 @@
+{
+    "holy": {
+        "id": "holy",
+        "name": "Holy",
+        "icon": "/icons/element/holy.webp",
+        "color": "#f5d96a",
+        "symbol": "☀"
+    },
+    "dark": {
+        "id": "dark",
+        "name": "Dark",
+        "icon": "/icons/element/dark.webp",
+        "color": "#a86bd6",
+        "symbol": "●"
+    },
+    "fire": {
+        "id": "fire",
+        "name": "Fire",
+        "icon": "/icons/element/fire.webp",
+        "color": "#e84a1f",
+        "symbol": "🔥"
+    },
+    "ice": {
+        "id": "ice",
+        "name": "Ice",
+        "icon": "/icons/element/ice.webp",
+        "color": "#5ec4e8",
+        "symbol": "❄"
+    },
+    "lightning": {
+        "id": "lightning",
+        "name": "Lightning",
+        "icon": "/icons/element/lightning.webp",
+        "color": "#e0d04a",
+        "symbol": "⚡"
+    }
+}

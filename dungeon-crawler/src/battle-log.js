@@ -8,8 +8,20 @@
 //    getLog()                 — return the full log array (newest first)
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { ELEMENTS } from './elements.js';
+
 const MAX_LOG = 500;   // events kept in the data store
 const DOM_CAP = 200;   // max <div> rows kept in the DOM at once
+
+// Renders an inline element badge "🔥+6" with the element's color.
+// Used in attack rows to show per-element rider damage and spell elements.
+function _elemBadge(elementId, value, signed = true) {
+  const def = ELEMENTS[elementId];
+  if (!def) return '';
+  const sign = signed && value >= 0 ? '+' : '';
+  const num = value != null ? `${sign}${value}` : '';
+  return `<span class="bl-elem" style="color:${def.color};" title="${def.name}">${def.symbol}${num}</span>`;
+}
 
 const _log = [];
 let _activeFilter = 'all';
@@ -380,10 +392,27 @@ function _buildRowHtml(e) {
   if (e.blocked) {
     dmgPart = 'blocked';
   } else if (e.hit) {
+    // Per-element rider breakdown for physical attacks (Flame Dagger etc.) —
+    // appended after the main number so the player sees the elemental contribution.
+    let elemTrail = '';
+    if (e.elementalBreakdown) {
+      const parts = Object.entries(e.elementalBreakdown).filter(([, v]) => v);
+      if (parts.length > 0) {
+        elemTrail = ' ' + parts.map(([id, v]) => _elemBadge(id, v, true)).join(' ');
+      }
+    }
+    // Spell element prefix (e.g. Banishment fires holy, Fireball fires fire) —
+    // shown in front of the damage so the spell's element is unambiguous.
+    const elemPrefix = e.spellElement ? `${_elemBadge(e.spellElement, null)} ` : '';
+    // Monster attack with an element (e.g. fire elemental) — same prefix shape,
+    // plus a "(resN%)" suffix when the player's gear soaked some of it.
+    const monsterElemPrefix = (e.actor === 'monster' && e.attackElement) ? `${_elemBadge(e.attackElement, null)} ` : '';
+    const monsterResistTrail = (e.actor === 'monster' && e.attackElement && e.elementResistance > 0)
+      ? ` <span class="bl-elem-resist">(res ${Math.round(e.elementResistance * 100)}%)</span>` : '';
     if (e.crit) {
-      dmgPart = `<b>CRIT! ${e.finalDamage}</b><span style="font-size:10px;">dmg</span>`;
+      dmgPart = `${elemPrefix}${monsterElemPrefix}<b>CRIT! ${e.finalDamage}</b><span style="font-size:10px;">dmg</span>${elemTrail}${monsterResistTrail}`;
     } else {
-      dmgPart = `<b>${e.finalDamage}</b> dmg`;
+      dmgPart = `${elemPrefix}${monsterElemPrefix}<b>${e.finalDamage}</b> dmg${elemTrail}${monsterResistTrail}`;
     }
   }
   const formula = _formula(e);

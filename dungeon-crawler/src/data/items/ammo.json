@@ -108,5 +108,33 @@
         "isSpellBook": true,
         "statBonuses": { "intelligence": 2 },
         "skillBonuses": { "Heal": 2 }
+    },
+    {
+        "name": "Flame Arrows",
+        "slot": "ammo",
+        "attackType": null,
+        "baseDamage": null,
+        "damageModifier": 1.0,
+        "damageType": "fire",
+        "elementalDamage": { "fire": 5 },
+        "ammoType": "arrow",
+        "icon": "/icons/flame_arrows.png",
+        "description": "Arrows tipped with a combustible oil that ignites upon being loosed. They burn with a fierce heat.",
+        "value": 350,
+        "weight": 1.1
+    },
+    {
+        "name": "Ice Arrows",
+        "slot": "ammo",
+        "attackType": null,
+        "baseDamage": null,
+        "damageModifier": 1.0,
+        "damageType": "ice",
+        "elementalDamage": { "ice": 5 },
+        "ammoType": "arrow",
+        "icon": "/icons/ice_arrows.png",
+        "description": "Arrows tipped with magical ice shards that shatter upon impact, chilling the air.",
+        "value": 350,
+        "weight": 1.1
     }
 ]
