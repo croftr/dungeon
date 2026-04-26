@@ -1299,25 +1299,38 @@ export function hideTooltip() {
 }
 
 /** Attach hover tooltip listeners to any hoverable item element.
- *  getItem() is called each time to get the current item (may change). */
-export function attachTooltipListeners(el, getItem, preferAbove = false, showBuyPrice = false) {
+ *  getItem() is called each time to get the current item (may change).
+ *  delayMs > 0 defers the tooltip so fast clicks never trigger it. */
+export function attachTooltipListeners(el, getItem, preferAbove = false, showBuyPrice = false, delayMs = 0) {
   // Remove any existing listeners first
   if (el._tooltipCleanup) {
     el._tooltipCleanup();
     delete el._tooltipCleanup;
   }
 
+  let _delayTimer = null;
+
   const onEnter = (e) => {
     const item = getItem();
-    if (item) showTooltip(item, e.clientX, e.clientY, preferAbove, showBuyPrice);
+    if (!item) return;
+    if (delayMs > 0) {
+      _delayTimer = setTimeout(() => {
+        _delayTimer = null;
+        const current = getItem();
+        if (current) showTooltip(current, e.clientX, e.clientY, preferAbove, showBuyPrice);
+      }, delayMs);
+    } else {
+      showTooltip(item, e.clientX, e.clientY, preferAbove, showBuyPrice);
+    }
   };
 
   const onMove = (e) => {
+    const panel = document.getElementById('item-detail-panel');
+    // While waiting for the delay to fire, don't reposition (tooltip not visible yet)
+    if (delayMs > 0 && panel.classList.contains('detail-hidden')) return;
     const item = getItem();
     if (item) {
-      // Keep tooltip populated and repositioned as cursor moves
       populateTooltip(item, showBuyPrice);
-      const panel = document.getElementById('item-detail-panel');
       panel.classList.remove('detail-hidden');
       positionTooltip(e.clientX, e.clientY, preferAbove);
     } else {
@@ -1325,7 +1338,11 @@ export function attachTooltipListeners(el, getItem, preferAbove = false, showBuy
     }
   };
 
-  const onLeave = () => hideTooltip();
+  const onLeave = () => {
+    clearTimeout(_delayTimer);
+    _delayTimer = null;
+    hideTooltip();
+  };
 
   el.addEventListener('mouseenter', onEnter);
   el.addEventListener('mousemove', onMove);
@@ -1333,6 +1350,8 @@ export function attachTooltipListeners(el, getItem, preferAbove = false, showBuy
 
   // Store cleanup function
   el._tooltipCleanup = () => {
+    clearTimeout(_delayTimer);
+    _delayTimer = null;
     el.removeEventListener('mouseenter', onEnter);
     el.removeEventListener('mousemove', onMove);
     el.removeEventListener('mouseleave', onLeave);

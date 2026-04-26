@@ -595,6 +595,28 @@ function refreshMember(m) {
       }, remaining);
     }
   }
+
+  // Attach delayed tooltips to HUD action slots (900ms so fast clicks never trigger)
+  const HUD_TOOLTIP_DELAY = 900;
+  if (lhSlot) {
+    attachTooltipListeners(lhSlot, () => m.equipment?.leftHand ?? null, true, false, HUD_TOOLTIP_DELAY);
+  }
+  if (rhSlot) {
+    attachTooltipListeners(rhSlot, () => {
+      if (!m.equipment) return null;
+      const lh = m.equipment.leftHand;
+      if (lh) {
+        try { if (getItemDef(lh.name)?.slot === 'bothHands') return lh; } catch (e) { /* ignore */ }
+      }
+      return m.equipment.rightHand ?? null;
+    }, true, false, HUD_TOOLTIP_DELAY);
+  }
+  if (skSlot)  attachTooltipListeners(skSlot,  () => m.equipment?.skill  ?? null, true, false, HUD_TOOLTIP_DELAY);
+  if (sk2Slot) attachTooltipListeners(sk2Slot, () => m.equipment?.skill2 ?? null, true, false, HUD_TOOLTIP_DELAY);
+  if (sk3Slot) attachTooltipListeners(sk3Slot, () => m.equipment?.skill3 ?? null, true, false, HUD_TOOLTIP_DELAY);
+  if (sk4Slot) attachTooltipListeners(sk4Slot, () => m.equipment?.skill4 ?? null, true, false, HUD_TOOLTIP_DELAY);
+  if (sk5Slot) attachTooltipListeners(sk5Slot, () => m.equipment?.skill5 ?? null, true, false, HUD_TOOLTIP_DELAY);
+  if (sk6Slot) attachTooltipListeners(sk6Slot, () => m.equipment?.skill6 ?? null, true, false, HUD_TOOLTIP_DELAY);
 }
 
 // ─────────────────────────────────────────────
