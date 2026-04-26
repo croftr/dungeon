@@ -33,5 +33,12 @@
         "icon": "/icons/element/lightning.webp",
         "color": "#e0d04a",
         "symbol": "⚡"
+    },
+    "water": {
+        "id": "water",
+        "name": "Water",
+        "icon": "/icons/element/water.webp",
+        "color": "#2563eb",
+        "symbol": "💧"
     }
 }

@@ -8166,10 +8166,10 @@ body.party-targeting-mode .member-card--dead .portrait {
 }
 
 .bl-who {
-  min-width: 130px;
-  max-width: 130px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  min-width: 200px;
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
   flex-shrink: 0;
 }
 

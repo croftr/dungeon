@@ -22,15 +22,6 @@ _dummy.drainStamina = false;
 _dummy.originalStats = { ...D.dummy.stats };
 _dummy.originalAttackSpeed = D.dummy.attackSpeed;
 
-const _iceMushroom = inst(D.ice_mushroom, 11, 12, 18,
-    asset('/monsters/ice-mushroom/idle.glb'),
-    asset('/monsters/ice-mushroom/standard-attack.glb'),
-    asset('/monsters/ice-mushroom/standard-attack.mp3'), 0.45, 0, 0, 0, // level = 0
-    null, // patrol
-    asset('/monsters/ice-mushroom/dead.glb'),
-    null,
-    asset('/monsters/ice-mushroom/walk.glb'),
-    null,
-    asset('/monsters/ice-mushroom/combat-idle.glb'));
 
-export const level0Monsters = [_dummy, _iceMushroom];
+
+export const level0Monsters = [_dummy];

@@ -25,7 +25,8 @@
     "icon": "/icons/family/aquatic.webp",
     "elementalResistances": {
       "ice": "resist",
-      "lightning": "weak",
+      "water": "resist",
+      "lightning": "vulnerable",
       "fire": "weak"
     }
   },

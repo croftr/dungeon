@@ -19,7 +19,8 @@
             "dark": 0,
             "fire": 0,
             "ice": 0.9,
-            "lightning": 0
+            "lightning": 0,
+            "water": 0
         },
         "stances": [
             "viperseeker",
@@ -65,7 +66,8 @@
             "dark": 0,
             "fire": 0,
             "ice": 1.0,
-            "lightning": 0
+            "lightning": 0,
+            "water": 0
         },
         "stances": [
             "inquisitor",
@@ -111,7 +113,8 @@
             "dark": 0,
             "fire": 0,
             "ice": 0,
-            "lightning": 0
+            "lightning": 0,
+            "water": 0
         },
         "stances": [
             "slayer"
@@ -155,7 +158,8 @@
             "dark": 0,
             "fire": 0,
             "ice": 0,
-            "lightning": 0
+            "lightning": 0,
+            "water": 0
         },
         "stances": [
             "curatio"
@@ -205,7 +209,8 @@
             "dark": 0,
             "fire": 0,
             "ice": 0,
-            "lightning": 0
+            "lightning": 0,
+            "water": 0
         },
         "stances": [
             "talon"
@@ -248,7 +253,8 @@
             "dark": 0,
             "fire": 0,
             "ice": 0,
-            "lightning": 0
+            "lightning": 0,
+            "water": 0
         },
         "stances": [
             "overclock",
@@ -294,7 +300,8 @@
             "dark": 0,
             "fire": 0,
             "ice": 0,
-            "lightning": 0
+            "lightning": 0,
+            "water": 0
         },
         "stances": [
             "viper",
@@ -338,7 +345,8 @@
             "dark": 0,
             "fire": 0,
             "ice": 0,
-            "lightning": 0
+            "lightning": 0,
+            "water": 0
         },
         "stances": [
             "vengeance",

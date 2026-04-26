@@ -348,6 +348,7 @@ _applyMultiAttacks('Demon', [
     weight: 3,
     damageMultiplier: 0.5,
     specialAttack: true,
+    damageType: 'dark',
     specialOnHitEffects: [{ effectId: 'fear', chance: 0.25, durationSec: 10 }],
   },
 ]);
@@ -399,6 +400,7 @@ _applyMultiAttacks('Aqua Man', [
     weight: 3,
     damageMultiplier: 0.8,
     specialAttack: true,
+    damageType: 'water',
     specialOnHitEffects: [{ effectId: 'slow', chance: 0.60, durationSec: 8 }, { effectId: 'poison', chance: 0.20 }],
   },
 ]);
@@ -470,6 +472,7 @@ _applyMultiAttacks('Demon Ogre', [
     weight: 1,
     damageMultiplier: 0.5,
     specialAttack: true,
+    damageType: 'dark',
     specialOnHitEffects: [{ effectId: 'rot', chance: 0.5 }],
   },
 ]);
@@ -578,6 +581,7 @@ _applyMultiAttacks('Crow Wizard', [
     weight: 2,
     damageMultiplier: 0.5,
     specialAttack: true,
+    damageType: 'fire',
   },
   {
     name: 'crowSpecial',
@@ -1241,6 +1245,12 @@ function _loadMonster(m, scene) {
               damageMultiplier: _jsonSpecial?.damageMultiplier ?? atkDef.damageMultiplier ?? null,
               specialAttackType: atkDef.specialAttackType ?? null,
               displayName: atkDef.displayName ?? null,
+              // Elemental fields — read by _applyMonsterDamage to route the hit
+              // through the player's elemental resistance and to add per-element
+              // rider damage on top of the physical chunk. JSON wins over the
+              // in-code variant, mirroring the damageMultiplier pattern above.
+              damageType: _jsonSpecial?.damageType ?? atkDef.damageType ?? null,
+              elementalDamage: _jsonSpecial?.elementalDamage ?? atkDef.elementalDamage ?? null,
             };
             // Keep m.actions.attack pointing to first variant for backward compat
             if (idx === 0) m.actions.attack = action;
