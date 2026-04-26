@@ -112,7 +112,7 @@ export function spawnLevel1Objects(ctx) {
 
     // New room north of the mushroom section
     addSpellCabinet(group, loader, 12, 11, 0, 0, -0.7, [
-        'Scroll of Resist Fear'
+        'Scroll of Resist Fear', 'Scroll of Frostbolt'
     ]);
 
     // ── Traps ─────────────────────────────────────────────────────────────────
