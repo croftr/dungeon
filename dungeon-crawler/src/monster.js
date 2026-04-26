@@ -1967,7 +1967,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
   // Stats are now cumulative — no auto-reset on new fight.
 
   // ── Skeleton Shield Block ──────────────────────────────────────────────────
-  if (m.name.includes('Skeleton') && !attackType.includes('poison') && attackType !== 'fireball' && attackType !== 'frostbolt' && attackType !== 'banishment' && attackType !== 'incinerate') {
+  if (m.name.includes('Skeleton') && !attackType.includes('poison') && attackType !== 'fireball' && attackType !== 'frostbolt' && attackType !== 'lightningbolt' && attackType !== 'holybolt' && attackType !== 'darkbolt' && attackType !== 'banishment' && attackType !== 'incinerate') {
     if (Math.random() <= 0.10) {
       addLogEntry({
         time: Date.now(), actor: 'player',
@@ -2184,8 +2184,8 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     hitChance = 1.0;
   }
 
-  // Fireball/Frostbolt/Banishment uses INT + monster magic resilience; all other attacks use STR + monster defence
-  const isMagic = attackType === 'fireball' || attackType === 'frostbolt' || attackType === 'banishment' || attackType === 'incinerate';
+  // All elemental bolt spells use INT + monster magic resilience; other attacks use STR + monster defence
+  const isMagic = attackType === 'fireball' || attackType === 'frostbolt' || attackType === 'lightningbolt' || attackType === 'holybolt' || attackType === 'darkbolt' || attackType === 'banishment' || attackType === 'incinerate';
 
   // DEX-based hit chance — higher DEX advantage means more reliable hits
   if (Math.random() >= hitChance) {
@@ -2896,7 +2896,7 @@ function _playHitAnimation(m, attackType, killer, elementalBreakdown = null, spe
     return; // Skip standard red flash/knockback for dummy
   }
 
-  if (attackType === 'fireball' || attackType === 'frostbolt' || attackType === 'banishment' || attackType === 'incinerate') {
+  if (attackType === 'fireball' || attackType === 'frostbolt' || attackType === 'lightningbolt' || attackType === 'holybolt' || attackType === 'darkbolt' || attackType === 'banishment' || attackType === 'incinerate') {
     // Magic spells — recolour the spark by spell element when present, otherwise
     // the existing white→orange spark plays (preserves prior look for non-elemental spells).
     const spellColor = spellElement ? ELEMENTS[spellElement]?.color : null;

@@ -727,6 +727,308 @@ function _spawnFrostboltImpact(pos, tex) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
+//  LIGHTNINGBOLT — electric projectile (mirror of Fireball with lightning colours)
+//  White-hot → yellow → amber orb flying forward, discharging on impact
+// ══════════════════════════════════════════════════════════════════════════
+export function triggerLightningboltEffect(travelCells = 2) {
+    if (!batchRenderer || !sceneRef || !cameraRef) return;
+    const tex = createGlowTexture();
+    const dir = new THREE.Vector3();
+    cameraRef.getWorldDirection(dir);
+
+    const WORLD_PER_CELL = 2;
+    const travelDist = travelCells * WORLD_PER_CELL;
+    const SPEED = 16; // faster than fire/ice — lightning is quick
+    const travelMs = (travelDist / SPEED) * 1000;
+
+    // ── Electric orb sprite that flies forward ────────────────────────────────
+    const orbMat = new THREE.SpriteMaterial({
+        map: tex, color: 0xffe040,
+        blending: THREE.AdditiveBlending, transparent: true, depthWrite: false,
+    });
+    const orb = new THREE.Sprite(orbMat);
+    orb.scale.setScalar(0.5);
+    const startPos = new THREE.Vector3().copy(cameraRef.position).addScaledVector(dir, 0.8);
+    const endPos = startPos.clone().addScaledVector(dir, travelDist);
+    orb.position.copy(startPos);
+    sceneRef.add(orb);
+
+    // ── Electric spark trail: crackling yellow bursts every 40 ms ─────────────
+    let trailActive = true;
+    const trailId = setInterval(() => {
+        if (!trailActive || !batchRenderer || !sceneRef) return;
+        const burst = new ParticleSystem({
+            duration: 0.15, looping: false,
+            startLife: new IntervalValue(0.08, 0.2),
+            startSpeed: new IntervalValue(0.5, 1.5),
+            startSize: new IntervalValue(0.03, 0.12),
+            startColor: new ConstantColor(new Vector4(1.0, 0.95, 0.4, 1.0)),
+            worldSpace: true, maxParticle: 14,
+            emissionOverTime: new ConstantValue(0),
+            emissionBursts: [{ time: 0, count: new ConstantValue(10), cycle: 1, interval: 0.005, probability: 1 }],
+            shape: new SphereEmitter({ radius: 0.06, thickness: 1, arc: Math.PI * 2 }),
+            material: _mat(tex),
+            startTileIndex: new ConstantValue(0), uTileCount: 1, vTileCount: 1,
+            renderMode: RenderMode.BillBoard, renderOrder: 2,
+        });
+        burst.addBehavior(new ColorOverLife(new ColorRange(
+            new Vector4(1.0, 1.0, 0.8, 1),
+            new Vector4(0.8, 0.5, 0.0, 0),
+        )));
+        burst.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.5, 0.1, 0), 0]])));
+        _spawn(burst, orb.position.clone(), 0.4);
+    }, 40);
+
+    // ── Animate orb, then discharge on impact ────────────────────────────────
+    const startTime = performance.now();
+    function animateOrb() {
+        const t = Math.min((performance.now() - startTime) / travelMs, 1);
+        orb.position.lerpVectors(startPos, endPos, t);
+        if (t < 1) {
+            requestAnimationFrame(animateOrb);
+        } else {
+            clearInterval(trailId);
+            trailActive = false;
+            if (orb.parent) sceneRef.remove(orb);
+            orbMat.dispose();
+            _spawnLightningboltImpact(endPos.clone(), tex);
+        }
+    }
+    requestAnimationFrame(animateOrb);
+}
+
+function _spawnLightningboltImpact(pos, tex) {
+    // Sharp outward discharge — fast, bright, yellow-white
+    const discharge = new ParticleSystem({
+        duration: 0.4, looping: false,
+        startLife: new IntervalValue(0.1, 0.5),
+        startSpeed: new IntervalValue(3.0, 10.0),
+        startSize: new IntervalValue(0.05, 0.22),
+        startColor: new ConstantColor(new Vector4(1.0, 1.0, 0.7, 1)),
+        worldSpace: true, maxParticle: 140,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(110), cycle: 1, interval: 0.005, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.2, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex),
+        startTileIndex: new ConstantValue(0), uTileCount: 1, vTileCount: 1,
+        renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    discharge.addBehavior(new ColorOverLife(new ColorRange(
+        new Vector4(1.0, 1.0, 1.0, 1),    // blinding white flash
+        new Vector4(0.7, 0.6, 0.0, 0),     // fades to dim amber
+    )));
+    discharge.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(0.2, 1.0, 0.6, 0), 0]])));
+    _spawn(discharge, pos, 1.2);
+
+    // Secondary lingering sparks
+    const sparks = new ParticleSystem({
+        duration: 0.6, looping: false,
+        startLife: new IntervalValue(0.2, 0.6),
+        startSpeed: new IntervalValue(1.0, 4.0),
+        startSize: new IntervalValue(0.02, 0.08),
+        startColor: new ConstantColor(new Vector4(1.0, 0.9, 0.3, 1)),
+        worldSpace: true, maxParticle: 60,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0.05, count: new ConstantValue(45), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.35, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex),
+        startTileIndex: new ConstantValue(0), uTileCount: 1, vTileCount: 1,
+        renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    sparks.addBehavior(new ColorOverLife(new ColorRange(new Vector4(1, 0.9, 0.5, 1), new Vector4(0.4, 0.2, 0.0, 0))));
+    sparks.addBehavior(new SizeOverLife(FADE_OUT));
+    _spawn(sparks, pos, 1.5);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  HOLYBOLT — radiant divine orb (holy element, warm gold/white palette)
+//  Blazing golden sphere flying forward, bursting in a sunburst on impact
+// ══════════════════════════════════════════════════════════════════════════
+export function triggerHolyboltEffect(travelCells = 2) {
+    if (!batchRenderer || !sceneRef || !cameraRef) return;
+    const tex = createGlowTexture();
+    const dir = new THREE.Vector3();
+    cameraRef.getWorldDirection(dir);
+
+    const WORLD_PER_CELL = 2;
+    const travelDist = travelCells * WORLD_PER_CELL;
+    const SPEED = 13;
+    const travelMs = (travelDist / SPEED) * 1000;
+
+    // ── Radiant golden orb ────────────────────────────────────────────────────
+    const orbMat = new THREE.SpriteMaterial({
+        map: tex, color: 0xf5d96a,
+        blending: THREE.AdditiveBlending, transparent: true, depthWrite: false,
+    });
+    const orb = new THREE.Sprite(orbMat);
+    orb.scale.setScalar(0.6);
+    const startPos = new THREE.Vector3().copy(cameraRef.position).addScaledVector(dir, 0.8);
+    const endPos = startPos.clone().addScaledVector(dir, travelDist);
+    orb.position.copy(startPos);
+    sceneRef.add(orb);
+
+    // ── Holy light mote trail ─────────────────────────────────────────────────
+    let trailActive = true;
+    const trailId = setInterval(() => {
+        if (!trailActive || !batchRenderer || !sceneRef) return;
+        const motes = new ParticleSystem({
+            duration: 0.25, looping: false,
+            startLife: new IntervalValue(0.15, 0.35),
+            startSpeed: new IntervalValue(0.1, 0.5),
+            startSize: new IntervalValue(0.04, 0.15),
+            startColor: new ConstantColor(new Vector4(1.0, 0.97, 0.7, 1.0)),
+            worldSpace: true, maxParticle: 10,
+            emissionOverTime: new ConstantValue(0),
+            emissionBursts: [{ time: 0, count: new ConstantValue(7), cycle: 1, interval: 0.01, probability: 1 }],
+            shape: new SphereEmitter({ radius: 0.08, thickness: 1, arc: Math.PI * 2 }),
+            material: _mat(tex),
+            startTileIndex: new ConstantValue(0), uTileCount: 1, vTileCount: 1,
+            renderMode: RenderMode.BillBoard, renderOrder: 2,
+        });
+        motes.addBehavior(new ColorOverLife(new ColorRange(
+            new Vector4(1.0, 1.0, 0.9, 1),
+            new Vector4(0.9, 0.7, 0.1, 0),
+        )));
+        motes.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.6, 0.2, 0), 0]])));
+        _spawn(motes, orb.position.clone(), 0.5);
+    }, 55);
+
+    const startTime = performance.now();
+    function animateOrb() {
+        const t = Math.min((performance.now() - startTime) / travelMs, 1);
+        orb.position.lerpVectors(startPos, endPos, t);
+        if (t < 1) {
+            requestAnimationFrame(animateOrb);
+        } else {
+            clearInterval(trailId);
+            trailActive = false;
+            if (orb.parent) sceneRef.remove(orb);
+            orbMat.dispose();
+            _spawnHolyboltImpact(endPos.clone(), tex);
+        }
+    }
+    requestAnimationFrame(animateOrb);
+}
+
+function _spawnHolyboltImpact(pos, tex) {
+    // Blazing sunburst — warm white expanding then golden fade
+    const burst = new ParticleSystem({
+        duration: 0.5, looping: false,
+        startLife: new IntervalValue(0.2, 0.7),
+        startSpeed: new IntervalValue(2.0, 8.0),
+        startSize: new IntervalValue(0.07, 0.28),
+        startColor: new ConstantColor(new Vector4(1.0, 1.0, 0.85, 1)),
+        worldSpace: true, maxParticle: 130,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(100), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.22, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex),
+        startTileIndex: new ConstantValue(0), uTileCount: 1, vTileCount: 1,
+        renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    burst.addBehavior(new ColorOverLife(new ColorRange(
+        new Vector4(1.0, 1.0, 1.0, 1),    // pure white flash
+        new Vector4(0.9, 0.65, 0.0, 0),    // fades to warm amber-gold
+    )));
+    burst.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(0.3, 1.0, 0.7, 0), 0]])));
+    _spawn(burst, pos, 1.5);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  DARKBOLT — void shadow orb (dark element, deep purple/black palette)
+//  Sinister dark sphere flying forward, imploding in shadowy wisps on impact
+// ══════════════════════════════════════════════════════════════════════════
+export function triggerDarkboltEffect(travelCells = 2) {
+    if (!batchRenderer || !sceneRef || !cameraRef) return;
+    const tex = createGlowTexture();
+    const dir = new THREE.Vector3();
+    cameraRef.getWorldDirection(dir);
+
+    const WORLD_PER_CELL = 2;
+    const travelDist = travelCells * WORLD_PER_CELL;
+    const SPEED = 11;
+    const travelMs = (travelDist / SPEED) * 1000;
+
+    // ── Void orb ──────────────────────────────────────────────────────────────
+    const orbMat = new THREE.SpriteMaterial({
+        map: tex, color: 0xa86bd6,
+        blending: THREE.AdditiveBlending, transparent: true, depthWrite: false,
+    });
+    const orb = new THREE.Sprite(orbMat);
+    orb.scale.setScalar(0.58);
+    const startPos = new THREE.Vector3().copy(cameraRef.position).addScaledVector(dir, 0.8);
+    const endPos = startPos.clone().addScaledVector(dir, travelDist);
+    orb.position.copy(startPos);
+    sceneRef.add(orb);
+
+    // ── Shadowy wisp trail ────────────────────────────────────────────────────
+    let trailActive = true;
+    const trailId = setInterval(() => {
+        if (!trailActive || !batchRenderer || !sceneRef) return;
+        const wisps = new ParticleSystem({
+            duration: 0.3, looping: false,
+            startLife: new IntervalValue(0.15, 0.4),
+            startSpeed: new IntervalValue(0.05, 0.4),
+            startSize: new IntervalValue(0.05, 0.18),
+            startColor: new ConstantColor(new Vector4(0.55, 0.2, 0.75, 0.9)),
+            worldSpace: true, maxParticle: 10,
+            emissionOverTime: new ConstantValue(0),
+            emissionBursts: [{ time: 0, count: new ConstantValue(7), cycle: 1, interval: 0.01, probability: 1 }],
+            shape: new SphereEmitter({ radius: 0.09, thickness: 1, arc: Math.PI * 2 }),
+            material: _mat(tex),
+            startTileIndex: new ConstantValue(0), uTileCount: 1, vTileCount: 1,
+            renderMode: RenderMode.BillBoard, renderOrder: 2,
+        });
+        wisps.addBehavior(new ColorOverLife(new ColorRange(
+            new Vector4(0.7, 0.4, 1.0, 1),
+            new Vector4(0.1, 0.0, 0.2, 0),
+        )));
+        wisps.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.7, 0.3, 0), 0]])));
+        _spawn(wisps, orb.position.clone(), 0.5);
+    }, 60);
+
+    const startTime = performance.now();
+    function animateOrb() {
+        const t = Math.min((performance.now() - startTime) / travelMs, 1);
+        orb.position.lerpVectors(startPos, endPos, t);
+        if (t < 1) {
+            requestAnimationFrame(animateOrb);
+        } else {
+            clearInterval(trailId);
+            trailActive = false;
+            if (orb.parent) sceneRef.remove(orb);
+            orbMat.dispose();
+            _spawnDarkboltImpact(endPos.clone(), tex);
+        }
+    }
+    requestAnimationFrame(animateOrb);
+}
+
+function _spawnDarkboltImpact(pos, tex) {
+    // Void implosion — outward shadowy burst then deep purple fade
+    const burst = new ParticleSystem({
+        duration: 0.55, looping: false,
+        startLife: new IntervalValue(0.2, 0.75),
+        startSpeed: new IntervalValue(1.5, 7.0),
+        startSize: new IntervalValue(0.06, 0.26),
+        startColor: new ConstantColor(new Vector4(0.7, 0.3, 1.0, 1)),
+        worldSpace: true, maxParticle: 130,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(100), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.22, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex),
+        startTileIndex: new ConstantValue(0), uTileCount: 1, vTileCount: 1,
+        renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    burst.addBehavior(new ColorOverLife(new ColorRange(
+        new Vector4(0.85, 0.6, 1.0, 1),   // bright lavender flash
+        new Vector4(0.1, 0.0, 0.15, 0),    // fades to near-black void
+    )));
+    burst.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(0.3, 1.0, 0.8, 0), 0]])));
+    _spawn(burst, pos, 1.5);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
 //  INCINERATE — Ashar (Wizard) / Pyromancer
 //  A long, sustained torrent of intense fire filling the area in front
 // ══════════════════════════════════════════════════════════════════════════

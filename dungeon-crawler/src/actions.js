@@ -203,7 +203,7 @@ export function playAction(attackType, hand = 'left', memberIndex = 0, elementId
   playActionSound(attackType);
 
   // Spells with no visual overlay (use 3D particles instead) — stop here
-  if (attackType === ACTIONS.FIREBALL || attackType === ACTIONS.FROSTBOLT || attackType === ACTIONS.BANISHMENT || attackType === ACTIONS.REGENERATE || attackType === ACTIONS.INCINERATE) {
+  if (attackType === ACTIONS.FIREBALL || attackType === ACTIONS.FROSTBOLT || attackType === ACTIONS.LIGHTNINGBOLT || attackType === ACTIONS.HOLYBOLT || attackType === ACTIONS.DARKBOLT || attackType === ACTIONS.BANISHMENT || attackType === ACTIONS.REGENERATE || attackType === ACTIONS.INCINERATE) {
     return;
   }
 

@@ -20,6 +20,36 @@
         "weight": 0.2
     },
     {
+        "name": "Scroll of Lightningbolt",
+        "type": "spellbook",
+        "spellName": "Lightningbolt",
+        "requiredInt": 10,
+        "icon": "/icons/scroll_lightningbolt.png",
+        "description": "Ancient parchment cracking with static electricity. Study it to learn Lightningbolt. Requires 10 Intelligence.",
+        "value": 640,
+        "weight": 0.2
+    },
+    {
+        "name": "Scroll of Holybolt",
+        "type": "spellbook",
+        "spellName": "Holybolt",
+        "requiredInt": 10,
+        "icon": "/icons/scroll_holybolt.png",
+        "description": "Ancient parchment radiating a warm golden glow. Study it to learn Holybolt. Requires 10 Intelligence.",
+        "value": 620,
+        "weight": 0.2
+    },
+    {
+        "name": "Scroll of Darkbolt",
+        "type": "spellbook",
+        "spellName": "Darkbolt",
+        "requiredInt": 10,
+        "icon": "/icons/scroll_darkbolt.png",
+        "description": "A sinister scroll humming with void energy. Study it to learn Darkbolt. Requires 10 Intelligence.",
+        "value": 620,
+        "weight": 0.2
+    },
+    {
         "name": "Scroll of Heal",
         "type": "spellbook",
         "spellName": "Heal",

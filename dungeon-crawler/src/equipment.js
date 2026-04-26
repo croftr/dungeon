@@ -39,6 +39,9 @@ import {
   triggerManaTapEffect,
   triggerFireballEffect,
   triggerFrostboltEffect,
+  triggerLightningboltEffect,
+  triggerHolyboltEffect,
+  triggerDarkboltEffect,
   triggerRegenerationEffect,
   triggerCurePoisonEffect,
   triggerWhirlwindEffect,
@@ -70,6 +73,27 @@ function _dispatchSpellVFX(attackType, target = null) {
         : 2;
       triggerFrostboltEffect(dist);
       // frostbolt audio handled by playActionSound inside playAction
+      break;
+    }
+    case 'lightningbolt': {
+      const dist = target
+        ? Math.abs(target.gridRow - player.gridRow) + Math.abs(target.gridCol - player.gridCol)
+        : 2;
+      triggerLightningboltEffect(dist);
+      break;
+    }
+    case 'holybolt': {
+      const dist = target
+        ? Math.abs(target.gridRow - player.gridRow) + Math.abs(target.gridCol - player.gridCol)
+        : 2;
+      triggerHolyboltEffect(dist);
+      break;
+    }
+    case 'darkbolt': {
+      const dist = target
+        ? Math.abs(target.gridRow - player.gridRow) + Math.abs(target.gridCol - player.gridCol)
+        : 2;
+      triggerDarkboltEffect(dist);
       break;
     }
     case 'banishment': {
@@ -3737,7 +3761,7 @@ export function useHand(memberIndex, hand, silent = false) {
     return;
   }
 
-  const isRanged = attackType === ACTIONS.SHOOT || attackType === ACTIONS.FIREBALL || attackType === ACTIONS.FROSTBOLT || attackType === ACTIONS.BANISHMENT || attackType === 'incinerate';
+  const isRanged = attackType === ACTIONS.SHOOT || attackType === ACTIONS.FIREBALL || attackType === ACTIONS.FROSTBOLT || attackType === ACTIONS.LIGHTNINGBOLT || attackType === ACTIONS.HOLYBOLT || attackType === ACTIONS.DARKBOLT || attackType === ACTIONS.BANISHMENT || attackType === 'incinerate';
   const isBuff = attackType === ACTIONS.REGENERATE;
 
   // Back-row members can only melee if their front partner is dead (stepped up).

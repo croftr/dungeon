@@ -13,6 +13,19 @@
         "Tome of the Slayer",
         "Tome of the Talon",
         "Tome of Overclock",
-        "Tome of Bloodgrudge"
+        "Tome of Bloodgrudge",
+        "Scroll of Fireball",
+        "Scroll of Frostbolt",
+        "Scroll of LightningBolt",
+        "Scroll of HolyBolt",
+        "Scroll of DarkBolt",
+        "Scroll of Heal",
+        "Scroll of Regeneration",
+        "Scroll of Cure Poison",
+        "Scroll of Resist Poison",
+        "Scroll of Rejuvenate",
+        "Scroll of Sleep",
+        "Scroll of Incinerate",
+        "Scroll of Resist Fear"
     ]
 }
