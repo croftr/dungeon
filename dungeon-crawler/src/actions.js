@@ -12,6 +12,7 @@
 import { ACTIONS } from './items.js';
 import { playActionSound } from './audio.js';
 import { playSlashTrail, playShieldTrail } from './slash-trail.js';
+import { getElementColorHex } from './elements.js';
 
 const ACTION_SVG = {
 
@@ -193,8 +194,9 @@ const ACTION_SVG = {
  * @param {string|null} attackType  — one of ACTIONS values, or null (no-op)
  * @param {string}      hand        — 'left' | 'right'  (mirrors swipe/shoot/punch for right hand)
  * @param {number}      memberIndex — party member index (0-3), controls arc direction
+ * @param {string|null} elementId   — optional element id ("fire", "ice"…) for visual tinting (slash trail only)
  */
-export function playAction(attackType, hand = 'left', memberIndex = 0) {
+export function playAction(attackType, hand = 'left', memberIndex = 0, elementId = null) {
   if (!attackType) return;
 
   // Play the matching sound simultaneously
@@ -211,9 +213,9 @@ export function playAction(attackType, hand = 'left', memberIndex = 0) {
     return;
   }
 
-  // Other melee attacks use the diagonal slash trail
+  // Other melee attacks use the diagonal slash trail; tint by primary element if any.
   if (attackType === ACTIONS.SWIPE || attackType === ACTIONS.BASH || attackType === ACTIONS.PUNCH) {
-    playSlashTrail(hand, memberIndex);
+    playSlashTrail(hand, memberIndex, getElementColorHex(elementId));
     return;
   }
 

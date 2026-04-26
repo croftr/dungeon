@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
-import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createIceCloud, createCrocodileSparkle, createHellSpawn, createBloodSplatter, createGreenBloodSplatter, createCrowWizardFireAoe, createCrowWizardCure, createCrowWizardFear } from './particles.js';
+import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createIceCloud, createCrocodileSparkle, createHellSpawn, createBloodSplatter, createGreenBloodSplatter, createCrowWizardFireAoe, createCrowWizardCure, createCrowWizardFear, createElementalBurst } from './particles.js';
+import { ELEMENTS } from './elements.js';
 import { CELL, isPassable } from './map.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
@@ -1952,7 +1953,7 @@ export function showCritIndicator(monsterId, damage) {
   }, 1400);
 }
 
-export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, killer = null) {
+export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, killer = null, elementalBreakdown = null, spellElement = null) {
   const m = monsters.find((x) => x.id === monsterId && x.alive);
   if (!m) return { hit: false, damage: 0, killed: false, monsterHp: 0 };
 
@@ -2157,7 +2158,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
 
       _playDeathAnimation(m);
     } else {
-      _playHitAnimation(m, attackType, killer);
+      _playHitAnimation(m, attackType, killer, elementalBreakdown, spellElement);
     }
   }, delay);
 
@@ -2289,7 +2290,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     spellElement,
   };
 
-  const result = hitMonster(monsterId, damage, attackType, isCrit, character.name);
+  const result = hitMonster(monsterId, damage, attackType, isCrit, character.name, elementalBreakdown, spellElement);
 
   let stunned = false;
   if (attackType === 'shield-bash' && result.hit && !result.killed) {
@@ -2852,7 +2853,7 @@ function _playBlockAnimation(m) {
     .start();
 }
 
-function _playHitAnimation(m, attackType, killer) {
+function _playHitAnimation(m, attackType, killer, elementalBreakdown = null, spellElement = null) {
   if (!m.mesh) return;
   const mesh = m.mesh;
 
@@ -2867,7 +2868,14 @@ function _playHitAnimation(m, attackType, killer) {
   }
 
   if (attackType === 'fireball' || attackType === 'banishment' || attackType === 'incinerate') {
-    createHitSpark(mesh.position);
+    // Magic spells — recolour the spark by spell element when present, otherwise
+    // the existing white→orange spark plays (preserves prior look for non-elemental spells).
+    const spellColor = spellElement ? ELEMENTS[spellElement]?.color : null;
+    if (spellColor) {
+      createElementalBurst(mesh.position, spellColor);
+    } else {
+      createHitSpark(mesh.position);
+    }
   } else if (!m.name.includes('Skeleton')) {
     if (m.name.includes('Mushroom')) {
       createGreenBloodSplatter(mesh.position, 0.45);
@@ -2883,6 +2891,18 @@ function _playHitAnimation(m, attackType, killer) {
         yOffset = 0.9;
       }
       createBloodSplatter(mesh.position, yOffset);
+    }
+  }
+
+  // Elemental rider bursts — fire one small additive sprite burst per element
+  // that landed (after monster weak/resist multipliers). Plays on top of the
+  // splatter for fleshy targets and stands alone on skeletons / dummies that
+  // skip blood, so an elemental hit always reads visually.
+  if (elementalBreakdown) {
+    for (const [elementId, value] of Object.entries(elementalBreakdown)) {
+      if (!value) continue;
+      const colour = ELEMENTS[elementId]?.color;
+      if (colour) createElementalBurst(mesh.position, colour);
     }
   }
 

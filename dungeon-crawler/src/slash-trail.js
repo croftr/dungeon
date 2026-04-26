@@ -113,14 +113,19 @@ export function initSlashTrail(camera) {
   camera.add(_shieldMesh);
 }
 
+// Default trail tint — pale gold. Used when no element override is supplied.
+const DEFAULT_TRAIL_COLOR = 0xffffcc;
+
 /**
  * Play the slash trail effect.
  * @param {'left'|'right'} hand — mirrors the arc for right-hand attacks
  * @param {number} memberIndex — party member index (0-3), used to pick arc direction
+ * @param {number|null} colorHex — optional Three.js color (e.g. 0xe84a1f for fire). Falls back to the default pale gold.
  */
-export function playSlashTrail(hand = 'left', memberIndex = 0) {
+export function playSlashTrail(hand = 'left', memberIndex = 0, colorHex = null) {
   if (!_trailMesh || _animating) return;
   _animating = true;
+  _trailMesh.material.color.setHex(colorHex ?? DEFAULT_TRAIL_COLOR);
 
   // Party column: indices 0,2 = left column, 1,3 = right column
   const rightColumn = memberIndex % 2 === 1;

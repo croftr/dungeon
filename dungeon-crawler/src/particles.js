@@ -262,6 +262,50 @@ export function createHitSpark(position) {
     }, 100);
 }
 
+/**
+ * Subtle elemental impact burst — drop-in cousin of createHitSpark, sized for
+ * a per-rider hit confirmation rather than a spell explosion. Tints the
+ * sprites by the supplied hex color (string like "#e84a1f"). Designed to
+ * overlay the existing blood splatter without competing with it.
+ */
+export function createElementalBurst(position, colorHex) {
+  if (!proton || !position || !colorHex) return;
+
+  const emitter = new Proton.Emitter();
+  // Smaller burst than a hit-spark; this fires alongside the splatter so it
+  // shouldn't dominate. Quick fade so multiple riders don't pile up visually.
+  emitter.rate = new Proton.Rate(new Proton.Span(8, 14), new Proton.Span(0.01));
+  emitter.addInitialize(new Proton.Mass(1));
+  emitter.addInitialize(new Proton.Radius(0.4, 1.0));
+  emitter.addInitialize(new Proton.Life(0.18, 0.32));
+  emitter.addInitialize(new Proton.V(4, new Proton.Vector3D(0, 1, 0), 180));
+
+  const material = new THREE.SpriteMaterial({
+    map: sparkTexture,
+    color: 0xffffff,
+    blending: THREE.AdditiveBlending,
+    transparent: true,
+    depthWrite: false,
+  });
+  emitter.addInitialize(new Proton.Body(new THREE.Sprite(material)));
+  emitter.addInitialize(new Proton.Position(new Proton.PointZone(position.x, position.y + 0.5, position.z)));
+
+  emitter.addBehaviour(new Proton.Alpha(1, 0));
+  emitter.addBehaviour(new Proton.Scale(1, 0.1));
+  // Bright core fading out to the element's authored colour — the hot-to-cool
+  // gradient makes the burst read as "elemental energy" regardless of hue.
+  emitter.addBehaviour(new Proton.Color('#ffffff', colorHex));
+  emitter.addBehaviour(new Proton.RandomDrift(1.5, 1.5, 1.5, 0.05));
+
+  emitter.emit();
+  proton.addEmitter(emitter);
+
+  setTimeout(() => {
+    emitter.stopEmit();
+    setTimeout(() => { proton.removeEmitter(emitter); }, 400);
+  }, 80);
+}
+
 export function createCritSpark(position) {
     if (!proton) return;
 

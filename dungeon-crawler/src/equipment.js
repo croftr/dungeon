@@ -1,5 +1,5 @@
 import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getAttackSpeedMultiplier, hasEffectFlag, breakPartyUnseen, showMemberHeal, showMemberSpHeal, getEffectiveStats, getEffectiveElementalResistances } from './party.js';
-import { ELEMENTS, ELEMENT_IDS } from './elements.js';
+import { ELEMENTS, ELEMENT_IDS, getPrimaryAttackElement } from './elements.js';
 import { showInlineHelp } from './help.js';
 import { getItemDef, canUseItemByJob, normalizeJob } from './items.js';
 import { getHqDefenceBonus, scaleHqPotionEffect, getHqEffectBonus, hqDisplayName } from './crafting.js';
@@ -3799,12 +3799,18 @@ export function useHand(memberIndex, hand, silent = false) {
   // Attacking breaks the Unseen buff
   breakPartyUnseen(`${m.name} attacks — the cloak of shadow disperses!`);
 
+  // Resolve ammo + primary element up front so the slash trail can be tinted
+  // before the swing fires.
+  const ammoItem = m.equipment?.ammo;
+  const ammoDef = ammoItem ? getItemDef(ammoItem.name) : null;
+  const primaryElement = getPrimaryAttackElement(def, ammoDef);
+
   // Play the visual + audio animation regardless of whether a target exists
-  playAction(attackType, hand, memberIndex);
+  playAction(attackType, hand, memberIndex, primaryElement);
   if (isSpell || isBuff) _dispatchSpellVFX(attackType, target);
 
   if (isBuff) {
-    // Legacy global buffs handled here. 
+    // Legacy global buffs handled here.
     // Regeneration is now targeted, but if we add other untargeted buffs
     // they could go here. For now, we'll just return.
     return;
@@ -3815,8 +3821,6 @@ export function useHand(memberIndex, hand, silent = false) {
   }
 
   // Pass character object + weapon def; hit chance and damage are resolved in combat-rules.js
-  const ammoItem = m.equipment?.ammo;
-  const ammoDef = ammoItem ? getItemDef(ammoItem.name) : null;
   const result = attackMonster(target.id, m, def, attackType, ammoDef, !!item?.hq);
 
   addLogEntry({
@@ -3868,7 +3872,7 @@ export function useHand(memberIndex, hand, silent = false) {
         daTarget = _closestMonsterInFront(maxRange);
         if (daTarget) {
           daResult = attackMonster(daTarget.id, m, def, attackType, ammoDef, !!item?.hq);
-          playAction(attackType, hand, memberIndex);
+          playAction(attackType, hand, memberIndex, primaryElement);
           if (isSpell || isBuff) _dispatchSpellVFX(attackType, daTarget);
         }
       } else {

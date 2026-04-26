@@ -85,11 +85,11 @@
         "job": "Warrior",
         "race": "Dwarf",
         "stats": {
-            "strength": 108,
-            "dexterity": 106,
-            "vitality": 108,
-            "intelligence": 104,
-            "resilience": 100
+            "strength": 8,
+            "dexterity": 6,
+            "vitality": 8,
+            "intelligence": 4,
+            "resilience": 10
         },
         "bio": "A stout and hearty fighter from the mountainous deeps. Thorek believes every problem can be solved with a sharp axe and enough ale.",
         "stances": [

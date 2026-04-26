@@ -39,3 +39,27 @@ export function getMonsterElementMultiplier(monster, element) {
 export function capPlayerResistance(value) {
   return Math.min(PLAYER_RESIST_CAP, value);
 }
+
+// Returns the dominant element id for an attack, or null if non-elemental.
+// Used for cosmetic effects (slash-trail tint, hit-burst colour) where we want
+// one canonical element even though a weapon could carry multiple riders.
+// Priority: largest weapon rider → largest ammo rider → null.
+export function getPrimaryAttackElement(weaponDef, ammoDef = null) {
+  const pickLargest = (map) => {
+    if (!map) return null;
+    let bestId = null, bestVal = -Infinity;
+    for (const [id, val] of Object.entries(map)) {
+      if (val > bestVal) { bestVal = val; bestId = id; }
+    }
+    return bestVal > 0 ? bestId : null;
+  };
+  return pickLargest(weaponDef?.elementalDamage) ?? pickLargest(ammoDef?.elementalDamage);
+}
+
+// Hex colour for an element (used by Three.js materials). Returns null when
+// the id is unknown/null so callers can skip tinting.
+export function getElementColorHex(elementId) {
+  const c = ELEMENTS[elementId]?.color;
+  if (!c) return null;
+  return parseInt(c.replace('#', ''), 16);
+}
