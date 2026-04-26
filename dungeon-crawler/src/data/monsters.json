@@ -314,7 +314,9 @@
       "intelligence": 10,
       "resilience": 10
     },
-    "elementalDamage": { "ice": 5 },
+    "elementalDamage": {
+      "ice": 5
+    },
     "elementalResistances": {
       "ice": "immune",
       "fire": "weak"
@@ -452,6 +454,9 @@
     "family": "ogre",
     "description": "Massive and brute-brained, Ogres compensate for their low cunning with overwhelming ferocity. A single blow from their knotted fists can cave iron armour and shatter stone columns.",
     "image": "/monster-images/ogre.webp",
+    "elementalResistances": {
+      "ice": "weak"
+    },
     "specialAttacks": [
       {
         "name": "doubleCombo",
@@ -882,7 +887,9 @@
       "intelligence": 7,
       "resilience": 8
     },
-    "elementalDamage": { "ice": 4 },
+    "elementalDamage": {
+      "ice": 4
+    },
     "elementalResistances": {
       "ice": "immune",
       "fire": "weak"
@@ -1130,10 +1137,6 @@
       },
       {
         "item": "Demon's Eyes",
-        "chance": 0.4
-      },
-      {
-        "item": "Ogre's Head",
         "chance": 0.4
       },
       {
