@@ -196,7 +196,6 @@ const SLOT_LABELS = {
 // ─────────────────────────────────────────────
 let activeCharIndex = null;
 let activeCharDevIndex = null;
-let _equipSkillTab = 'action';
 let _ctxInvIndex = null;   // inventory slot most recently right-clicked
 let _skillSwMenuCtx = null; // { memberIndex, mode: 'skill'|'spell' } when skill-switch menu is open
 
@@ -527,7 +526,7 @@ function renderModal(memberIndex) {
   const devBtn = document.getElementById('equip-char-dev');
   if (devBtn) {
     if (m.isDead) {
-      devBtn.textContent = 'Development';
+      devBtn.textContent = 'Skill Tree';
       devBtn.classList.remove('level-up-pending');
       devBtn.disabled = true;
     } else if (m.pendingLevelUp) {
@@ -535,7 +534,7 @@ function renderModal(memberIndex) {
       devBtn.classList.add('level-up-pending');
       devBtn.disabled = false;
     } else {
-      devBtn.textContent = 'Development';
+      devBtn.textContent = 'Skill Tree';
       devBtn.classList.remove('level-up-pending');
       devBtn.disabled = false;
     }
@@ -702,53 +701,6 @@ function renderModal(memberIndex) {
   if (mpVal) mpVal.textContent = `${m.mp}/${m.mpMax}`;
   if (spVal) spVal.textContent = `${m.sp ?? 100}/${m.spMax ?? 100}`;
 
-  // ── Skills ──
-  const skillsEl = document.getElementById('char-skills');
-  if (skillsEl) {
-    skillsEl.innerHTML = '';
-    const skills = m.skills ?? [];
-
-    const filteredSkills = skills.filter((skill) => {
-      const def = getItemDef(skill.name) || (typeof SKILLS_DATA !== 'undefined' ? SKILLS_DATA[skill.name] : null);
-      return _equipSkillTab === 'passive' ? (def?.isPassive === true) : (def?.isPassive !== true);
-    });
-
-    if (filteredSkills.length === 0) {
-      const empty = document.createElement('p');
-      empty.className = 'skill-empty';
-      empty.textContent = `No ${_equipSkillTab} skills learned.`;
-      skillsEl.appendChild(empty);
-    } else {
-      filteredSkills.forEach((skill) => {
-        const card = document.createElement('div');
-        card.className = 'skill-card';
-        const isEquipped = m.equipment?.skill?.name === skill.name;
-        if (isEquipped) card.classList.add('skill-card--equipped');
-
-        // Render skill icon
-        renderItemIcon({ icon: skill.icon }, card);
-
-        // Tooltip
-        attachTooltipListeners(card, () => {
-          const potency = _formatSkillPotency(skill.name, m);
-          return {
-            ...skill,
-            isSkill: true,
-            potency: potency
-          };
-        });
-
-        // Click to equip — clicking the already-equipped skill unequips it
-        card.addEventListener('click', () => {
-          if (m.isDead) return;
-          m.equipment.skill = isEquipped ? null : { name: skill.name, slot: 'skill', icon: skill.icon ?? null };
-          renderModal(memberIndex);
-          refreshPartyCards();
-        });
-        skillsEl.appendChild(card);
-      });
-    }
-  }
 
   // Remove the spells container if it exists (from previous turn)
   const spellsContainer = document.getElementById('char-spells-container');
@@ -5482,16 +5434,6 @@ export function initEquipment() {
 }
 
 function attachCharDevListeners() {
-  // Equip Skill Tabs
-  document.querySelectorAll('#equip-skill-tabs .skill-tab-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      document.querySelectorAll('#equip-skill-tabs .skill-tab-btn').forEach(b => b.classList.remove('active'));
-      e.target.classList.add('active');
-      _equipSkillTab = e.target.dataset.tab;
-      if (activeCharIndex !== null) renderModal(activeCharIndex);
-    });
-  });
-
   // Char Dev Close
   const closeBtn = document.getElementById('char-dev-close');
   if (closeBtn) closeBtn.addEventListener('click', closeCharDevModal);

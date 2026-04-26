@@ -3810,14 +3810,13 @@ function _renderForgeSlots() {
             _showForgeCtxMenu(e.clientX, e.clientY, equip, i, itemDef, isHQ);
         };
 
-        const displayName = isHQ ? hqDisplayName(itemName) : itemName;
         if (i === 8) {
             equip.attachTooltipListeners(slot, () => _forgeContents[8]
-                ? { name: displayName, description: 'Click to take into your inventory. Right-click to choose who receives it.' }
+                ? { name: itemName, hq: isHQ, description: 'Click to take into your inventory. Right-click to choose who receives it.' }
                 : null);
         } else {
             equip.attachTooltipListeners(slot, () => _forgeContents[i]
-                ? { name: displayName, description: 'Click to return to inventory. Right-click to choose who receives it.' }
+                ? { name: itemName, hq: isHQ, description: 'Click to return to inventory. Right-click to choose who receives it.' }
                 : null);
         }
     });
@@ -4859,14 +4858,13 @@ function _renderAlchemySlots() {
             };
 
             // Hover tooltip — result slot gets a "take it" hint
-            const displayName = isHQ ? hqDisplayName(itemName) : itemName;
             if (i === 8) {
                 equip.attachTooltipListeners(slot, () => _alchemyContents[8]
-                    ? { name: displayName, description: 'Click to take into your inventory. Right-click to choose who receives it.' }
+                    ? { name: itemName, hq: isHQ, description: 'Click to take into your inventory. Right-click to choose who receives it.' }
                     : null);
             } else {
                 equip.attachTooltipListeners(slot, () => _alchemyContents[i]
-                    ? { name: displayName, description: 'Click to return to inventory. Right-click to choose who receives it.' }
+                    ? { name: itemName, hq: isHQ, description: 'Click to return to inventory. Right-click to choose who receives it.' }
                     : null);
             }
         });

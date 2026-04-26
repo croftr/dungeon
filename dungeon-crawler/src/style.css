@@ -3573,46 +3573,6 @@ label.mm-setting-label {
   transform: translateX(-4px);
 }
 
-/* ── Skills panel ── */
-.equip-section-title--skills {
-  margin-top: 10px;
-  border-top: 1px solid #3a2a10;
-  padding-top: 10px;
-}
-
-.skill-tabs {
-  display: flex;
-  gap: 5px;
-  padding: 0 10px 10px;
-}
-
-.skill-tab-btn {
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid #3a2a10;
-  color: #7a6a50;
-  padding: 4px 12px;
-  font-family: inherit;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  cursor: pointer;
-  border-radius: 3px;
-  transition: all 0.2s;
-}
-
-.skill-tab-btn:hover {
-  background: rgba(200, 168, 74, 0.1);
-  color: #a8987a;
-}
-
-.skill-tab-btn.active {
-  background: rgba(200, 168, 74, 0.2);
-  border-color: #c8a84a;
-  color: #e8d090;
-  box-shadow: inset 0 0 5px rgba(200, 168, 74, 0.2);
-}
-
-#char-skills,
 #cd-char-skills,
 #cd-available-skills {
   padding: 10px;
