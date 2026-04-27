@@ -1529,6 +1529,7 @@ const _ARENA_INTRO_VIDEOS = {
   'ogre':              { overlay: 'ogre-arena-video-overlay',            video: 'ogre-arena-video',            skip: 'skip-ogre-arena-btn',            src: '/videos/ogre.mp4' },
   'aqua_man':          { overlay: 'aqua-man-arena-video-overlay',        video: 'aqua-man-arena-video',        skip: 'skip-aqua-man-arena-btn',        src: '/videos/aqua-man-arena.mp4' },
   'crocodile_warrior': { overlay: 'crocodile-warrior-arena-video-overlay', video: 'crocodile-warrior-arena-video', skip: 'skip-crocodile-warrior-arena-btn', src: '/videos/crocodile-warrior-arena.mp4' },
+  'crow_wizard':       { overlay: 'crow-wizard-arena-video-overlay',     video: 'crow-wizard-arena-video',     skip: 'skip-crow-wizard-arena-btn',     src: '/videos/crow-wizard-arena.mp4' },
   'demon':             { overlay: 'demon-arena-video-overlay',           video: 'demon-arena-video',           skip: 'skip-demon-arena-btn',           src: '/videos/demon-arena.mp4' },
   'minotaur':          { overlay: 'minotaur-arena-video-overlay',        video: 'minotaur-arena-video',        skip: 'skip-minotaur-arena-btn',        src: '/videos/minotaur-arena.mp4' },
   'giant':             { overlay: 'giant-arena-video-overlay',           video: 'giant-arena-video',           skip: 'skip-giant-arena-btn',           src: '/videos/giant-arena.mp4' },

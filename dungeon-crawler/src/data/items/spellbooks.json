@@ -14,7 +14,7 @@
         "type": "spellbook",
         "spellName": "Frostbolt",
         "requiredInt": 10,
-        "icon": "/icons/scroll_frostbolt.png",
+        "icon": "/icons/scroll_frostbolt.webp",
         "description": "Ancient parchment covered in glistening frost runes. Study it to learn Frostbolt. Requires 10 Intelligence.",
         "value": 620,
         "weight": 0.2
@@ -24,7 +24,7 @@
         "type": "spellbook",
         "spellName": "Lightningbolt",
         "requiredInt": 10,
-        "icon": "/icons/scroll_lightningbolt.png",
+        "icon": "/icons/scroll_lightningbolt.webp",
         "description": "Ancient parchment cracking with static electricity. Study it to learn Lightningbolt. Requires 10 Intelligence.",
         "value": 640,
         "weight": 0.2
@@ -34,7 +34,7 @@
         "type": "spellbook",
         "spellName": "Holybolt",
         "requiredInt": 10,
-        "icon": "/icons/scroll_holybolt.png",
+        "icon": "/icons/scroll_holybolt.webp",
         "description": "Ancient parchment radiating a warm golden glow. Study it to learn Holybolt. Requires 10 Intelligence.",
         "value": 620,
         "weight": 0.2
@@ -44,7 +44,7 @@
         "type": "spellbook",
         "spellName": "Darkbolt",
         "requiredInt": 10,
-        "icon": "/icons/scroll_darkbolt.png",
+        "icon": "/icons/scroll_darkbolt.webp",
         "description": "A sinister scroll humming with void energy. Study it to learn Darkbolt. Requires 10 Intelligence.",
         "value": 620,
         "weight": 0.2

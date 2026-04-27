@@ -95,6 +95,15 @@
         "sellable": true
     },
     {
+        "name": "Crow Talon",
+        "slot": "loot",
+        "icon": "/icons/ingredients/crow-talon.webp",
+        "description": "The sharpened talon of a crow wizard. A gruesome but valuable trophy.",
+        "value": 150,
+        "weight": 0.2,
+        "sellable": true
+    },
+    {
         "name": "Minotaur Horn",
         "slot": "loot",
         "icon": "/icons/ingredients/minotaur_horn.webp",
@@ -306,6 +315,16 @@
         "slot": "loot",
         "icon": "/icons/ingredients/tree_man_essence.webp",
         "description": "A nature-infused, wood-like orb containing the core essence of a Tree Man.",
+        "value": 0,
+        "weight": 0.1,
+        "sellable": false,
+        "stackCount": 10
+    },
+    {
+        "name": "Crow Essence",
+        "slot": "loot",
+        "icon": "/icons/ingredients/crow_essence.webp",
+        "description": "A shadow-wrapped, corvid orb containing the core essence of a Crow Wizard.",
         "value": 0,
         "weight": 0.1,
         "sellable": false,

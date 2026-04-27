@@ -645,7 +645,7 @@
             "str": 0.8,
             "dex": 0.2
         },
-        "icon": "/icons/flame_axe.png",
+        "icon": "/icons/flame_axe.webp",
         "description": "A heavy battle axe that glows with internal heat. Its blade is perpetually wreathed in flames.",
         "value": 650,
         "weight": 3.0
@@ -666,7 +666,7 @@
             "str": 0.2,
             "dex": 0.8
         },
-        "icon": "/icons/flame_dagger.png",
+        "icon": "/icons/flame_dagger.webp",
         "description": "A razor-sharp dagger forged in the heart of a volcano. It leaves a trail of embers with every strike.",
         "value": 450,
         "weight": 0.5
@@ -687,7 +687,7 @@
             "str": 0.8,
             "dex": 0.2
         },
-        "icon": "/icons/ice_axe.png",
+        "icon": "/icons/ice_axe.webp",
         "description": "A battle axe forged from eternal ice. Its blade is freezing to the touch.",
         "value": 650,
         "weight": 3.0
@@ -708,7 +708,7 @@
             "str": 0.2,
             "dex": 0.8
         },
-        "icon": "/icons/ice_dagger.png",
+        "icon": "/icons/ice_dagger.webp",
         "description": "A shard of magically hardened ice, sharpened to a lethal edge.",
         "value": 450,
         "weight": 0.5
@@ -729,7 +729,7 @@
             "str": 0.8,
             "dex": 0.2
         },
-        "icon": "/icons/flame_greataxe.png",
+        "icon": "/icons/flame_greataxe.webp",
         "description": "A massive two-handed axe that burns with an inextinguishable flame. Its heavy head is wreathed in fire.",
         "value": 1200,
         "weight": 6.5
@@ -750,7 +750,7 @@
             "str": 0.8,
             "dex": 0.2
         },
-        "icon": "/icons/ice_greataxe.png",
+        "icon": "/icons/ice_greataxe.webp",
         "description": "A massive two-handed axe carved from a single block of magical ice. It emits a constant aura of frost.",
         "value": 1200,
         "weight": 6.5

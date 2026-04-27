@@ -1182,6 +1182,7 @@
     "name": "Crow Wizard",
     "family": "avian",
     "description": "A sinister sorcerer wrapped in corvid flesh, the Crow Wizard commands fire and shadow with equal cruelty. Its cawing incantations carry the stench of old magic — and those who hear its shriek often find their courage deserting them entirely.",
+    "image": "/monster-images/crow-wizard.webp",
     "hp": 319,
     "defence": 13,
     "damageReduction": 0.10,
@@ -1228,12 +1229,21 @@
         "chance": 1
       },
       {
+        "item": "Crow Talon",
+        "chance": 0.4
+      },
+      {
+        "item": "Crow Essence",
+        "chance": 1
+      },
+      {
         "item": {
           "name": "Gold Coins",
           "quantity": 20
         },
         "chance": 1
       }
-    ]
+    ],
+    "uniqueArenaItem": "Crow Talon"
   }
 }

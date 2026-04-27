@@ -155,4 +155,10 @@ export function spawnLevel0Objects(ctx) {
     }
 
 
+    // ── Essentiary Unlock All Button (West wall of starter room) ──────────────
+    // Positioned at row 12, col 8. The face points East (+X) into the room at col 9.
+    const { group: essBtn } = createWallButton(+1, { target: 'essentiary_unlock_all' });
+    essBtn.position.set(9 * CELL - 1.0, 1.25, 12 * CELL);
+    group.add(essBtn);
+
 }
