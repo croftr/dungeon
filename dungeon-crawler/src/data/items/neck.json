@@ -24,6 +24,6 @@
         "defence": 0,
         "value": 825,
         "weight": 0.1,
-        "skillDurationBonusMs": 10000
+        "skillDurationBonusMs": 5000
     }
 ]

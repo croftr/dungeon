@@ -6,7 +6,7 @@
         "description": "Ancient serpent-lore bound in scaled leather. Teaches the Viper Stance to an eligible warrior — poison ticks deal +2 damage when attacking with a poison weapon.",
         "type": "stance-tome",
         "stanceId": "viper",
-        "value": 1,
+        "value": 100,
         "weight": 0.5
     },
     {
@@ -16,7 +16,7 @@
         "description": "A whisper-thin manuscript that seems to fade from sight. Teaches the Ghost Stance — monster hit chance reduced by 15%.",
         "type": "stance-tome",
         "stanceId": "ghost",
-        "value": 1,
+        "value": 100,
         "weight": 0.5
     },
     {
@@ -26,7 +26,7 @@
         "description": "Heavy tome clasped in iron. Teaches the Inquisitor Stance — +40% resistance to all on-hit status effects.",
         "type": "stance-tome",
         "stanceId": "inquisitor",
-        "value": 1,
+        "value": 100,
         "weight": 0.5
     },
     {
@@ -36,7 +36,7 @@
         "description": "Pages gleaming with sanctified light. Teaches the Holy Stance — +25% damage dealt to undead monsters.",
         "type": "stance-tome",
         "stanceId": "holy",
-        "value": 1,
+        "value": 100,
         "weight": 0.5
     },
     {
@@ -46,7 +46,7 @@
         "description": "A tattered hunter's log of vital strikes. Teaches the Heartseeker Stance — +10% critical hit chance on attacks.",
         "type": "stance-tome",
         "stanceId": "heartseeker",
-        "value": 1,
+        "value": 100,
         "weight": 0.5
     },
     {
@@ -56,7 +56,7 @@
         "description": "A tattered hunter's log of vital strikes. Teaches the Viperseeker Stance — +50% critical hit chance and +2 poison damage per tick.",
         "type": "stance-tome",
         "stanceId": "viperseeker",
-        "value": 1,
+        "value": 100,
         "weight": 0.5
     },
     {
@@ -66,7 +66,7 @@
         "description": "Pages still crackling with arcane wrath. Teaches the Vengeance Stance — +50% damage on damage-dealing spells.",
         "type": "stance-tome",
         "stanceId": "vengeance",
-        "value": 1,
+        "value": 100,
         "weight": 0.5
     },
     {
@@ -76,7 +76,7 @@
         "description": "A scholar's treatise on accelerated casting. Teaches the SpellSurge Stance — -30% cooldown on all spells.",
         "type": "stance-tome",
         "stanceId": "spellsurge",
-        "value": 1,
+        "value": 100,
         "weight": 0.5
     },
     {
@@ -86,7 +86,7 @@
         "description": "A knightly codex bound in mirrored steel. Teaches the Retribution Stance — reflects 25% of incoming damage back onto the attacker.",
         "type": "stance-tome",
         "stanceId": "retribution",
-        "value": 1,
+        "value": 100,
         "weight": 0.5
     },
     {
@@ -96,7 +96,7 @@
         "description": "A healer's bestiary of restorative incantations. Teaches the Curatio Stance — cure and heal spells restore +6 HP; Regeneration heals +3 HP per tick.",
         "type": "stance-tome",
         "stanceId": "curatio",
-        "value": 1,
+        "value": 100,
         "weight": 0.5
     },
     {
@@ -106,7 +106,7 @@
         "description": "A blood-spattered war-chant carved into stone. Teaches the Slayer Stance — enters a state of roaring fury, boosting all damage dealt by 80%.",
         "type": "stance-tome",
         "stanceId": "slayer",
-        "value": 1,
+        "value": 100,
         "weight": 0.5
     },
     {
@@ -116,7 +116,7 @@
         "description": "A predator's meditation on striking twice. Teaches the Talon Stance — strike twice with every attack.",
         "type": "stance-tome",
         "stanceId": "talon",
-        "value": 1,
+        "value": 100,
         "weight": 0.5
     },
     {
@@ -126,7 +126,7 @@
         "description": "A frantic mechanist's journal. Teaches the Overclock Stance — doubles attack speed at the cost of stamina and focus.",
         "type": "stance-tome",
         "stanceId": "overclock",
-        "value": 1,
+        "value": 100,
         "weight": 0.5
     },
     {
@@ -136,7 +136,7 @@
         "description": "A vengeful ledger of wounds repaid. Teaches the Bloodgrudge Stance — steal 10 HP from enemies on successful hits.",
         "type": "stance-tome",
         "stanceId": "bloodgrudge",
-        "value": 1,
+        "value": 100,
         "weight": 0.5
     }
 ]

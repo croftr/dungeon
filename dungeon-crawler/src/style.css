@@ -5784,6 +5784,155 @@ body.party-targeting-mode .member-card--dead .portrait {
   transition: width 0.15s ease;
 }
 
+/* ── Hunter's Eye HUD Panel (fixed right side, above party panel) ──────── */
+#hunters-eye-panel {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  width: 272px;
+  max-height: 58vh;
+  overflow-y: auto;
+  background: rgba(4, 2, 1, 0.94);
+  border: 1px solid rgba(200, 160, 50, 0.75);
+  border-radius: 6px;
+  padding: 10px 12px 12px;
+  font-family: monospace;
+  font-size: 11px;
+  color: #ddd0a0;
+  pointer-events: auto;
+  z-index: 610;
+  box-shadow: 0 0 14px rgba(200, 160, 50, 0.35), 0 2px 10px rgba(0, 0, 0, 0.9);
+  transition: bottom 0.2s ease;
+}
+
+#hunters-eye-panel .hep-hud-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #9a8850;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+  pointer-events: auto;
+}
+#hunters-eye-panel .hep-hud-close:hover { color: #f5e060; }
+
+#hunters-eye-panel .hep-hud-name {
+  color: #f5e060;
+  font-weight: bold;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  padding-right: 18px;
+  margin-bottom: 1px;
+}
+#hunters-eye-panel .hep-hud-family {
+  color: #c8a060;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+#hunters-eye-panel .hep-hud-desc {
+  color: #a09070;
+  font-size: 10px;
+  font-style: italic;
+  line-height: 1.4;
+  margin-bottom: 2px;
+}
+#hunters-eye-panel .hep-hud-divider {
+  height: 1px;
+  background: rgba(200, 160, 50, 0.3);
+  margin: 6px 0;
+}
+#hunters-eye-panel .hep-hud-section-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #9a8850;
+  margin-bottom: 4px;
+}
+#hunters-eye-panel .hep-hud-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 2px;
+  gap: 8px;
+}
+#hunters-eye-panel .hep-hud-label { color: #9a8850; }
+#hunters-eye-panel .hep-hud-val { color: #e8d090; }
+
+#hunters-eye-panel .hep-hud-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 10px;
+  row-gap: 2px;
+  margin-top: 3px;
+}
+#hunters-eye-panel .hep-hud-stat { color: #a09060; font-size: 10px; }
+#hunters-eye-panel .hep-hud-stat b { color: #e8d090; }
+
+#hunters-eye-panel .hep-hud-resist-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+  font-size: 10px;
+}
+#hunters-eye-panel .hep-hud-resist-badge {
+  font-weight: bold;
+  font-size: 9px;
+  letter-spacing: 0.05em;
+}
+
+#hunters-eye-panel .hep-hud-special {
+  margin-bottom: 5px;
+}
+#hunters-eye-panel .hep-hud-special-name {
+  color: #e8c060;
+  font-weight: bold;
+  font-size: 10px;
+}
+#hunters-eye-panel .hep-hud-special-tag {
+  color: #ff9040;
+  font-weight: normal;
+  font-size: 9px;
+}
+#hunters-eye-panel .hep-hud-special-desc {
+  color: #a09070;
+  font-size: 9px;
+  font-style: italic;
+  line-height: 1.35;
+  margin-top: 1px;
+}
+
+#hunters-eye-panel .hep-hud-onhit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 6px;
+  margin-bottom: 3px;
+  font-size: 10px;
+  font-weight: bold;
+}
+#hunters-eye-panel .hep-hud-effect-name { flex: 1; }
+#hunters-eye-panel .hep-hud-effect-chance { color: #ffdd60; flex-shrink: 0; }
+#hunters-eye-panel .hep-hud-effect-desc {
+  flex-basis: 100%;
+  font-size: 9px;
+  font-weight: normal;
+  color: #88cc70;
+  opacity: 0.85;
+}
+
+#hunters-eye-panel .hep-hud-debuff {
+  font-size: 10px;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
 /* ── Hunter's Eye stats panel (CSS2DObject label) ───────────────────────── */
 .monster-stats-panel {
   transform: translateX(-50%) translateY(-110%);

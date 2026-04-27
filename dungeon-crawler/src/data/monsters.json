@@ -355,6 +355,9 @@
     "damageReduction": 0.08,
     "xp": 245,
     "attackSpeed": 1,
+    "elementalResistances": {
+      "fire": "weak"
+    },
     "stats": {
       "strength": 18,
       "dexterity": 6,
@@ -401,6 +404,9 @@
         ]
       }
     ],
+    "elementalResistances": {
+      "fire": "weak"
+    },
     "hp": 380,
     "defence": 12,
     "damageReduction": 0.10,

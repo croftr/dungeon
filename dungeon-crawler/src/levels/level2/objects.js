@@ -28,8 +28,8 @@ export function spawnLevel2Objects(ctx) {
     addPortal(group, loader, 7, 1, 0, 0, 0, -0.85, 13, 13, 0);
 
     // ── New area: Spell Cabinet (Room A, north wall, row 3 col 5) ─────────────
-    addSpellCabinet(group, loader, 5, 3, 0, 0, -0.7, ["Scroll of HolyBolt", "Scroll of DarkBolt"]);
-    addSpellCabinet(group, loader, 2, 8, 0, 0, -0.7, ['Scroll of LightningBolt', 'Scroll of Incinerate']);
+    addSpellCabinet(group, loader, 5, 3, 0, 0, -0.7, ["Scroll of Holybolt", "Scroll of Darkbolt"]);
+    addSpellCabinet(group, loader, 2, 8, Math.PI / 2, -0.3, -0.7, ['Scroll of Lightningbolt', 'Scroll of Incinerate']);
 
     // ── New area: Chest (Room C, south wall, row 13 col 9) ───────────────────
     addChest(group, loader, 9, 13, Math.PI, 0.7, [

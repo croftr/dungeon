@@ -171,7 +171,7 @@ export const level1Monsters = [
     asset('/monsters/mummy-annimation/Meshy_AI_Animation_Walking_withSkin.glb')),
 
   // Night Goblins in the secret room north of the zombie room (Rows 11-13, Cols 15-19)
-  inst(D.night_goblin, 300, 12, 16,
+  inst(D.night_goblin, 108, 12, 16,
     asset('/monsters/night-goblin/idle.glb'),
     asset('/monsters/night-goblin/single-attack.glb'),
     asset('/monsters/night-goblin/goblin-attack.wav'), 0.45, 0, 0, 1, null,
@@ -181,7 +181,7 @@ export const level1Monsters = [
     null,
     asset('/monsters/night-goblin/cobat-idle.glb')),
 
-  inst(D.night_goblin, 301, 12, 18,
+  inst(D.night_goblin, 109, 12, 18,
     asset('/monsters/night-goblin/idle.glb'),
     asset('/monsters/night-goblin/single-attack.glb'),
     asset('/monsters/night-goblin/goblin-attack.wav'), 0.45, 0, 0, 1, null,
@@ -192,7 +192,7 @@ export const level1Monsters = [
     asset('/monsters/night-goblin/cobat-idle.glb')),
 
   // Zombies in the hidden room (Rows 17-20, Cols 16-19)
-  inst(D.zombie, 201, 18, 17,
+  inst(D.zombie, 105, 18, 17,
     asset('/monsters/zombie-animation/Meshy_AI_Animation_Idle_3_withSkin.glb'),
     asset('/monsters/zombie-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb'),
     asset('/monsters/zombie-animation/zombie-attack.mp3'), 0.45, 0, 0, 1,
@@ -203,7 +203,7 @@ export const level1Monsters = [
     null,
     asset('/monsters/zombie-animation/zombie-combat-idle.glb')),
 
-  inst(D.zombie, 202, 18, 18,
+  inst(D.zombie, 106, 18, 18,
     asset('/monsters/zombie-animation/Meshy_AI_Animation_Idle_3_withSkin.glb'),
     asset('/monsters/zombie-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb'),
     asset('/monsters/zombie-animation/zombie-attack.mp3'), 0.45, 0, 0, 1,
@@ -214,7 +214,7 @@ export const level1Monsters = [
     null,
     asset('/monsters/zombie-animation/zombie-combat-idle.glb')),
 
-  inst(D.zombie, 203, 19, 18,
+  inst(D.zombie, 107, 19, 18,
     asset('/monsters/zombie-animation/Meshy_AI_Animation_Idle_3_withSkin.glb'),
     asset('/monsters/zombie-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb'),
     asset('/monsters/zombie-animation/zombie-attack.mp3'), 0.45, 0, 0, 1,
@@ -226,7 +226,7 @@ export const level1Monsters = [
     asset('/monsters/zombie-animation/zombie-combat-idle.glb')),
 
   // Mushrooms guarding the Scroll of Resist Fear cabinet (rows 11-12, col 11)
-  inst(D.mushroom, 70, 11, 11,
+  inst(D.mushroom, 72, 11, 11,
     asset('/monsters/mushroom/idle.glb'),
     asset('/monsters/mushroom/attack.glb'),
     null, 0.45, 0, 0, 1, null,
@@ -236,7 +236,7 @@ export const level1Monsters = [
     null,
     asset('/monsters/mushroom/combat-idle.glb')),
 
-  inst(D.mushroom, 71, 11, 13,
+  inst(D.mushroom, 73, 11, 13,
     asset('/monsters/mushroom/idle.glb'),
     asset('/monsters/mushroom/attack.glb'),
     null, 0.45, 0, 0, 1, null,

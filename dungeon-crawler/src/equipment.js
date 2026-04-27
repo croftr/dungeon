@@ -3264,13 +3264,9 @@ function _executePartySpell(caster, casterIndex, hand, spellDef) {
   }
   setMp(caster.id, caster.mp - spellDef.mpCost);
 
-  const isSkillHand = hand.startsWith('skill');
-  const isSpellSlot = !isSkillHand && spellDef.slot === 'spell';
-  const baseKey = isSkillHand ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
-  const timeKey = isSpellSlot ? `${baseKey}-${spellDef.name}` : baseKey;
-  lastAttackTimes[timeKey] = performance.now();
+  lastAttackTimes[`${casterIndex}-spell-${spellDef.name}`] = performance.now();
 
-  if (isSkillHand) {
+  if (hand.startsWith('skill')) {
     const cd = (spellDef.delay ?? 15) * 1000 * getSpellCooldownMultiplier(caster);
     _startSkillCooldownUI(casterIndex, performance.now() + cd, hand);
   }
@@ -3339,13 +3335,9 @@ function _executeAoEDebuffSpell(caster, casterIndex, hand, spellDef) {
   }
   setMp(caster.id, caster.mp - spellDef.mpCost);
 
-  const isSkillHand = hand.startsWith('skill');
-  const isSpellSlot = !isSkillHand && spellDef.slot === 'spell';
-  const baseKey = isSkillHand ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
-  const timeKey = isSpellSlot ? `${baseKey}-${spellDef.name}` : baseKey;
-  lastAttackTimes[timeKey] = performance.now();
+  lastAttackTimes[`${casterIndex}-spell-${spellDef.name}`] = performance.now();
 
-  if (isSkillHand) {
+  if (hand.startsWith('skill')) {
     const cd = (spellDef.delay ?? 15) * 1000 * getSpellCooldownMultiplier(caster);
     _startSkillCooldownUI(casterIndex, performance.now() + cd, hand);
   }
@@ -3404,13 +3396,9 @@ function _executeLineSpell(caster, casterIndex, hand, spellDef) {
   }
   setMp(caster.id, caster.mp - spellDef.mpCost);
 
-  const isSkillHand = hand.startsWith('skill');
-  const isSpellSlot = !isSkillHand && spellDef.slot === 'spell';
-  const baseKey = isSkillHand ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
-  const timeKey = isSpellSlot ? `${baseKey}-${spellDef.name}` : baseKey;
-  lastAttackTimes[timeKey] = performance.now();
+  lastAttackTimes[`${casterIndex}-spell-${spellDef.name}`] = performance.now();
 
-  if (isSkillHand) {
+  if (hand.startsWith('skill')) {
     const cd = (spellDef.delay ?? 15) * 1000 * getSpellCooldownMultiplier(caster);
     _startSkillCooldownUI(casterIndex, performance.now() + cd, hand);
   }
@@ -3466,15 +3454,10 @@ function _executePartyMemberSpell(caster, casterIndex, hand, spellDef, target) {
   setMp(caster.id, caster.mp - spellDef.mpCost);
 
   // Record cooldown so the slot greys out normally.
-  // Spells include the spell name so switching spells in the same hand doesn't
-  // inherit the previous spell's cooldown.
-  const isSkillHand = hand.startsWith('skill');
-  const isSpellSlot = !isSkillHand && spellDef.slot === 'spell';
-  const baseKey = isSkillHand ? `${casterIndex}-skill-${spellDef.name}` : `${casterIndex}-${hand}`;
-  const timeKey = isSpellSlot ? `${baseKey}-${spellDef.name}` : baseKey;
-  lastAttackTimes[timeKey] = performance.now();
+  // Use a per-member, per-spell-name key so the same spell on cooldown blocks all slots it's in.
+  lastAttackTimes[`${casterIndex}-spell-${spellDef.name}`] = performance.now();
 
-  if (isSkillHand) {
+  if (hand.startsWith('skill')) {
     const cd = (spellDef.delay ?? 15) * 1000 * getSpellCooldownMultiplier(caster);
     const ends = performance.now() + cd;
     if (spellDef.name === 'Heal') _healSkillCooldownEnds[casterIndex] = ends;
@@ -3717,14 +3700,13 @@ export function useHand(memberIndex, hand, silent = false) {
   // Check cooldown timer
   // A 'bothHands' weapon is driven by the left or right hand click but acts as
   // one cooldown, we only care about its primary slot timer (left).
-  // Spells include the spell name in the key so switching spells in the same
-  // hand slot doesn't inherit the previous spell's cooldown.
-  // Skill slot spells all share a per-spell key regardless of which skill slot.
+  // Spells use a per-member, per-spell-name key that is slot-independent so the
+  // same spell equipped in multiple slots shares one cooldown.
   const isSpellSlot = def?.slot === 'spell';
   const baseKey = isBothHands ? `${memberIndex}-left`
     : isSkillSlotHand ? `${memberIndex}-skill`
     : `${memberIndex}-${hand}`;
-  const timeKey = isSpellSlot ? `${baseKey}-${item.name}` : baseKey;
+  const timeKey = isSpellSlot ? `${memberIndex}-spell-${item.name}` : baseKey;
   const now = performance.now();
   if (lastAttackTimes[timeKey]) {
     if (now - lastAttackTimes[timeKey] < delaySec * 1000) {
@@ -4028,7 +4010,7 @@ function _tickAutoHand(memberIndex, hand, staggerOffsetMs) {
 
   const isSpellSlot = def?.slot === 'spell';
   const baseKey = isBothHands ? `${memberIndex}-left` : `${memberIndex}-${hand}`;
-  const timeKey = isSpellSlot ? `${baseKey}-${item.name}` : baseKey;
+  const timeKey = isSpellSlot ? `${memberIndex}-spell-${item.name}` : baseKey;
 
   const lastFire = lastAttackTimes[timeKey] ?? 0;
   if (now < lastFire + delaySec * 1000) return; // still on cooldown

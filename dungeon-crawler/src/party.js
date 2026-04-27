@@ -436,7 +436,7 @@ function refreshMember(m) {
     }
     lhDelaySec *= getAttackSpeedMultiplier(m);
 
-    const lhTimeKey = (lhDef?.slot === 'spell' && lhName) ? `${i}-left-${lhName}` : `${i}-left`;
+    const lhTimeKey = (lhDef?.slot === 'spell' && lhName) ? `${i}-spell-${lhName}` : `${i}-left`;
     const lastUsed = lastAttackTimes[lhTimeKey];
     const lhCanAttack = lastUsed === undefined || (performance.now() - lastUsed) >= (lhDelaySec * 1000);
     lhSlot.classList.toggle('slot-cooling-down', !lhCanAttack);
@@ -470,7 +470,7 @@ function refreshMember(m) {
     const rhCurName = lhBothHands ? lhName : rhName;
     const rhCurDef = lhBothHands ? lhDef : rhDef;
     const rhTimeKey = (!lhBothHands && rhCurDef?.slot === 'spell' && rhCurName)
-      ? `${i}-right-${rhCurName}` : (lhBothHands ? `${i}-left` : `${i}-right`);
+      ? `${i}-spell-${rhCurName}` : (lhBothHands ? `${i}-left` : `${i}-right`);
     const lastUsed = lastAttackTimes[rhTimeKey];
     const rhCanAttack = lastUsed === undefined || (performance.now() - lastUsed) >= (rhDelaySec * 1000);
 
@@ -491,7 +491,7 @@ function refreshMember(m) {
 
     const skDef = skName ? getSkillOrSpellDef(skName) : null;
     const skDelaySec = skDef ? (skDef.delay ?? (skDef.cooldownMs != null ? skDef.cooldownMs / 1000 : 0)) : 0;
-    const lastUsed = lastAttackTimes[`${i}-skill-${skName}`];
+    const lastUsed = lastAttackTimes[skDef?.slot === 'spell' ? `${i}-spell-${skName}` : `${i}-skill-${skName}`];
     const skCanUse = lastUsed === undefined || (performance.now() - lastUsed) >= (skDelaySec * 1000);
     skSlot.classList.toggle('slot-cooling-down', !!skName && !skCanUse);
     const skNoMp = (skDef?.mpCost ?? 0) > 0 && m.mp < skDef.mpCost;
@@ -510,7 +510,7 @@ function refreshMember(m) {
     sk2Slot.classList.toggle('slot-empty', !sk2Name);
     const sk2Def = sk2Name ? getSkillOrSpellDef(sk2Name) : null;
     const sk2DelaySec = sk2Def ? (sk2Def.delay ?? (sk2Def.cooldownMs != null ? sk2Def.cooldownMs / 1000 : 0)) : 0;
-    const lastUsed2 = lastAttackTimes[`${i}-skill-${sk2Name}`];
+    const lastUsed2 = lastAttackTimes[sk2Def?.slot === 'spell' ? `${i}-spell-${sk2Name}` : `${i}-skill-${sk2Name}`];
     const sk2CanUse = lastUsed2 === undefined || (performance.now() - lastUsed2) >= (sk2DelaySec * 1000);
     sk2Slot.classList.toggle('slot-cooling-down', !!sk2Name && !sk2CanUse);
     const sk2NoMp = (sk2Def?.mpCost ?? 0) > 0 && m.mp < sk2Def.mpCost;
@@ -528,7 +528,7 @@ function refreshMember(m) {
     sk3Slot.classList.toggle('slot-empty', !sk3Name);
     const sk3Def = sk3Name ? getSkillOrSpellDef(sk3Name) : null;
     const sk3DelaySec = sk3Def ? (sk3Def.delay ?? (sk3Def.cooldownMs != null ? sk3Def.cooldownMs / 1000 : 0)) : 0;
-    const lastUsed3 = lastAttackTimes[`${i}-skill-${sk3Name}`];
+    const lastUsed3 = lastAttackTimes[sk3Def?.slot === 'spell' ? `${i}-spell-${sk3Name}` : `${i}-skill-${sk3Name}`];
     const sk3CanUse = lastUsed3 === undefined || (performance.now() - lastUsed3) >= (sk3DelaySec * 1000);
     sk3Slot.classList.toggle('slot-cooling-down', !!sk3Name && !sk3CanUse);
     const sk3NoMp = (sk3Def?.mpCost ?? 0) > 0 && m.mp < sk3Def.mpCost;
@@ -546,7 +546,7 @@ function refreshMember(m) {
     sk4Slot.classList.toggle('slot-empty', !sk4Name);
     const sk4Def = sk4Name ? getSkillOrSpellDef(sk4Name) : null;
     const sk4DelaySec = sk4Def ? (sk4Def.delay ?? (sk4Def.cooldownMs != null ? sk4Def.cooldownMs / 1000 : 0)) : 0;
-    const lastUsed4 = lastAttackTimes[`${i}-skill-${sk4Name}`];
+    const lastUsed4 = lastAttackTimes[sk4Def?.slot === 'spell' ? `${i}-spell-${sk4Name}` : `${i}-skill-${sk4Name}`];
     const sk4CanUse = lastUsed4 === undefined || (performance.now() - lastUsed4) >= (sk4DelaySec * 1000);
     sk4Slot.classList.toggle('slot-cooling-down', !!sk4Name && !sk4CanUse);
     const sk4NoMp = (sk4Def?.mpCost ?? 0) > 0 && m.mp < sk4Def.mpCost;
@@ -564,7 +564,7 @@ function refreshMember(m) {
     sk5Slot.classList.toggle('slot-empty', !sk5Name);
     const sk5Def = sk5Name ? getSkillOrSpellDef(sk5Name) : null;
     const sk5DelaySec = sk5Def ? (sk5Def.delay ?? (sk5Def.cooldownMs != null ? sk5Def.cooldownMs / 1000 : 0)) : 0;
-    const lastUsed5 = lastAttackTimes[`${i}-skill-${sk5Name}`];
+    const lastUsed5 = lastAttackTimes[sk5Def?.slot === 'spell' ? `${i}-spell-${sk5Name}` : `${i}-skill-${sk5Name}`];
     const sk5CanUse = lastUsed5 === undefined || (performance.now() - lastUsed5) >= (sk5DelaySec * 1000);
     sk5Slot.classList.toggle('slot-cooling-down', !!sk5Name && !sk5CanUse);
     const sk5NoMp = (sk5Def?.mpCost ?? 0) > 0 && m.mp < sk5Def.mpCost;
@@ -582,7 +582,7 @@ function refreshMember(m) {
     sk6Slot.classList.toggle('slot-empty', !sk6Name);
     const sk6Def = sk6Name ? getSkillOrSpellDef(sk6Name) : null;
     const sk6DelaySec = sk6Def ? (sk6Def.delay ?? (sk6Def.cooldownMs != null ? sk6Def.cooldownMs / 1000 : 0)) : 0;
-    const lastUsed6 = lastAttackTimes[`${i}-skill-${sk6Name}`];
+    const lastUsed6 = lastAttackTimes[sk6Def?.slot === 'spell' ? `${i}-spell-${sk6Name}` : `${i}-skill-${sk6Name}`];
     const sk6CanUse = lastUsed6 === undefined || (performance.now() - lastUsed6) >= (sk6DelaySec * 1000);
     sk6Slot.classList.toggle('slot-cooling-down', !!sk6Name && !sk6CanUse);
     const sk6NoMp = (sk6Def?.mpCost ?? 0) > 0 && m.mp < sk6Def.mpCost;

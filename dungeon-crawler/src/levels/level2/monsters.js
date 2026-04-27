@@ -46,7 +46,7 @@ export const level2Monsters = [
 
   // Crow Wizard room — east of Room B, accessed via corridor (row 8, cols 15-19); room rows 7-9 cols 20-25
   // Two summoned skeletons flank the entrance — dormant until the player enters
-  Object.assign(inst(D.summoned_skeleton, 401, 7, 20,
+  Object.assign(inst(D.summoned_skeleton, 451, 7, 20,
     asset('/monsters/summoned-skeleton/idle.glb'),
     asset('/monsters/summoned-skeleton/attack.glb'),
     asset('/monsters/summoned-skeleton/skeleton-attack.mp3'),
@@ -59,7 +59,7 @@ export const level2Monsters = [
     glbStandUp: asset('/monsters/summoned-skeleton/standing-up.glb'),
   }),
 
-  Object.assign(inst(D.summoned_skeleton, 402, 9, 20,
+  Object.assign(inst(D.summoned_skeleton, 452, 9, 20,
     asset('/monsters/summoned-skeleton/idle.glb'),
     asset('/monsters/summoned-skeleton/attack.glb'),
     asset('/monsters/summoned-skeleton/skeleton-attack.mp3'),
@@ -72,7 +72,7 @@ export const level2Monsters = [
     glbStandUp: asset('/monsters/summoned-skeleton/standing-up.glb'),
   }),
 
-  inst(D.crow_wizard, 400, 8, 22,
+  inst(D.crow_wizard, 450, 8, 22,
     asset('/monsters/crow-wizard/idle.glb'),
     asset('/monsters/crow-wizard/standard-attack.glb'),
     asset('/monsters/crow-wizard/standard-attack.mp3'),

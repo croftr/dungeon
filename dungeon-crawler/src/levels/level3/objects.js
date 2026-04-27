@@ -45,11 +45,11 @@ export function spawnLevel3Objects(ctx) {
     ]);
 
     // ── Portal Activator Eggs ───────────────────────────────────────────────────────────
-    // Minotaur room centre — contains Red Crystal
-    addPortalActivatorStatue(group, loader, 11, 11, 0, 0.45, ['Red Crystal']);
+    // Minotaur room centre — contains Blue Crystal
+    addPortalActivatorStatue(group, loader, 11, 11, 0, 0.45, ['Blue Crystal']);
 
-    // Alcove at col 20, row 19 — contains Blue Crystal
-    addPortalActivatorStatue(group, loader, 20, 19, 0, 0.45, ['Blue Crystal']);
+    // Alcove at col 20, row 19 — contains Red Crystal
+    addPortalActivatorStatue(group, loader, 20, 19, 0, 0.45, ['Red Crystal']);
 
     // ── Trap ──────────────────────────────────────────────────────────────────
     // Guards the entry corridor to the central minotaur room

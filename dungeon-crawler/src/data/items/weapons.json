@@ -244,7 +244,7 @@
         "attackType": "bash",
         "weaponType": "staff",
         "staminaDrain": 1,
-        "baseDamage": 5,
+        "baseDamage": 2,
         "delay": 4,
         "statWeights": {
             "str": 0.8,
@@ -254,6 +254,9 @@
         "description": "A gnarled wooden staff. A reliable melee weapon for wizards who want to bash enemies.",
         "value": 54,
         "weight": 1.5,
+        "elementalDamage": {
+            "holy": 5
+        },
         "statBonuses": {
             "mp": 2
         }
@@ -527,10 +530,13 @@
         "attackType": "bash",
         "weaponType": "staff",
         "staminaDrain": 1,
-        "baseDamage": 12,
+        "baseDamage": 5,
         "delay": 3.2,
         "statWeights": {
             "intelligence": 1.0
+        },
+        "elementalDamage": {
+            "holy": 10
         },
         "icon": "/icons/life_staff.webp",
         "description": "A staff crafted from living elderwood, pulsing with the essence of vitality and magic. It restores and bolsters the life force of its wielder.",

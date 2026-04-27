@@ -3,6 +3,7 @@ import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
 import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createIceCloud, createCrocodileSparkle, createHellSpawn, createBloodSplatter, createGreenBloodSplatter, createCrowWizardFireAoe, createCrowWizardCure, createCrowWizardFear, createElementalBurst } from './particles.js';
 import { ELEMENTS } from './elements.js';
+import MONSTER_FAMILIES from './data/monster-families.json';
 import { CELL, isPassable } from './map.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
@@ -66,10 +67,165 @@ export function getHuntersEyeTargetId() { return _huntersEyeTargetId; }
 export function setHuntersEyeTarget(id) {
   _huntersEyeTargetId = id;
   monsters.forEach((m) => {
-    const show = id !== null && m.id === id && m.alive;
-    if (m.statsLabel) m.statsLabel.visible = show;
-    if (show && m.statsPanel) _updateStatsPanel(m);
+    if (m.statsLabel) m.statsLabel.visible = false; // floating label always hidden; HUD panel takes over
+    if (id !== null && m.id === id && m.alive) _renderHuntersEyeHud(m);
   });
+  if (id === null) _hideHuntersEyePanel();
+}
+
+function _hideHuntersEyePanel() {
+  const panel = document.getElementById('hunters-eye-panel');
+  if (panel) panel.style.display = 'none';
+}
+
+let _hudPanelInitialized = false;
+
+function _renderHuntersEyeHud(m) {
+  const panel = document.getElementById('hunters-eye-panel');
+  const content = document.getElementById('hunters-eye-content');
+  if (!panel || !content) return;
+
+  if (!_hudPanelInitialized) {
+    document.getElementById('hunters-eye-close')?.addEventListener('click', () => setHuntersEyeTarget(null));
+    _hudPanelInitialized = true;
+  }
+
+  // Position above party panel if it is visible
+  const partyPanel = document.getElementById('party-panel');
+  if (partyPanel && !partyPanel.classList.contains('party-panel--hidden')) {
+    panel.style.bottom = (partyPanel.offsetHeight + 8) + 'px';
+  } else {
+    panel.style.bottom = '16px';
+  }
+
+  const s = m.stats ?? {};
+  const familyDef = MONSTER_FAMILIES[m.family];
+
+  // Merge elemental resistances: monster-specific overrides family
+  const allResistances = { ...(familyDef?.elementalResistances ?? {}), ...(m.elementalResistances ?? {}) };
+
+  const isSundered = skillsState.sunderArmor?.active && skillsState.sunderArmor?.targetId === m.id;
+  const sunderMag = skillsState.sunderArmor?.magnitude ?? 1;
+  const defVal = m.defence ?? '—';
+  const resVal = s.resilience ?? '—';
+  const displayDef = isSundered && defVal !== '—' ? `<span style="color:#ff8080">${Math.floor(defVal * sunderMag)}</span>` : defVal;
+  const displayRes = isSundered && resVal !== '—' ? `<span style="color:#ff8080">${Math.floor(resVal * sunderMag)}</span>` : resVal;
+
+  let html = '';
+
+  // Name + family
+  html += `<div class="hep-hud-name">${m.name}</div>`;
+  if (familyDef) html += `<div class="hep-hud-family">${familyDef.name}</div>`;
+  if (m.description) html += `<div class="hep-hud-desc">${m.description}</div>`;
+
+  // Core stats
+  html += `<div class="hep-hud-divider"></div>`;
+  html += `<div class="hep-hud-section-label">Stats</div>`;
+  html += `<div class="hep-hud-row"><span class="hep-hud-label">HP</span><span class="hep-hud-val">${m.hp} / ${m.hpMax}</span></div>`;
+  const reductionStr = m.damageReduction ? ` <span style="color:#9a8850">+${Math.round(m.damageReduction * 100)}% reduction</span>` : '';
+  html += `<div class="hep-hud-row"><span class="hep-hud-label">DEF</span><span class="hep-hud-val">${displayDef}${reductionStr}</span></div>`;
+  html += `<div class="hep-hud-row"><span class="hep-hud-label">ATK SPD</span><span class="hep-hud-val">${m.attackSpeed}×</span></div>`;
+  html += `<div class="hep-hud-grid">`;
+  html += `<span class="hep-hud-stat">STR <b>${s.strength ?? '—'}</b></span>`;
+  html += `<span class="hep-hud-stat">DEX <b>${s.dexterity ?? '—'}</b></span>`;
+  html += `<span class="hep-hud-stat">VIT <b>${s.vitality ?? '—'}</b></span>`;
+  html += `<span class="hep-hud-stat">INT <b>${s.intelligence ?? '—'}</b></span>`;
+  html += `<span class="hep-hud-stat">RES <b>${displayRes}</b></span>`;
+  html += `</div>`;
+
+  // Elemental resistances
+  const RESIST_CONF = {
+    immune:     { label: 'IMMUNE',     color: '#9060ff' },
+    resist:     { label: 'RESIST',     color: '#60b0ff' },
+    weak:       { label: 'WEAK',       color: '#ffb040' },
+    vulnerable: { label: 'VULNERABLE', color: '#ff5050' },
+  };
+  const resistEntries = Object.entries(allResistances);
+  if (resistEntries.length) {
+    html += `<div class="hep-hud-divider"></div>`;
+    html += `<div class="hep-hud-section-label">Elemental</div>`;
+    for (const [elemId, category] of resistEntries) {
+      const elemDef = ELEMENTS[elemId];
+      const conf = RESIST_CONF[category] ?? { label: category.toUpperCase(), color: '#ddd0a0' };
+      const symbol = elemDef?.symbol ?? '';
+      const elemName = elemDef?.name ?? elemId;
+      const elemColor = elemDef?.color ?? '#ddd0a0';
+      html += `<div class="hep-hud-resist-row">`;
+      html += `<span style="color:${elemColor}">${symbol} ${elemName}</span>`;
+      html += `<span class="hep-hud-resist-badge" style="color:${conf.color}">${conf.label}</span>`;
+      html += `</div>`;
+    }
+  }
+
+  // Elemental damage dealt by monster
+  if (m.elementalDamage && Object.keys(m.elementalDamage).length) {
+    html += `<div class="hep-hud-divider"></div>`;
+    html += `<div class="hep-hud-section-label">Elemental Damage</div>`;
+    for (const [elemId, bonus] of Object.entries(m.elementalDamage)) {
+      const elemDef = ELEMENTS[elemId];
+      const symbol = elemDef?.symbol ?? '';
+      const elemName = elemDef?.name ?? elemId;
+      const elemColor = elemDef?.color ?? '#ddd0a0';
+      html += `<div class="hep-hud-row"><span style="color:${elemColor}">${symbol} ${elemName}</span><span class="hep-hud-val">+${bonus}</span></div>`;
+    }
+  }
+
+  // Special attacks
+  if (m.specialAttacks?.length) {
+    html += `<div class="hep-hud-divider"></div>`;
+    html += `<div class="hep-hud-section-label">Special Attacks</div>`;
+    for (const sa of m.specialAttacks) {
+      const name = sa.displayName ?? sa.name;
+      const tags = [];
+      if (sa.aoe) tags.push('AoE');
+      if (sa.damageMultiplier) tags.push(`×${sa.damageMultiplier}`);
+      const tagStr = tags.length ? ` <span class="hep-hud-special-tag">[${tags.join(', ')}]</span>` : '';
+      html += `<div class="hep-hud-special">`;
+      html += `<div class="hep-hud-special-name">${name}${tagStr}</div>`;
+      if (sa.description) html += `<div class="hep-hud-special-desc">${sa.description}</div>`;
+      html += `</div>`;
+    }
+  }
+
+  // On-hit effects
+  if (m.onHitEffects?.length) {
+    html += `<div class="hep-hud-divider"></div>`;
+    html += `<div class="hep-hud-section-label">On-Hit Effects</div>`;
+    for (const effect of m.onHitEffects) {
+      const def = STATUS_EFFECT_DEFS[effect.effectId];
+      const name = def?.name ?? effect.effectId;
+      const chance = Math.round(effect.chance * 100);
+      const desc = def ? describeEffect(def) : '';
+      const effectColor = def?.color ?? '#c0ff80';
+      html += `<div class="hep-hud-onhit" style="color:${effectColor}">`;
+      html += `<span class="hep-hud-effect-name">${name}</span>`;
+      html += `<span class="hep-hud-effect-chance">${chance}%</span>`;
+      if (desc) html += `<span class="hep-hud-effect-desc">${desc}</span>`;
+      html += `</div>`;
+    }
+  }
+
+  // Active debuffs currently on the monster
+  const nowMs = performance.now();
+  const isEntangled = skillsState.entangle?.active && skillsState.entangle?.targetId === m.id;
+  const isStunned = m.stunUntil && nowMs < m.stunUntil;
+  const hasStatusDebuffs = m.activeDebuffs?.some(d => nowMs < d.expiresAt);
+  if (isSundered || isEntangled || isStunned || hasStatusDebuffs) {
+    html += `<div class="hep-hud-divider"></div>`;
+    html += `<div class="hep-hud-section-label">Active Effects</div>`;
+    if (isSundered) html += `<div class="hep-hud-debuff" style="color:#ff8080">Sunder Armor (DEF/RES ½)</div>`;
+    if (isEntangled) html += `<div class="hep-hud-debuff" style="color:#80ff80">Entangle (Atk Spd ½)</div>`;
+    if (isStunned)   html += `<div class="hep-hud-debuff" style="color:#ffd040">Stunned (Cannot Act)</div>`;
+    (m.activeDebuffs ?? []).forEach(d => {
+      if (nowMs >= d.expiresAt) return;
+      const def = STATUS_EFFECT_DEFS[d.effectId];
+      if (!def) return;
+      html += `<div class="hep-hud-debuff" style="color:${def.color ?? '#c0ff80'}">${def.name} (${describeEffect(def)})</div>`;
+    });
+  }
+
+  content.innerHTML = html;
+  panel.style.display = 'block';
 }
 
 // Forward-direction unit vectors per facing value (0=N,1=E,2=S,3=W)
@@ -1620,7 +1776,7 @@ export function updateMonsters(dt, playerCamera, scene) {
       if (m.stunLabel) m.stunLabel.visible = false;
       if (m.entangleLabel) m.entangleLabel.visible = false;
       if (m.sunderLabel) m.sunderLabel.visible = false;
-      if (_huntersEyeTargetId === m.id) _huntersEyeTargetId = null;
+      if (_huntersEyeTargetId === m.id) { _huntersEyeTargetId = null; _hideHuntersEyePanel(); }
       if (m.mesh) m.mesh.visible = false;
       return;
     }
@@ -1659,6 +1815,7 @@ export function updateMonsters(dt, playerCamera, scene) {
         if (m.stunLabel) m.stunLabel.visible = false;
         if (m.entangleLabel) m.entangleLabel.visible = false;
         if (m.sunderLabel) m.sunderLabel.visible = false;
+        if (_huntersEyeTargetId === m.id) { _huntersEyeTargetId = null; _hideHuntersEyePanel(); }
         m.mesh.visible = false;
         return;
       }
@@ -1679,7 +1836,7 @@ export function updateMonsters(dt, playerCamera, scene) {
       if (m.stunLabel) m.stunLabel.visible = false;
       if (m.entangleLabel) m.entangleLabel.visible = false;
       if (m.sunderLabel) m.sunderLabel.visible = false;
-      if (_huntersEyeTargetId === m.id) _huntersEyeTargetId = null;
+      if (_huntersEyeTargetId === m.id) { _huntersEyeTargetId = null; _hideHuntersEyePanel(); }
       return;
     }
 
@@ -1715,7 +1872,7 @@ export function updateMonsters(dt, playerCamera, scene) {
           panelDirty = true;
         }
       });
-      if (panelDirty && m.statsLabel?.visible) _updateStatsPanel(m);
+      if (panelDirty && _huntersEyeTargetId === m.id) _renderHuntersEyeHud(m);
     }
 
     if (m.sleepLabel) m.sleepLabel.visible = isAsleep;
@@ -1783,7 +1940,7 @@ export function updateMonsters(dt, playerCamera, scene) {
     // Auto-deactivate Hunter's Eye if the player disengages from this monster
     if (_huntersEyeTargetId === m.id && !inRange) {
       _huntersEyeTargetId = null;
-      if (m.statsLabel) m.statsLabel.visible = false;
+      _hideHuntersEyePanel();
     }
 
     // Movement when player is out of attack range.
@@ -1911,7 +2068,7 @@ export function applyMonsterStatusEffect(monsterId, effectId, caster = null, dur
       tickDamageBonus,
     });
   }
-  if (m.statsLabel?.visible) _updateStatsPanel(m);
+  if (_huntersEyeTargetId === m.id) _renderHuntersEyeHud(m);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2082,7 +2239,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       m.hpBarFill.style.width = `${pct}%`;
     }
 
-    if (m.statsLabel?.visible) _updateStatsPanel(m);
+    if (_huntersEyeTargetId === m.id) _renderHuntersEyeHud(m);
 
     if (m.name !== 'Training Dummy' || m.drainStamina) {
       setInCombat();
@@ -2309,8 +2466,8 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     if (Math.random() < SHIELD_BASH_STUN_CHANCE) {
       stunned = true;
       m.stunUntil = performance.now() + SHIELD_BASH_STUN_DURATION_MS;
-      if (m.statsLabel?.visible) _updateStatsPanel(m);
-      setTimeout(() => { if (m.statsLabel?.visible) _updateStatsPanel(m); }, SHIELD_BASH_STUN_DURATION_MS); // refresh UI when it drops
+      if (_huntersEyeTargetId === m.id) _renderHuntersEyeHud(m);
+      setTimeout(() => { if (_huntersEyeTargetId === m.id) _renderHuntersEyeHud(m); }, SHIELD_BASH_STUN_DURATION_MS);
     }
   }
 

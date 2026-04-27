@@ -42,10 +42,7 @@
     "name": "Ancient",
     "description": "Primordial guardians of the earth, older than memory and rooted in ancient magic.",
     "icon": "/icons/family/ancient.webp",
-    "elementalResistances": {
-      "lightning": "resist",
-      "ice": "weak"
-    }
+    "elementalResistances": {}
   },
   "ogre": {
     "id": "ogre",
