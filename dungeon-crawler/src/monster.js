@@ -68,9 +68,22 @@ export function setHuntersEyeTarget(id) {
   _huntersEyeTargetId = id;
   monsters.forEach((m) => {
     if (m.statsLabel) m.statsLabel.visible = false; // floating label always hidden; HUD panel takes over
-    if (id !== null && m.id === id && m.alive) _renderHuntersEyeHud(m);
+    if (id !== null && m.id === id) _renderHuntersEyeHud(m);
   });
   if (id === null) _hideHuntersEyePanel();
+}
+
+/**
+ * Called at the start of a new fight (new monster engages).
+ * Clears the Hunter's Eye panel only if its target is already dead.
+ */
+export function clearHuntersEyeIfDead() {
+  if (_huntersEyeTargetId === null) return;
+  const target = monsters.find(m => m.id === _huntersEyeTargetId);
+  if (!target || !target.alive) {
+    _huntersEyeTargetId = null;
+    _hideHuntersEyePanel();
+  }
 }
 
 function _hideHuntersEyePanel() {
@@ -111,6 +124,8 @@ function _renderHuntersEyeHud(m) {
   const displayDef = isSundered && defVal !== '—' ? `<span style="color:#ff8080">${Math.floor(defVal * sunderMag)}</span>` : defVal;
   const displayRes = isSundered && resVal !== '—' ? `<span style="color:#ff8080">${Math.floor(resVal * sunderMag)}</span>` : resVal;
 
+  const isDefeated = !m.alive;
+
   let html = '';
 
   // Name + family
@@ -118,10 +133,20 @@ function _renderHuntersEyeHud(m) {
   if (familyDef) html += `<div class="hep-hud-family">${familyDef.name}</div>`;
   if (m.description) html += `<div class="hep-hud-desc">${m.description}</div>`;
 
+  // Defeated banner
+  if (isDefeated) {
+    html += `<div class="hep-hud-divider"></div>`;
+    html += `<div class="hep-hud-defeated">☠ DEFEATED</div>`;
+  }
+
   // Core stats
   html += `<div class="hep-hud-divider"></div>`;
   html += `<div class="hep-hud-section-label">Stats</div>`;
-  html += `<div class="hep-hud-row"><span class="hep-hud-label">HP</span><span class="hep-hud-val">${m.hp} / ${m.hpMax}</span></div>`;
+  if (isDefeated) {
+    html += `<div class="hep-hud-row"><span class="hep-hud-label">HP</span><span class="hep-hud-val" style="color:#ff6060">0 / ${m.hpMax}</span></div>`;
+  } else {
+    html += `<div class="hep-hud-row"><span class="hep-hud-label">HP</span><span class="hep-hud-val">${m.hp} / ${m.hpMax}</span></div>`;
+  }
   const reductionStr = m.damageReduction ? ` <span style="color:#9a8850">+${Math.round(m.damageReduction * 100)}% reduction</span>` : '';
   html += `<div class="hep-hud-row"><span class="hep-hud-label">DEF</span><span class="hep-hud-val">${displayDef}${reductionStr}</span></div>`;
   html += `<div class="hep-hud-row"><span class="hep-hud-label">ATK SPD</span><span class="hep-hud-val">${m.attackSpeed}×</span></div>`;
@@ -150,8 +175,9 @@ function _renderHuntersEyeHud(m) {
       const symbol = elemDef?.symbol ?? '';
       const elemName = elemDef?.name ?? elemId;
       const elemColor = elemDef?.color ?? '#ddd0a0';
+      const iconHtml = elemDef?.icon ? `<img src="${elemDef.icon}" class="hep-hud-elem-icon" alt="">` : '';
       html += `<div class="hep-hud-resist-row">`;
-      html += `<span style="color:${elemColor}">${symbol} ${elemName}</span>`;
+      html += `<span style="color:${elemColor}">${iconHtml}${symbol} ${elemName}</span>`;
       html += `<span class="hep-hud-resist-badge" style="color:${conf.color}">${conf.label}</span>`;
       html += `</div>`;
     }
@@ -166,28 +192,52 @@ function _renderHuntersEyeHud(m) {
       const symbol = elemDef?.symbol ?? '';
       const elemName = elemDef?.name ?? elemId;
       const elemColor = elemDef?.color ?? '#ddd0a0';
-      html += `<div class="hep-hud-row"><span style="color:${elemColor}">${symbol} ${elemName}</span><span class="hep-hud-val">+${bonus}</span></div>`;
+      const iconHtml = elemDef?.icon ? `<img src="${elemDef.icon}" class="hep-hud-elem-icon" alt="">` : '';
+      html += `<div class="hep-hud-row"><span style="color:${elemColor}">${iconHtml}${symbol} ${elemName}</span><span class="hep-hud-val">+${bonus}</span></div>`;
     }
   }
 
-  // Special attacks
-  if (m.specialAttacks?.length) {
+  // Special attacks (pulled from multi-attack variants with specialAttack:true)
+  const _specialVariants = (m.attacks ?? []).filter(a => a.specialAttack);
+  const _allSpecials = [...(m.specialAttacks ?? []), ..._specialVariants];
+  if (_allSpecials.length) {
     html += `<div class="hep-hud-divider"></div>`;
     html += `<div class="hep-hud-section-label">Special Attacks</div>`;
-    for (const sa of m.specialAttacks) {
+    for (const sa of _allSpecials) {
       const name = sa.displayName ?? sa.name;
       const tags = [];
       if (sa.aoe) tags.push('AoE');
       if (sa.damageMultiplier) tags.push(`×${sa.damageMultiplier}`);
       const tagStr = tags.length ? ` <span class="hep-hud-special-tag">[${tags.join(', ')}]</span>` : '';
+      // Elemental type tag for special attacks
+      let elemTagHtml = '';
+      if (sa.damageType) {
+        const elemDef = ELEMENTS[sa.damageType];
+        const elemColor = elemDef?.color ?? '#ddd0a0';
+        const iconHtml = elemDef?.icon ? `<img src="${elemDef.icon}" class="hep-hud-elem-icon" alt="">` : '';
+        const sym = elemDef?.symbol ?? '';
+        const eName = elemDef?.name ?? sa.damageType;
+        elemTagHtml = ` <span style="color:${elemColor};font-size:9px">${iconHtml}${sym} ${eName}</span>`;
+      }
       html += `<div class="hep-hud-special">`;
-      html += `<div class="hep-hud-special-name">${name}${tagStr}</div>`;
+      html += `<div class="hep-hud-special-name">${name}${tagStr}${elemTagHtml}</div>`;
       if (sa.description) html += `<div class="hep-hud-special-desc">${sa.description}</div>`;
+      // Show on-hit effects for this special attack
+      if (sa.specialOnHitEffects?.length) {
+        for (const eff of sa.specialOnHitEffects) {
+          const def = STATUS_EFFECT_DEFS[eff.effectId];
+          const effName = def?.name ?? eff.effectId;
+          const chance = Math.round(eff.chance * 100);
+          const isPoisonEffect = eff.effectId.includes('poison');
+          const effColor = isPoisonEffect ? '#3ecf5a' : (def?.color ?? '#c0ff80');
+          html += `<div class="hep-hud-special-onhit" style="color:${effColor}">${effName} <span class="hep-hud-effect-chance">${chance}%</span></div>`;
+        }
+      }
       html += `</div>`;
     }
   }
 
-  // On-hit effects
+  // On-hit effects (monster-level, not per-attack)
   if (m.onHitEffects?.length) {
     html += `<div class="hep-hud-divider"></div>`;
     html += `<div class="hep-hud-section-label">On-Hit Effects</div>`;
@@ -196,7 +246,8 @@ function _renderHuntersEyeHud(m) {
       const name = def?.name ?? effect.effectId;
       const chance = Math.round(effect.chance * 100);
       const desc = def ? describeEffect(def) : '';
-      const effectColor = def?.color ?? '#c0ff80';
+      const isPoisonEffect = effect.effectId.includes('poison');
+      const effectColor = isPoisonEffect ? '#3ecf5a' : (def?.color ?? '#c0ff80');
       html += `<div class="hep-hud-onhit" style="color:${effectColor}">`;
       html += `<span class="hep-hud-effect-name">${name}</span>`;
       html += `<span class="hep-hud-effect-chance">${chance}%</span>`;
@@ -205,23 +256,27 @@ function _renderHuntersEyeHud(m) {
     }
   }
 
-  // Active debuffs currently on the monster
-  const nowMs = performance.now();
-  const isEntangled = skillsState.entangle?.active && skillsState.entangle?.targetId === m.id;
-  const isStunned = m.stunUntil && nowMs < m.stunUntil;
-  const hasStatusDebuffs = m.activeDebuffs?.some(d => nowMs < d.expiresAt);
-  if (isSundered || isEntangled || isStunned || hasStatusDebuffs) {
-    html += `<div class="hep-hud-divider"></div>`;
-    html += `<div class="hep-hud-section-label">Active Effects</div>`;
-    if (isSundered) html += `<div class="hep-hud-debuff" style="color:#ff8080">Sunder Armor (DEF/RES ½)</div>`;
-    if (isEntangled) html += `<div class="hep-hud-debuff" style="color:#80ff80">Entangle (Atk Spd ½)</div>`;
-    if (isStunned)   html += `<div class="hep-hud-debuff" style="color:#ffd040">Stunned (Cannot Act)</div>`;
-    (m.activeDebuffs ?? []).forEach(d => {
-      if (nowMs >= d.expiresAt) return;
-      const def = STATUS_EFFECT_DEFS[d.effectId];
-      if (!def) return;
-      html += `<div class="hep-hud-debuff" style="color:${def.color ?? '#c0ff80'}">${def.name} (${describeEffect(def)})</div>`;
-    });
+  // Active debuffs currently on the monster (only if still alive)
+  if (!isDefeated) {
+    const nowMs = performance.now();
+    const isEntangled = skillsState.entangle?.active && skillsState.entangle?.targetId === m.id;
+    const isStunned = m.stunUntil && nowMs < m.stunUntil;
+    const hasStatusDebuffs = m.activeDebuffs?.some(d => nowMs < d.expiresAt);
+    if (isSundered || isEntangled || isStunned || hasStatusDebuffs) {
+      html += `<div class="hep-hud-divider"></div>`;
+      html += `<div class="hep-hud-section-label">Active Effects</div>`;
+      if (isSundered) html += `<div class="hep-hud-debuff" style="color:#ff8080">Sunder Armor (DEF/RES ½)</div>`;
+      if (isEntangled) html += `<div class="hep-hud-debuff" style="color:#80ff80">Entangle (Atk Spd ½)</div>`;
+      if (isStunned)   html += `<div class="hep-hud-debuff" style="color:#ffd040">Stunned (Cannot Act)</div>`;
+      (m.activeDebuffs ?? []).forEach(d => {
+        if (nowMs >= d.expiresAt) return;
+        const def = STATUS_EFFECT_DEFS[d.effectId];
+        if (!def) return;
+        const isPoisonDebuff = d.effectId.includes('poison');
+        const debuffColor = isPoisonDebuff ? '#3ecf5a' : (def.color ?? '#c0ff80');
+        html += `<div class="hep-hud-debuff" style="color:${debuffColor}">${def.name} (${describeEffect(def)})</div>`;
+      });
+    }
   }
 
   content.innerHTML = html;
@@ -1776,7 +1831,7 @@ export function updateMonsters(dt, playerCamera, scene) {
       if (m.stunLabel) m.stunLabel.visible = false;
       if (m.entangleLabel) m.entangleLabel.visible = false;
       if (m.sunderLabel) m.sunderLabel.visible = false;
-      if (_huntersEyeTargetId === m.id) { _huntersEyeTargetId = null; _hideHuntersEyePanel(); }
+      if (_huntersEyeTargetId === m.id) { _hideHuntersEyePanel(); _huntersEyeTargetId = null; }
       if (m.mesh) m.mesh.visible = false;
       return;
     }
@@ -1815,7 +1870,7 @@ export function updateMonsters(dt, playerCamera, scene) {
         if (m.stunLabel) m.stunLabel.visible = false;
         if (m.entangleLabel) m.entangleLabel.visible = false;
         if (m.sunderLabel) m.sunderLabel.visible = false;
-        if (_huntersEyeTargetId === m.id) { _huntersEyeTargetId = null; _hideHuntersEyePanel(); }
+        if (_huntersEyeTargetId === m.id) { _hideHuntersEyePanel(); _huntersEyeTargetId = null; }
         m.mesh.visible = false;
         return;
       }
@@ -1829,6 +1884,7 @@ export function updateMonsters(dt, playerCamera, scene) {
     if (m.mixer) m.mixer.update(dt);
 
     // If dead, we stop here (no attacks, no patrol, no labels)
+    // Hunter's Eye panel stays visible for dead targets — shows defeated state.
     if (!m.alive) {
       if (m.hpLabel) m.hpLabel.visible = false;
       if (m.statsLabel) m.statsLabel.visible = false;
@@ -1836,7 +1892,11 @@ export function updateMonsters(dt, playerCamera, scene) {
       if (m.stunLabel) m.stunLabel.visible = false;
       if (m.entangleLabel) m.entangleLabel.visible = false;
       if (m.sunderLabel) m.sunderLabel.visible = false;
-      if (_huntersEyeTargetId === m.id) { _huntersEyeTargetId = null; _hideHuntersEyePanel(); }
+      // Re-render once to show the defeated state (only first time after death)
+      if (_huntersEyeTargetId === m.id && !m._huntersEyeDefeatedShown) {
+        m._huntersEyeDefeatedShown = true;
+        _renderHuntersEyeHud(m);
+      }
       return;
     }
 
@@ -1937,8 +1997,9 @@ export function updateMonsters(dt, playerCamera, scene) {
     // this monster — same adjacency check used for proximity attacks.
     if (m.hpLabel) m.hpLabel.visible = inRange;
 
-    // Auto-deactivate Hunter's Eye if the player disengages from this monster
-    if (_huntersEyeTargetId === m.id && !inRange) {
+    // Auto-deactivate Hunter's Eye only for alive monsters that go out of range
+    // Dead monsters keep their panel visible until a new fight or manual dismiss.
+    if (_huntersEyeTargetId === m.id && !inRange && m.alive) {
       _huntersEyeTargetId = null;
       _hideHuntersEyePanel();
     }
@@ -2003,6 +2064,8 @@ export function updateMonsters(dt, playerCamera, scene) {
     if (inRange && !isPartyUnseen() && (m.name !== 'Training Dummy' || m.combatMode)) {
       m.engaged = true;
       if (m.name !== 'Training Dummy' || m.drainStamina) setInCombat();
+      // New fight starting — clear Hunter's Eye panel if previous target is dead
+      clearHuntersEyeIfDead();
 
       if (isSuppressed) {
         // Monster is asleep (or otherwise suppressed) — cannot attack

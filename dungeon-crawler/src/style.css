@@ -5933,6 +5933,33 @@ body.party-targeting-mode .member-card--dead .portrait {
   margin-bottom: 2px;
 }
 
+#hunters-eye-panel .hep-hud-defeated {
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 0.12em;
+  color: #ff5050;
+  text-shadow: 0 0 8px rgba(255, 60, 60, 0.7);
+  padding: 3px 0 2px;
+  opacity: 0.9;
+}
+
+#hunters-eye-panel .hep-hud-elem-icon {
+  width: 12px;
+  height: 12px;
+  vertical-align: middle;
+  margin-right: 2px;
+  object-fit: contain;
+}
+
+#hunters-eye-panel .hep-hud-special-onhit {
+  font-size: 9px;
+  font-weight: bold;
+  margin-top: 2px;
+  padding-left: 8px;
+  opacity: 0.9;
+}
+
 /* ── Hunter's Eye stats panel (CSS2DObject label) ───────────────────────── */
 .monster-stats-panel {
   transform: translateX(-50%) translateY(-110%);
