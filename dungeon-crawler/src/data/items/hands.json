@@ -4,7 +4,7 @@
         "slot": "hands",
         "attackType": null,
         "baseDamage": null,
-        "icon": "/icons/leather_gloves.webp",
+        "icon": "/icons/hands/leather_gloves.webp",
         "description": "Soft leather gloves. Improve grip and protect the knuckles.",
         "defence": 1,
         "value": 24,
@@ -15,7 +15,7 @@
         "slot": "hands",
         "attackType": null,
         "baseDamage": null,
-        "icon": "/icons/iron_gauntlets.webp",
+        "icon": "/icons/hands/iron_gauntlets.webp",
         "description": "Articulated iron gauntlets. Protect the hands from blade and fire.",
         "defence": 2,
         "value": 150,
@@ -26,7 +26,7 @@
         "slot": "hands",
         "attackType": null,
         "baseDamage": null,
-        "icon": "/icons/wardancer_hands.webp",
+        "icon": "/icons/hands/wardancer_hands.webp",
         "description": "Silver gauntlets that hum with magical vibrations, aiding the wearer's blade-work and reaction speed.",
         "defence": 3,
         "value": 500,
@@ -38,7 +38,7 @@
     {
         "name": "Celestial Vindicator Gauntlets",
         "slot": "hands",
-        "icon": "/icons/celestial_vindicator_hands.webp",
+        "icon": "/icons/hands/celestial_vindicator_hands.webp",
         "description": "Elegant silver gauntlets with glowing white plates. The fingertips and knuckles are tipped with radiant yellow essence.",
         "defence": 4,
         "value": 1000,
@@ -54,7 +54,7 @@
     {
         "name": "Ironpeak Dwarf Gauntlets",
         "slot": "hands",
-        "icon": "/icons/dwarf_gauntlets.webp",
+        "icon": "/icons/hands/dwarf_gauntlets.webp",
         "description": "Thick iron gauntlets that reinforce a dwarf's grip and shield against mighty blows.",
         "defence": 3,
         "value": 850,
@@ -63,7 +63,7 @@
     {
         "name": "Sylvan Elderwood Bracers",
         "slot": "hands",
-        "icon": "/icons/sylvan_bracers.webp",
+        "icon": "/icons/hands/sylvan_bracers.webp",
         "description": "Durable and elegant bracers carved from elderwood, quickening the wearer's aim.",
         "defence": 3,
         "value": 850,
@@ -72,7 +72,7 @@
     {
         "name": "Mountain Stalker Gloves",
         "slot": "hands",
-        "icon": "/icons/mountain_bracers.webp",
+        "icon": "/icons/hands/mountain_bracers.webp",
         "description": "Thick leather gloves with reinforced knuckles, providing excellent grip and protection.",
         "defence": 3,
         "value": 850,
@@ -81,7 +81,7 @@
     {
         "name": "Aethelgard Archmage Cuffs",
         "slot": "hands",
-        "icon": "/icons/archmage_bracers.webp",
+        "icon": "/icons/hands/archmage_bracers.webp",
         "description": "Silk and gold gloves that channel the flow of magic into the fingertips.",
         "defence": 1,
         "value": 850,
@@ -96,7 +96,7 @@
     {
         "name": "Storm-Reaver Bracers",
         "slot": "hands",
-        "icon": "/icons/stormreaver_bracers.webp",
+        "icon": "/icons/hands/stormreaver_bracers.webp",
         "description": "Heavy iron bracers that add weight and power to every swing.",
         "defence": 4,
         "value": 850,
@@ -105,7 +105,7 @@
     {
         "name": "Seraphic Grace Mitts",
         "slot": "hands",
-        "icon": "/icons/seraphic_bracers.webp",
+        "icon": "/icons/hands/seraphic_bracers.webp",
         "description": "Soft silk gloves that glow when a healing spell is cast.",
         "defence": 1,
         "value": 850,
@@ -118,7 +118,7 @@
     {
         "name": "Pyro Palms",
         "slot": "hands",
-        "icon": "/icons/pyro_palms.webp",
+        "icon": "/icons/hands/pyro_palms.webp",
         "description": "Thick leather gloves with reinforced knuckles, providing excellent grip and protection.",
         "defence": 2,
         "value": 850,

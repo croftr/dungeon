@@ -219,7 +219,7 @@ const _FORGE_WEAPON_NAMES = new Set(WEAPONS_DATA.map(w => w.name));
         if (hasArmour) {
             ITEMS.push({
                 name: `${baseName} Armour Parchment`,
-                icon: '/icons/forge-armour.webp',
+                icon: '/icons/parchments/forge-armour.webp',
                 description: `An ancient looking piece of parchment. It documents the secrets of forging ${baseName} armour.`,
                 type: 'parchment',
                 parchmentType: 'essence-armour',
@@ -231,7 +231,7 @@ const _FORGE_WEAPON_NAMES = new Set(WEAPONS_DATA.map(w => w.name));
         if (hasWeapons) {
             ITEMS.push({
                 name: `${baseName} Weapons Parchment`,
-                icon: '/icons/forge-weapons.webp',
+                icon: '/icons/parchments/forge-weapons.webp',
                 description: `An ancient looking piece of parchment. It documents the secrets of forging ${baseName} weapons.`,
                 type: 'parchment',
                 parchmentType: 'essence-weapons',

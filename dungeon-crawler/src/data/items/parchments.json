@@ -1,7 +1,7 @@
 [
   {
     "name": "Minor Potions Parchment",
-    "icon": "/icons/potions_parchment.webp",
+    "icon": "/icons/parchments/potions_parchment.webp",
     "description": "An ancient looking piece of parchment. It documents alchemy ingredients for creating minor potions.",
     "type": "parchment",
     "parchmentType": "minor-potions",
@@ -10,7 +10,7 @@
   },
   {
     "name": "Party Potions Parchment",
-    "icon": "/icons/party_potions_parchment.webp",
+    "icon": "/icons/parchments/party_potions_parchment.webp",
     "description": "An ancient looking piece of parchment. It documents alchemical recipes for creating party potions.",
     "type": "parchment",
     "parchmentType": "party-potions",
@@ -19,7 +19,7 @@
   },
   {
     "name": "Potions Parchment",
-    "icon": "/icons/potions_parchment.webp",
+    "icon": "/icons/parchments/potions_parchment.webp",
     "description": "An ancient looking piece of parchment. It documents alchemical recipes for creating basic potions.",
     "type": "parchment",
     "parchmentType": "potions",
@@ -28,7 +28,7 @@
   },
   {
     "name": "Forge Armour Parchment",
-    "icon": "/icons/forge-armour.webp",
+    "icon": "/icons/parchments/forge-armour.webp",
     "description": "An ancient looking piece of parchment. It documents the secrets of forging magical armor.",
     "type": "parchment",
     "parchmentType": "forge-armour",
@@ -37,7 +37,7 @@
   },
   {
     "name": "Forge Weapons Parchment",
-    "icon": "/icons/forge-weapons.webp",
+    "icon": "/icons/parchments/forge-weapons.webp",
     "description": "An ancient looking piece of parchment. It documents the secrets of forging magical weapons.",
     "type": "parchment",
     "parchmentType": "forge-weapons",
@@ -46,7 +46,7 @@
   },
   {
     "name": "Ogre Helm Parchment",
-    "icon": "/icons/forge-armour.webp",
+    "icon": "/icons/parchments/forge-armour.webp",
     "description": "An ancient looking piece of parchment. It documents the secrets of forging an Ogre Helm.",
     "type": "parchment",
     "parchmentType": "essence-recipe",
@@ -56,7 +56,7 @@
   },
   {
     "name": "Minotaur Cuirass Parchment",
-    "icon": "/icons/forge-armour.webp",
+    "icon": "/icons/parchments/forge-armour.webp",
     "description": "An ancient looking piece of parchment. It documents the secrets of forging a Minotaur Cuirass.",
     "type": "parchment",
     "parchmentType": "essence-recipe",
@@ -66,7 +66,7 @@
   },
   {
     "name": "Lizard Scale Cloak Parchment",
-    "icon": "/icons/forge-armour.webp",
+    "icon": "/icons/parchments/forge-armour.webp",
     "description": "An ancient looking piece of parchment. It documents the secrets of forging a Lizard Scale Cloak.",
     "type": "parchment",
     "parchmentType": "essence-recipe",
@@ -76,7 +76,7 @@
   },
   {
     "name": "Crocodilian Boots Parchment",
-    "icon": "/icons/forge-armour.webp",
+    "icon": "/icons/parchments/forge-armour.webp",
     "description": "An ancient looking piece of parchment. It documents the secrets of forging Crocodilian Boots.",
     "type": "parchment",
     "parchmentType": "essence-recipe",
@@ -86,7 +86,7 @@
   },
   {
     "name": "Seers Shawl Parchment",
-    "icon": "/icons/forge-armour.webp",
+    "icon": "/icons/parchments/forge-armour.webp",
     "description": "An ancient looking piece of parchment. It documents the secrets of forging a Seers Shawl.",
     "type": "parchment",
     "parchmentType": "essence-recipe",
@@ -96,7 +96,7 @@
   },
   {
     "name": "Trickster's Hood Parchment",
-    "icon": "/icons/forge-armour.webp",
+    "icon": "/icons/parchments/forge-armour.webp",
     "description": "An ancient looking piece of parchment. It documents the secrets of forging a Trickster's Hood.",
     "type": "parchment",
     "parchmentType": "essence-recipe",
@@ -106,7 +106,7 @@
   },
   {
     "name": "Barbarian's Loin Cloth Parchment",
-    "icon": "/icons/forge-armour.webp",
+    "icon": "/icons/parchments/forge-armour.webp",
     "description": "An ancient looking piece of parchment. It documents the secrets of forging a Barbarian's Loin Cloth.",
     "type": "parchment",
     "parchmentType": "essence-recipe",
@@ -116,7 +116,7 @@
   },
   {
     "name": "Barbarian's Club Parchment",
-    "icon": "/icons/forge-armour.webp",
+    "icon": "/icons/parchments/forge-armour.webp",
     "description": "An ancient looking piece of parchment. It documents the secrets of forging a Barbarian's Club.",
     "type": "parchment",
     "parchmentType": "essence-recipe",
@@ -126,7 +126,7 @@
   },
   {
     "name": "Pyro Palms Parchment",
-    "icon": "/icons/forge-armour.webp",
+    "icon": "/icons/parchments/forge-armour.webp",
     "description": "An ancient looking piece of parchment. It documents the secrets of forging Pyro Palms.",
     "type": "parchment",
     "parchmentType": "essence-recipe",
@@ -136,7 +136,7 @@
   },
   {
     "name": "Demon Blade Parchment",
-    "icon": "/icons/forge-weapons.webp",
+    "icon": "/icons/parchments/forge-weapons.webp",
     "description": "An ancient looking piece of parchment. It documents the secrets of forging a Demon Blade.",
     "type": "parchment",
     "parchmentType": "essence-recipe",

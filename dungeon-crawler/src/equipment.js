@@ -5005,7 +5005,7 @@ function _useHealSkill(member, memberIndex) {
     attackType: ACTIONS.HEAL,
     mpCost: 12,
     cooldown: HEAL_SKILL_COOLDOWN_MS,
-    icon: '/icons/heal.webp',
+    icon: '/icons/spells/heal.webp',
   });
 }
 

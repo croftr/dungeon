@@ -4,7 +4,7 @@
     "name": "Poison",
     "description": "Takes 1 damage every 2 seconds for 30 seconds.",
     "type": "debuff",
-    "icon": "/icons/poison.svg",
+    "icon": "/icons/status-effects/poison.svg",
     "color": "#50ff50",
     "duration": 60,
     "tickInterval": 2,
@@ -15,7 +15,7 @@
     "name": "Deadly Poison",
     "description": "Takes 2 damage every 2 seconds for 30 seconds.",
     "type": "debuff",
-    "icon": "/icons/poison.svg",
+    "icon": "/icons/status-effects/poison.svg",
     "color": "#20c020",
     "duration": 60,
     "tickInterval": 2,
@@ -26,7 +26,7 @@
     "name": "Regeneration",
     "description": "Restores 1 HP every 2 seconds for 30 seconds.",
     "type": "buff",
-    "icon": "/icons/regeneration.webp",
+    "icon": "/icons/spells/regeneration.webp",
     "color": "#80ff80",
     "duration": 30,
     "tickInterval": 2,
@@ -37,7 +37,7 @@
     "name": "Rot",
     "description": "Prevents SP regeneration for 30 seconds.",
     "type": "debuff",
-    "icon": "/icons/rot.svg",
+    "icon": "/icons/status-effects/rot.svg",
     "color": "#c8b060",
     "duration": 30,
     "preventsSpRegen": true
@@ -47,7 +47,7 @@
     "name": "Frozen",
     "description": "Frozen solid — cannot act for 20 seconds.",
     "type": "debuff",
-    "icon": "/icons/frozen.svg",
+    "icon": "/icons/status-effects/frozen.svg",
     "color": "#00ffff",
     "duration": 20,
     "preventsAction": true
@@ -57,7 +57,7 @@
     "name": "Resist Poison",
     "description": "Reduces chance of being poisoned by 50% for 60 seconds.",
     "type": "buff",
-    "icon": "/icons/resist-poison.webp",
+    "icon": "/icons/spells/resist-poison.webp",
     "color": "#80ff80",
     "duration": 60,
     "statusResistances": {
@@ -69,7 +69,7 @@
     "name": "Fear",
     "description": "Frozen with fear — cannot act for 20 seconds.",
     "type": "debuff",
-    "icon": "/icons/fear.webp",
+    "icon": "/icons/spells/fear.webp",
     "color": "#8000ff",
     "duration": 20,
     "preventsAction": true
@@ -79,7 +79,7 @@
     "name": "Slow",
     "description": "Roots slow your movement — attack speed halved for 15 seconds.",
     "type": "debuff",
-    "icon": "/icons/slow.svg",
+    "icon": "/icons/status-effects/slow.svg",
     "color": "#8080c0",
     "duration": 15,
     "attackSpeedMultiplier": 2.0
@@ -89,7 +89,7 @@
     "name": "Sleep",
     "description": "Fallen into magical slumber — cannot act or move.",
     "type": "debuff",
-    "icon": "/icons/sleep.webp",
+    "icon": "/icons/spells/sleep.webp",
     "color": "#6060cc",
     "duration": 20,
     "preventsAction": true
@@ -99,7 +99,7 @@
     "name": "Trapped",
     "description": "Caught in a trap — the party cannot move for 10 seconds.",
     "type": "debuff",
-    "icon": "/icons/bear-trap.svg",
+    "icon": "/icons/status-effects/bear-trap.svg",
     "color": "#c07030",
     "duration": 10,
     "preventsAction": true
@@ -132,7 +132,7 @@
     "name": "Stun",
     "description": "Stunned by a heavy blow — cannot act for 5 seconds.",
     "type": "debuff",
-    "icon": "/icons/stun.webp",
+    "icon": "/icons/status-effects/stun.webp",
     "color": "#ffff00",
     "duration": 5,
     "preventsAction": true
@@ -142,7 +142,7 @@
     "name": "Resist Fear",
     "description": "Reduces chance of being feared by 50% for 60 seconds.",
     "type": "buff",
-    "icon": "/icons/resist-fear.webp",
+    "icon": "/icons/spells/resist-fear.webp",
     "color": "#4080ff",
     "duration": 60,
     "statusResistances": {

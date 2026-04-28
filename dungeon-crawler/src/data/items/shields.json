@@ -12,7 +12,7 @@
             "str": 1,
             "dex": 0
         },
-        "icon": "/icons/wooden_shield.webp",
+        "icon": "/icons/shields/wooden_shield.webp",
         "description": "A basic shield made of reinforced wood. Offers light protection.",
         "defence": 1,
         "value": 60,
@@ -35,7 +35,7 @@
             "str": 1,
             "dex": 0
         },
-        "icon": "/icons/bronze_shield.webp",
+        "icon": "/icons/shields/bronze_shield.webp",
         "description": "A round iron-banded shield. Passively deflects incoming blows.",
         "defence": 1,
         "value": 165,
@@ -54,7 +54,7 @@
             "str": 1,
             "dex": 0
         },
-        "icon": "/icons/spiked_shield.webp",
+        "icon": "/icons/shields/spiked_shield.webp",
         "description": "A sturdy metal-rimmed shield with a wicked central spike for offensive bashing.",
         "defence": 1,
         "value": 140,
@@ -76,7 +76,7 @@
         "skillBonuses": {
             "Sanctuary": 5
         },
-        "icon": "/icons/wardens_shield.webp",
+        "icon": "/icons/shields/wardens_shield.webp",
         "description": "A heavy, reinforced shield used by the keepers of the deep. Provides exceptional protection.",
         "defence": 2,
         "value": 300,
@@ -89,7 +89,7 @@
         "type": "weapon",
         "attackType": "shield-bash",
         "baseDamage": 5,
-        "icon": "/icons/dwarf_shield.webp",
+        "icon": "/icons/shields/dwarf_shield.webp",
         "description": "A powerful dwarf round shield tightly bound in iron, featuring a heavy steel boss capable of crushing skulls.",
         "defence": 5,
         "blockChance": 0.15,
