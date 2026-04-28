@@ -128,5 +128,15 @@
         "description": "A scroll etched with calming blue runes. Study it to learn Resist Fear. Requires 10 Intelligence.",
         "value": 480,
         "weight": 0.2
+    },
+    {
+        "name": "Tome of Shell",
+        "type": "spellbook",
+        "spellName": "Shell",
+        "requiredInt": 12,
+        "icon": "/icons/scrolls/scroll_resist_fear.webp",
+        "description": "A shimmering tome bound in pale blue leather. Study it to learn Shell. Requires 12 Intelligence.",
+        "value": 600,
+        "weight": 0.2
     }
 ]

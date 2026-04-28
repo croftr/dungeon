@@ -365,5 +365,55 @@
                 "quantity": 1
             }
         ]
+    },
+    {
+        "name": "Blood-Feather Mantle",
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Crow Talon",
+                "quantity": 1
+            },
+            {
+                "name": "Crow Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Padded Vest",
+                "quantity": 1
+            }
+        ]
+    },
+    {
+        "name": "Crest of the Caw",
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Crow Talon",
+                "quantity": 1
+            },
+            {
+                "name": "Crow Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Shawl",
+                "quantity": 1
+            }
+        ]
     }
 ]

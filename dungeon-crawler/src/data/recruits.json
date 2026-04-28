@@ -18,7 +18,7 @@
             "holy": 0,
             "dark": 0,
             "fire": 0,
-            "ice": 0.9,
+            "ice": 0,
             "lightning": 0,
             "water": 0
         },
@@ -56,18 +56,18 @@
         "job": "Paladin",
         "race": "Human",
         "stats": {
-            "strength": 7,
-            "dexterity": 6,
-            "vitality": 8,
-            "intelligence": 4,
-            "resilience": 8
+            "strength": 107,
+            "dexterity": 106,
+            "vitality": 108,
+            "intelligence": 104,
+            "resilience": 108
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
         "baseElementalResistances": {
             "holy": 0,
             "dark": 0,
             "fire": 0,
-            "ice": 1.0,
+            "ice": 0,
             "lightning": 0,
             "water": 0
         },
@@ -338,7 +338,7 @@
             "strength": 4,
             "dexterity": 6,
             "vitality": 6,
-            "intelligence": 19,
+            "intelligence": 9,
             "resilience": 8
         },
         "bio": "A devoted healer whose presence brings hope to the darkest depths. Seraphina draws upon pure light to mend flesh and soul.",
@@ -357,7 +357,8 @@
         "startingSkills": [],
         "startingSpells": [
             "Heal",
-            "Banishment"
+            "Banishment",
+            "Shell"
         ],
         "startingInventory": [
             "Cure Poison Potion",

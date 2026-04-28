@@ -148,5 +148,22 @@
     "statusResistances": {
       "fear": 0.5
     }
+  },
+  "shell": {
+    "id": "shell",
+    "name": "Shell",
+    "description": "A magical barrier that reduces all elemental damage taken by 10% for 60 seconds.",
+    "type": "buff",
+    "icon": "/icons/spells/shell.webp",
+    "color": "#a0c8ff",
+    "duration": 60,
+    "elementalResistances": {
+      "holy": 0.1,
+      "dark": 0.1,
+      "fire": 0.1,
+      "ice": 0.1,
+      "lightning": 0.1,
+      "water": 0.1
+    }
   }
 }

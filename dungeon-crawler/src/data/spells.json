@@ -238,5 +238,37 @@
         "description": "A warding incantation that halves the chance of the entire party being afflicted by fear for 60 seconds.",
         "value": 0,
         "weight": 0
+    },
+    {
+        "name": "Shell",
+        "type": "buff",
+        "target": "party",
+        "slot": "spell",
+        "attackType": "shell",
+        "baseDamage": 0,
+        "statusDuration": 60,
+        "delay": 4,
+        "mpCost": 12,
+        "icon": "/icons/spells/shell.webp",
+        "description": "Conjures a magical barrier around the entire party, reducing all elemental damage taken by 10% for 60 seconds.",
+        "value": 0,
+        "weight": 0
+    },
+    {
+        "name": "Shield Bash",
+        "type": "direct-damage",
+        "target": "monster",
+        "slot": "spell",
+        "attackType": "bash",
+        "baseDamage": 0,
+        "magnitudeFormula": "strength",
+        "magnitudeScale": 1,
+        "magnitudeBonusMode": "flat",
+        "delay": 4,
+        "mpCost": 6,
+        "icon": "/icons/spells/shield-bash.webp",
+        "description": "A powerful bash with the shield. Deals double damage against monsters with low resilience.",
+        "value": 0,
+        "weight": 0
     }
 ]

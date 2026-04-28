@@ -152,7 +152,11 @@
         "statBonuses": {
             "intelligence": 1,
             "resilience": 1
-        }
+        },
+        "job": [
+            "Wizard",
+            "White Mage"
+        ]
     },
     {
         "name": "Trickster's Hood",
@@ -167,5 +171,31 @@
             "resilience": 1
         },
         "trapDisarmBonus": 0.5
+    },
+    {
+        "name": "Crest of the Caw",
+        "slot": "head",
+        "icon": "/icons/head/crest_of_the_caw.webp",
+        "description": "An ornate headpiece crafted from dark obsidian and shimmering crow feathers. It focuses the wearer's mind with the mystical echo of the Crow Wizard.",
+        "defence": 5,
+        "value": 1800,
+        "weight": 1.0,
+        "statBonuses": {
+            "intelligence": 2,
+            "resilience": 1,
+            "mp": 2
+        },
+        "elementalResistances": {
+            "holy": 0.1,
+            "dark": 0.1,
+            "fire": 0.2,
+            "ice": 0.1,
+            "lightning": 0.1,
+            "water": 0.1
+        },
+        "job": [
+            "Wizard",
+            "White Mage"
+        ]
     }
 ]

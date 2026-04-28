@@ -155,5 +155,27 @@
             "resilience": 2,
             "vitality": 1
         }
+    },
+    {
+        "name": "Blood-Feather Mantle",
+        "slot": "chest",
+        "icon": "/icons/chest/blood_feather_mantle.webp",
+        "description": "A heavy crimson mantle woven from enchanted crow feathers and reinforced with arcane silk. It pulses with a dark, avian energy.",
+        "defence": 2,
+        "value": 2500,
+        "weight": 15,
+        "statBonuses": {
+            "intelligence": 1,
+            "vitality": 1,
+            "mp": 2
+        },
+        "elementalResistances": {
+            "holy": 0.1,
+            "dark": 0.1,
+            "fire": 0.2,
+            "ice": 0.1,
+            "lightning": 0.1,
+            "water": 0.1
+        }
     }
 ]
