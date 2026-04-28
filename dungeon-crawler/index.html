@@ -1081,8 +1081,15 @@
 
         <!-- MAIN: skill tree fills all height, learned skills bar at bottom -->
         <section id="char-dev-skills-section">
+          <div id="cd-tab-bar">
+            <button class="cd-tab cd-tab--active" data-cd-tab="tree">Skill Tree</button>
+            <button class="cd-tab" data-cd-tab="stances">Stances</button>
+          </div>
           <div id="cd-skill-tree-container">
             <!-- tree nodes + SVG edges rendered here -->
+          </div>
+          <div id="cd-stances-container" class="cd-tab-hidden">
+            <!-- stance cards rendered here -->
           </div>
           <div id="cd-learned-skills-bar">
             <div id="cd-learned-skills-header">

@@ -4108,6 +4108,194 @@ label.mm-setting-label {
   position: relative;
 }
 
+/* ── Char-dev tab bar (Skill Tree | Stances) ── */
+#cd-tab-bar {
+  display: flex;
+  gap: 0;
+  padding: 6px 10px 0 10px;
+  border-bottom: 1px solid #3a2a14;
+  background: rgba(0, 0, 0, 0.35);
+  flex-shrink: 0;
+}
+
+.cd-tab {
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
+  color: #8a7050;
+  font-family: inherit;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  cursor: pointer;
+  border-radius: 4px 4px 0 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.cd-tab:hover {
+  color: #d8b870;
+  background: rgba(255, 200, 100, 0.06);
+}
+
+.cd-tab--active {
+  color: #f0d080;
+  background: #1a1208;
+  border-color: #5a3e1c;
+  position: relative;
+  top: 1px;
+}
+
+.cd-tab-hidden {
+  display: none !important;
+}
+
+/* ── Stances gallery ── */
+#cd-stances-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.cd-stances-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.cd-stance-card {
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #1a1208 0%, #0e0a04 100%);
+  border: 1px solid #5a3e1c;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 220, 120, 0.05);
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+
+.cd-stance-card:hover {
+  border-color: #8a6a30;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 220, 120, 0.08);
+}
+
+.cd-stance-card--active {
+  border-color: #d8a040;
+  box-shadow: 0 0 0 1px rgba(216, 160, 64, 0.4), 0 4px 14px rgba(216, 160, 64, 0.25), inset 0 1px 0 rgba(255, 220, 120, 0.1);
+}
+
+.cd-stance-art {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background: #000;
+  overflow: hidden;
+}
+
+.cd-stance-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cd-stance-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.7) 100%);
+  pointer-events: none;
+}
+
+.cd-stance-active-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(216, 160, 64, 0.95);
+  color: #1a1208;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 3px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  z-index: 1;
+}
+
+.cd-stance-body {
+  padding: 10px 12px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.cd-stance-name {
+  font-size: 15px;
+  color: #f0d080;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.cd-stance-desc {
+  font-size: 12px;
+  color: #b8a888;
+  line-height: 1.45;
+  flex: 1;
+}
+
+.cd-stance-actions {
+  margin-top: 4px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cd-stance-btn {
+  background: #2a1e10;
+  border: 1px solid #6a4a20;
+  color: #d8b870;
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.cd-stance-btn:hover {
+  background: #3a2c14;
+  color: #f0d080;
+  border-color: #8a6a30;
+}
+
+.cd-stance-card--active .cd-stance-btn {
+  border-color: #8a6a30;
+}
+
+.cd-stances-empty {
+  text-align: center;
+  padding: 60px 30px;
+  color: #8a7050;
+}
+
+.cd-stances-empty-title {
+  font-size: 18px;
+  color: #b89860;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+
+.cd-stances-empty-desc {
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
 /* Viewport layer — fills the container, clips zoomed/panned canvas */
 .tree-viewport {
   width: 100%;

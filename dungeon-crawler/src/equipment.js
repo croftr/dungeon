@@ -19,7 +19,7 @@ import SPELL_TYPE_ICONS from './data/spell-type-icons.json';
 import { isInFrontOfPlayer, player } from './player.js';
 import { isAlchemyModalOpen, addItemToAlchemy } from './objects.js';
 import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude, calcOnHitChance } from './combat-rules.js';
-import { showStanceMenu, getAvailableStances, getEligibleStances, getSpellCooldownMultiplier, getStanceCureHealBonus, hasStanceDoubleAttack } from './stance.js';
+import { showStanceMenu, getAvailableStances, getEligibleStances, getSpellCooldownMultiplier, getStanceCureHealBonus, hasStanceDoubleAttack, getStanceDef, setStance } from './stance.js';
 import { playStanceVideo, RECRUITS } from './recruits.js';
 import { playCritSound, playSkillSound, playItemSound, playLevelUpConfirmSound, playInventorySortSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
@@ -2751,6 +2751,10 @@ function renderCharDevModal(memberIndex) {
     });
   }
 
+  // ── Stances tab ──
+  _renderStancesTab(m, memberIndex);
+  _wireCharDevTabs();
+
   // ── Confirm footer: visible only in level-up mode ──
   const footer = document.getElementById('char-dev-footer');
   const confirmBtn = document.getElementById('char-dev-confirm');
@@ -2759,6 +2763,97 @@ function renderCharDevModal(memberIndex) {
     confirmBtn.disabled = !m.pendingNodeChoice;
     confirmBtn.title = m.pendingNodeChoice ? '' : 'Select a node first';
   }
+}
+
+let _cdTabsWired = false;
+function _wireCharDevTabs() {
+  if (_cdTabsWired) return;
+  _cdTabsWired = true;
+  document.querySelectorAll('#cd-tab-bar .cd-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.cdTab;
+      document.querySelectorAll('#cd-tab-bar .cd-tab').forEach(b => {
+        b.classList.toggle('cd-tab--active', b === btn);
+      });
+      const tree = document.getElementById('cd-skill-tree-container');
+      const stances = document.getElementById('cd-stances-container');
+      if (tree) tree.classList.toggle('cd-tab-hidden', tab !== 'tree');
+      if (stances) stances.classList.toggle('cd-tab-hidden', tab !== 'stances');
+    });
+  });
+}
+
+function _renderStancesTab(m, memberIndex) {
+  const container = document.getElementById('cd-stances-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const ids = getAvailableStances(m);
+  if (!ids || ids.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'cd-stances-empty';
+    empty.innerHTML = `
+      <div class="cd-stances-empty-title">No Stances Unlocked</div>
+      <div class="cd-stances-empty-desc">Stance Tomes teach this character new combat stances. Once learned, switch between them with a right-click on their portrait during combat.</div>
+    `;
+    container.appendChild(empty);
+    return;
+  }
+
+  const grid = document.createElement('div');
+  grid.className = 'cd-stances-grid';
+  ids.forEach(id => {
+    const def = getStanceDef(id, m);
+    if (!def) return;
+    const isActive = m.stance === id;
+    const card = document.createElement('div');
+    card.className = 'cd-stance-card' + (isActive ? ' cd-stance-card--active' : '');
+
+    const splash = def.splashImage || def.portrait || def.icon;
+    const art = document.createElement('div');
+    art.className = 'cd-stance-art';
+    if (splash) {
+      const img = document.createElement('img');
+      img.src = asset(splash);
+      img.alt = def.name;
+      art.appendChild(img);
+    }
+    if (isActive) {
+      const badge = document.createElement('div');
+      badge.className = 'cd-stance-active-badge';
+      badge.textContent = 'Active';
+      art.appendChild(badge);
+    }
+    card.appendChild(art);
+
+    const body = document.createElement('div');
+    body.className = 'cd-stance-body';
+    const title = document.createElement('div');
+    title.className = 'cd-stance-name';
+    title.textContent = def.name;
+    body.appendChild(title);
+
+    const desc = document.createElement('div');
+    desc.className = 'cd-stance-desc';
+    desc.textContent = def.description || '';
+    body.appendChild(desc);
+
+    const actions = document.createElement('div');
+    actions.className = 'cd-stance-actions';
+    const btn = document.createElement('button');
+    btn.className = 'cd-stance-btn';
+    btn.textContent = isActive ? 'Drop Stance' : 'Activate';
+    btn.addEventListener('click', () => {
+      setStance(memberIndex, isActive ? null : id);
+      _renderStancesTab(m, memberIndex);
+    });
+    actions.appendChild(btn);
+    body.appendChild(actions);
+
+    card.appendChild(body);
+    grid.appendChild(card);
+  });
+  container.appendChild(grid);
 }
 
 function _setDetailIcon(iconPath, textFallback = '') {
