@@ -103,6 +103,18 @@ export function spawnLevel2Objects(ctx) {
     addTrap1(group, loader, 32, 10);  // long east passage (row 32, col 10)
     addTrap1(group, loader, 32, 17);  // corridor further along east passage (row 32, col 17)
 
+    // ── Crow-annex corridor portcullis & button ───────────────────────────────
+    // Corridor at col 24, rows 4–6 connects the crow wizard room (south) to the
+    // stance NPC's annex room (north). Gate sits at the north end of the corridor
+    // (row 4); button is on the east wall at row 6, on the crow-wizard side.
+    addPortcullis(group, loader, 24, 4, 0);
+
+    const { group: stanceCorridorBtn } = createWallButton(-1,
+        { portcullisRow: 4, portcullisCol: 24, wallRow: 6, wallCol: 25, animAxis: 'x', animDir: -1 },
+        'x');
+    stanceCorridorBtn.position.set(25 * CELL - 1.0, 1.25, 6 * CELL);
+    group.add(stanceCorridorBtn);
+
     // ── Stance NPC (crow annex room, back wall) ───────────────────────────────
     // Only spawn on level 2 if he hasn't departed yet
     if (!stanceNpcDeparted) {

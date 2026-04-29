@@ -13,6 +13,7 @@ export const CELL_PORTCULLIS = 4;
 export const CELL_HOLE = 5;
 export const CELL_STAIRS_UP = 6;
 export const CELL_BLACK_WALL = 7;
+export const CELL_LAVA = 8;
 
 import { level0Map } from './levels/level0/map.js';
 import { level1Map } from './levels/level1/map.js';
@@ -233,6 +234,24 @@ injectVariationShader(ceilMat);
 const exitMat = new THREE.MeshLambertMaterial({ color: 0x226622, emissive: 0x113311 });
 const blackWallMat = new THREE.MeshLambertMaterial({ color: 0x000000 });
 
+const lavaTex = textureLoader.load(asset('/textures/lava-floor.webp'));
+lavaTex.wrapS = lavaTex.wrapT = THREE.RepeatWrapping;
+lavaTex.anisotropy = 16;
+const lavaMat = new THREE.MeshBasicMaterial({ map: lavaTex, transparent: true, depthWrite: false });
+lavaMat.onBeforeCompile = (shader) => {
+  // Soft radial alpha fade so lava blends into the surrounding floor instead
+  // of forming a hard square. Distance is measured from tile centre in UV space.
+  shader.fragmentShader = shader.fragmentShader.replace(
+    '#include <map_fragment>',
+    [
+      '#include <map_fragment>',
+      'float lavaR = length(vMapUv - vec2(0.5));',
+      'float lavaMask = 1.0 - smoothstep(0.28, 0.5, lavaR);',
+      'diffuseColor.a *= lavaMask;',
+    ].join('\n')
+  );
+};
+
 const wallGeo = new THREE.BoxGeometry(CELL, WALL_H, CELL);
 const tileGeo = new THREE.PlaneGeometry(CELL, CELL);
 
@@ -251,7 +270,7 @@ export function findCell(type) {
 export function isPassable(row, col) {
   if (row < 0 || row >= ROWS || col < 0 || col >= COLS) return false;
   const cell = dungeonMap[row][col];
-  return cell === CELL_FLOOR || cell === CELL_START || cell === CELL_EXIT || cell === CELL_HOLE || cell === CELL_STAIRS_UP;
+  return cell === CELL_FLOOR || cell === CELL_START || cell === CELL_EXIT || cell === CELL_HOLE || cell === CELL_STAIRS_UP || cell === CELL_LAVA;
 }
 
 export function cellToWorld(row, col) {
@@ -356,6 +375,12 @@ export function buildLevel(scene) {
         if (cell !== CELL_HOLE) {
           dummy.position.set(wx, 0, wz); dummy.rotation.set(-Math.PI / 2, 0, 0); dummy.updateMatrix();
           floorIM.setMatrixAt(fI++, dummy.matrix);
+        }
+        if (cell === CELL_LAVA) {
+          const lava = new THREE.Mesh(tileGeo, lavaMat);
+          lava.rotation.set(-Math.PI / 2, 0, 0);
+          lava.position.set(wx, 0.012, wz);
+          scene.add(lava); currentMapMeshes.push(lava);
         }
       }
     }

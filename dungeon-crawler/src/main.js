@@ -1,12 +1,12 @@
 import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import { buildLevel, buildTextureZone, buildInnerTextureZone, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures } from './map.js';
+import { buildLevel, buildTextureZone, buildInnerTextureZone, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, CELL_LAVA, dungeonMap, invalidateWallTextures } from './map.js';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles, invalidateParticleTextures } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
-import { initParty, updateParty, party, refreshPartyCards, autoAttack, autoRangeAttack, setHp, flashPortraitHit, showMemberDamage, isPartyUnseen, resurrectAll } from './party.js';
+import { initParty, updateParty, party, refreshPartyCards, autoAttack, autoRangeAttack, setHp, flashPortraitHit, showMemberDamage, isPartyUnseen, resurrectAll, getEffectiveElementalResistances } from './party.js';
 import { getItemDef } from './items.js';
 import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt, applyClearedLevelMonsters } from './monster.js';
@@ -44,7 +44,7 @@ const ARENA_MAP = [
   [1,0,0,0,0,0,0,0,1],
   [1,0,0,0,0,0,0,0,1],
   [1,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,1],
+  [1,8,0,0,0,0,0,8,1],
   [1,0,0,0,0,0,0,0,1],
   [1,0,0,0,0,0,0,0,1],
   [1,0,0,0,2,0,0,0,1],
@@ -578,6 +578,31 @@ initMonsters(scene);
 // ─────────────────────────────────────────────
 let lastTime = performance.now();
 
+// Lava floor: 6 fire damage per tick to every living party member, mitigated
+// by fire resistance. Tick once per second while standing on a CELL_LAVA tile.
+const LAVA_DPS = 6;
+const LAVA_TICK_INTERVAL = 1.0;
+let _lavaTickAccum = 0;
+function tickLavaDamage(dt) {
+  const cell = dungeonMap[player.gridRow]?.[player.gridCol];
+  if (cell !== CELL_LAVA) { _lavaTickAccum = 0; return; }
+  _lavaTickAccum += dt;
+  if (_lavaTickAccum < LAVA_TICK_INTERVAL) return;
+  _lavaTickAccum -= LAVA_TICK_INTERVAL;
+  let anyHit = false;
+  party.forEach((m, i) => {
+    if (!m || m.isEmpty || m.isDead) return;
+    const resistance = getEffectiveElementalResistances(m).fire ?? 0;
+    if (resistance >= 1) return;
+    const dmg = Math.max(1, Math.round(LAVA_DPS * (1 - resistance)));
+    setHp(i, m.hp - dmg);
+    showMemberDamage(i, dmg, false);
+    flashPortraitHit(i);
+    anyHit = true;
+  });
+  if (anyHit) playPartyHitSound();
+}
+
 function animate(now) {
   requestAnimationFrame(animate);
   const dt = Math.min((now - lastTime) / 1000, 0.1);
@@ -599,6 +624,7 @@ function animate(now) {
   updateQuarks(dt);
   updateAudio(dt);
   updateParty(dt);
+  tickLavaDamage(dt);
 
   // Auto-attack: front row members attack automatically when a monster is in melee range
   if (autoAttack) {
@@ -2216,7 +2242,7 @@ window.loadLevel = function (levelNum) {
         [3,22],[3,23],[3,25],[3,26],           // south wall (doorway at [3,24])
       ],
       [],
-      asset('/textures/crow-wall.png'),
+      asset('/textures/crow-wall.webp'),
       null
     );
 

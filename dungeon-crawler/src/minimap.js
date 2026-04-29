@@ -11,6 +11,7 @@ const CELL_COLORS = {
   3: '#8a4a4a',               // exit (faded red/rust)
   5: 'rgba(0, 0, 0, 0)',      // hole (fully transparent)
   6: '#5a5040',               // stairs
+  8: 'rgba(200, 60, 30, 0.8)', // lava
 };
 
 let mmCtx = null;
