@@ -21,7 +21,7 @@ export const level2Map = [
   [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1], // row 5  ← Room A south + col 13 continues; crow annex corridor col 24
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1], // row 6  ← col 13 corridor south; crow annex corridor col 24 (doorway)
   [1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1], // row 7  ← Room B (iceman, cols 9-14); mushroom room cols 2-4; crow room cols 20-25
-  [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1], // row 8  ← Room B + west corridor (cols 2-8) + east corridor (cols 15-19) + crow room (cols 20-25)
+  [1, 1, 0, 0, 0, 9, 9, 9, 9, 0, 0, 9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1], // row 8  ← Room B + ice floor at cols 11-12 (centre); west corridor cols 5-8 (ice floor); east corridor cols 15-19; crow room cols 20-25
   [1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1], // row 9  ← Room B; mushroom room cols 2-4; crow room cols 20-25
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 10 ← col 11 corridor south
   [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 11 ← Room C (orc warriors, cols 5-11)

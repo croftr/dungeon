@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { asset } from './assets.js';
+import ELEMENT_FLOORS from './data/element-floors.json';
 
 // ─────────────────────────────────────────────
 //  MAP DATA  (0=floor, 1=wall, 2=start, 3=exit)
@@ -14,6 +15,7 @@ export const CELL_HOLE = 5;
 export const CELL_STAIRS_UP = 6;
 export const CELL_BLACK_WALL = 7;
 export const CELL_LAVA = 8;
+export const CELL_ICE = 9;
 
 import { level0Map } from './levels/level0/map.js';
 import { level1Map } from './levels/level1/map.js';
@@ -234,23 +236,32 @@ injectVariationShader(ceilMat);
 const exitMat = new THREE.MeshLambertMaterial({ color: 0x226622, emissive: 0x113311 });
 const blackWallMat = new THREE.MeshLambertMaterial({ color: 0x000000 });
 
-const lavaTex = textureLoader.load(asset('/textures/lava-floor.webp'));
-lavaTex.wrapS = lavaTex.wrapT = THREE.RepeatWrapping;
-lavaTex.anisotropy = 16;
-const lavaMat = new THREE.MeshBasicMaterial({ map: lavaTex, transparent: true, depthWrite: false });
-lavaMat.onBeforeCompile = (shader) => {
-  // Soft radial alpha fade so lava blends into the surrounding floor instead
+// ── Element floor registry ────────────────────────────────────────────────
+// Each entry in element-floors.json maps a cell id to a tinted overlay tile
+// that ticks elemental damage. To add a new one (e.g. acid, holy) just add a
+// JSON entry — the material is built here and the damage tick in main.js
+// loops over the same registry.
+const _elementFloorMatByCell = {};
+for (const [, def] of Object.entries(ELEMENT_FLOORS)) {
+  const tex = textureLoader.load(asset(def.texture));
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.anisotropy = 16;
+  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false });
+  // Soft radial alpha fade so the tile blends into surrounding floor instead
   // of forming a hard square. Distance is measured from tile centre in UV space.
-  shader.fragmentShader = shader.fragmentShader.replace(
-    '#include <map_fragment>',
-    [
+  mat.onBeforeCompile = (shader) => {
+    shader.fragmentShader = shader.fragmentShader.replace(
       '#include <map_fragment>',
-      'float lavaR = length(vMapUv - vec2(0.5));',
-      'float lavaMask = 1.0 - smoothstep(0.28, 0.5, lavaR);',
-      'diffuseColor.a *= lavaMask;',
-    ].join('\n')
-  );
-};
+      [
+        '#include <map_fragment>',
+        'float efR = length(vMapUv - vec2(0.5));',
+        'float efMask = 1.0 - smoothstep(0.28, 0.5, efR);',
+        'diffuseColor.a *= efMask;',
+      ].join('\n')
+    );
+  };
+  _elementFloorMatByCell[def.cell] = mat;
+}
 
 const wallGeo = new THREE.BoxGeometry(CELL, WALL_H, CELL);
 const tileGeo = new THREE.PlaneGeometry(CELL, CELL);
@@ -270,7 +281,8 @@ export function findCell(type) {
 export function isPassable(row, col) {
   if (row < 0 || row >= ROWS || col < 0 || col >= COLS) return false;
   const cell = dungeonMap[row][col];
-  return cell === CELL_FLOOR || cell === CELL_START || cell === CELL_EXIT || cell === CELL_HOLE || cell === CELL_STAIRS_UP || cell === CELL_LAVA;
+  if (cell === CELL_FLOOR || cell === CELL_START || cell === CELL_EXIT || cell === CELL_HOLE || cell === CELL_STAIRS_UP) return true;
+  return _elementFloorMatByCell[cell] !== undefined;
 }
 
 export function cellToWorld(row, col) {
@@ -376,11 +388,12 @@ export function buildLevel(scene) {
           dummy.position.set(wx, 0, wz); dummy.rotation.set(-Math.PI / 2, 0, 0); dummy.updateMatrix();
           floorIM.setMatrixAt(fI++, dummy.matrix);
         }
-        if (cell === CELL_LAVA) {
-          const lava = new THREE.Mesh(tileGeo, lavaMat);
-          lava.rotation.set(-Math.PI / 2, 0, 0);
-          lava.position.set(wx, 0.012, wz);
-          scene.add(lava); currentMapMeshes.push(lava);
+        const elemMat = _elementFloorMatByCell[cell];
+        if (elemMat) {
+          const tile = new THREE.Mesh(tileGeo, elemMat);
+          tile.rotation.set(-Math.PI / 2, 0, 0);
+          tile.position.set(wx, 0.012, wz);
+          scene.add(tile); currentMapMeshes.push(tile);
         }
       }
     }

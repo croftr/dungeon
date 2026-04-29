@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import { buildLevel, buildTextureZone, buildInnerTextureZone, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, CELL_LAVA, dungeonMap, invalidateWallTextures } from './map.js';
+import { buildLevel, buildTextureZone, buildInnerTextureZone, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures } from './map.js';
+import ELEMENT_FLOORS from './data/element-floors.json';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles, invalidateParticleTextures } from './particles.js';
@@ -578,29 +579,31 @@ initMonsters(scene);
 // ─────────────────────────────────────────────
 let lastTime = performance.now();
 
-// Lava floor: 6 fire damage per tick to every living party member, mitigated
-// by fire resistance. Tick once per second while standing on a CELL_LAVA tile.
-const LAVA_DPS = 6;
-const LAVA_TICK_INTERVAL = 1.0;
-let _lavaTickAccum = 0;
-function tickLavaDamage(dt) {
+// Element-floor damage: each entry in element-floors.json maps a cell id to an
+// element + dps + tick interval. While the player stands on a matching cell,
+// every living party member takes damage of that element each tick, mitigated
+// by their resistance to that element. Tunable via data/element-floors.json.
+const _elementFloorTickAccum = {};
+function tickElementFloorDamage(dt) {
   const cell = dungeonMap[player.gridRow]?.[player.gridCol];
-  if (cell !== CELL_LAVA) { _lavaTickAccum = 0; return; }
-  _lavaTickAccum += dt;
-  if (_lavaTickAccum < LAVA_TICK_INTERVAL) return;
-  _lavaTickAccum -= LAVA_TICK_INTERVAL;
-  let anyHit = false;
-  party.forEach((m, i) => {
-    if (!m || m.isEmpty || m.isDead) return;
-    const resistance = getEffectiveElementalResistances(m).fire ?? 0;
-    if (resistance >= 1) return;
-    const dmg = Math.max(1, Math.round(LAVA_DPS * (1 - resistance)));
-    setHp(i, m.hp - dmg);
-    showMemberDamage(i, dmg, false);
-    flashPortraitHit(i);
-    anyHit = true;
-  });
-  if (anyHit) playPartyHitSound();
+  for (const [id, def] of Object.entries(ELEMENT_FLOORS)) {
+    if (cell !== def.cell) { _elementFloorTickAccum[id] = 0; continue; }
+    const acc = (_elementFloorTickAccum[id] ?? 0) + dt;
+    if (acc < def.tickInterval) { _elementFloorTickAccum[id] = acc; continue; }
+    _elementFloorTickAccum[id] = acc - def.tickInterval;
+    let anyHit = false;
+    party.forEach((m, i) => {
+      if (!m || m.isEmpty || m.isDead) return;
+      const resistance = getEffectiveElementalResistances(m)[def.element] ?? 0;
+      if (resistance >= 1) return;
+      const dmg = Math.max(1, Math.round(def.dps * (1 - resistance)));
+      setHp(i, m.hp - dmg);
+      showMemberDamage(i, dmg, false);
+      flashPortraitHit(i);
+      anyHit = true;
+    });
+    if (anyHit) playPartyHitSound();
+  }
 }
 
 function animate(now) {
@@ -624,7 +627,7 @@ function animate(now) {
   updateQuarks(dt);
   updateAudio(dt);
   updateParty(dt);
-  tickLavaDamage(dt);
+  tickElementFloorDamage(dt);
 
   // Auto-attack: front row members attack automatically when a monster is in melee range
   if (autoAttack) {

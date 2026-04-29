@@ -83,10 +83,7 @@
         "startingInventory": [
             "Cure Poison Potion",
             "Minor Rejuvenate Potion",
-            "Minor Healing Potion",
-            "Tome of the Inquisitor",
-            "Tome of the Holy",
-            "Tome of Retribution"
+            "Minor Healing Potion"
         ],
         "startingActionSlots": [
             "Cure Poison Potion",

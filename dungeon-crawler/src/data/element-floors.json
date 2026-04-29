@@ -1,0 +1,16 @@
+{
+  "lava": {
+    "cell": 8,
+    "element": "fire",
+    "dps": 6,
+    "tickInterval": 1.0,
+    "texture": "/textures/lava-floor.webp"
+  },
+  "ice": {
+    "cell": 9,
+    "element": "ice",
+    "dps": 6,
+    "tickInterval": 1.0,
+    "texture": "/textures/ice-floor.webp"
+  }
+}

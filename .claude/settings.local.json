@@ -50,7 +50,8 @@
       "Bash(for f:*)",
       "Bash(do name=\"$f%.png\" echo \"Converting $f...\" ffmpeg -y -i \"$f\" -vf \"scale=''''min\\(1024,iw\\)'''':''''min\\(1024,ih\\)'''':force_original_aspect_ratio=decrease:flags=lanczos\" -c:v libwebp -quality 85 -lossless 0 \"$name.webp\")",
       "Bash(tail -1 done echo Done ls -lh *.webp)",
-      "Bash(find C:/Users/rob/projects/dungeon/dungeon-crawler -name wet-wall* -o -name black-stone*)"
+      "Bash(find C:/Users/rob/projects/dungeon/dungeon-crawler -name wet-wall* -o -name black-stone*)",
+      "Bash(ffmpeg -y -i dungeon-crawler/public/textures/ice-floor.png -c:v libwebp -quality 80 -compression_level 6 dungeon-crawler/public/textures/ice-floor.webp)"
     ]
   }
 }
