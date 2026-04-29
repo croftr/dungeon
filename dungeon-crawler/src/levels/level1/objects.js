@@ -100,7 +100,7 @@ export function spawnLevel1Objects(ctx) {
     // ── Spell Cabinet ────────────────────────────────────────────────────────
     // Goblin room — moved west away from the passage at col 17
     addSpellCabinet(group, loader, 15, 11, 0, 0, -0.7, [
-        "Scroll of Resist Poison", "Potions Parchment", "Shell"
+        "Scroll of Resist Poison", "Potions Parchment", "Scroll of Shell"
     ]);
 
     // Dead-end passage near the zombie room

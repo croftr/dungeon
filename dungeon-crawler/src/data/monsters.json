@@ -528,9 +528,9 @@
       {
         "item": {
           "name": "Gold Coins",
-          "quantity": 5
+          "quantity": 10
         },
-        "chance": 0.3
+        "chance": 0.5
       }
     ],
     "uniqueArenaItem": "Ogre's Head"
