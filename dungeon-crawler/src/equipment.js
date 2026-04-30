@@ -1132,6 +1132,7 @@ function populateTooltip(obj, showBuyPrice = false) {
         <div id="detail-row-onhit" class="detail-onhit-list"></div>
         <div id="detail-row-familybonus" class="detail-familybonus-list"></div>
         <div id="detail-row-elemdmg" class="detail-elemdmg-list"></div>
+        <div id="detail-row-elemres" class="detail-elemdmg-list"></div>
     `;
 
   if (isCustom) {
@@ -1219,6 +1220,7 @@ function populateTooltip(obj, showBuyPrice = false) {
   const hasOnHitEffects = def?.onHitEffects && def.onHitEffects.length > 0;
   const hasFamilyBonus = def?.familyBonus && (Array.isArray(def.familyBonus) ? def.familyBonus.length > 0 : Object.keys(def.familyBonus).length > 0);
   const hasElementalDamage = def?.elementalDamage && Object.keys(def.elementalDamage).length > 0;
+  const hasElementalResistances = def?.elementalResistances && Object.keys(def.elementalResistances).length > 0;
   const hasBonusList = hasStatBonus || hasSkillBonus || hasSkillDurationBonus || hasTrapDisarmBonus;
 
   // Hide/show rows based on item type and available stats
@@ -1232,6 +1234,7 @@ function populateTooltip(obj, showBuyPrice = false) {
   document.getElementById('detail-row-onhit').style.display = hasOnHitEffects ? 'flex' : 'none';
   document.getElementById('detail-row-familybonus').style.display = hasFamilyBonus ? 'flex' : 'none';
   document.getElementById('detail-row-elemdmg').style.display = hasElementalDamage ? 'flex' : 'none';
+  document.getElementById('detail-row-elemres').style.display = hasElementalResistances ? 'flex' : 'none';
   document.getElementById('detail-row-scaling').style.display = hasScaling ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-mod').style.display = isAmmo ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-type').style.display = isAmmo ? 'flex' : 'none';
@@ -1364,6 +1367,23 @@ function populateTooltip(obj, showBuyPrice = false) {
       return `<div class="detail-onhit-item" style="--onhit-color:${color}">
         <span><span style="color:${color};">${symbol}</span> ${label}</span>
         <span>${sign}${value} dmg</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Elemental resistances rider — extra resistance, per element.
+  if (hasElementalResistances) {
+    const listEl = document.getElementById('detail-row-elemres');
+    listEl.innerHTML = Object.entries(def.elementalResistances).map(([elem, value]) => {
+      const elemDef = ELEMENTS[elem];
+      const color = elemDef?.color ?? '#c8b080';
+      const symbol = elemDef?.symbol ?? '';
+      const label = elemDef?.name ?? elem.charAt(0).toUpperCase() + elem.slice(1);
+      const sign = value >= 0 ? '+' : '';
+      const pct = Math.round(value * 100);
+      return `<div class="detail-onhit-item" style="--onhit-color:${color}">
+        <span><span style="color:${color};">${symbol}</span> ${label} Res</span>
+        <span>${sign}${pct}%</span>
       </div>`;
     }).join('');
   }
