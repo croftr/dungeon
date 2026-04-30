@@ -121,13 +121,6 @@ export const level1Monsters = [
     null,
     asset('/monsters/mushroom/combat-idle.glb')),
 
-  inst(D.iceman, 63, 19, 4,
-    asset('/monsters/iceMan-animation/Meshy_AI_Animation_Walking_withSkin.glb'),
-    asset('/monsters/iceMan-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb'),
-    asset('/monsters/iceMan-animation/iceman-attack.mp3'), 0.6, 0, 0, 1, null,
-    asset('/monsters/iceMan-animation/Meshy_AI_Animation_Dead_withSkin.glb'),
-    asset('/monsters/iceMan-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb')),
-
   // Additional Goblins spread through Level 1 corridors (avoiding big rooms)
   inst(D.goblin, 25, 13, 1,
     asset('/monsters/goblin-animation/goblin-alert.glb'),
@@ -138,6 +131,14 @@ export const level1Monsters = [
     asset('/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb')),
 
   inst(D.goblin, 26, 18, 3,
+    asset('/monsters/goblin-animation/goblin-alert.glb'),
+    asset('/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb'),
+    asset('/monsters/goblin-animation/goblin-attack.wav'), 0.45, 0, 0, 1, null,
+    asset('/monsters/goblin-animation/Meshy_AI_Animation_Dead_withSkin.glb'),
+    asset('/monsters/goblin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+    asset('/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb')),
+
+  inst(D.goblin, 27, 19, 4,
     asset('/monsters/goblin-animation/goblin-alert.glb'),
     asset('/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb'),
     asset('/monsters/goblin-animation/goblin-attack.wav'), 0.45, 0, 0, 1, null,

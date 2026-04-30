@@ -15,9 +15,53 @@
     ]
   },
   {
+    "id": "elixir-of-rage",
+    "name": "A Vial of Rage",
+    "giver": "potion-merchant",
+    "text": "I'm clean out of Elixir of Rage — that swirling red brew that smells of blood and sweat. Bring me a single vial and there's thirty gold in it for you. Keep the elixir; it's the gesture I'm paying for.",
+    "audio": "/npcs/potion-merchant/elixir-of-rage-quest.mp3",
+    "requiredItems": [
+      "Elixir of Rage"
+    ],
+    "keepRequiredItems": true,
+    "completionText": "Ah — that lovely red shimmer. You're a darling. Here's the thirty gold I promised. Hold onto the vial; you'll want it before I will.",
+    "completionAudio": "/npcs/potion-merchant/elixir-of-rage-complete.mp3",
+    "completionRewards": [
+      {
+        "name": "Gold Coins",
+        "quantity": 30
+      },
+      "Life Berry"
+    ]
+  },
+  {
+    "id": "elixir-of-enlightenment",
+    "name": "A Vial of Enlightenment",
+    "giver": "potion-merchant",
+    "text": "Could you spare an Elixir of Enlightenment? The blue one — smells faintly of ozone. A customer paid in advance and I've nothing on the shelf. Thirty gold for the favour, and you keep the vial.",
+    "audio": "/npcs/potion-merchant/elixir-of-enlightenment-quest.mp3",
+    "requiredItems": [
+      "Elixir of Enlightenment"
+    ],
+    "keepRequiredItems": true,
+    "completionText": "Beautiful. That's the one. Thirty gold, as agreed — and the vial stays with you. You've saved me a very awkward conversation.",
+    "completionAudio": "/npcs/potion-merchant/elixir-of-enlightenment-complete.mp3",
+    "completionRewards": [
+      {
+        "name": "Gold Coins",
+        "quantity": 30
+      },
+      "Mana Berry"
+    ]
+  },
+  {
     "id": "oracles-marrow",
     "name": "The Oracle's Marrow",
     "giver": "potion-merchant",
+    "prerequisiteQuests": [
+      "elixir-of-rage",
+      "elixir-of-enlightenment"
+    ],
     "text": "Bring me a single vial of Starlight Nectar. It is liquid radiance, gathered only on the solstice and rarer than a dragon’s heart-blood. I know its resting place, but my bones are too brittle for the climb.Take this key; it will recognize the lock and part the stone for you. But heed my warning: the Vault is the private larder of Kargen the Cloud-Walker. He is a giant of the ancient peaks, and he has a short temper for thieves.",
     "audio": "/npcs/potion-merchant/necter-quest.mp3",
     "video": true,

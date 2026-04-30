@@ -1185,3 +1185,46 @@ export async function playSuccessSound() {
     console.warn('[audio] playSuccessSound failed:', err);
   }
 }
+
+let _elementFloorSource = null;
+let _elementFloorGain = null;
+let _elementFloorUrl = null;
+
+export async function setElementFloorSound(url) {
+  if (_elementFloorUrl === url) return;
+  _elementFloorUrl = url;
+
+  if (_elementFloorGain && _elementFloorSource) {
+    const ctx = getCtx();
+    const now = ctx.currentTime;
+    _elementFloorGain.gain.cancelScheduledValues(now);
+    _elementFloorGain.gain.setValueAtTime(_elementFloorGain.gain.value, now);
+    _elementFloorGain.gain.linearRampToValueAtTime(0, now + 0.3);
+    const src = _elementFloorSource;
+    setTimeout(() => { try { src.stop(); } catch (_) {} }, 300);
+    _elementFloorSource = null;
+    _elementFloorGain = null;
+  }
+
+  if (!url) return;
+
+  const buffer = await getBuffer(asset(url));
+  if (!buffer || _elementFloorUrl !== url) return;
+
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    const gainNode = ctx.createGain();
+    gainNode.gain.setValueAtTime(0, ctx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.6, ctx.currentTime + 0.3);
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
+    _elementFloorSource = source;
+    _elementFloorGain = gainNode;
+  } catch (err) {
+    console.warn('[audio] setElementFloorSound failed:', err);
+  }
+}

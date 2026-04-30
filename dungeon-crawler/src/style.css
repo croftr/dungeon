@@ -7425,6 +7425,25 @@ body.party-targeting-mode .member-card--dead .portrait {
   color: #8a6030;
 }
 
+#anvil-return-btn {
+  background: transparent;
+  border: 1px solid #8a4a20;
+  border-radius: 4px;
+  color: #d89850;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+#anvil-return-btn:hover {
+  background: rgba(80, 30, 0, 0.4);
+  border-color: #ff9030;
+  color: #ffd070;
+}
+
 #anvil-result {
   display: flex;
   flex-direction: column;
@@ -8783,6 +8802,25 @@ body.cursor-interact #renderer-canvas {
 #alchemy-arrow {
   font-size: 32px;
   color: #2d4d2d;
+}
+
+#alchemy-return-btn {
+  background: transparent;
+  border: 1px solid #2d6d2d;
+  border-radius: 4px;
+  color: #7acc7a;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+#alchemy-return-btn:hover {
+  background: rgba(40, 80, 40, 0.4);
+  border-color: #5aca5a;
+  color: #aaffaa;
 }
 
 #alchemy-result {
@@ -10381,6 +10419,20 @@ body.cursor-interact #renderer-canvas {
 
 .quest-completed-badge {
   color: #888;
+}
+
+.quest-locked-badge {
+  color: #b07a3a;
+}
+
+.quest-list-item-locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.quest-list-item-locked:hover {
+  background: inherit;
+  border-color: inherit;
 }
 
 /* Quest detail */

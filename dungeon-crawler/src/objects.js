@@ -5467,6 +5467,48 @@ function _returnItemToParty(itemName) {
     return false;
 }
 
+function _returnAlchemyIngredients() {
+    let returnedAny = false;
+    let fullInventory = false;
+    for (let i = 0; i < 8; i++) {
+        if (_alchemyContents[i]) {
+            if (_returnItemToParty(_alchemyContents[i])) {
+                _alchemyContents[i] = null;
+                returnedAny = true;
+            } else {
+                fullInventory = true;
+            }
+        }
+    }
+    if (fullInventory) {
+        showMessage('Not enough room in party inventory to return all items!');
+    }
+    if (returnedAny) {
+        _renderAlchemySlots();
+    }
+}
+
+function _returnForgeIngredients() {
+    let returnedAny = false;
+    let fullInventory = false;
+    for (let i = 0; i < 8; i++) {
+        if (_forgeContents[i]) {
+            if (_returnItemToParty(_forgeContents[i])) {
+                _forgeContents[i] = null;
+                returnedAny = true;
+            } else {
+                fullInventory = true;
+            }
+        }
+    }
+    if (fullInventory) {
+        showMessage('Not enough room in party inventory to return all items!');
+    }
+    if (returnedAny) {
+        _renderForgeSlots();
+    }
+}
+
 function _autoPopulateAlchemySlots(recipe) {
     // Move to most recently used
     _knownAlchemyRecipes.delete(recipe.name);

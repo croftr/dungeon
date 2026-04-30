@@ -106,6 +106,7 @@ function _renderQuestList(body, npcQuests) {
 
     npcQuests.forEach(q => {
         const status = _questLog[q.id] || 'available';
+        const locked = status === 'available' && _isQuestLocked(q);
         const row = document.createElement('div');
         row.className = 'quest-list-item';
 
@@ -115,7 +116,11 @@ function _renderQuestList(body, npcQuests) {
 
         const badge = document.createElement('span');
         badge.className = 'quest-list-badge';
-        if (status === 'accepted') {
+        if (locked) {
+            badge.textContent = ' (locked)';
+            badge.classList.add('quest-locked-badge');
+            row.classList.add('quest-list-item-locked');
+        } else if (status === 'accepted') {
             badge.textContent = ' (accepted)';
             badge.classList.add('quest-accepted-badge');
         } else if (status === 'completed') {
@@ -126,7 +131,9 @@ function _renderQuestList(body, npcQuests) {
         row.appendChild(name);
         row.appendChild(badge);
 
-        row.addEventListener('click', () => _showQuestDetail(body, npcQuests, q));
+        if (!locked) {
+            row.addEventListener('click', () => _showQuestDetail(body, npcQuests, q));
+        }
         list.appendChild(row);
     });
 
@@ -233,6 +240,12 @@ function _showQuestDetail(body, npcQuests, quest) {
     body.appendChild(detail);
 }
 
+function _isQuestLocked(quest) {
+    const prereqs = quest.prerequisiteQuests;
+    if (!prereqs || prereqs.length === 0) return false;
+    return prereqs.some(id => _questLog[id] !== 'completed');
+}
+
 function _checkQuestRequirements(quest) {
     if (!quest.requiredItems || quest.requiredItems.length === 0) return true;
 
@@ -274,7 +287,12 @@ function _completeQuest(body, npcQuests, quest) {
     _closeQuestDialog();
     _completionAudioEndPromise = Promise.resolve();
 
-    // 4. Give rewards and show modal immediately
+    // 4. Re-render the list view (handles merchant quest tab where dialog doesn't close)
+    if (body && body.isConnected) {
+        _renderQuestList(body, npcQuests);
+    }
+
+    // 5. Give rewards and show modal immediately
     {
         const itemNames = [];
         let gold = 0;

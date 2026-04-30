@@ -13,7 +13,7 @@ import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAtta
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt, applyClearedLevelMonsters } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, setEmptyAllContainers, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems } from './objects.js';
-import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound, prefetchActionSounds, checkNpcDialogueProximity } from './audio.js';
+import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound, prefetchActionSounds, checkNpcDialogueProximity, setElementFloorSound } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
@@ -45,7 +45,7 @@ const ARENA_MAP = [
   [1,0,0,0,0,0,0,0,1],
   [1,0,0,0,0,0,0,0,1],
   [1,0,0,0,0,0,0,0,1],
-  [1,8,0,0,0,0,0,8,1],
+  [1,0,0,8,0,9,0,0,1],
   [1,0,0,0,0,0,0,0,1],
   [1,0,0,0,0,0,0,0,1],
   [1,0,0,0,2,0,0,0,1],
@@ -586,9 +586,16 @@ let lastTime = performance.now();
 const _elementFloorTickAccum = {};
 function tickElementFloorDamage(dt) {
   const cell = dungeonMap[player.gridRow]?.[player.gridCol];
+  let currentFloorSound = null;
+
   for (const [id, def] of Object.entries(ELEMENT_FLOORS)) {
-    if (cell !== def.cell) { _elementFloorTickAccum[id] = 0; continue; }
-    const acc = (_elementFloorTickAccum[id] ?? 0) + dt;
+    if (cell === def.cell) {
+      if (def.element === 'fire') currentFloorSound = '/sounds/elements/lava-floor.mp3';
+      else if (def.element === 'ice') currentFloorSound = '/sounds/elements/ice-floor.mp3';
+    }
+
+    if (cell !== def.cell) { _elementFloorTickAccum[id] = def.tickInterval; continue; }
+    const acc = (_elementFloorTickAccum[id] ?? def.tickInterval) + dt;
     if (acc < def.tickInterval) { _elementFloorTickAccum[id] = acc; continue; }
     _elementFloorTickAccum[id] = acc - def.tickInterval;
     let anyHit = false;
@@ -604,6 +611,8 @@ function tickElementFloorDamage(dt) {
     });
     if (anyHit) playPartyHitSound();
   }
+
+  setElementFloorSound(currentFloorSound);
 }
 
 function animate(now) {
