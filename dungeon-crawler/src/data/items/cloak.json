@@ -142,5 +142,29 @@
         },
         "value": 750,
         "weight": 1.5
+    },
+    {
+        "name": "Ashen Shroud",
+        "slot": "cloak",
+        "icon": "/icons/cloak/ashen_shroud.webp",
+        "description": "A tattered cloak woven from charcoal-stained fibers, smelling faintly of old woodsmoke and cold ash.",
+        "defence": 1,
+        "value": 100,
+        "weight": 2.5,
+        "elementalResistances": {
+            "fire": 0.1
+        }
+    },
+    {
+        "name": "Hoarfrost Mantle",
+        "slot": "cloak",
+        "icon": "/icons/cloak/hoarfrost_mantle.webp",
+        "description": "A heavy mantle that remains perpetually frozen, radiating a bone-chilling cold that protects against the harshest blizzards.",
+        "defence": 1,
+        "value": 100,
+        "weight": 2.5,
+        "elementalResistances": {
+            "ice": 0.1
+        }
     }
 ]

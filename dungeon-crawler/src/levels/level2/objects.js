@@ -33,7 +33,7 @@ export function spawnLevel2Objects(ctx) {
 
     // ── New area: Chest (Room C, south wall, row 13 col 9) ───────────────────
     addChest(group, loader, 9, 13, Math.PI, 0.7, [
-        'Poison Arrows', 'Poison Dagger', 'Life Orb',
+        'Poison Dagger', 'Life Orb', "Hoarfrost Mantle",
         { name: 'Gold Coins', quantity: 10 }
     ]);
 
@@ -76,7 +76,7 @@ export function spawnLevel2Objects(ctx) {
     // Chest at col 28 north side — side by side with the egg against the east wall
     addChest(group, loader, 28, 32, -Math.PI / 2, -0.5, [
         { name: 'Gold Coins', quantity: 10 },
-        'Ruby Ring', 'Mana Potion', 'Life Essence',
+        'Mana Potion', 'Life Essence',
         'Chain Shirt', 'Plate Cuirass'
     ], asset('/items/chest1.glb'), true, 0.5);
 

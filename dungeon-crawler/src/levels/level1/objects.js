@@ -80,7 +80,7 @@ export function spawnLevel1Objects(ctx) {
 
     // Chest in the alcove east of (row 15, col 13)
     addChest(group, loader, 14, 15, -Math.PI / 2, 0, [
-        "Travelling Cloak", "Travelling Cloak", "Cloth Trousers"
+        "Travelling Cloak", "Ashen Shroud", "Cloth Trousers"
     ], undefined, true, 0.7);
 
     // ── Bone pile ────────────────────────────────────────────────────────────
