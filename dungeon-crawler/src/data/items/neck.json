@@ -25,5 +25,25 @@
         "value": 825,
         "weight": 0.1,
         "skillDurationBonusMs": 5000
+    },
+    {
+        "name": "Balance Pendant",
+        "slot": "neck",
+        "attackType": null,
+        "baseDamage": null,
+        "elementalResistances": {
+            "holy": 0.1,
+            "dark": 0.1,
+            "fire": 0.2,
+            "ice": 0.1,
+            "lightning": 0.1,
+            "water": 0.1
+        },
+        "icon": "/icons/neck/balance_pendant.webp",
+        "description": "A harmonious prism that grants protection against a wide array of elemental forces.",
+        "defence": 0,
+        "value": 825,
+        "weight": 0.1,
+        "skillDurationBonusMs": 5000
     }
 ]

@@ -560,6 +560,9 @@
         "statWeights": {
             "intelligence": 1.0
         },
+        "elementalResistances": {
+            "dark": 0.2
+        },
         "icon": "/icons/weapons/life_orb.webp",
         "description": "A radiant crystal orb that pulses with the essence of vitality. It bolsters the wielder's health and mana without the need for physical strike.",
         "value": 2000,
@@ -581,6 +584,10 @@
         "delay": 3.2,
         "statWeights": {
             "intelligence": 1.0
+        },
+        "elementalResistances": {
+            "fire": 0.1,
+            "ice": 0.1
         },
         "icon": "/icons/weapons/ogre_head_orb.webp",
         "description": "A gruesome orb made from an ogre's head. It pulses with raw, untamed power, granting the wielder enhanced strength and resilience.",

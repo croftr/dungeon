@@ -56,6 +56,10 @@
         "defence": 5,
         "value": 500,
         "weight": 8,
+        "elementalResistances": {
+            "dark": 0.1,
+            "fire": 0.1
+        },
         "statBonuses": {
             "dexterity": 1,
             "resilience": 1

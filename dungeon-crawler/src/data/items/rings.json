@@ -63,5 +63,26 @@
         "statBonuses": {
             "resilience": 1
         }
+    },
+    {
+        "name": "Ring of Balance",
+        "slot": "ring1",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/rings/ring_of_balance.webp",
+        "description": "A harmonious prism that grants protection against a wide array of elemental forces.",
+        "elementalResistances": {
+            "holy": 0.1,
+            "dark": 0.1,
+            "fire": 0.1,
+            "ice": 0.1,
+            "lightning": 0.1,
+            "water": 0.1
+        },
+        "value": 360,
+        "weight": 0.05,
+        "statBonuses": {
+            "resilience": 1
+        }
     }
 ]
