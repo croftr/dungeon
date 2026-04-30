@@ -1451,6 +1451,22 @@ export function initObjects(scene, camera) {
         anvilParchmentPickerClose.onclick = (e) => { e.stopPropagation(); _hideAnvilParchmentPicker(); };
     }
 
+    // Return Items buttons (alchemy + forge)
+    const alchemyReturnBtn = document.getElementById('alchemy-return-btn');
+    if (alchemyReturnBtn) {
+        alchemyReturnBtn.onclick = (e) => {
+            e.stopPropagation();
+            _returnAlchemyIngredients();
+        };
+    }
+    const anvilReturnBtn = document.getElementById('anvil-return-btn');
+    if (anvilReturnBtn) {
+        anvilReturnBtn.onclick = (e) => {
+            e.stopPropagation();
+            _returnForgeIngredients();
+        };
+    }
+
     // Alchemy recipe filter tabs
     document.querySelectorAll('#alchemy-filter-tabs .bench-filter-tab').forEach(btn => {
         btn.addEventListener('click', (e) => {
