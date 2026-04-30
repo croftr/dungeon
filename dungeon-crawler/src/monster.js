@@ -103,13 +103,8 @@ function _renderHuntersEyeHud(m) {
     _hudPanelInitialized = true;
   }
 
-  // Position above party panel if it is visible
-  const partyPanel = document.getElementById('party-panel');
-  if (partyPanel && !partyPanel.classList.contains('party-panel--hidden')) {
-    panel.style.bottom = (partyPanel.offsetHeight + 8) + 'px';
-  } else {
-    panel.style.bottom = '16px';
-  }
+  // Clear any inline bottom style so CSS positioning can take over
+  panel.style.bottom = '';
 
   const s = m.stats ?? {};
   const familyDef = MONSTER_FAMILIES[m.family];
@@ -131,7 +126,6 @@ function _renderHuntersEyeHud(m) {
   // Name + family
   html += `<div class="hep-hud-name">${m.name}</div>`;
   if (familyDef) html += `<div class="hep-hud-family">${familyDef.name}</div>`;
-  if (m.description) html += `<div class="hep-hud-desc">${m.description}</div>`;
 
   // Defeated banner
   if (isDefeated) {
