@@ -230,49 +230,52 @@ export function drawMinimap() {
     }
   }
 
-  // Player Compass Needle
+  // Player marker — directional vision cone + center dot.
+  // The cone fans forward from the player's facing so there is no symmetry
+  // and the heading is unambiguous at any zoom level.
   const px = player.gridCol * MM_CELL + MM_CELL / 2;
   const py = player.gridRow * MM_CELL + MM_CELL / 2;
   const angle = -FACING_ANGLES[player.facing];
 
   mmCtx.save();
   mmCtx.translate(px, py);
-  mmCtx.rotate(angle);
+  mmCtx.rotate(angle);   // 0 rad points "up" on canvas, which is forward
 
-  const radius = MM_CELL * 0.6;
+  const dotR    = Math.max(2, MM_CELL * 0.22);   // player position dot
+  const coneR   = MM_CELL * 1.25;                // cone reach
+  const halfArc = Math.PI / 9;                   // 40° total field-of-view cone
 
-  // Outer glow
-  const gradient = mmCtx.createRadialGradient(0, 0, 0, 0, 0, radius * 1.5);
-  gradient.addColorStop(0, 'rgba(232, 200, 122, 0.4)');
-  gradient.addColorStop(1, 'rgba(232, 200, 122, 0)');
-  mmCtx.fillStyle = gradient;
+  // Glow under the cone — gives forward direction an obvious "headlight" feel
+  const coneGrad = mmCtx.createRadialGradient(0, 0, 0, 0, 0, coneR);
+  coneGrad.addColorStop(0,   'rgba(255, 230, 150, 0.55)');
+  coneGrad.addColorStop(0.6, 'rgba(255, 200, 110, 0.18)');
+  coneGrad.addColorStop(1,   'rgba(255, 200, 110, 0)');
+  mmCtx.fillStyle = coneGrad;
   mmCtx.beginPath();
-  mmCtx.arc(0, 0, radius * 1.5, 0, Math.PI * 2);
-  mmCtx.fill();
-
-  // North pointer
-  mmCtx.fillStyle = '#ecf0f1';
-  mmCtx.beginPath();
-  mmCtx.moveTo(0, -radius);
-  mmCtx.lineTo(radius * 0.3, 0);
-  mmCtx.lineTo(-radius * 0.3, 0);
+  mmCtx.moveTo(0, 0);
+  // -PI/2 is "up" (forward) in canvas coords after rotation
+  mmCtx.arc(0, 0, coneR, -Math.PI / 2 - halfArc, -Math.PI / 2 + halfArc);
   mmCtx.closePath();
   mmCtx.fill();
 
-  // South rear
-  mmCtx.fillStyle = '#c0392b';
+  // Crisp leading edge so the cone reads even on busy backgrounds
+  mmCtx.strokeStyle = 'rgba(255, 240, 180, 0.85)';
+  mmCtx.lineWidth = 0.6;
   mmCtx.beginPath();
-  mmCtx.moveTo(0, radius);
-  mmCtx.lineTo(radius * 0.3, 0);
-  mmCtx.lineTo(-radius * 0.3, 0);
-  mmCtx.closePath();
-  mmCtx.fill();
+  mmCtx.moveTo(0, 0);
+  mmCtx.lineTo(Math.cos(-Math.PI / 2 - halfArc) * coneR, Math.sin(-Math.PI / 2 - halfArc) * coneR);
+  mmCtx.moveTo(0, 0);
+  mmCtx.lineTo(Math.cos(-Math.PI / 2 + halfArc) * coneR, Math.sin(-Math.PI / 2 + halfArc) * coneR);
+  mmCtx.stroke();
 
-  // Central pin
-  mmCtx.fillStyle = '#2c3e50';
+  // Player dot — solid bright core with dark outline for contrast
+  mmCtx.fillStyle = '#ffe89a';
+  mmCtx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
+  mmCtx.lineWidth = 1.25;
   mmCtx.beginPath();
-  mmCtx.arc(0, 0, radius * 0.1, 0, Math.PI * 2);
+  mmCtx.arc(0, 0, dotR, 0, Math.PI * 2);
   mmCtx.fill();
+  mmCtx.stroke();
 
   mmCtx.restore();
 

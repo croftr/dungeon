@@ -63,11 +63,11 @@ export function spawnLevel2Objects(ctx) {
     // Two chests in the chest vault (col 1, rows 33–34)
     addChest(group, loader, 0.7, 34, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 10 },
-        'Life Essence', 'Mana Berry', 'Scroll of Fireball'
+        'Mana Berry', 'Scroll of Fireball', 'Balance Pendant'
     ]);
     addChest(group, loader, 1.3, 34, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 10 },
-        'Ring of Strength', 'Ring of Wisdom', 'Ring of Dexterity'
+        'Ring of Strength', 'Ring of Wisdom', 'Ring of Balance'
     ]);
 
     // Ethereal Egg in the centre of the demon room — contains Red Crystal
