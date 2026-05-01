@@ -104,6 +104,17 @@ export const level2Monsters = [
     null,
     asset('/monsters/ice-mushroom/combat-idle.glb')),
 
+  // Ice gauntlet reward room (cols 2-4, row 14) — guardian mushroom after crossing ice floor
+  inst(D.ice_mushroom, 502, 14, 4,
+    asset('/monsters/ice-mushroom/idle.glb'),
+    asset('/monsters/ice-mushroom/standard-attack.glb'),
+    asset('/monsters/ice-mushroom/standard-attack.mp3'), 0.45, 0, 0, 2, null,
+    asset('/monsters/ice-mushroom/dead.glb'),
+    null,
+    asset('/monsters/ice-mushroom/walk.glb'),
+    null,
+    asset('/monsters/ice-mushroom/combat-idle.glb')),
+
   // Room C (rows 11-13, cols 5-11) — 2 Orc Warriors
   inst(D.orc_warrior, 204, 12, 6,
     asset('/monsters/orc-warrior/idle-normal.glb'),

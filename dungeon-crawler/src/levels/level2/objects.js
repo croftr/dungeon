@@ -28,13 +28,20 @@ export function spawnLevel2Objects(ctx) {
     addPortal(group, loader, 7, 1, 0, 0, 0, -0.85, 13, 13, 0);
 
     // ── New area: Spell Cabinet (Room A, north wall, row 3 col 5) ─────────────
-    addSpellCabinet(group, loader, 5, 3, 0, 0, -0.7, ["Scroll of Holybolt", "Scroll of Darkbolt"]);
+    addSpellCabinet(group, loader, 5, 3, 0, 0, -0.7, ["Resist Ice", "Resist Fire"]);
     addSpellCabinet(group, loader, 2, 8, Math.PI / 2, -0.3, -0.7, ['Scroll of Lightningbolt', 'Scroll of Incinerate']);
 
     // ── New area: Chest (Room C, south wall, row 13 col 9) ───────────────────
     addChest(group, loader, 9, 13, Math.PI, 0.7, [
-        'Poison Dagger', 'Life Orb', "Hoarfrost Mantle",
-        { name: 'Gold Coins', quantity: 10 }
+        'Poison Dagger', 'Life Orb',
+        { name: 'Gold Coins', quantity: 20 }
+    ]);
+
+    // ── Ice gauntlet reward chest (south wall of reward room, col 3 row 14) ──
+    addChest(group, loader, 3, 14, Math.PI, 0.7, [
+        { name: 'Gold Coins', quantity: 100 },
+        "Hoarfrost Mantle",
+        "Ice Dagger"
     ]);
 
     // ── Portcullises & Keys ───────────────────────────────────────────────────
@@ -75,7 +82,7 @@ export function spawnLevel2Objects(ctx) {
 
     // Chest at col 28 north side — side by side with the egg against the east wall
     addChest(group, loader, 28, 32, -Math.PI / 2, -0.5, [
-        { name: 'Gold Coins', quantity: 10 },
+        { name: 'Gold Coins', quantity: 50 },
         'Mana Potion', 'Life Essence',
         'Chain Shirt', 'Plate Cuirass'
     ], asset('/items/chest1.glb'), true, 0.5);
@@ -85,7 +92,7 @@ export function spawnLevel2Objects(ctx) {
 
     // Chest in the NE corner of the giant room
     addChest(group, loader, 24, 17, -Math.PI / 2, 0.7, [
-        { name: 'Gold Coins', quantity: 20 },
+        { name: 'Gold Coins', quantity: 50 },
         'Starlight Nectar'
     ], asset('/items/chest1.glb'), true, -0.5);
 

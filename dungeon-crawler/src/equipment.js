@@ -115,6 +115,10 @@ function _dispatchSpellVFX(attackType, target = null) {
     case 'resist-poison':
     case 'resist-fear':
     case 'shell':
+    case 'resist-fire':
+    case 'resist-ice':
+    case 'resist-lightning':
+    case 'resist-water':
       playSkillSound('cure');
       triggerCurePoisonEffect();
       break;
@@ -3397,7 +3401,35 @@ function _executePartySpell(caster, casterIndex, hand, spellDef) {
     _executeResistFear(caster, spellDef);
   } else if (spellDef.attackType === ACTIONS.SHELL) {
     _executeShell(caster, spellDef);
+  } else if (spellDef.attackType === ACTIONS.RESIST_FIRE) {
+    _executeResistElement(caster, spellDef, 'Resist Fire', 'resist-fire');
+  } else if (spellDef.attackType === ACTIONS.RESIST_ICE) {
+    _executeResistElement(caster, spellDef, 'Resist Ice', 'resist-ice');
+  } else if (spellDef.attackType === ACTIONS.RESIST_LIGHTNING) {
+    _executeResistElement(caster, spellDef, 'Resist Lightning', 'resist-lightning');
+  } else if (spellDef.attackType === ACTIONS.RESIST_WATER) {
+    _executeResistElement(caster, spellDef, 'Resist Water', 'resist-water');
   }
+}
+
+function _executeResistElement(caster, spellDef, skillName, effectId) {
+  const targets = party.filter(m => !m.isEmpty && !m.isDead);
+  const duration = spellDef?.statusDuration ?? null;
+  targets.forEach(m => applyStatusEffect(m.id, effectId, null, duration));
+
+  showMessage(`${caster.name} casts <b>${skillName}</b> — the party is shielded!`, 2500);
+
+  targets.forEach(m => {
+    addLogEntry({
+      time: Date.now(),
+      type: 'skill',
+      actor: caster.name,
+      skillName: skillName,
+      target: m.name,
+    });
+  });
+
+  refreshPartyCards();
 }
 
 function _executeResistFear(caster, spellDef) {

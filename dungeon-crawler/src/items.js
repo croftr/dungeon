@@ -66,6 +66,10 @@ export const ACTIONS = Object.freeze({
   INCINERATE: 'incinerate',
   RESIST_FEAR: 'resist-fear',
   SHELL: 'shell',
+  RESIST_FIRE: 'resist-fire',
+  RESIST_ICE: 'resist-ice',
+  RESIST_LIGHTNING: 'resist-lightning',
+  RESIST_WATER: 'resist-water',
 });
 
 export const ITEMS = [

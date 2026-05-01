@@ -165,5 +165,53 @@
       "lightning": 0.1,
       "water": 0.1
     }
+  },
+  "resist-fire": {
+    "id": "resist-fire",
+    "name": "Resist Fire",
+    "description": "Reduces fire damage taken by 30% for 6 seconds.",
+    "type": "buff",
+    "icon": "/icons/spells/resist-fire.webp",
+    "color": "#ff4040",
+    "duration": 6,
+    "elementalResistances": {
+      "fire": 0.3
+    }
+  },
+  "resist-ice": {
+    "id": "resist-ice",
+    "name": "Resist Ice",
+    "description": "Reduces ice damage taken by 30% for 6 seconds.",
+    "type": "buff",
+    "icon": "/icons/spells/resist-ice.webp",
+    "color": "#40ffff",
+    "duration": 6,
+    "elementalResistances": {
+      "ice": 0.3
+    }
+  },
+  "resist-lightning": {
+    "id": "resist-lightning",
+    "name": "Resist Lightning",
+    "description": "Reduces lightning damage taken by 30% for 6 seconds.",
+    "type": "buff",
+    "icon": "/icons/spells/resist-lightning.webp",
+    "color": "#ffff00",
+    "duration": 6,
+    "elementalResistances": {
+      "lightning": 0.3
+    }
+  },
+  "resist-water": {
+    "id": "resist-water",
+    "name": "Resist Water",
+    "description": "Reduces water damage taken by 30% for 6 seconds.",
+    "type": "buff",
+    "icon": "/icons/spells/resist-water.webp",
+    "color": "#4080ff",
+    "duration": 6,
+    "elementalResistances": {
+      "water": 0.3
+    }
   }
 }

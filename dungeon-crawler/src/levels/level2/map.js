@@ -6,6 +6,8 @@
 //          → Crow Wizard room (rows 7-9, cols 20-25)
 //          → Room B → south corridor (col 11, row 10)
 //          → Room C (rows 11-13, cols 5-11) → south passage (col 7, row 14)
+// ICE GAUNTLET: Ice Mushroom room (cols 2-4, rows 7-9) → south ice passage (col 3, rows 10-13)
+//               → reward room (cols 2-4, row 14): chest (100 gold + Balance Pendant) + ice mushroom
 // EXISTING (shifted +15 from original):
 // Main room cols 3-8, rows 16-20. Passage at col 7, rows 21-28.
 // Giant room: NE corner — enter via portcullis on east wall of main room (col 9, row 30),
@@ -23,11 +25,11 @@ export const level2Map = [
   [1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1], // row 7  ← Room B (iceman, cols 9-14); mushroom room cols 2-4; crow room cols 20-25
   [1, 1, 0, 0, 0, 9, 9, 9, 9, 0, 0, 9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1], // row 8  ← Room B + ice floor at cols 11-12 (centre); west corridor cols 5-8 (ice floor); east corridor cols 15-19; crow room cols 20-25
   [1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1], // row 9  ← Room B; mushroom room cols 2-4; crow room cols 20-25
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 10 ← col 11 corridor south
-  [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 11 ← Room C (orc warriors, cols 5-11)
-  [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 12 ← Room C
-  [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 13 ← Room C south (chest here)
-  [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 14 ← passage south to treeman area
+  [1, 1, 1, 9, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 10 ← col 11 corridor south; ice passage col 3 (step 1)
+  [1, 1, 1, 9, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 11 ← Room C (orc warriors, cols 5-11); ice passage col 3 (step 2)
+  [1, 1, 1, 9, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 12 ← Room C; ice passage col 3 (step 3)
+  [1, 1, 1, 9, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 13 ← Room C south (chest here); ice passage col 3 (step 4)
+  [1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 14 ← passage south to treeman area (col 7); ice gauntlet reward room (cols 2-4)
   [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 15 ← bridge (was old row 0, col 7 opened)
   [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 16 ← main room entry (was old row 1, col 7 changed 2→0)
   [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1], // row 17 ← giant room (cols 13-24)
