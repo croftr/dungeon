@@ -1183,17 +1183,21 @@
     "family": "avian",
     "description": "A sinister sorcerer wrapped in corvid flesh, the Crow Wizard commands fire and shadow with equal cruelty. Its cawing incantations carry the stench of old magic — and those who hear its shriek often find their courage deserting them entirely.",
     "image": "/monster-images/crow-wizard.webp",
-    "hp": 319,
+    "hp": 320,
     "defence": 13,
     "damageReduction": 0.10,
     "xp": 350,
     "attackSpeed": 1.5,
     "stats": {
-      "strength": 19,
-      "dexterity": 24,
+      "strength": 20,
+      "dexterity": 25,
       "vitality": 17,
       "intelligence": 26,
       "resilience": 15
+    },
+    "elementalResistances": {
+      "ice": "weak",
+      "fire": "resist"
     },
     "specialAttacks": [
       {

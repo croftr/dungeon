@@ -27,6 +27,10 @@
         "Scroll of Sleep",
         "Scroll of Incinerate",
         "Scroll of Resist Fear",
-        "Shell"
+        "Scroll of Shell",
+        "Scroll of Resist Fire",
+        "Scroll of Resist Ice",
+        "Scroll of Resist Lightning",
+        "Scroll of Resist Water"
     ]
 }

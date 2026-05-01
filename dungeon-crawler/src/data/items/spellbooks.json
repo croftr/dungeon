@@ -138,5 +138,45 @@
         "description": "A shimmering tome bound in pale blue leather. Study it to learn Shell. Requires 12 Intelligence.",
         "value": 600,
         "weight": 0.2
+    },
+    {
+        "name": "Scroll of Resist Fire",
+        "type": "spellbook",
+        "spellName": "Resist Fire",
+        "requiredInt": 10,
+        "icon": "/icons/scrolls/scroll_resist_fire.webp",
+        "description": "Ancient parchment bearer of warding incantations. Study it to learn Resist Fire. Requires 10 Intelligence.",
+        "value": 480,
+        "weight": 0.2
+    },
+    {
+        "name": "Scroll of Resist Ice",
+        "type": "spellbook",
+        "spellName": "Resist Ice",
+        "requiredInt": 10,
+        "icon": "/icons/scrolls/scroll_resist_ice.webp",
+        "description": "Ancient parchment bearer of warding incantations. Study it to learn Resist Ice. Requires 10 Intelligence.",
+        "value": 480,
+        "weight": 0.2
+    },
+    {
+        "name": "Scroll of Resist Lightning",
+        "type": "spellbook",
+        "spellName": "Resist Lightning",
+        "requiredInt": 10,
+        "icon": "/icons/scrolls/scroll_resist_lightning.webp",
+        "description": "Ancient parchment bearer of warding incantations. Study it to learn Resist Lightning. Requires 10 Intelligence.",
+        "value": 480,
+        "weight": 0.2
+    },
+    {
+        "name": "Scroll of Resist Water",
+        "type": "spellbook",
+        "spellName": "Resist Water",
+        "requiredInt": 10,
+        "icon": "/icons/scrolls/scroll_resist_water.webp",
+        "description": "Ancient parchment bearer of warding incantations. Study it to learn Resist Water. Requires 10 Intelligence.",
+        "value": 480,
+        "weight": 0.2
     }
 ]

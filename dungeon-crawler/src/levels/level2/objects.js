@@ -28,7 +28,7 @@ export function spawnLevel2Objects(ctx) {
     addPortal(group, loader, 7, 1, 0, 0, 0, -0.85, 13, 13, 0);
 
     // ── New area: Spell Cabinet (Room A, north wall, row 3 col 5) ─────────────
-    addSpellCabinet(group, loader, 5, 3, 0, 0, -0.7, ["Resist Ice", "Resist Fire"]);
+    addSpellCabinet(group, loader, 5, 3, 0, 0, -0.7, ["Scroll of Resist Ice", "Scroll of Resist Fire"]);
     addSpellCabinet(group, loader, 2, 8, Math.PI / 2, -0.3, -0.7, ['Scroll of Lightningbolt', 'Scroll of Incinerate']);
 
     // ── New area: Chest (Room C, south wall, row 13 col 9) ───────────────────
@@ -41,7 +41,7 @@ export function spawnLevel2Objects(ctx) {
     addChest(group, loader, 3, 14, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 100 },
         "Hoarfrost Mantle",
-        "Ice Dagger"
+        "Padded Vest"
     ]);
 
     // ── Portcullises & Keys ───────────────────────────────────────────────────
