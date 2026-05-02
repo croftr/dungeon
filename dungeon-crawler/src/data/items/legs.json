@@ -19,7 +19,15 @@
         "description": "Riveted chain leggings that protect the thighs and shins.",
         "defence": 2,
         "value": 210,
-        "weight": 5
+        "weight": 5,
+        "job": [
+            "Paladin",
+            "Warrior",
+            "Barbarian",
+            "Ranger",
+            "Hunter",
+            "War Dancer"
+        ]
     },
     {
         "name": "Amethyst Wardancer Leggings",

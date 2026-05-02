@@ -19,7 +19,15 @@
         "description": "Reinforced leather boots with iron toe-caps. Sturdy and intimidating.",
         "defence": 2,
         "value": 105,
-        "weight": 2
+        "weight": 2,
+        "job": [
+            "Paladin",
+            "Warrior",
+            "Barbarian",
+            "Ranger",
+            "Hunter",
+            "War Dancer"
+        ]
     },
     {
         "name": "Leather Boots",

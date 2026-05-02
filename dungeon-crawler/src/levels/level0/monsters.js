@@ -34,4 +34,4 @@ const _ironWarden = inst(D.iron_warden, 11, 11, 21,
     null, // glbIdleAlt
     asset('/monsters/iron-warden/combat-idle.glb'));
 
-export const level0Monsters = [_dummy, _ironWarden];
+export const level0Monsters = [_dummy];

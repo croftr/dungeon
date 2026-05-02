@@ -108,10 +108,9 @@ export function getItemDef(name) {
 //  JOB-BASED RESTRICTIONS (tomes, weapons, armor)
 //
 //  Items can opt into a class restriction by adding a `job` field. Accepts
-//  either a single key ("paladin") or an array (["paladin", "warrior"]).
-//  Job keys match the lowercase-hyphenated forms in public/skills/jobs/*.
-//  Canonical keys: barbarian, hunter, paladin, ranger, war-dancer, warrior,
-//  white-mage, wizard.
+//  either a single key ("Paladin") or an array (["Paladin", "Warrior"]).
+//  Job names are normalized (lowercase, spaces to hyphens) to match 
+//  canonical keys defined in src/data/jobs.js.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function normalizeJob(job) {

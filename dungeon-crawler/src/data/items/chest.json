@@ -33,7 +33,15 @@
         "description": "Interlocking iron rings form a flexible shirt of armour.",
         "defence": 3,
         "value": 270,
-        "weight": 5
+        "weight": 5,
+        "job": [
+            "Paladin",
+            "Warrior",
+            "Barbarian",
+            "Ranger",
+            "Hunter",
+            "War Dancer"
+        ]
     },
     {
         "name": "Plate Cuirass",
@@ -44,7 +52,11 @@
         "description": "Heavy forged steel chest plate. Near impenetrable \u2014 if you can move in it.",
         "defence": 4,
         "value": 750,
-        "weight": 12
+        "weight": 12,
+        "job": [
+            "Paladin",
+            "Warrior"
+        ]
     },
     {
         "name": "Minotaur Cuirass",
@@ -63,7 +75,15 @@
         "statBonuses": {
             "dexterity": 1,
             "resilience": 1
-        }
+        },
+        "job": [
+            "Paladin",
+            "Warrior",
+            "Barbarian",
+            "Ranger",
+            "Hunter",
+            "War Dancer"
+        ]
     },
     {
         "name": "Amethyst Wardancer Cuirass",
@@ -180,6 +200,10 @@
             "ice": 0.1,
             "lightning": 0.1,
             "water": 0.1
-        }
+        },
+        "job": [
+            "White Mage",
+            "Wizard"
+        ]
     }
 ]

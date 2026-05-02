@@ -26,7 +26,7 @@ export function spawnLevel2Objects(ctx) {
 
 
     // ── Portal back to Level 0 ────────────────────────────────────────────────
-    addPortal(group, loader, 7, 1, 0, 0, 0, -0.85, 13, 13, 0);
+    addPortal(group, loader, 2, 1, 0, Math.PI / 2, -0.85, 0, 13, 13, 0);
 
     // ── New area: Spell Cabinet (Room A, north wall, row 3 col 5) ─────────────
     addSpellCabinet(group, loader, 5, 3, 0, 0, -0.7, ["Scroll of Resist Ice", "Scroll of Resist Fire"]);
@@ -35,12 +35,12 @@ export function spawnLevel2Objects(ctx) {
     // ── New area: Chest (Room C, south wall, row 13 col 9) ───────────────────
     addChest(group, loader, 9, 13, Math.PI, 0.7, [
         'Poison Dagger', 'Life Orb',
-        { name: 'Gold Coins', quantity: 20 }
+        { name: 'Gold Coins', quantity: 30 }
     ]);
 
     // ── Ice gauntlet reward chest (south wall of reward room, col 3 row 14) ──
     addChest(group, loader, 3, 14, Math.PI, 0.7, [
-        { name: 'Gold Coins', quantity: 100 },
+        { name: 'Gold Coins', quantity: 150 },
         "Hoarfrost Mantle",
         "Padded Vest"
     ]);
@@ -70,7 +70,7 @@ export function spawnLevel2Objects(ctx) {
     // ── Chests ────────────────────────────────────────────────────────────────
     // Two chests in the chest vault (col 1, rows 33–34)
     addChest(group, loader, 0.7, 34, Math.PI, 0.7, [
-        { name: 'Gold Coins', quantity: 10 },
+        { name: 'Gold Coins', quantity: 20 },
         'Mana Berry', 'Scroll of Fireball', 'Balance Pendant'
     ]);
     addChest(group, loader, 1.3, 34, Math.PI, 0.7, [
