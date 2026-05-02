@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { CELL } from '../../map.js';
 import { asset } from '../../assets.js';
 import { playNpcDialogue } from '../../audio.js';
+import { showDramaticUnlock } from '../../dramatic-banner.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  LEVEL 2 – The Deep Passage
@@ -155,6 +156,12 @@ export function spawnLevel2Objects(ctx) {
                         playNpcDialogue(1, 24, '/npcs/stance-npc/outro.mp3', 0.8, () => {
                             _despawnWithFlash(model, group, () => {
                                 setStanceNpcDeparted(true);
+                                new Audio(asset('/sounds/actions/stance-start.mp3'))
+                                    .play().catch(() => {});
+                                showDramaticUnlock(
+                                    'Stances Unlocked',
+                                    'A new tutor has set up shop in town — visit him to learn combat stances'
+                                );
                             });
                         });
                     };
