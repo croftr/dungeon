@@ -198,11 +198,13 @@ export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef 
   if (ammoDef && ammoDef.damageModifier) {
     raw = Math.round(raw * ammoDef.damageModifier);
   }
+  // damageReduction is physical-only — it represents armour plating that turns
+  // blades and arrows aside, not magical wards. Magic attacks ignore it.
   const dr = monster.damageReduction ?? 0;
   if (dr) raw = Math.round(raw * (1 - dr));
-  const statMitigation = Math.floor(
-    ((monster.stats?.resilience ?? 0) + (monster.stats?.vitality ?? 0)) * RESILIENCE_DAMAGE_FACTOR / 2
-  );
+  // Physical stat mitigation comes from VITALITY (body mass, sinew). Resilience
+  // is reserved for magical wards (see calcPlayerMagicDamage).
+  const statMitigation = Math.floor((monster.stats?.vitality ?? 0) * RESILIENCE_DAMAGE_FACTOR);
   const afterMit = Math.max(1, raw - statMitigation - (monster.defence ?? 0));
   const stanceMult = getStanceDamageMultiplier(character, monster);
   const physicalFinal = stanceMult === 1 ? afterMit : Math.max(1, Math.round(afterMit * stanceMult));
@@ -250,11 +252,14 @@ export function getElementalRiderBreakdown(character, monster, weaponDef, ammoDe
 
 /**
  * Damage dealt by a magic attack (FIREBALL).
- * Uses character INT instead of STR, and is reduced by the monster's VIT/RES stat mitigation.
+ * Uses character INT instead of STR. Reduced ONLY by the monster's RES — physical
+ * defence and damageReduction (armour plating) do not apply to magic. The element
+ * multiplier (resist/weak/vulnerable) is applied AFTER mitigation, so a vulnerable
+ * creature actually feels vulnerable rather than having its weakness eaten by soak.
  *
  * @param {object} character  Party member (needs stats.intelligence)
  * @param {object|null} weaponDef  Item definition (needs baseDamage)
- * @param {object} monster    Monster (needs stats.vitality, stats.resilience)
+ * @param {object} monster    Monster (needs stats.resilience)
  * @returns {number}          Final damage (minimum 1)
  */
 export function calcPlayerMagicDamage(character, weaponDef, monster, weaponIsHQ = false) {
@@ -273,23 +278,23 @@ export function calcPlayerMagicDamage(character, weaponDef, monster, weaponIsHQ 
     });
   }
 
-  // Apply per-element multiplier: family/monster resistance categories drive the
-  // multiplier (e.g. undead is "vulnerable" to holy → 2×). Spells with no element
-  // are treated as raw arcane and skip this step. Holy stance's
-  // damageElementMultiplier also applies here when the spell has an element.
+  // Magic mitigation: RES only. damageReduction (armour) and physical defence
+  // do not apply to magical attacks.
+  const statMitigation = Math.floor((monster.stats?.resilience ?? 0) * RESILIENCE_DAMAGE_FACTOR);
+  let afterMit = Math.max(1, raw - statMitigation);
+
+  // Apply per-element multiplier AFTER mitigation so vulnerability actually
+  // doubles the damage that gets through, instead of having its bonus eaten by
+  // soak. Spells with no element are treated as raw arcane and skip this step.
+  // Holy stance's damageElementMultiplier also applies when the spell has an element.
   const element = weaponDef?.element ?? null;
   if (element) {
     const monMult = getMonsterElementMultiplier(monster, element);
     const stanceElemMult = getStanceElementMultiplier(character, element);
-    raw = Math.round(raw * monMult * stanceElemMult);
+    if (monMult === 0) return 0; // immune — no damage at all
+    afterMit = Math.max(1, Math.round(afterMit * monMult * stanceElemMult));
   }
 
-  const dr = monster.damageReduction ?? 0;
-  if (dr) raw = Math.round(raw * (1 - dr));
-  const statMitigation = Math.floor(
-    ((monster.stats?.resilience ?? 0) + (monster.stats?.vitality ?? 0)) * RESILIENCE_DAMAGE_FACTOR / 2
-  );
-  const afterMit = Math.max(1, raw - statMitigation);
   const stanceMult = getStanceDamageMultiplier(character, monster) * getMagicDamageMultiplier(character);
   return stanceMult === 1 ? afterMit : Math.max(1, Math.round(afterMit * stanceMult));
 }

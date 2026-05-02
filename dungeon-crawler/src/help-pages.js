@@ -227,13 +227,15 @@ function buildCombatHtml() {
       <tr><td>Stat weight (STR / DEX / INT)</td><td>Each weapon weights stats differently.</td></tr>
       <tr><td>HQ forging</td><td>Permanent bonus stamped at the anvil.</td></tr>
       <tr><td>Family bonus</td><td>Extra damage vs. a named monster family.</td></tr>
-      <tr><td>Target VIT + RES</td><td>Halved, ×${resFactor}, subtracted as mitigation.</td></tr>
+      <tr><td>Target damageReduction</td><td>Armour plating — % cut applied to physical only.</td></tr>
+      <tr><td>Target VIT</td><td>×${resFactor}, subtracted as mitigation. (Body mass soaks blades.)</td></tr>
       <tr><td>Target Defence</td><td>Subtracted flat from the remainder.</td></tr>
       <tr><td>Stance multiplier</td><td>Final ×, e.g. Holy Stance vs. Undead.</td></tr>
     </table>
     <p class="help-aside">
       <b>Minimum damage is always 1.</b> A scratch is still a scratch — even the
-      mightiest hide must yield <i>something</i>.
+      mightiest hide must yield <i>something</i>. Note that <b>Resilience</b>
+      does not soak blades — it is reserved for magical wards (see the Grimoire).
     </p>
 
     <h2 class="help-h2">⚔ Monster Damage to You</h2>
@@ -309,8 +311,8 @@ function buildCombatHtml() {
       <tr><td><b>Strength</b></td><td>Heavier blows with most weapons. Scales melee damage.</td></tr>
       <tr><td><b>Dexterity</b></td><td>More hits land, more dodges of theirs. Scales bows &amp; daggers.</td></tr>
       <tr><td><b>Intelligence</b></td><td>+${MP_PER_INT} max MP per point. The fuel of the mage — see the Grimoire.</td></tr>
-      <tr><td><b>Vitality</b></td><td>+${HP_PER_VIT} max HP per point, and shared half of damage soak.</td></tr>
-      <tr><td><b>Resilience</b></td><td>+${SP_PER_RES} max SP per point, damage soak, and the wall against status effects.</td></tr>
+      <tr><td><b>Vitality</b></td><td>+${HP_PER_VIT} max HP per point. Soaks <b>physical</b> damage (×${RULES.resilienceDamageFactor} per point).</td></tr>
+      <tr><td><b>Resilience</b></td><td>+${SP_PER_RES} max SP per point. Soaks <b>magic</b> damage (×${RULES.resilienceDamageFactor} per point) and walls against status effects.</td></tr>
     </table>
 
     <h2 class="help-h2">⚔ A Word on Stances</h2>
@@ -395,11 +397,16 @@ function buildMagicHtml() {
     <table class="help-table">
       <tr><th>Step</th><th>What happens</th></tr>
       <tr><td>1. Base</td><td>Stat formula (typically scaled INT) + item bonuses.</td></tr>
-      <tr><td>2. Element</td><td>Multiplied by target's elemental factor (×0–×2).</td></tr>
-      <tr><td>3. Stance</td><td>Holy Stance &amp; kin add a final element multiplier.</td></tr>
-      <tr><td>4. Mitigation</td><td>Target VIT/RES soak as in physical combat.</td></tr>
-      <tr><td>5. Result</td><td>Minimum 1 damage on a successful cast.</td></tr>
+      <tr><td>2. Mitigation</td><td>Subtract target <b>RES × ${RULES.resilienceDamageFactor}</b>. Magic ignores armour and physical Defence entirely.</td></tr>
+      <tr><td>3. Element</td><td>Multiplied <i>after</i> mitigation by the target's elemental factor (×0 immune to ×2 vulnerable). Holy Stance &amp; kin layer a further element multiplier here.</td></tr>
+      <tr><td>4. Result</td><td>Minimum 1 damage on a successful non-immune cast. Immune targets take <b>0</b>.</td></tr>
     </table>
+    <p class="help-aside">
+      Why the order matters: the element multiplier is applied <b>after</b> soak,
+      so a "vulnerable" creature truly takes double the damage that gets through
+      — its weakness is no longer eaten by mitigation. This is what makes a
+      construct of pure iron melt before a flame, even with high RES.
+    </p>
 
     <h2 class="help-h2">✦ Will the Spell Even Land?</h2>
     <p>
@@ -491,7 +498,7 @@ function buildMagicHtml() {
       <tr><th>Stat</th><th>Why it matters to a mage</th></tr>
       <tr><td><b>Intelligence</b></td><td>Triple-blessed for the mage: damage &amp; healing magnitude, +${MP_PER_INT} max MP per point, <b>and</b> the chance your spell lands at all.</td></tr>
       <tr><td><b>Vitality</b></td><td>+${HP_PER_VIT} max HP per point. Boosts Regeneration; keeps you alive long enough to cast.</td></tr>
-      <tr><td><b>Resilience</b></td><td>+${SP_PER_RES} max SP per point. Resists hostile spells &amp; on-hit afflictions.</td></tr>
+      <tr><td><b>Resilience</b></td><td>+${SP_PER_RES} max SP per point. <b>The</b> stat for magic mitigation — soaks hostile spells (×${RULES.resilienceDamageFactor} per point) and walls against on-hit afflictions.</td></tr>
       <tr><td><b>Dexterity</b></td><td>Helps you dodge enemy blows while you incant. (Spell <i>accuracy</i> is INT, not DEX.)</td></tr>
     </table>
 
