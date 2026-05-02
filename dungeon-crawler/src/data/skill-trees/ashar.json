@@ -1,7 +1,8 @@
 {
   "nodes": [
     { "id": "start", "label": "Wizard Initiate",              "type": "start", "edges": ["n1"] },
-    { "id": "n1",    "label": "+2 Intelligence",              "type": "stat",  "benefit": { "intelligence": 2 },                  "icon": "/skills/stats-increase/intelligence_increase.webp", "edges": ["n2","n3","n4","n18","n21","n24"] },
+    { "id": "n1",    "label": "+2 Intelligence",              "type": "stat",  "benefit": { "intelligence": 2 },                  "icon": "/skills/stats-increase/intelligence_increase.webp", "edges": ["n2","n3","n4","n18","n21","n24","nAA"] },
+    { "id": "nAA",  "label": "Arcane Appraisal",            "type": "skill", "benefit": { "skill": "Arcane Appraisal" },         "icon": "/skills/arcane_ appraisal.webp",                     "edges": [] },
     { "id": "n2",    "label": "Arcane Lantern",               "type": "skill", "benefit": { "skill": "Arcane Lantern" },          "icon": "/skills/arcane-lantern.webp",                        "edges": ["n5","n6"] },
     { "id": "n3",    "label": "+1 Intelligence, +1 Resilience","type": "stat", "benefit": { "intelligence": 1, "resilience": 1 }, "icon": "/skills/stats-increase/mixed_stat_increase.webp",    "edges": ["n5","n6","n7"] },
     { "id": "n4",    "label": "Runic Scholar",                "type": "skill", "benefit": { "skill": "Runic Scholar" },           "icon": "/skills/runic-scholar.webp",                         "edges": ["n6","n7"] },
@@ -44,6 +45,7 @@
     "n14":  [110, 580],
     "n15":  [350, 580],
     "n17":  [350, 660],
+    "nAA":  [590, 130],
     "n18":  [830, 220],
     "n19":  [830, 400],
     "n20":  [830, 580],

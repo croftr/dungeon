@@ -33,6 +33,7 @@ import {
   triggerEntangleEffect,
   triggerSunderArmorEffect,
   triggerBerserkEffect,
+  triggerCombustEffect,
   triggerWarcryEffect,
   triggerArcaneLanternEffect,
   triggerRunicScholarEffect,
@@ -1065,17 +1066,12 @@ function populateTooltip(obj, showBuyPrice = false) {
     slotEl.textContent = 'Skill type: ' + (obj.type || 'Generic');
     actionEl.textContent = obj.cooldownMs ? `Cooldown: ${obj.cooldownMs / 1000}s` : '';
     descEl.textContent = obj.description;
-    statsEl.style.display = obj.potency ? 'flex' : 'none';
-
-    // Clear and show potency if applicable
-    if (obj.potency) {
-      statsEl.innerHTML = `
-                <div class="detail-stat-row">
-                    <span>Current Power</span>
-                    <span style="color:#c0a0f8">${obj.potency}</span>
-                </div>
-            `;
-    }
+    const skillRows = [];
+    if (obj.type === 'buff' && obj.durationMs != null) skillRows.push(`<div class="detail-stat-row"><span>Duration</span><span>${obj.durationMs / 1000}s</span></div>`);
+    if (obj.potency) skillRows.push(`<div class="detail-stat-row"><span>Current Power</span><span style="color:#c0a0f8">${obj.potency}</span></div>`);
+    statsEl.style.display = skillRows.length ? 'flex' : 'none';
+    statsEl.style.flexDirection = 'column';
+    statsEl.innerHTML = skillRows.join('');
     return;
   }
 
@@ -1091,6 +1087,7 @@ function populateTooltip(obj, showBuyPrice = false) {
     descEl.textContent = spellDef?.description ?? obj.description ?? '';
     const rows = [];
     if (spellDef?.magnitudeFormula) rows.push(`<div class="detail-stat-row"><span>Magnitude</span><span>${spellDef.magnitudeFormula}${spellDef.magnitudeScale != null ? ' × ' + spellDef.magnitudeScale : ''}</span></div>`);
+    if (spellType === 'buff' && spellDef?.statusDuration != null) rows.push(`<div class="detail-stat-row"><span>Duration</span><span>${spellDef.statusDuration}s</span></div>`);
     rows.push(`<div class="detail-stat-row"><span>MP Cost</span><span>${spellDef?.mpCost ?? '?'}</span></div>`);
     statsEl.innerHTML = rows.join('');
     statsEl.style.display = 'flex';
@@ -4009,9 +4006,11 @@ export function useHand(memberIndex, hand, silent = false) {
   const ammoItem = m.equipment?.ammo;
   const ammoDef = ammoItem ? getItemDef(ammoItem.name) : null;
   const primaryElement = getPrimaryAttackElement(def, ammoDef);
+  const isCombusting = !isSpell && skillsState.combust?.active && skillsState.combust?.actorName === m.name && now < skillsState.combust.expiresAt;
+  const swipeElement = isCombusting ? 'fire' : primaryElement;
 
   // Play the visual + audio animation regardless of whether a target exists
-  playAction(attackType, hand, memberIndex, primaryElement);
+  playAction(attackType, hand, memberIndex, swipeElement);
   if (isSpell || isBuff) _dispatchSpellVFX(attackType, target);
 
   if (isBuff) {
@@ -4077,13 +4076,13 @@ export function useHand(memberIndex, hand, silent = false) {
         daTarget = _closestMonsterInFront(maxRange);
         if (daTarget) {
           daResult = attackMonster(daTarget.id, m, def, attackType, ammoDef, !!item?.hq);
-          playAction(attackType, hand, memberIndex, primaryElement);
+          playAction(attackType, hand, memberIndex, swipeElement);
           if (isSpell || isBuff) _dispatchSpellVFX(attackType, daTarget);
         }
       } else {
         daTarget = target;
         daResult = attackMonster(target.id, m, def, attackType, ammoDef, !!item?.hq);
-        playAction(attackType, hand, memberIndex);
+        playAction(attackType, hand, memberIndex, swipeElement);
         if (isSpell || isBuff) _dispatchSpellVFX(attackType, daTarget);
       }
       if (daResult) {
@@ -4459,6 +4458,7 @@ function useSkill(memberIndex) {
   }
 
   if (skill.name === "Hunter's Eye") { _useHuntersEye(m, memberIndex); return; }
+  if (skill.name === 'Arcane Appraisal') { _useHuntersEye(m, memberIndex); return; }
   if (skill.name === 'Sanctuary') { _useSanctuary(m, memberIndex); return; }
   if (skill.name === 'Holy Radiance') { _useHolyRadiance(m, memberIndex); return; }
   if (skill.name === 'Arcane Lantern') { _useArcaneLantern(m, memberIndex); return; }
@@ -4468,6 +4468,7 @@ function useSkill(memberIndex) {
   if (skill.name === 'Entangle') { _useEntangle(m, memberIndex); return; }
   if (skill.name === 'Sunder Armor') { _useSunderArmor(m, memberIndex); return; }
   if (skill.name === 'Berserk') { _useBerserk(m, memberIndex); return; }
+  if (skill.name === 'Combust') { _useCombust(m, memberIndex); return; }
   if (skill.name === 'Warcry') { _useWarcry(m, memberIndex); return; }
   if (skill.name === 'Whirlwind') { _useWhirlwind(m, memberIndex); return; }
   if (skill.name === 'War Dance') { _useWarDance(m, memberIndex); return; }
@@ -4490,35 +4491,36 @@ function useSkill(memberIndex) {
 
 // ── Hunter's Eye (Elrond) ──────────────────────────────────────────────────
 function _useHuntersEye(member, memberIndex) {
+  const skillName = member.equipment.skill.name;
   // Always allow manual deactivation
   if (getHuntersEyeTargetId() !== null) {
     setHuntersEyeTarget(null);
-    showMessage(`${member.name} lowers Hunter's Eye.`);
+    showMessage(`${member.name} lowers ${skillName}.`);
     return;
   }
 
   const now = performance.now();
   if (now < _huntersEyeCooldownEnd) {
     const remaining = Math.ceil((_huntersEyeCooldownEnd - now) / 1000);
-    showMessage(`<span style="color:#f0b040">Hunter's Eye</span> — ready in ${remaining}s`, 2000);
+    showMessage(`<span style="color:#f0b040">${skillName}</span> — ready in ${remaining}s`, 2000);
     return;
   }
 
   const target = getInRangeMonster();
   if (!target) {
-    showMessage(`<span style="color:#f0b040">Hunter's Eye</span> — no enemy in range. Engage a monster first!`, 2500);
+    showMessage(`<span style="color:#f0b040">${skillName}</span> — no enemy in range. Engage a monster first!`, 2500);
     return;
   }
 
-  const def = getItemDef(member.equipment.skill.name);
+  const def = getItemDef(skillName);
   const delayMs = (def?.delay ?? 60) * 1000;
   _huntersEyeCooldownEnd = now + delayMs;
-  lastAttackTimes[`${memberIndex}-skill-Hunter's Eye`] = now;
+  lastAttackTimes[`${memberIndex}-skill-${skillName}`] = now;
   setHuntersEyeTarget(target.id);
   playSkillSound('hunters-eye');
   triggerHuntersEyeEffect();
-  showMessage(`<span style="color:#f0b040">Hunter's Eye</span> — ${member.name} reads the ${target.name}!`, 2500);
-  addLogEntry({ type: 'skill', actor: member.name, skillName: "Hunter's Eye" });
+  showMessage(`<span style="color:#f0b040">${skillName}</span> — ${member.name} reads the ${target.name}!`, 2500);
+  addLogEntry({ type: 'skill', actor: member.name, skillName });
   _startSkillCooldownUI(memberIndex, _huntersEyeCooldownEnd);
 }
 
@@ -4664,6 +4666,48 @@ function _useBerserk(member, memberIndex) {
   }, berserkDurationMs);
 
   _startSkillCooldownUI(memberIndex, _berserkCooldownEnd);
+}
+
+// ── Combust (Korg) ─────────────────────────────────────────────────────────
+const COMBUST_COOLDOWN_MS = SKILLS_DATA['Combust'].cooldownMs;
+const COMBUST_DURATION_MS = SKILLS_DATA['Combust'].durationMs;
+let _combustCooldownEnd = 0;
+let _combustExpireTimer = null;
+
+function _useCombust(member, memberIndex) {
+  const now = performance.now();
+  if (now < _combustCooldownEnd) {
+    const remaining = Math.ceil((_combustCooldownEnd - now) / 1000);
+    showMessage(`<span style="color:#ff6a00">Combust</span> — ready in ${remaining}s`, 2000);
+    return;
+  }
+
+  const def = getItemDef(member.equipment.skill.name);
+  const delayMs = (def?.delay ?? 120) * 1000;
+  const combustDurationMs = COMBUST_DURATION_MS + (member.skillDurationBonusMs ?? 0);
+  skillsState.combust.active = true;
+  skillsState.combust.actorName = member.name;
+  skillsState.combust.expiresAt = now + combustDurationMs;
+  _combustCooldownEnd = now + delayMs;
+  lastAttackTimes[`${memberIndex}-skill-Combust`] = now;
+
+  playSkillSound('combust');
+  triggerCombustEffect();
+  showMessage(
+    `<span style="color:#ff6a00">✦ Combust</span> — ${member.name} ignites! +50% fire resist, +10 fire damage for 30s.`,
+    3000
+  );
+  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Combust', note: '+50% fire res, +10 fire dmg for 30s' });
+
+  if (_combustExpireTimer) clearTimeout(_combustExpireTimer);
+  _combustExpireTimer = setTimeout(() => {
+    skillsState.combust.active = false;
+    skillsState.combust.actorName = null;
+    showMessage(`<span style="color:#ff6a00">Combust</span> fades — the flames extinguish.`, 2500);
+    _combustExpireTimer = null;
+  }, combustDurationMs);
+
+  _startSkillCooldownUI(memberIndex, _combustCooldownEnd);
 }
 
 // ── Warcry (Korg) ──────────────────────────────────────────────────────────

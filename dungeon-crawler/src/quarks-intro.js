@@ -344,6 +344,74 @@ export function triggerBerserkEffect() {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
+//  COMBUST — Korg (Barbarian)
+//  Towering column of fire erupting upward with outward ember ring
+// ══════════════════════════════════════════════════════════════════════════
+export function triggerCombustEffect() {
+    if (!batchRenderer || !sceneRef || !cameraRef) return;
+    const tex = createGlowTexture();
+    const pos = cameraRef.position;
+
+    // Dense upward fire column — hot white-yellow core fading to deep orange-red
+    const column = new ParticleSystem({
+        duration: 1.4, looping: false,
+        startLife: new IntervalValue(0.6, 1.6),
+        startSpeed: new IntervalValue(2.0, 6.5),
+        startSize: new IntervalValue(0.10, 0.40),
+        startColor: new ConstantColor(new Vector4(1, 0.5, 0.0, 1)),
+        worldSpace: true, maxParticle: 220,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(180), cycle: 1, interval: 0.004, probability: 1 }],
+        shape: new ConeEmitter({ radius: 0.25, thickness: 1, arc: Math.PI * 2, angle: Math.PI / 5 }),
+        material: _mat(tex), startTileIndex: new ConstantValue(0),
+        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    column.addBehavior(new ColorOverLife(new ColorRange(
+        new Vector4(1.0, 0.95, 0.3, 1),
+        new Vector4(0.85, 0.05, 0.0, 0),
+    )));
+    column.addBehavior(new SizeOverLife(FADE_OUT));
+    _spawn(column, pos, 2.8);
+
+    // Outward ember ring at ground level
+    const ring = new ParticleSystem({
+        duration: 0.9, looping: false,
+        startLife: new IntervalValue(0.4, 1.2),
+        startSpeed: new IntervalValue(3.5, 8.0),
+        startSize: new IntervalValue(0.05, 0.18),
+        startColor: new ConstantColor(new Vector4(1, 0.4, 0.0, 1)),
+        worldSpace: true, maxParticle: 120,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(90), cycle: 1, interval: 0.008, probability: 1 }],
+        shape: new CircleEmitter({ radius: 0.2, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex), startTileIndex: new ConstantValue(0),
+        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    ring.addBehavior(new ColorOverLife(new ColorRange(new Vector4(1, 0.7, 0.1, 1), new Vector4(0.7, 0.0, 0.0, 0))));
+    ring.addBehavior(new SizeOverLife(GROW_FADE));
+    ring.emitter.rotation.set(-Math.PI / 2, 0, 0);
+    _spawn(ring, new THREE.Vector3().copy(pos).add(new THREE.Vector3(0, -0.5, 0)), 2.0);
+
+    // Lingering sparks drifting up and outward
+    const sparks = new ParticleSystem({
+        duration: 2.0, looping: false,
+        startLife: new IntervalValue(1.0, 2.5),
+        startSpeed: new IntervalValue(0.5, 2.5),
+        startSize: new IntervalValue(0.03, 0.09),
+        startColor: new ConstantColor(new Vector4(1, 0.6, 0.1, 1)),
+        worldSpace: true, maxParticle: 80,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(60), cycle: 1, interval: 0.02, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.5, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex), startTileIndex: new ConstantValue(0),
+        uTileCount: 1, vTileCount: 1, renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    sparks.addBehavior(new ColorOverLife(new ColorRange(new Vector4(1, 0.8, 0.2, 1), new Vector4(0.5, 0.0, 0.0, 0))));
+    sparks.addBehavior(new SizeOverLife(FADE_OUT));
+    _spawn(sparks, pos, 4.0);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
 //  WARCRY — Korg (Barbarian)
 //  Powerful amber/golden outward shockwave  (party-wide inspiration)
 // ══════════════════════════════════════════════════════════════════════════

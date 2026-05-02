@@ -485,6 +485,7 @@ export function clearCombat() {
 
 const SKILL_SOUND_MAP = {
   'berserk': { url: asset('/sounds/actions/skills/berserk.mp3'), offset: 0.0 },
+  'combust': { url: asset('/sounds/actions/fireball.mp3'), offset: 0.0 },
   'cure': { url: asset('/sounds/actions/skills/cure.mp3'), offset: 0.0 },
   'holy': { url: asset('/sounds/actions/skills/holy.mp3'), offset: 0.0 },
   'hunters-eye': { url: asset('/sounds/actions/skills/hunters-eye.mp3'), offset: 0.0 },

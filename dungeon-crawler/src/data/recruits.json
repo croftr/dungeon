@@ -169,7 +169,9 @@
         "stances": [
             "curatio"
         ],
-        "startingSkills": [],
+        "startingSkills": [
+            "Arcane Appraisal"
+        ],
         "startingSpells": [
             "Fireball",
             "Heal"
@@ -230,8 +232,7 @@
         ],
         "startingActionSlots": [
             "Cure Poison Potion",
-            "Minor Healing Potion",
-            null
+            "Minor Healing Potion"
         ],
         "gridCol": 11,
         "gridRow": 8,

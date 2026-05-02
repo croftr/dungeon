@@ -7,6 +7,14 @@
         "effectType": "reveal",
         "effectTarget": "monster"
     },
+    "Arcane Appraisal": {
+        "type": "debuff",
+        "icon": "/skills/arcane_ appraisal.webp",
+        "description": "Reveal full stats of the engaged monster — HP, STR, DEX, VIT, INT, RES and Defence. Only usable in combat.",
+        "cooldownMs": 90000,
+        "effectType": "reveal",
+        "effectTarget": "monster"
+    },
     "Sanctuary": {
         "type": "buff",
         "icon": "/skills/sancturary.webp",
@@ -92,6 +100,17 @@
         "stateKey": "berserk",
         "magnitude": 1.8,
         "magnitudeBonusMode": "percent"
+    },
+    "Combust": {
+        "type": "buff",
+        "icon": "/skills/combust.webp",
+        "description": "Ignites with inner fire, gaining 50% fire resistance and adding 10 bonus fire damage to all attacks for 30s. Cooldown: 120s.",
+        "cooldownMs": 120000,
+        "durationMs": 30000,
+        "effectType": "combustBuff",
+        "effectTarget": "self",
+        "stateKey": "combust",
+        "magnitude": 10
     },
     "Miners Light": {
         "type": "buff",

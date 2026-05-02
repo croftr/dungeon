@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
 import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createIceCloud, createCrocodileSparkle, createHellSpawn, createBloodSplatter, createGreenBloodSplatter, createCrowWizardFireAoe, createCrowWizardCure, createCrowWizardFear, createElementalBurst } from './particles.js';
-import { ELEMENTS } from './elements.js';
+import { ELEMENTS, getMonsterElementMultiplier } from './elements.js';
 import MONSTER_FAMILIES from './data/monster-families.json';
 import { CELL, isPassable } from './map.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
@@ -2496,10 +2496,23 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   // Elemental info for the battle log: physical attacks expose a per-element
   // rider breakdown (already accounts for monster weak/resist multipliers and
   // stance bonus); magic spells expose the spell's element.
-  const elementalBreakdown = isMagic
+  let elementalBreakdown = isMagic
     ? null
     : getElementalRiderBreakdown(effChar, mSunder, weaponDef, ammoDef).breakdown;
   const spellElement = isMagic ? (weaponDef?.element ?? null) : null;
+
+  // Combust — flat fire elemental rider added on top of weapon fire damage when active
+  if (!isMagic && skillsState.combust?.active && skillsState.combust?.actorName === character.name && now < skillsState.combust.expiresAt) {
+    const fireMult = getMonsterElementMultiplier(mSunder, 'fire');
+    if (fireMult > 0) {
+      const fireRider = Math.round(10 * fireMult);
+      if (fireRider > 0) {
+        damage += fireRider;
+        if (!elementalBreakdown) elementalBreakdown = {};
+        elementalBreakdown.fire = (elementalBreakdown.fire ?? 0) + fireRider;
+      }
+    }
+  }
 
   const formula = {
     weaponBase: weaponDef?.baseDamage ?? 0,

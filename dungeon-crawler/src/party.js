@@ -1090,6 +1090,9 @@ export function getEffectiveElementalResistances(member) {
       add(elem, resistance);
     }
   }
+  if (skillsState.combust?.active && skillsState.combust?.actorName === member.name && now < skillsState.combust.expiresAt) {
+    add('fire', 0.5);
+  }
   return combined;
 }
 
@@ -1360,6 +1363,7 @@ function getActiveEffectsForMember(m) {
     active.push(hasMiners ? 'Miners Light' : 'Arcane Lantern');
   }
   if (skillsState.berserk.active && skillsState.berserk.actorName === m.name && now < skillsState.berserk.expiresAt) active.push('Berserk');
+  if (skillsState.combust.active && skillsState.combust.actorName === m.name && now < skillsState.combust.expiresAt) active.push('Combust');
   if (skillsState.whirlwind.active && skillsState.whirlwind.actorName === m.name && now < skillsState.whirlwind.expiresAt) active.push('Whirlwind');
   if (skillsState.trueShot.active && skillsState.trueShot.actorName === m.name && now < skillsState.trueShot.expiresAt) active.push('True Shot');
   if (skillsState.doubleAttack.active && skillsState.doubleAttack.actorName === m.name && now < skillsState.doubleAttack.expiresAt) active.push('Double Attack');

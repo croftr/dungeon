@@ -87,4 +87,11 @@ export const skillsState = {
     expiresAt: 0,
     magnitude: 1, // resolved at cast time
   },
+
+  /** Combust — adds flat fire elemental rider to attacks and grants fire resistance. */
+  combust: {
+    active: false,
+    actorName: null,
+    expiresAt: 0,
+  },
 };
