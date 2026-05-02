@@ -45,6 +45,9 @@
         "weight": 4.5,
         "statBonuses": {
             "strength": 1
+        },
+        "elementalResistances": {
+            "water": 0.1
         }
     },
     {
@@ -152,6 +155,9 @@
         "statBonuses": {
             "intelligence": 1,
             "resilience": 1
+        },
+        "elementalResistances": {
+            "dark": 0.2
         },
         "job": [
             "Wizard",

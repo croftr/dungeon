@@ -42,6 +42,10 @@
         },
         "statusResistances": {
             "fear": 0.25
+        },
+        "elementalResistances": {
+            "ice": 0.1,
+            "water": 0.1
         }
     }
 ]

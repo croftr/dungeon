@@ -128,6 +128,9 @@
         },
         "skillBonuses": {
             "fire": 1
+        },
+        "elementalResistances": {
+            "fire": 0.2
         }
     }
 ]

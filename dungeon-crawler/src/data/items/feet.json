@@ -134,6 +134,9 @@
         "statBonuses": {
             "resilience": 1,
             "vitality": 1
+        },
+        "elementalResistances": {
+            "water": 0.1
         }
     }
 ]

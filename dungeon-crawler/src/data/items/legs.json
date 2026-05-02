@@ -122,6 +122,10 @@
         "statBonuses": {
             "vitality": 1,
             "resilience": 1
+        },
+        "elementalResistances": {
+            "fire": 0.1,
+            "ice": 0.1
         }
     },
     {
@@ -135,6 +139,10 @@
         "statBonuses": {
             "vitality": 1,
             "resilience": 1
+        },
+        "elementalResistances": {
+            "lightning": 0.1,
+            "water": 0.1
         }
     }
 ]
