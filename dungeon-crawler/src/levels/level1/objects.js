@@ -1,5 +1,6 @@
 import { CELL } from '../../map.js';
 import { asset } from '../../assets.js';
+import { showDramaticUnlock } from '../../dramatic-banner.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  LEVEL 1 – The Western Dungeon
@@ -37,7 +38,15 @@ export function spawnLevel1Objects(ctx) {
             scale: 0.6,
             greetingModel: '/npcs/monster-npc/agree-gesture.glb',
             greetingAudio: ['/npcs/monster-npc/thank-you.mp3'],
-            playOnce: true
+            playOnce: true,
+            onGreeting: () => {
+                setTimeout(() => {
+                    showDramaticUnlock(
+                        'Essence Crafting Unlocked',
+                        'Harvest essences from fallen foes and forge them into powerful gear at the anvil in town'
+                    );
+                }, 2000);
+            }
         });
     }
 

@@ -9,6 +9,7 @@ import { getItemDef } from './items.js';
 import { showMessage } from './minimap.js';
 import { addItemToInventory, consumeItemAt } from './equipment.js';
 import QUESTS from './data/quests.json';
+import { getHelpTopicsForNpc, getHelpPage, openHelpPage } from './help-pages.js';
 
 // ── State ────────────────────────────────────────────────────────────────────
 // questId → 'available' | 'accepted' | 'completed'
@@ -74,11 +75,12 @@ export function renderMerchantQuestPanel(npcId) {
     const container = document.getElementById('merchant-quest-body');
     if (!container) return;
     const npcQuests = QUESTS.filter(q => q.giver === npcId);
-    if (!npcQuests.length) {
+    const helpTopics = getHelpTopicsForNpc(npcId);
+    if (!npcQuests.length && !helpTopics.length) {
         container.innerHTML = '<div class="merchant-quest-empty">No quests available.</div>';
         return;
     }
-    _renderQuestList(container, npcQuests);
+    _renderQuestList(container, npcQuests, npcId);
 }
 
 export function openQuestDialog(npcId) {
@@ -88,7 +90,7 @@ export function openQuestDialog(npcId) {
     const overlay = document.getElementById('quest-dialog-overlay');
     const body = document.getElementById('quest-dialog-body');
 
-    _renderQuestList(body, npcQuests);
+    _renderQuestList(body, npcQuests, npcId);
 
     overlay.classList.remove('chest-hidden');
     _questDialogOpen = true;
@@ -99,7 +101,7 @@ function _closeQuestDialog() {
     _questDialogOpen = false;
 }
 
-function _renderQuestList(body, npcQuests) {
+function _renderQuestList(body, npcQuests, npcId = null) {
     body.innerHTML = '';
     const list = document.createElement('div');
     list.className = 'quest-list';
@@ -132,15 +134,49 @@ function _renderQuestList(body, npcQuests) {
         row.appendChild(badge);
 
         if (!locked) {
-            row.addEventListener('click', () => _showQuestDetail(body, npcQuests, q));
+            row.addEventListener('click', () => _showQuestDetail(body, npcQuests, q, npcId));
         }
         list.appendChild(row);
     });
 
     body.appendChild(list);
+
+    // Append help-page entries (lore topics) for this NPC, if any.
+    const helpTopics = npcId ? getHelpTopicsForNpc(npcId) : [];
+    if (helpTopics.length) {
+        const header = document.createElement('div');
+        header.className = 'merchant-quest-panel-label help-topic-section-label';
+        header.textContent = 'Lore & Knowledge';
+        body.appendChild(header);
+
+        const helpList = document.createElement('div');
+        helpList.className = 'quest-list help-topic-list';
+        helpTopics.forEach(topicId => {
+            const page = getHelpPage(topicId);
+            if (!page) return;
+            const row = document.createElement('div');
+            row.className = 'quest-list-item help-topic-item';
+            row.style.setProperty('--help-accent', page.accent);
+
+            const mark = document.createElement('span');
+            mark.className = 'help-topic-mark';
+            mark.textContent = topicId === 'magic' ? '✦' : '⚔';
+            mark.style.color = page.accent;
+
+            const name = document.createElement('span');
+            name.className = 'quest-list-name';
+            name.textContent = page.listLabel;
+
+            row.appendChild(mark);
+            row.appendChild(name);
+            row.addEventListener('click', () => openHelpPage(topicId));
+            helpList.appendChild(row);
+        });
+        body.appendChild(helpList);
+    }
 }
 
-function _showQuestDetail(body, npcQuests, quest) {
+function _showQuestDetail(body, npcQuests, quest, npcId = null) {
     const status = _questLog[quest.id] || 'available';
     const met = status === 'accepted' && _checkQuestRequirements(quest);
     const useCompletion = met || status === 'completed';
@@ -192,7 +228,7 @@ function _showQuestDetail(body, npcQuests, quest) {
             completeBtn.textContent = 'Complete Quest';
             completeBtn.addEventListener('click', () => {
                 completeBtn.disabled = true;
-                _completeQuest(body, npcQuests, quest);
+                _completeQuest(body, npcQuests, quest, npcId);
             });
             btnRow.appendChild(completeBtn);
         }
@@ -215,7 +251,7 @@ function _showQuestDetail(body, npcQuests, quest) {
                 _giveRewardItems(quest.rewardItems);
             }
             // Re-render the list so badge updates
-            _renderQuestList(body, npcQuests);
+            _renderQuestList(body, npcQuests, npcId);
         });
         btnRow.appendChild(acceptBtn);
 
@@ -223,7 +259,7 @@ function _showQuestDetail(body, npcQuests, quest) {
         declineBtn.className = 'quest-btn quest-btn-decline';
         declineBtn.textContent = 'Decline';
         declineBtn.addEventListener('click', () => {
-            _renderQuestList(body, npcQuests);
+            _renderQuestList(body, npcQuests, npcId);
         });
         btnRow.appendChild(declineBtn);
     } else {
@@ -231,7 +267,7 @@ function _showQuestDetail(body, npcQuests, quest) {
         backBtn.className = 'quest-btn quest-btn-decline';
         backBtn.textContent = 'Back';
         backBtn.addEventListener('click', () => {
-            _renderQuestList(body, npcQuests);
+            _renderQuestList(body, npcQuests, npcId);
         });
         btnRow.appendChild(backBtn);
     }
@@ -264,7 +300,7 @@ function _checkQuestRequirements(quest) {
     return true;
 }
 
-function _completeQuest(body, npcQuests, quest) {
+function _completeQuest(body, npcQuests, quest, npcId = null) {
     // 1. Remove required items (unless quest flags them as kept).
     //    Stacked items are decremented by 1 rather than having the whole stack removed.
     if (quest.requiredItems && !quest.keepRequiredItems) {
@@ -289,7 +325,7 @@ function _completeQuest(body, npcQuests, quest) {
 
     // 4. Re-render the list view (handles merchant quest tab where dialog doesn't close)
     if (body && body.isConnected) {
-        _renderQuestList(body, npcQuests);
+        _renderQuestList(body, npcQuests, npcId);
     }
 
     // 5. Give rewards and show modal immediately

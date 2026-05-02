@@ -2,7 +2,15 @@
 // (e.g. "Stances Unlocked" after meeting the stance NPC). Styled to match the
 // level-up overlay's gold-on-black theme.
 
+import { asset } from './assets.js';
+
 export function showDramaticUnlock(title, subtitle = '') {
+  try {
+    const audio = new Audio(asset('/sounds/quest-accepted.mp3'));
+    audio.volume = 0.9;
+    audio.play().catch(() => {});
+  } catch (e) { /* ignore */ }
+
   let overlay = document.getElementById('dramatic-unlock-overlay');
   if (!overlay) {
     overlay = document.createElement('div');

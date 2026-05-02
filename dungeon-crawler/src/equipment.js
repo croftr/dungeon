@@ -39,6 +39,7 @@ import {
   triggerManaTapEffect,
   triggerFireballEffect,
   triggerFrostboltEffect,
+  triggerWaterboltEffect,
   triggerLightningboltEffect,
   triggerHolyboltEffect,
   triggerDarkboltEffect,
@@ -73,6 +74,13 @@ function _dispatchSpellVFX(attackType, target = null) {
         : 2;
       triggerFrostboltEffect(dist);
       // frostbolt audio handled by playActionSound inside playAction
+      break;
+    }
+    case 'waterbolt': {
+      const dist = target
+        ? Math.abs(target.gridRow - player.gridRow) + Math.abs(target.gridCol - player.gridCol)
+        : 2;
+      triggerWaterboltEffect(dist);
       break;
     }
     case 'lightningbolt': {
@@ -3913,7 +3921,7 @@ export function useHand(memberIndex, hand, silent = false) {
     return;
   }
 
-  const isRanged = attackType === ACTIONS.SHOOT || attackType === ACTIONS.FIREBALL || attackType === ACTIONS.FROSTBOLT || attackType === ACTIONS.LIGHTNINGBOLT || attackType === ACTIONS.HOLYBOLT || attackType === ACTIONS.DARKBOLT || attackType === ACTIONS.BANISHMENT || attackType === 'incinerate';
+  const isRanged = attackType === ACTIONS.SHOOT || attackType === ACTIONS.FIREBALL || attackType === ACTIONS.FROSTBOLT || attackType === ACTIONS.WATERBOLT || attackType === ACTIONS.LIGHTNINGBOLT || attackType === ACTIONS.HOLYBOLT || attackType === ACTIONS.DARKBOLT || attackType === ACTIONS.BANISHMENT || attackType === 'incinerate';
   const isBuff = attackType === ACTIONS.REGENERATE;
 
   // Back-row members can only melee if their front partner is dead (stepped up).

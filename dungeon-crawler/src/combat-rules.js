@@ -94,7 +94,28 @@ export function playerHitChance(character, monster, weaponDef = null) {
           chance += skillDef.magnitude || 0;
         }
       }
-      if (skillDef?.isPassive && name === 'Pyromancer' && (weaponDef?.attackType === 'fireball' || weaponDef?.attackType === 'incinerate')) {
+    });
+  }
+
+  return clamp(chance, MIN_HIT_CHANCE, MAX_HIT_CHANCE);
+}
+
+/**
+ * Probability (0–1) that `character` lands a direct-damage spell on `monster`.
+ * Mirrors the physical hit formula but contests INT vs INT — a focused mind
+ * against a focused mind. The Pyromancer passive's accuracyMagnitude still
+ * applies to Fireball and Incinerate.
+ */
+export function playerSpellHitChance(character, monster, spellDef = null) {
+  const intDiff = (character.stats?.intelligence ?? 10) - (monster.stats?.intelligence ?? 10);
+  let chance = BASE_PLAYER_HIT_CHANCE + intDiff * DEX_HIT_MODIFIER;
+
+  if (character.skills) {
+    character.skills.forEach(skill => {
+      const name = typeof skill === 'string' ? skill : skill.name;
+      const skillDef = SKILLS_DATA[name];
+      if (skillDef?.isPassive && name === 'Pyromancer'
+          && (spellDef?.attackType === 'fireball' || spellDef?.attackType === 'incinerate')) {
         chance += skillDef.accuracyMagnitude || 0;
       }
     });

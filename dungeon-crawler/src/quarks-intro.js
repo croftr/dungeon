@@ -723,6 +723,99 @@ function _spawnFrostboltImpact(pos, tex) {
         new Vector4(0.05, 0.3, 0.8, 0),   // fades to deep ice-blue
     )));
     shatter.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(0.3, 1.0, 0.8, 0), 0]])));
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  WATERBOLT — water-element projectile
+//  Watery core → cyan → deep-blue orb flying forward, splashing on impact
+// ══════════════════════════════════════════════════════════════════════════
+export function triggerWaterboltEffect(travelCells = 2) {
+    if (!batchRenderer || !sceneRef || !cameraRef) return;
+    const tex = createGlowTexture();
+    const dir = new THREE.Vector3();
+    cameraRef.getWorldDirection(dir);
+
+    const WORLD_PER_CELL = 2;
+    const travelDist = travelCells * WORLD_PER_CELL;
+    const SPEED = 12;
+    const travelMs = (travelDist / SPEED) * 1000;
+
+    // ── Watery orb sprite that flies forward ─────────────────────────────────
+    const orbMat = new THREE.SpriteMaterial({
+        map: tex, color: 0x29b6f6,
+        blending: THREE.AdditiveBlending, transparent: true, depthWrite: false,
+    });
+    const orb = new THREE.Sprite(orbMat);
+    orb.scale.setScalar(0.55);
+    const startPos = new THREE.Vector3().copy(cameraRef.position).addScaledVector(dir, 0.8);
+    const endPos = startPos.clone().addScaledVector(dir, travelDist);
+    orb.position.copy(startPos);
+    sceneRef.add(orb);
+
+    // ── Water drop trail: tiny liquid bursts spawned every 50 ms ─────────────
+    let trailActive = true;
+    const trailId = setInterval(() => {
+        if (!trailActive || !batchRenderer || !sceneRef) return;
+        const burst = new ParticleSystem({
+            duration: 0.2, looping: false,
+            startLife: new IntervalValue(0.12, 0.28),
+            startSpeed: new IntervalValue(0.15, 0.7),
+            startSize: new IntervalValue(0.04, 0.14),
+            startColor: new ConstantColor(new Vector4(0.1, 0.6, 1.0, 0.9)),
+            worldSpace: true, maxParticle: 12,
+            emissionOverTime: new ConstantValue(0),
+            emissionBursts: [{ time: 0, count: new ConstantValue(8), cycle: 1, interval: 0.01, probability: 1 }],
+            shape: new SphereEmitter({ radius: 0.07, thickness: 1, arc: Math.PI * 2 }),
+            material: _mat(tex),
+            startTileIndex: new ConstantValue(0), uTileCount: 1, vTileCount: 1,
+            renderMode: RenderMode.BillBoard, renderOrder: 2,
+        });
+        burst.addBehavior(new ColorOverLife(new ColorRange(
+            new Vector4(0.4, 0.8, 1.0, 1),
+            new Vector4(0.0, 0.3, 0.8, 0),
+        )));
+        burst.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(1, 0.6, 0.2, 0), 0]])));
+        _spawn(burst, orb.position.clone(), 0.55);
+    }, 50);
+
+    // ── Animate orb, then splash on impact ───────────────────────────────────
+    const startTime = performance.now();
+    function animateOrb() {
+        const t = Math.min((performance.now() - startTime) / travelMs, 1);
+        orb.position.lerpVectors(startPos, endPos, t);
+        if (t < 1) {
+            requestAnimationFrame(animateOrb);
+        } else {
+            clearInterval(trailId);
+            trailActive = false;
+            if (orb.parent) sceneRef.remove(orb);
+            orbMat.dispose();
+            _spawnWaterboltImpact(endPos.clone(), tex);
+        }
+    }
+    requestAnimationFrame(animateOrb);
+}
+
+function _spawnWaterboltImpact(pos, tex) {
+    const shatter = new ParticleSystem({
+        duration: 0.5, looping: false,
+        startLife: new IntervalValue(0.2, 0.7),
+        startSpeed: new IntervalValue(2.5, 8.0),
+        startSize: new IntervalValue(0.06, 0.28),
+        startColor: new ConstantColor(new Vector4(0.2, 0.7, 1.0, 1)),
+        worldSpace: true, maxParticle: 130,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(100), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.25, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex),
+        startTileIndex: new ConstantValue(0), uTileCount: 1, vTileCount: 1,
+        renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    shatter.addBehavior(new ColorOverLife(new ColorRange(
+        new Vector4(0.8, 1.0, 1.0, 1),   // light blue core on impact
+        new Vector4(0.0, 0.2, 0.6, 0),    // fades to deep water-blue
+    )));
+    shatter.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(0.3, 1.0, 0.8, 0), 0]])));
     _spawn(shatter, pos, 1.5);
 }
 

@@ -688,6 +688,10 @@
       {
         "item": "Aqua Man Essence",
         "chance": 1
+      },
+      {
+        "item": "Scroll of Waterbolt",
+        "chance": 0.05
       }
     ],
     "uniqueArenaItem": "Aqua Man Flipper"

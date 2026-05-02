@@ -316,10 +316,12 @@ setCallbacks({
 
         if (demon && !demon.alive) {
           setZoneMusic(asset('/sounds/backing/lvl2-post-demon.mp3'));
-        } else if (inTreemanRoom || (treeman && !treeman.alive)) {
+        } else if (treeman && !treeman.alive) {
           setZoneMusic(asset('/sounds/backing/demon-room.mp3'));
+        } else if (inTreemanRoom) {
+          setZoneMusic(asset('/sounds/backing/level-2.mp3'));
         } else {
-          setZoneMusic(asset('/sounds/backing/lvl2-post-demon.mp3'));
+          setZoneMusic(asset('/sounds/backing/level-2-start.mp3'));
         }
       }
 
@@ -2336,8 +2338,8 @@ window.loadLevel = function (levelNum) {
     camera.rotation.order = 'YXZ';
     camera.rotation.y = FACING_ANGLES[player.facing];
   } else if (levelNum === 2) {
-    // Face South to see the room and Treeman
-    player.facing = 2;
+    // Face East to look down the starting corridor
+    player.facing = 1;
     camera.rotation.order = 'YXZ';
     camera.rotation.y = FACING_ANGLES[player.facing];
   } else if (levelNum === 4) {
@@ -2383,13 +2385,16 @@ window.loadLevel = function (levelNum) {
   if (levelNum === 2) {
     const demon = monsters.find(m => m.name === 'Demon' && (m.level ?? 1) === 2);
     const treeman = monsters.find(m => m.name === 'Treeman');
+    const inTreemanRoom = player.gridRow >= 16 && player.gridRow <= 29;
     if (demon && !demon.alive) {
       setZoneMusic(asset('/sounds/backing/lvl2-post-demon.mp3'));
     } else if (treeman && !treeman.alive) {
       setZoneMusic(asset('/sounds/backing/demon-room.mp3'));
+    } else if (inTreemanRoom) {
+      setZoneMusic(asset('/sounds/backing/level-2.mp3'));
     } else {
-      // Both alive — play exploration music for the new dungeon area
-      setZoneMusic(asset('/sounds/backing/lvl2-post-demon.mp3'));
+      // Both alive and not in Treeman room — play exploration music for the new dungeon area
+      setZoneMusic(asset('/sounds/backing/level-2-start.mp3'));
     }
   }
 

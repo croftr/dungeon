@@ -52,6 +52,7 @@ export const ACTIONS = Object.freeze({
   PUNCH: 'punch',
   FIREBALL: 'fireball',
   FROSTBOLT: 'frostbolt',
+  WATERBOLT: 'waterbolt',
   LIGHTNINGBOLT: 'lightningbolt',
   HOLYBOLT: 'holybolt',
   DARKBOLT: 'darkbolt',

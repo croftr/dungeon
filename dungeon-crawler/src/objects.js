@@ -2633,6 +2633,9 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, sh
                 idleAction.stop();
                 greetingAction.reset().play();
             }
+            if (typeof options.onGreeting === 'function') {
+                try { options.onGreeting(); } catch (e) { console.warn('[shop] onGreeting failed:', e); }
+            }
         } : null;
 
         model.traverse((child) => {

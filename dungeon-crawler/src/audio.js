@@ -29,6 +29,7 @@ const SOUND_MAP = {
   punch: { url: asset('/sounds/actions/bash.mp3'), offset: 0.05 },
   fireball: { url: asset('/sounds/actions/fireball.mp3'), offset: 0.0 },
   frostbolt: { url: asset('/sounds/actions/fireball.mp3'), offset: 0.0 },
+  waterbolt: { url: asset('/sounds/actions/fireball.mp3'), offset: 0.0 },
   lightningbolt: { url: asset('/sounds/actions/fireball.mp3'), offset: 0.0 },
   holybolt: { url: asset('/sounds/banishment.mp3'), offset: 0.0 },
   darkbolt: { url: asset('/sounds/actions/fireball.mp3'), offset: 0.0 },
@@ -388,7 +389,7 @@ let currentMusicIndex = 0;
 const MUSIC_TRACKS_BY_LEVEL = {
   0: [asset('/sounds/back1.mp3')],
   1: [asset('/sounds/back1.mp3'), asset('/sounds/back2.mp3')],
-  2: [asset('/sounds/backing/level-2.mp3')],
+  2: [asset('/sounds/backing/level-2-start.mp3')],
   3: [asset('/sounds/backing/minotaur-level.mp3')],
 };
 
@@ -1057,7 +1058,8 @@ async function _playTrack(url, loop, gen) {
 
   musicSource = source;
   musicGainNode = gainNode;
-  source.start(0);
+  const delaySec = url.includes('level-2-start.mp3') ? 2 : 0;
+  source.start(ctx.currentTime + delaySec);
 }
 
 // ── Title screen theme tune ──────────────────────────────────────────────────

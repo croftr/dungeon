@@ -122,7 +122,9 @@
         "stances": [
             "slayer"
         ],
-        "startingSkills": [],
+        "startingSkills": [
+            "Miners Light"
+        ],
         "image": "/heros/dwarf_barbarian_head.webp",
         "leftHand": "Wooden Shield",
         "rightHand": "Axe",
@@ -263,7 +265,10 @@
             "overclock",
             "bloodgrudge"
         ],
-        "startingSkills": [],
+        "startingSkills": [
+            "Miners Light",
+            "Hunter's Eye"
+        ],
         "image": "/heros/dwarf-ranger.webp",
         "leftHand": "Torch",
         "rightHand": "Crossbow",

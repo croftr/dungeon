@@ -33,7 +33,7 @@ export function spawnLevel0Objects(ctx) {
         { name: 'Gold Coins', quantity: 10000 },
         'Potion of Invincibility', 'Potion of Unseen', "Elixir of Rage", "Elixir of Rage",
         "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Elixir of Enlightenment",
-        "Crow Essence", "Crow Talon",
+        "Scroll of Waterbolt",
         // Essences (2 of each)
         "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence",
         "Tome of the Viperseeker",

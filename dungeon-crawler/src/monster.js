@@ -12,7 +12,7 @@ import { STATUS_EFFECT_DEFS } from './status-effects.js';
 import { showMessage } from './minimap.js';
 import { getPoisonTickBonus, getReflectDamage, getCritChanceBonus, getStanceBerserkMultiplier, getStanceLifestealAmount } from './stance.js';
 import {
-  playerHitChance, monsterHitChance,
+  playerHitChance, playerSpellHitChance, monsterHitChance,
   calcPlayerPhysicalDamage, calcPlayerMagicDamage, calcMonsterDamage,
   getElementalRiderBreakdown,
   calcOnHitChance,
@@ -2191,7 +2191,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
   // Stats are now cumulative — no auto-reset on new fight.
 
   // ── Skeleton Shield Block ──────────────────────────────────────────────────
-  if (m.name.includes('Skeleton') && !attackType.includes('poison') && attackType !== 'fireball' && attackType !== 'frostbolt' && attackType !== 'lightningbolt' && attackType !== 'holybolt' && attackType !== 'darkbolt' && attackType !== 'banishment' && attackType !== 'incinerate') {
+  if (m.name.includes('Skeleton') && !attackType.includes('poison') && attackType !== 'fireball' && attackType !== 'frostbolt' && attackType !== 'waterbolt' && attackType !== 'lightningbolt' && attackType !== 'holybolt' && attackType !== 'darkbolt' && attackType !== 'banishment' && attackType !== 'incinerate') {
     if (Math.random() <= 0.10) {
       addLogEntry({
         time: Date.now(), actor: 'player',
@@ -2398,7 +2398,12 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   // Apply status effect stat modifiers to the attacker's stats for this attack
   const effChar = { ...character, stats: getEffectiveStats(character) };
 
-  let hitChance = playerHitChance(effChar, m, weaponDef);
+  // Direct-damage spells contest INT vs INT; physical attacks contest DEX vs DEX.
+  const isMagic = attackType === 'fireball' || attackType === 'frostbolt' || attackType === 'waterbolt' || attackType === 'lightningbolt' || attackType === 'holybolt' || attackType === 'darkbolt' || attackType === 'banishment' || attackType === 'incinerate';
+
+  let hitChance = isMagic
+    ? playerSpellHitChance(effChar, m, weaponDef)
+    : playerHitChance(effChar, m, weaponDef);
 
   const now = performance.now();
   // True Shot: Never miss with ranged attacks
@@ -2408,10 +2413,6 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     hitChance = 1.0;
   }
 
-  // All elemental bolt spells use INT + monster magic resilience; other attacks use STR + monster defence
-  const isMagic = attackType === 'fireball' || attackType === 'frostbolt' || attackType === 'lightningbolt' || attackType === 'holybolt' || attackType === 'darkbolt' || attackType === 'banishment' || attackType === 'incinerate';
-
-  // DEX-based hit chance — higher DEX advantage means more reliable hits
   if (Math.random() >= hitChance) {
     recordAttack(character.name, false);
     // Runic Scholar is consumed on any spell attempt, hit or miss
@@ -3120,7 +3121,7 @@ function _playHitAnimation(m, attackType, killer, elementalBreakdown = null, spe
     return; // Skip standard red flash/knockback for dummy
   }
 
-  if (attackType === 'fireball' || attackType === 'frostbolt' || attackType === 'lightningbolt' || attackType === 'holybolt' || attackType === 'darkbolt' || attackType === 'banishment' || attackType === 'incinerate') {
+  if (attackType === 'fireball' || attackType === 'frostbolt' || attackType === 'waterbolt' || attackType === 'lightningbolt' || attackType === 'holybolt' || attackType === 'darkbolt' || attackType === 'banishment' || attackType === 'incinerate') {
     // Magic spells — recolour the spark by spell element when present, otherwise
     // the existing white→orange spark plays (preserves prior look for non-elemental spells).
     const spellColor = spellElement ? ELEMENTS[spellElement]?.color : null;

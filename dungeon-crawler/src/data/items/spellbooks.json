@@ -20,6 +20,16 @@
         "weight": 0.2
     },
     {
+        "name": "Scroll of Waterbolt",
+        "type": "spellbook",
+        "spellName": "Waterbolt",
+        "requiredInt": 10,
+        "icon": "/icons/scrolls/scroll_waterbolt.webp",
+        "description": "Ancient parchment radiating with the essence of deep waters. Study it to learn Waterbolt. Requires 10 Intelligence.",
+        "value": 620,
+        "weight": 0.2
+    },
+    {
         "name": "Scroll of Lightningbolt",
         "type": "spellbook",
         "spellName": "Lightningbolt",

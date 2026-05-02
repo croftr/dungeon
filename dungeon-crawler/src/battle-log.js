@@ -203,7 +203,7 @@ function _downloadCsv() {
 // ── Category mapping (used for filter data-attr) ─────────────────────────────
 
 // Attack types that are spells (go under Magic filter, not Attacks)
-const SPELL_ATTACK_TYPES = new Set(['fireball', 'frostbolt', 'lightningbolt', 'holybolt', 'darkbolt', 'banishment', 'incinerate']);
+const SPELL_ATTACK_TYPES = new Set(['fireball', 'frostbolt', 'waterbolt', 'lightningbolt', 'holybolt', 'darkbolt', 'banishment', 'incinerate']);
 
 // Skill log entries whose skillName matches these are spells → Magic filter
 // Everything else logged as type:'skill' is an active ability → Skills filter
@@ -284,6 +284,7 @@ const TYPE_ABBR = {
   shoot: 'shoot',
   fireball: 'fire',
   frostbolt: 'ice',
+  waterbolt: 'water',
   lightningbolt: 'lightning',
   holybolt: 'holy',
   darkbolt: 'dark',
@@ -438,8 +439,8 @@ function _formula(e) {
   }
 
   if (e.actor === 'player') {
-    const stat = ['fireball', 'frostbolt', 'lightningbolt', 'holybolt', 'darkbolt', 'banishment', 'incinerate'].includes(e.attackType) ? 'INT' : (e.statLabel ?? 'STR');
-    const mit = ['fireball', 'frostbolt', 'lightningbolt', 'holybolt', 'darkbolt', 'banishment', 'incinerate'].includes(e.attackType) ? 'RES' : 'DEF';
+    const stat = ['fireball', 'frostbolt', 'waterbolt', 'lightningbolt', 'holybolt', 'darkbolt', 'banishment', 'incinerate'].includes(e.attackType) ? 'INT' : (e.statLabel ?? 'STR');
+    const mit = ['fireball', 'frostbolt', 'waterbolt', 'lightningbolt', 'holybolt', 'darkbolt', 'banishment', 'incinerate'].includes(e.attackType) ? 'RES' : 'DEF';
     const ammoLine = e.ammoModifier && e.ammoModifier !== 1 ? ` ×${e.ammoModifier}ammo` : '';
     const drText = e.damageReduction ? ` ×${Math.round((1 - e.damageReduction) * 100)}%dr` : '';
     const rawBase = e.damageReduction ? Math.round((e.statBonus + e.weaponBase) * (1 - e.damageReduction)) : (e.statBonus + e.weaponBase);
