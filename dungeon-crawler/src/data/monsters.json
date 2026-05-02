@@ -1182,6 +1182,71 @@
       }
     ]
   },
+  "iron_warden": {
+    "name": "Iron Warden",
+    "family": "elemental",
+    "description": "An ancient construct of living iron, forged to guard the deepest vaults. Its armoured shell deflects blades and arrows with contemptuous ease — but the elemental energies coursing through its core are also its greatest weakness.",
+    "hp": 320,
+    "defence": 80,
+    "damageReduction": 0.90,
+    "xp": 280,
+    "attackSpeed": 1.2,
+    "physicalHitSound": "/monsters/iron-warden/getting-hit-sound.mp3",
+    "stats": {
+      "strength": 22,
+      "dexterity": 10,
+      "vitality": 20,
+      "intelligence": 18,
+      "resilience": 30
+    },
+    "elementalDamage": {
+      "lightning": 5
+    },
+    "elementalResistances": {
+      "fire": "vulnerable",
+      "ice": "vulnerable",
+      "lightning": "vulnerable",
+      "water": "vulnerable",
+      "holy": "vulnerable",
+      "dark": "vulnerable"
+    },
+    "specialAttacks": [
+      {
+        "name": "wardenBolt",
+        "displayName": "Arc Bolt",
+        "description": "Channels a focused bolt of lightning at a single party member, dealing heavy lightning damage.",
+        "aoe": false,
+        "damageMultiplier": 1.4
+      },
+      {
+        "name": "wardenShockwave",
+        "displayName": "Iron Shockwave",
+        "description": "Releases a pulsing shockwave of magnetic energy that strikes all party members with lightning damage.",
+        "aoe": true,
+        "damageMultiplier": 0.8,
+        "onHitEffects": [
+          {
+            "effectId": "stun",
+            "chance": 0.15
+          }
+        ]
+      }
+    ],
+    "drops": [
+      {
+        "item": "Iron Ore",
+        "chance": 1
+      },
+      {
+        "item": "Mana Berry",
+        "chance": 0.3
+      },
+      {
+        "item": "Life Berry",
+        "chance": 0.2
+      }
+    ]
+  },
   "crow_wizard": {
     "name": "Crow Wizard",
     "family": "avian",

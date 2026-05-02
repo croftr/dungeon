@@ -22,6 +22,16 @@ _dummy.drainStamina = false;
 _dummy.originalStats = { ...D.dummy.stats };
 _dummy.originalAttackSpeed = D.dummy.attackSpeed;
 
+const _ironWarden = inst(D.iron_warden, 11, 11, 21,
+    asset('/monsters/iron-warden/idle.glb'),
+    asset('/monsters/iron-warden/standard-attack.glb'),
+    asset('/monsters/iron-warden/attack-sound.mp3'),
+    0.45, 0, 0, 0,
+    null, // patrol
+    asset('/monsters/iron-warden/dying.glb'),
+    asset('/monsters/iron-warden/getting-hit.glb'),
+    asset('/monsters/iron-warden/walking.glb'),
+    null, // glbIdleAlt
+    asset('/monsters/iron-warden/combat-idle.glb'));
 
-
-export const level0Monsters = [_dummy];
+export const level0Monsters = [_dummy, _ironWarden];

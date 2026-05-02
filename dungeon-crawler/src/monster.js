@@ -830,6 +830,41 @@ _applyMultiAttacks('Demon Spawn', [
   },
 ]);
 
+_applyMultiAttacks('Iron Warden', [
+  {
+    name: 'wardenStrike',
+    glb: asset('/monsters/iron-warden/standard-attack.glb'),
+    sound: asset('/monsters/iron-warden/attack-sound.mp3'),
+    soundTimings: [0.4],
+    damageTimings: [0.4],
+    weight: 5,
+  },
+  {
+    name: 'wardenBolt',
+    glb: asset('/monsters/iron-warden/level1-spell.glb'),
+    sound: asset('/monsters/iron-warden/attack-sound.mp3'),
+    soundTimings: [0.5],
+    damageTimings: [0.5],
+    weight: 2,
+    specialAttack: true,
+    specialAttackType: 'randomAny',
+    damageType: 'lightning',
+    damageMultiplier: 1.4,
+  },
+  {
+    name: 'wardenShockwave',
+    glb: asset('/monsters/iron-warden/level2-spell.glb'),
+    sound: asset('/monsters/iron-warden/attack-sound.mp3'),
+    soundTimings: [0.5],
+    damageTimings: [0.5],
+    weight: 2,
+    specialAttack: true,
+    damageType: 'lightning',
+    damageMultiplier: 0.8,
+    specialOnHitEffects: [{ effectId: 'stun', chance: 0.15 }],
+  },
+]);
+
 function _pickWeightedVariant(variants) {
   const loaded = variants.filter(v => v != null);
   if (loaded.length === 0) return null;
@@ -2694,6 +2729,18 @@ export function triggerMonsterAttack(monsterId) {
         setTimeout(() => { if (m.alive) createCrowWizardFear(m.mesh.position); }, duration * pts * 1000);
         showMessage(`<b>${m.name}</b> strikes with Shadow Talons!`, 2000);
       }
+      if (variant.name === 'wardenBolt' && m.mesh) {
+        const duration = attackAction.getClip().duration;
+        const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
+        setTimeout(() => { if (m.alive) createElementalBurst(m.mesh.position, ELEMENTS['lightning'].color); }, duration * pts * 1000);
+        showMessage(`<b>${m.name}</b> fires an Arc Bolt!`, 2000);
+      }
+      if (variant.name === 'wardenShockwave' && m.mesh) {
+        const duration = attackAction.getClip().duration;
+        const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
+        setTimeout(() => { if (m.alive) createElementalBurst(m.mesh.position, ELEMENTS['lightning'].color); }, duration * pts * 1000);
+        showMessage(`<b>${m.name}</b> unleashes an Iron Shockwave!`, 2000);
+      }
     }
   }
   // Legacy fallback
@@ -3132,6 +3179,13 @@ function _playHitAnimation(m, attackType, killer, elementalBreakdown = null, spe
       m.actions.hit.reset().play();
     }
     return; // Skip standard red flash/knockback for dummy
+  }
+
+  const _isSpellHit = ['fireball', 'frostbolt', 'waterbolt', 'lightningbolt', 'holybolt', 'darkbolt', 'banishment', 'incinerate'].includes(attackType);
+  if (!_isSpellHit && m.physicalHitSound) {
+    const snd = new Audio(asset(m.physicalHitSound));
+    snd.volume = 0.7;
+    snd.play().catch(() => {});
   }
 
   if (attackType === 'fireball' || attackType === 'frostbolt' || attackType === 'waterbolt' || attackType === 'lightningbolt' || attackType === 'holybolt' || attackType === 'darkbolt' || attackType === 'banishment' || attackType === 'incinerate') {
