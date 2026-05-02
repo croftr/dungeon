@@ -166,6 +166,13 @@ const MERCHANT_STOCK = MERCHANT_DATA.stock.map(_normStock).filter(Boolean);
 const POTION_MERCHANT_STOCK = POTION_MERCHANT_DATA.stock.map(_normStock).filter(Boolean);
 const STANCE_MERCHANT_STOCK = STANCE_MERCHANT_DATA.stock.map(_normStock).filter(Boolean);
 
+// Initial-count map per (name|hq) key — caps how high replenishment can refill the potion merchant
+const POTION_MERCHANT_INITIAL_COUNTS = new Map();
+for (const it of POTION_MERCHANT_STOCK) {
+  const k = `${it.name}|${it.hq ? 1 : 0}`;
+  POTION_MERCHANT_INITIAL_COUNTS.set(k, (POTION_MERCHANT_INITIAL_COUNTS.get(k) ?? 0) + 1);
+}
+
 // Items still available for sale (items bought are removed permanently)
 let _merchantAvailable = [...MERCHANT_STOCK];
 let _potionMerchantAvailable = [...POTION_MERCHANT_STOCK];
@@ -5351,6 +5358,36 @@ export function getPotionMerchantStock() { return _potionMerchantAvailable.map(e
 
 /** Restores potion merchant stock. Accepts legacy string-array saves via _normStock. */
 export function setPotionMerchantStock(stock) { if (stock) _potionMerchantAvailable = stock.map(_normStock).filter(Boolean); }
+
+/**
+ * Tops up the potion merchant's stock toward initial counts. Adds at most `units`
+ * items per call, preferring slots with the largest deficit so refill stays balanced.
+ * Never exceeds the per-slot initial count, so unbought stock stays unchanged.
+ */
+export function replenishPotionMerchant(units = 2) {
+  const cur = new Map();
+  for (const it of _potionMerchantAvailable) {
+    const k = `${it.name}|${it.hq ? 1 : 0}`;
+    cur.set(k, (cur.get(k) ?? 0) + 1);
+  }
+  const deficits = [];
+  for (const [k, init] of POTION_MERCHANT_INITIAL_COUNTS) {
+    const have = cur.get(k) ?? 0;
+    if (have < init) deficits.push({ k, missing: init - have });
+  }
+  deficits.sort((a, b) => b.missing - a.missing);
+  let added = 0;
+  while (added < units && deficits.some(d => d.missing > 0)) {
+    for (const d of deficits) {
+      if (added >= units) break;
+      if (d.missing <= 0) continue;
+      const [name, hqFlag] = d.k.split('|');
+      _potionMerchantAvailable.push({ name, hq: hqFlag === '1' });
+      d.missing--;
+      added++;
+    }
+  }
+}
 
 /** Returns a snapshot of stance merchant stock. */
 export function getStanceMerchantStock() { return _stanceMerchantAvailable.map(e => ({ ...e })); }
