@@ -5,7 +5,7 @@
     "description": "Poison ticks deal +2 damage when attacking with a poison weapon.",
     "icon": "/heros/high-elf-poison.webp",
     "portrait": "/heros/high-elf-poison.webp",
-    "splashImage": "/heros/high-elf-poison-full.png",
+    "splashImage": "/heros/high-elf-poison-full.webp",
     "effects": {
       "poisonTickBonus": 2,
       "requiresPoisonWeapon": true,
@@ -19,7 +19,7 @@
     "description": "Harder for enemies to hit — monster hit chance reduced by 15%.",
     "icon": "/heros/high-elf-evade.webp",
     "portrait": "/heros/high-elf-evade.webp",
-    "splashImage": "/heros/high-elf-evade-full.png",
+    "splashImage": "/heros/high-elf-evade-full.webp",
     "effects": {
       "monsterHitChanceReduction": 0.15,
       "preventsSpRegen": true,
@@ -32,7 +32,7 @@
     "description": "+40% resistance to all on-hit status effects.",
     "icon": "/heros/human_paladin_Inquisitor.webp",
     "portrait": "/heros/human_paladin_Inquisitor.webp",
-    "splashImage": "/heros/human_paladin_Inquisitor-full.png",
+    "splashImage": "/heros/human_paladin_Inquisitor-full.webp",
     "effects": {
       "statusResistances": {
         "all": 0.4
@@ -47,7 +47,7 @@
     "description": "+25% damage dealt to undead monsters and a +25% Holy damage rider.",
     "icon": "/heros/human_paladin_holy.webp",
     "portrait": "/heros/human_paladin_holy.webp",
-    "splashImage": "/heros/human_paladin_holy-full.png",
+    "splashImage": "/heros/human_paladin_holy-full.webp",
     "effects": {
       "damageFamilyMultiplier": {
         "undead": 1.25
@@ -65,7 +65,7 @@
     "description": "+10% critical hit chance on attacks.",
     "icon": "/heros/elf_ranger_heartseeker.webp",
     "portrait": "/heros/elf_ranger_heartseeker.webp",
-    "splashImage": "/heros/elf_ranger_heartseeker-full.png",
+    "splashImage": "/heros/elf_ranger_heartseeker-full.webp",
     "effects": {
       "critChanceBonus": 0.15,
       "preventsSpRegen": true,
@@ -78,7 +78,7 @@
     "description": "+50% damage on damage-dealing spells.",
     "icon": "/heros/white-mage-vengeance.webp",
     "portrait": "/heros/white-mage-vengeance.webp",
-    "splashImage": "/heros/white-mage-vengeance-full.png",
+    "splashImage": "/heros/white-mage-vengeance-full.webp",
     "effects": {
       "magicDamageMultiplier": 1.5,
       "preventsSpRegen": true,
@@ -91,7 +91,7 @@
     "description": "-30% cooldown on all spells.",
     "icon": "/heros/white-mage-spellsurge.webp",
     "portrait": "/heros/white-mage-spellsurge.webp",
-    "splashImage": "/heros/white-mage-spellsurge-full.png",
+    "splashImage": "/heros/white-mage-spellsurge-full.webp",
     "effects": {
       "spellCooldownMultiplier": 0.7,
       "preventsSpRegen": true,
@@ -104,7 +104,7 @@
     "description": "Reflects 25% of incoming damage back onto the attacker.",
     "icon": "/heros/human_paladin_retribution.webp",
     "portrait": "/heros/human_paladin_retribution.webp",
-    "splashImage": "/heros/human_paladin_retribution-full.png",
+    "splashImage": "/heros/human_paladin_retribution-full.webp",
     "effects": {
       "reflectDamagePercent": 0.25,
       "preventsSpRegen": true,
@@ -117,7 +117,7 @@
     "description": "Increases HP restored by cure and heal spells by 6, and increases Regeneration healing by 3 HP per tick.",
     "icon": "/heros/human_wizard_curatio.webp",
     "portrait": "/heros/human_wizard_curatio.webp",
-    "splashImage": "/heros/human_wizard_curatio-full.png",
+    "splashImage": "/heros/human_wizard_curatio-full.webp",
     "effects": {
       "cureHealBonus": 6,
       "regenMagnitude": 3,
@@ -131,7 +131,7 @@
     "description": "Enters a state of roaring fury, boosting all damage dealt by 80%.",
     "icon": "/heros/dwarf_barbarian_slayer.webp",
     "portrait": "/heros/dwarf_barbarian_slayer.webp",
-    "splashImage": "/heros/dwarf_barbarian_slayer-full.png",
+    "splashImage": "/heros/dwarf_barbarian_slayer-full.webp",
     "effects": {
       "berserkMultiplier": 1.8,
       "preventsSpRegen": true,
@@ -144,7 +144,7 @@
     "description": "Enters a state of focused aggression, allowing the character to strike twice with every attack.",
     "icon": "/heros/human_barbarian_talon.webp",
     "portrait": "/heros/human_barbarian_talon.webp",
-    "splashImage": "/heros/human_barbarian_talon-full.png",
+    "splashImage": "/heros/human_barbarian_talon-full.webp",
     "effects": {
       "doubleAttack": true,
       "preventsSpRegen": true,
@@ -157,7 +157,7 @@
     "description": "Doubles attack speed at the cost of stamina and focus.",
     "icon": "/heros/dwarf-ranger-overclock.webp",
     "portrait": "/heros/dwarf-ranger-overclock.webp",
-    "splashImage": "/heros/dwarf-ranger-overclock-full.png",
+    "splashImage": "/heros/dwarf-ranger-overclock-full.webp",
     "effects": {
       "attackSpeedMultiplier": 0.5,
       "preventsSpRegen": true,
@@ -170,7 +170,7 @@
     "description": "Steals 10 HP from enemies on successful hits at the cost of stamina and focus.",
     "icon": "/heros/dwarf-ranger-bloodgrudge.webp",
     "portrait": "/heros/dwarf-ranger-bloodgrudge.webp",
-    "splashImage": "/heros/dwarf-ranger-bloodgrudge-full.png",
+    "splashImage": "/heros/dwarf-ranger-bloodgrudge-full.webp",
     "effects": {
       "lifestealAmount": 10,
       "preventsSpRegen": true,
@@ -183,7 +183,7 @@
     "description": "Hunter's focus allows for devastating vital strikes and potent poisons — +50% crit chance and +2 poison damage.",
     "icon": "/heros/elf_ranger_viper.webp",
     "portrait": "/heros/elf_ranger_viper.webp",
-    "splashImage": "/heros/elf_ranger_viper-full.png",
+    "splashImage": "/heros/elf_ranger_viper-full.webp",
     "effects": {
       "critChanceBonus": 0.5,
       "poisonTickBonus": 2,

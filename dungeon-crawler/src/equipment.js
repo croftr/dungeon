@@ -1087,6 +1087,13 @@ function populateTooltip(obj, showBuyPrice = false) {
     descEl.textContent = spellDef?.description ?? obj.description ?? '';
     const rows = [];
     if (spellDef?.magnitudeFormula) rows.push(`<div class="detail-stat-row"><span>Magnitude</span><span>${spellDef.magnitudeFormula}${spellDef.magnitudeScale != null ? ' × ' + spellDef.magnitudeScale : ''}</span></div>`);
+    if (spellDef?.element) {
+      const elemDef = ELEMENTS[spellDef.element];
+      const color = elemDef?.color ?? '#c8b080';
+      const symbol = elemDef?.symbol ?? '';
+      const name = elemDef?.name ?? spellDef.element;
+      rows.push(`<div class="detail-stat-row"><span>Element</span><span style="color:${color}">${symbol} ${name}</span></div>`);
+    }
     if (spellType === 'buff' && spellDef?.statusDuration != null) rows.push(`<div class="detail-stat-row"><span>Duration</span><span>${spellDef.statusDuration}s</span></div>`);
     rows.push(`<div class="detail-stat-row"><span>MP Cost</span><span>${spellDef?.mpCost ?? '?'}</span></div>`);
     statsEl.innerHTML = rows.join('');
@@ -1100,6 +1107,14 @@ function populateTooltip(obj, showBuyPrice = false) {
         <div class="detail-stat-row" id="detail-row-damage">
             <span>Attack Power</span>
             <span id="item-detail-damage">—</span>
+        </div>
+        <div class="detail-stat-row" id="detail-row-stamina">
+            <span>SP / Attack</span>
+            <span id="item-detail-stamina">—</span>
+        </div>
+        <div class="detail-stat-row" id="detail-row-delay">
+            <span>Attack Delay</span>
+            <span id="item-detail-delay">—</span>
         </div>
         <div class="detail-stat-row" id="detail-row-defence">
             <span>Defence</span>
@@ -1230,6 +1245,8 @@ function populateTooltip(obj, showBuyPrice = false) {
   const hasFamilyBonus = def?.familyBonus && (Array.isArray(def.familyBonus) ? def.familyBonus.length > 0 : Object.keys(def.familyBonus).length > 0);
   const hasElementalDamage = def?.elementalDamage && Object.keys(def.elementalDamage).length > 0;
   const hasElementalResistances = def?.elementalResistances && Object.keys(def.elementalResistances).length > 0;
+  const hasStaminaDrain = def?.staminaDrain != null;
+  const hasDelay = def?.delay != null;
   const hasBonusList = hasStatBonus || hasSkillBonus || hasSkillDurationBonus || hasTrapDisarmBonus;
 
   // Hide/show rows based on item type and available stats
@@ -1247,6 +1264,8 @@ function populateTooltip(obj, showBuyPrice = false) {
   document.getElementById('detail-row-scaling').style.display = hasScaling ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-mod').style.display = isAmmo ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-type').style.display = isAmmo ? 'flex' : 'none';
+  document.getElementById('detail-row-stamina').style.display = hasStaminaDrain && !isAmmo ? 'flex' : 'none';
+  document.getElementById('detail-row-delay').style.display = hasDelay && !isAmmo ? 'flex' : 'none';
   const hasJob = !!def?.job;
   document.getElementById('detail-row-job').style.display = hasJob ? 'flex' : 'none';
   if (hasJob) {
@@ -1284,6 +1303,12 @@ function populateTooltip(obj, showBuyPrice = false) {
   } else {
     document.getElementById('item-detail-damage').textContent =
       def?.baseDamage != null ? def.baseDamage : '—';
+    if (hasStaminaDrain) {
+      document.getElementById('item-detail-stamina').textContent = (def.staminaDrain * 5) + ' SP';
+    }
+    if (hasDelay) {
+      document.getElementById('item-detail-delay').textContent = def.delay + 's';
+    }
     if (hasDefence) {
       document.getElementById('item-detail-defence').textContent = def.defence;
     }
@@ -3095,7 +3120,11 @@ function _sbRenderDetail(spellDef, m) {
     </div>`;
 
   if (spellDef.element) {
-    statsHtml += `<div class="sb-stat"><span class="sb-stat-label">Element</span><span class="sb-stat-val sb-stat-val--element">${spellDef.element}</span></div>`;
+    const elemDef = ELEMENTS[spellDef.element];
+    const color = elemDef?.color ?? '#c8b080';
+    const symbol = elemDef?.symbol ?? '';
+    const name = elemDef?.name ?? spellDef.element;
+    statsHtml += `<div class="sb-stat"><span class="sb-stat-label">Element</span><span class="sb-stat-val sb-stat-val--element" style="color:${color}">${symbol} ${name}</span></div>`;
   }
 
   if (spellDef.magnitudeFormula && spellDef.magnitudeScale) {
