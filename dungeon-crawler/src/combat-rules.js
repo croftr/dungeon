@@ -103,19 +103,21 @@ export function playerHitChance(character, monster, weaponDef = null) {
 /**
  * Probability (0–1) that `character` lands a direct-damage spell on `monster`.
  * Mirrors the physical hit formula but contests INT vs INT — a focused mind
- * against a focused mind. The Pyromancer passive's accuracyMagnitude still
- * applies to Fireball and Incinerate.
+ * against a focused mind. Elemental-mastery passives (Pyromancer, Cryomancer,
+ * Stormcaller, Hydromancer) add accuracyMagnitude to spells of their element.
  */
 export function playerSpellHitChance(character, monster, spellDef = null) {
   const intDiff = (character.stats?.intelligence ?? 10) - (monster.stats?.intelligence ?? 10);
   let chance = BASE_PLAYER_HIT_CHANCE + intDiff * DEX_HIT_MODIFIER;
 
-  if (character.skills) {
+  const spellElement = spellDef?.element ?? null;
+  if (character.skills && spellElement) {
     character.skills.forEach(skill => {
       const name = typeof skill === 'string' ? skill : skill.name;
       const skillDef = SKILLS_DATA[name];
-      if (skillDef?.isPassive && name === 'Pyromancer'
-          && (spellDef?.attackType === 'fireball' || spellDef?.attackType === 'incinerate')) {
+      if (skillDef?.isPassive
+          && skillDef.effectType === 'spellElementDamageBonus'
+          && skillDef.element === spellElement) {
         chance += skillDef.accuracyMagnitude || 0;
       }
     });
@@ -267,13 +269,17 @@ export function calcPlayerMagicDamage(character, weaponDef, monster, weaponIsHQ 
   let raw = weaponDef?.magnitudeFormula
     ? resolveSpellMagnitude(weaponDef.name, weaponDef, character) + hqBonus
     : (weaponDef?.baseDamage ?? 0) + hqBonus + (character.stats?.intelligence ?? 10);
-  // Apply Pyromancer passive skill bonus per instance of the skill
-  if (character.skills) {
+  // Apply elemental-mastery passive bonuses (Pyromancer for fire, Cryomancer for ice, etc.)
+  // Stacks per instance of the skill on the character.
+  const spellElement = weaponDef?.element ?? null;
+  if (character.skills && spellElement) {
     character.skills.forEach(skill => {
       const name = typeof skill === 'string' ? skill : skill.name;
-      if (name === 'Pyromancer') {
-        const skillDef = SKILLS_DATA['Pyromancer'];
-        raw += (skillDef?.magnitude ?? 1);
+      const skillDef = SKILLS_DATA[name];
+      if (skillDef?.isPassive
+          && skillDef.effectType === 'spellElementDamageBonus'
+          && skillDef.element === spellElement) {
+        raw += (skillDef.magnitude ?? 1);
       }
     });
   }

@@ -170,11 +170,13 @@
             "curatio"
         ],
         "startingSkills": [
-            "Arcane Appraisal"
+            "Arcane Appraisal",
+            "Pyromancer"
         ],
         "startingSpells": [
             "Fireball",
-            "Heal"
+            "Heal",
+            "Frostbolt"
         ],
         "startingInventory": [
             "Oak Staff",

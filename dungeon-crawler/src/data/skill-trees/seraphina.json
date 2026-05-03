@@ -1,7 +1,7 @@
 {
   "nodes": [
     { "id": "start", "label": "White Mage Initiate",           "type": "start", "edges": ["n1"] },
-    { "id": "n1",    "label": "+2 Intelligence",               "type": "stat",  "benefit": { "intelligence": 2 },                  "icon": "/skills/stats-increase/intelligence_increase.webp", "edges": ["n4","n18","n21","n24"] },
+    { "id": "n1",    "label": "+2 Intelligence",               "type": "stat",  "benefit": { "intelligence": 2 },                  "icon": "/skills/stats-increase/intelligence_increase.webp", "edges": ["n4","n18","n21","n24","nLB1"] },
     { "id": "n4",    "label": "+1 Intelligence, +1 Resilience","type": "stat",  "benefit": { "intelligence": 1, "resilience": 1 }, "icon": "/skills/stats-increase/mixed_stat_increase.webp",    "edges": ["n5","n6","n7","nAA"] },
     { "id": "nAA",  "label": "Arcane Appraisal",             "type": "skill", "benefit": { "skill": "Arcane Appraisal" },         "icon": "/skills/arcane_ appraisal.webp",                     "edges": [] },
     { "id": "n5",    "label": "+1 Intelligence, +1 Vitality",  "type": "stat",  "benefit": { "intelligence": 1, "vitality": 1 },   "icon": "/skills/stats-increase/mixed_stat_increase.webp",    "edges": ["n8","n9"] },
@@ -26,7 +26,15 @@
 
     { "id": "n24",   "label": "Arcane Reservoir I",          "type": "skill", "benefit": { "skill": "Arcane Reservoir" },        "icon": "/skills/arcane-reservoir.webp",                      "edges": ["n25"] },
     { "id": "n25",   "label": "Arcane Reservoir II",         "type": "skill", "benefit": { "skill": "Arcane Reservoir" },        "icon": "/skills/arcane-reservoir.webp",                      "edges": ["n26"] },
-    { "id": "n26",   "label": "Arcane Reservoir III",        "type": "skill", "benefit": { "skill": "Arcane Reservoir" },        "icon": "/skills/arcane-reservoir.webp",                      "edges": [] }
+    { "id": "n26",   "label": "Arcane Reservoir III",        "type": "skill", "benefit": { "skill": "Arcane Reservoir" },        "icon": "/skills/arcane-reservoir.webp",                      "edges": [] },
+
+    { "id": "nLB1",  "label": "Lightbringer I",              "type": "skill", "benefit": { "skill": "Lightbringer" },            "icon": "/skills/lightbringer.webp",                          "edges": ["nLB2"] },
+    { "id": "nLB2",  "label": "Lightbringer II",             "type": "skill", "benefit": { "skill": "Lightbringer" },            "icon": "/skills/lightbringer.webp",                          "edges": ["nLB3"] },
+    { "id": "nLB3",  "label": "Lightbringer III",            "type": "skill", "benefit": { "skill": "Lightbringer" },            "icon": "/skills/lightbringer.webp",                          "edges": ["nSB1"] },
+
+    { "id": "nSB1",  "label": "Shadowbinder I",              "type": "skill", "benefit": { "skill": "Shadowbinder" },            "icon": "/skills/shadowbinder.webp",                          "edges": ["nSB2"] },
+    { "id": "nSB2",  "label": "Shadowbinder II",             "type": "skill", "benefit": { "skill": "Shadowbinder" },            "icon": "/skills/shadowbinder.webp",                          "edges": ["nSB3"] },
+    { "id": "nSB3",  "label": "Shadowbinder III",            "type": "skill", "benefit": { "skill": "Shadowbinder" },            "icon": "/skills/shadowbinder.webp",                          "edges": [] }
   ],
   "positions": {
     "start": [ 350,  40],
@@ -52,6 +60,13 @@
     "n23":   [1070, 580],
     "n24":   [1310, 220],
     "n25":   [1310, 400],
-    "n26":   [1310, 580]
+    "n26":   [1310, 580],
+
+    "nLB1":  [1550, 220],
+    "nLB2":  [1550, 400],
+    "nLB3":  [1550, 580],
+    "nSB1":  [1550, 750],
+    "nSB2":  [1550, 840],
+    "nSB3":  [1550, 930]
   }
 }

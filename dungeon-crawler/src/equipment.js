@@ -5267,9 +5267,9 @@ function _useHealSkill(member, memberIndex) {
  */
 // I will need to update _executePartyMemberSpell to handle the cooldown if it came from a skill slot.
 
-// ── Generic cooldown badge ────────────────────────────────────────────────
+// ── Skill slot cooldown visual ────────────────────────────────────────────
 /**
- * Shows a countdown badge on the skill slot of the given party member.
+ * Marks the skill slot as cooling down until expiresAt, then clears it.
  * @param {number} memberIndex - Party slot index (0-3)
  * @param {number} expiresAt   - performance.now() timestamp when cooldown ends
  */
@@ -5278,30 +5278,18 @@ function _startSkillCooldownUI(memberIndex, expiresAt, slotKey = 'skill') {
   const slotEl = document.getElementById(`slot-sk${suffix}-${memberIndex}`);
   if (!slotEl) return;
 
-  // Cancel any existing timer stored on this element
   if (slotEl._cdTimer) clearInterval(slotEl._cdTimer);
 
-  let badge = slotEl.querySelector('.skill-cd-badge');
-  if (!badge) {
-    badge = document.createElement('span');
-    badge.className = 'skill-cd-badge';
-    slotEl.appendChild(badge);
-  }
+  // Remove any stale badge from a previous system
+  slotEl.querySelector('.skill-cd-badge')?.remove();
 
   slotEl.classList.add('slot-cooling-down');
-  // Re-enable pointer events so clicking shows the remaining time message
-  slotEl.style.pointerEvents = 'auto';
 
   function tick() {
-    const remaining = Math.ceil((expiresAt - performance.now()) / 1000);
-    if (remaining <= 0) {
+    if (performance.now() >= expiresAt) {
       clearInterval(slotEl._cdTimer);
       slotEl._cdTimer = null;
       slotEl.classList.remove('slot-cooling-down');
-      slotEl.style.pointerEvents = '';
-      badge.remove();
-    } else {
-      badge.textContent = remaining + 's';
     }
   }
 

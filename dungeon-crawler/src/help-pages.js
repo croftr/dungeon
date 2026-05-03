@@ -420,8 +420,8 @@ function buildMagicHtml() {
       gawping at it.
     </p>
     <p>
-      The <i>Pyromancer</i> passive grants a flat accuracy bonus to <b>Fireball</b>
-      and <b>Incinerate</b> on top of its damage gift. AoE and debuff spells like
+      The <i>Pyromancer</i> passive grants a flat accuracy bonus to all
+      <b>fire-element</b> spells on top of its damage gift. AoE and debuff spells like
       <b>Sleep</b> and <b>Fear</b> are different beasts altogether — they do not
       use this INT roll. Each monster instead rolls its own resistance based on
       <b>Resilience</b>, gated by the spell's own

@@ -19,7 +19,19 @@
 
     { "id": "n18",   "label": "Pyromancer I",                 "type": "skill", "benefit": { "skill": "Pyromancer" },              "icon": "/skills/pyromancer.webp",                            "edges": ["n19"] },
     { "id": "n19",   "label": "Pyromancer II",                "type": "skill", "benefit": { "skill": "Pyromancer" },              "icon": "/skills/pyromancer.webp",                            "edges": ["n20"] },
-    { "id": "n20",   "label": "Pyromancer III",               "type": "skill", "benefit": { "skill": "Pyromancer" },              "icon": "/skills/pyromancer.webp",                            "edges": [] },
+    { "id": "n20",   "label": "Pyromancer III",               "type": "skill", "benefit": { "skill": "Pyromancer" },              "icon": "/skills/pyromancer.webp",                            "edges": ["nCR1","nST1","nHY1"] },
+
+    { "id": "nCR1",  "label": "Cryomancer I",                 "type": "skill", "benefit": { "skill": "Cryomancer" },              "icon": "/skills/cryomancer.webp",                            "edges": ["nCR2"] },
+    { "id": "nCR2",  "label": "Cryomancer II",                "type": "skill", "benefit": { "skill": "Cryomancer" },              "icon": "/skills/cryomancer.webp",                            "edges": ["nCR3"] },
+    { "id": "nCR3",  "label": "Cryomancer III",               "type": "skill", "benefit": { "skill": "Cryomancer" },              "icon": "/skills/cryomancer.webp",                            "edges": [] },
+
+    { "id": "nST1",  "label": "Stormcaller I",                "type": "skill", "benefit": { "skill": "Stormcaller" },             "icon": "/skills/stormcaller.webp",                           "edges": ["nST2"] },
+    { "id": "nST2",  "label": "Stormcaller II",               "type": "skill", "benefit": { "skill": "Stormcaller" },             "icon": "/skills/stormcaller.webp",                           "edges": ["nST3"] },
+    { "id": "nST3",  "label": "Stormcaller III",              "type": "skill", "benefit": { "skill": "Stormcaller" },             "icon": "/skills/stormcaller.webp",                           "edges": [] },
+
+    { "id": "nHY1",  "label": "Hydromancer I",                "type": "skill", "benefit": { "skill": "Hydromancer" },             "icon": "/skills/hydromancer.webp",                           "edges": ["nHY2"] },
+    { "id": "nHY2",  "label": "Hydromancer II",               "type": "skill", "benefit": { "skill": "Hydromancer" },             "icon": "/skills/hydromancer.webp",                           "edges": ["nHY3"] },
+    { "id": "nHY3",  "label": "Hydromancer III",              "type": "skill", "benefit": { "skill": "Hydromancer" },             "icon": "/skills/hydromancer.webp",                           "edges": [] },
 
     { "id": "n21",   "label": "Battle Mage I",               "type": "skill", "benefit": { "skill": "Battle Mage" },             "icon": "/skills/battle-mage.webp",                           "edges": ["n22"] },
     { "id": "n22",   "label": "Battle Mage II",              "type": "skill", "benefit": { "skill": "Battle Mage" },             "icon": "/skills/battle-mage.webp",                           "edges": ["n23"] },
@@ -54,6 +66,16 @@
     "n23":  [1070, 580],
     "n24":  [1310, 220],
     "n25":  [1310, 400],
-    "n26":  [1310, 580]
+    "n26":  [1310, 580],
+
+    "nCR1": [590, 750],
+    "nCR2": [590, 840],
+    "nCR3": [590, 930],
+    "nST1": [830, 750],
+    "nST2": [830, 840],
+    "nST3": [830, 930],
+    "nHY1": [1070, 750],
+    "nHY2": [1070, 840],
+    "nHY3": [1070, 930]
   }
 }

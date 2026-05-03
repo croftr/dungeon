@@ -2502,21 +2502,6 @@ label.mm-setting-label {
   z-index: 1;
 }
 
-/* Hunter's Eye countdown badge inside the skill slot */
-.skill-cd-badge {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: bold;
-  color: #f0d870;
-  pointer-events: none;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
-  z-index: 2;
-}
-
 
 /* ── Runic Scholar primed — arcane purple glow on the skill slot ─────────── */
 @keyframes runic-pulse {

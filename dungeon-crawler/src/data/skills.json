@@ -117,7 +117,7 @@
         "icon": "/skills/arcane-lantern.webp",
         "description": "Ignites a specialized lantern, illuminating the dungeon brightly for 60 seconds. Cooldown: 90s.",
         "cooldownMs": 90000,
-        "durationMs": 60000,
+        "durationMs": 90000,
         "effectType": "light",
         "effectTarget": "party",
         "stateKey": "arcaneLight"
@@ -338,8 +338,59 @@
         "isPassive": true,
         "type": "passive",
         "icon": "/skills/pyromancer.webp",
-        "description": "Increases fireball base damage by 4 and accuracy by 5%.",
-        "effectType": "fireballDamageBonus",
+        "description": "Increases base damage of fire spells by 4 and their accuracy by 5%.",
+        "effectType": "spellElementDamageBonus",
+        "element": "fire",
+        "magnitude": 4,
+        "accuracyMagnitude": 0.05
+    },
+    "Cryomancer": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/cryomancer.webp",
+        "description": "Increases base damage of ice spells by 4 and their accuracy by 5%.",
+        "effectType": "spellElementDamageBonus",
+        "element": "ice",
+        "magnitude": 4,
+        "accuracyMagnitude": 0.05
+    },
+    "Stormcaller": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/stormcaller.webp",
+        "description": "Increases base damage of lightning spells by 4 and their accuracy by 5%.",
+        "effectType": "spellElementDamageBonus",
+        "element": "lightning",
+        "magnitude": 4,
+        "accuracyMagnitude": 0.05
+    },
+    "Hydromancer": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/hydromancer.webp",
+        "description": "Increases base damage of water spells by 4 and their accuracy by 5%.",
+        "effectType": "spellElementDamageBonus",
+        "element": "water",
+        "magnitude": 4,
+        "accuracyMagnitude": 0.05
+    },
+    "Lightbringer": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/lightbringer.webp",
+        "description": "Increases base damage of holy spells by 4 and their accuracy by 5%.",
+        "effectType": "spellElementDamageBonus",
+        "element": "holy",
+        "magnitude": 4,
+        "accuracyMagnitude": 0.05
+    },
+    "Shadowbinder": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/shadowbinder.webp",
+        "description": "Increases base damage of dark spells by 4 and their accuracy by 5%.",
+        "effectType": "spellElementDamageBonus",
+        "element": "dark",
         "magnitude": 4,
         "accuracyMagnitude": 0.05
     },
