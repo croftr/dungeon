@@ -161,4 +161,9 @@ export function spawnLevel0Objects(ctx) {
     essBtn.position.set(9 * CELL - 1.0, 1.25, 12 * CELL);
     group.add(essBtn);
 
+    // ── Test Teleport to Level 4 (next to essentiary button) ─────────────────
+    const { group: lvl4Btn } = createWallButton(+1, { target: 'teleport_level4' });
+    lvl4Btn.position.set(9 * CELL - 1.0, 1.25, 11 * CELL);
+    group.add(lvl4Btn);
+
 }
