@@ -141,9 +141,9 @@
     "stats": {
       "strength": 20,
       "dexterity": 15,
-      "vitality": 18,
+      "vitality": 32,
       "intelligence": 8,
-      "resilience": 12
+      "resilience": 18
     },
     "drops": [
       {
@@ -415,9 +415,9 @@
     "stats": {
       "strength": 28,
       "dexterity": 18,
-      "vitality": 25,
+      "vitality": 50,
       "intelligence": 26,
-      "resilience": 20
+      "resilience": 30
     },
     "drops": [
       {
@@ -488,9 +488,9 @@
     "stats": {
       "strength": 24,
       "dexterity": 18,
-      "vitality": 25,
+      "vitality": 45,
       "intelligence": 16,
-      "resilience": 20
+      "resilience": 22
     },
     "drops": [
       {
@@ -579,9 +579,9 @@
     "stats": {
       "strength": 34,
       "dexterity": 30,
-      "vitality": 30,
+      "vitality": 55,
       "intelligence": 10,
-      "resilience": 30
+      "resilience": 35
     },
     "drops": [
       {
@@ -654,9 +654,9 @@
     "stats": {
       "strength": 22,
       "dexterity": 22,
-      "vitality": 14,
+      "vitality": 28,
       "intelligence": 22,
-      "resilience": 14
+      "resilience": 30
     },
     "onHitEffects": [
       {
@@ -724,9 +724,9 @@
     "stats": {
       "strength": 35,
       "dexterity": 28,
-      "vitality": 28,
+      "vitality": 50,
       "intelligence": 12,
-      "resilience": 25
+      "resilience": 30
     },
     "onHitEffects": [
       {
@@ -946,9 +946,9 @@
     "stats": {
       "strength": 42,
       "dexterity": 14,
-      "vitality": 35,
+      "vitality": 65,
       "intelligence": 8,
-      "resilience": 28
+      "resilience": 35
     },
     "drops": [
       {
@@ -1020,9 +1020,9 @@
     "stats": {
       "strength": 26,
       "dexterity": 26,
-      "vitality": 18,
+      "vitality": 35,
       "intelligence": 14,
-      "resilience": 18
+      "resilience": 38
     },
     "drops": [
       {
@@ -1136,9 +1136,9 @@
     "stats": {
       "strength": 34,
       "dexterity": 28,
-      "vitality": 28,
+      "vitality": 55,
       "intelligence": 18,
-      "resilience": 24
+      "resilience": 40
     },
     "drops": [
       {
@@ -1251,9 +1251,9 @@
     "stats": {
       "strength": 20,
       "dexterity": 25,
-      "vitality": 17,
+      "vitality": 22,
       "intelligence": 26,
-      "resilience": 15
+      "resilience": 38
     },
     "elementalResistances": {
       "ice": "weak",
