@@ -18,7 +18,7 @@ import RECRUITS_DATA from './data/recruits.json';
 import SPELL_TYPE_ICONS from './data/spell-type-icons.json';
 import { isInFrontOfPlayer, player } from './player.js';
 import { isAlchemyModalOpen, addItemToAlchemy } from './objects.js';
-import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude, calcOnHitChance } from './combat-rules.js';
+import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude, calcOnHitChance, calcControlSpellLandChance } from './combat-rules.js';
 import { showStanceMenu, getAvailableStances, getEligibleStances, getSpellCooldownMultiplier, getStanceCureHealBonus, hasStanceDoubleAttack, getStanceDef, setStance } from './stance.js';
 import { playStanceVideo, RECRUITS } from './recruits.js';
 import { playCritSound, playSkillSound, playItemSound, playLevelUpConfirmSound, playInventorySortSound } from './audio.js';
@@ -3659,7 +3659,7 @@ function _executeAoEDebuffSpell(caster, casterIndex, hand, spellDef) {
 
   let hitCount = 0;
   aoeTargets.forEach(target => {
-    const chance = calcOnHitChance(spellDef.hitChance ?? 0.65, target.stats?.resilience ?? 0, null, effectId);
+    const chance = calcControlSpellLandChance(caster, target, spellDef);
     if (Math.random() < chance) {
       applyMonsterStatusEffect(target.id, effectId, caster.name, duration);
       hitCount++;
@@ -3724,7 +3724,10 @@ function _executeLineSpell(caster, casterIndex, hand, spellDef) {
         time: Date.now(), actor: 'player', attacker: caster.name, target: result.monsterName || target.name,
         attackType: spellDef.attackType, hitChance: result.hitChance ?? 0, hit: result.hit, crit: result.crit,
         weaponBase: result.formula?.weaponBase ?? 0, statBonus: result.formula?.statBonus ?? 0,
-        statLabel: result.formula?.statLabel ?? 'STR', mitigation: result.formula?.mitigation ?? 0,
+        statLabel: result.formula?.statLabel ?? 'STR',
+        statSoakPct: result.formula?.statSoakPct ?? 0,
+        statSoakLabel: result.formula?.statSoakLabel ?? 'res',
+        defence: result.formula?.defence ?? 0,
         preCritDamage: result.formula?.preCritDamage ?? 0, finalDamage: result.damage,
         critMultiplier: result.formula?.critMultiplier ?? 1,
         spellElement: result.formula?.spellElement ?? null,
@@ -4159,7 +4162,10 @@ export function useHand(memberIndex, hand, silent = false) {
     weaponBase: result.formula?.weaponBase ?? 0,
     statBonus: result.formula?.statBonus ?? 0,
     statLabel: result.formula?.statLabel ?? 'STR',
-    mitigation: result.formula?.mitigation ?? 0,
+    statSoakPct: result.formula?.statSoakPct ?? 0,
+    statSoakLabel: result.formula?.statSoakLabel ?? 'vit',
+    defence: result.formula?.defence ?? 0,
+    damageReduction: result.formula?.damageReduction ?? 0,
     preCritDamage: result.formula?.preCritDamage ?? 0,
     finalDamage: result.damage,
     critMultiplier: result.formula?.critMultiplier ?? 1,
@@ -4218,7 +4224,10 @@ export function useHand(memberIndex, hand, silent = false) {
           weaponBase: daResult.formula?.weaponBase ?? 0,
           statBonus: daResult.formula?.statBonus ?? 0,
           statLabel: daResult.formula?.statLabel ?? 'STR',
-          mitigation: daResult.formula?.mitigation ?? 0,
+          statSoakPct: daResult.formula?.statSoakPct ?? 0,
+          statSoakLabel: daResult.formula?.statSoakLabel ?? 'vit',
+          defence: daResult.formula?.defence ?? 0,
+          damageReduction: daResult.formula?.damageReduction ?? 0,
           preCritDamage: daResult.formula?.preCritDamage ?? 0,
           finalDamage: daResult.damage,
           critMultiplier: daResult.formula?.critMultiplier ?? 1,
@@ -5009,7 +5018,7 @@ function _useMinersLight(member, memberIndex) {
   _minersLightCooldownEnd = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill-Miners Light`] = now;
 
-  playSkillSound('magic');
+  playSkillSound('miners-light');
   triggerArcaneLanternEffect();
   showMessage(
     `<span style="color:#d8d8ff">✦ Miners Light</span> — ${member.name} ignites a lantern for 60s.`,

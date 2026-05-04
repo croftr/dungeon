@@ -165,7 +165,9 @@ function buildCombatHtml() {
     const critChance = pct(RULES.critChance);
     const critMult = `${RULES.critMultiplier}×`;
     const monsterBase = RULES.monsterBaseAttack;
-    const resFactor = RULES.resilienceDamageFactor;
+    const mitK = RULES.mitigationK;
+    const dexCritPct = `${(RULES.critPerDex * 100).toFixed(1)}%`;
+    const dexCritCapPct = `${(RULES.critMaxBonusFromDex * 100).toFixed(0)}%`;
     const stunChance = pct(RULES.shieldBashStunChance);
     const stunDuration = `${(RULES.shieldBashStunDurationMs / 1000).toFixed(0)}s`;
 
@@ -210,8 +212,14 @@ function buildCombatHtml() {
     <p>
       One blow in <b>${Math.round(1 / RULES.critChance)}</b> finds the gap in the
       armour — a critical hit lands for <b>${critMult} damage</b>. Both you and the
-      enemy share this chance (${critChance}). Train Dexterity to land more strikes,
-      and Strength to make the criticals matter.
+      enemy share this <b>${critChance}</b> base chance. <b>Dexterity</b> sharpens
+      it further: every point of DEX above 10 adds <b>${dexCritPct}</b> to the
+      crit chance, capped at <b>+${dexCritCapPct}</b>. Train Dexterity to land
+      both more <i>and</i> more vicious strikes, and Strength to make them hurt.
+    </p>
+    <p class="help-aside">
+      Critical strikes multiply the <b>whole blow</b>, including any elemental
+      rider — a flame dagger that crits sees its fire damage tripled too.
     </p>
 
     <h2 class="help-h2">⚔ How Damage is Reckoned</h2>
@@ -228,7 +236,7 @@ function buildCombatHtml() {
       <tr><td>HQ forging</td><td>Permanent bonus stamped at the anvil.</td></tr>
       <tr><td>Family bonus</td><td>Extra damage vs. a named monster family.</td></tr>
       <tr><td>Target damageReduction</td><td>Armour plating — % cut applied to physical only.</td></tr>
-      <tr><td>Target VIT</td><td>×${resFactor}, subtracted as mitigation. (Body mass soaks blades.)</td></tr>
+      <tr><td>Target VIT</td><td>Multiplicative soak via <span class="help-mono">${mitK} / (${mitK} + VIT)</span>. (Body mass soaks blades; diminishing returns.)</td></tr>
       <tr><td>Target Defence</td><td>Subtracted flat from the remainder.</td></tr>
       <tr><td>Stance multiplier</td><td>Final ×, e.g. Holy Stance vs. Undead.</td></tr>
     </table>
@@ -241,10 +249,12 @@ function buildCombatHtml() {
     <h2 class="help-h2">⚔ Monster Damage to You</h2>
     <p>
       A beast's blow begins at its <b>Strength + ${monsterBase}</b>. The hero's
-      <b>Resilience and Vitality</b> together form a soaking factor —
-      <span class="help-mono">100 / (100 + RES + VIT)</span> — and equipped armour's
-      <b>Defence</b> is then subtracted flat. Elemental attacks pass through one
-      final filter: your gear's resistance to that element.
+      <b>Vitality</b> alone soaks the blow — by the same curve a monster suffers
+      from your strikes — <span class="help-mono">${mitK} / (${mitK} + VIT)</span>.
+      Equipped armour's <b>Defence</b> is then subtracted flat. Elemental attacks
+      pass through one final filter: your gear's resistance to that element.
+      <b>Resilience</b> is the magical ward — it does not stand between you and
+      a sword, only between you and a spell or affliction.
     </p>
 
     <h2 class="help-h2">⚔ The Shield &amp; the Stun</h2>
@@ -311,8 +321,8 @@ function buildCombatHtml() {
       <tr><td><b>Strength</b></td><td>Heavier blows with most weapons. Scales melee damage.</td></tr>
       <tr><td><b>Dexterity</b></td><td>More hits land, more dodges of theirs. Scales bows &amp; daggers.</td></tr>
       <tr><td><b>Intelligence</b></td><td>+${MP_PER_INT} max MP per point. The fuel of the mage — see the Grimoire.</td></tr>
-      <tr><td><b>Vitality</b></td><td>+${HP_PER_VIT} max HP per point. Soaks <b>physical</b> damage (×${RULES.resilienceDamageFactor} per point).</td></tr>
-      <tr><td><b>Resilience</b></td><td>+${SP_PER_RES} max SP per point. Soaks <b>magic</b> damage (×${RULES.resilienceDamageFactor} per point) and walls against status effects.</td></tr>
+      <tr><td><b>Vitality</b></td><td>+${HP_PER_VIT} max HP per point. Soaks <b>physical</b> damage via <span class="help-mono">${mitK} / (${mitK} + VIT)</span>.</td></tr>
+      <tr><td><b>Resilience</b></td><td>+${SP_PER_RES} max SP per point. Soaks <b>magic</b> damage via <span class="help-mono">${mitK} / (${mitK} + RES)</span> and walls against status effects.</td></tr>
     </table>
 
     <h2 class="help-h2">⚔ A Word on Stances</h2>
@@ -397,7 +407,7 @@ function buildMagicHtml() {
     <table class="help-table">
       <tr><th>Step</th><th>What happens</th></tr>
       <tr><td>1. Base</td><td>Stat formula (typically scaled INT) + item bonuses.</td></tr>
-      <tr><td>2. Mitigation</td><td>Subtract target <b>RES × ${RULES.resilienceDamageFactor}</b>. Magic ignores armour and physical Defence entirely.</td></tr>
+      <tr><td>2. Mitigation</td><td>Multiplicative soak via <span class="help-mono">${RULES.mitigationK} / (${RULES.mitigationK} + RES)</span>. Magic ignores armour and physical Defence entirely.</td></tr>
       <tr><td>3. Element</td><td>Multiplied <i>after</i> mitigation by the target's elemental factor (×0 immune to ×2 vulnerable). Holy Stance &amp; kin layer a further element multiplier here.</td></tr>
       <tr><td>4. Result</td><td>Minimum 1 damage on a successful non-immune cast. Immune targets take <b>0</b>.</td></tr>
     </table>
@@ -413,7 +423,7 @@ function buildMagicHtml() {
       Aye — even a Fireball can miss. A direct-damage spell is a contest of
       <b>minds</b>, not footwork: caster <b>Intelligence</b> against target
       Intelligence. Begin at a base of <b>${pct(RULES.basePlayerHitChance)}</b>,
-      shifted by <b>${(RULES.dexHitModifier * 100).toFixed(1)}%</b> for every point
+      shifted by <b>${(RULES.intHitModifier * 100).toFixed(1)}%</b> for every point
       of INT advantage (or disadvantage), floored at
       <b>${pct(RULES.minHitChance)}</b> and capped at <b>${pct(RULES.maxHitChance)}</b>.
       A quick-witted lich will turn aside your bolt; a witless slime stands
@@ -423,15 +433,28 @@ function buildMagicHtml() {
       The <i>Pyromancer</i> passive grants a flat accuracy bonus to all
       <b>fire-element</b> spells on top of its damage gift. AoE and debuff spells like
       <b>Sleep</b> are different beasts altogether — they do not
-      use this INT roll. Each monster instead rolls its own resistance based on
+      use this INT roll directly. Each monster rolls its own resistance based on
       <b>Resilience</b>, gated by the spell's own
-      <span class="help-mono">hitChance</span>. So a single Sleep can lull half a
-      pack and bounce off the others.
+      <span class="help-mono">hitChance</span> — but the caster's <b>INT vs the
+      monster's INT</b> now tilts that base chance by <b>${(RULES.intHitModifier * 100).toFixed(1)}%</b>
+      per point, capped at <b>±20%</b>. A brilliant archmage chips through where
+      a half-trained novice bounces off; RES is still the primary wall.
     </p>
     <p class="help-aside">
       A miss still <b>spends MP and triggers cast delay</b>. Train Intelligence on
       your casters, or pick your targets — and remember that a missed spell will
       still consume any one-shot effects (Runic Scholar &amp; the like).
+    </p>
+
+    <h2 class="help-h2">✦ The Critical Cast</h2>
+    <p>
+      A spell can crit just like a sword-stroke — every successful cast carries
+      the same <b>${pct(RULES.critChance)}</b> base chance to land for
+      <b>${RULES.critMultiplier}× damage</b>. The passive
+      <b>Arcane Focus</b> is the caster's road to more: each rank adds <b>+5%</b>
+      crit chance on top of the base, applied to all damaging spells. Stack it
+      with elemental-mastery passives (Pyromancer &amp; kin) for casters who
+      seek the <i>perfect cast</i>.
     </p>
 
     <h2 class="help-h2">✦ Elemental Riders on Weapons</h2>
@@ -498,7 +521,7 @@ function buildMagicHtml() {
       <tr><th>Stat</th><th>Why it matters to a mage</th></tr>
       <tr><td><b>Intelligence</b></td><td>Triple-blessed for the mage: damage &amp; healing magnitude, +${MP_PER_INT} max MP per point, <b>and</b> the chance your spell lands at all.</td></tr>
       <tr><td><b>Vitality</b></td><td>+${HP_PER_VIT} max HP per point. Boosts Regeneration; keeps you alive long enough to cast.</td></tr>
-      <tr><td><b>Resilience</b></td><td>+${SP_PER_RES} max SP per point. <b>The</b> stat for magic mitigation — soaks hostile spells (×${RULES.resilienceDamageFactor} per point) and walls against on-hit afflictions.</td></tr>
+      <tr><td><b>Resilience</b></td><td>+${SP_PER_RES} max SP per point. <b>The</b> stat for magic mitigation — soaks hostile spells via <span class="help-mono">${RULES.mitigationK} / (${RULES.mitigationK} + RES)</span> and walls against on-hit afflictions.</td></tr>
       <tr><td><b>Dexterity</b></td><td>Helps you dodge enemy blows while you incant. (Spell <i>accuracy</i> is INT, not DEX.)</td></tr>
     </table>
 

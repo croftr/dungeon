@@ -17,8 +17,8 @@ import {
   getElementalRiderBreakdown,
   calcOnHitChance,
   pickRandomFrontLineTarget, pickDirectionalTarget,
-  CRIT_CHANCE, CRIT_MULTIPLIER,
-  MONSTER_BASE_ATTACK, RESILIENCE_DAMAGE_FACTOR,
+  CRIT_CHANCE, CRIT_MULTIPLIER, getSpellCritChanceBonus, getDexCritChanceBonus,
+  MONSTER_BASE_ATTACK,
   SHIELD_BASH_STUN_CHANCE, SHIELD_BASH_STUN_DURATION_MS,
 } from './combat-rules.js';
 import { setInCombat, clearCombat, playCritSound, playActionSound, playHitSound, playPartyHitSound, playShieldBlockSound, isInCombat, playSoundByUrl, setZoneMusic } from './audio.js';
@@ -2474,8 +2474,12 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     ? calcPlayerMagicDamage(effChar, weaponDef, mSunder, weaponIsHQ)
     : calcPlayerPhysicalDamage(effChar, weaponDef, mSunder, ammoDef, weaponIsHQ);
 
-  // 5% chance to critically hit — triples the calculated damage
-  const isCrit = Math.random() < (CRIT_CHANCE + getCritChanceBonus(character));
+  // 5% base crit chance — triples the calculated damage. DEX over 10 chips in a
+  // small additional bonus (capped). Spells additionally pick up any passive
+  // spell-crit bonus (e.g. Arcane Focus).
+  const spellCritBonus = isMagic ? getSpellCritChanceBonus(character) : 0;
+  const dexCritBonus = getDexCritChanceBonus(character);
+  const isCrit = Math.random() < (CRIT_CHANCE + getCritChanceBonus(character) + dexCritBonus + spellCritBonus);
   let damage = isCrit ? Math.round(preCritDamage * CRIT_MULTIPLIER) : preCritDamage;
 
   // Runic Scholar — doubles final spell damage after ALL other modifiers (including crit)
@@ -2531,9 +2535,17 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   // Elemental info for the battle log: physical attacks expose a per-element
   // rider breakdown (already accounts for monster weak/resist multipliers and
   // stance bonus); magic spells expose the spell's element.
+  // Riders are folded into preCritDamage and crit along with the physical
+  // portion, so on a crit the displayed per-element numbers must be scaled too
+  // for the totals to add up.
   let elementalBreakdown = isMagic
     ? null
     : getElementalRiderBreakdown(effChar, mSunder, weaponDef, ammoDef).breakdown;
+  if (isCrit && elementalBreakdown) {
+    for (const k of Object.keys(elementalBreakdown)) {
+      elementalBreakdown[k] = Math.round(elementalBreakdown[k] * CRIT_MULTIPLIER);
+    }
+  }
   const spellElement = isMagic ? (weaponDef?.element ?? null) : null;
 
   // Combust — flat fire elemental rider added on top of weapon fire damage when active
@@ -2549,11 +2561,20 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     }
   }
 
+  // Multiplicative stat-soak percentage shown in the formula:
+  //   physical → VIT curve, magic → RES curve. K/(K+stat).
+  const soakStat = isMagic
+    ? (mSunder.stats?.resilience ?? 0)
+    : (mSunder.stats?.vitality ?? 0);
+  const statSoakPct = Math.round(100 * soakStat / (100 + soakStat));
+
   const formula = {
     weaponBase: weaponDef?.baseDamage ?? 0,
     statBonus: formulaStatBonus,
     statLabel,
-    mitigation: isMagic ? effectiveResilience : effectiveDefence,
+    statSoakPct,
+    statSoakLabel: isMagic ? 'res' : 'vit',
+    defence: isMagic ? 0 : effectiveDefence,
     preCritDamage,
     critMultiplier: isCrit ? CRIT_MULTIPLIER : 1,
     runicScholar: runicActive,
@@ -3005,11 +3026,15 @@ function _applyMonsterDamage(monster, opts = {}) {
     : 0;
   const baseDamage = calcMonsterDamage(monster, effTarget, charDefence, elementResistance);
   const preCritDamage = damageMultiplier ? Math.round(baseDamage * damageMultiplier) : baseDamage;
-  const resVit = (effTarget.stats?.resilience ?? 0) + (effTarget.stats?.vitality ?? 0);
-  const resMitigation = Math.round(100 * resVit / (100 + resVit));
+  // Physical mitigation is VIT-only via the multiplicative curve
+  // K/(K+VIT). Display the soaked percentage so the battle-log formula matches
+  // the actual damage applied by calcMonsterDamage.
+  const tgtVit = effTarget.stats?.vitality ?? 0;
+  const vitSoakPct = Math.round(100 * tgtVit / (100 + tgtVit));
 
-  // 5% chance to critically hit — triples the calculated damage (standard attacks only)
-  const isCrit = !isSpecial && Math.random() < CRIT_CHANCE;
+  // 5% base crit chance — triples the calculated damage (standard attacks only).
+  // High-DEX monsters (assassins, etc.) chip in a small bonus, capped.
+  const isCrit = !isSpecial && Math.random() < (CRIT_CHANCE + getDexCritChanceBonus(monster));
   let damage = isCrit ? Math.round(preCritDamage * CRIT_MULTIPLIER) : preCritDamage;
 
   // Elemental rider damage on top of the physical/main hit. Basic attacks
@@ -3088,7 +3113,8 @@ function _applyMonsterDamage(monster, opts = {}) {
     attackType: isSpecial ? 'special' : 'attack', hitChance, hit: true, crit: isCrit,
     statBonus: monster.stats?.strength ?? 10,
     baseBonus: MONSTER_BASE_ATTACK,
-    mitigation: resMitigation,
+    mitigation: vitSoakPct,
+    mitigationLabel: 'vit',
     defenceMitigation: charDefence,
     preCritDamage,
     finalDamage: damage,

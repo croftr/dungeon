@@ -20,8 +20,11 @@ export const BASE_PLAYER_HIT_CHANCE = RULES.basePlayerHitChance;
 /** Base probability (0–1) that a monster's attack hits a party member. */
 export const BASE_MONSTER_HIT_CHANCE = RULES.baseMonsterHitChance;
 
-/** Hit chance shift per point of DEX advantage/disadvantage (both directions). */
+/** Physical hit chance shift per point of DEX advantage/disadvantage (both directions). */
 export const DEX_HIT_MODIFIER = RULES.dexHitModifier;
+
+/** Spell hit chance shift per point of INT advantage/disadvantage (both directions). */
+export const INT_HIT_MODIFIER = RULES.intHitModifier;
 
 /** Floor applied to all hit chance results — no attacker can drop below this. */
 export const MIN_HIT_CHANCE = RULES.minHitChance;
@@ -37,16 +40,58 @@ export const CRIT_CHANCE = RULES.critChance;
 /** Damage multiplier applied when a critical hit occurs. */
 export const CRIT_MULTIPLIER = RULES.critMultiplier;
 
+/** Crit-chance bonus per point of DEX over 10. */
+export const CRIT_PER_DEX = RULES.critPerDex;
+
+/** Maximum crit-chance bonus contributed by DEX scaling. */
+export const CRIT_MAX_BONUS_FROM_DEX = RULES.critMaxBonusFromDex;
+
+/**
+ * DEX-scaling crit-chance bonus for a player attacker. Each point of DEX over
+ * 10 adds CRIT_PER_DEX to the crit chance, capped at CRIT_MAX_BONUS_FROM_DEX.
+ * Stacks with the base CRIT_CHANCE and any other passive/stance bonuses.
+ *
+ * @param {object} character  Party member (uses .stats.dexterity)
+ * @returns {number}          Bonus crit chance (0..CRIT_MAX_BONUS_FROM_DEX)
+ */
+export function getDexCritChanceBonus(character) {
+  const dex = character?.stats?.dexterity ?? 10;
+  const over = dex - 10;
+  if (over <= 0) return 0;
+  return Math.min(CRIT_MAX_BONUS_FROM_DEX, over * CRIT_PER_DEX);
+}
+
+/**
+ * Sums per-passive crit-chance bonuses that apply only to spells. Used in
+ * addition to the base CRIT_CHANCE on magic attacks. e.g. Arcane Focus.
+ *
+ * @param {object} character  Party member (uses .skills)
+ * @returns {number}          Crit chance bonus (0–1) to add when attack is magic
+ */
+export function getSpellCritChanceBonus(character) {
+  if (!character?.skills) return 0;
+  let bonus = 0;
+  character.skills.forEach(skill => {
+    const name = typeof skill === 'string' ? skill : skill.name;
+    const skillDef = SKILLS_DATA[name];
+    if (skillDef?.isPassive && skillDef.effectType === 'spellCritChanceBonus') {
+      bonus += skillDef.magnitude || 0;
+    }
+  });
+  return bonus;
+}
+
 // ── Monster attack damage constants ──────────────────────────────────────────
 
 /** Flat bonus added to a monster's STR when calculating attack damage. */
 export const MONSTER_BASE_ATTACK = RULES.monsterBaseAttack;
 
 /**
- * Fraction of a character's RES stat subtracted from incoming monster damage.
- * e.g. RES 18 × 0.5 = 9 points of damage reduction.
+ * Mitigation soak constant for the multiplicative curve `K / (K + stat)`.
+ * Lower K → faster diminishing returns; higher K → gentler. 100 keeps the
+ * curve familiar (stat 10 → ~91% damage through, stat 50 → ~67%).
  */
-export const RESILIENCE_DAMAGE_FACTOR = RULES.resilienceDamageFactor;
+export const MITIGATION_K = RULES.mitigationK;
 
 // ── On-hit status effect constants ───────────────────────────────────────────
 
@@ -108,7 +153,7 @@ export function playerHitChance(character, monster, weaponDef = null) {
  */
 export function playerSpellHitChance(character, monster, spellDef = null) {
   const intDiff = (character.stats?.intelligence ?? 10) - (monster.stats?.intelligence ?? 10);
-  let chance = BASE_PLAYER_HIT_CHANCE + intDiff * DEX_HIT_MODIFIER;
+  let chance = BASE_PLAYER_HIT_CHANCE + intDiff * INT_HIT_MODIFIER;
 
   const spellElement = spellDef?.element ?? null;
   if (character.skills && spellElement) {
@@ -204,10 +249,12 @@ export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef 
   // blades and arrows aside, not magical wards. Magic attacks ignore it.
   const dr = monster.damageReduction ?? 0;
   if (dr) raw = Math.round(raw * (1 - dr));
-  // Physical stat mitigation comes from VITALITY (body mass, sinew). Resilience
-  // is reserved for magical wards (see calcPlayerMagicDamage).
-  const statMitigation = Math.floor((monster.stats?.vitality ?? 0) * RESILIENCE_DAMAGE_FACTOR);
-  const afterMit = Math.max(1, raw - statMitigation - (monster.defence ?? 0));
+  // Physical mitigation: VITALITY soaks via the multiplicative curve
+  // `K / (K + VIT)`. Resilience is reserved for magical wards (see
+  // calcPlayerMagicDamage). Defence subtracts flat after the curve.
+  const vit = monster.stats?.vitality ?? 0;
+  const afterCurve = Math.round(raw * MITIGATION_K / (MITIGATION_K + vit));
+  const afterMit = Math.max(1, afterCurve - (monster.defence ?? 0));
   const stanceMult = getStanceDamageMultiplier(character, monster);
   const physicalFinal = stanceMult === 1 ? afterMit : Math.max(1, Math.round(afterMit * stanceMult));
 
@@ -284,10 +331,11 @@ export function calcPlayerMagicDamage(character, weaponDef, monster, weaponIsHQ 
     });
   }
 
-  // Magic mitigation: RES only. damageReduction (armour) and physical defence
-  // do not apply to magical attacks.
-  const statMitigation = Math.floor((monster.stats?.resilience ?? 0) * RESILIENCE_DAMAGE_FACTOR);
-  let afterMit = Math.max(1, raw - statMitigation);
+  // Magic mitigation: RESILIENCE soaks via the multiplicative curve
+  // `K / (K + RES)`. damageReduction (armour) and physical defence do not
+  // apply to magical attacks.
+  const res = monster.stats?.resilience ?? 0;
+  let afterMit = Math.max(1, Math.round(raw * MITIGATION_K / (MITIGATION_K + res)));
 
   // Apply per-element multiplier AFTER mitigation so vulnerability actually
   // doubles the damage that gets through, instead of having its bonus eaten by
@@ -307,25 +355,48 @@ export function calcPlayerMagicDamage(character, weaponDef, monster, weaponIsHQ 
 
 /**
  * Damage dealt by a monster's attack on a party member.
- * Scales with monster STR; reduced by the character's RES and VIT (50-50 split)
- * and DEF (physical defence from equipped armour). If the attack carries an
- * element, the caller passes a pre-resolved `elementResistance` (0..1) which is
- * applied as a final multiplicative reduction.
+ * Scales with monster STR; soaked by the character's VITALITY via the
+ * multiplicative `K / (K + VIT)` curve, then DEF subtracts flat. If the attack
+ * carries an element, the caller passes a pre-resolved `elementResistance`
+ * (0..1) which is applied as a final multiplicative reduction.
  *
  * @param {object} monster              Monster (needs stats.strength)
- * @param {object} character            Party member (needs stats.resilience, stats.vitality)
+ * @param {object} character            Party member (needs stats.vitality)
  * @param {number} [characterDefence=0] Total physical defence from equipment
  * @param {number} [elementResistance=0] Pre-resolved player resistance (0..0.9) for the attack's element. Caller passes 0 for non-elemental.
  * @returns {number}                    Final damage (minimum 1)
  */
 export function calcMonsterDamage(monster, character, characterDefence = 0, elementResistance = 0) {
   const raw = (monster.stats?.strength ?? 10) + MONSTER_BASE_ATTACK;
-  const resVit = (character.stats?.resilience ?? 0) + (character.stats?.vitality ?? 0);
-  const resFactor = 100 / (100 + resVit);
-  const afterRes = Math.floor(raw * resFactor);
-  let dmg = Math.max(1, afterRes - characterDefence);
+  // Physical mitigation: VITALITY only via the multiplicative curve. Mirrors
+  // the player→monster path; RES is reserved for magic and afflictions.
+  const vit = character.stats?.vitality ?? 0;
+  const afterCurve = Math.floor(raw * MITIGATION_K / (MITIGATION_K + vit));
+  let dmg = Math.max(1, afterCurve - characterDefence);
   if (elementResistance) dmg = Math.max(1, Math.round(dmg * (1 - elementResistance)));
   return window.easyMode ? Math.max(1, Math.floor(dmg * 0.5)) : dmg;
+}
+
+// ── Control-spell land chance ────────────────────────────────────────────────
+
+/**
+ * Effective probability (0–1) that an AoE/debuff control spell (e.g. Sleep)
+ * lands on a single monster. Built on top of `calcOnHitChance` so RES still
+ * dominates resistance, but tilted by caster INT vs monster INT so a trained
+ * archmage lands these noticeably more often than a novice. The tilt is
+ * capped to ±20 percentage points to keep RES the primary lever.
+ *
+ * @param {object} caster        Party member casting the spell (uses .stats.intelligence)
+ * @param {object} monster       Target monster (uses .stats.intelligence and .stats.resilience)
+ * @param {object} spellDef      Spell definition (uses .hitChance, .attackType)
+ * @returns {number}             Clamped effective land chance (0–1)
+ */
+export function calcControlSpellLandChance(caster, monster, spellDef) {
+  const baseHitChance = spellDef?.hitChance ?? 0.65;
+  const intDiff = (caster?.stats?.intelligence ?? 10) - (monster?.stats?.intelligence ?? 10);
+  const tilt = clamp(intDiff * INT_HIT_MODIFIER, -0.20, 0.20);
+  const adjusted = baseHitChance + tilt;
+  return calcOnHitChance(adjusted, monster?.stats?.resilience ?? 0, null, spellDef?.attackType);
 }
 
 // ── On-hit effect chance ──────────────────────────────────────────────────────

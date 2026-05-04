@@ -498,6 +498,7 @@ const SKILL_SOUND_MAP = {
   'heal': { url: asset('/sounds/actions/life-crystal.mp3'), offset: 0.0 },
   'alchemy': { url: asset('/sounds/items/alchemy-bubbles.mp3'), offset: 0.0 },
   'double-attack': { url: asset('/skills/double-attack.mp3'), offset: 0.0 },
+  'miners-light': { url: asset('/sounds/actions/skills/miners-light.mp3'), offset: 0.0 },
   'rampart': { url: asset('/sounds/actions/skills/rampart.mp3'), offset: 0.0 },
   'sleep': { url: asset('/sounds/sleep.mp3'), offset: 0.0 },
 };

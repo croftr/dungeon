@@ -403,6 +403,14 @@
         "magnitude": 2,
         "regenMagnitude": 1
     },
+    "Arcane Focus": {
+        "isPassive": true,
+        "type": "passive",
+        "icon": "/skills/arcane-focus.webp",
+        "description": "Long study of the perfect cast — increases the critical-hit chance of all damaging spells by 5%.",
+        "effectType": "spellCritChanceBonus",
+        "magnitude": 0.05
+    },
     "Shield Master": {
         "isPassive": true,
         "type": "passive",

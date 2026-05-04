@@ -460,18 +460,23 @@ function _formula(e) {
 
   if (e.actor === 'player') {
     const stat = ['fireball', 'frostbolt', 'waterbolt', 'lightningbolt', 'holybolt', 'darkbolt', 'banishment', 'incinerate'].includes(e.attackType) ? 'INT' : (e.statLabel ?? 'STR');
-    const mit = ['fireball', 'frostbolt', 'waterbolt', 'lightningbolt', 'holybolt', 'darkbolt', 'banishment', 'incinerate'].includes(e.attackType) ? 'RES' : 'DEF';
     const ammoLine = e.ammoModifier && e.ammoModifier !== 1 ? ` ×${e.ammoModifier}ammo` : '';
     const drText = e.damageReduction ? ` ×${Math.round((1 - e.damageReduction) * 100)}%dr` : '';
     const rawBase = e.damageReduction ? Math.round((e.statBonus + e.weaponBase) * (1 - e.damageReduction)) : (e.statBonus + e.weaponBase);
-    const raw = rawBase - e.mitigation;
+    // Multiplicative soak from VIT (physical) or RES (magic), then flat defence
+    // (physical only; magic ignores defence).
+    const soakLabel = e.statSoakLabel ?? 'vit';
+    const soakPct = e.statSoakPct ?? 0;
+    const afterSoak = Math.round(rawBase * (100 - soakPct) / 100);
+    const defStr = e.defence ? ` −def${e.defence}` : '';
+    const raw = Math.max(1, afterSoak - (e.defence ?? 0));
     const crit = e.crit ? ` ×${e.critMultiplier}` : '';
     const berserkText = (e.berserkMultiplier && e.berserkMultiplier !== 1.0) ? ` (Berserk ×${e.berserkMultiplier})` : '';
     const warcryText = (e.warcryMultiplier && e.warcryMultiplier !== 1.0) ? ` (Warcry ×${e.warcryMultiplier})` : '';
     const stunText = e.stunned ? ' (Stunned!)' : '';
     const poisonText = e.poisoned ? ' (Poisoned!)' : '';
     const sunderText = e.sundered ? ' (Sundered!)' : '';
-    return `(${stat}${e.statBonus}+base${e.weaponBase}${ammoLine}${drText}−${mit}${e.mitigation}=${raw}${crit})${berserkText}${warcryText}${stunText}${poisonText}${sunderText}`;
+    return `(${stat}${e.statBonus}+base${e.weaponBase}${ammoLine}${drText} −${soakLabel}${soakPct}%${defStr}=${raw}${crit})${berserkText}${warcryText}${stunText}${poisonText}${sunderText}`;
   }
 
   // monster attack
@@ -483,5 +488,6 @@ function _formula(e) {
   const stunText = e.stunned ? ' (Stunned!)' : '';
   const poisonText = e.poisoned ? ' (Poisoned!)' : '';
   const defStr = defMit > 0 ? `−def${defMit}` : '';
-  return `(STR${e.statBonus}+${e.baseBonus}−res${e.mitigation}%${defStr}=${raw}${crit})${stunText}${poisonText}`;
+  const mitLabel = e.mitigationLabel ?? 'res';
+  return `(STR${e.statBonus}+${e.baseBonus}−${mitLabel}${e.mitigation}%${defStr}=${raw}${crit})${stunText}${poisonText}`;
 }

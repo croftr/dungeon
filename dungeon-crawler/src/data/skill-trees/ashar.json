@@ -15,7 +15,8 @@
     { "id": "n12",   "label": "+1 Intelligence, +1 Resilience","type": "stat", "benefit": { "intelligence": 1, "resilience": 1 }, "icon": "/skills/stats-increase/mixed_stat_increase.webp",    "edges": ["n14","n15"] },
     { "id": "n14",   "label": "+1 Intelligence, +1 Vitality", "type": "stat",  "benefit": { "intelligence": 1, "vitality": 1 },   "icon": "/skills/stats-increase/mixed_stat_increase.webp",    "edges": ["n17"] },
     { "id": "n15",   "label": "+2 Intelligence",              "type": "stat",  "benefit": { "intelligence": 2 },                  "icon": "/skills/stats-increase/intelligence_increase.webp", "edges": ["n17"] },
-    { "id": "n17",   "label": "+2 Resilience",                "type": "stat",  "benefit": { "resilience": 2 },                    "icon": "/skills/stats-increase/resilience_increase.webp",   "edges": [] },
+    { "id": "n17",   "label": "+2 Resilience",                "type": "stat",  "benefit": { "resilience": 2 },                    "icon": "/skills/stats-increase/resilience_increase.webp",   "edges": ["nAF"] },
+    { "id": "nAF",   "label": "Arcane Focus",                 "type": "skill", "benefit": { "skill": "Arcane Focus" },            "icon": "/skills/arcane-focus.webp",                          "edges": [] },
 
     { "id": "n18",   "label": "Pyromancer I",                 "type": "skill", "benefit": { "skill": "Pyromancer" },              "icon": "/skills/pyromancer.webp",                            "edges": ["n19"] },
     { "id": "n19",   "label": "Pyromancer II",                "type": "skill", "benefit": { "skill": "Pyromancer" },              "icon": "/skills/pyromancer.webp",                            "edges": ["n20"] },
@@ -57,6 +58,7 @@
     "n14":  [110, 580],
     "n15":  [350, 580],
     "n17":  [350, 660],
+    "nAF":  [350, 750],
     "nAA":  [590, 130],
     "n18":  [830, 220],
     "n19":  [830, 400],
