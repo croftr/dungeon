@@ -422,7 +422,7 @@ function buildMagicHtml() {
     <p>
       The <i>Pyromancer</i> passive grants a flat accuracy bonus to all
       <b>fire-element</b> spells on top of its damage gift. AoE and debuff spells like
-      <b>Sleep</b> and <b>Fear</b> are different beasts altogether — they do not
+      <b>Sleep</b> are different beasts altogether — they do not
       use this INT roll. Each monster instead rolls its own resistance based on
       <b>Resilience</b>, gated by the spell's own
       <span class="help-mono">hitChance</span>. So a single Sleep can lull half a
@@ -448,7 +448,7 @@ function buildMagicHtml() {
       <tr><th>Type</th><th>Examples</th><th>Notes</th></tr>
       <tr>
         <td><b>Direct Damage</b></td>
-        <td>${elementDot('fire')}Fireball, ${elementDot('ice')}Frostbolt, ${elementDot('water')}Waterbolt, ${elementDot('lightning')}Lightningbolt, ${elementDot('holy')}Holybolt, ${elementDot('dark')}Darkbolt</td>
+        <td>${elementDot('fire')}Fireball, ${elementDot('fire')}Incinerate, ${elementDot('ice')}Frostbolt, ${elementDot('water')}Waterbolt, ${elementDot('lightning')}Lightningbolt, ${elementDot('holy')}Holybolt, ${elementDot('holy')}Banishment, ${elementDot('dark')}Darkbolt</td>
         <td>Scale with INT and the target's element factor.</td>
       </tr>
       <tr>
@@ -463,7 +463,7 @@ function buildMagicHtml() {
       </tr>
       <tr>
         <td><b>Debuff</b></td>
-        <td>Sleep, Fear, Banishment</td>
+        <td>Sleep</td>
         <td>Resilience reduces incoming chance — see the Codex on afflictions.</td>
       </tr>
     </table>
