@@ -407,7 +407,7 @@
     "elementalResistances": {
       "fire": "weak"
     },
-    "hp": 380,
+    "hp": 400,
     "defence": 12,
     "damageReduction": 0.10,
     "xp": 1000,
@@ -480,7 +480,7 @@
         ]
       }
     ],
-    "hp": 220,
+    "hp": 250,
     "defence": 9,
     "damageReduction": 0.10,
     "xp": 500,
@@ -1012,7 +1012,7 @@
         ]
       }
     ],
-    "hp": 260,
+    "hp": 300,
     "defence": 16,
     "damageReduction": 0.08,
     "xp": 220,
@@ -1171,16 +1171,7 @@
       "intelligence": 3,
       "resilience": 5
     },
-    "drops": [
-      {
-        "item": "Life Essence",
-        "chance": 1
-      },
-      {
-        "item": "Mana Berry",
-        "chance": 0.3
-      }
-    ]
+    "drops": []
   },
   "iron_warden": {
     "name": "Iron Warden",

@@ -154,7 +154,7 @@ const canvas = document.getElementById('renderer-canvas');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFShadowMap;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 // When the GPU evicts the WebGL context (common during video decoding under memory pressure),
 // Three.js restores the context but textures don't auto-reupload — force them all here.

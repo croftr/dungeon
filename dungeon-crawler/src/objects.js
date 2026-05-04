@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createBlobShadow } from './blob-shadow.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
 import { CELL, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld, buildLevel, level1Map, level2Map } from './map.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
@@ -1666,9 +1667,9 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
     if (interactive) {
         if (isStarterStash && _persistedStarterStashItems !== null) {
             contents = [..._persistedStarterStashItems];
-        } else if (_containerContentsPersistence[persistenceKey]) {
+        } else if (_containerContentsPersistence.hasOwnProperty(persistenceKey)) {
             contents = _containerContentsPersistence[persistenceKey];
-        } else if (_emptyAllContainers && !isStarterStash) {
+        } else if (_emptyAllContainers && !isStarterStash && (!contents || contents.length === 0)) {
             contents = [];
         }
     }
@@ -2665,6 +2666,9 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, sh
             }
         });
 
+        const _mBlob = createBlobShadow(0.5);
+        _mBlob.position.set(model.position.x, 0.05, model.position.z);
+        scene.add(_mBlob);
         scene.add(model);
     });
 }
@@ -3125,6 +3129,9 @@ function addJester(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) 
             });
         }
 
+        const _jBlob = createBlobShadow(0.5);
+        _jBlob.position.set(model.position.x, 0.05, model.position.z);
+        scene.add(_jBlob);
         scene.add(model);
     });
 }
@@ -3181,6 +3188,9 @@ function addPartyConfirmNPC(scene, loader, col, row, rotY = 0, offsetX = 0, offs
 
         model.name = 'PartyConfirmNPCModel';
         _partyConfirmNPCModel = model;
+        const _pcBlob = createBlobShadow(0.5);
+        _pcBlob.position.set(model.position.x, 0.05, model.position.z);
+        scene.add(_pcBlob);
         scene.add(model);
     });
 }
@@ -3252,6 +3262,9 @@ function addCustomNPC(scene, loader, col, row, glbPath, dialogue, scale = 0.55, 
             });
         }
 
+        const _cnBlob = createBlobShadow(0.5);
+        _cnBlob.position.set(model.position.x, 0.05, model.position.z);
+        scene.add(_cnBlob);
         scene.add(model);
 
         const onModelLoaded = arguments[16];

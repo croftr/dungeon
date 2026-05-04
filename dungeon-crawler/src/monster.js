@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createBlobShadow } from './blob-shadow.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
 import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createIceCloud, createCrocodileSparkle, createHellSpawn, createBloodSplatter, createGreenBloodSplatter, createCrowWizardFireAoe, createCrowWizardCure, createCrowWizardFear, createElementalBurst } from './particles.js';
@@ -1268,6 +1269,13 @@ function _loadMonster(m, scene) {
       }
     });
 
+    const _blobS = m.scale ?? 1;
+    const _blob = createBlobShadow(0.55);
+    _blob.scale.setScalar(1 / _blobS);
+    _blob.position.y = 0.05 / _blobS;
+    model.add(_blob);
+    m.blobShadow = _blob;
+
     m.mixer = new THREE.AnimationMixer(model);
 
     if (gltf.animations && gltf.animations.length > 0 && m.glbIdle) {
@@ -2290,6 +2298,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
 
   if (killedByThisHit) {
     m.alive = false;
+    if (m.blobShadow) m.blobShadow.visible = false;
     if (_isBossMonster(m) && !window._arenaMode) {
       _killedBosses.add(_bossKey(m));
     }

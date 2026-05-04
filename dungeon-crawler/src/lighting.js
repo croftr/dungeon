@@ -14,7 +14,7 @@ export function initLighting(scene) {
   // Primary torch — follows the camera each frame
   const torch = new THREE.PointLight(0xffcc99, 2.5, 8, 2);
   torch.castShadow = true;
-  torch.shadow.mapSize.set(256, 256);
+  torch.shadow.mapSize.set(512, 512);
   scene.add(torch);
 
   // Subtle cool fill to stop pitch-black areas being unreadable
