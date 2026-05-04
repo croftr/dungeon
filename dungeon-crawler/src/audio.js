@@ -40,6 +40,8 @@ const SOUND_MAP = {
   hit: { url: asset('/sounds/actions/hit.mp3'), offset: 0.0 },
   'gold-coins': { url: asset('/sounds/items/gold-coins.mp3'), offset: 0.0 },
   'shield-block': { url: asset('/sounds/actions/shield-block.mp3'), offset: 0.0 },
+  encumbered: { url: asset('/sounds/actions/encumbered.mp3'), offset: 0.0 },
+  overloaded: { url: asset('/sounds/actions/encumbered.mp3'), offset: 0.0 },
 };
 
 const ITEM_SOUNDS = {

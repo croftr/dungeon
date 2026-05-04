@@ -369,6 +369,85 @@ export function updateEffectiveStats(m) {
   m.hp = Math.min(m.hp, m.hpMax);
   m.mp = Math.min(m.mp, m.mpMax);
   m.sp = Math.min(m.sp, m.spMax);
+
+}
+
+// Strength × this = max carry weight in kg.
+export const STRENGTH_TO_CARRY_KG = 5;
+// At/above this fraction of max → "heavy" (party speed halved).
+export const HEAVY_THRESHOLD = 0.9;
+
+function encumbranceLevelFor(carry, max) {
+  if (!max || max <= 0) return 'none';
+  if (carry > max) return 'overloaded';
+  if (carry >= max * HEAVY_THRESHOLD) return 'heavy';
+  return 'none';
+}
+
+function itemWeightOnce(item, counted) {
+  if (!item || counted.has(item)) return 0;
+  counted.add(item);
+  const def = getItemDef(item.name);
+  const w = def?.weight ?? 0;
+  const count = item.count ?? 1;
+  return w * count;
+}
+
+function computeMemberCarryWeight(m) {
+  let total = 0;
+  // Use a Set to avoid double-counting bothHands weapons mirrored across
+  // leftHand + rightHand (same object reference).
+  const counted = new Set();
+  if (m.equipment) {
+    for (const item of Object.values(m.equipment)) total += itemWeightOnce(item, counted);
+  }
+  if (m.quickslots) {
+    for (const item of m.quickslots) total += itemWeightOnce(item, counted);
+  }
+  if (m.loadoutB) {
+    for (const item of Object.values(m.loadoutB)) total += itemWeightOnce(item, counted);
+  }
+  if (m.inventory) {
+    for (const item of m.inventory) total += itemWeightOnce(item, counted);
+  }
+  return total;
+}
+
+export function getMemberCarryWeight(m) {
+  if (!m || m.isEmpty) return 0;
+  return computeMemberCarryWeight(m);
+}
+
+export function getMemberMaxCarry(m) {
+  if (!m || m.isEmpty) return 0;
+  // Effective strength reflects equipment + level-up bonuses + buffs.
+  const str = m.stats?.strength ?? 0;
+  return str * STRENGTH_TO_CARRY_KG;
+}
+
+export function getMemberEncumbranceLevel(m) {
+  if (!m || m.isEmpty || m.isDead) return 'none';
+  return encumbranceLevelFor(getMemberCarryWeight(m), getMemberMaxCarry(m));
+}
+
+// Worst-case encumbrance across the party drives party-wide movement.
+export function getPartyEncumbranceLevel() {
+  let worst = 'none';
+  for (const m of party) {
+    if (!m || m.isEmpty || m.isDead) continue;
+    const lvl = getMemberEncumbranceLevel(m);
+    if (lvl === 'overloaded') return 'overloaded';
+    if (lvl === 'heavy') worst = 'heavy';
+  }
+  return worst;
+}
+
+// Returns ms-per-cell for player movement, or null if movement is blocked.
+export function getPartyMoveMs() {
+  const lvl = getPartyEncumbranceLevel();
+  if (lvl === 'overloaded') return null;
+  if (lvl === 'heavy') return 600;
+  return 300;
 }
 
 export function extendPartyData() {
@@ -661,6 +740,18 @@ function renderModal(memberIndex) {
   if (slotCountEl) {
     const used = m.inventory.filter(it => it !== null).length;
     slotCountEl.textContent = `${used}/${INVENTORY_SIZE}`;
+  }
+
+  // ── Weight readout ──
+  const weightEl = document.getElementById('inv-weight');
+  if (weightEl) {
+    const carry = getMemberCarryWeight(m);
+    const max = getMemberMaxCarry(m);
+    weightEl.textContent = `${carry.toFixed(1)} / ${max.toFixed(1)} kg`;
+    const lvl = getMemberEncumbranceLevel(m);
+    weightEl.style.color = lvl === 'overloaded' ? '#ff5050'
+      : lvl === 'heavy' ? '#e0c040'
+        : '';
   }
 
   // ── Cap grid visual height to 5 rows (scroll beyond) ──

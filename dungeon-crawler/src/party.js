@@ -1,7 +1,7 @@
 import { getItemDef } from './items.js';
-import { renderItemIcon, attachTooltipListeners, hideTooltip, rotateLoadout, clearAutoAttackTimers, clearAutoRangeAttackTimers, updateEffectiveStats, refreshEquipmentModal } from './equipment.js';
+import { renderItemIcon, attachTooltipListeners, hideTooltip, rotateLoadout, clearAutoAttackTimers, clearAutoRangeAttackTimers, updateEffectiveStats, refreshEquipmentModal, getMemberEncumbranceLevel, getMemberCarryWeight, getMemberMaxCarry } from './equipment.js';
 import { addLogEntry } from './battle-log.js';
-import { isInCombat, playGoldSound, playPartyHitSound } from './audio.js';
+import { isInCombat, playGoldSound, playPartyHitSound, playActionSound } from './audio.js';
 import { showMessage } from './minimap.js';
 import { skillsState } from './skills-state.js';
 import { SPELLS } from './spells.js';
@@ -1397,6 +1397,52 @@ function getSkillOrSpellDef(name) {
   return getItemDef(name);
 }
 
+// Severity-ordered: only fires a toast/sound when a member crosses to a *worse*
+// encumbrance level (not when items are dropped to relieve it). On a member's
+// first frame after init we silently sync the prev level so a save loaded with
+// a member already encumbered doesn't spam the player.
+const ENC_SEVERITY = { none: 0, heavy: 1, overloaded: 2 };
+function notifyEncumbranceTransition(m, encLevel) {
+  const prev = m._prevEncLevel;
+  m._prevEncLevel = encLevel;
+  if (prev === undefined) return;
+  if (encLevel === prev) return;
+  const carry = getMemberCarryWeight(m);
+  const max = getMemberMaxCarry(m);
+  if (ENC_SEVERITY[encLevel] > ENC_SEVERITY[prev]) {
+    // Got worse — toast, sound, and battle-log entry.
+    if (encLevel === 'heavy') {
+      showMessage(`<span style="color:#e0c040">${m.name} is encumbered — party movement halved.</span>`, 3000);
+      playActionSound('encumbered');
+    } else if (encLevel === 'overloaded') {
+      showMessage(`<span style="color:#ff5050">${m.name} is overloaded — party cannot move!</span>`, 3500);
+      playActionSound('overloaded');
+    }
+    addLogEntry({
+      type: 'encumbrance',
+      subtype: 'applied',
+      target: m.name,
+      level: encLevel,
+      carry,
+      max,
+      effectColor: encLevel === 'overloaded' ? '#ff5050' : '#e0c040',
+      time: Date.now(),
+    });
+  } else if (encLevel === 'none') {
+    // Fully cleared — log only (no toast/sound).
+    addLogEntry({
+      type: 'encumbrance',
+      subtype: 'cleared',
+      target: m.name,
+      level: encLevel,
+      carry,
+      max,
+      effectColor: '#80c080',
+      time: Date.now(),
+    });
+  }
+}
+
 function updateStatusBanners() {
   party.forEach(m => {
     if (m.isEmpty) return;
@@ -1428,7 +1474,21 @@ function updateStatusBanners() {
       }
     });
 
-    const key = activeNames.join('|');
+    // Encumbrance is a derived passive state (not a timed debuff). Append its
+    // icon as an additional banner entry and fold its level into the cache key
+    // so the banner re-renders when carry weight crosses a threshold.
+    const encLevel = getMemberEncumbranceLevel(m);
+    notifyEncumbranceTransition(m, encLevel);
+    const encDef = encLevel === 'heavy'
+      ? STATUS_EFFECT_DEFS.encumbered
+      : encLevel === 'overloaded'
+        ? STATUS_EFFECT_DEFS.overloaded
+        : null;
+    if (encDef) {
+      entries.push({ name: encDef.name, def: encDef, fromStatusEffects: true });
+    }
+
+    const key = activeNames.join('|') + '|enc:' + encLevel;
     if (banner._prevKeys === key) return;
     banner._prevKeys = key;
 

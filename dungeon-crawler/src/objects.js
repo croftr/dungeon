@@ -3486,6 +3486,8 @@ export function openChestModal(chestObj) {
     document.getElementById('chest-sent-label').textContent = '';
     document.getElementById('chest-title').textContent = chestObj.userData.title || 'Chest';
 
+    document.getElementById('chest-body').scrollTop = 0;
+
     const grid = document.getElementById('chest-grid');
     let slots = grid.querySelectorAll('.chest-slot');
     const contents = chestObj.userData.contents || [];

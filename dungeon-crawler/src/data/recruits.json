@@ -170,14 +170,14 @@
             "curatio"
         ],
         "startingSkills": [
-            "Arcane Appraisal"
+            "Arcane Appraisal",
+            "Arcane Lantern"
         ],
         "startingSpells": [
             "Fireball",
             "Heal"
         ],
         "startingInventory": [
-            "Oak Staff",
             "Cure Poison Potion",
             "Minor Mana Potion",
             "Minor Mana Potion"
@@ -362,7 +362,10 @@
             "vengeance",
             "spellsurge"
         ],
-        "startingSkills": [],
+        "startingSkills": [
+            "Arcane Lantern",
+            "Arcane Appraisal"
+        ],
         "startingSpells": [
             "Heal",
             "Banishment",

@@ -149,6 +149,10 @@ function _downloadCsv() {
       action = e.effectName || '';
       result = 'Afflicted';
       details = `By ${e.attacker || ''}`;
+    } else if (type === 'encumbrance') {
+      action = e.subtype === 'cleared' ? 'Encumbrance cleared' : (e.level === 'overloaded' ? 'Overloaded' : 'Encumbered');
+      result = e.subtype === 'cleared' ? 'Cleared' : 'Applied';
+      details = (e.carry != null && e.max != null) ? `${e.carry.toFixed(1)} / ${e.max.toFixed(1)} kg` : '';
     } else if (type === 'tick') {
       action = e.effectName || '';
       damage = e.amount != null ? e.amount : '';
@@ -221,6 +225,7 @@ function _getCat(entry) {
   // Damage spells logged as attack entries
   if (entry.actor === 'player' && SPELL_ATTACK_TYPES.has(entry.attackType)) return 'magic';
   if (entry.type === 'status-effect') return 'effect';
+  if (entry.type === 'encumbrance') return 'effect';
   if (entry.type === 'tick') return 'effect'; // both poison ticks and regen ticks
   if (entry.type === 'reflect') return 'attack';
   if (entry.type === 'potion') return 'item';
@@ -243,6 +248,7 @@ function _prependRow(entry) {
     typeClass = (entry.finalDamage != null && entry.finalDamage < 0) ? 'bl--heal' : 'bl--skill';
   }
   else if (entry.type === 'status-effect') typeClass = 'bl--status-effect';
+  else if (entry.type === 'encumbrance') typeClass = 'bl--status-effect';
   else if (entry.type === 'tick') typeClass = entry.amount > 0 ? 'bl--tick-dmg' : 'bl--tick-heal';
   else if (entry.type === 'reflect') typeClass = 'bl--reflect';
   else if (entry.type === 'potion') typeClass = 'bl--potion';
@@ -319,6 +325,20 @@ function _buildRowHtml(e) {
     const noteText = e.note ? ` <span class="bl-skill-note">(${e.note})</span>` : '';
     return `<span class="bl-badge">✦</span>` +
       `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.actor}</b> uses <b>${e.skillName}</b>${targetText}${healText}${noteText}</span>`;
+  }
+
+  // ── Encumbrance change ─────────────────────────────────────────────────────
+  if (e.type === 'encumbrance') {
+    const carryText = (e.carry != null && e.max != null)
+      ? ` <span class="bl-skill-note">(${e.carry.toFixed(1)} / ${e.max.toFixed(1)} kg)</span>`
+      : '';
+    if (e.subtype === 'cleared') {
+      return `<span class="bl-badge">⚖</span>` +
+        `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.target}</b> is no longer encumbered${carryText}</span>`;
+    }
+    const label = e.level === 'overloaded' ? 'Overloaded' : 'Encumbered';
+    return `<span class="bl-badge">⚖</span>` +
+      `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.target}</b>: <b>${label}</b>${carryText}</span>`;
   }
 
   // ── Status effect applied ──────────────────────────────────────────────────

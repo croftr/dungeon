@@ -1,5 +1,6 @@
 import { Tween, Easing, Group } from '@tweenjs/tween.js';
 import { changeZoom, changeSize, toggleFullscreen, resetPan } from './minimap.js';
+import { getPartyMoveMs } from './equipment.js';
 
 export const tweenGroup = new Group();
 import { isPassable, cellToWorld, CELL_EXIT, dungeonMap } from './map.js';
@@ -18,7 +19,13 @@ const DIR = [
   { dx: -1, dz: 0 }, // 3 West
 ];
 
-const MOVE_MS = 300; // tween duration
+const MOVE_MS = 300; // baseline tween duration; encumbrance can stretch or block movement (see getPartyMoveMs)
+
+// Resolves the active per-cell move duration. null = blocked (overloaded party).
+function currentMoveMs() {
+  const ms = getPartyMoveMs();
+  return ms;
+}
 
 // ─────────────────────────────────────────────
 //  PLAYER STATE
@@ -61,6 +68,13 @@ export function initPlayer(startRow, startCol, camera, facing = 0) {
 export function moveForward(camera, sign = 1) {
   if (player.moving || playerFrozen) return;
 
+  const moveMs = currentMoveMs();
+  if (moveMs === null) {
+    // Overloaded — party can't move at all.
+    bumpFeedback(camera);
+    return;
+  }
+
   const dir = DIR[player.facing];
   const newRow = player.gridRow + dir.dz * sign;
   const newCol = player.gridCol + dir.dx * sign;
@@ -77,7 +91,7 @@ export function moveForward(camera, sign = 1) {
   const target = cellToWorld(newRow, newCol);
 
   new Tween(camera.position, tweenGroup)
-    .to({ x: target.x, z: target.z }, MOVE_MS)
+    .to({ x: target.x, z: target.z }, moveMs)
     .easing(Easing.Quadratic.InOut)
     .onComplete(() => {
       player.moving = false;
@@ -91,6 +105,14 @@ export function moveForward(camera, sign = 1) {
 
 export function turnPlayer(camera, sign = 1) {
   if (player.moving || playerFrozen) return;
+
+  const moveMs = currentMoveMs();
+  if (moveMs === null) {
+    // Overloaded — even turning is gated for consistency with movement lock.
+    bumpFeedback(camera);
+    return;
+  }
+
   player.moving = true;
 
   player.facing = ((player.facing + sign) + 4) % 4;
@@ -105,7 +127,7 @@ export function turnPlayer(camera, sign = 1) {
 
   const rot = { y: currentY };
   new Tween(rot, tweenGroup)
-    .to({ y: currentY + delta }, MOVE_MS)
+    .to({ y: currentY + delta }, moveMs)
     .easing(Easing.Quadratic.InOut)
     .onUpdate(() => { camera.rotation.y = rot.y; })
     .onComplete(() => {
@@ -122,6 +144,12 @@ export function turnPlayer(camera, sign = 1) {
 // sign = -1 → strafe left  (perpendicular counter-clockwise from facing)
 export function strafePlayer(camera, sign = 1) {
   if (player.moving || playerFrozen) return;
+
+  const moveMs = currentMoveMs();
+  if (moveMs === null) {
+    bumpFeedback(camera);
+    return;
+  }
 
   // The strafe direction is 90° to the right of current facing (+1 turn),
   // or 90° to the left (-1 turn), without changing player.facing.
@@ -141,7 +169,7 @@ export function strafePlayer(camera, sign = 1) {
   const target = cellToWorld(newRow, newCol);
 
   new Tween(camera.position, tweenGroup)
-    .to({ x: target.x, z: target.z }, MOVE_MS)
+    .to({ x: target.x, z: target.z }, moveMs)
     .easing(Easing.Quadratic.InOut)
     .onComplete(() => {
       player.moving = false;
