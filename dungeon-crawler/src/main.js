@@ -351,7 +351,7 @@ setCallbacks({
         if (window.playMinotaurVideo) window.playMinotaurVideo();
       }
     } else if (window.currentLevel === 4) {
-      setZoneMusic(asset('/sounds/backing/lvl2-post-demon.mp3'));
+      setZoneMusic(null);
     } else if (window.currentLevel === 5) {
       setZoneMusic(asset('/sounds/backing/hall-of-heroes.mp3'));
     }
@@ -2398,9 +2398,9 @@ window.loadLevel = function (levelNum) {
     }
   }
 
-  // Level 4 music
+  // Level 4 music — clear any zone override so the level ambient pool plays
   if (levelNum === 4) {
-    setZoneMusic(asset('/sounds/backing/lvl2-post-demon.mp3'));
+    setZoneMusic(null);
   }
 
   // Hall of Heroes — always plays its theme

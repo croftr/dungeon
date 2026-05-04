@@ -391,6 +391,7 @@ const MUSIC_TRACKS_BY_LEVEL = {
   1: [asset('/sounds/back1.mp3'), asset('/sounds/back2.mp3')],
   2: [asset('/sounds/backing/level-2-start.mp3')],
   3: [asset('/sounds/backing/minotaur-level.mp3')],
+  4: [asset('/sounds/backing/level4.mp3')],
 };
 
 // Per-track volume overrides — default for all tracks is 0.3
@@ -990,8 +991,11 @@ function _switchToCombatMusic() {
   isCombatMusicPlaying = true;
   _musicGen++;                  // invalidate any pending normal-track load
   _stopCurrent();
-  // Level 4 and Level 99 (Arena) both play the arena track in combat
-  const track = (_ambientLevel === 4 || _ambientLevel === ARENA_LEVEL) ? asset('/sounds/backing/arena.mp3') : BATTLE_TRACK;
+  // Level 4 has its own combat track; Level 99 (Arena) plays the arena track
+  let track;
+  if (_ambientLevel === 4) track = asset('/sounds/backing/level4-combat.mp3');
+  else if (_ambientLevel === ARENA_LEVEL) track = asset('/sounds/backing/arena.mp3');
+  else track = BATTLE_TRACK;
   _playTrack(track, true, _musicGen);
 }
 
@@ -1060,7 +1064,8 @@ async function _playTrack(url, loop, gen) {
   musicSource = source;
   musicGainNode = gainNode;
   const delaySec = url.includes('level-2-start.mp3') ? 2 : 0;
-  source.start(ctx.currentTime + delaySec);
+  const offsetSec = url.includes('level4.mp3') ? 3 : 0;
+  source.start(ctx.currentTime + delaySec, offsetSec);
 }
 
 // ── Title screen theme tune ──────────────────────────────────────────────────
