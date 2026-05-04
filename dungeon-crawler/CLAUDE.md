@@ -8,6 +8,7 @@ Saves fire automatically on dungeon-level transitions. No manual save, no mid-le
 - Dungeon levels 1–5 have two canonical states: **start** (pristine) and **end** (all gates open, all chests empty; non-boss monsters respawned to full HP; bosses stay dead only if previously killed — see "Boss monsters" below).
 - Level 0 is the hub and never "clears." The Level 0 starter stash is the only persistent bank.
 - `currentLevelReached` is the highest dungeon level the player has entered. On load, every dungeon level `< currentLevelReached` (and ≠ `currentLevel`) is rebuilt in end state; `currentLevel` is rebuilt in start state and the player spawns at its entry portal (`findCell(CELL_START)`).
+- **Monster alive state is in-memory only.** Killed monsters stay dead across in-session level transitions (their `m.alive = false` persists in the `monsters[]` array). `applyClearedLevelMonsters` only runs during `loadCheckpoint` (save-load), not on within-session revisits.
 - Items left in chests on a level that flips to end state are **lost** (by design).
 
 ### Key files

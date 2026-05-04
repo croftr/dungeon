@@ -10,7 +10,7 @@ import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.j
 import { initParty, updateParty, party, refreshPartyCards, autoAttack, autoRangeAttack, setHp, flashPortraitHit, showMemberDamage, isPartyUnseen, resurrectAll, getEffectiveElementalResistances } from './party.js';
 import { getItemDef } from './items.js';
 import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
-import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt, applyClearedLevelMonsters } from './monster.js';
+import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, setEmptyAllContainers, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems, replenishPotionMerchant } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound, prefetchActionSounds, checkNpcDialogueProximity, setElementFloorSound } from './audio.js';
@@ -2299,13 +2299,12 @@ window.loadLevel = function (levelNum) {
   // 3. Clear and respawn level objects
   clearObjects(scene);
 
-  // End-state rule: a dungeon level below the "highest reached" watermark
-  // is rebuilt in cleared state — empty chests, no live monsters. Applies on
-  // both within-session revisits and on save-load.
+  // End-state rule: empty chests on levels below the "highest reached" watermark.
+  // Monster alive state persists in-memory across transitions; applyClearedLevelMonsters
+  // only runs on save-load (in loadCheckpoint), not on in-session revisits.
   const reached = window.currentLevelReached ?? 0;
   const isCleared = levelNum >= 1 && levelNum <= 5 && levelNum < reached;
   setEmptyAllContainers(isCleared);
-  if (isCleared) applyClearedLevelMonsters(levelNum);
 
   spawnObjectsForLevel();
   setEmptyAllContainers(false);
@@ -2613,7 +2612,6 @@ window._arenaExit = function (won) {
     const reached = window.currentLevelReached ?? 0;
     const isCleared = pre.level >= 1 && pre.level <= 5 && pre.level < reached;
     setEmptyAllContainers(isCleared);
-    if (isCleared) applyClearedLevelMonsters(pre.level);
     spawnObjectsForLevel();
     setEmptyAllContainers(false);
     updateRecruitsMeshState();
