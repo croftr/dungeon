@@ -73,6 +73,10 @@ export function spawnLevel0Objects(ctx) {
         addDisabledPortal(group, loader, 11, 13, 0, 0, 0.85, 'level4');
     }
 
+    // ── Portal to Level 6 (The Whispering Forest) — always open for testing ──
+    // Placed at col 10, row 13 (to the right of the Level 4 portal at col 11).
+    addPortal(group, loader, 10, 13, 6, 0, 0, 0.85);
+
     // ── Starter gate (portcullis) — closed until party is confirmed ───────────
     const starterGate = addPortcullis(group, loader, 8, 13, Math.PI / 2, starterGateOpened);
     setStarterGate(starterGate);

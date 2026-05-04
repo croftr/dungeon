@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import { buildLevel, buildTextureZone, buildInnerTextureZone, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures } from './map.js';
+import { buildLevel, buildTextureZone, buildInnerTextureZone, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, level6Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures, setCeilingVisible } from './map.js';
+
 import ELEMENT_FLOORS from './data/element-floors.json';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
 import { initLighting, updateLighting } from './lighting.js';
@@ -2183,8 +2184,9 @@ window.loadLevel = function (levelNum) {
   setAmbientLevel(levelNum);
 
   // 1. Swap Map Array
-  const maps = [level0Map, level1Map, level2Map, level3Map, level4Map, level5Map];
+  const maps = [level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, level6Map];
   changeMapArray(maps[levelNum] ?? level0Map);
+
 
   // 2. Rebuild map meshes for walls/floors
   buildLevel(scene);
@@ -2296,6 +2298,34 @@ window.loadLevel = function (levelNum) {
     );
   }
 
+  // Level 6: outdoor forest — forest-wall on all walls, forest-floor on all floors,
+  // no ceiling (hidden), sky-blue background and fog.
+  if (levelNum === 6) {
+    const wallCells = [];
+    const floorCells = [];
+    level6Map.forEach((row, r) => row.forEach((cell, c) => {
+      if (cell === 1 || cell === 7) wallCells.push([r, c]);
+      else if (cell !== CELL_HOLE) floorCells.push([r, c]);
+    }));
+    buildTextureZone(scene, wallCells, floorCells,
+      asset('/textures/forrest-wall.png'),
+      asset('/textures/forrest-floor.png')
+    );
+    // Hide the ceiling — outdoor sky is visible instead
+    setCeilingVisible(false);
+    // Set sky-blue scene background and fog
+    const skyBlue = new THREE.Color(0x5ca8d6);
+    scene.background = skyBlue;
+    scene.fog = new THREE.Fog(skyBlue, 4, 18);
+  } else {
+    // Restore normal dungeon ceiling and atmosphere for all other levels
+    setCeilingVisible(true);
+    const dungeonDark = new THREE.Color(0x050505);
+    scene.background = dungeonDark;
+    scene.fog = new THREE.Fog(dungeonDark, 2, 12);
+  }
+
+
   // 3. Clear and respawn level objects
   clearObjects(scene);
 
@@ -2375,6 +2405,20 @@ window.loadLevel = function (levelNum) {
     player.facing = 0; // North — door is behind them to the east
     camera.rotation.order = 'YXZ';
     camera.rotation.y = FACING_ANGLES[player.facing];
+  } else if (levelNum === 0 && oldLevel === 6) {
+    // Returning from Whispering Forest — place in front of the level 6 portal, face north
+    player.gridRow = 12;
+    player.gridCol = 10;
+    const wRetF = cellToWorld(12, 10);
+    camera.position.set(wRetF.x, wRetF.y, wRetF.z);
+    player.facing = 0; // North
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = FACING_ANGLES[player.facing];
+  } else if (levelNum === 6) {
+    // Arriving at Whispering Forest — face west to explore
+    player.facing = 3; // West
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = FACING_ANGLES[player.facing];
   }
 
   // 5. Update Minimap bounds
@@ -2406,6 +2450,11 @@ window.loadLevel = function (levelNum) {
   // Hall of Heroes — always plays its theme
   if (levelNum === 5) {
     setZoneMusic(asset('/sounds/backing/hall-of-heroes.mp3'));
+  }
+
+  // Level 6 forest — play the forest ambient track
+  if (levelNum === 6) {
+    setZoneMusic(asset('/sounds/backing/forrest.mp3'));
   }
 };
 

@@ -3,6 +3,7 @@
 // (cols 16–23, rows 7–14), connected via row 11.
 // The cell at (row 13, col 7) is the one-way threshold to Level 1 — stepping there triggers loadLevel(1).
 // Start (2) at row 11, col 10.
+// Portals along south wall of starter room (row 13): col 13 = Lvl 2, col 12 = Lvl 3, col 11 = Lvl 4, col 10 = Lvl 6 (open).
 export const level0Map = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 0
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 1

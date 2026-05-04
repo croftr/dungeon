@@ -23,7 +23,8 @@ import { level2Map } from './levels/level2/map.js';
 import { level3Map } from './levels/level3/map.js';
 import { level4Map } from './levels/level4/map.js';
 import { level5Map } from './levels/level5/map.js';
-export { level0Map, level1Map, level2Map, level3Map, level4Map, level5Map };
+import { level6Map } from './levels/level6/map.js';
+export { level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, level6Map };
 
 export let dungeonMap = level0Map;
 export let ROWS = dungeonMap.length;
@@ -290,6 +291,13 @@ export function cellToWorld(row, col) {
 }
 
 let currentMapMeshes = [];
+let _ceilIM = null; // module-level reference so setCeilingVisible can toggle it
+
+/** Show or hide the ceiling tiles — used for outdoor levels (e.g. level 6). */
+export function setCeilingVisible(visible) {
+  if (_ceilIM) _ceilIM.visible = visible;
+}
+
 
 export function buildLevel(scene) {
   currentMapMeshes.forEach(mesh => scene.remove(mesh));
@@ -408,6 +416,7 @@ export function buildLevel(scene) {
   scene.add(blackWallIM); currentMapMeshes.push(blackWallIM);
   scene.add(floorIM); currentMapMeshes.push(floorIM);
   scene.add(ceilIM); currentMapMeshes.push(ceilIM);
+  _ceilIM = ceilIM; // track for visibility toggling
 }
 
 export function buildTextureZone(scene, wallCells, floorCells, wallTexPath, floorTexPath) {

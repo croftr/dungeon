@@ -394,6 +394,7 @@ const MUSIC_TRACKS_BY_LEVEL = {
   2: [asset('/sounds/backing/level-2-start.mp3')],
   3: [asset('/sounds/backing/minotaur-level.mp3')],
   4: [asset('/sounds/backing/level4.mp3')],
+  6: [asset('/sounds/backing/forrest.mp3')],
 };
 
 // Per-track volume overrides — default for all tracks is 0.3
