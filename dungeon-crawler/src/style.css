@@ -2580,7 +2580,7 @@ label.mm-setting-label {
 
 /* Modal box */
 #equip-modal {
-  width: 920px;
+  width: 980px;
   max-width: 96vw;
   max-height: 90vh;
   background: rgba(10, 7, 4, 0.97);
@@ -2904,11 +2904,13 @@ label.mm-setting-label {
   }
 }
 
-/* ── Inventory header row (title + sort button) ── */
+/* ── Inventory header row (slot count + weight + sort button) ── */
 .equip-inv-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 6px 8px;
   border-bottom: 1px solid #2a2010;
 }
 
@@ -2920,15 +2922,14 @@ label.mm-setting-label {
 #inv-sort-btn,
 #chest-sort-btn {
   font-family: monospace;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 1px;
   text-transform: uppercase;
   color: #8a7040;
   background: none;
   border: 1px solid #3a2e18;
   border-radius: 3px;
-  padding: 2px 7px;
-  margin-right: 8px;
+  padding: 4px 11px;
   cursor: pointer;
   line-height: 1.4;
   transition: color 0.15s, border-color 0.15s;
@@ -2941,7 +2942,7 @@ label.mm-setting-label {
 }
 
 .equip-section-title {
-  font-size: 9px;
+  font-size: 11px;
   color: #5a5040;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -3050,11 +3051,18 @@ label.mm-setting-label {
 /* Slot count indicator in the inventory header (e.g. "8/40") */
 .inv-slot-count {
   font-family: monospace;
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: 1px;
   color: #8a7040;
-  margin-right: 8px;
   padding: 2px 4px;
+}
+
+/* Weight readout — slightly brighter to stand out from the slot count */
+.inv-weight-display {
+  color: #a09050;
+  border-left: 1px solid #3a2e18;
+  padding-left: 10px;
+  margin-left: 2px;
 }
 
 /* ── Character stats panel ── */
@@ -3077,7 +3085,7 @@ label.mm-setting-label {
 }
 
 .stat-name {
-  font-size: 10px;
+  font-size: 11px;
   color: #8a7850;
   letter-spacing: 1px;
   text-transform: uppercase;
