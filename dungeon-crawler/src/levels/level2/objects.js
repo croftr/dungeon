@@ -30,7 +30,7 @@ export function spawnLevel2Objects(ctx) {
 
     // ── New area: Spell Cabinet (Room A, north wall, row 3 col 5) ─────────────
     addSpellCabinet(group, loader, 5, 3, 0, 0, -0.7, ["Scroll of Resist Ice", "Scroll of Resist Fire"]);
-    addSpellCabinet(group, loader, 2, 8, Math.PI / 2, -0.7, -0.7, ['Scroll of Lightningbolt', 'Scroll of Incinerate']);
+    addSpellCabinet(group, loader, 2, 8, Math.PI / 2, -0.7, 0, ['Scroll of Lightningbolt', 'Scroll of Incinerate']);
 
     // ── New area: Chest (Room C, south wall, row 13 col 9) ───────────────────
     addChest(group, loader, 9, 13, Math.PI, 0.7, [

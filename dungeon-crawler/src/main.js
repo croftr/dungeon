@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import { buildLevel, buildTextureZone, buildInnerTextureZone, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures } from './map.js';
+import { buildLevel, buildTextureZone, buildInnerTextureZone, buildFloorZone, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures } from './map.js';
 import ELEMENT_FLOORS from './data/element-floors.json';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
 import { initLighting, updateLighting } from './lighting.js';
@@ -2243,6 +2243,11 @@ window.loadLevel = function (levelNum) {
       [16,9], [17,9], [18,9], [19,9],
       [16,13], [17,11], [17,12], [17,13], [18,11], [19,11], [19,12], [19,13]
     ];
+    buildFloorZone(
+      scene,
+      mFloors,
+      asset('/textures/fungal-floor.webp')
+    );
     buildInnerTextureZone(
       scene,
       mFloors,
@@ -2296,8 +2301,16 @@ window.loadLevel = function (levelNum) {
     const iceFloors = [
       [7, 2], [7, 3], [7, 4], [7, 9], [7, 10], [7, 11], [7, 12], [7, 13], [7, 14],
       [8, 2], [8, 3], [8, 4], [8, 5], [8, 6], [8, 7], [8, 8], [8, 9], [8, 10], [8, 11], [8, 12], [8, 13], [8, 14],
-      [9, 2], [9, 3], [9, 4], [9, 9], [9, 10], [9, 11], [9, 12], [9, 13], [9, 14]
+      [9, 2], [9, 3], [9, 4], [9, 9], [9, 10], [9, 11], [9, 12], [9, 13], [9, 14],
+      // Ice gauntlet: corridor south of mushroom room and reward room with chest
+      [10, 3], [11, 3], [12, 3], [13, 3],
+      [14, 2], [14, 3], [14, 4]
     ];
+    buildFloorZone(
+      scene,
+      iceFloors,
+      asset('/textures/dungeon-ice-floor.webp')
+    );
     buildInnerTextureZone(
       scene,
       iceFloors,

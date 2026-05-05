@@ -433,6 +433,21 @@ export function buildTextureZone(scene, wallCells, floorCells, wallTexPath, floo
   }
 }
 
+export function buildFloorZone(scene, floorCells, texPath) {
+  const loader = new THREE.TextureLoader();
+  loader.setCrossOrigin('anonymous');
+  const tex = loader.load(texPath);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.anisotropy = 16;
+  const mat = new THREE.MeshLambertMaterial({ map: tex });
+  for (const [r, c] of floorCells) {
+    const tile = new THREE.Mesh(tileGeo, mat);
+    tile.rotation.set(-Math.PI / 2, 0, 0);
+    tile.position.set(c * CELL, 0.005, r * CELL);
+    scene.add(tile); currentMapMeshes.push(tile);
+  }
+}
+
 export function buildInnerTextureZone(scene, floorCells, wallTexPath) {
   const loader = new THREE.TextureLoader();
   loader.setCrossOrigin('anonymous');
