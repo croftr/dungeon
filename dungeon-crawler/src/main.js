@@ -7,7 +7,7 @@ import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES,
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles, invalidateParticleTextures } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
-import { initParty, updateParty, party, refreshPartyCards, autoAttack, autoRangeAttack, setHp, flashPortraitHit, showMemberDamage, isPartyUnseen, resurrectAll, getEffectiveElementalResistances } from './party.js';
+import { initParty, updateParty, party, refreshPartyCards, autoAttack, autoRangeAttack, setHp, flashPortraitHit, showMemberDamage, isPartyUnseen, resurrectAll, respawnAtHub, getEffectiveElementalResistances } from './party.js';
 import { getItemDef } from './items.js';
 import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
@@ -781,6 +781,33 @@ if (loadGameCancelBtn) {
   loadGameCancelBtn.addEventListener('click', () => {
     loadGameScreen.style.display = 'none';
     preStartScreen.style.display = 'flex';
+  });
+}
+
+// ── Game Over screen buttons ──
+const gameOverRespawnBtn = document.getElementById('game-over-respawn');
+const gameOverLoadBtn = document.getElementById('game-over-load');
+const gameOverSavesEl = document.getElementById('game-over-saves');
+
+if (gameOverRespawnBtn) {
+  gameOverRespawnBtn.addEventListener('click', () => {
+    respawnAtHub();
+    window.loadLevel(0);
+    initPlayer(11, 18, camera, 1);
+  });
+}
+
+if (gameOverLoadBtn && gameOverSavesEl) {
+  gameOverLoadBtn.addEventListener('click', () => {
+    const showing = gameOverSavesEl.classList.contains('game-over-saves-visible');
+    if (showing) {
+      gameOverSavesEl.classList.add('game-over-saves-hidden');
+      gameOverSavesEl.classList.remove('game-over-saves-visible');
+    } else {
+      gameOverSavesEl.classList.remove('game-over-saves-hidden');
+      gameOverSavesEl.classList.add('game-over-saves-visible');
+      renderSavesList('#game-over-saves');
+    }
   });
 }
 

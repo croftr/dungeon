@@ -10,6 +10,7 @@ import { STATUS_EFFECT_DEFS } from './status-effects.js';
 import { asset } from './assets.js';
 import STANCES from './data/stances.json';
 import { getStancePortraitPath } from './stance.js';
+import { getCurrentLevelThreshold } from './leveling.js';
 
 // ─────────────────────────────────────────────
 //  PARTY DATA  — 4 members
@@ -999,6 +1000,28 @@ export function resurrectAll() {
   // Hide Game Over if it was showing
   const el = document.getElementById('game-over');
   if (el) el.classList.remove('active');
+}
+
+export function respawnAtHub() {
+  resurrectAll();
+
+  for (const m of party) {
+    if (m.isEmpty) continue;
+    const floor = getCurrentLevelThreshold(m);
+    if ((m.xp ?? 0) > floor) m.xp = floor;
+  }
+
+  addLogEntry({ type: 'death', target: 'Party', time: Date.now() });
+
+  const el = document.getElementById('game-over');
+  if (el) el.classList.remove('active');
+  const saves = document.getElementById('game-over-saves');
+  if (saves) {
+    saves.classList.add('game-over-saves-hidden');
+    saves.classList.remove('game-over-saves-visible');
+  }
+
+  refreshPartyCards();
 }
 
 let mpRegenTimers = {};    // out-of-combat MP regen: per-member accumulators
