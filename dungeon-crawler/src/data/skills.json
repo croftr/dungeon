@@ -415,7 +415,7 @@
         "isPassive": true,
         "type": "passive",
         "icon": "/skills/shield-master.webp",
-        "description": "Mastery of the shield increases block chance by 2% (when a shield is equipped), base damage by 1, and defence by 1.",
+        "description": "Mastery of the shield increases block chance by 2% (when a shield is equipped), base damage by 1, defence by 1, and shield bash stun chance by 1%.",
         "effectType": "shieldMasterBonus",
         "blockChanceBonus": 2,
         "magnitude": 1,

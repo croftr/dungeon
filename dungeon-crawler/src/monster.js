@@ -2599,7 +2599,12 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
 
   let stunned = false;
   if (attackType === 'shield-bash' && result.hit && !result.killed) {
-    if (Math.random() < SHIELD_BASH_STUN_CHANCE) {
+    const shieldMasterLevels = (character.skills ?? []).filter(s => {
+      const name = typeof s === 'string' ? s : s.name;
+      return SKILLS_DATA[name]?.effectType === 'shieldMasterBonus';
+    }).length;
+    const stunChance = SHIELD_BASH_STUN_CHANCE + shieldMasterLevels * 0.01;
+    if (Math.random() < stunChance) {
       stunned = true;
       m.stunUntil = performance.now() + SHIELD_BASH_STUN_DURATION_MS;
       if (_huntersEyeTargetId === m.id) _renderHuntersEyeHud(m);
