@@ -643,12 +643,12 @@ function animate(now) {
   // Auto-attack: front row members attack automatically when a monster is in melee range
   if (autoAttack) {
     const currentLevel = window.currentLevel ?? 0;
-    const hasTarget = monsters.some(t =>
+    const playerPassable = isPassable(player.gridRow, player.gridCol);
+    const hasTarget = playerPassable && monsters.some(t =>
       t.alive &&
       (t.level ?? 1) === currentLevel &&
       isInFrontOfPlayer(t.gridRow, t.gridCol, 1) &&
-      isPassable(t.gridRow, t.gridCol) &&
-      isPassable(player.gridRow, player.gridCol)
+      isPassable(t.gridRow, t.gridCol)
     );
     if (hasTarget) {
       for (const i of [0, 1]) {
@@ -668,12 +668,12 @@ function animate(now) {
   // is baked into tickAutoRangeAttack via AUTO_EXTRA_DELAY_MS.
   if (autoRangeAttack) {
     const currentLevel = window.currentLevel ?? 0;
-    const hasRangedTarget = monsters.some(t =>
+    const playerPassable = isPassable(player.gridRow, player.gridCol);
+    const hasRangedTarget = playerPassable && monsters.some(t =>
       t.alive &&
       (t.level ?? 1) === currentLevel &&
       isInFrontOfPlayer(t.gridRow, t.gridCol, 4) &&
-      isPassable(t.gridRow, t.gridCol) &&
-      isPassable(player.gridRow, player.gridCol)
+      isPassable(t.gridRow, t.gridCol)
     );
     if (hasRangedTarget) {
       for (const i of [0, 1, 2, 3]) {
