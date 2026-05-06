@@ -1,4 +1,24 @@
 {
+  "rabbit": {
+    "name": "Rabbit",
+    "family": "beast",
+    "description": "A skittish creature driven to desperation by hunger. Its tiny claws are barely a threat, but it bites with surprising speed.",
+    "hp": 50,
+    "defence": 2,
+    "xp": 40,
+    "attackSpeed": 1,
+    "stats": {
+      "strength": 5,
+      "dexterity": 12,
+      "vitality": 5,
+      "intelligence": 2,
+      "resilience": 2
+    },
+    "drops": [
+      {"item": "Life Essence", "chance": 0.5},
+      {"item": "Life Berry", "chance": 0.2}
+    ]
+  },
   "goblin": {
     "name": "Goblin",
     "family": "goblinoid",
