@@ -373,7 +373,7 @@ export function updateEffectiveStats(m) {
 }
 
 // Strength × this = max carry weight in kg.
-export const STRENGTH_TO_CARRY_KG = 4;
+export const STRENGTH_TO_CARRY_KG = 5;
 // At/above 100% of max → "heavy" (party speed halved); at/above 200% → "overloaded" (no movement).
 export const ENCUMBERED_THRESHOLD = 1.0;
 export const OVERLOADED_THRESHOLD = 2.0;
