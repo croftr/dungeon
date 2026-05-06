@@ -217,7 +217,7 @@
   "encumbered": {
     "id": "encumbered",
     "name": "Encumbered",
-    "description": "Carrying close to maximum weight — party movement halved.",
+    "description": "Carrying more than maximum weight — party movement halved.",
     "type": "debuff",
     "icon": "/icons/status-effects/encumbered.svg",
     "color": "#e0c040"
@@ -225,7 +225,7 @@
   "overloaded": {
     "id": "overloaded",
     "name": "Overloaded",
-    "description": "Carrying more than maximum weight — party cannot move.",
+    "description": "Carrying more than twice maximum weight — party cannot move.",
     "type": "debuff",
     "icon": "/icons/status-effects/overloaded.svg",
     "color": "#ff4040"

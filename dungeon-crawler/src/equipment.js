@@ -373,14 +373,15 @@ export function updateEffectiveStats(m) {
 }
 
 // Strength × this = max carry weight in kg.
-export const STRENGTH_TO_CARRY_KG = 5;
-// At/above this fraction of max → "heavy" (party speed halved).
-export const HEAVY_THRESHOLD = 0.9;
+export const STRENGTH_TO_CARRY_KG = 4;
+// At/above 100% of max → "heavy" (party speed halved); at/above 200% → "overloaded" (no movement).
+export const ENCUMBERED_THRESHOLD = 1.0;
+export const OVERLOADED_THRESHOLD = 2.0;
 
 function encumbranceLevelFor(carry, max) {
   if (!max || max <= 0) return 'none';
-  if (carry > max) return 'overloaded';
-  if (carry >= max * HEAVY_THRESHOLD) return 'heavy';
+  if (carry >= max * OVERLOADED_THRESHOLD) return 'overloaded';
+  if (carry >= max * ENCUMBERED_THRESHOLD) return 'heavy';
   return 'none';
 }
 
