@@ -34,13 +34,4 @@ const _ironWarden = inst(D.iron_warden, 11, 11, 21,
     null, // glbIdleAlt
     asset('/monsters/iron-warden/combat-idle.glb'));
 
-const _rabbit = inst(D.rabbit, 12, 11, 18,
-    asset('/monsters/rabbit/Meshy_AI_Iron_Hoof_Warlord_biped_Animation_Walking_withSkin.glb'), // idle
-    asset('/monsters/rabbit/Meshy_AI_Iron_Hoof_Warlord_biped_Animation_Triple_Combo_Attack_withSkin.glb'), // attack
-    null, 0.35, 0, 0, 1,
-    null, // patrol
-    null, // glbDeath
-    null, // glbHit
-    asset('/monsters/rabbit/Meshy_AI_Iron_Hoof_Warlord_biped_Animation_Walking_withSkin.glb')); // walk = idle
-
-export const level0Monsters = [_dummy, _rabbit];
+export const level0Monsters = [_dummy];
