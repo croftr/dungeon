@@ -1,0 +1,68 @@
+[
+    {
+        "name": "Storm-Reaver Helmet",
+        "slot": "head",
+        "icon": "/icons/sets/stormreaver/stormreaver_helm.webp",
+        "description": "A savage-looking helmet forged from jagged iron and dragon-bone.",
+        "defence": 5,
+        "value": 1100,
+        "weight": 4.5,
+        "set": "stormreaver",
+        "job": ["Barbarian"]
+    },
+    {
+        "name": "Storm-Reaver Harness",
+        "slot": "chest",
+        "icon": "/icons/sets/stormreaver/stormreaver_tunic.webp",
+        "description": "A brutal chestplate of overlapping iron plates, showing the scars of many battles.",
+        "defence": 8,
+        "value": 1800,
+        "weight": 10.0,
+        "set": "stormreaver",
+        "job": ["Barbarian"]
+    },
+    {
+        "name": "Storm-Reaver Bracers",
+        "slot": "hands",
+        "icon": "/icons/sets/stormreaver/stormreaver_bracers.webp",
+        "description": "Heavy iron bracers that add weight and power to every swing.",
+        "defence": 4,
+        "value": 850,
+        "weight": 3.0,
+        "set": "stormreaver",
+        "job": ["Barbarian"]
+    },
+    {
+        "name": "Storm-Reaver Greaves",
+        "slot": "legs",
+        "icon": "/icons/sets/stormreaver/stormreaver_leggings.webp",
+        "description": "Thick iron greaves designed for stomping through the blood of fallen foes.",
+        "defence": 5,
+        "value": 1100,
+        "weight": 6.0,
+        "set": "stormreaver",
+        "job": ["Barbarian"]
+    },
+    {
+        "name": "Storm-Reaver Sabatons",
+        "slot": "feet",
+        "icon": "/icons/sets/stormreaver/stormreaver_boots.webp",
+        "description": "Spiked iron boots that leave a trail of destruction with every step.",
+        "defence": 4,
+        "value": 850,
+        "weight": 4.0,
+        "set": "stormreaver",
+        "job": ["Barbarian"]
+    },
+    {
+        "name": "Storm-Reaver Pelt",
+        "slot": "cloak",
+        "icon": "/icons/sets/stormreaver/stormreaver_cloak.webp",
+        "description": "A massive bear pelt bound with iron chains, stinking of sweat and victory.",
+        "defence": 3,
+        "value": 1100,
+        "weight": 3.0,
+        "set": "stormreaver",
+        "job": ["Barbarian"]
+    }
+]

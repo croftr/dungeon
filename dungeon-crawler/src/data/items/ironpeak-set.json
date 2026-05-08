@@ -1,0 +1,69 @@
+[
+    {
+        "name": "Ironpeak Dwarf Helm",
+        "slot": "head",
+        "icon": "/icons/sets/ironpeak/dwarf_helm.webp",
+        "description": "A powerful dwarf warrior helmet forged from thick iron and bronze. It bears the mark of the Ironpeak clan.",
+        "defence": 5,
+        "value": 1100,
+        "weight": 4.0,
+        "set": "ironpeak",
+        "job": ["Warrior"]
+    },
+    {
+        "name": "Ironpeak Dwarf Cuirass",
+        "slot": "chest",
+        "icon": "/icons/sets/ironpeak/dwarf_cuirass.webp",
+        "description": "A powerful dwarf warrior cuirass adorned with ornate gold trim over impenetrable iron plates.",
+        "defence": 8,
+        "value": 1800,
+        "weight": 8.0,
+        "set": "ironpeak",
+        "job": ["Warrior"]
+    },
+    {
+        "name": "Ironpeak Dwarf Gauntlets",
+        "slot": "hands",
+        "icon": "/icons/sets/ironpeak/dwarf_gauntlets.webp",
+        "description": "Thick iron gauntlets that reinforce a dwarf's grip and shield against mighty blows.",
+        "defence": 3,
+        "value": 850,
+        "weight": 2.5,
+        "set": "ironpeak",
+        "job": ["Warrior"]
+    },
+    {
+        "name": "Ironpeak Dwarf Greaves",
+        "slot": "legs",
+        "icon": "/icons/sets/ironpeak/dwarf_greaves.webp",
+        "description": "Heavy iron greaves designed to protect a dwarf warrior in the thickest of melee.",
+        "defence": 5,
+        "value": 1100,
+        "weight": 4.0,
+        "set": "ironpeak",
+        "job": ["Warrior"]
+    },
+    {
+        "name": "Ironpeak Dwarf Sabatons",
+        "slot": "feet",
+        "icon": "/icons/sets/ironpeak/dwarf_sabatons.webp",
+        "description": "Thick iron sabatons, grounding a dwarf so strongly that they are almost impossible to knock over.",
+        "defence": 3,
+        "value": 850,
+        "weight": 2.5,
+        "set": "ironpeak",
+        "job": ["Warrior"]
+    },
+    {
+        "name": "Ironpeak Bear Cloak",
+        "slot": "cloak",
+        "icon": "/icons/sets/ironpeak/dwarf_cloak.webp",
+        "description": "A heavy cloak woven from the fur of a dire bear, bound with large iron clasps. Provides warmth and protection.",
+        "defence": 2,
+        "value": 750,
+        "weight": 1.5,
+        "elementalResistances": { "ice": 0.25 },
+        "set": "ironpeak",
+        "job": ["Warrior"]
+    }
+]

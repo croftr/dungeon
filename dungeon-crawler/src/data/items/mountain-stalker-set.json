@@ -1,0 +1,68 @@
+[
+    {
+        "name": "Mountain Stalker Hood",
+        "slot": "head",
+        "icon": "/icons/sets/mountain-stalker/mountain_hood.webp",
+        "description": "A rugged leather hood lined with thick fur, perfect for the cold peaks.",
+        "defence": 4,
+        "value": 1100,
+        "weight": 2.0,
+        "set": "mountain-stalker",
+        "job": ["Ranger"]
+    },
+    {
+        "name": "Mountain Stalker Trenchcoat",
+        "slot": "chest",
+        "icon": "/icons/sets/mountain-stalker/mountain_tunic.webp",
+        "description": "A heavy leather coat reinforced with iron studs and lined with bear fur.",
+        "defence": 9,
+        "value": 1800,
+        "weight": 8.0,
+        "set": "mountain-stalker",
+        "job": ["Ranger"]
+    },
+    {
+        "name": "Mountain Stalker Gloves",
+        "slot": "hands",
+        "icon": "/icons/sets/mountain-stalker/mountain_bracers.webp",
+        "description": "Thick leather gloves with reinforced knuckles, providing excellent grip and protection.",
+        "defence": 3,
+        "value": 850,
+        "weight": 2.0,
+        "set": "mountain-stalker",
+        "job": ["Ranger"]
+    },
+    {
+        "name": "Mountain Stalker Trousers",
+        "slot": "legs",
+        "icon": "/icons/sets/mountain-stalker/mountain_leggings.webp",
+        "description": "Heavy leather trousers with integrated iron plates on the thighs.",
+        "defence": 5,
+        "value": 1100,
+        "weight": 4.5,
+        "set": "mountain-stalker",
+        "job": ["Ranger"]
+    },
+    {
+        "name": "Mountain Stalker Boots",
+        "slot": "feet",
+        "icon": "/icons/sets/mountain-stalker/mountain_boots.webp",
+        "description": "Heavy-duty boots with iron crampons for climbing the steepest peaks.",
+        "defence": 4,
+        "value": 850,
+        "weight": 3.0,
+        "set": "mountain-stalker",
+        "job": ["Ranger"]
+    },
+    {
+        "name": "Mountain Stalker Heavy Cloak",
+        "slot": "cloak",
+        "icon": "/icons/sets/mountain-stalker/mountain_cloak.webp",
+        "description": "A thick, weather-beaten cloak made from the hide of a crag-cat.",
+        "defence": 4,
+        "value": 1000,
+        "weight": 2.5,
+        "set": "mountain-stalker",
+        "job": ["Ranger"]
+    }
+]

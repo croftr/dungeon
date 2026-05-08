@@ -8,7 +8,14 @@
         "value": 400,
         "weight": 0.3,
         "set": "wizard",
-        "job": ["Wizard", "White Mage"]
+        "elementalResistances": {
+            "fire": 0.02,
+            "ice": 0.02
+        },
+        "job": [
+            "Wizard",
+            "White Mage"
+        ]
     },
     {
         "name": "Wizard's Robe",
@@ -19,7 +26,14 @@
         "value": 400,
         "weight": 0.6,
         "set": "wizard",
-        "job": ["Wizard", "White Mage"]
+        "elementalResistances": {
+            "fire": 0.02,
+            "ice": 0.02
+        },
+        "job": [
+            "Wizard",
+            "White Mage"
+        ]
     },
     {
         "name": "Wizard's Gloves",
@@ -28,9 +42,16 @@
         "description": "Light cloth gloves embroidered with mystic threads. Part of the Wizard's Regalia.",
         "defence": 1,
         "value": 400,
-        "weight": 0.2,
+        "weight": 0.02,
         "set": "wizard",
-        "job": ["Wizard", "White Mage"]
+        "elementalResistances": {
+            "fire": 0.02,
+            "ice": 0.02
+        },
+        "job": [
+            "Wizard",
+            "White Mage"
+        ]
     },
     {
         "name": "Wizard's Leggings",
@@ -41,7 +62,14 @@
         "value": 400,
         "weight": 0.4,
         "set": "wizard",
-        "job": ["Wizard", "White Mage"]
+        "elementalResistances": {
+            "fire": 0.02,
+            "ice": 0.02
+        },
+        "job": [
+            "Wizard",
+            "White Mage"
+        ]
     },
     {
         "name": "Wizard's Boots",
@@ -52,6 +80,13 @@
         "value": 400,
         "weight": 0.3,
         "set": "wizard",
-        "job": ["Wizard", "White Mage"]
+        "elementalResistances": {
+            "fire": 0.02,
+            "ice": 0.02
+        },
+        "job": [
+            "Wizard",
+            "White Mage"
+        ]
     }
 ]

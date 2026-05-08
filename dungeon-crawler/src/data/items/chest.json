@@ -49,7 +49,7 @@
         "attackType": null,
         "baseDamage": null,
         "icon": "/icons/chest/plate_cuirass.webp",
-        "description": "Heavy forged steel chest plate. Near impenetrable \u2014 if you can move in it.",
+        "description": "Heavy forged steel chest plate. Near impenetrable — if you can move in it.",
         "defence": 4,
         "value": 750,
         "weight": 12,
@@ -84,101 +84,6 @@
             "Hunter",
             "War Dancer"
         ]
-    },
-    {
-        "name": "Amethyst Wardancer Cuirass",
-        "slot": "chest",
-        "attackType": null,
-        "baseDamage": null,
-        "icon": "/icons/chest/wardancer_chest.webp",
-        "description": "An exquisite silver breastplate that feels as light as silk. Pulsing with violet energy, it offers peerless protection without hindering movement.",
-        "defence": 7,
-        "value": 1200,
-        "weight": 5,
-        "statBonuses": {
-            "dexterity": 1,
-            "resilience": 1
-        }
-    },
-    {
-        "name": "Celestial Vindicator Cuirass",
-        "slot": "chest",
-        "icon": "/icons/chest/celestial_vindicator_chest.webp",
-        "description": "A heavy breastplate of radiant white and silver steel. Ornate yellow trims glow with celestial power, absorbing the darkest of blows.",
-        "defence": 10,
-        "value": 2500,
-        "weight": 15,
-        "statBonuses": {
-            "strength": 2,
-            "vitality": 2
-        }
-    },
-    {
-        "name": "Ironpeak Dwarf Cuirass",
-        "slot": "chest",
-        "icon": "/icons/chest/dwarf_cuirass.webp",
-        "description": "A powerful dwarf warrior cuirass adorned with ornate gold trim over impenetrable iron plates.",
-        "defence": 8,
-        "value": 1800,
-        "weight": 8.0,
-        "statBonuses": {}
-    },
-    {
-        "name": "Sylvan Elderwood Tunic",
-        "slot": "chest",
-        "icon": "/icons/chest/sylvan_tunic.webp",
-        "description": "An exquisite woodelf tunic glowing with inner vibrant energy, offering peerless agility.",
-        "defence": 8,
-        "value": 1800,
-        "weight": 4.0
-    },
-    {
-        "name": "Mountain Stalker Trenchcoat",
-        "slot": "chest",
-        "icon": "/icons/chest/mountain_tunic.webp",
-        "description": "A heavy leather coat reinforced with iron studs and lined with bear fur.",
-        "defence": 9,
-        "value": 1800,
-        "weight": 8.0
-    },
-    {
-        "name": "Aethelgard Archmage Robe",
-        "slot": "chest",
-        "icon": "/icons/chest/archmage_tunic.webp",
-        "description": "Ornate silk robes woven with protective runes and star-metal thread.",
-        "defence": 5,
-        "value": 1800,
-        "weight": 2.0,
-        "statBonuses": {
-            "intelligence": 3,
-            "vitality": 1
-        },
-        "skillBonuses": {
-            "fire": 2
-        }
-    },
-    {
-        "name": "Storm-Reaver Harness",
-        "slot": "chest",
-        "icon": "/icons/chest/stormreaver_tunic.webp",
-        "description": "A brutal chestplate of overlapping iron plates, showing the scars of many battles.",
-        "defence": 8,
-        "value": 1800,
-        "weight": 10.0
-    },
-    {
-        "name": "Seraphic Grace Gown",
-        "slot": "chest",
-        "icon": "/icons/chest/seraphic_tunic.webp",
-        "description": "A flowing white gown embroidered with golden thread, protecting the pure of heart.",
-        "defence": 6,
-        "value": 1800,
-        "weight": 2.5,
-        "statBonuses": {
-            "intelligence": 2,
-            "resilience": 2,
-            "vitality": 1
-        }
     },
     {
         "name": "Blood-Feather Mantle",

@@ -1,0 +1,68 @@
+[
+    {
+        "name": "Sylvan Elderwood Hood",
+        "slot": "head",
+        "icon": "/icons/sets/sylvan/sylvan_hood.webp",
+        "description": "A mystical hood woven from ancient sylvan leaves and strong magical threads.",
+        "defence": 4,
+        "value": 1100,
+        "weight": 1.5,
+        "set": "sylvan",
+        "job": ["Hunter"]
+    },
+    {
+        "name": "Sylvan Elderwood Tunic",
+        "slot": "chest",
+        "icon": "/icons/sets/sylvan/sylvan_tunic.webp",
+        "description": "An exquisite woodelf tunic glowing with inner vibrant energy, offering peerless agility.",
+        "defence": 8,
+        "value": 1800,
+        "weight": 4.0,
+        "set": "sylvan",
+        "job": ["Hunter"]
+    },
+    {
+        "name": "Sylvan Elderwood Bracers",
+        "slot": "hands",
+        "icon": "/icons/sets/sylvan/sylvan_bracers.webp",
+        "description": "Durable and elegant bracers carved from elderwood, quickening the wearer's aim.",
+        "defence": 3,
+        "value": 850,
+        "weight": 1.0,
+        "set": "sylvan",
+        "job": ["Hunter"]
+    },
+    {
+        "name": "Sylvan Elderwood Leggings",
+        "slot": "legs",
+        "icon": "/icons/sets/sylvan/sylvan_leggings.webp",
+        "description": "Flexible and sturdy leggings imbued with the agility of the deep forest.",
+        "defence": 4,
+        "value": 1100,
+        "weight": 2.0,
+        "set": "sylvan",
+        "job": ["Hunter"]
+    },
+    {
+        "name": "Sylvan Elderwood Boots",
+        "slot": "feet",
+        "icon": "/icons/sets/sylvan/sylvan_boots.webp",
+        "description": "Silent boots that tread softly upon any surface, leaving no trace behind.",
+        "defence": 3,
+        "value": 850,
+        "weight": 1.2,
+        "set": "sylvan",
+        "job": ["Hunter"]
+    },
+    {
+        "name": "Sylvan Elderwood Cloak",
+        "slot": "cloak",
+        "icon": "/icons/sets/sylvan/sylvan_cloak.webp",
+        "description": "A flowing silken cloak interwoven with silver thread and enchanted leaves.",
+        "defence": 3,
+        "value": 1000,
+        "weight": 0.5,
+        "set": "sylvan",
+        "job": ["Hunter"]
+    }
+]

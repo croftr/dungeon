@@ -1,0 +1,81 @@
+[
+    {
+        "name": "Aethelgard Archmage Hood",
+        "slot": "head",
+        "icon": "/icons/sets/aethelgard/archmage_hood.webp",
+        "description": "A silk hood shimmering with arcane energy, focusing the wearer's mind.",
+        "defence": 2,
+        "value": 1100,
+        "weight": 0.5,
+        "statBonuses": { "intelligence": 3 },
+        "skillBonuses": { "fire": 2 },
+        "set": "aethelgard",
+        "job": ["Wizard"]
+    },
+    {
+        "name": "Aethelgard Archmage Robe",
+        "slot": "chest",
+        "icon": "/icons/sets/aethelgard/archmage_tunic.webp",
+        "description": "Ornate silk robes woven with protective runes and star-metal thread.",
+        "defence": 5,
+        "value": 1800,
+        "weight": 2.0,
+        "statBonuses": { "intelligence": 3, "vitality": 1 },
+        "skillBonuses": { "fire": 2 },
+        "set": "aethelgard",
+        "job": ["Wizard"]
+    },
+    {
+        "name": "Aethelgard Archmage Cuffs",
+        "slot": "hands",
+        "icon": "/icons/sets/aethelgard/archmage_bracers.webp",
+        "description": "Silk and gold gloves that channel the flow of magic into the fingertips.",
+        "defence": 1,
+        "value": 850,
+        "weight": 0.3,
+        "statBonuses": { "intelligence": 2 },
+        "skillBonuses": { "fire": 2 },
+        "set": "aethelgard",
+        "job": ["Wizard"]
+    },
+    {
+        "name": "Aethelgard Archmage Leggings",
+        "slot": "legs",
+        "icon": "/icons/sets/aethelgard/archmage_leggings.webp",
+        "description": "Star-silk leggings that feel like moonlight against the skin.",
+        "defence": 3,
+        "value": 1100,
+        "weight": 0.8,
+        "statBonuses": { "intelligence": 1, "resilience": 1 },
+        "skillBonuses": { "fire": 2 },
+        "set": "aethelgard",
+        "job": ["Wizard"]
+    },
+    {
+        "name": "Aethelgard Archmage Slippers",
+        "slot": "feet",
+        "icon": "/icons/sets/aethelgard/archmage_boots.webp",
+        "description": "Enchanted slippers that never touch the ground, allowing for a near-silent stride.",
+        "defence": 1,
+        "value": 850,
+        "weight": 0.2,
+        "statBonuses": { "intelligence": 1, "resilience": 1 },
+        "skillBonuses": { "fire": 2 },
+        "set": "aethelgard",
+        "job": ["Wizard"]
+    },
+    {
+        "name": "Aethelgard Archmage Mantle",
+        "slot": "cloak",
+        "icon": "/icons/sets/aethelgard/archmage_cloak.webp",
+        "description": "A long, flowing mantle embroidered with constellation maps.",
+        "defence": 2,
+        "value": 1100,
+        "weight": 1.0,
+        "statBonuses": { "intelligence": 2 },
+        "skillBonuses": { "fire": 2 },
+        "elementalResistances": { "fire": 0.2 },
+        "set": "aethelgard",
+        "job": ["Wizard"]
+    }
+]

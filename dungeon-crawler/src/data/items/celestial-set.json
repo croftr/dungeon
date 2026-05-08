@@ -1,0 +1,77 @@
+[
+    {
+        "name": "Celestial Vindicator Helm",
+        "slot": "head",
+        "icon": "/icons/sets/celestial/celestial_vindicator_helm.webp",
+        "description": "A magnificent helm forged from glowing white metal and polished silver. It radiates a warm, holy light, protecting the wearer's mind with divine yellow energy.",
+        "defence": 4,
+        "value": 1200,
+        "weight": 3.0,
+        "statBonuses": { "resilience": 2, "intelligence": 1 },
+        "skillBonuses": { "Shield Master": 1 },
+        "set": "celestial",
+        "job": ["Paladin"]
+    },
+    {
+        "name": "Celestial Vindicator Cuirass",
+        "slot": "chest",
+        "icon": "/icons/sets/celestial/celestial_vindicator_chest.webp",
+        "description": "A heavy breastplate of radiant white and silver steel. Ornate yellow trims glow with celestial power, absorbing the darkest of blows.",
+        "defence": 10,
+        "value": 2500,
+        "weight": 15,
+        "statBonuses": { "strength": 2, "vitality": 2 },
+        "set": "celestial",
+        "job": ["Paladin"]
+    },
+    {
+        "name": "Celestial Vindicator Gauntlets",
+        "slot": "hands",
+        "icon": "/icons/sets/celestial/celestial_vindicator_hands.webp",
+        "description": "Elegant silver gauntlets with glowing white plates. The fingertips and knuckles are tipped with radiant yellow essence.",
+        "defence": 4,
+        "value": 1000,
+        "weight": 3,
+        "statBonuses": { "strength": 1, "resilience": 1 },
+        "skillBonuses": { "Mace Tactician": 1 },
+        "set": "celestial",
+        "job": ["Paladin"]
+    },
+    {
+        "name": "Celestial Vindicator Leggings",
+        "slot": "legs",
+        "icon": "/icons/sets/celestial/celestial_vindicator_legs.webp",
+        "description": "Heavily plated greaves forged from white-gold alloys and silver. They feel weightless while providing impenetrable holy defense.",
+        "defence": 5,
+        "value": 1500,
+        "weight": 8,
+        "statBonuses": { "vitality": 2 },
+        "set": "celestial",
+        "job": ["Paladin"]
+    },
+    {
+        "name": "Celestial Vindicator Sabatons",
+        "slot": "feet",
+        "icon": "/icons/sets/celestial/celestial_vindicator_feet.webp",
+        "description": "Solid silver boots inlaid with glowing white runes. Each step leaves a faint trail of radiant yellow dust.",
+        "defence": 4,
+        "value": 1100,
+        "weight": 5,
+        "statBonuses": { "resilience": 2 },
+        "set": "celestial",
+        "job": ["Paladin"]
+    },
+    {
+        "name": "Celestial Vindicator Cloak",
+        "slot": "cloak",
+        "icon": "/icons/sets/celestial/celestial_vindicator_cloak.webp",
+        "description": "A magnificent cloak of shimmering white silk with silver embroidery. A radiant yellow seal is pinned at the shoulder, guiding the faithful.",
+        "defence": 4,
+        "value": 1500,
+        "weight": 2.0,
+        "statBonuses": { "intelligence": 2, "resilience": 1 },
+        "elementalResistances": { "holy": 0.15, "dark": 0.15 },
+        "set": "celestial",
+        "job": ["Paladin"]
+    }
+]

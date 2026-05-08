@@ -1,0 +1,74 @@
+[
+    {
+        "name": "Amethyst Wardancer Helm",
+        "slot": "head",
+        "icon": "/icons/sets/wardancer/wardancer_helm.webp",
+        "description": "A lightweight elven helm forged from shimmering silver and inlaid with glowing amethyst. It enhances the wearer's agility and focus.",
+        "defence": 4,
+        "value": 600,
+        "weight": 1.5,
+        "statBonuses": { "dexterity": 1 },
+        "set": "wardancer",
+        "job": ["War Dancer"]
+    },
+    {
+        "name": "Amethyst Wardancer Cuirass",
+        "slot": "chest",
+        "icon": "/icons/sets/wardancer/wardancer_chest.webp",
+        "description": "An exquisite silver breastplate that feels as light as silk. Pulsing with violet energy, it offers peerless protection without hindering movement.",
+        "defence": 7,
+        "value": 1200,
+        "weight": 5,
+        "statBonuses": { "dexterity": 1, "resilience": 1 },
+        "set": "wardancer",
+        "job": ["War Dancer"]
+    },
+    {
+        "name": "Amethyst Wardancer Bracers",
+        "slot": "hands",
+        "icon": "/icons/sets/wardancer/wardancer_hands.webp",
+        "description": "Silver gauntlets that hum with magical vibrations, aiding the wearer's blade-work and reaction speed.",
+        "defence": 3,
+        "value": 500,
+        "weight": 0.8,
+        "statBonuses": { "dexterity": 1 },
+        "set": "wardancer",
+        "job": ["War Dancer"]
+    },
+    {
+        "name": "Amethyst Wardancer Leggings",
+        "slot": "legs",
+        "icon": "/icons/sets/wardancer/wardancer_legs.webp",
+        "description": "Form-fitting silver greaves that provide exceptional protection while feeling as light as air. Ornamented with deep purple gems.",
+        "defence": 4,
+        "value": 800,
+        "weight": 3,
+        "statBonuses": { "dexterity": 1 },
+        "set": "wardancer",
+        "job": ["War Dancer"]
+    },
+    {
+        "name": "Amethyst Wardancer Sabatons",
+        "slot": "feet",
+        "icon": "/icons/sets/wardancer/wardancer_feet.webp",
+        "description": "Ornate silver boots that allow for silent, effortless movement. The embedded amethysts glow when the wearer is in motion.",
+        "defence": 3,
+        "value": 500,
+        "weight": 1.2,
+        "statBonuses": { "dexterity": 1 },
+        "set": "wardancer",
+        "job": ["War Dancer"]
+    },
+    {
+        "name": "Amethyst Wardancer Cloak",
+        "slot": "cloak",
+        "icon": "/icons/sets/wardancer/wardancer_cloak.webp",
+        "description": "A regal cloak of shimmering violet silk. It flows behind the dancer like a trail of shadow and light, granting supernatural grace.",
+        "defence": 3,
+        "value": 1000,
+        "weight": 0.5,
+        "statBonuses": { "dexterity": 2 },
+        "set": "wardancer",
+        "job": ["War Dancer"]
+    }
+]

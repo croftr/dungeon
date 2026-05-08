@@ -45,6 +45,14 @@ import SPELLBOOKS from './data/items/spellbooks.json';
 import PARCHMENTS from './data/items/parchments.json';
 import STANCE_TOMES from './data/items/stance-tomes.json';
 import WIZARD_SET from './data/items/wizard-set.json';
+import AETHELGARD_SET from './data/items/aethelgard-set.json';
+import SERAPHIC_SET from './data/items/seraphic-set.json';
+import MOUNTAIN_STALKER_SET from './data/items/mountain-stalker-set.json';
+import SYLVAN_SET from './data/items/sylvan-set.json';
+import CELESTIAL_SET from './data/items/celestial-set.json';
+import IRONPEAK_SET from './data/items/ironpeak-set.json';
+import WARDANCER_SET from './data/items/wardancer-set.json';
+import STORMREAVER_SET from './data/items/stormreaver-set.json';
 
 export const ACTIONS = Object.freeze({
   SWIPE: 'swipe',
@@ -94,6 +102,14 @@ export const ITEMS = [
   ...PARCHMENTS,
   ...STANCE_TOMES,
   ...WIZARD_SET,
+  ...AETHELGARD_SET,
+  ...SERAPHIC_SET,
+  ...MOUNTAIN_STALKER_SET,
+  ...SYLVAN_SET,
+  ...CELESTIAL_SET,
+  ...IRONPEAK_SET,
+  ...WARDANCER_SET,
+  ...STORMREAVER_SET,
   ...SPELLS,
 ];
 

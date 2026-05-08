@@ -1,0 +1,74 @@
+[
+    {
+        "name": "Seraphic Grace Cowl",
+        "slot": "head",
+        "icon": "/icons/sets/seraphic/seraphic_hood.webp",
+        "description": "A pure white cowl that radiates a soft, holy light.",
+        "defence": 2,
+        "value": 1100,
+        "weight": 0.4,
+        "statBonuses": { "intelligence": 2, "resilience": 2 },
+        "set": "seraphic",
+        "job": ["White Mage"]
+    },
+    {
+        "name": "Seraphic Grace Gown",
+        "slot": "chest",
+        "icon": "/icons/sets/seraphic/seraphic_tunic.webp",
+        "description": "A flowing white gown embroidered with golden thread, protecting the pure of heart.",
+        "defence": 6,
+        "value": 1800,
+        "weight": 2.5,
+        "statBonuses": { "intelligence": 2, "resilience": 2, "vitality": 1 },
+        "set": "seraphic",
+        "job": ["White Mage"]
+    },
+    {
+        "name": "Seraphic Grace Mitts",
+        "slot": "hands",
+        "icon": "/icons/sets/seraphic/seraphic_bracers.webp",
+        "description": "Soft silk gloves that glow when a healing spell is cast.",
+        "defence": 1,
+        "value": 850,
+        "weight": 0.2,
+        "statBonuses": { "intelligence": 1, "resilience": 1 },
+        "set": "seraphic",
+        "job": ["White Mage"]
+    },
+    {
+        "name": "Seraphic Grace Skirt",
+        "slot": "legs",
+        "icon": "/icons/sets/seraphic/seraphic_leggings.webp",
+        "description": "A long, pleated skirt made of blessed linen.",
+        "defence": 4,
+        "value": 1100,
+        "weight": 1.0,
+        "statBonuses": { "resilience": 2 },
+        "set": "seraphic",
+        "job": ["White Mage"]
+    },
+    {
+        "name": "Seraphic Grace Sandals",
+        "slot": "feet",
+        "icon": "/icons/sets/seraphic/seraphic_boots.webp",
+        "description": "Lightweight sandals that make the wearer feel as if they are walking on clouds.",
+        "defence": 1,
+        "value": 850,
+        "weight": 0.3,
+        "statBonuses": { "intelligence": 1, "resilience": 1 },
+        "set": "seraphic",
+        "job": ["White Mage"]
+    },
+    {
+        "name": "Seraphic Grace Stole",
+        "slot": "cloak",
+        "icon": "/icons/sets/seraphic/seraphic_cloak.webp",
+        "description": "A long, narrow stole draped over the shoulders, symbolising life and light.",
+        "defence": 2,
+        "value": 1100,
+        "weight": 0.5,
+        "statBonuses": { "intelligence": 1, "resilience": 2 },
+        "set": "seraphic",
+        "job": ["White Mage"]
+    }
+]

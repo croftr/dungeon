@@ -20,5 +20,109 @@
                 "dark": 0.05
             }
         }
+    },
+    "aethelgard": {
+        "name": "Aethelgard Archmage",
+        "slots": ["head", "chest", "hands", "legs", "feet", "cloak"],
+        "bonus": {
+            "statBonuses": {
+                "strength": 1,
+                "dexterity": 1,
+                "vitality": 1,
+                "intelligence": 1,
+                "resilience": 1
+            }
+        }
+    },
+    "seraphic": {
+        "name": "Seraphic Grace",
+        "slots": ["head", "chest", "hands", "legs", "feet", "cloak"],
+        "bonus": {
+            "statBonuses": {
+                "strength": 1,
+                "dexterity": 1,
+                "vitality": 1,
+                "intelligence": 1,
+                "resilience": 1
+            }
+        }
+    },
+    "mountain-stalker": {
+        "name": "Mountain Stalker",
+        "slots": ["head", "chest", "hands", "legs", "feet", "cloak"],
+        "bonus": {
+            "statBonuses": {
+                "strength": 1,
+                "dexterity": 1,
+                "vitality": 1,
+                "intelligence": 1,
+                "resilience": 1
+            }
+        }
+    },
+    "sylvan": {
+        "name": "Sylvan Elderwood",
+        "slots": ["head", "chest", "hands", "legs", "feet", "cloak"],
+        "bonus": {
+            "statBonuses": {
+                "strength": 1,
+                "dexterity": 1,
+                "vitality": 1,
+                "intelligence": 1,
+                "resilience": 1
+            }
+        }
+    },
+    "celestial": {
+        "name": "Celestial Vindicator",
+        "slots": ["head", "chest", "hands", "legs", "feet", "cloak"],
+        "bonus": {
+            "statBonuses": {
+                "strength": 1,
+                "dexterity": 1,
+                "vitality": 1,
+                "intelligence": 1,
+                "resilience": 1
+            }
+        }
+    },
+    "ironpeak": {
+        "name": "Ironpeak Dwarf",
+        "slots": ["head", "chest", "hands", "legs", "feet", "cloak"],
+        "bonus": {
+            "statBonuses": {
+                "strength": 1,
+                "dexterity": 1,
+                "vitality": 1,
+                "intelligence": 1,
+                "resilience": 1
+            }
+        }
+    },
+    "wardancer": {
+        "name": "Amethyst Wardancer",
+        "slots": ["head", "chest", "hands", "legs", "feet", "cloak"],
+        "bonus": {
+            "statBonuses": {
+                "strength": 1,
+                "dexterity": 1,
+                "vitality": 1,
+                "intelligence": 1,
+                "resilience": 1
+            }
+        }
+    },
+    "stormreaver": {
+        "name": "Storm-Reaver",
+        "slots": ["head", "chest", "hands", "legs", "feet", "cloak"],
+        "bonus": {
+            "statBonuses": {
+                "strength": 1,
+                "dexterity": 1,
+                "vitality": 1,
+                "intelligence": 1,
+                "resilience": 1
+            }
+        }
     }
 }
