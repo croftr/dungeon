@@ -4777,31 +4777,35 @@ label.mm-setting-label {
 
 /* ── Level Up! button pulse in inventory header ── */
 #equip-char-dev.level-up-pending {
-  background: rgba(200, 168, 74, 0.3);
-  border: 2px solid #e8c84a;
+  background: linear-gradient(180deg, rgba(90, 62, 18, 0.98) 0%, rgba(38, 24, 5, 1) 100%);
+  border: 1px solid rgba(240, 200, 60, 1);
+  outline: 1px solid rgba(240, 200, 60, 0.45);
+  outline-offset: -3px;
   color: #fff8d0;
   font-weight: bold;
   font-size: 13px;
   letter-spacing: 1.5px;
-  padding: 3px 12px;
-  text-shadow: 0 0 6px rgba(255, 220, 80, 0.5);
+  padding: 0 12px;
+  text-shadow: 0 0 8px rgba(255, 220, 80, 0.6);
   animation: levelup-btn-pulse 1.6s ease-in-out infinite;
 }
 
 @keyframes levelup-btn-pulse {
-
-  0%,
-  100% {
-    box-shadow: 0 0 4px rgba(200, 168, 74, 0.3);
-    background: rgba(200, 168, 74, 0.22);
-    border-color: #c8a84a;
+  0%, 100% {
+    box-shadow:
+      0 3px 10px rgba(0, 0, 0, 0.7),
+      0 0 10px rgba(200, 158, 80, 0.2),
+      inset 0 1px 0 rgba(255, 220, 140, 0.1);
+    border-color: rgba(220, 175, 50, 0.9);
     transform: scale(1);
   }
-
   50% {
-    box-shadow: 0 0 12px rgba(255, 210, 60, 0.75), 0 0 24px rgba(200, 168, 74, 0.35);
-    background: rgba(200, 168, 74, 0.38);
-    border-color: #f0d060;
+    box-shadow:
+      0 3px 14px rgba(0, 0, 0, 0.8),
+      0 0 22px rgba(255, 210, 60, 0.55),
+      0 0 40px rgba(200, 158, 80, 0.25),
+      inset 0 1px 0 rgba(255, 220, 140, 0.15);
+    border-color: rgba(255, 220, 80, 1);
     transform: scale(1.06);
   }
 }
@@ -6940,9 +6944,16 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
 .chest-slot,
 .merchant-slot {
   aspect-ratio: 1;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid #2a2010;
-  border-radius: 3px;
+  background:
+    radial-gradient(circle 2px at 3px 3px, rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) 3px, rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at 3px calc(100% - 3px), rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) calc(100% - 3px), rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(0, 0, 0, 0.07) 3px, rgba(0, 0, 0, 0.07) 4px),
+    radial-gradient(ellipse at 38% 32%, rgba(38, 26, 10, 0.92) 0%, rgba(7, 5, 2, 1) 80%);
+  border: 1px solid;
+  border-color: #0d0806 #231608 #231608 #0d0806;
+  border-radius: 1px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -6950,7 +6961,10 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   color: #c0a060;
   text-align: center;
   padding: 3px;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 200, 80, 0.07),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.45),
+    inset 0 2px 8px rgba(0, 0, 0, 0.82);
   word-break: break-word;
   line-height: 1.3;
   cursor: pointer;
@@ -6959,10 +6973,12 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
 
 .chest-slot:hover,
 .merchant-slot:hover {
-  border-color: #c8a84a;
-  background: rgba(80, 60, 20, 0.6);
+  border-color: #7a5020 #a07030 #8a5c24 #5a3812;
+  box-shadow:
+    inset 0 0 0 1px rgba(225, 165, 60, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.55),
+    0 0 10px rgba(175, 115, 28, 0.28);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
 }
 
 .chest-slot,
@@ -7043,24 +7059,37 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
 
 .chest-inv-slot {
   aspect-ratio: 1;
-  background: rgba(0, 0, 0, 0.45);
-  border: 1px solid #1e1810;
-  border-radius: 3px;
+  background:
+    radial-gradient(circle 2px at 3px 3px, rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) 3px, rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at 3px calc(100% - 3px), rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) calc(100% - 3px), rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(0, 0, 0, 0.07) 3px, rgba(0, 0, 0, 0.07) 4px),
+    radial-gradient(ellipse at 38% 32%, rgba(38, 26, 10, 0.92) 0%, rgba(7, 5, 2, 1) 80%);
+  border: 1px solid;
+  border-color: #0d0806 #231608 #231608 #0d0806;
+  border-radius: 1px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 200, 80, 0.07),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.45),
+    inset 0 2px 8px rgba(0, 0, 0, 0.82);
   position: relative;
 }
 
 .chest-inv-slot.occupied {
-  border-color: #3a2e18;
+  border-color: #3a2212 #5c3a1c #4c2e14 #261608;
   cursor: pointer;
 }
 
 .chest-inv-slot.occupied:hover {
-  border-color: #c8a84a;
-  background: rgba(60, 40, 10, 0.45);
+  border-color: #7a5020 #a07030 #8a5c24 #5a3812;
+  box-shadow:
+    inset 0 0 0 1px rgba(225, 165, 60, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.55),
+    0 0 10px rgba(175, 115, 28, 0.28);
 }
 
 .chest-inv-slot img {
@@ -7777,9 +7806,16 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
 .anvil-slot {
   width: 60px;
   height: 60px;
-  background: rgba(20, 10, 3, 0.9);
-  border: 1px solid #4a3010;
-  border-radius: 6px;
+  background:
+    radial-gradient(circle 2px at 3px 3px, rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) 3px, rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at 3px calc(100% - 3px), rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) calc(100% - 3px), rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(0, 0, 0, 0.07) 3px, rgba(0, 0, 0, 0.07) 4px),
+    radial-gradient(ellipse at 38% 32%, rgba(38, 26, 10, 0.92) 0%, rgba(7, 5, 2, 1) 80%);
+  border: 1px solid;
+  border-color: #0d0806 #231608 #231608 #0d0806;
+  border-radius: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -7787,20 +7823,30 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   transition: border-color 0.15s, box-shadow 0.15s;
   position: relative;
   box-sizing: border-box;
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 200, 80, 0.07),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.45),
+    inset 0 2px 8px rgba(0, 0, 0, 0.82);
 }
 
 .anvil-slot:hover {
-  border-color: #c88030;
-  box-shadow: 0 0 8px rgba(200, 128, 48, 0.3);
+  border-color: #7a5020 #c88030 #c88030 #5a3812;
+  box-shadow:
+    inset 0 0 0 1px rgba(200, 128, 48, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.55),
+    0 0 8px rgba(200, 128, 48, 0.3);
 }
 
 .anvil-slot.occupied {
-  border-color: #6a4a20;
+  border-color: #3a2212 #5c3a1c #4c2e14 #261608;
 }
 
 .anvil-slot.occupied:hover {
-  border-color: #f0a030;
-  box-shadow: 0 0 10px rgba(240, 160, 48, 0.35);
+  border-color: #7a5020 #f0a030 #c88030 #5a3812;
+  box-shadow:
+    inset 0 0 0 1px rgba(240, 160, 48, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.55),
+    0 0 10px rgba(240, 160, 48, 0.35);
 }
 
 .anvil-slot img {
@@ -7952,9 +7998,16 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
 
 .corpse-slot {
   aspect-ratio: 1;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid #2a2010;
-  border-radius: 3px;
+  background:
+    radial-gradient(circle 2px at 3px 3px, rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) 3px, rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at 3px calc(100% - 3px), rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) calc(100% - 3px), rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(0, 0, 0, 0.07) 3px, rgba(0, 0, 0, 0.07) 4px),
+    radial-gradient(ellipse at 38% 32%, rgba(38, 26, 10, 0.92) 0%, rgba(7, 5, 2, 1) 80%);
+  border: 1px solid;
+  border-color: #0d0806 #231608 #231608 #0d0806;
+  border-radius: 1px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -7962,7 +8015,10 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   color: #c0a060;
   text-align: center;
   padding: 3px;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 200, 80, 0.07),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.45),
+    inset 0 2px 8px rgba(0, 0, 0, 0.82);
   word-break: break-word;
   line-height: 1.3;
   cursor: pointer;
@@ -7970,8 +8026,11 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
 }
 
 .corpse-slot:hover {
-  border-color: #a08050;
-  background: rgba(60, 40, 10, 0.45);
+  border-color: #7a5020 #a07030 #8a5c24 #5a3812;
+  box-shadow:
+    inset 0 0 0 1px rgba(225, 165, 60, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.55),
+    0 0 10px rgba(175, 115, 28, 0.28);
 }
 
 .corpse-slot.occupied img {
@@ -8212,23 +8271,36 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
 /* ── Merchant item slots (shop & basket) ─────────────────────────────── */
 .merch-slot {
   aspect-ratio: 1;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid #2a2010;
-  border-radius: 3px;
+  background:
+    radial-gradient(circle 2px at 3px 3px, rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) 3px, rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at 3px calc(100% - 3px), rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) calc(100% - 3px), rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(0, 0, 0, 0.07) 3px, rgba(0, 0, 0, 0.07) 4px),
+    radial-gradient(ellipse at 38% 32%, rgba(38, 26, 10, 0.92) 0%, rgba(7, 5, 2, 1) 80%);
+  border: 1px solid;
+  border-color: #0d0806 #231608 #231608 #0d0806;
+  border-radius: 1px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 3px 2px 2px;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 200, 80, 0.07),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.45),
+    inset 0 2px 8px rgba(0, 0, 0, 0.82);
   cursor: pointer;
   position: relative;
-  transition: border-color 0.1s, background 0.1s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .merch-slot:hover {
-  border-color: #a08050;
-  background: rgba(60, 40, 10, 0.45);
+  border-color: #7a5020 #a07030 #8a5c24 #5a3812;
+  box-shadow:
+    inset 0 0 0 1px rgba(225, 165, 60, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.55),
+    0 0 10px rgba(175, 115, 28, 0.28);
 }
 
 .merch-slot img {
@@ -9053,20 +9125,33 @@ body.cursor-interact #renderer-canvas {
 .alchemy-slot {
   width: 60px;
   height: 60px;
-  background: rgba(20, 35, 20, 0.6);
-  border: 1px solid #2d4d2d;
-  border-radius: 4px;
+  background:
+    radial-gradient(circle 2px at 3px 3px, rgba(38, 120, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) 3px, rgba(38, 120, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at 3px calc(100% - 3px), rgba(38, 120, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) calc(100% - 3px), rgba(38, 120, 38, 0.55) 40%, transparent 65%),
+    repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(0, 0, 0, 0.07) 3px, rgba(0, 0, 0, 0.07) 4px),
+    radial-gradient(ellipse at 38% 32%, rgba(10, 30, 10, 0.95) 0%, rgba(2, 6, 2, 1) 80%);
+  border: 1px solid;
+  border-color: #050905 #0d2008 #0d2008 #050905;
+  border-radius: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-shadow:
+    inset 1px 1px 0 rgba(80, 220, 80, 0.06),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.45),
+    inset 0 2px 8px rgba(0, 0, 0, 0.82);
 }
 
 .alchemy-slot:hover {
-  background: rgba(40, 70, 40, 0.8);
-  border-color: #4da4d1;
-  box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+  border-color: #0d3a0d #4da4d1 #4da4d1 #0a2a0a;
+  box-shadow:
+    inset 0 0 0 1px rgba(77, 164, 209, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.55),
+    0 0 10px rgba(77, 164, 209, 0.2);
 }
 
 .alchemy-slot.occupied img {
