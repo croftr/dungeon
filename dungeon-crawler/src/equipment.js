@@ -968,7 +968,10 @@ function buildPartyBar(activeIndex) {
       });
     }
 
-    portraits.appendChild(memEl);
+    const slot = document.createElement('div');
+    slot.className = 'equip-member-slot';
+    slot.appendChild(memEl);
+    portraits.appendChild(slot);
   });
   bar.appendChild(portraits);
   _appendXpBar(bar, party[activeIndex]);

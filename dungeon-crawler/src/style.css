@@ -2626,16 +2626,14 @@ label.mm-setting-label {
 }
 
 #equip-char-name {
-  font-size: 13px;
+  font-size: 17px;
   color: #c8a84a;
   letter-spacing: 2px;
   text-transform: uppercase;
 }
 
 #equip-char-level {
-  font-size: 11px;
-  color: #7a6a44;
-  letter-spacing: 1px;
+  display: none;
 }
 
 #equip-char-dev {
@@ -2645,7 +2643,8 @@ label.mm-setting-label {
   border-radius: 3px;
   font-family: monospace;
   font-size: 12px;
-  padding: 3px 10px;
+  height: 28px;
+  padding: 0 10px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
   white-space: nowrap;
@@ -2702,6 +2701,40 @@ label.mm-setting-label {
   align-items: center;
 }
 
+/* Slot wrapper — portrait + name label stacked */
+.equip-member-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Dim inactive slots; restore on hover */
+.equip-member-slot:not(:has(.equip-party-member.active)) {
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.equip-member-slot:not(:has(.equip-party-member.active)):hover {
+  opacity: 1;
+}
+
+@keyframes portrait-active-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 2px rgba(200, 168, 74, 0.35),
+      0 0 16px rgba(200, 168, 74, 0.55),
+      0 0 32px rgba(200, 168, 74, 0.18),
+      0 4px 12px rgba(0, 0, 0, 0.6);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px rgba(225, 190, 80, 0.55),
+      0 0 26px rgba(225, 190, 80, 0.8),
+      0 0 50px rgba(225, 190, 80, 0.28),
+      0 4px 12px rgba(0, 0, 0, 0.6);
+  }
+}
+
 .equip-party-member {
   width: 44px;
   height: 44px;
@@ -2726,21 +2759,18 @@ label.mm-setting-label {
 }
 
 .equip-party-member.active {
-  border-color: #c8a84a;
-  box-shadow: 0 0 15px rgba(200, 168, 74, 0.4), 0 4px 10px rgba(0, 0, 0, 0.5);
-  transform: scale(1.1);
+  border-color: #f0d060;
+  box-shadow:
+    0 0 0 2px rgba(200, 168, 74, 0.35),
+    0 0 16px rgba(200, 168, 74, 0.55),
+    0 0 32px rgba(200, 168, 74, 0.18),
+    0 4px 12px rgba(0, 0, 0, 0.6);
+  transform: scale(1.25);
+  animation: portrait-active-pulse 2.5s ease-in-out infinite;
 }
 
 .equip-party-member.active::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 12px;
-  height: 4px;
-  background: #c8a84a;
-  border-radius: 2px 2px 0 0;
+  display: none;
 }
 
 .equip-party-member img,
@@ -2780,7 +2810,7 @@ label.mm-setting-label {
 }
 
 #equip-xp-name {
-  font-size: 11px;
+  font-size: 14px;
   color: #c8a84a;
   font-family: monospace;
   letter-spacing: 1.5px;
@@ -2789,7 +2819,7 @@ label.mm-setting-label {
 }
 
 #equip-xp-text {
-  font-size: 10px;
+  font-size: 12px;
   color: #52a852;
   font-family: monospace;
   letter-spacing: 1px;
@@ -2992,9 +3022,20 @@ label.mm-setting-label {
 
 .inv-cell {
   aspect-ratio: 1;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid #2a2010;
-  border-radius: 3px;
+  position: relative;
+  background:
+    /* Corner rivets — metal studs at each corner */
+    radial-gradient(circle 2px at 3px 3px, rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) 3px, rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at 3px calc(100% - 3px), rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) calc(100% - 3px), rgba(155, 105, 38, 0.55) 40%, transparent 65%),
+    /* Horizontal grain lines */
+    repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(0, 0, 0, 0.07) 3px, rgba(0, 0, 0, 0.07) 4px),
+    /* Dark stone/leather base */
+    radial-gradient(ellipse at 38% 32%, rgba(38, 26, 10, 0.92) 0%, rgba(7, 5, 2, 1) 80%);
+  border: 1px solid;
+  border-color: #0d0806 #231608 #231608 #0d0806;
+  border-radius: 1px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3002,27 +3043,41 @@ label.mm-setting-label {
   color: #c0a060;
   text-align: center;
   padding: 3px;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 200, 80, 0.07),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.45),
+    inset 0 2px 8px rgba(0, 0, 0, 0.82);
   word-break: break-word;
   line-height: 1.3;
   cursor: default;
 }
 
 .inv-cell.occupied {
-  border-color: #6a5030;
+  background:
+    radial-gradient(circle 2px at 3px 3px, rgba(185, 130, 48, 0.7) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) 3px, rgba(185, 130, 48, 0.7) 40%, transparent 65%),
+    radial-gradient(circle 2px at 3px calc(100% - 3px), rgba(185, 130, 48, 0.7) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) calc(100% - 3px), rgba(185, 130, 48, 0.7) 40%, transparent 65%),
+    repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(0, 0, 0, 0.05) 3px, rgba(0, 0, 0, 0.05) 4px),
+    radial-gradient(ellipse at 38% 32%, rgba(52, 34, 13, 0.9) 0%, rgba(10, 7, 3, 1) 80%);
+  border-color: #3a2212 #5c3a1c #4c2e14 #261608;
   color: #e8c87a;
   cursor: pointer;
+  box-shadow:
+    inset 0 0 0 1px rgba(200, 140, 50, 0.1),
+    inset 0 2px 6px rgba(0, 0, 0, 0.68),
+    0 0 4px rgba(130, 85, 20, 0.12);
 }
 
 .inv-cell.occupied:hover {
-  border-color: #a08050;
-  background: rgba(60, 40, 10, 0.45);
+  border-color: #7a5020 #a07030 #8a5c24 #5a3812;
+  box-shadow:
+    inset 0 0 0 1px rgba(225, 165, 60, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.55),
+    0 0 10px rgba(175, 115, 28, 0.28);
 }
 
 /* Stack count badge — sits in the bottom-right of an inventory cell */
-.inv-cell {
-  position: relative;
-}
 
 .inv-count-badge {
   position: absolute;
@@ -3087,6 +3142,18 @@ label.mm-setting-label {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+#elemental-resistances,
+#status-resistances {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 5px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid #1e1508;
+  border-radius: 3px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.55), inset 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 .stat-row {
