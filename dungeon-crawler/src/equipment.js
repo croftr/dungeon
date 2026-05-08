@@ -914,8 +914,8 @@ function syncPartyBarActiveState(activeIndex) {
 function _rebuildXpBar(activeIndex) {
   const bar = document.getElementById('equip-party-bar');
   if (!bar) return;
-  const existing = document.getElementById('equip-xp-wrap');
-  if (existing) existing.remove();
+  document.getElementById('equip-xp-wrap')?.remove();
+  document.getElementById('equip-xp-name')?.remove();
   const m = party[activeIndex];
   if (!m || m.isEmpty) return;
   _appendXpBar(bar, m);
@@ -985,11 +985,12 @@ function _appendXpBar(bar, m) {
   const labelRow = document.createElement('div');
   labelRow.id = 'equip-xp-label-row';
 
-  const nameLevel = document.createElement('span');
-  nameLevel.id = 'equip-xp-name';
   const nextXP = getNextLevelXP(m);
   const currXPThreshold = getCurrentLevelThreshold(m);
-  nameLevel.textContent = `${m.name}  ·  Lv.${m.level ?? 0}`;
+
+  const levelSpan = document.createElement('span');
+  levelSpan.id = 'equip-xp-level';
+  levelSpan.textContent = `Lv. ${m.level ?? 0}`;
 
   const xpText = document.createElement('span');
   xpText.id = 'equip-xp-text';
@@ -1001,7 +1002,7 @@ function _appendXpBar(bar, m) {
     xpText.textContent = `${m.xp ?? 0} XP  ·  MAX LEVEL`;
   }
 
-  labelRow.appendChild(nameLevel);
+  labelRow.appendChild(levelSpan);
   labelRow.appendChild(xpText);
 
   const track = document.createElement('div');
@@ -1013,9 +1014,16 @@ function _appendXpBar(bar, m) {
   fill.style.width = pct + '%';
 
   track.appendChild(fill);
+
   xpWrap.appendChild(labelRow);
   xpWrap.appendChild(track);
+
+  const nameSpan = document.createElement('span');
+  nameSpan.id = 'equip-xp-name';
+  nameSpan.textContent = m.name;
+
   bar.appendChild(xpWrap);
+  bar.appendChild(nameSpan);
 }
 
 
