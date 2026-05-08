@@ -1,0 +1,57 @@
+[
+    {
+        "name": "Wizard's Hat",
+        "slot": "head",
+        "icon": "/icons/sets/wizard/wizard-head.webp",
+        "description": "A pointed hat threaded with silver runes. Part of the Wizard's Regalia.",
+        "defence": 1,
+        "value": 400,
+        "weight": 0.3,
+        "set": "wizard",
+        "job": ["Wizard", "White Mage"]
+    },
+    {
+        "name": "Wizard's Robe",
+        "slot": "chest",
+        "icon": "/icons/sets/wizard/wizard-chest.webp",
+        "description": "A flowing robe stitched with arcane sigils. Part of the Wizard's Regalia.",
+        "defence": 1,
+        "value": 400,
+        "weight": 0.6,
+        "set": "wizard",
+        "job": ["Wizard", "White Mage"]
+    },
+    {
+        "name": "Wizard's Gloves",
+        "slot": "hands",
+        "icon": "/icons/sets/wizard/wizard-hands.webp",
+        "description": "Light cloth gloves embroidered with mystic threads. Part of the Wizard's Regalia.",
+        "defence": 1,
+        "value": 400,
+        "weight": 0.2,
+        "set": "wizard",
+        "job": ["Wizard", "White Mage"]
+    },
+    {
+        "name": "Wizard's Leggings",
+        "slot": "legs",
+        "icon": "/icons/sets/wizard/wizard-legs.webp",
+        "description": "Soft cloth leggings woven with silver filigree. Part of the Wizard's Regalia.",
+        "defence": 1,
+        "value": 400,
+        "weight": 0.4,
+        "set": "wizard",
+        "job": ["Wizard", "White Mage"]
+    },
+    {
+        "name": "Wizard's Boots",
+        "slot": "feet",
+        "icon": "/icons/sets/wizard/wizard-boots.webp",
+        "description": "Soft slippers stitched with silver thread. Part of the Wizard's Regalia.",
+        "defence": 1,
+        "value": 400,
+        "weight": 0.3,
+        "set": "wizard",
+        "job": ["Wizard", "White Mage"]
+    }
+]

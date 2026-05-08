@@ -1,5 +1,6 @@
 import { getItemDef } from './items.js';
-import { renderItemIcon, attachTooltipListeners, hideTooltip, rotateLoadout, clearAutoAttackTimers, clearAutoRangeAttackTimers, updateEffectiveStats, refreshEquipmentModal, getMemberEncumbranceLevel, getMemberCarryWeight, getMemberMaxCarry } from './equipment.js';
+import { renderItemIcon, attachTooltipListeners, hideTooltip, rotateLoadout, clearAutoAttackTimers, clearAutoRangeAttackTimers, updateEffectiveStats, refreshEquipmentModal, getMemberEncumbranceLevel, getMemberCarryWeight, getMemberMaxCarry, formatSetBonusText } from './equipment.js';
+import SETS_DATA from './data/sets.json';
 import { addLogEntry } from './battle-log.js';
 import { isInCombat, playGoldSound, playPartyHitSound, playActionSound } from './audio.js';
 import { showMessage } from './minimap.js';
@@ -1511,7 +1512,26 @@ function updateStatusBanners() {
       entries.push({ name: encDef.name, def: encDef, fromStatusEffects: true });
     }
 
-    const key = activeNames.join('|') + '|enc:' + encLevel;
+    // Set bonuses are derived passive state (like encumbrance). For each active
+    // set, synthesize a status-effect-shaped def with a per-set name and a
+    // description summarising the bonus payload, so the tooltip is useful.
+    const activeSets = m.activeSets ?? [];
+    const setBonusBase = STATUS_EFFECT_DEFS.set_bonus;
+    if (setBonusBase) {
+      activeSets.forEach(setId => {
+        const setDef = SETS_DATA[setId];
+        if (!setDef) return;
+        const synthName = `${setDef.name} Set Bonus`;
+        const synthDef = {
+          ...setBonusBase,
+          name: synthName,
+          description: formatSetBonusText(setDef),
+        };
+        entries.push({ name: synthName, def: synthDef, fromStatusEffects: true });
+      });
+    }
+
+    const key = activeNames.join('|') + '|enc:' + encLevel + '|sets:' + activeSets.join(',');
     if (banner._prevKeys === key) return;
     banner._prevKeys = key;
 

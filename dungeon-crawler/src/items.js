@@ -44,6 +44,7 @@ import SKILLS from './data/items/skill-items.json';
 import SPELLBOOKS from './data/items/spellbooks.json';
 import PARCHMENTS from './data/items/parchments.json';
 import STANCE_TOMES from './data/items/stance-tomes.json';
+import WIZARD_SET from './data/items/wizard-set.json';
 
 export const ACTIONS = Object.freeze({
   SWIPE: 'swipe',
@@ -92,6 +93,7 @@ export const ITEMS = [
   ...SPELLBOOKS,
   ...PARCHMENTS,
   ...STANCE_TOMES,
+  ...WIZARD_SET,
   ...SPELLS,
 ];
 

@@ -1,4 +1,13 @@
 {
+  "set_bonus": {
+    "id": "set_bonus",
+    "name": "Set Bonus",
+    "description": "Wearing a complete equipment set grants extra bonuses.",
+    "type": "buff",
+    "icon": "/icons/status-effects/set-bonus.svg",
+    "color": "#f5c84a",
+    "passive": true
+  },
   "poison": {
     "id": "poison",
     "name": "Poison",

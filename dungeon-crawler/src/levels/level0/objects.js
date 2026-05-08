@@ -43,7 +43,8 @@ export function spawnLevel0Objects(ctx) {
         // Unique Arena Items (2 of each)
         "Crocodile Hide", "Crocodile Hide",
         "Ogre's Head", "Ogre's Head",
-        "Iron Ore", "Iron Ore", "Ogre Helm Parchment", "Crocodilian Boots Parchment", "Leather Boots", "Iron Helm"
+        "Iron Ore", "Iron Ore", "Ogre Helm Parchment", "Crocodilian Boots Parchment", "Leather Boots", "Iron Helm",
+        "Wizard's Hat", "Wizard's Robe", "Wizard's Gloves", "Wizard's Leggings", "Wizard's Boots"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in the east room (center) ────────────────────────────────────

@@ -42,6 +42,7 @@ const SOUND_MAP = {
   'shield-block': { url: asset('/sounds/actions/shield-block.mp3'), offset: 0.0 },
   encumbered: { url: asset('/sounds/actions/encumbered.mp3'), offset: 0.0 },
   overloaded: { url: asset('/sounds/actions/encumbered.mp3'), offset: 0.0 },
+  'set-bonus': { url: asset('/sounds/actions/set-bonus.mp3'), offset: 0.0 },
 };
 
 const ITEM_SOUNDS = {

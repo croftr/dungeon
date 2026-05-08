@@ -15,13 +15,14 @@ import { playAction } from './actions.js';
 import { attackMonster, monsters, getInRangeMonster, setHuntersEyeTarget, getHuntersEyeTargetId, applyMonsterStatusEffect } from './monster.js';
 import { showMessage } from './minimap.js';
 import RECRUITS_DATA from './data/recruits.json';
+import SETS_DATA from './data/sets.json';
 import SPELL_TYPE_ICONS from './data/spell-type-icons.json';
 import { isInFrontOfPlayer, player } from './player.js';
 import { isAlchemyModalOpen, addItemToAlchemy } from './objects.js';
 import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude, calcOnHitChance, calcControlSpellLandChance } from './combat-rules.js';
 import { showStanceMenu, getAvailableStances, getEligibleStances, getSpellCooldownMultiplier, getStanceCureHealBonus, hasStanceDoubleAttack, getStanceDef, setStance } from './stance.js';
 import { playStanceVideo, RECRUITS } from './recruits.js';
-import { playCritSound, playSkillSound, playItemSound, playLevelUpConfirmSound, playInventorySortSound } from './audio.js';
+import { playCritSound, playSkillSound, playItemSound, playLevelUpConfirmSound, playInventorySortSound, playActionSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { skillsState } from './skills-state.js';
 import { getNextLevelXP, getCurrentLevelThreshold, hydrateSkill } from './leveling.js';
@@ -251,6 +252,42 @@ let _skillSwMenuCtx = null; // { memberIndex, mode: 'skill'|'spell' } when skill
 //  DATA SETUP  — extends party member objects
 // ─────────────────────────────────────────────
 
+// Builds a human-readable summary of a set's bonus payload (statBonuses,
+// elementalResistances, etc.) used in battle log entries, toast messages and
+// the status-effect tooltip. Resistances are rendered as percentages.
+export function formatSetBonusText(setDef) {
+  if (!setDef?.bonus) return '';
+  const parts = [];
+  const b = setDef.bonus;
+  if (b.statBonuses) {
+    Object.entries(b.statBonuses).forEach(([stat, val]) => {
+      const sign = val >= 0 ? '+' : '';
+      parts.push(`${sign}${val} ${stat}`);
+    });
+  }
+  if (b.elementalResistances) {
+    const entries = Object.entries(b.elementalResistances);
+    if (entries.length > 0) {
+      const allEqual = entries.every(([, v]) => v === entries[0][1]);
+      if (allEqual && entries.length >= 4) {
+        parts.push(`+${Math.round(entries[0][1] * 100)}% all elemental resist`);
+      } else {
+        entries.forEach(([elem, val]) => {
+          const sign = val >= 0 ? '+' : '';
+          parts.push(`${sign}${Math.round(val * 100)}% ${elem} resist`);
+        });
+      }
+    }
+  }
+  if (b.skillBonuses) {
+    Object.entries(b.skillBonuses).forEach(([key, val]) => {
+      const sign = val >= 0 ? '+' : '';
+      parts.push(`${sign}${val} ${key}`);
+    });
+  }
+  return parts.join(', ');
+}
+
 export function updateEffectiveStats(m) {
   if (!m.baseStats) {
     if (!m.stats) return; // safeguard
@@ -348,6 +385,81 @@ export function updateEffectiveStats(m) {
       }
     }
   });
+
+  // Set bonuses: when every slot listed by a set definition is filled with a
+  // matching `set` item, apply the set's bonus on top of the per-piece bonuses.
+  // Set definitions live in src/data/sets.json keyed by set id.
+  const prevActiveSets = m._lastActiveSets ?? [];
+  m.activeSets = [];
+  for (const [setId, setDef] of Object.entries(SETS_DATA)) {
+    const slots = setDef.slots || [];
+    if (slots.length === 0) continue;
+    const allMatch = slots.every(slot => {
+      const item = m.equipment?.[slot];
+      if (!item) return false;
+      const def = getItemDef(item.name);
+      return def?.set === setId;
+    });
+    if (!allMatch) continue;
+    m.activeSets.push(setId);
+    const bonus = setDef.bonus || {};
+    if (bonus.statBonuses) {
+      Object.entries(bonus.statBonuses).forEach(([stat, delta]) => {
+        if (stat === 'hp') directHpBonus += delta;
+        else if (stat === 'mp') directMpBonus += delta;
+        else if (stat === 'sp') directSpBonus += delta;
+        else if (newStats[stat] !== undefined) newStats[stat] += delta;
+      });
+    }
+    if (bonus.skillBonuses) {
+      Object.entries(bonus.skillBonuses).forEach(([key, delta]) => {
+        newSkillBonuses[key] = (newSkillBonuses[key] ?? 0) + delta;
+      });
+    }
+    if (bonus.elementalResistances) {
+      Object.entries(bonus.elementalResistances).forEach(([elem, resistance]) => {
+        const sum = (newElementalResistances[elem] ?? 0) + resistance;
+        newElementalResistances[elem] = sum > 0.9 ? 0.9 : sum;
+      });
+    }
+    if (bonus.statusResistances) {
+      Object.entries(bonus.statusResistances).forEach(([effectId, resistance]) => {
+        newStatusResistances[effectId] = Math.min(0.9, (newStatusResistances[effectId] ?? 0) + resistance);
+      });
+    }
+  }
+
+  // Notify on set-bonus transitions. First call (prev was undefined) is a
+  // baseline-only sync — no toast/log so save-load doesn't spam events.
+  // window._isRestoring suppresses notifications during checkpoint restore.
+  if (m._lastActiveSets !== undefined && !window._isRestoring) {
+    const gained = m.activeSets.filter(s => !prevActiveSets.includes(s));
+    const lost = prevActiveSets.filter(s => !m.activeSets.includes(s));
+    gained.forEach(setId => {
+      const setDef = SETS_DATA[setId];
+      const setName = setDef?.name ?? setId;
+      const detail = formatSetBonusText(setDef);
+      addLogEntry({
+        time: Date.now(),
+        type: 'effect',
+        actor: m.name,
+        description: `gains <b>${setName}</b> set bonus — ${detail}`,
+      });
+      showMessage(`<span style="color:#f5c84a">★ ${m.name}: ${setName} set complete — ${detail}</span>`, 3500);
+      playActionSound('set-bonus');
+    });
+    lost.forEach(setId => {
+      const setDef = SETS_DATA[setId];
+      const setName = setDef?.name ?? setId;
+      addLogEntry({
+        time: Date.now(),
+        type: 'effect',
+        actor: m.name,
+        description: `loses <b>${setName}</b> set bonus`,
+      });
+    });
+  }
+  m._lastActiveSets = [...m.activeSets];
 
   m.stats = newStats;
   m.skillBonuses = newSkillBonuses;
