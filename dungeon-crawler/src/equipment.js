@@ -802,11 +802,10 @@ function renderModal(memberIndex) {
     modal.classList.remove('equip-modal--dead');
   }
 
-  // ── Skill Tree tab label — level-up indicator ──
+  // ── Skill Tree tab label — bouncing arrow when level-up pending ──
   const stTabBtn = document.getElementById('equip-tab-skilltree');
   if (stTabBtn) {
     const hasPending = !m.isDead && (m.pendingNodePicks ?? 0) > 0;
-    stTabBtn.classList.toggle('equip-tab--levelup', hasPending);
     stTabBtn.innerHTML = hasPending
       ? 'Skill Tree <span class="equip-tab-levelup-badge">⬆</span>'
       : 'Skill Tree';
@@ -3102,8 +3101,11 @@ function _renderSkillTreeTab(m, memberIndex, force = false) {
   const treeAlreadyRendered = treeContainer && treeContainer.querySelector('.tree-viewport');
   const skipTreeRebuild = !force && key === _lastRenderedTreeKey && treeAlreadyRendered;
 
-  if (!skipTreeRebuild) {
-    // Reset detail panel only when we're actually rebuilding (member change / node picked / level up)
+  // Only reset the detail panel when switching members (or first open).
+  // Don't wipe it on tree rebuilds caused by node selection — the user
+  // explicitly clicked a node to see its details.
+  const memberChanged = !_lastRenderedTreeKey || _lastRenderedTreeKey.split('|')[0] !== String(memberIndex);
+  if (memberChanged) {
     const detailName = document.getElementById('cd-detail-name');
     const detailAction = document.getElementById('cd-detail-action');
     const detailDesc = document.getElementById('cd-detail-desc');
