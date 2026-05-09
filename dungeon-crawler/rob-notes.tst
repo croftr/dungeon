@@ -2,7 +2,7 @@
 bash sync-s3.sh
 
 // convert png to webp
-ffmpeg -i "pngaaa.com-235683.png" -vf "scale=128:128" "bronze_key.webp"
+ffmpeg -i "img.png" -vf "scale=128:128" "img.webp"
 
 //powershell only convert all png to webp in current directory
 Get-ChildItem -File | ForEach-Object { ffmpeg -i $_.Name -vf "scale=128:128" "$($_.BaseName).webp" }

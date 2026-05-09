@@ -46,6 +46,7 @@ export function spawnLevel0Objects(ctx) {
         "Iron Ore", "Iron Ore", "Ogre Helm Parchment", "Crocodilian Boots Parchment", 
         "Savage Schematics", "Trackers Schematics", "Steel Schematics", "Wizard Schematics",
         "Leather Boots", "Iron Helm",
+        "Heavy Ogre Drape", "Ashen Shroud",
         "Wizard's Hat", "Wizard's Robe", "Wizard's Gloves", "Wizard's Leggings", "Wizard's Boots",
         "Steel Vanguard Helm", "Steel Vanguard Chestplate", "Steel Vanguard Gauntlets", "Steel Vanguard Legplates", "Steel Vanguard Sabatons",
         "Tracker's Guise Cowl", "Tracker's Guise Tunic", "Tracker's Guise Gloves", "Tracker's Guise Breeches", "Tracker's Guise Boots",
