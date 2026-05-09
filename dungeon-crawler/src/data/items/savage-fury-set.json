@@ -1,0 +1,87 @@
+[
+    {
+        "name": "Savage Fury Headdress",
+        "slot": "head",
+        "icon": "/icons/sets/savage-fury/savage-fury-head.png",
+        "description": "A tribal wolf pelt headdress. Early game light armor. Part of the Savage Fury set.",
+        "defence": 2,
+        "value": 150,
+        "weight": 1.5,
+        "set": "savage-fury",
+        "statBonuses": {
+            "hp": 2
+        },
+        "job": [
+            "War Dancer",
+            "Barbarian"
+        ]
+    },
+    {
+        "name": "Savage Fury Harness",
+        "slot": "chest",
+        "icon": "/icons/sets/savage-fury/savage-fury-chest.png",
+        "description": "A crude harness of thick leather and furs. Part of the Savage Fury set.",
+        "defence": 3,
+        "value": 250,
+        "weight": 3.0,
+        "set": "savage-fury",
+        "statBonuses": {
+            "hp": 2
+        },
+        "job": [
+            "War Dancer",
+            "Barbarian"
+        ]
+    },
+    {
+        "name": "Savage Fury Bracers",
+        "slot": "hands",
+        "icon": "/icons/sets/savage-fury/savage-fury-hands.png",
+        "description": "Leather bracers with animal teeth. Part of the Savage Fury set.",
+        "defence": 1,
+        "value": 100,
+        "weight": 0.5,
+        "set": "savage-fury",
+        "statBonuses": {
+            "hp": 2
+        },
+        "job": [
+            "War Dancer",
+            "Barbarian"
+        ]
+    },
+    {
+        "name": "Savage Fury Leg Wraps",
+        "slot": "legs",
+        "icon": "/icons/sets/savage-fury/savage-fury-legs.png",
+        "description": "A heavy fur loincloth and leather leg wraps. Part of the Savage Fury set.",
+        "defence": 2,
+        "value": 150,
+        "weight": 2.0,
+        "set": "savage-fury",
+        "statBonuses": {
+            "hp": 2
+        },
+        "job": [
+            "War Dancer",
+            "Barbarian"
+        ]
+    },
+    {
+        "name": "Savage Fury Footwraps",
+        "slot": "feet",
+        "icon": "/icons/sets/savage-fury/savage-fury-feet.png",
+        "description": "Fur-lined crude leather boots. Part of the Savage Fury set.",
+        "defence": 1,
+        "value": 100,
+        "weight": 1.0,
+        "set": "savage-fury",
+        "statBonuses": {
+            "hp": 2
+        },
+        "job": [
+            "War Dancer",
+            "Barbarian"
+        ]
+    }
+]

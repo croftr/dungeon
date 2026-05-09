@@ -1,0 +1,72 @@
+[
+    {
+        "name": "Tracker's Guise Cowl",
+        "slot": "head",
+        "icon": "/icons/sets/trackers-guise/trackers-guise-head.png",
+        "description": "A leather cowl. Early game light armor for hunters. Part of the Tracker's Guise set.",
+        "defence": 2,
+        "value": 150,
+        "weight": 1.5,
+        "set": "trackers-guise",
+        "job": [
+            "Hunter",
+            "Ranger"
+        ]
+    },
+    {
+        "name": "Tracker's Guise Tunic",
+        "slot": "chest",
+        "icon": "/icons/sets/trackers-guise/trackers-guise-chest.png",
+        "description": "A light leather tunic with fur lining. Part of the Tracker's Guise set.",
+        "defence": 3,
+        "value": 250,
+        "weight": 3.0,
+        "set": "trackers-guise",
+        "job": [
+            "Hunter",
+            "Ranger"
+        ]
+    },
+    {
+        "name": "Tracker's Guise Gloves",
+        "slot": "hands",
+        "icon": "/icons/sets/trackers-guise/trackers-guise-hands.png",
+        "description": "Light leather fingerless gloves. Part of the Tracker's Guise set.",
+        "defence": 1,
+        "value": 100,
+        "weight": 0.5,
+        "set": "trackers-guise",
+        "job": [
+            "Hunter",
+            "Ranger"
+        ]
+    },
+    {
+        "name": "Tracker's Guise Breeches",
+        "slot": "legs",
+        "icon": "/icons/sets/trackers-guise/trackers-guise-legs.png",
+        "description": "Leather leggings designed for mobility. Part of the Tracker's Guise set.",
+        "defence": 2,
+        "value": 150,
+        "weight": 2.0,
+        "set": "trackers-guise",
+        "job": [
+            "Hunter",
+            "Ranger"
+        ]
+    },
+    {
+        "name": "Tracker's Guise Boots",
+        "slot": "feet",
+        "icon": "/icons/sets/trackers-guise/trackers-guise-feet.png",
+        "description": "Soft leather boots for silent movement. Part of the Tracker's Guise set.",
+        "defence": 1,
+        "value": 100,
+        "weight": 1.0,
+        "set": "trackers-guise",
+        "job": [
+            "Hunter",
+            "Ranger"
+        ]
+    }
+]

@@ -54,6 +54,8 @@ import IRONPEAK_SET from './data/items/ironpeak-set.json';
 import WARDANCER_SET from './data/items/wardancer-set.json';
 import STORMREAVER_SET from './data/items/stormreaver-set.json';
 import STEEL_VANGUARD_SET from './data/items/steel-vanguard-set.json';
+import TRACKERS_GUISE_SET from './data/items/trackers-guise-set.json';
+import SAVAGE_FURY_SET from './data/items/savage-fury-set.json';
 
 export const ACTIONS = Object.freeze({
   SWIPE: 'swipe',
@@ -112,6 +114,8 @@ export const ITEMS = [
   ...WARDANCER_SET,
   ...STORMREAVER_SET,
   ...STEEL_VANGUARD_SET,
+  ...TRACKERS_GUISE_SET,
+  ...SAVAGE_FURY_SET,
   ...SPELLS,
 ];
 

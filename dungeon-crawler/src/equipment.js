@@ -816,9 +816,21 @@ function renderModal(memberIndex) {
   if (_activeEquipTab === 'skilltree') _renderSkillTreeTab(m, memberIndex);
   else if (_activeEquipTab === 'stances') _renderStancesTab(m, memberIndex);
 
+  // ── Job display (top of center column) ──
+  const jobEl = document.getElementById('char-job-display');
+  if (jobEl) {
+    if (m.job) {
+      const iconSlug = m.job.toLowerCase().replace(/\s+/g, '-');
+      jobEl.innerHTML = `<img class="char-job-icon" src="${asset(`/skills/jobs/${iconSlug}.webp`)}" alt="" onerror="this.style.display='none'"><span class="char-job-name">${m.job}</span>`;
+    } else {
+      jobEl.innerHTML = '';
+    }
+  }
+
   // ── Paperdoll slots ──
   // For bothHands items the same object sits in both leftHand and rightHand.
   // We show the name in full on the primary (leftHand) slot and faded on rightHand.
+  const activeSets = new Set(m.activeSets ?? []);
   SLOT_KEYS.forEach((key) => {
     const el = document.getElementById(`pd-${key}`);
     if (!el) return;
@@ -827,6 +839,9 @@ function renderModal(memberIndex) {
     const isSecondary = isBothHands && key === 'rightHand';
     el.classList.toggle('occupied', item !== null);
     el.classList.toggle('both-hands-secondary', isSecondary);
+    // Gold glow if this equipped item belongs to an active set bonus
+    const itemSetId = item ? getItemDef(item.name)?.set : null;
+    el.classList.toggle('pd-slot--set-bonus', !!(itemSetId && activeSets.has(itemSetId)));
     const pdItemEl = el.querySelector('.pd-item') || el;
     renderItemIcon(item, pdItemEl);
   });

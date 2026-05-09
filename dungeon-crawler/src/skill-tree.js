@@ -360,10 +360,10 @@ export function renderSkillTree(m, container, onNodeClick) {
       requestAnimationFrame(initTransform);
       return;
     }
-    // Start zoomed in ~5 zoom-in button presses past the fit scale (1.25^5 ≈ 3.05×),
+    // Start zoomed in ~2 zoom-in button presses past the fit scale (1.25^2 ≈ 1.56×),
     // with the start node at top-centre of the viewport
     const fitScale = Math.min(vw / canvasW, vh / canvasH, 1.0);
-    const initScale = Math.min(fitScale * Math.pow(1.25, 5), 4.0);
+    const initScale = Math.min(fitScale * Math.pow(1.25, 2), 4.0);
     const [startX, startY] = positions['start'] ?? [canvasW / 2, 0];
     viewport._scale = initScale;
     viewport._tx = vw / 2 - startX * initScale;

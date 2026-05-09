@@ -204,6 +204,42 @@
         "sellable": false
     },
     {
+        "name": "Savage Schematics",
+        "slot": "loot",
+        "icon": "/icons/key/savage_schematics.webp",
+        "description": "A set of primal schematics used by a blacksmith to craft the Savage Fury armor set.",
+        "value": 0,
+        "weight": 0.1,
+        "sellable": false
+    },
+    {
+        "name": "Trackers Schematics",
+        "slot": "loot",
+        "icon": "/icons/key/trackers_schematics.webp",
+        "description": "Detailed schematics documenting the patterns for crafting Tracker's Guise armor.",
+        "value": 0,
+        "weight": 0.1,
+        "sellable": false
+    },
+    {
+        "name": "Steel Schematics",
+        "slot": "loot",
+        "icon": "/icons/key/steel_schematics.webp",
+        "description": "Heavy metal-bound schematics detailing the construction of Steel Vanguard armor.",
+        "value": 0,
+        "weight": 0.1,
+        "sellable": false
+    },
+    {
+        "name": "Wizard Schematics",
+        "slot": "loot",
+        "icon": "/icons/key/wizard_schematics.webp",
+        "description": "Arcane schematics containing the embroidery patterns and magical weaves for Wizard armor.",
+        "value": 0,
+        "weight": 0.1,
+        "sellable": false
+    },
+    {
         "name": "Broken Sun-Forged Key",
         "slot": "loot",
         "icon": "/icons/key/sun_forged_key_broken.webp",

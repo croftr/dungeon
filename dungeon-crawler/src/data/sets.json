@@ -211,5 +211,59 @@
                 "dark": 0.05
             }
         }
+    },
+    "trackers-guise": {
+        "name": "Tracker's Guise",
+        "slots": [
+            "head",
+            "chest",
+            "hands",
+            "legs",
+            "feet"
+        ],
+        "bonus": {
+            "statBonuses": {
+                "strength": 1,
+                "dexterity": 1,
+                "vitality": 1,
+                "intelligence": 1,
+                "resilience": 1
+            },
+            "elementalResistances": {
+                "fire": 0.05,
+                "ice": 0.05,
+                "lightning": 0.05,
+                "water": 0.05,
+                "holy": 0.05,
+                "dark": 0.05
+            }
+        }
+    },
+    "savage-fury": {
+        "name": "Savage Fury",
+        "slots": [
+            "head",
+            "chest",
+            "hands",
+            "legs",
+            "feet"
+        ],
+        "bonus": {
+            "statBonuses": {
+                "strength": 1,
+                "dexterity": 1,
+                "vitality": 1,
+                "intelligence": 1,
+                "resilience": 1
+            },
+            "elementalResistances": {
+                "fire": 0.05,
+                "ice": 0.05,
+                "lightning": 0.05,
+                "water": 0.05,
+                "holy": 0.05,
+                "dark": 0.05
+            }
+        }
     }
 }
