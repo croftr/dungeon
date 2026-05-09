@@ -2603,7 +2603,8 @@ label.mm-setting-label {
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 220, 120, 0.07);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
   font-family: monospace;
 }
 
@@ -2616,6 +2617,7 @@ label.mm-setting-label {
   border-bottom: 2px solid #1a0e06;
   background: url('/images/inventory-header.webp') center / cover no-repeat;
   flex-shrink: 0;
+  border-radius: 6px 6px 0 0;
 }
 
 #equip-char-info {
@@ -2660,9 +2662,21 @@ label.mm-setting-label {
 #equip-char-dev {
   font-family: monospace;
   font-size: 12px;
-  padding: 0 10px;
+  padding: 6px 20px;
   white-space: nowrap;
   letter-spacing: 1px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  z-index: 10;
+  height: auto;
+  border-radius: 6px 6px 0 0;
+  border-bottom: none;
+  box-shadow:
+    0 -3px 10px rgba(0, 0, 0, 0.7),
+    0 0 10px rgba(200, 158, 80, 0.15),
+    inset 0 1px 0 rgba(255, 220, 140, 0.08);
 }
 
 #equip-close {
@@ -2678,6 +2692,16 @@ label.mm-setting-label {
   border-color: rgba(232, 200, 122, 1);
   outline-color: rgba(232, 200, 122, 0.45);
   color: #fff8e8;
+}
+
+#equip-char-dev:hover {
+  box-shadow:
+    0 -3px 12px rgba(0, 0, 0, 0.8),
+    0 0 14px rgba(200, 158, 80, 0.3),
+    inset 0 1px 0 rgba(255, 220, 140, 0.12);
+}
+
+#equip-close:hover {
   box-shadow:
     0 3px 12px rgba(0, 0, 0, 0.8),
     0 0 14px rgba(200, 158, 80, 0.3),
@@ -2691,6 +2715,7 @@ label.mm-setting-label {
   grid-template-rows: auto 1fr;
   overflow: hidden;
   flex: 1;
+  border-radius: 0 0 6px 6px;
 }
 
 #equip-party-bar {
@@ -4785,7 +4810,6 @@ label.mm-setting-label {
   font-weight: bold;
   font-size: 13px;
   letter-spacing: 1.5px;
-  padding: 0 12px;
   text-shadow: 0 0 8px rgba(255, 220, 80, 0.6);
   animation: levelup-btn-pulse 1.6s ease-in-out infinite;
 }
@@ -4793,20 +4817,20 @@ label.mm-setting-label {
 @keyframes levelup-btn-pulse {
   0%, 100% {
     box-shadow:
-      0 3px 10px rgba(0, 0, 0, 0.7),
+      0 -3px 10px rgba(0, 0, 0, 0.7),
       0 0 10px rgba(200, 158, 80, 0.2),
       inset 0 1px 0 rgba(255, 220, 140, 0.1);
     border-color: rgba(220, 175, 50, 0.9);
-    transform: scale(1);
+    transform: translate(-50%, -100%) scale(1);
   }
   50% {
     box-shadow:
-      0 3px 14px rgba(0, 0, 0, 0.8),
+      0 -3px 14px rgba(0, 0, 0, 0.8),
       0 0 22px rgba(255, 210, 60, 0.55),
       0 0 40px rgba(200, 158, 80, 0.25),
       inset 0 1px 0 rgba(255, 220, 140, 0.15);
     border-color: rgba(255, 220, 80, 1);
-    transform: scale(1.06);
+    transform: translate(-50%, -100%) scale(1.06);
   }
 }
 
