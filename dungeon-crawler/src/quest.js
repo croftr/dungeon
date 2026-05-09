@@ -359,10 +359,16 @@ function _showQuestCompleteModal(itemNames, gold) {
         const row = document.createElement('div');
         row.className = 'quest-complete-item';
         if (def?.icon) {
+            const iconWrap = document.createElement('div');
+            iconWrap.className = 'merch-slot';
+            iconWrap.style.width = '64px';
+            iconWrap.style.height = '64px';
+            iconWrap.style.flexShrink = '0';
             const img = document.createElement('img');
             img.src = asset(def.icon);
             img.alt = name;
-            row.appendChild(img);
+            iconWrap.appendChild(img);
+            row.appendChild(iconWrap);
         }
         const label = document.createElement('span');
         label.className = 'quest-complete-item-name';
@@ -373,10 +379,16 @@ function _showQuestCompleteModal(itemNames, gold) {
     if (gold > 0) {
         const row = document.createElement('div');
         row.className = 'quest-complete-item';
+        const iconWrap = document.createElement('div');
+        iconWrap.className = 'merch-slot';
+        iconWrap.style.width = '64px';
+        iconWrap.style.height = '64px';
+        iconWrap.style.flexShrink = '0';
         const img = document.createElement('img');
         img.src = asset('/icons/gold_coins.webp');
         img.alt = 'Gold';
-        row.appendChild(img);
+        iconWrap.appendChild(img);
+        row.appendChild(iconWrap);
         const label = document.createElement('span');
         label.className = 'quest-complete-item-name';
         label.textContent = `${gold} Gold`;

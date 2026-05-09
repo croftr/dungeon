@@ -11344,12 +11344,7 @@ body.cursor-interact #renderer-canvas {
   padding: 10px 14px;
 }
 
-.quest-complete-item img {
-  width: 44px;
-  height: 44px;
-  object-fit: contain;
-  image-rendering: pixelated;
-}
+
 
 .quest-complete-item-name {
   color: #e8d8a8;

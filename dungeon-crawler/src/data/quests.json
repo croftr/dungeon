@@ -1,8 +1,86 @@
 [
   {
+    "id": "savage-armor-quest",
+    "name": "Savage Schematics",
+    "giver": "weapons-merchant",
+    "text": "I've heard tales of a tribal design called Savage Fury. It's crude but surprisingly effective for early combat. If you can find the Savage Schematics, I can decipher them and craft the entire set for you.",
+    "requiredItems": [
+      "Savage Schematics"
+    ],
+    "keepRequiredItems": false,
+    "completionText": "These schematics are rough, but the design is sound. Give me a moment... yes, here is your Savage Fury armor. Wear it well.",
+    "completionRewards": [
+      "Savage Fury Headdress",
+      "Savage Fury Harness",
+      "Savage Fury Bracers",
+      "Savage Fury Leg Wraps",
+      "Savage Fury Footwraps"
+    ]
+  },
+  {
+    "id": "trackers-armor-quest",
+    "name": "Trackers Schematics",
+    "giver": "weapons-merchant",
+    "text": "Hunters and rangers often rely on the Tracker's Guise. It's light, durable, and perfect for moving silently. Bring me the Trackers Schematics, and I'll make the set yours.",
+    "requiredItems": [
+      "Trackers Schematics"
+    ],
+    "keepRequiredItems": false,
+    "completionText": "Ah, the Tracker's Guise. Excellent stitching on these plans. Here is the set, crafted exactly to specification.",
+    "completionRewards": [
+      "Tracker's Guise Cowl",
+      "Tracker's Guise Tunic",
+      "Tracker's Guise Gloves",
+      "Tracker's Guise Breeches",
+      "Tracker's Guise Boots"
+    ]
+  },
+  {
+    "id": "steel-armor-quest",
+    "name": "Steel Schematics",
+    "giver": "weapons-merchant",
+    "text": "For heavy protection, nothing beats the Steel Vanguard. It's bulky but it'll save your life in a pinch. Find the Steel Schematics, and I'll forge it for you.",
+    "requiredItems": [
+      "Steel Schematics"
+    ],
+    "keepRequiredItems": false,
+    "completionText": "Heavy, solid steel. Just the way it should be. The Vanguard set is ready for battle.",
+    "completionRewards": [
+      "Steel Vanguard Helm",
+      "Steel Vanguard Chestplate",
+      "Steel Vanguard Gauntlets",
+      "Steel Vanguard Legplates",
+      "Steel Vanguard Sabatons"
+    ]
+  },
+  {
+    "id": "wizard-armor-quest",
+    "name": "Wizard Schematics",
+    "giver": "weapons-merchant",
+    "text": "Magic users need specialized gear. The Wizard's Regalia is threaded with silver runes to ward off elemental damage. Bring me the Wizard Schematics, and I'll weave it for you.",
+    "requiredItems": [
+      "Wizard Schematics"
+    ],
+    "keepRequiredItems": false,
+    "completionText": "Such intricate runework... Done. The Wizard's Regalia is yours, pulsing with latent energy.",
+    "completionRewards": [
+      "Wizard's Hat",
+      "Wizard's Robe",
+      "Wizard's Gloves",
+      "Wizard's Leggings",
+      "Wizard's Boots"
+    ]
+  },
+  {
     "id": "hall-of-heroes",
     "name": "The Hall of Heroes",
     "giver": "weapons-merchant",
+    "prerequisiteQuests": [
+      "savage-armor-quest",
+      "trackers-armor-quest",
+      "steel-armor-quest",
+      "wizard-armor-quest"
+    ],
     "text": "Beyond that iron door lies the Hall of Heroes — a proving ground where legends are forged or forgotten. I've seen a hundred warriors pass through it. Few earned the name. The door will open for any who carry the will to fight, but what waits inside... that's another matter. If you're half as capable as you look, I'd say go.",
     "audio": "/npcs/merchant1/hall-of-heros-quest.mp3",
     "requiredItems": [
