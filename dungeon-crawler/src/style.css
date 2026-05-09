@@ -7205,7 +7205,6 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
 #chest-main-content {
   display: flex;
   flex: 1;
-  height: 430px;
   max-height: calc(100vh - 140px);
 }
 
@@ -7227,6 +7226,7 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   top: 0;
   background: rgba(10, 7, 4, 0.98);
   z-index: 1;
+  flex-shrink: 0;
 }
 
 #chest-body-header #chest-header-icon {
@@ -7376,6 +7376,7 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   overflow-y: auto;
   flex: 1;
   min-height: 0;
+  align-content: start;
 }
 
 .chest-inv-slot {
