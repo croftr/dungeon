@@ -245,6 +245,14 @@ const SLOT_LABELS = {
 // ─────────────────────────────────────────────
 let activeCharIndex = null;
 let activeCharDevIndex = null;
+let _activeEquipTab = 'inventory';
+let _equipTabsWired = false;
+// Track last-rendered skill tree / stances state so we don't rebuild the DOM
+// every frame (refreshEquipmentModal fires from updateParty on every game tick).
+// Without this, click handlers attach to elements that get destroyed before
+// pointerup fires, making the tab feel completely unclickable.
+let _lastRenderedTreeKey = null;
+let _lastRenderedStancesKey = null;
 let _ctxInvIndex = null;   // inventory slot most recently right-clicked
 let _skillSwMenuCtx = null; // { memberIndex, mode: 'skill'|'spell' } when skill-switch menu is open
 
@@ -794,23 +802,19 @@ function renderModal(memberIndex) {
     modal.classList.remove('equip-modal--dead');
   }
 
-  // ── Development / Level Up! button ──
-  const devBtn = document.getElementById('equip-char-dev');
-  if (devBtn) {
-    if (m.isDead) {
-      devBtn.textContent = 'Skill Tree';
-      devBtn.classList.remove('level-up-pending');
-      devBtn.disabled = true;
-    } else if (m.pendingLevelUp) {
-      devBtn.textContent = '⬆ Level Up!';
-      devBtn.classList.add('level-up-pending');
-      devBtn.disabled = false;
-    } else {
-      devBtn.textContent = 'Skill Tree';
-      devBtn.classList.remove('level-up-pending');
-      devBtn.disabled = false;
-    }
+  // ── Skill Tree tab label — level-up indicator ──
+  const stTabBtn = document.getElementById('equip-tab-skilltree');
+  if (stTabBtn) {
+    const hasPending = !m.isDead && (m.pendingNodePicks ?? 0) > 0;
+    stTabBtn.classList.toggle('equip-tab--levelup', hasPending);
+    stTabBtn.innerHTML = hasPending
+      ? 'Skill Tree <span class="equip-tab-levelup-badge">⬆</span>'
+      : 'Skill Tree';
   }
+
+  // Re-render active non-inventory tab when switching members
+  if (_activeEquipTab === 'skilltree') _renderSkillTreeTab(m, memberIndex);
+  else if (_activeEquipTab === 'stances') _renderStancesTab(m, memberIndex);
 
   // ── Paperdoll slots ──
   // For bothHands items the same object sits in both leftHand and rightHand.
@@ -867,18 +871,9 @@ function renderModal(memberIndex) {
         : '';
   }
 
-  // ── Cap grid visual height to 5 rows (scroll beyond) ──
+  // ── Let grid fill available column height (scroll if it overflows) ──
   const gridEl = document.getElementById('inventory-grid');
-  if (gridEl) {
-    setTimeout(() => {
-      const firstCell = gridEl.querySelector('.inv-cell');
-      const cellH = firstCell?.getBoundingClientRect().height ?? 0;
-      if (cellH > 0) {
-        const visibleRows = 5, gap = 5, padding = 10;
-        gridEl.style.maxHeight = `${visibleRows * cellH + (visibleRows - 1) * gap + 2 * padding}px`;
-      }
-    }, 0);
-  }
+  if (gridEl) gridEl.style.maxHeight = '';
 
   // ── Inventory cells ──
   const cells = document.querySelectorAll('.inv-cell');
@@ -2841,15 +2836,19 @@ function onPaperdollSlotContextMenu(e) {
 // ─────────────────────────────────────────────
 //  OPEN / CLOSE
 // ─────────────────────────────────────────────
-function openModal(memberIndex) {
-  // Close char-dev if it's open — never show both modals simultaneously
+function openModal(memberIndex, tab = null) {
   if (activeCharDevIndex !== null) closeCharDevModal();
   const wasOpen = activeCharIndex !== null;
   activeCharIndex = memberIndex;
   hideTooltip();
   document.getElementById('equip-overlay').classList.remove('equip-hidden');
-  // Rebuild portrait tabs only when modal first opens; otherwise just update active state
-  if (!wasOpen) buildPartyBar(memberIndex);
+  if (!wasOpen) {
+    buildPartyBar(memberIndex);
+    _wireEquipTabs();
+    _switchEquipTab(tab ?? 'inventory');
+  } else if (tab) {
+    _switchEquipTab(tab);
+  }
   renderModal(memberIndex);
 
   showInlineHelp('first-inventory-open', {
@@ -2908,19 +2907,11 @@ function _confirmDrop() {
 //  CHARACTER DEVELOPMENT MODAL
 // ─────────────────────────────────────────────
 export function openCharDevModal(memberIndex) {
-  // Close inventory if it's open — never show both modals simultaneously
-  if (activeCharIndex !== null) closeModal();
-  activeCharDevIndex = memberIndex;
-  hideTooltip();
-  document.getElementById('char-dev-overlay').classList.remove('char-dev-hidden');
-  renderCharDevModal(memberIndex);
+  openModal(memberIndex, 'skilltree');
 }
 
 export function closeCharDevModal() {
-  hideTooltip();
-  document.getElementById('char-dev-overlay').classList.add('char-dev-hidden');
-  activeCharDevIndex = null;
-  refreshPartyCards();
+  closeModal();
 }
 
 function renderCharDevModal(memberIndex) {
@@ -3052,12 +3043,108 @@ function _wireCharDevTabs() {
   });
 }
 
-function _renderStancesTab(m, memberIndex) {
+// ─────────────────────────────────────────────
+//  INVENTORY MODAL TABS
+// ─────────────────────────────────────────────
+function _wireEquipTabs() {
+  if (_equipTabsWired) return;
+  _equipTabsWired = true;
+  document.querySelectorAll('#equip-tab-bar .equip-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      _switchEquipTab(btn.dataset.equipTab);
+    });
+  });
+}
+
+function _switchEquipTab(tab) {
+  _activeEquipTab = tab;
+  document.querySelectorAll('#equip-tab-bar .equip-tab').forEach(btn => {
+    btn.classList.toggle('equip-tab--active', btn.dataset.equipTab === tab);
+  });
+  const inventory = document.getElementById('equip-body');
+  const skilltree = document.getElementById('equip-skilltree-panel');
+  const stances = document.getElementById('equip-stances-panel');
+  if (inventory) inventory.classList.toggle('equip-tab-panel--hidden', tab !== 'inventory');
+  if (skilltree) skilltree.classList.toggle('equip-tab-panel--hidden', tab !== 'skilltree');
+  if (stances) stances.classList.toggle('equip-tab-panel--hidden', tab !== 'stances');
+
+  if (activeCharIndex !== null) {
+    const m = party[activeCharIndex];
+    if (tab === 'skilltree') _renderSkillTreeTab(m, activeCharIndex);
+    else if (tab === 'stances') _renderStancesTab(m, activeCharIndex);
+  }
+}
+
+function _renderSkillTreeTab(m, memberIndex, force = false) {
+  const pending = (m.pendingNodePicks ?? 0) > 0;
+
+  // Build a key that captures everything that affects what's rendered.
+  // If nothing has changed, skip the rebuild — otherwise we'd destroy the
+  // skill-tree DOM every game tick and clicks would never complete.
+  const acquiredCount = (m.acquiredNodes ?? []).length;
+  const key = `${memberIndex}|${m.skillTreeId}|${acquiredCount}|${m.pendingNodePicks ?? 0}|${m.pendingNodeChoice ?? ''}`;
+  const treeContainer = document.getElementById('cd-skill-tree-container');
+  const treeAlreadyRendered = treeContainer && treeContainer.querySelector('.tree-viewport');
+  const skipTreeRebuild = !force && key === _lastRenderedTreeKey && treeAlreadyRendered;
+
+  if (!skipTreeRebuild) {
+    // Reset detail panel only when we're actually rebuilding (member change / node picked / level up)
+    const detailName = document.getElementById('cd-detail-name');
+    const detailAction = document.getElementById('cd-detail-action');
+    const detailDesc = document.getElementById('cd-detail-desc');
+    const detailPotency = document.getElementById('cd-detail-potency');
+    if (detailName) detailName.textContent = 'Select a node';
+    if (detailAction) detailAction.textContent = '';
+    if (detailDesc) detailDesc.textContent = '';
+    if (detailPotency) detailPotency.textContent = '';
+    _setDetailIcon(null);
+  }
+
+  const pendingRow = document.getElementById('equip-st-pending-row');
+  const pendingLabel = document.getElementById('cd-stat-points-remaining');
+  if (pendingRow) pendingRow.style.display = pending ? 'flex' : 'none';
+  if (pendingLabel) {
+    const picks = m.pendingNodePicks ?? 0;
+    pendingLabel.textContent = picks === 1 ? '1 node pick available' : `${picks} node picks available`;
+  }
+
+  if (!skipTreeRebuild && treeContainer) {
+    _lastRenderedTreeKey = key;
+    // Defer to next frame so the panel has its final layout dimensions
+    // (otherwise the auto-fit zoom/pan calculations use 0×0).
+    requestAnimationFrame(() => {
+      renderSkillTree(m, treeContainer, (node) => {
+        _showNodeDetail(node, m);
+        const confirmBtn = document.getElementById('char-dev-confirm');
+        if (confirmBtn) {
+          confirmBtn.disabled = !m.pendingNodeChoice;
+          confirmBtn.title = m.pendingNodeChoice ? '' : 'Select a node first';
+        }
+      });
+    });
+  }
+
+  const footer = document.getElementById('char-dev-footer');
+  const confirmBtn = document.getElementById('char-dev-confirm');
+  if (footer) footer.style.display = pending ? 'flex' : 'none';
+  if (confirmBtn && pending) {
+    confirmBtn.disabled = !m.pendingNodeChoice;
+    confirmBtn.title = m.pendingNodeChoice ? '' : 'Select a node first';
+  }
+}
+
+function _renderStancesTab(m, memberIndex, force = false) {
   const container = document.getElementById('cd-stances-container');
   if (!container) return;
-  container.innerHTML = '';
 
   const ids = getAvailableStances(m);
+  // Skip rebuild if nothing has changed (refreshEquipmentModal fires every frame)
+  const key = `${memberIndex}|${(ids ?? []).join(',')}|${m.stance ?? ''}`;
+  const alreadyRendered = container.firstElementChild;
+  if (!force && key === _lastRenderedStancesKey && alreadyRendered) return;
+  _lastRenderedStancesKey = key;
+  container.innerHTML = '';
+
   if (!ids || ids.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'cd-stances-empty';
@@ -5888,16 +5975,16 @@ function attachOverlayListeners() {
       if (firstIndex !== -1) openModal(firstIndex);
     }
 
-    // C key — open character development
+    // C key — open inventory on skill tree tab
     if (e.key === 'c' || e.key === 'C') {
-      if (activeCharIndex !== null || activeCharDevIndex !== null) return; // already open
+      if (activeCharIndex !== null || activeCharDevIndex !== null) return;
       const overlayOpen = ['tactics-overlay', 'chest-overlay', 'armor-stand-overlay', 'merchant-overlay', 'main-menu-overlay'].some(id => {
         const el = document.getElementById(id);
         return el && window.getComputedStyle(el).display !== 'none';
       });
       if (overlayOpen) return;
       const firstIndex = party.findIndex(m => !m.isEmpty && !m.isDead);
-      if (firstIndex !== -1) openCharDevModal(firstIndex);
+      if (firstIndex !== -1) openModal(firstIndex, 'skilltree');
     }
   });
 
@@ -5914,15 +6001,6 @@ function attachOverlayListeners() {
   });
 }
 
-// Development button — close inventory and open char-dev for same member
-document.getElementById('equip-char-dev').addEventListener('click', () => {
-  if (activeCharIndex !== null) {
-    if (party[activeCharIndex].isDead) return;
-    const idx = activeCharIndex;
-    closeModal();
-    openCharDevModal(idx);
-  }
-});
 
 
 
@@ -6035,8 +6113,9 @@ function attachCharDevListeners() {
   if (confirmBtn) {
     confirmBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (activeCharDevIndex === null) return;
-      const m = party[activeCharDevIndex];
+      const charIdx = activeCharIndex ?? activeCharDevIndex;
+      if (charIdx === null) return;
+      const m = party[charIdx];
       if (!m || m.isEmpty || (m.pendingNodePicks ?? 0) <= 0) return;
       if (!m.pendingNodeChoice) return;
 
@@ -6045,7 +6124,6 @@ function attachCharDevListeners() {
       const node = tree.nodes.find(n => n.id === m.pendingNodeChoice);
       if (!node) return;
 
-      // Apply node benefit and record it
       applyNodeBenefit(m, node);
       if (!m.acquiredNodes) m.acquiredNodes = ['start'];
       m.acquiredNodes.push(m.pendingNodeChoice);
@@ -6055,11 +6133,10 @@ function attachCharDevListeners() {
       updateEffectiveStats(m);
 
       if ((m.pendingNodePicks ?? 0) > 0) {
-        // More picks remaining — re-render and stay open
-        renderCharDevModal(activeCharDevIndex);
+        _renderSkillTreeTab(m, charIdx);
+        renderModal(charIdx);
         refreshPartyCards();
       } else {
-        // All picks used — finalize
         m.pendingLevelUp = false;
         playLevelUpConfirmSound();
 

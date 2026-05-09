@@ -688,8 +688,6 @@
   <div id="equip-overlay" class="equip-hidden">
     <div id="equip-modal">
 
-      <button id="equip-char-dev" aria-label="Open Skill Tree">Skill Tree</button>
-
       <div id="equip-header">
         <div id="equip-char-info">
           <span id="equip-char-name"></span>
@@ -698,7 +696,14 @@
         <button id="equip-close" aria-label="Close">&times;</button>
       </div>
 
-      <div id="equip-body">
+      <!-- ── Tab bar ── -->
+      <div id="equip-tab-bar">
+        <button class="equip-tab equip-tab--active" data-equip-tab="inventory">Inventory</button>
+        <button class="equip-tab" data-equip-tab="skilltree" id="equip-tab-skilltree">Skill Tree</button>
+        <button class="equip-tab" data-equip-tab="stances">Stances</button>
+      </div>
+
+      <div id="equip-body" class="equip-tab-panel">
         <div id="equip-party-bar"></div>
         <!-- LEFT: Inventory -->
         <section id="equip-inventory">
@@ -1009,6 +1014,45 @@
         </section>
 
       </div><!-- /#equip-body -->
+
+      <!-- ── Skill Tree tab panel ── -->
+      <div id="equip-skilltree-panel" class="equip-tab-panel equip-tab-panel--hidden">
+        <div id="equip-st-pending-row">
+          <span class="equip-st-levelup-icon">⬆</span>
+          <span id="cd-stat-points-remaining"></span>
+        </div>
+        <div id="equip-st-body">
+          <div id="cd-skill-tree-container">
+            <!-- tree nodes + SVG edges rendered here -->
+          </div>
+          <aside id="equip-st-sidebar">
+            <h4 class="equip-section-title equip-st-sidebar-title">Node Detail</h4>
+            <div id="cd-detail-panel">
+              <div id="cd-detail-header">
+                <div id="cd-detail-icon"></div>
+                <div id="cd-detail-header-text">
+                  <div id="cd-detail-name">Select a node</div>
+                  <div id="cd-detail-action"></div>
+                </div>
+              </div>
+              <div id="cd-detail-sep"></div>
+              <div id="cd-detail-desc"></div>
+              <div id="cd-detail-potency"></div>
+            </div>
+            <div id="char-dev-footer">
+              <button id="char-dev-confirm" disabled>⬆ Confirm Level Up</button>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      <!-- ── Stances tab panel ── -->
+      <div id="equip-stances-panel" class="equip-tab-panel equip-tab-panel--hidden">
+        <div id="cd-stances-container">
+          <!-- stance cards rendered here -->
+        </div>
+      </div>
+
     </div><!-- /#equip-modal -->
   </div><!-- /#equip-overlay -->
 
@@ -1039,9 +1083,6 @@
           </div>
 
           <section id="char-dev-stats-section">
-            <div id="cd-stat-points-row" style="display:none;">
-              <span id="cd-stat-points-remaining"></span>
-            </div>
             <div id="cd-char-stats">
               <div class="stat-row">
                 <span class="stat-name">STR</span>
@@ -1066,51 +1107,13 @@
             </div>
           </section>
 
-          <section id="char-dev-detail-section">
-            <h4 class="equip-section-title">Node Detail</h4>
-            <div id="cd-detail-panel">
-              <div id="cd-detail-header">
-                <div id="cd-detail-icon"></div>
-                <div id="cd-detail-header-text">
-                  <div id="cd-detail-name">Select a node</div>
-                  <div id="cd-detail-action"></div>
-                </div>
-              </div>
-              <div id="cd-detail-sep"></div>
-              <div id="cd-detail-desc"></div>
-              <div id="cd-detail-potency"></div>
-            </div>
-          </section>
         </div>
 
-        <!-- MAIN: skill tree fills all height, learned skills bar at bottom -->
+        <!-- MAIN: placeholder — content now lives in the inventory modal tabs -->
         <section id="char-dev-skills-section">
-          <div id="cd-tab-bar">
-            <button class="cd-tab cd-tab--active" data-cd-tab="tree">Skill Tree</button>
-            <button class="cd-tab" data-cd-tab="stances">Stances</button>
-          </div>
-          <div id="cd-skill-tree-container">
-            <!-- tree nodes + SVG edges rendered here -->
-          </div>
-          <div id="cd-stances-container" class="cd-tab-hidden">
-            <!-- stance cards rendered here -->
-          </div>
-          <div id="cd-learned-skills-bar">
-            <div id="cd-learned-skills-header">
-              <h4 class="equip-section-title equip-section-title--skills">Learned Skills</h4>
-            </div>
-            <div id="cd-char-skills">
-              <!-- skill cards injected here -->
-            </div>
-          </div>
         </section>
 
       </div><!-- /#char-dev-body -->
-
-      <!-- Confirm footer — only shown during a pending level-up -->
-      <div id="char-dev-footer" style="display:none;">
-        <button id="char-dev-confirm" disabled>Confirm Level Up</button>
-      </div>
     </div>
   </div>
 

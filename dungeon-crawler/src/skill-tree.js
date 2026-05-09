@@ -351,19 +351,24 @@ export function renderSkillTree(m, container, onNodeClick) {
       viewport._ty = savedTY;
       viewport._scale = savedScale;
       applyTransform();
-    } else {
-      // Start zoomed in ~5 zoom-in button presses past the fit scale (1.25^5 ≈ 3.05×),
-      // with the start node at top-centre of the viewport
-      const vw = viewport.offsetWidth;
-      const vh = viewport.offsetHeight;
-      const fitScale = Math.min(vw / canvasW, vh / canvasH, 1.0);
-      const initScale = Math.min(fitScale * Math.pow(1.25, 5), 4.0);
-      const [startX, startY] = positions['start'] ?? [canvasW / 2, 0];
-      viewport._scale = initScale;
-      viewport._tx = vw / 2 - startX * initScale;
-      viewport._ty = 130 - startY * initScale;
-      applyTransform();
+      return;
     }
+    const vw = viewport.offsetWidth;
+    const vh = viewport.offsetHeight;
+    // If viewport hasn't been laid out yet (panel was display:none), retry next frame
+    if (!vw || !vh) {
+      requestAnimationFrame(initTransform);
+      return;
+    }
+    // Start zoomed in ~5 zoom-in button presses past the fit scale (1.25^5 ≈ 3.05×),
+    // with the start node at top-centre of the viewport
+    const fitScale = Math.min(vw / canvasW, vh / canvasH, 1.0);
+    const initScale = Math.min(fitScale * Math.pow(1.25, 5), 4.0);
+    const [startX, startY] = positions['start'] ?? [canvasW / 2, 0];
+    viewport._scale = initScale;
+    viewport._tx = vw / 2 - startX * initScale;
+    viewport._ty = 130 - startY * initScale;
+    applyTransform();
   };
 
   // Wait one frame so viewport has been laid out and offsetWidth/Height are valid
@@ -466,9 +471,11 @@ export function renderSkillTree(m, container, onNodeClick) {
     if (e.key === 'ArrowUp')    dy =  PAN_STEP;
     if (e.key === 'ArrowDown')  dy = -PAN_STEP;
     if (!dx && !dy) return;
-    // Only consume arrows when the skill tree section is visible
-    const overlay = document.getElementById('char-dev-overlay');
-    if (!overlay || overlay.classList.contains('char-dev-hidden')) return;
+    // Only consume arrows when the skill tree tab is visible
+    const overlay = document.getElementById('equip-overlay');
+    if (!overlay || overlay.classList.contains('equip-hidden')) return;
+    const stPanel = document.getElementById('equip-skilltree-panel');
+    if (!stPanel || stPanel.classList.contains('equip-tab-panel--hidden')) return;
     e.preventDefault();
     viewport._tx = (viewport._tx ?? 0) + dx;
     viewport._ty = (viewport._ty ?? 0) + dy;

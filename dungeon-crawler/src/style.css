@@ -2596,14 +2596,16 @@ label.mm-setting-label {
 #equip-modal {
   width: 980px;
   max-width: 96vw;
-  max-height: 90vh;
+  height: 90vh;
+  min-height: 620px;
+  max-height: 760px;
   background: rgba(10, 7, 4, 0.97);
   border: 1px solid #5a4a30;
   border-radius: 6px;
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 220, 120, 0.07);
   display: flex;
   flex-direction: column;
-  overflow: visible;
+  overflow: hidden;
   position: relative;
   font-family: monospace;
 }
@@ -2684,6 +2686,7 @@ label.mm-setting-label {
   width: 28px;
   line-height: 1;
   margin-left: auto;
+  margin-right: 28px;
 }
 
 #equip-char-dev:hover,
@@ -2706,6 +2709,177 @@ label.mm-setting-label {
     0 3px 12px rgba(0, 0, 0, 0.8),
     0 0 14px rgba(200, 158, 80, 0.3),
     inset 0 1px 0 rgba(255, 220, 140, 0.12);
+}
+
+/* ── Inventory Modal Tab Bar ── */
+#equip-tab-bar {
+  display: flex;
+  gap: 0;
+  padding: 0 14px;
+  background: linear-gradient(180deg, rgba(18, 12, 6, 0.98) 0%, rgba(10, 7, 4, 0.98) 100%);
+  border-bottom: 2px solid #2a1e0c;
+  flex-shrink: 0;
+  position: relative;
+}
+
+#equip-tab-bar::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200, 168, 74, 0.15), transparent);
+  pointer-events: none;
+}
+
+.equip-tab {
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #6a5530;
+  font-family: monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 9px 20px 8px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  position: relative;
+  white-space: nowrap;
+}
+
+.equip-tab:hover {
+  color: #c8a84a;
+  background: rgba(200, 168, 74, 0.05);
+}
+
+.equip-tab--active {
+  color: #f0d878;
+  border-bottom-color: #c8a84a;
+  text-shadow: 0 0 8px rgba(200, 168, 74, 0.4);
+}
+
+.equip-tab--levelup {
+  color: #ffe880;
+  border-bottom-color: #ffe040;
+  animation: equip-tab-levelup-pulse 1.6s ease-in-out infinite;
+}
+
+.equip-tab-levelup-badge {
+  display: inline-block;
+  margin-left: 5px;
+  font-size: 10px;
+  color: #ffe040;
+  vertical-align: middle;
+  animation: equip-badge-bounce 1s ease-in-out infinite;
+}
+
+@keyframes equip-tab-levelup-pulse {
+  0%, 100% { text-shadow: 0 0 6px rgba(255, 220, 40, 0.5); }
+  50% { text-shadow: 0 0 14px rgba(255, 220, 40, 0.9), 0 0 24px rgba(255, 180, 20, 0.4); }
+}
+
+@keyframes equip-badge-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* ── Tab panels ── */
+.equip-tab-panel {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.equip-tab-panel--hidden {
+  display: none !important;
+}
+
+/* ── Skill Tree tab panel layout ── */
+#equip-skilltree-panel {
+  background: rgba(8, 6, 3, 0.98);
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+#equip-skilltree-panel * {
+  pointer-events: auto;
+}
+
+#equip-st-pending-row {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: linear-gradient(90deg, rgba(80, 55, 10, 0.6), rgba(50, 35, 8, 0.4), rgba(80, 55, 10, 0.6));
+  border-bottom: 1px solid rgba(200, 168, 74, 0.3);
+  font-family: monospace;
+  font-size: 11px;
+  color: #f0d060;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
+}
+
+.equip-st-levelup-icon {
+  font-size: 13px;
+  color: #ffe040;
+  animation: equip-badge-bounce 1s ease-in-out infinite;
+}
+
+#equip-st-body {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Skill tree render container — fills the entire body now */
+
+/* ── Skill Tree Floating Detail Box (top-right) ── */
+#equip-st-sidebar {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 240px;
+  max-height: calc(100% - 24px);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, rgba(20, 14, 6, 0.96) 0%, rgba(10, 7, 3, 0.96) 100%);
+  border: 1px solid #5a4520;
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 220, 120, 0.06);
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+.equip-st-sidebar-title {
+  padding: 8px 12px 6px;
+  border-bottom: 1px solid #3a2a14;
+  margin: 0;
+  background: rgba(0, 0, 0, 0.4);
+  flex-shrink: 0;
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+
+/* #char-dev-footer — rule in char-dev section below, updated there */
+
+/* ── Stances tab panel ── */
+#equip-stances-panel {
+  background: rgba(8, 6, 3, 0.98);
+}
+
+#equip-stances-panel #cd-stances-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  height: 100%;
 }
 
 /* Three-column body: inventory | stats+skills | paperdoll */
@@ -3058,6 +3232,7 @@ label.mm-setting-label {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-height: 0;
 }
 
 /* ── MIDDLE: Stats + Skills ── */
@@ -3066,7 +3241,11 @@ label.mm-setting-label {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  padding-top: 40px;
 }
+
+#equip-charinfo > #char-stats { flex: 1; display: flex; flex-direction: column; }
+#equip-charinfo > #char-stats > #elemental-resistances { margin-top: auto; }
 
 #inventory-grid {
   display: grid;
@@ -3075,7 +3254,8 @@ label.mm-setting-label {
   padding: 10px;
   align-content: start;
   overflow-y: auto;
-  /* max-height set at render time to match 5 rows of cells */
+  flex: 1;
+  min-height: 0;
 }
 
 .inv-cell {
@@ -4299,26 +4479,34 @@ label.mm-setting-label {
 
 /* Confirm footer ── */
 #char-dev-footer {
+  display: none;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  padding: 10px 16px;
-  background: linear-gradient(0deg, #1a1408, #14100c);
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.5);
+  margin-top: auto;
   border-top: 2px solid #3a2a10;
   flex-shrink: 0;
 }
 
 #char-dev-confirm {
-  background: linear-gradient(180deg, #5a4010, #3a2808);
+  background: linear-gradient(180deg, #6a4c14, #3a2808);
   border: 1px solid #c8a84a;
-  color: #e8d090;
+  outline: 1px solid rgba(200, 168, 74, 0.3);
+  outline-offset: -3px;
+  color: #f0d878;
   font-family: monospace;
-  font-size: 14px;
+  font-size: 12px;
   letter-spacing: 1px;
-  padding: 8px 32px;
+  text-transform: uppercase;
+  padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
+  width: 100%;
   transition: background 0.15s, box-shadow 0.15s;
+  text-shadow: 0 0 6px rgba(200, 168, 74, 0.4);
+  box-shadow: 0 0 10px rgba(200, 168, 74, 0.15), inset 0 1px 0 rgba(255, 220, 140, 0.08);
 }
 
 #char-dev-confirm:hover:not(:disabled) {
@@ -4335,7 +4523,8 @@ label.mm-setting-label {
 
 /* ── Skill Tree Container ── */
 #cd-skill-tree-container {
-  flex: 1;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   position: relative;
 }
@@ -4545,22 +4734,23 @@ label.mm-setting-label {
 /* Zoom/pan toolbar */
 .tree-toolbar {
   position: absolute;
-  bottom: 8px;
-  right: 10px;
-  z-index: 20;
+  bottom: 12px;
+  right: 14px;
+  z-index: 50;
   display: flex;
   gap: 4px;
+  pointer-events: auto;
 }
 
 .tree-ctrl-btn {
-  background: rgba(20, 16, 10, 0.9);
-  border: 1px solid #4a3a20;
-  color: #b0a080;
+  background: rgba(20, 16, 10, 0.95);
+  border: 1px solid #5a4520;
+  color: #d8b870;
   font-family: monospace;
   font-size: 16px;
   line-height: 1;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 4px;
   cursor: pointer;
   display: flex;
@@ -4568,6 +4758,8 @@ label.mm-setting-label {
   justify-content: center;
   transition: color 0.15s, border-color 0.15s, background 0.15s;
   user-select: none;
+  pointer-events: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
 
 .tree-ctrl-btn:hover {
@@ -4936,6 +5128,7 @@ label.mm-setting-label {
 #equip-paperdoll {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   overflow: visible;
 }
 
