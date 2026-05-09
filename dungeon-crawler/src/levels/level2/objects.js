@@ -42,7 +42,8 @@ export function spawnLevel2Objects(ctx) {
     addChest(group, loader, 3, 14, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 150 },
         "Hoarfrost Mantle",
-        "Padded Vest"
+        "Padded Vest",
+        "Savage Schematics"
     ]);
 
     // ── Portcullises & Keys ───────────────────────────────────────────────────
@@ -71,7 +72,7 @@ export function spawnLevel2Objects(ctx) {
     // Two chests in the chest vault (col 1, rows 33–34)
     addChest(group, loader, 0.7, 34, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 20 },
-        'Mana Berry', 'Scroll of Fireball', 'Balance Pendant'
+        'Mana Berry', 'Scroll of Fireball', "Trackers Schematics"
     ]);
     addChest(group, loader, 1.3, 34, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 10 },
@@ -85,7 +86,7 @@ export function spawnLevel2Objects(ctx) {
     addChest(group, loader, 28, 32, -Math.PI / 2, -0.5, [
         { name: 'Gold Coins', quantity: 50 },
         'Mana Potion', 'Life Essence',
-        'Chain Shirt', 'Plate Cuirass'
+        "Steel Schematics"
     ], asset('/items/chest1.glb'), true, 0.5);
 
     // Ethereal Egg at col 28 south side — side by side with the chest

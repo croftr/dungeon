@@ -140,7 +140,7 @@
         "weight": 0.2
     },
     {
-        "name": "Tome of Shell",
+        "name": "Scroll of Shell",
         "type": "spellbook",
         "spellName": "Shell",
         "requiredInt": 12,
