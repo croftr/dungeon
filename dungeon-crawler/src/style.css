@@ -2993,20 +2993,29 @@ label.mm-setting-label {
   font-size: 11px;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: #8a7040;
-  background: none;
-  border: 1px solid #3a2e18;
+  color: #e8c87a;
+  background: linear-gradient(180deg, rgba(65, 44, 18, 0.97) 0%, rgba(24, 15, 5, 0.99) 100%);
+  border: 1px solid rgba(200, 158, 80, 0.9);
+  outline: 1px solid rgba(200, 158, 80, 0.35);
+  outline-offset: -3px;
   border-radius: 3px;
   padding: 4px 11px;
   cursor: pointer;
   line-height: 1.4;
-  transition: color 0.15s, border-color 0.15s;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+#chest-sort-btn {
+  height: 28px;
+  margin-right: 8px;
 }
 
 #inv-sort-btn:hover,
 #chest-sort-btn:hover {
-  color: #c8a84a;
-  border-color: #6a5028;
+  background: linear-gradient(180deg, rgba(90, 62, 24, 1) 0%, rgba(38, 24, 8, 1) 100%);
+  border-color: rgba(232, 200, 122, 1);
+  outline-color: rgba(232, 200, 122, 0.45);
+  color: #fff8e8;
 }
 
 .equip-section-title {
@@ -6865,28 +6874,14 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   justify-content: space-between;
   padding: 12px 18px;
   border-bottom: 1px solid #4a3e28;
-  background: linear-gradient(to bottom, rgba(30, 25, 20, 0.6), rgba(10, 7, 4, 0.8));
+  background-image: url('/images/chest-header.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   flex-shrink: 0;
+  position: relative;
 }
 
-#chest-title-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-#chest-header-icon {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-}
-
-#chest-title {
-  font-size: 13px;
-  color: #c8a84a;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
 
 #chest-sent-label {
   flex: 1;
@@ -6901,9 +6896,11 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
 }
 
 #chest-close {
-  background: none;
-  border: 1px solid #4a3a20;
-  color: #888;
+  background: linear-gradient(180deg, rgba(65, 44, 18, 0.97) 0%, rgba(24, 15, 5, 0.99) 100%);
+  border: 1px solid rgba(200, 158, 80, 0.9);
+  outline: 1px solid rgba(200, 158, 80, 0.35);
+  outline-offset: -3px;
+  color: #e8c87a;
   font-size: 18px;
   width: 28px;
   height: 28px;
@@ -6913,25 +6910,56 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   align-items: center;
   justify-content: center;
   line-height: 1;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
 #chest-close:hover {
-  border-color: #8a7040;
-  color: #c8a84a;
+  background: linear-gradient(180deg, rgba(90, 62, 24, 1) 0%, rgba(38, 24, 8, 1) 100%);
+  border-color: rgba(232, 200, 122, 1);
+  outline-color: rgba(232, 200, 122, 0.45);
+  color: #fff8e8;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.8);
 }
 
 #chest-main-content {
   display: flex;
   flex: 1;
+  height: 430px;
+  max-height: calc(100vh - 140px);
 }
 
 #chest-body {
   flex: 1;
   border-right: 1px solid #3a2e18;
   overflow-y: auto;
-  min-height: 100px;
-  max-height: 410px;
-  /* Roughly 5 rows of slots */
+  min-height: 0;
+}
+
+#chest-body-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 4px;
+  border-bottom: 1px solid #3a2e18;
+  position: sticky;
+  top: 0;
+  background: rgba(10, 7, 4, 0.98);
+  z-index: 1;
+}
+
+#chest-body-header #chest-header-icon {
+  position: static;
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+#chest-body-header #chest-title {
+  font-size: 13px;
+  color: #c8a84a;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 600;
 }
 
 #chest-grid {
@@ -6999,6 +7027,12 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   align-items: center;
   justify-content: space-between;
   padding: 6px 14px 4px;
+  position: sticky;
+  top: 0;
+  background: rgba(10, 7, 4, 0.98);
+  z-index: 1;
+  border-bottom: 1px solid #3a2e18;
+  flex-shrink: 0;
 }
 
 #chest-party-inv-label {
@@ -7054,7 +7088,8 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   gap: 10px;
   padding: 15px;
   overflow-y: auto;
-  max-height: 410px;
+  flex: 1;
+  min-height: 0;
 }
 
 .chest-inv-slot {
