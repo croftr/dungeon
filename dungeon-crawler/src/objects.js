@@ -3415,6 +3415,13 @@ function _renderChestPartyInv() {
         }
         gridEl.appendChild(slot);
     });
+
+    const targetSlots = _activeChestSlots ? _activeChestSlots.length : m.inventory.length;
+    for (let i = m.inventory.length; i < targetSlots; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'chest-inv-slot';
+        gridEl.appendChild(slot);
+    }
 }
 
 function _renderArmorStandPartyInv() {
@@ -3501,27 +3508,35 @@ export function openChestModal(chestObj) {
 
     document.getElementById('chest-body').scrollTop = 0;
 
+    // Default to first non-empty party member
+    _chestPartyMemberIdx = party.findIndex(m => !m.isEmpty);
+    if (_chestPartyMemberIdx === -1) _chestPartyMemberIdx = 0;
+
+    const m = party[_chestPartyMemberIdx];
+    const partyInvLen = (m && !m.isEmpty && m.inventory) ? m.inventory.length : 40;
+
     const grid = document.getElementById('chest-grid');
-    let slots = grid.querySelectorAll('.chest-slot');
     const contents = chestObj.userData.contents || [];
+    const targetSlots = Math.max(partyInvLen, contents.length);
     
-    // Dynamically add slots if contents exceed current slot count
-    if (contents.length > slots.length) {
-        for (let i = slots.length; i < contents.length; i++) {
+    let slots = grid.querySelectorAll('.chest-slot');
+    // Dynamically adjust slots to match targetSlots exactly
+    if (slots.length < targetSlots) {
+        for (let i = slots.length; i < targetSlots; i++) {
             const newSlot = document.createElement('div');
             newSlot.className = 'chest-slot';
             newSlot.dataset.index = i;
             grid.appendChild(newSlot);
         }
-        slots = grid.querySelectorAll('.chest-slot');
+    } else if (slots.length > targetSlots) {
+        for (let i = slots.length - 1; i >= targetSlots; i--) {
+            grid.removeChild(slots[i]);
+        }
     }
+    slots = grid.querySelectorAll('.chest-slot');
 
     _activeChestContents = contents;
     _activeChestSlots = slots;
-
-    // Default to first non-empty party member
-    _chestPartyMemberIdx = party.findIndex(m => !m.isEmpty);
-    if (_chestPartyMemberIdx === -1) _chestPartyMemberIdx = 0;
 
     const sortBtn = document.getElementById('chest-sort-btn');
     if (sortBtn) {
