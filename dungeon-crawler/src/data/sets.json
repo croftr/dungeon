@@ -1,7 +1,13 @@
 {
     "wizard": {
         "name": "Wizard's Regalia",
-        "slots": ["head", "chest", "hands", "legs", "feet"],
+        "slots": [
+            "head",
+            "chest",
+            "hands",
+            "legs",
+            "feet"
+        ],
         "bonus": {
             "statBonuses": {
                 "intelligence": 1,
@@ -23,7 +29,14 @@
     },
     "aethelgard": {
         "name": "Aethelgard Archmage",
-        "slots": ["head", "chest", "hands", "legs", "feet", "cloak"],
+        "slots": [
+            "head",
+            "chest",
+            "hands",
+            "legs",
+            "feet",
+            "cloak"
+        ],
         "bonus": {
             "statBonuses": {
                 "strength": 1,
@@ -36,7 +49,14 @@
     },
     "seraphic": {
         "name": "Seraphic Grace",
-        "slots": ["head", "chest", "hands", "legs", "feet", "cloak"],
+        "slots": [
+            "head",
+            "chest",
+            "hands",
+            "legs",
+            "feet",
+            "cloak"
+        ],
         "bonus": {
             "statBonuses": {
                 "strength": 1,
@@ -49,7 +69,14 @@
     },
     "mountain-stalker": {
         "name": "Mountain Stalker",
-        "slots": ["head", "chest", "hands", "legs", "feet", "cloak"],
+        "slots": [
+            "head",
+            "chest",
+            "hands",
+            "legs",
+            "feet",
+            "cloak"
+        ],
         "bonus": {
             "statBonuses": {
                 "strength": 1,
@@ -62,7 +89,14 @@
     },
     "sylvan": {
         "name": "Sylvan Elderwood",
-        "slots": ["head", "chest", "hands", "legs", "feet", "cloak"],
+        "slots": [
+            "head",
+            "chest",
+            "hands",
+            "legs",
+            "feet",
+            "cloak"
+        ],
         "bonus": {
             "statBonuses": {
                 "strength": 1,
@@ -75,7 +109,14 @@
     },
     "celestial": {
         "name": "Celestial Vindicator",
-        "slots": ["head", "chest", "hands", "legs", "feet", "cloak"],
+        "slots": [
+            "head",
+            "chest",
+            "hands",
+            "legs",
+            "feet",
+            "cloak"
+        ],
         "bonus": {
             "statBonuses": {
                 "strength": 1,
@@ -88,7 +129,14 @@
     },
     "ironpeak": {
         "name": "Ironpeak Dwarf",
-        "slots": ["head", "chest", "hands", "legs", "feet", "cloak"],
+        "slots": [
+            "head",
+            "chest",
+            "hands",
+            "legs",
+            "feet",
+            "cloak"
+        ],
         "bonus": {
             "statBonuses": {
                 "strength": 1,
@@ -101,7 +149,14 @@
     },
     "wardancer": {
         "name": "Amethyst Wardancer",
-        "slots": ["head", "chest", "hands", "legs", "feet", "cloak"],
+        "slots": [
+            "head",
+            "chest",
+            "hands",
+            "legs",
+            "feet",
+            "cloak"
+        ],
         "bonus": {
             "statBonuses": {
                 "strength": 1,
@@ -114,7 +169,14 @@
     },
     "stormreaver": {
         "name": "Storm-Reaver",
-        "slots": ["head", "chest", "hands", "legs", "feet", "cloak"],
+        "slots": [
+            "head",
+            "chest",
+            "hands",
+            "legs",
+            "feet",
+            "cloak"
+        ],
         "bonus": {
             "statBonuses": {
                 "strength": 1,
@@ -122,6 +184,31 @@
                 "vitality": 1,
                 "intelligence": 1,
                 "resilience": 1
+            }
+        }
+    },
+    "steel-vanguard": {
+        "name": "Steel Vanguard",
+        "slots": [
+            "head",
+            "chest",
+            "hands",
+            "legs",
+            "feet"
+        ],
+        "bonus": {
+            "statBonuses": {
+                "strength": 1,
+                "dexterity": 1,
+                "resilience": 1
+            },
+            "elementalResistances": {
+                "fire": 0.05,
+                "ice": 0.05,
+                "lightning": 0.05,
+                "water": 0.05,
+                "holy": 0.05,
+                "dark": 0.05
             }
         }
     }

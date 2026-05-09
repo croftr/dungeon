@@ -1,5 +1,10 @@
 # Dungeon Crawler — Development Guidelines
 
+## Git Workflow
+
+- Always work directly on `main`. Do not create new branches unless explicitly asked.
+- Commit changes directly to `main` and do not open PRs unless asked.
+
 ## Save Game System (v7 — Checkpoint / Level-State)
 
 Saves fire automatically on dungeon-level transitions. No manual save, no mid-level save. The saved payload describes *progression*, not a snapshot of every game object — world state is rebuilt by re-running the level spawn code with the right flags.

@@ -53,6 +53,7 @@ import CELESTIAL_SET from './data/items/celestial-set.json';
 import IRONPEAK_SET from './data/items/ironpeak-set.json';
 import WARDANCER_SET from './data/items/wardancer-set.json';
 import STORMREAVER_SET from './data/items/stormreaver-set.json';
+import STEEL_VANGUARD_SET from './data/items/steel-vanguard-set.json';
 
 export const ACTIONS = Object.freeze({
   SWIPE: 'swipe',
@@ -110,6 +111,7 @@ export const ITEMS = [
   ...IRONPEAK_SET,
   ...WARDANCER_SET,
   ...STORMREAVER_SET,
+  ...STEEL_VANGUARD_SET,
   ...SPELLS,
 ];
 

@@ -1,0 +1,72 @@
+[
+    {
+        "name": "Steel Vanguard Helm",
+        "slot": "head",
+        "icon": "/icons/sets/steel-vanguard/steel-vanguard-head.png",
+        "description": "A heavy, closed steel helm with a slit visor. Part of the Steel Vanguard set.",
+        "defence": 3,
+        "value": 300,
+        "weight": 5.0,
+        "set": "steel-vanguard",
+        "job": [
+            "Paladin",
+            "Warrior"
+        ]
+    },
+    {
+        "name": "Steel Vanguard Chestplate",
+        "slot": "chest",
+        "icon": "/icons/sets/steel-vanguard/steel-vanguard-chest.png",
+        "description": "A thick, bulky steel breastplate over chainmail. Part of the Steel Vanguard set.",
+        "defence": 5,
+        "value": 500,
+        "weight": 12.0,
+        "set": "steel-vanguard",
+        "job": [
+            "Paladin",
+            "Warrior"
+        ]
+    },
+    {
+        "name": "Steel Vanguard Gauntlets",
+        "slot": "hands",
+        "icon": "/icons/sets/steel-vanguard/steel-vanguard-hands.png",
+        "description": "Heavy steel gauntlets. Part of the Steel Vanguard set.",
+        "defence": 2,
+        "value": 200,
+        "weight": 3.0,
+        "set": "steel-vanguard",
+        "job": [
+            "Paladin",
+            "Warrior"
+        ]
+    },
+    {
+        "name": "Steel Vanguard Legplates",
+        "slot": "legs",
+        "icon": "/icons/sets/steel-vanguard/steel-vanguard-legs.png",
+        "description": "Heavy steel plate leg armor. Part of the Steel Vanguard set.",
+        "defence": 3,
+        "value": 300,
+        "weight": 6.0,
+        "set": "steel-vanguard",
+        "job": [
+            "Paladin",
+            "Warrior"
+        ]
+    },
+    {
+        "name": "Steel Vanguard Sabatons",
+        "slot": "feet",
+        "icon": "/icons/sets/steel-vanguard/steel-vanguard-feet.png",
+        "description": "Heavy steel sabatons. Part of the Steel Vanguard set.",
+        "defence": 2,
+        "value": 200,
+        "weight": 4.0,
+        "set": "steel-vanguard",
+        "job": [
+            "Paladin",
+            "Warrior"
+        ]
+    }
+]
