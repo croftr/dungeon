@@ -2486,9 +2486,15 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   // 5% base crit chance — triples the calculated damage. DEX over 10 chips in a
   // small additional bonus (capped). Spells additionally pick up any passive
   // spell-crit bonus (e.g. Arcane Focus).
-  const spellCritBonus = isMagic ? getSpellCritChanceBonus(character) : 0;
-  const dexCritBonus = getDexCritChanceBonus(character);
-  const isCrit = Math.random() < (CRIT_CHANCE + getCritChanceBonus(character) + dexCritBonus + spellCritBonus);
+  function getTotalCritChance(char, isSpell) {
+    const spellCrit = isSpell ? getSpellCritChanceBonus(char) : 0;
+    const dexCrit = getDexCritChanceBonus(char);
+    const stanceCrit = getCritChanceBonus(char);
+    const equipCrit = char.skillBonuses?.['critChance'] ?? 0;
+    return CRIT_CHANCE + stanceCrit + dexCrit + spellCrit + equipCrit;
+  }
+
+  const isCrit = Math.random() < getTotalCritChance(character, isMagic);
   let damage = isCrit ? Math.round(preCritDamage * CRIT_MULTIPLIER) : preCritDamage;
 
   // Runic Scholar — doubles final spell damage after ALL other modifiers (including crit)
@@ -2971,7 +2977,7 @@ function _applyMonsterDamage(monster, opts = {}) {
   const blockChance = Math.max(
     leftItem?.blockChance ?? 0,
     rightItem?.blockChance ?? 0
-  ) + shieldMasterBlockBonus;
+  ) + shieldMasterBlockBonus + (target.skillBonuses?.['blockChance'] ?? 0);
 
   if (blockChance > 0 && Math.random() * 100 < blockChance) {
     blocked = true;

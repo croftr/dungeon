@@ -179,10 +179,14 @@ export function playerSpellHitChance(character, monster, spellDef = null) {
  * @param {object} character  Party member object (needs stats.dexterity)
  * @returns {number}          Clamped probability
  */
+export function getPlayerDodgeChance(character) {
+  return getMonsterHitChanceReduction(character) + (character.skillBonuses?.['dodgeChance'] ?? 0);
+}
+
 export function monsterHitChance(monster, character) {
   const dexDiff = (monster.stats?.dexterity ?? 10) - (character.stats?.dexterity ?? 10);
   let chance = BASE_MONSTER_HIT_CHANCE + dexDiff * DEX_HIT_MODIFIER;
-  chance -= getMonsterHitChanceReduction(character);
+  chance -= getPlayerDodgeChance(character);
   return clamp(chance, MIN_HIT_CHANCE, MAX_HIT_CHANCE);
 }
 
@@ -241,7 +245,8 @@ export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef 
   }
 
   const hqBonus = weaponIsHQ ? getHqWeaponDamageBonus(weaponDef) : 0;
-  let raw = (weaponDef?.baseDamage ?? 0) + hqBonus + statBonus + passiveBonus + familyBonus;
+  const bowBonus = (weaponDef?.weaponType === 'bow' || weaponDef?.weaponType === 'crossbow') ? (character.skillBonuses?.['bowDamage'] ?? 0) : 0;
+  let raw = (weaponDef?.baseDamage ?? 0) + hqBonus + statBonus + passiveBonus + familyBonus + bowBonus;
   if (ammoDef && ammoDef.damageModifier) {
     raw = Math.round(raw * ammoDef.damageModifier);
   }

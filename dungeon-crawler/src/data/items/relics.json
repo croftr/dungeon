@@ -32,5 +32,102 @@
         "specialBonuses": [
             "Lights the way (as a torch)"
         ]
+    },
+    {
+        "name": "Talisman of the Wind",
+        "slot": "relic",
+        "icon": "/icons/relic/talisman-of-the-wind.webp",
+        "description": "A feather-light charm that guides your aim (+2 DEX, +5 Bow Damage).",
+        "value": 600,
+        "weight": 0.1,
+        "job": [
+            "Hunter"
+        ],
+        "hpRegen": {
+            "amount": 1,
+            "interval": 5
+        },
+        "skillBonuses": {
+            "bowDamage": 2
+        }
+    },
+    {
+        "name": "Bulwark of the Ancestors",
+        "slot": "relic",
+        "icon": "/icons/relic/bulwark-of-the-ancestors.webp",
+        "description": "A heavy iron crest bearing an ancient dwarven clan mark (+2 VIT, +1 RES, +10% Shield Block Chance).",
+        "value": 750,
+        "weight": 2.0,
+        "job": [
+            "Warrior"
+        ],
+        "hpRegen": {
+            "amount": 1,
+            "interval": 5
+        },
+        "skillBonuses": {
+            "blockChance": 10
+        }
+    },
+    {
+        "name": "Bloodstone Amulet",
+        "slot": "relic",
+        "icon": "/icons/relic/bloodstone-amulet.webp",
+        "description": "A dark, jagged crystal that hums with savage fury (+3 STR, +5% Critical Hit Chance).",
+        "value": 800,
+        "weight": 0.2,
+        "job": [
+            "Barbarian"
+        ],
+        "statBonuses": {
+            "strength": 3
+        },
+        "skillBonuses": {
+            "critChance": 0.05
+        }
+    },
+    {
+        "name": "Tracker's Medallion",
+        "slot": "relic",
+        "icon": "/icons/relic/trackers-medallion.webp",
+        "description": "A polished brass medallion inscribed with runes of protection (+1 DEX, +1 INT, +15% Resistance to all elements).",
+        "value": 650,
+        "weight": 0.3,
+        "job": [
+            "Ranger"
+        ],
+        "statBonuses": {
+            "dexterity": 1
+        },
+        "hpRegen": {
+            "amount": 1,
+            "interval": 5
+        },
+        "elementalResistances": {
+            "holy": 0.5,
+            "dark": 0.5,
+            "fire": 0.5,
+            "ice": 0.5,
+            "lightning": 0.5,
+            "water": 0.5
+        }
+    },
+    {
+        "name": "Crescent Moon Charm",
+        "slot": "relic",
+        "icon": "/icons/relic/crescent-moon-charm.webp",
+        "description": "A delicate silver charm that catches the light (+3 DEX, +10% Dodge Chance).",
+        "value": 700,
+        "weight": 0.1,
+        "job": [
+            "War Dancer"
+        ],
+        "hpRegen": {
+            "amount": 1,
+            "interval": 5
+        },
+        "skillBonuses": {
+            "dodgeChance": 0.10
+        }
     }
 ]
