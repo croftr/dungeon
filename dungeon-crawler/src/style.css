@@ -5438,9 +5438,9 @@ label.mm-setting-label {
   left: -22%;
 }
 
-/* Alternate ammo — partially overlaps the active ammo slot, offset up-and-left */
+/* Alternate ammo — partially overlaps the active ammo slot, offset down-and-left */
 #pd-ammoB {
-  top: 95%;
+  top: 111%;
   left: -30%;
   filter: brightness(0.85);
   z-index: 1;
@@ -5457,7 +5457,7 @@ label.mm-setting-label {
 /* Small swap button just to the right of the ammo stack */
 #ammo-rotate-btn {
   position: absolute;
-  top: 99%;
+  top: 107%;
   left: 6%;
   transform: translate(-50%, -50%);
   width: 22px;
@@ -5909,6 +5909,15 @@ label.mm-setting-label {
 }
 
 .detail-skillbonus-item span:last-child {
+  color: var(--sb-color, #b8a0e8);
+  font-weight: 600;
+}
+
+.detail-skillbonus-item--single {
+  justify-content: flex-start;
+}
+
+.detail-skillbonus-item--single span {
   color: var(--sb-color, #b8a0e8);
   font-weight: 600;
 }

@@ -1072,6 +1072,7 @@ export function respawnAtHub() {
 let mpRegenTimers = {};    // out-of-combat MP regen: per-member accumulators
 let battleMageTimers = {}; // in-combat MP regen (Battle Mage passive): per-member accumulators
 let spRegenAccum = 0;
+let relicHpRegenTimers = {}; // relic-driven HP regen: per-member accumulators
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  STATUS EFFECT APPLICATION
@@ -1373,6 +1374,21 @@ export function updateParty(dt) {
       }
     });
   }
+
+  // ── Relic-driven HP regen (e.g. Testament of Faith) ──────────────────────
+  party.forEach(m => {
+    if (m.isEmpty || m.isDead) { delete relicHpRegenTimers[m.id]; return; }
+    const relic = m.equipment?.relic;
+    const relicDef = relic ? getItemDef(relic.name) : null;
+    const regen = relicDef?.hpRegen;
+    if (!regen?.interval || !regen?.amount) { delete relicHpRegenTimers[m.id]; return; }
+    if (m.hp >= m.hpMax) { relicHpRegenTimers[m.id] = 0; return; }
+    relicHpRegenTimers[m.id] = (relicHpRegenTimers[m.id] ?? 0) + dt;
+    while (relicHpRegenTimers[m.id] >= regen.interval) {
+      relicHpRegenTimers[m.id] -= regen.interval;
+      setHp(m.id, Math.min(m.hp + regen.amount, m.hpMax));
+    }
+  });
 
   // ── Process all active status effects each frame ────────────────────────
   const now = performance.now();

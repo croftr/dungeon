@@ -1448,13 +1448,15 @@ function populateTooltip(obj, showBuyPrice = false) {
   const hasSkillBonus = def?.skillBonuses && Object.keys(def.skillBonuses).length > 0;
   const hasSkillDurationBonus = def?.skillDurationBonusMs != null && def.skillDurationBonusMs !== 0;
   const hasTrapDisarmBonus = def?.trapDisarmBonus != null && def.trapDisarmBonus !== 0;
+  const hasHpRegen = def?.hpRegen?.amount > 0 && def?.hpRegen?.interval > 0;
+  const hasSpecialBonuses = Array.isArray(def?.specialBonuses) && def.specialBonuses.length > 0;
   const hasOnHitEffects = def?.onHitEffects && def.onHitEffects.length > 0;
   const hasFamilyBonus = def?.familyBonus && (Array.isArray(def.familyBonus) ? def.familyBonus.length > 0 : Object.keys(def.familyBonus).length > 0);
   const hasElementalDamage = def?.elementalDamage && Object.keys(def.elementalDamage).length > 0;
   const hasElementalResistances = def?.elementalResistances && Object.keys(def.elementalResistances).length > 0;
   const hasStaminaDrain = def?.staminaDrain != null;
   const hasDelay = def?.delay != null;
-  const hasBonusList = hasStatBonus || hasSkillBonus || hasSkillDurationBonus || hasTrapDisarmBonus;
+  const hasBonusList = hasStatBonus || hasSkillBonus || hasSkillDurationBonus || hasTrapDisarmBonus || hasHpRegen || hasSpecialBonuses;
 
   // Hide/show rows based on item type and available stats
   document.getElementById('detail-row-damage').style.display = (isAmmo || isSpellbook || isMainSpellbook) ? 'none' : 'flex';
@@ -1562,6 +1564,19 @@ function populateTooltip(obj, showBuyPrice = false) {
       // Trap disarm bonus
       if (hasTrapDisarmBonus) {
         html += `<div class="detail-skillbonus-item"><span>Disarm Trap</span><span>+${Math.round(def.trapDisarmBonus * 100)}%</span></div>`;
+      }
+
+      // HP regeneration (relics, etc.)
+      if (hasHpRegen) {
+        const { amount, interval } = def.hpRegen;
+        html += `<div class="detail-skillbonus-item" style="--sb-color:#70c870"><span>HP Regen</span><span>+${amount} / ${interval}s</span></div>`;
+      }
+
+      // Free-form special bonuses (e.g. "Lights the way")
+      if (hasSpecialBonuses) {
+        for (const text of def.specialBonuses) {
+          html += `<div class="detail-skillbonus-item detail-skillbonus-item--single" style="--sb-color:#c8a84a"><span>${text}</span></div>`;
+        }
       }
 
       listEl.innerHTML = html;
