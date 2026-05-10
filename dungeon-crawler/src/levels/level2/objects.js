@@ -30,7 +30,7 @@ export function spawnLevel2Objects(ctx) {
 
     // ── New area: Spell Cabinet (Room A, north wall, row 3 col 5) ─────────────
     addSpellCabinet(group, loader, 5, 3, 0, 0, -0.7, ["Scroll of Resist Ice", "Scroll of Resist Fire"]);
-    addSpellCabinet(group, loader, 2, 8, Math.PI / 2, -0.7, 0, ['Scroll of Lightningbolt', 'Scroll of Incinerate']);
+    addSpellCabinet(group, loader, 2, 8, Math.PI / 2, -0.7, 0, ['Scroll of Lightningbolt', 'Scroll of Fireball']);
 
     // ── New area: Chest (Room C, south wall, row 13 col 9) ───────────────────
     addChest(group, loader, 9, 13, Math.PI, 0.7, [
@@ -72,7 +72,7 @@ export function spawnLevel2Objects(ctx) {
     // Two chests in the chest vault (col 1, rows 33–34)
     addChest(group, loader, 0.7, 34, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 20 },
-        'Mana Berry', 'Scroll of Fireball', "Trackers Schematics"
+        'Mana Berry', "Trackers Schematics", 'Scroll of Incinerate'
     ]);
     addChest(group, loader, 1.3, 34, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 10 },

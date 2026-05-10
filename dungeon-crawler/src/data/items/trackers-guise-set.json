@@ -2,7 +2,7 @@
     {
         "name": "Tracker's Guise Cowl",
         "slot": "head",
-        "icon": "/icons/sets/trackers-guise/trackers-guise-head.png",
+        "icon": "/icons/sets/trackers-guise/trackers-guise-head.webp",
         "description": "A leather cowl. Early game light armor for hunters. Part of the Tracker's Guise set.",
         "defence": 2,
         "value": 150,
@@ -16,7 +16,7 @@
     {
         "name": "Tracker's Guise Tunic",
         "slot": "chest",
-        "icon": "/icons/sets/trackers-guise/trackers-guise-chest.png",
+        "icon": "/icons/sets/trackers-guise/trackers-guise-chest.webp",
         "description": "A light leather tunic with fur lining. Part of the Tracker's Guise set.",
         "defence": 3,
         "value": 250,
@@ -30,7 +30,7 @@
     {
         "name": "Tracker's Guise Gloves",
         "slot": "hands",
-        "icon": "/icons/sets/trackers-guise/trackers-guise-hands.png",
+        "icon": "/icons/sets/trackers-guise/trackers-guise-hands.webp",
         "description": "Light leather fingerless gloves. Part of the Tracker's Guise set.",
         "defence": 1,
         "value": 100,
@@ -44,7 +44,7 @@
     {
         "name": "Tracker's Guise Breeches",
         "slot": "legs",
-        "icon": "/icons/sets/trackers-guise/trackers-guise-legs.png",
+        "icon": "/icons/sets/trackers-guise/trackers-guise-legs.webp",
         "description": "Leather leggings designed for mobility. Part of the Tracker's Guise set.",
         "defence": 2,
         "value": 150,
@@ -58,7 +58,7 @@
     {
         "name": "Tracker's Guise Boots",
         "slot": "feet",
-        "icon": "/icons/sets/trackers-guise/trackers-guise-feet.png",
+        "icon": "/icons/sets/trackers-guise/trackers-guise-feet.webp",
         "description": "Soft leather boots for silent movement. Part of the Tracker's Guise set.",
         "defence": 1,
         "value": 100,

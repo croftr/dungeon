@@ -2887,6 +2887,27 @@ label.mm-setting-label {
   pointer-events: auto;
 }
 
+.equip-st-sidebar--hidden {
+  display: none !important;
+}
+
+/* Placeholder text shown top-right when no node has been selected yet */
+#equip-st-placeholder {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 30;
+  font-family: monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #6a5530;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.9), 0 1px 2px rgba(0, 0, 0, 1);
+  pointer-events: none;
+  font-style: italic;
+  opacity: 0.85;
+}
+
 .equip-st-sidebar-title {
   padding: 8px 12px 6px;
   border-bottom: 1px solid #3a2a14;
@@ -7647,22 +7668,43 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   width: 390px;
   background: rgba(10, 7, 4, 0.97);
   border: 1px solid #5a4a30;
+  border-top: none;
   border-radius: 6px;
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 220, 120, 0.07);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
   font-family: monospace;
 }
 
 #corpse-header {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px;
   border-bottom: 1px solid #3a2e18;
-  background: rgba(0, 0, 0, 0.4);
+  border-radius: 6px 6px 0 0;
   flex-shrink: 0;
+}
+
+#corpse-header::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: 0;
+  background: url('/images/corpse-heder2.webp') 40% center/cover no-repeat, rgba(0, 0, 0, 0.4);
+  border-radius: 6px;
+  border: 1px solid #3a2e18;
+  box-shadow: inset 0 -6px 14px rgba(0,0,0,0.75), inset 5px 0 14px rgba(0,0,0,0.6);
+  z-index: 0;
+}
+
+#corpse-header > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* ── Armor Stand modal ── */
@@ -8319,6 +8361,7 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
 }
 
 #corpse-sent-label {
+  display: none;
   flex: 1;
   text-align: right;
   font-size: 11px;
@@ -8343,6 +8386,8 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   align-items: center;
   justify-content: center;
   line-height: 1;
+  margin-right: 16px;
+  margin-top: -2px;
 }
 
 #corpse-close:hover {

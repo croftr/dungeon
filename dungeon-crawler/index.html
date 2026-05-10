@@ -1028,7 +1028,8 @@
           <div id="cd-skill-tree-container">
             <!-- tree nodes + SVG edges rendered here -->
           </div>
-          <aside id="equip-st-sidebar">
+          <div id="equip-st-placeholder">Select a node</div>
+          <aside id="equip-st-sidebar" class="equip-st-sidebar--hidden">
             <h4 class="equip-section-title equip-st-sidebar-title">Node Detail</h4>
             <div id="cd-detail-panel">
               <div id="cd-detail-header">
@@ -1244,10 +1245,6 @@
   <div id="corpse-overlay" class="chest-hidden">
     <div id="corpse-modal">
       <div id="corpse-header" class="chest-header-style">
-        <div id="corpse-title-wrap">
-          <img data-src="/icons/skull_crossbones.svg" id="corpse-header-icon" alt="Corpse">
-          <span id="corpse-title">Corpse</span>
-        </div>
         <span id="corpse-sent-label"></span>
         <button id="corpse-close" aria-label="Close">&times;</button>
       </div>

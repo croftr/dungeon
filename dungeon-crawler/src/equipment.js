@@ -3107,15 +3107,12 @@ function _renderSkillTreeTab(m, memberIndex, force = false) {
   // explicitly clicked a node to see its details.
   const memberChanged = !_lastRenderedTreeKey || _lastRenderedTreeKey.split('|')[0] !== String(memberIndex);
   if (memberChanged) {
-    const detailName = document.getElementById('cd-detail-name');
-    const detailAction = document.getElementById('cd-detail-action');
-    const detailDesc = document.getElementById('cd-detail-desc');
-    const detailPotency = document.getElementById('cd-detail-potency');
-    if (detailName) detailName.textContent = 'Select a node';
-    if (detailAction) detailAction.textContent = '';
-    if (detailDesc) detailDesc.textContent = '';
-    if (detailPotency) detailPotency.textContent = '';
-    _setDetailIcon(null);
+    // Hide the detail box, show the placeholder until a node is clicked
+    const sidebar = document.getElementById('equip-st-sidebar');
+    const placeholder = document.getElementById('equip-st-placeholder');
+    if (sidebar) sidebar.classList.add('equip-st-sidebar--hidden');
+    if (placeholder) placeholder.style.display = '';
+    m.detailFocusNodeId = null;
   }
 
   const pendingRow = document.getElementById('equip-st-pending-row');
@@ -3270,6 +3267,12 @@ function _showSkillDetail(skill, m, cardEl = null) {
 }
 
 function _showNodeDetail(node, m) {
+  // Reveal the floating detail box, hide the placeholder text
+  const sidebar = document.getElementById('equip-st-sidebar');
+  const placeholder = document.getElementById('equip-st-placeholder');
+  if (sidebar) sidebar.classList.remove('equip-st-sidebar--hidden');
+  if (placeholder) placeholder.style.display = 'none';
+
   document.getElementById('cd-detail-name').textContent = node.label;
   if (node.type === 'start') {
     document.getElementById('cd-detail-action').textContent = 'Starting Node';

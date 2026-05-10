@@ -2,7 +2,7 @@
     {
         "name": "Savage Fury Headdress",
         "slot": "head",
-        "icon": "/icons/sets/savage-fury/savage-fury-head.png",
+        "icon": "/icons/sets/savage-fury/savage-fury-head.webp",
         "description": "A tribal wolf pelt headdress. Early game light armor. Part of the Savage Fury set.",
         "defence": 2,
         "value": 150,
@@ -19,7 +19,7 @@
     {
         "name": "Savage Fury Harness",
         "slot": "chest",
-        "icon": "/icons/sets/savage-fury/savage-fury-chest.png",
+        "icon": "/icons/sets/savage-fury/savage-fury-chest.webp",
         "description": "A crude harness of thick leather and furs. Part of the Savage Fury set.",
         "defence": 3,
         "value": 250,
@@ -36,7 +36,7 @@
     {
         "name": "Savage Fury Bracers",
         "slot": "hands",
-        "icon": "/icons/sets/savage-fury/savage-fury-hands.png",
+        "icon": "/icons/sets/savage-fury/savage-fury-hands.webp",
         "description": "Leather bracers with animal teeth. Part of the Savage Fury set.",
         "defence": 1,
         "value": 100,
@@ -53,7 +53,7 @@
     {
         "name": "Savage Fury Leg Wraps",
         "slot": "legs",
-        "icon": "/icons/sets/savage-fury/savage-fury-legs.png",
+        "icon": "/icons/sets/savage-fury/savage-fury-legs.webp",
         "description": "A heavy fur loincloth and leather leg wraps. Part of the Savage Fury set.",
         "defence": 2,
         "value": 150,
@@ -70,7 +70,7 @@
     {
         "name": "Savage Fury Footwraps",
         "slot": "feet",
-        "icon": "/icons/sets/savage-fury/savage-fury-feet.png",
+        "icon": "/icons/sets/savage-fury/savage-fury-feet.webp",
         "description": "Fur-lined crude leather boots. Part of the Savage Fury set.",
         "defence": 1,
         "value": 100,
