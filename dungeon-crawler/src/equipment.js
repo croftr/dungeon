@@ -802,10 +802,11 @@ function renderModal(memberIndex) {
     modal.classList.remove('equip-modal--dead');
   }
 
-  // ── Skill Tree tab label — bouncing arrow when level-up pending ──
+  // ── Skill Tree tab label — pulsing ember glow + bouncing arrow when level-up pending ──
   const stTabBtn = document.getElementById('equip-tab-skilltree');
   if (stTabBtn) {
     const hasPending = !m.isDead && (m.pendingNodePicks ?? 0) > 0;
+    stTabBtn.classList.toggle('equip-tab--levelup', hasPending);
     stTabBtn.innerHTML = hasPending
       ? 'Skill Tree <span class="equip-tab-levelup-badge">⬆</span>'
       : 'Skill Tree';
