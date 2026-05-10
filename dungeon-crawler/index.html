@@ -978,8 +978,8 @@
             <div class="pd-slot" id="pd-feet" data-slot="feet">
               <span class="pd-item"></span>
             </div>
-            <div class="pd-slot" id="pd-ammo" data-slot="ammo">
-              <!-- faint quiver/arrow outline icon -->
+            <button id="ammo-rotate-btn" type="button" title="Swap ammo (keys 1-4 in game)" aria-label="Rotate ammo">&#8644;</button>
+            <div class="pd-slot" id="pd-ammoB" data-slot="ammoB" title="Ammo (B) — press 1-4 to swap with active ammo">
               <svg class="pd-slot-icon" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg" fill="none"
                 stroke="#c8a84a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M40 8 L32 40 L24 8" />
@@ -989,31 +989,26 @@
               </svg>
               <span class="pd-item"></span>
             </div>
-            <div class="pd-slot" id="pd-skill" data-slot="skill">
+            <div class="pd-slot" id="pd-ammo" data-slot="ammo">
+              <svg class="pd-slot-icon" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg" fill="none"
+                stroke="#c8a84a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M40 8 L32 40 L24 8" />
+                <line x1="32" y1="4" x2="32" y2="40" />
+                <line x1="28" y1="4" x2="36" y2="4" />
+                <line x1="20" y1="12" x2="44" y2="12" />
+              </svg>
+              <span class="pd-item"></span>
+            </div>
+            <div class="pd-slot" id="pd-relic" data-slot="relic" title="Relic">
+              <svg class="pd-slot-icon" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" fill="none"
+                stroke="#c8a84a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="22" cy="22" r="10" />
+                <path d="M22 6 L22 12 M22 32 L22 38 M6 22 L12 22 M32 22 L38 22" />
+              </svg>
               <span class="pd-item"></span>
             </div>
 
           </div><!-- /#paperdoll-wrap -->
-
-          <!-- Loadout B section — alternate items that swap in when rotating -->
-          <div id="loadout-b-section">
-            <button id="loadout-rotate-btn" title="Rotate all loadout slots (Keys 1-4 in game)">&#8644;
-              Rotate</button>
-            <div id="loadout-b-slots">
-              <div class="pd-loadout-b-slot" id="pd-lhB" data-lb="leftHand">
-                <span class="lb-slot-label">L</span>
-                <span class="pd-item"></span>
-              </div>
-              <div class="pd-loadout-b-slot" id="pd-rhB" data-lb="rightHand">
-                <span class="lb-slot-label">R</span>
-                <span class="pd-item"></span>
-              </div>
-              <div class="pd-loadout-b-slot" id="pd-skB" data-lb="skill">
-                <span class="lb-slot-label">S</span>
-                <span class="pd-item"></span>
-              </div>
-            </div>
-          </div>
         </section>
 
       </div><!-- /#equip-body -->
@@ -2846,12 +2841,10 @@
   <div id="inv-context-menu" class="inv-ctx-hidden">
     <div class="inv-ctx-item inv-ctx-use" id="inv-ctx-use" style="display: none;">🍹 Drink</div>
 
-    <div class="inv-ctx-item inv-ctx-equip" id="inv-ctx-equip">⚔ Equip (A)</div>
+    <div class="inv-ctx-item inv-ctx-equip" id="inv-ctx-equip">⚔ Equip</div>
     <div class="inv-ctx-item inv-ctx-read" id="inv-ctx-read" style="display: none;">📜 Read</div>
     <div class="inv-ctx-item inv-ctx-study" id="inv-ctx-study" style="display: none;">📖 Study</div>
-    <div class="inv-ctx-item" id="inv-ctx-equip-lb-left" style="display: none;">⚔ Equip B Left</div>
-    <div class="inv-ctx-item" id="inv-ctx-equip-lb-right" style="display: none;">⚔ Equip B Right</div>
-    <div class="inv-ctx-item" id="inv-ctx-skill-b" style="display: none;">✦ Skill B</div>
+    <div class="inv-ctx-item" id="inv-ctx-equip-ammo-b" style="display: none;">⚔ Equip Ammo (B)</div>
     <div class="inv-ctx-item inv-ctx-learn" id="inv-ctx-learn" style="display: none;">📜 Learn</div>
     <div class="inv-ctx-item inv-ctx-drop" id="inv-ctx-drop" style="display: none;">🗑 Drop</div>
     <div class="inv-ctx-item inv-ctx-alchemy" id="inv-ctx-alchemy" style="display: none;">🧪 Put in Alchemy</div>

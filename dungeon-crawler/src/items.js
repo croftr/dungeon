@@ -56,6 +56,7 @@ import STORMREAVER_SET from './data/items/stormreaver-set.json';
 import STEEL_VANGUARD_SET from './data/items/steel-vanguard-set.json';
 import TRACKERS_GUISE_SET from './data/items/trackers-guise-set.json';
 import SAVAGE_FURY_SET from './data/items/savage-fury-set.json';
+import RELICS from './data/items/relics.json';
 
 export const ACTIONS = Object.freeze({
   SWIPE: 'swipe',
@@ -116,6 +117,7 @@ export const ITEMS = [
   ...STEEL_VANGUARD_SET,
   ...TRACKERS_GUISE_SET,
   ...SAVAGE_FURY_SET,
+  ...RELICS,
   ...SPELLS,
 ];
 

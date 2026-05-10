@@ -68,8 +68,9 @@ A monster is a "boss" iff its entry in `src/data/monsters.json` has an `image` f
 
 - Party: 4 members in `party[]` array (`party.js`), HUD cards `member-0` through `member-3`
 - Equipment: `extendPartyData()` in `equipment.js`, always call `updateEffectiveStats(m)` after changes
-- Loadout B: `m.loadoutB = { leftHand, rightHand, potion, skill }`, swap with `rotateLoadout(memberIndex)`
-- Keys 1-4: rotate loadout for member 0-3
+- Ammo B: `m.ammoB` holds an alternate ammo item, swapped with `m.equipment.ammo` via `rotateAmmo(memberIndex)`
+- Keys 1-4: swap active ammo with ammo B for member 0-3
+- Relic slot: `m.equipment.relic` (paperdoll bottom-right) — placeholder for upcoming relic items, no effects yet
 - Monsters: `monsters[]` array in `monster.js`, each has `level` property (1/2/3)
 - Objects: spawned fresh each level load by `spawnObjectsForLevel()` in `objects.js`
-- `bothHands` weapons: mirror to both leftHand+rightHand; when storing to loadoutB only store in leftHand
+- `bothHands` weapons: mirror to both leftHand+rightHand

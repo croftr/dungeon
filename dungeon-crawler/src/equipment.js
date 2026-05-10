@@ -174,7 +174,7 @@ const SLOT_KEYS = [
   'leftHand', 'rightHand',
   'belt', 'hands',
   'ring1', 'ring2',
-  'legs', 'feet', 'ammo', 'skill', 'skill2', 'skill3', 'skill4', 'skill5', 'skill6',
+  'legs', 'feet', 'ammo', 'relic', 'skill', 'skill2', 'skill3', 'skill4', 'skill5', 'skill6',
 ];
 
 // Item types that can be placed in quick-use slots.
@@ -525,9 +525,7 @@ function computeMemberCarryWeight(m) {
   if (m.quickslots) {
     for (const item of m.quickslots) total += itemWeightOnce(item, counted);
   }
-  if (m.loadoutB) {
-    for (const item of Object.values(m.loadoutB)) total += itemWeightOnce(item, counted);
-  }
+  if (m.ammoB) total += itemWeightOnce(m.ammoB, counted);
   if (m.inventory) {
     for (const item of m.inventory) total += itemWeightOnce(item, counted);
   }
@@ -587,13 +585,9 @@ export function extendPartyData() {
     if (m.pendingLevelUp === undefined) m.pendingLevelUp = false;
     if (!m.quickslots) m.quickslots = [null, null, null];
     else while (m.quickslots.length < 3) m.quickslots.push(null);
-    if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, skill: null };
-    else {
-      // Migrate old potion fields out of loadoutB (potions now live in action slots)
-      delete m.loadoutB.potion;
-      delete m.loadoutB.potion2;
-      delete m.loadoutB.potion3;
-    }
+    // Migrate away from old loadoutB system — only ammoB remains
+    if (m.loadoutB) delete m.loadoutB;
+    if (m.ammoB === undefined) m.ammoB = null;
     // Skill tree fields
     if (!m.acquiredNodes) m.acquiredNodes = ['start'];
     if (m.pendingNodeChoice === undefined) m.pendingNodeChoice = null;
@@ -609,6 +603,7 @@ export function extendPartyData() {
       if (m.equipment.skill4 === undefined) m.equipment.skill4 = null;
       if (m.equipment.skill5 === undefined) m.equipment.skill5 = null;
       if (m.equipment.skill6 === undefined) m.equipment.skill6 = null;
+      if (m.equipment.relic === undefined) m.equipment.relic = null;
       // Migrate old quickslots[0..2] → skill4/5/6 (one-time migration)
       if (m.quickslots) {
         if (!m.equipment.skill4 && m.quickslots[0]) { m.equipment.skill4 = m.quickslots[0]; m.quickslots[0] = null; }
@@ -846,25 +841,12 @@ function renderModal(memberIndex) {
     renderItemIcon(item, pdItemEl);
   });
 
-  // ── Loadout B slots ──
-  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, skill: null };
-  const lhbEl = document.getElementById('pd-lhB');
-  const rhbEl = document.getElementById('pd-rhB');
-  const skbEl = document.getElementById('pd-skB');
-  if (lhbEl) {
-    lhbEl.classList.toggle('occupied', !!m.loadoutB.leftHand);
-    renderItemIcon(m.loadoutB.leftHand, lhbEl.querySelector('.pd-item') || lhbEl);
-  }
-  if (rhbEl) {
-    const lhbIsBothHands = m.loadoutB.leftHand?.slot === 'bothHands';
-    rhbEl.classList.toggle('occupied', lhbIsBothHands || !!m.loadoutB.rightHand);
-    rhbEl.classList.toggle('both-hands-secondary', lhbIsBothHands);
-    renderItemIcon(lhbIsBothHands ? m.loadoutB.leftHand : m.loadoutB.rightHand,
-      rhbEl.querySelector('.pd-item') || rhbEl);
-  }
-  if (skbEl) {
-    skbEl.classList.toggle('occupied', !!m.loadoutB.skill);
-    renderItemIcon(m.loadoutB.skill, skbEl.querySelector('.pd-item') || skbEl);
+  // ── Ammo B slot (alternate ammo, swapped via 1-4 keys) ──
+  if (m.ammoB === undefined) m.ammoB = null;
+  const ammoBEl = document.getElementById('pd-ammoB');
+  if (ammoBEl) {
+    ammoBEl.classList.toggle('occupied', !!m.ammoB);
+    renderItemIcon(m.ammoB, ammoBEl.querySelector('.pd-item') || ammoBEl);
   }
 
   // ── Slot-count header ──
@@ -1991,145 +1973,58 @@ export function useQuickslotPotion(memberIndex, slotIdx) {
 }
 
 // ─────────────────────────────────────────────
-//  LOADOUT ROTATE
+//  AMMO ROTATE
 // ─────────────────────────────────────────────
 
 /**
- * Rotates all four loadout slots simultaneously (left hand, right hand, potion, skill).
- * Active ↔ Loadout B. All four swap together — you cannot rotate just one slot.
+ * Swaps the active ammo slot with the alternate ammo (B) slot.
+ * No-op (and silent) if neither slot holds anything.
  */
-export function rotateLoadout(memberIndex) {
+export function rotateAmmo(memberIndex) {
   const m = party[memberIndex];
-  if (!m || m.isEmpty || m.isDead) return;
-  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, skill: null };
-
-  const activeLeft = m.equipment.leftHand;
-  const isActiveBothHands = activeLeft?.slot === 'bothHands';
-  // For bothHands, rightHand is just a mirror — don't save it separately into loadoutB
-  const activeRight = isActiveBothHands ? null : m.equipment.rightHand;
-  const activeSkill = m.equipment.skill ?? null;
-
-  const newLeft = m.loadoutB.leftHand ?? null;
-  const newRight = m.loadoutB.rightHand ?? null;
-  const newSkill = m.loadoutB.skill ?? null;
-
-  // Apply new active loadout
-  m.equipment.leftHand = newLeft;
-  if (newLeft?.slot === 'bothHands') {
-    m.equipment.rightHand = newLeft; // mirror both-hands weapon
-  } else {
-    m.equipment.rightHand = newRight;
-  }
-  m.equipment.skill = newSkill;
-
-  // Store old active into loadout B
-  m.loadoutB.leftHand = activeLeft ?? null;
-  m.loadoutB.rightHand = activeRight ?? null;
-  m.loadoutB.skill = activeSkill;
-
+  if (!m || m.isEmpty || m.isDead) return false;
+  if (m.ammoB === undefined) m.ammoB = null;
+  const active = m.equipment.ammo ?? null;
+  if (!active && !m.ammoB) return false;
+  m.equipment.ammo = m.ammoB;
+  m.ammoB = active;
   updateEffectiveStats(m);
   refreshPartyCards();
+  playInventorySortSound();
+  // Brief flash on the party-card weapon slots so the player sees the swap landed
+  for (const slotId of [`slot-lh-${memberIndex}`, `slot-rh-${memberIndex}`]) {
+    const el = document.getElementById(slotId);
+    if (!el) continue;
+    el.classList.remove('slot-ammo-rotated');
+    void el.offsetWidth; // restart animation
+    el.classList.add('slot-ammo-rotated');
+    setTimeout(() => el.classList.remove('slot-ammo-rotated'), 600);
+  }
+  return true;
 }
 
 /**
- * Assigns the item at invIndex directly to the loadout B left hand slot.
+ * Assigns the ammo at invIndex to the alternate ammo (B) slot.
  */
-function _assignLoadoutBLeft(memberIndex, invIndex) {
+function _assignAmmoB(memberIndex, invIndex) {
   const m = party[memberIndex];
   if (!m || m.isEmpty) return;
-  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, skill: null };
+  if (m.ammoB === undefined) m.ammoB = null;
   const item = m.inventory[invIndex];
   if (!item) return;
   const def = getItemDef(item.name);
+  if (def?.slot !== 'ammo') return;
   if (def && !canUseItemByJob(m, def)) {
     const jobs = Array.isArray(def.job) ? def.job.join('/') : def.job;
     showMessage(`Only ${jobs}s can equip ${item.name}.`);
     return;
   }
-  const slot = def?.slot ?? 'hand';
-  if ((slot === 'hand' && !def?.rightHandOnly) || slot === 'bothHands') {
-    const displaced = m.loadoutB.leftHand;
-    const itemObj = { name: item.name, slot };
-    if (item.hq) itemObj.hq = true;
-    // For bothHands items also clear B rightHand since mirror will be set on rotate
-    if (slot === 'bothHands') {
-      m.loadoutB.rightHand = null;
-    }
-    m.loadoutB.leftHand = itemObj;
-    m.inventory[invIndex] = displaced;
-    showMessage(`${item.name} assigned to Loadout B left hand.`);
-    renderModal(memberIndex);
-    refreshPartyCards();
-  }
-}
-
-/**
- * Assigns the item at invIndex directly to the loadout B right hand slot.
- */
-function _assignLoadoutBRight(memberIndex, invIndex) {
-  const m = party[memberIndex];
-  if (!m || m.isEmpty) return;
-  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, skill: null };
-  const item = m.inventory[invIndex];
-  if (!item) return;
-  const def = getItemDef(item.name);
-  if (def && !canUseItemByJob(m, def)) {
-    const jobs = Array.isArray(def.job) ? def.job.join('/') : def.job;
-    showMessage(`Only ${jobs}s can equip ${item.name}.`);
-    return;
-  }
-  const slot = def?.slot ?? 'hand';
-  if (slot === 'hand' && !def?.leftHandOnly) {
-    const displaced = m.loadoutB.rightHand;
-    const newRight = { name: item.name, slot };
-    if (item.hq) newRight.hq = true;
-    m.loadoutB.rightHand = newRight;
-    m.inventory[invIndex] = displaced;
-    showMessage(`${item.name} assigned to Loadout B right hand.`);
-    renderModal(memberIndex);
-    refreshPartyCards();
-  }
-}
-
-/**
- * Assigns the potion at invIndex to the loadout B potion slot.
- */
-function _assignLoadoutBPotion(memberIndex, invIndex) {
-  const m = party[memberIndex];
-  if (!m || m.isEmpty) return;
-  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, skill: null };
-  const item = m.inventory[invIndex];
-  if (!item) return;
-  const displaced = m.loadoutB.potion;
-  const newPotion = { name: item.name, slot: 'quickslot' };
-  if (item.hq) newPotion.hq = true;
-  m.loadoutB.potion = newPotion;
+  const displaced = m.ammoB;
+  const newAmmo = { name: item.name, slot: 'ammo' };
+  if (item.hq) newAmmo.hq = true;
+  m.ammoB = newAmmo;
   m.inventory[invIndex] = displaced;
-  showMessage(`${item.name} assigned to Loadout B potion slot.`);
-  renderModal(memberIndex);
-  refreshPartyCards();
-}
-
-/**
- * Assigns the skill at invIndex to the loadout B skill slot.
- */
-function _assignLoadoutBSkill(memberIndex, invIndex) {
-  const m = party[memberIndex];
-  if (!m || m.isEmpty) return;
-  if (!m.loadoutB) m.loadoutB = { leftHand: null, rightHand: null, skill: null };
-  const item = m.inventory[invIndex];
-  if (!item) return;
-  const def = getItemDef(item.name);
-  if (def?.slot !== 'skill') return;
-  if (!canUseItemByJob(m, def)) {
-    const jobs = Array.isArray(def.job) ? def.job.join('/') : def.job;
-    showMessage(`Only ${jobs}s can equip ${item.name}.`);
-    return;
-  }
-  const displaced = m.loadoutB.skill;
-  m.loadoutB.skill = { name: item.name, slot: 'skill', type: def.type, delay: (def.cooldownMs ?? 0) / 1000 };
-  m.inventory[invIndex] = displaced;
-  showMessage(`${item.name} assigned to Loadout B skill slot.`);
+  showMessage(`${item.name} assigned to ammo slot B.`);
   renderModal(memberIndex);
   refreshPartyCards();
 }
@@ -2455,13 +2350,9 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
   if (studyBtn) studyBtn.style.display = 'none';
   if (dropBtn) dropBtn.style.display = 'none';
 
-  // ── Loadout B equip buttons ──
-  const lbLeftBtn = document.getElementById('inv-ctx-equip-lb-left');
-  const lbRightBtn = document.getElementById('inv-ctx-equip-lb-right');
-  const lbSkillBtn = document.getElementById('inv-ctx-skill-b');
-  if (lbLeftBtn) lbLeftBtn.style.display = 'none';
-  if (lbRightBtn) lbRightBtn.style.display = 'none';
-  if (lbSkillBtn) lbSkillBtn.style.display = 'none';
+  // ── Ammo B equip button ──
+  const ammoBBtn = document.getElementById('inv-ctx-equip-ammo-b');
+  if (ammoBBtn) ammoBBtn.style.display = 'none';
 
 
 
@@ -2512,13 +2403,6 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
         _equipItem(activeCharIndex, _ctxInvIndex);
         _hideContextMenu();
       };
-      if (lbSkillBtn) {
-        lbSkillBtn.style.display = 'block';
-        lbSkillBtn.onclick = () => {
-          _assignLoadoutBSkill(activeCharIndex, _ctxInvIndex);
-          _hideContextMenu();
-        };
-      }
     }
   } else if (def?.slot && def.slot !== 'loot' && def.slot !== 'skill' && def.slot !== 'spell' && def.type !== 'spellbook') {
     if (jobOk) {
@@ -2527,23 +2411,13 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
         _equipItem(activeCharIndex, _ctxInvIndex);
         _hideContextMenu();
       };
-      // Show B-slot options for hand items
-      const handSlots = ['hand', 'bothHands'];
-      if (handSlots.includes(def.slot)) {
-        if (lbLeftBtn && !def.rightHandOnly && !def.leftHandOnly) {
-          lbLeftBtn.style.display = 'block';
-          lbLeftBtn.onclick = () => {
-            _assignLoadoutBLeft(activeCharIndex, _ctxInvIndex);
-            _hideContextMenu();
-          };
-        }
-        if (lbRightBtn && def.slot !== 'bothHands' && !def.leftHandOnly) {
-          lbRightBtn.style.display = 'block';
-          lbRightBtn.onclick = () => {
-            _assignLoadoutBRight(activeCharIndex, _ctxInvIndex);
-            _hideContextMenu();
-          };
-        }
+      // Ammo items can also be assigned to the alternate (B) ammo slot
+      if (def.slot === 'ammo' && ammoBBtn) {
+        ammoBBtn.style.display = 'block';
+        ammoBBtn.onclick = () => {
+          _assignAmmoB(activeCharIndex, _ctxInvIndex);
+          _hideContextMenu();
+        };
       }
     }
   } else {
@@ -5877,57 +5751,43 @@ function attachCardListeners() {
 }
 
 function attachOverlayListeners() {
-  // Loadout B rotate button
-  const rotateBtn = document.getElementById('loadout-rotate-btn');
-  if (rotateBtn) {
-    rotateBtn.addEventListener('click', () => {
-      if (activeCharIndex !== null) {
-        if (party[activeCharIndex].isDead) return;
-        rotateLoadout(activeCharIndex);
-        renderModal(activeCharIndex);
-      }
+  // Ammo rotate button — same swap as keys 1-4 in game
+  const ammoRotateBtn = document.getElementById('ammo-rotate-btn');
+  if (ammoRotateBtn) {
+    ammoRotateBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activeCharIndex === null) return;
+      if (party[activeCharIndex]?.isDead) return;
+      if (rotateAmmo(activeCharIndex)) renderModal(activeCharIndex);
     });
   }
 
-  // Loadout B slots — clicking a B slot with an item unequips it back to inventory
-  ['pd-lhB', 'pd-rhB', 'pd-skB'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.addEventListener('click', () => {
+  // Ammo B slot — clicking returns the alternate ammo to inventory
+  const ammoBSlot = document.getElementById('pd-ammoB');
+  if (ammoBSlot) {
+    ammoBSlot.addEventListener('click', (e) => {
+      e.stopPropagation();
       if (activeCharIndex === null) return;
       const m = party[activeCharIndex];
-      if (!m || !m.loadoutB) return;
-      if (m.isDead) return;
-      const lb = el.dataset.lb;
-      let item = null;
-      if (lb === 'leftHand') {
-        item = m.loadoutB.leftHand;
-        if (item && m.loadoutB.leftHand?.slot === 'bothHands') m.loadoutB.rightHand = null;
-        m.loadoutB.leftHand = null;
-      } else if (lb === 'rightHand') {
-        item = m.loadoutB.rightHand;
-        m.loadoutB.rightHand = null;
-      } else if (lb === 'skill') {
-        item = m.loadoutB.skill;
-        m.loadoutB.skill = null;
+      if (!m || m.isDead) return;
+      const item = m.ammoB;
+      if (!item) return;
+      const slot = m.inventory.indexOf(null);
+      if (slot === -1) {
+        showMessage('Inventory full!');
+        return;
       }
-      if (item) {
-        const slot = m.inventory.indexOf(null);
-        if (slot !== -1) {
-          m.inventory[slot] = item;
-          showMessage(`${item.name} returned to inventory.`);
-        } else {
-          // Restore on slot if inventory full
-          if (lb === 'leftHand') m.loadoutB.leftHand = item;
-          else if (lb === 'rightHand') m.loadoutB.rightHand = item;
-          else m.loadoutB.skill = item;
-          showMessage('Inventory full!');
-        }
-      }
+      m.inventory[slot] = item;
+      m.ammoB = null;
+      showMessage(`${item.name} returned to inventory.`);
       renderModal(activeCharIndex);
       refreshPartyCards();
     });
-  });
+    attachTooltipListeners(ammoBSlot, () => {
+      if (activeCharIndex === null) return null;
+      return party[activeCharIndex].ammoB ?? null;
+    });
+  }
 
   // Action slot picker close button + backdrop click
   const aspClose = document.getElementById('action-slot-picker-close');

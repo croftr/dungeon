@@ -41,7 +41,8 @@ export function updateLighting({ torch, fill }, camera, dt) {
     for (let i = 0; i < party.length; i++) {
       const m = party[i];
       if (!m.isEmpty && m.equipment) {
-        if (m.equipment.leftHand?.name === 'Torch' || m.equipment.rightHand?.name === 'Torch') {
+        if (m.equipment.leftHand?.name === 'Torch' || m.equipment.rightHand?.name === 'Torch'
+          || m.equipment.relic?.name === 'Testament of Faith') {
           hasTorch = true;
           break;
         }

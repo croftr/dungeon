@@ -50,7 +50,8 @@ export function spawnLevel0Objects(ctx) {
         "Wizard's Hat", "Wizard's Robe", "Wizard's Gloves", "Wizard's Leggings", "Wizard's Boots",
         "Steel Vanguard Helm", "Steel Vanguard Chestplate", "Steel Vanguard Gauntlets", "Steel Vanguard Legplates", "Steel Vanguard Sabatons",
         "Tracker's Guise Cowl", "Tracker's Guise Tunic", "Tracker's Guise Gloves", "Tracker's Guise Breeches", "Tracker's Guise Boots",
-        "Savage Fury Headdress", "Savage Fury Harness", "Savage Fury Bracers", "Savage Fury Leg Wraps", "Savage Fury Footwraps"
+        "Savage Fury Headdress", "Savage Fury Harness", "Savage Fury Bracers", "Savage Fury Leg Wraps", "Savage Fury Footwraps",
+        "Three Eyed Familiar", "Testament of Faith"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in the east room (center) ────────────────────────────────────

@@ -2552,8 +2552,7 @@ label.mm-setting-label {
 }
 
 /* SKILL placeholder — only for S slot */
-[id^="slot-sk"].slot-empty::before,
-#pd-skill.slot-empty::before {
+[id^="slot-sk"].slot-empty::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -5439,8 +5438,91 @@ label.mm-setting-label {
   left: -22%;
 }
 
-/* feet — same level as hands/rings */
-#pd-skill {
+/* Alternate ammo — partially overlaps the active ammo slot, offset up-and-left */
+#pd-ammoB {
+  top: 95%;
+  left: -30%;
+  filter: brightness(0.85);
+  z-index: 1;
+}
+
+#pd-ammoB.occupied {
+  filter: none;
+}
+
+#pd-ammo {
+  z-index: 2;
+}
+
+/* Small swap button just to the right of the ammo stack */
+#ammo-rotate-btn {
+  position: absolute;
+  top: 99%;
+  left: 6%;
+  transform: translate(-50%, -50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid #7a6a3a;
+  background: rgba(40, 30, 10, 0.9);
+  color: #c8a84a;
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+#ammo-rotate-btn:hover {
+  background: rgba(80, 60, 20, 0.95);
+  border-color: #c8a84a;
+  color: #ffd070;
+}
+
+#ammo-rotate-btn:active {
+  transform: translate(-50%, -50%) scale(0.92);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Party-card ammo indicators on the ranged-weapon slot
+───────────────────────────────────────────────────────────────────────────── */
+.equip-slot .ammo-type-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #9a9a9a;
+  border: 1px solid rgba(0, 0, 0, 0.7);
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Subtle outer ring on the slot when an alternate ammo is loaded and ready to swap */
+.equip-slot.slot-has-alt-ammo .ammo-type-dot {
+  box-shadow: 0 0 0 1px #c8a84a, 0 0 4px rgba(200, 168, 74, 0.7);
+}
+
+/* Brief pulse animation triggered when the player rotates ammo */
+@keyframes ammoRotateFlash {
+  0% { box-shadow: 0 0 0 0 rgba(200, 168, 74, 0.9), inset 0 1px 3px rgba(0, 0, 0, 0.6); }
+  40% { box-shadow: 0 0 6px 3px rgba(200, 168, 74, 0.85), inset 0 1px 3px rgba(0, 0, 0, 0.6); }
+  100% { box-shadow: 0 0 0 0 rgba(200, 168, 74, 0), inset 0 1px 3px rgba(0, 0, 0, 0.6); }
+}
+
+.equip-slot.slot-ammo-rotated {
+  animation: ammoRotateFlash 0.55s ease-out;
+}
+
+/* Relic — bottom-right, mirrors the ammo position on the opposite side */
+#pd-relic {
   top: 103%;
   left: 122%;
 }
@@ -10618,116 +10700,6 @@ body.cursor-interact #renderer-canvas {
   display: none !important;
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   LOADOUT B — alternate item slots in the inventory paperdoll
-───────────────────────────────────────────────────────────────────────────── */
-#loadout-b-section {
-  margin: 10px auto 0;
-  padding: 8px;
-  border: 1px solid #3a3020;
-  border-radius: 4px;
-  background: rgba(10, 8, 4, 0.5);
-  width: 180px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-
-#loadout-rotate-btn {
-  background: rgba(50, 35, 10, 0.8);
-  border: 1px solid #7a6a3a;
-  border-radius: 3px;
-  color: #c8a84a;
-  font-family: monospace;
-  font-size: 11px;
-  padding: 2px 8px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-#loadout-rotate-btn:hover {
-  background: rgba(80, 60, 20, 0.9);
-  border-color: #c8a84a;
-  color: #ffd070;
-}
-
-#loadout-b-slots {
-  display: flex;
-  gap: 4px;
-  justify-content: center;
-}
-
-.pd-loadout-b-slot {
-  position: relative;
-  width: 36px;
-  height: 36px;
-  border: 1px dashed #4a3a1a;
-  border-radius: 3px;
-  background: rgba(15, 12, 5, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  overflow: hidden;
-}
-
-.pd-loadout-b-slot:hover {
-  border-color: #7a6a3a;
-  background: rgba(30, 22, 8, 0.8);
-}
-
-.pd-loadout-b-slot.occupied {
-  border-color: #6a5a2a;
-  border-style: solid;
-  cursor: pointer;
-}
-
-.pd-loadout-b-slot.occupied:hover {
-  border-color: #c8a84a;
-  background: rgba(40, 30, 10, 0.9);
-}
-
-.pd-loadout-b-slot .pd-item {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.pd-loadout-b-slot .pd-item img {
-  width: 80%;
-  height: 80%;
-  object-fit: contain;
-}
-
-.lb-slot-label {
-  position: absolute;
-  top: 2px;
-  left: 3px;
-  font-size: 7px;
-  color: #5a4a1a;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.pd-loadout-b-slot.occupied .lb-slot-label {
-  color: #7a6a2a;
-}
-
-/* Alt-loadout indicator dot on HUD quickslot button */
-.quickslot-btn .qs-alt-dot {
-  position: absolute;
-  bottom: 3px;
-  right: 3px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #c8a84a;
-  pointer-events: none;
-}
 
 /* ── Dramatic Level Up Overlay ─────────────────────────────────────────── */
 #dramatic-levelup-overlay {

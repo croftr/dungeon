@@ -1,5 +1,5 @@
 import { getItemDef } from './items.js';
-import { renderItemIcon, attachTooltipListeners, hideTooltip, rotateLoadout, clearAutoAttackTimers, clearAutoRangeAttackTimers, updateEffectiveStats, refreshEquipmentModal, getMemberEncumbranceLevel, getMemberCarryWeight, getMemberMaxCarry, formatSetBonusText } from './equipment.js';
+import { renderItemIcon, attachTooltipListeners, hideTooltip, rotateAmmo, clearAutoAttackTimers, clearAutoRangeAttackTimers, updateEffectiveStats, refreshEquipmentModal, getMemberEncumbranceLevel, getMemberCarryWeight, getMemberMaxCarry, formatSetBonusText } from './equipment.js';
 import SETS_DATA from './data/sets.json';
 import { addLogEntry } from './battle-log.js';
 import { isInCombat, playGoldSound, playPartyHitSound, playActionSound } from './audio.js';
@@ -12,6 +12,29 @@ import { asset } from './assets.js';
 import STANCES from './data/stances.json';
 import { getStancePortraitPath } from './stance.js';
 import { getCurrentLevelThreshold } from './leveling.js';
+import ELEMENTS from './data/elements.json';
+
+// Resolve a CSS color for an ammo's damageType (used to tint the
+// ammo-type indicator on the party-card weapon slot).
+function _ammoIndicatorColor(damageType) {
+  if (!damageType || damageType === 'normal') return '#9a9a9a';
+  if (damageType === 'poison') return '#4ec24e';
+  return ELEMENTS[damageType]?.color ?? '#9a9a9a';
+}
+
+// Lazily injects (and returns) a dot-element used for the ammo-type indicator
+// in a party-card weapon slot. Returns null if the slot DOM is missing.
+function _getAmmoIndicatorEl(slotId) {
+  const slot = document.getElementById(slotId);
+  if (!slot) return null;
+  let dot = slot.querySelector('.ammo-type-dot');
+  if (!dot) {
+    dot = document.createElement('span');
+    dot.className = 'ammo-type-dot';
+    slot.appendChild(dot);
+  }
+  return dot;
+}
 
 // ─────────────────────────────────────────────
 //  PARTY DATA  — 4 members
@@ -420,6 +443,27 @@ function refreshMember(m) {
   if (sk4El) renderItemIcon(m.equipment?.skill4 ?? null, sk4El);
   if (sk5El) renderItemIcon(m.equipment?.skill5 ?? null, sk5El);
   if (sk6El) renderItemIcon(m.equipment?.skill6 ?? null, sk6El);
+
+  // Ammo-type indicator (top-right of the ranged weapon slot) + alt-ammo dot
+  // Only shown on the slot that holds a 'shoot' ranged weapon.
+  const ammoItem = m.equipment?.ammo ?? null;
+  const ammoDef = ammoItem ? (getItemDef(ammoItem.name) ?? null) : null;
+  const lhIsRanged = lhDef?.attackType === 'shoot';
+  const rhIsRanged = rhDef?.attackType === 'shoot';
+  const hasAltAmmo = !!(m.equipment && m.ammoB);
+  for (const [slotId, isRanged] of [[`slot-lh-${i}`, lhIsRanged], [`slot-rh-${i}`, rhIsRanged]]) {
+    const dot = _getAmmoIndicatorEl(slotId);
+    if (!dot) continue;
+    const slotEl = document.getElementById(slotId);
+    if (isRanged && ammoDef) {
+      dot.style.background = _ammoIndicatorColor(ammoDef.damageType);
+      dot.style.display = '';
+      dot.title = `Ammo: ${ammoItem.name}`;
+    } else {
+      dot.style.display = 'none';
+    }
+    if (slotEl) slotEl.classList.toggle('slot-has-alt-ammo', isRanged && hasAltAmmo);
+  }
 
   if (!m.cooldownTimers) m.cooldownTimers = {};
 
@@ -838,7 +882,7 @@ export function initParty() {
       closeTacticsModal();
     }
 
-    // Keys 1–4: rotate loadout for each party member, Space: rotate all
+    // Keys 1–4: swap active ammo with the alternate (B) ammo for each party member.
     // 1 → member 0 (top-left)  |  2 → member 1 (top-right)
     // 3 → member 2 (bottom-left)  |  4 → member 3 (bottom-right)
     const loadoutKeyMap = { '1': 0, '2': 1, '3': 2, '4': 3 };
@@ -861,7 +905,7 @@ export function initParty() {
         const m = party[memberIdx];
         if (m && !m.isEmpty) {
           e.preventDefault();
-          rotateLoadout(memberIdx);
+          rotateAmmo(memberIdx);
         }
       }
     }

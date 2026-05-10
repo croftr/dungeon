@@ -1,0 +1,25 @@
+[
+    {
+        "name": "Three Eyed Familiar",
+        "slot": "relic",
+        "icon": "/icons/relic/three-eyed-familiar.png",
+        "description": "A tiny chittering thing with three unblinking eyes. Whispers secrets only the arcane can parse.",
+        "value": 600,
+        "weight": 0.3,
+        "job": ["Wizard", "White Mage"],
+        "statBonuses": {
+            "intelligence": 1
+        }
+    },
+    {
+        "name": "Testament of Faith",
+        "slot": "relic",
+        "icon": "/icons/relic/testament-of-faith.png",
+        "description": "A small leather-bound book of devotions, worn smooth by countless hands. Its quiet weight steadies the body and casts a soft holy radiance, lighting the way.",
+        "value": 600,
+        "weight": 0.4,
+        "statBonuses": {
+            "vitality": 1
+        }
+    }
+]
