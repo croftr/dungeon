@@ -28,6 +28,13 @@ export function spawnLevel2Objects(ctx) {
     // ── Portal back to Level 0 ────────────────────────────────────────────────
     addPortal(group, loader, 2, 1, 0, Math.PI / 2, -0.85, 0, 13, 13, 0);
 
+    // ── Portal to Schematic Trials side zone ──────────────────────────────────
+    // Standalone challenge area: 4 alcoves, 4 reward chests, one per schematic
+    // quest. Everything on the far side is spawned on entry and cleared on
+    // exit so Level 2 stays light. Placed in the giant room so it sits well
+    // off the critical path.
+    addPortal(group, loader, 18, 18, 50, 0, 0, 0);
+
     // ── New area: Spell Cabinet (Room A, north wall, row 3 col 5) ─────────────
     addSpellCabinet(group, loader, 5, 3, 0, 0, -0.7, ["Scroll of Resist Ice", "Scroll of Resist Fire"]);
     addSpellCabinet(group, loader, 2, 8, Math.PI / 2, -0.7, 0, ['Scroll of Lightningbolt', 'Scroll of Fireball']);
@@ -44,8 +51,7 @@ export function spawnLevel2Objects(ctx) {
         { name: 'Gold Coins', quantity: 150 },
         "Hoarfrost Mantle",
         "Padded Vest",
-        "Testament of Faith",
-        "Savage Schematics"
+        "Testament of Faith"
     ]);
 
     // ── Portcullises & Keys ───────────────────────────────────────────────────
@@ -74,7 +80,7 @@ export function spawnLevel2Objects(ctx) {
     // Two chests in the chest vault (col 1, rows 33–34)
     addChest(group, loader, 0.7, 34, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 20 },
-        'Mana Berry', "Trackers Schematics", 'Scroll of Incinerate',
+        'Mana Berry', 'Scroll of Incinerate',
         "Talisman of the Wind"
     ]);
     addChest(group, loader, 1.3, 34, Math.PI, 0.7, [
@@ -90,8 +96,7 @@ export function spawnLevel2Objects(ctx) {
     addChest(group, loader, 28, 32, -Math.PI / 2, -0.5, [
         { name: 'Gold Coins', quantity: 50 },
         'Mana Potion', 'Life Essence',
-        "Bloodstone Amulet",
-        "Steel Schematics"
+        "Bloodstone Amulet"
     ], asset('/items/chest1.glb'), true, 0.5);
 
     // Ethereal Egg at col 28 south side — side by side with the chest

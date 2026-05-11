@@ -40,7 +40,6 @@ export function spawnLevel0Objects(ctx) {
         "Ice Axe", "Ice Dagger", "Ice Arrows",
         "Flame Greataxe", "Ice Greataxe",
         "Iron Ore", "Iron Ore", "Ogre Helm Parchment", "Crocodilian Boots Parchment",
-        "Savage Schematics", "Trackers Schematics", "Steel Schematics", "Wizard Schematics",
         "Three Eyed Familiar", "Testament of Faith", "Talisman of the Wind", "Bulwark of the Ancestors", "Bloodstone Amulet", "Tracker's Medallion", "Crescent Moon Charm"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 

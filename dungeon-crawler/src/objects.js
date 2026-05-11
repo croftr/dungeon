@@ -27,6 +27,7 @@ import { spawnLevel2Objects } from './levels/level2/objects.js';
 import { spawnLevel3Objects } from './levels/level3/objects.js';
 import { spawnLevel4Objects } from './levels/level4/objects.js';
 import { spawnLevel5Objects } from './levels/level5/objects.js';
+import { spawnSchematicTrialsObjects } from './levels/schematic-trials/objects.js';
 import { showNpcChoice, openQuestDialog, renderMerchantQuestPanel } from './quest.js';
 
 export const objects = [];
@@ -2304,6 +2305,7 @@ export function spawnObjectsForLevel() {
     else if (level === 3) spawnLevel3Objects(ctx);
     else if (level === 4) spawnLevel4Objects(ctx);
     else if (level === 5) spawnLevel5Objects(ctx);
+    else if (level === 50) spawnSchematicTrialsObjects(ctx);
     else if (level === 99) {
         // Arena – place 4 torches evenly around the edge
         addDroppedTorch(objectsGroup, _gltfLoader, 1, 1, 0);

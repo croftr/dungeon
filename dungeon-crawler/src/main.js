@@ -28,6 +28,7 @@ import { initEssentiary, getMonsterTier, recordArenaVictory, applyTierScaling } 
 import { getSkillExpertise } from './skill-tree.js';
 import { MONSTER_DEFS } from './monster-defs.js';
 import { inst } from './monster-factory.js';
+import { schematicTrialsMap } from './levels/schematic-trials/map.js';
 
 import './style.css';
 
@@ -40,6 +41,7 @@ window.currentLevel = 0;
 //  ARENA MAP  (level 99 — used by The Essentiary)
 // ─────────────────────────────────────────────
 const ARENA_LEVEL = 99;
+const SCHEMATIC_TRIALS_LEVEL = 50;
 const ARENA_MAP = [
   [1,1,1,1,1,1,1,1,1],
   [1,0,0,0,0,0,0,0,1],
@@ -2194,13 +2196,15 @@ window.loadLevel = function (levelNum) {
     }
   }
 
-  // Auto-save on dungeon-level transitions. Arena entry/exit and restore
-  // flows are excluded.
+  // Auto-save on dungeon-level transitions. Arena entry/exit, schematic
+  // trials entry/exit, and restore flows are excluded.
   if (!window._isRestoring
       && oldLevel !== undefined
       && oldLevel !== levelNum
       && levelNum !== ARENA_LEVEL
-      && oldLevel !== ARENA_LEVEL) {
+      && oldLevel !== ARENA_LEVEL
+      && levelNum !== SCHEMATIC_TRIALS_LEVEL
+      && oldLevel !== SCHEMATIC_TRIALS_LEVEL) {
     autoSaveCheckpoint();
   }
 
@@ -2211,6 +2215,7 @@ window.loadLevel = function (levelNum) {
 
   // 1. Swap Map Array
   const maps = [level0Map, level1Map, level2Map, level3Map, level4Map, level5Map];
+  maps[SCHEMATIC_TRIALS_LEVEL] = schematicTrialsMap;
   changeMapArray(maps[levelNum] ?? level0Map);
 
   // 2. Rebuild map meshes for walls/floors
@@ -2405,6 +2410,11 @@ window.loadLevel = function (levelNum) {
     player.facing = 0; // North
     camera.rotation.order = 'YXZ';
     camera.rotation.y = FACING_ANGLES[player.facing];
+  } else if (levelNum === SCHEMATIC_TRIALS_LEVEL) {
+    // Schematic Trials — face north into the N corridor
+    player.facing = 0;
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = FACING_ANGLES[player.facing];
   } else if (levelNum === 0 && oldLevel === 5) {
     // Returning from Hall of Heroes — place near the hero door, face north
     player.gridRow = 14;
@@ -2445,6 +2455,11 @@ window.loadLevel = function (levelNum) {
   // Hall of Heroes — always plays its theme
   if (levelNum === 5) {
     setZoneMusic(asset('/sounds/backing/hall-of-heroes.mp3'));
+  }
+
+  // Schematic Trials — borrow the demon-room track for an arcane feel
+  if (levelNum === SCHEMATIC_TRIALS_LEVEL) {
+    setZoneMusic(asset('/sounds/backing/demon-room.mp3'));
   }
 };
 
