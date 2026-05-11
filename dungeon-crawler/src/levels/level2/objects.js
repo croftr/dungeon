@@ -31,9 +31,9 @@ export function spawnLevel2Objects(ctx) {
     // ── Portal to Schematic Trials side zone ──────────────────────────────────
     // Standalone challenge area: 4 alcoves, 4 reward chests, one per schematic
     // quest. Everything on the far side is spawned on entry and cleared on
-    // exit so Level 2 stays light. Placed in the giant room so it sits well
-    // off the critical path.
-    addPortal(group, loader, 18, 18, 50, 0, 0, 0);
+    // exit so Level 2 stays light. Placed in the treeman main room — reachable
+    // without any key, so the trials are available early.
+    addPortal(group, loader, 5, 18, 50, 0, 0, 0);
 
     // ── New area: Spell Cabinet (Room A, north wall, row 3 col 5) ─────────────
     addSpellCabinet(group, loader, 5, 3, 0, 0, -0.7, ["Scroll of Resist Ice", "Scroll of Resist Fire"]);
