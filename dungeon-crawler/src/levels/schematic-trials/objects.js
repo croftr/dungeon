@@ -11,7 +11,7 @@
 //  the standard clearObjects() pass, so it adds zero load to Level 2.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const SCHEMATIC_TRIALS_RETURN = { row: 18, col: 4, facing: 1 }; // east-facing, one cell west of the entry portal in the treeman room
+export const SCHEMATIC_TRIALS_RETURN = { row: 18, col: 4, facing: 1 }; // east-facing, one cell east of the entry portal on the treeman room west wall
 
 export function spawnSchematicTrialsObjects(ctx) {
     const { group, loader, addChest, addPortal, addPortcullis, addKeyhole } = ctx;
