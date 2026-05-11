@@ -976,10 +976,11 @@ export function initObjects(scene, camera) {
                                 break; // Skip the normal bronze key search
                             }
 
+                            const keyName = obj.userData.requiredKey || 'Bronze Key';
                             let keyFound = false;
                             for (let i = 0; i < party.length; i++) {
                                 if (party[i] && !party[i].isEmpty && party[i].inventory) {
-                                    const invIndex = party[i].inventory.findIndex(item => item && item.name === 'Bronze Key');
+                                    const invIndex = party[i].inventory.findIndex(item => item && item.name === keyName);
                                     if (invIndex !== -1) {
                                         keyFound = true;
                                         party[i].inventory[invIndex] = null;
@@ -989,7 +990,7 @@ export function initObjects(scene, camera) {
                             }
 
                             if (keyFound) {
-                                showMessage("You use the Bronze Key. The portcullis grinds open.");
+                                showMessage(`You use the ${keyName}. The portcullis grinds open.`);
                                 playKeyLockSound();
                                 setTimeout(() => {
                                     openPortcullis(p);
@@ -1002,7 +1003,7 @@ export function initObjects(scene, camera) {
                                 }, 400);
                                 refreshPartyCards();
                             } else {
-                                showMessage("The portcullis is locked. It needs a key.");
+                                showMessage(`The portcullis is locked. It needs a ${keyName}.`);
                             }
                         } else {
                             showMessage("The portcullis is already open.");

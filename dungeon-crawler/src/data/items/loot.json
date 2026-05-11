@@ -77,6 +77,15 @@
         "sellable": false
     },
     {
+        "name": "Schematic Key",
+        "slot": "loot",
+        "icon": "/icons/key/schematic_key.svg",
+        "description": "A gilded key etched with blueprint runes. Opens one trial gate in the Schematic Sanctum — and only one.",
+        "value": 0,
+        "weight": 0.2,
+        "sellable": false
+    },
+    {
         "name": "Gold Coins",
         "slot": "loot",
         "icon": "/icons/gold_coins.webp",

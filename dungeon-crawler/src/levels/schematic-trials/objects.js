@@ -14,7 +14,29 @@
 export const SCHEMATIC_TRIALS_RETURN = { row: 18, col: 4, facing: 1 }; // east-facing, one cell west of the entry portal in the treeman room
 
 export function spawnSchematicTrialsObjects(ctx) {
-    const { group, loader, addChest, addPortal } = ctx;
+    const { group, loader, addChest, addPortal, addPortcullis, addKeyhole } = ctx;
+
+    // ── Four locked gates, one outside each alcove ────────────────────────────
+    // Each portcullis consumes one Schematic Key. The party starts with four
+    // keys, so they can open every gate — but each gate is one-shot, so they
+    // must choose the order. Keyholes share the portcullis cell; the hub-side
+    // offset just places the lock model on the side facing the player.
+
+    // North alcove gate (Savage) — corridor col 7, row 4
+    addPortcullis(group, loader, 7, 4, 0);
+    addKeyhole(group, loader, 7, 4, 0, 0.7, 0.7, null, null, 'Schematic Key');
+
+    // South alcove gate (Steel) — corridor col 7, row 9
+    addPortcullis(group, loader, 7, 9, 0);
+    addKeyhole(group, loader, 7, 9, Math.PI, -0.7, -0.7, null, null, 'Schematic Key');
+
+    // West alcove gate (Savage Tracker) — corridor col 4, row 6
+    addPortcullis(group, loader, 4, 6, Math.PI / 2);
+    addKeyhole(group, loader, 4, 6, -Math.PI / 2, 0.7, 0.7, null, null, 'Schematic Key');
+
+    // East alcove gate (Wizard) — corridor col 10, row 6
+    addPortcullis(group, loader, 10, 6, Math.PI / 2);
+    addKeyhole(group, loader, 10, 6, Math.PI / 2, -0.7, -0.7, null, null, 'Schematic Key');
 
     // ── Return portal at the centre of the hub ────────────────────────────────
     // Sends the party back to Level 2, placing them just west of the entry
