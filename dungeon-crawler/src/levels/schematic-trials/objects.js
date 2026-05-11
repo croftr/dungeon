@@ -62,7 +62,7 @@ export function spawnSchematicTrialsObjects(ctx) {
     ]);
 
     // South alcove — Steel Vanguard (heavy plate)
-    addChest(group, loader, 7, 12, 0, -0.7, [
+    addChest(group, loader, 7, 12, Math.PI, 0.7, [
         "Steel Schematics",
         { name: 'Gold Coins', quantity: 40 },
     ]);
