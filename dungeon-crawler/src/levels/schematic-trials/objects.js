@@ -17,7 +17,7 @@ import { CELL } from '../../map.js';
 export const SCHEMATIC_TRIALS_RETURN = { row: 18, col: 4, facing: 1 }; // east-facing, one cell east of the entry portal on the treeman room west wall
 
 export function spawnSchematicTrialsObjects(ctx) {
-    const { group, addChest, addPortcullis, addKeyhole, interactables } = ctx;
+    const { group, loader, addChest, addPortcullis, addKeyhole, interactables } = ctx;
 
     // ── Four locked gates, one outside each alcove ────────────────────────────
     // Each portcullis consumes one Schematic Key. The party starts with four
