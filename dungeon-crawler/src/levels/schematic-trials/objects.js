@@ -56,7 +56,7 @@ export function spawnSchematicTrialsObjects(ctx) {
 
     // ── Four reward chests, one per alcove ────────────────────────────────────
     // North alcove — Savage Fury (orc tribal armour)
-    addChest(group, loader, 7, 1, Math.PI, 0.7, [
+    addChest(group, loader, 7, 1, 0, -0.7, [
         "Savage Schematics",
         { name: 'Gold Coins', quantity: 40 },
     ]);
