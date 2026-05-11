@@ -19,24 +19,28 @@ export function spawnSchematicTrialsObjects(ctx) {
     // ── Four locked gates, one outside each alcove ────────────────────────────
     // Each portcullis consumes one Schematic Key. The party starts with four
     // keys, so they can open every gate — but each gate is one-shot, so they
-    // must choose the order. Keyholes share the portcullis cell; the hub-side
-    // offset just places the lock model on the side facing the player.
+    // must choose the order. Keyholes sit on a side wall of the approach
+    // corridor, mounted flush against the wall and facing the player.
 
-    // North alcove gate (Savage) — corridor col 7, row 4
+    // North alcove gate (Savage) — portcullis at (col 7, row 4).
+    // Keyhole on west wall of corridor cell (col 7, row 5), facing east.
     addPortcullis(group, loader, 7, 4, 0);
-    addKeyhole(group, loader, 7, 4, 0, 0.7, 0.7, null, null, 'Schematic Key');
+    addKeyhole(group, loader, 7, 5, Math.PI / 2, -0.85, 0, 4, 7, 'Schematic Key');
 
-    // South alcove gate (Steel) — corridor col 7, row 9
+    // South alcove gate (Steel) — portcullis at (col 7, row 9).
+    // Keyhole on west wall of corridor cell (col 7, row 8), facing east.
     addPortcullis(group, loader, 7, 9, 0);
-    addKeyhole(group, loader, 7, 9, Math.PI, -0.7, -0.7, null, null, 'Schematic Key');
+    addKeyhole(group, loader, 7, 8, Math.PI / 2, -0.85, 0, 9, 7, 'Schematic Key');
 
-    // West alcove gate (Savage Tracker) — corridor col 4, row 6
+    // West alcove gate (Trackers) — portcullis at (col 4, row 6).
+    // Keyhole on north wall of corridor cell (col 5, row 6), facing south.
     addPortcullis(group, loader, 4, 6, Math.PI / 2);
-    addKeyhole(group, loader, 4, 6, -Math.PI / 2, 0.7, 0.7, null, null, 'Schematic Key');
+    addKeyhole(group, loader, 5, 6, 0, 0, -0.85, 6, 4, 'Schematic Key');
 
-    // East alcove gate (Wizard) — corridor col 10, row 6
+    // East alcove gate (Wizard) — portcullis at (col 10, row 6).
+    // Keyhole on north wall of corridor cell (col 9, row 6), facing south.
     addPortcullis(group, loader, 10, 6, Math.PI / 2);
-    addKeyhole(group, loader, 10, 6, Math.PI / 2, -0.7, -0.7, null, null, 'Schematic Key');
+    addKeyhole(group, loader, 9, 6, 0, 0, -0.85, 6, 10, 'Schematic Key');
 
     // ── Return portal at the centre of the hub ────────────────────────────────
     // Sends the party back to Level 2, placing them just west of the entry
