@@ -35,6 +35,7 @@ export function spawnLevel2Objects(ctx) {
     // ── New area: Chest (Room C, south wall, row 13 col 9) ───────────────────
     addChest(group, loader, 9, 13, Math.PI, 0.7, [
         'Poison Dagger', 'Life Orb',
+        "Three Eyed Familiar",
         { name: 'Gold Coins', quantity: 30 }
     ]);
 
@@ -43,6 +44,7 @@ export function spawnLevel2Objects(ctx) {
         { name: 'Gold Coins', quantity: 150 },
         "Hoarfrost Mantle",
         "Padded Vest",
+        "Testament of Faith",
         "Savage Schematics"
     ]);
 
@@ -72,11 +74,13 @@ export function spawnLevel2Objects(ctx) {
     // Two chests in the chest vault (col 1, rows 33–34)
     addChest(group, loader, 0.7, 34, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 20 },
-        'Mana Berry', "Trackers Schematics", 'Scroll of Incinerate'
+        'Mana Berry', "Trackers Schematics", 'Scroll of Incinerate',
+        "Talisman of the Wind"
     ]);
     addChest(group, loader, 1.3, 34, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 10 },
-        'Ring of Strength', 'Ring of Wisdom', 'Ring of Balance'
+        'Ring of Strength', 'Ring of Wisdom', 'Ring of Balance',
+        "Bulwark of the Ancestors"
     ]);
 
     // Ethereal Egg in the centre of the demon room — contains Red Crystal
@@ -86,6 +90,7 @@ export function spawnLevel2Objects(ctx) {
     addChest(group, loader, 28, 32, -Math.PI / 2, -0.5, [
         { name: 'Gold Coins', quantity: 50 },
         'Mana Potion', 'Life Essence',
+        "Bloodstone Amulet",
         "Steel Schematics"
     ], asset('/items/chest1.glb'), true, 0.5);
 

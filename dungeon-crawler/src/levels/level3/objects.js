@@ -36,14 +36,16 @@ export function spawnLevel3Objects(ctx) {
     addChest(group, loader, 3, 2, 0, -0.8, [
         "Rune Pendant",
         "Silver Bolts",
-        'Poison Arrows'
+        'Poison Arrows',
+        "Tracker's Medallion"
     ]);
 
     // South-East room (row 18, col 19)
     addChest(group, loader, 19, 18, 0, -0.8, [
         "Sun Pendant",
         "Greatsword",
-        'Balance Pendant'
+        'Balance Pendant',
+        "Crescent Moon Charm"
     ]);
 
     // ── Portal Activator Eggs ───────────────────────────────────────────────────────────

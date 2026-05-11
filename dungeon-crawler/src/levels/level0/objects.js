@@ -34,23 +34,13 @@ export function spawnLevel0Objects(ctx) {
         'Potion of Invincibility', 'Potion of Unseen', "Elixir of Rage", "Elixir of Rage",
         "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Elixir of Enlightenment",
         "Scroll of Waterbolt",
-        // Essences (2 of each)
         "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence",
         "Tome of the Viperseeker",
         "Flame Axe", "Flame Dagger", "Flame Arrows",
         "Ice Axe", "Ice Dagger", "Ice Arrows",
         "Flame Greataxe", "Ice Greataxe",
-        // Unique Arena Items (2 of each)
-        "Crocodile Hide", "Crocodile Hide",
-        "Ogre's Head", "Ogre's Head",
-        "Iron Ore", "Iron Ore", "Ogre Helm Parchment", "Crocodilian Boots Parchment", 
+        "Iron Ore", "Iron Ore", "Ogre Helm Parchment", "Crocodilian Boots Parchment",
         "Savage Schematics", "Trackers Schematics", "Steel Schematics", "Wizard Schematics",
-        "Leather Boots", "Iron Helm",
-        "Heavy Ogre Drape", "Ashen Shroud",
-        "Wizard's Hat", "Wizard's Robe", "Wizard's Gloves", "Wizard's Leggings", "Wizard's Boots",
-        "Steel Vanguard Helm", "Steel Vanguard Chestplate", "Steel Vanguard Gauntlets", "Steel Vanguard Legplates", "Steel Vanguard Sabatons",
-        "Tracker's Guise Cowl", "Tracker's Guise Tunic", "Tracker's Guise Gloves", "Tracker's Guise Breeches", "Tracker's Guise Boots",
-        "Savage Fury Headdress", "Savage Fury Harness", "Savage Fury Bracers", "Savage Fury Leg Wraps", "Savage Fury Footwraps",
         "Three Eyed Familiar", "Testament of Faith", "Talisman of the Wind", "Bulwark of the Ancestors", "Bloodstone Amulet", "Tracker's Medallion", "Crescent Moon Charm"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
@@ -169,9 +159,9 @@ export function spawnLevel0Objects(ctx) {
     essBtn.position.set(9 * CELL - 1.0, 1.25, 12 * CELL);
     group.add(essBtn);
 
-    // ── Test Teleport to Level 4 (next to essentiary button) ─────────────────
-    const { group: lvl4Btn } = createWallButton(+1, { target: 'teleport_level4' });
-    lvl4Btn.position.set(9 * CELL - 1.0, 1.25, 11 * CELL);
-    group.add(lvl4Btn);
+    // ── Test Teleport to Level 3 (next to essentiary button) ─────────────────
+    const { group: lvl3Btn } = createWallButton(+1, { target: 'teleport_level3' });
+    lvl3Btn.position.set(9 * CELL - 1.0, 1.25, 11 * CELL);
+    group.add(lvl3Btn);
 
 }

@@ -86,7 +86,7 @@
             "dexterity": 1,
             "resilience": 1
         },
-        "trapDisarmBonus": 0.5
+        "trapDisarmBonus": 0.3
     },
     {
         "name": "Crest of the Caw",

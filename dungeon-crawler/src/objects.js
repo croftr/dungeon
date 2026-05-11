@@ -433,22 +433,22 @@ export function initObjects(scene, camera) {
                     } else {
                         showMessage("You can't reach that from here.");
                     }
-                } else if (obj.userData.target === 'teleport_level4') {
+                } else if (obj.userData.target === 'teleport_level3') {
                     if (isInFrontOfPlayer(11, 8, 1)) {
                         playButtonClickSound();
                         _animateButtonPress(obj);
 
                         if (window.loadLevel) {
-                            window.loadLevel(4);
+                            window.loadLevel(3);
                             setTimeout(() => {
-                                player.gridRow = 14;
-                                player.gridCol = 10;
-                                player.facing = 2; // South
-                                const w = cellToWorld(14, 10);
+                                player.gridRow = 21;
+                                player.gridCol = 11;
+                                player.facing = 0; // North
+                                const w = cellToWorld(21, 11);
                                 camera.position.set(w.x, w.y, w.z);
                                 camera.rotation.order = 'YXZ';
                                 camera.rotation.y = FACING_ANGLES[player.facing];
-                                showMessage("You are transported to the Forgotten Vault.");
+                                showMessage("You are transported to the Abyssal Crypts.");
                             }, 50);
                         }
                     } else {
