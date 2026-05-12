@@ -5,64 +5,33 @@
 - Always work directly on `main`. Do not create new branches unless explicitly asked.
 - Commit changes directly to `main` and do not open PRs unless asked.
 
-## Save Game System (v7 — Checkpoint / Level-State)
+## Save Game System
 
-Saves fire automatically on dungeon-level transitions. No manual save, no mid-level save. The saved payload describes *progression*, not a snapshot of every game object — world state is rebuilt by re-running the level spawn code with the right flags.
+**There is currently no save system.** The previous v7 checkpoint / "cleared-levels-go-empty" design was scrapped — it was brittle, hard to test, and lost player items by design. A replacement will be designed later.
 
-### Core model
-- Dungeon levels 1–5 have two canonical states: **start** (pristine) and **end** (all gates open, all chests empty; non-boss monsters respawned to full HP; bosses stay dead only if previously killed — see "Boss monsters" below).
-- Level 0 is the hub and never "clears." The Level 0 starter stash is the only persistent bank.
-- `currentLevelReached` is the highest dungeon level the player has entered. On load, every dungeon level `< currentLevelReached` (and ≠ `currentLevel`) is rebuilt in end state; `currentLevel` is rebuilt in start state and the player spawns at its entry portal (`findCell(CELL_START)`).
-- **Monster alive state is in-memory only.** Killed monsters stay dead across in-session level transitions (their `m.alive = false` persists in the `monsters[]` array). `applyClearedLevelMonsters` only runs during `loadCheckpoint` (save-load), not on within-session revisits.
-- Items left in chests on a level that flips to end state are **lost** (by design).
+Current focus is **state-cleanup groundwork** so a future save system can serialize the game cleanly. Two rules:
 
-### Key files
-- `src/save-checkpoint.js` — `captureCheckpoint`, `loadCheckpoint`, `autoSaveCheckpoint`, `SAVE_VERSION = 7`
-- `src/save-level-state.js` — `buildEndStateFlags(clearedLevels)`, per-level flag whitelist
-- `src/monster.js` — `applyClearedLevelMonsters(n)` implements the cleared-level monster transform
-- `src/save-game.js` — thin shim: `listSaves`, `triggerLoad`, `consumePendingLoad`, `deleteSave` + startup purge of pre-v7 keys
-- `src/main.js` — `loadLevel()` calls `autoSaveCheckpoint()` on transitions; `setEmptyAllContainers` + `applyClearedLevelMonsters` apply the end-state transform on cleared levels
-- `src/objects.js` — `setEmptyAllContainers` sentinel + `snapshotStarterStash` / `getPersistedStarterStashItems` for the stash bank
+1. **No hidden state.** Mutable game state must live on a known root (e.g. `party[]`, `monsters[]`, `_state` in objects.js, `window.videoFlags`) — not in module-local `let` bindings, closures, or the DOM. New flags go on existing roots.
+2. **JSON-able values.** Pure numbers/strings/booleans/arrays/plain objects. Sets and Maps need explicit conversion at the boundary.
 
-### How state is captured
-Instead of a registry, `captureCheckpoint()` calls explicit `capture*` / `restore*` helpers on each module:
-| Module | Captures |
-|--------|----------|
-| `party.js` | `capturePartyState` / `restorePartyState` — members, gold, autoAttack flags |
+### Capture / restore helpers (kept for the future save system)
+These are pure getters/setters — no orchestration, no I/O. They give a future save layer one entry point per module:
+
+| Module | Helpers |
+|--------|---------|
+| `party.js` | `capturePartyState` / `restorePartyState` |
 | `quest.js` | `getQuestLog` / `setQuestLog` |
-| `recruits.js` | `captureRecruits` / `restoreRecruits` — recruit isRecruited map |
-| `monster.js` | `captureMonsterState` / `restoreMonsterState` — droppedBossEssences, killedBosses |
-| `essentiary.js` | `captureEssentiary` / `restoreEssentiary` — arena monster tiers |
-| `objects.js` | `captureWorldState` / `restoreWorldState` — flags, merchant/potion stock, known recipes |
-| `main.js` | `captureVideoFlags` / `restoreVideoFlags` — cutscene seen flags |
+| `recruits.js` | `captureRecruits` / `restoreRecruits` |
+| `monster.js` | `captureMonsterState` / `restoreMonsterState` |
+| `essentiary.js` | `captureEssentiary` / `restoreEssentiary` |
+| `objects.js` | `captureWorldState` / `restoreWorldState` (and `getWorldFlags` / `setWorldFlags` underneath) |
+| `main.js` | `captureVideoFlags` / `restoreVideoFlags` (operate on `window.videoFlags`) |
 
-Player position and facing are NOT saved — they derive from the current level's entry portal.
+### Canonical world state
+`objects.js` declares its save-relevant state on a single `_state` object near the top of the file (gate/portal/NPC progression flags, crystal shrine state). Adding a new world flag = one line on `_state`; `getWorldFlags` spreads it, `setWorldFlags` overlays onto it.
 
-### Save slots
-Keyed by `currentLevelReached` (`dungeon-save-lvl-<n>`). Each new checkpoint overwrites the slot for that level tier — so the player has coarse undo between level milestones.
-
-### Adding new persistent state
-1. **New party member field** — automatic (party is deep-cloned by `capturePartyState`).
-2. **New module state** — add `captureFoo` / `restoreFoo` exports and call them from `captureCheckpoint` / `loadCheckpoint` in `save-checkpoint.js`.
-3. **New flag that applies to a specific dungeon level in end state** — add it to the whitelist in `getEndStateFlagsForLevel(n)` in `save-level-state.js`.
-
-### What NOT to save
-- Per-level gate flags — derived from the end-state rule.
-- Container contents outside the starter stash — chests on cleared levels are forced empty; chests on the current level are re-spawned fresh.
-- Per-monster HP / alive on cleared levels — `applyClearedLevelMonsters` respawns non-bosses and leaves killed bosses dead on load. Only the global `killedBosses` set is persisted.
-- Player position — derived from `findCell(CELL_START)` on current level.
-
-### Save-load flow
-1. Startup: `save-game.js` purges any pre-v7 keys from localStorage.
-2. Player clicks a save in the Esc menu → `triggerLoad` copies it to `sessionStorage` and reloads the page.
-3. On reload, main.js reads `consumePendingLoad()` → hydrates recruits pre-init → `loadCheckpoint(save)` after init:
-   - Restore party / quests / recruits / monster / essentiary / video.
-   - Build flag payload = saved `worldFlags` ∪ `buildEndStateFlags(cleared levels)`; apply with `setWorldFlags`.
-   - `applyClearedLevelMonsters(l)` for each cleared level.
-   - `window.loadLevel(save.currentLevel)` — spawns start state.
-
-### Boss monsters
-A monster is a "boss" iff its entry in `src/data/monsters.json` has an `image` field. On kill, `_applyDamage` in `monster.js` adds its `${level}:${id}` to the global `_killedBosses` set (captured in the save). On cleared-level rebuild, bosses in that set stay dead; all other monsters respawn to full HP. Summoned monsters (e.g. Treeman treekin, flagged `m.summoned = true`) are skipped entirely.
+### Cutscene flags
+`window.videoFlags` is the single object holding "have we seen this video" flags. Add new keys directly to its initializer in `main.js`.
 
 ## Architecture Quick Reference
 

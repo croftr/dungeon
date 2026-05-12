@@ -42,7 +42,7 @@ export function partyHasItem(itemName) {
     return false;
 }
 
-export function getCrystalShrineState() { return _crystalShrineState; }
+export function getCrystalShrineState() { return _state.crystalShrineState; }
 export function getSeenEssences() { return _seenEssences; }
 
 const _clickRaycaster = new THREE.Raycaster();
@@ -84,32 +84,46 @@ export function updateObjects(dt) {
 // ─────────────────────────────────────────────
 //  SARCOPHAGUS STATE
 // ─────────────────────────────────────────────
-let _mummyGateOpened = false;
-let _mummyEscapeGateOpened = false; // true once escape button pressed — keeps entrance open after zone
-let _starterGateOpened = false; // persists across level reloads — once open, never re-closes
-let _starterPortalEnabled = false;
-// Crystal shrine state: 0=empty, 1=red crystal placed, 2=red+blue placed
-let _crystalShrineState = 0;
+// ─────────────────────────────────────────────────────────────────────────────
+//  CANONICAL WORLD STATE — must be captured by the save system.
+//
+//  Every save-relevant gate/portal/NPC progression flag lives on this single
+//  object. Adding a new flag = one line here. The `getWorldFlags` /
+//  `setWorldFlags` boundary just spreads / Object.assigns this object plus a
+//  few side-bags (disarmedTraps, seenEssences, unlockedRecipes, monsterNpcStock)
+//  that still need conversion (Set ↔ array, etc).
+//
+//  Crystal shrine state: 0=empty, 1=red crystal placed, 2=red+blue placed.
+// ─────────────────────────────────────────────────────────────────────────────
+const _state = {
+  mummyGateOpened: false,
+  mummyEscapeGateOpened: false, // true once escape button pressed — keeps entrance open after zone
+  starterGateOpened: false,     // persists across level reloads — once open, never re-closes
+  starterPortalEnabled: false,
+  crystalShrineState: 0,
+  level3PortalEnabled: false,
+  level4PortalEnabled: false,
+  level2PortcullisOpened: false,
+  level2GiantPortcullisOpened: false,
+  level2HoleClosed: false,
+  level1HoleRoomSpawned: false,
+  monsterNpcSaved: false,
+  stanceNpcDeparted: false,
+  level1BtnPortcullisOpened: false,
+  level1OgrePortcullisOpened: false,
+  level1ShrineGateOpened: false,
+};
+
+// Scene/THREE refs — transient, NOT saved.
 let _crystalShrineMesh = null;
 let _crystalShrineScene = null;
 let _crystalShrineLoader = null;
 let _crystalShrineParams = null;
 let _disabledPortalMesh = null;       // level 2 disabled portal mesh
 let _level3DisabledPortalMesh = null; // level 3 disabled portal mesh
-let _level3PortalEnabled = false;
 let _level4DisabledPortalMesh = null; // level 4 disabled portal mesh
-let _level4PortalEnabled = false;
 let _partyConfirmNPCModel = null; // true once the player confirms — prevents re-triggering
 let _starterGate = null; // portcullis behind the party-confirm NPC; opens only via dialogue
-let _level2PortcullisOpened = false;
-let _level2GiantPortcullisOpened = false;
-let _level2HoleClosed = false;
-let _level1HoleRoomSpawned = false;
-let _monsterNpcSaved = false;
-let _stanceNpcDeparted = false;
-let _level1BtnPortcullisOpened = false;
-let _level1OgrePortcullisOpened = false;
-let _level1ShrineGateOpened = false;
 
 let _npcMixer = null;
 let _npcIdleAction = null;
@@ -272,15 +286,8 @@ function _hasNewEssencesForNpc(questNpcId) {
 // ─────────────────────────────────────────────
 //  SAVE GAME — container tracking
 // ─────────────────────────────────────────────
-// When true, every container spawned by addChest/addPortalActivatorStatue/
-// addWeaponRack/addSpellCabinet/addAnvil/addBonePile spawns with empty contents.
-// Toggled by loadLevel when entering a previously-cleared dungeon level.
-let _emptyAllContainers = false;
-export function setEmptyAllContainers(v) { _emptyAllContainers = !!v; }
-
 // Starter stash persistence — the single chest on Level 0 tagged with title='Stash'
-// is a true persistent bank. Its contents live in this module between level visits
-// and are captured/restored by the save-checkpoint module.
+// is a true persistent bank. Its contents live in this module between level visits.
 let _persistedStarterStashItems = null;
 export function getPersistedStarterStashItems() { return _persistedStarterStashItems; }
 export function setPersistedStarterStashItems(items) {
@@ -394,7 +401,7 @@ export function initObjects(scene, camera) {
                     if (isInFrontOfPlayer(3, 21, 1)) {
                         playButtonClickSound();
                         _animateButtonPress(obj);
-                        _mummyEscapeGateOpened = true;
+                        _state.mummyEscapeGateOpened = true;
                         const trapDoor = objects.find(o => o.name === 'Portcullis' && o.gridRow === 1 && o.gridCol === 10);
                         if (trapDoor) openPortcullis(trapDoor);
                     } else {
@@ -413,9 +420,9 @@ export function initObjects(scene, camera) {
                 } else if (obj.userData.target === 'close_hole') {
                     if (isInFrontOfPlayer(31, 25, 1)) {
                         playButtonClickSound();
-                        if (!_level2HoleClosed) {
+                        if (!_state.level2HoleClosed) {
                             _animateButtonPress(obj);
-                            _level2HoleClosed = true;
+                            _state.level2HoleClosed = true;
                             dungeonMap[32][23] = CELL_FLOOR;
                             level2Map[32][23] = CELL_FLOOR;
                             buildLevel(objectsGroup.parent);
@@ -499,9 +506,9 @@ export function initObjects(scene, camera) {
                         playButtonClickSound();
                         _animateButtonPress(obj);
                         const p = objects.find(o => o.name === 'Portcullis' && o.gridRow === 6 && o.gridCol === 1);
-                        if (p && !_level1OgrePortcullisOpened) {
+                        if (p && !_state.level1OgrePortcullisOpened) {
                             openPortcullis(p);
-                            _level1OgrePortcullisOpened = true;
+                            _state.level1OgrePortcullisOpened = true;
                             // Trigger the ogre encounter video when the gate opens
                             if (window.playOgreVideo) window.playOgreVideo();
                         }
@@ -517,7 +524,7 @@ export function initObjects(scene, camera) {
                         const p = objects.find(o => o.name === 'Portcullis' && o.gridRow === 7 && o.gridCol === 7);
                         if (p) {
                             openPortcullis(p);
-                            _level1BtnPortcullisOpened = true;
+                            _state.level1BtnPortcullisOpened = true;
                         }
                     } else {
                         showMessage("You can't reach that from here.");
@@ -750,7 +757,7 @@ export function initObjects(scene, camera) {
 
                     // Relocate quest: If this is the monster npc in the pit trap room (now an isShop entity)
                     if (window.currentLevel === 1 && obj.userData.gridRow === 26 && obj.userData.gridCol === 2) {
-                        _monsterNpcSaved = true;
+                        _state.monsterNpcSaved = true;
                         console.log("Antigravity: Monster NPC saved via shop interaction!");
                     }
                 } else {
@@ -829,8 +836,8 @@ export function initObjects(scene, camera) {
 
                     // Relocate quest: If this is the monster npc in the pit trap room
                     if (window.currentLevel === 1 && obj.userData.gridRow === 26 && obj.userData.gridCol === 2) {
-                        _monsterNpcSaved = true;
-                        console.log("Antigravity: Monster NPC saved! _monsterNpcSaved is now true.");
+                        _state.monsterNpcSaved = true;
+                        console.log("Antigravity: Monster NPC saved! _state.monsterNpcSaved is now true.");
                     }
                 }
                 break;
@@ -964,7 +971,7 @@ export function initObjects(scene, camera) {
                                     playKeyLockSound();
                                     setTimeout(() => {
                                         openPortcullis(p);
-                                        _level2GiantPortcullisOpened = true;
+                                        _state.level2GiantPortcullisOpened = true;
                                         if (window.playGiantVideo) {
                                             window.playGiantVideo();
                                         }
@@ -995,10 +1002,10 @@ export function initObjects(scene, camera) {
                                 setTimeout(() => {
                                     openPortcullis(p);
                                     if (window.currentLevel === 2 && p.gridRow === 23 && p.gridCol === 7) {
-                                        _level2PortcullisOpened = true;
+                                        _state.level2PortcullisOpened = true;
                                     }
                                     if (window.currentLevel === 1 && p.gridRow === 10 && p.gridCol === 17) {
-                                        _level1ShrineGateOpened = true;
+                                        _state.level1ShrineGateOpened = true;
                                     }
                                 }, 400);
                                 refreshPartyCards();
@@ -1018,7 +1025,7 @@ export function initObjects(scene, camera) {
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 2 && distCol <= 2) {
                     // Gate already open — nothing more to do
-                    if (_mummyGateOpened) break;
+                    if (_state.mummyGateOpened) break;
 
                     // Show the sarcophagus confirmation modal
                     const overlay = document.getElementById('sarcophagus-overlay');
@@ -1031,9 +1038,9 @@ export function initObjects(scene, camera) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 2 && distCol <= 2) {
-                    if (_crystalShrineState === 2) {
+                    if (_state.crystalShrineState === 2) {
                         showMessage("The shrine radiates with brilliant red and blue energy.");
-                    } else if (_crystalShrineState === 1) {
+                    } else if (_state.crystalShrineState === 1) {
                         // Red placed — look for blue crystal
                         let blueIdx = -1, blueMember = null;
                         for (let i = 0; i < party.length; i++) {
@@ -1044,24 +1051,24 @@ export function initObjects(scene, camera) {
                         }
                         if (blueMember) {
                             blueMember.inventory[blueIdx] = null;
-                            _crystalShrineState = 2;
+                            _state.crystalShrineState = 2;
                             _swapCrystalShrine();
                             playSoundByUrl(asset('/items/crystal-shrine/crystal-portal.mp3'), 0.9);
                             showMessage("The portal opens!");
                             if (window.playCrystalShrineRedBlueVideo) {
                                 window.playCrystalShrineRedBlueVideo(() => {
-                                    if (_starterPortalEnabled && _level3PortalEnabled) {
+                                    if (_state.starterPortalEnabled && _state.level3PortalEnabled) {
                                         _activateLevel4Portal();
-                                    } else if (_starterPortalEnabled) {
+                                    } else if (_state.starterPortalEnabled) {
                                         _activateLevel3Portal();
                                     } else {
                                         _activateStarterPortal();
                                     }
                                 });
                             } else {
-                                if (_starterPortalEnabled && _level3PortalEnabled) {
+                                if (_state.starterPortalEnabled && _state.level3PortalEnabled) {
                                     _activateLevel4Portal();
-                                } else if (_starterPortalEnabled) {
+                                } else if (_state.starterPortalEnabled) {
                                     _activateLevel3Portal();
                                 } else {
                                     _activateStarterPortal();
@@ -1081,7 +1088,7 @@ export function initObjects(scene, camera) {
                         }
                         if (redMember) {
                             redMember.inventory[redIdx] = null;
-                            _crystalShrineState = 1;
+                            _state.crystalShrineState = 1;
                             _swapCrystalShrine();
                             playSoundByUrl(asset('/items/crystal-shrine/crystal-portal.mp3'), 0.9);
                             if (window.playCrystalShrineRedVideo) {
@@ -1249,7 +1256,7 @@ export function initObjects(scene, camera) {
     if (sarcophagusYes) {
         sarcophagusYes.onclick = (e) => {
             e.stopPropagation();
-            _mummyGateOpened = true;
+            _state.mummyGateOpened = true;
 
             // Close the modal immediately
             const overlay = document.getElementById('sarcophagus-overlay');
@@ -1306,7 +1313,7 @@ export function initObjects(scene, camera) {
                 _partyConfirmNPCModel = null;
             }
 
-            _starterGateOpened = true;
+            _state.starterGateOpened = true;
             if (window.playBattlePrepVideo) {
                 window.playBattlePrepVideo(() => {
                     if (_starterGate) openPortcullis(_starterGate);
@@ -1671,8 +1678,6 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
             contents = [..._persistedStarterStashItems];
         } else if (_containerContentsPersistence.hasOwnProperty(persistenceKey)) {
             contents = _containerContentsPersistence[persistenceKey];
-        } else if (_emptyAllContainers && !isStarterStash && (!contents || contents.length === 0)) {
-            contents = [];
         }
     }
     loader.load(asset(modelPath), (gltf) => {
@@ -1781,9 +1786,9 @@ export function addDecoration(scene, loader, col, row, rotY = 0, modelPath, scal
 }
 
 function addCrystalShrine(scene, loader, col, row, rotY, scale, offsetX, offsetZ, offsetY) {
-    const modelPath = _crystalShrineState === 2
+    const modelPath = _state.crystalShrineState === 2
         ? asset('/items/crystal-shrine/crysta-temple-red-and-blue.glb')
-        : _crystalShrineState === 1
+        : _state.crystalShrineState === 1
             ? asset('/items/crystal-shrine/crysta-temple-red.glb')
             : asset('/items/crystal-shrine/crystal-temple-empty.glb');
 
@@ -1837,7 +1842,7 @@ function _swapCrystalShrine() {
 }
 
 function _activateStarterPortal() {
-    _starterPortalEnabled = true;
+    _state.starterPortalEnabled = true;
     if (_disabledPortalMesh) {
         _disabledPortalMesh.traverse((child) => {
             const idx = interactables.indexOf(child);
@@ -1848,13 +1853,13 @@ function _activateStarterPortal() {
     }
     addPortal(objectsGroup, _gltfLoader, 13, 13, 2, 0, 0, 0.85); // Left -> Level 2
     // Reset shrine to empty so it can be reused for the level 3 portal
-    _crystalShrineState = 0;
+    _state.crystalShrineState = 0;
     _swapCrystalShrine();
     showMessage("The crystal shrine blazes with power — a portal has opened!");
 }
 
 function _activateLevel3Portal() {
-    _level3PortalEnabled = true;
+    _state.level3PortalEnabled = true;
     if (_level3DisabledPortalMesh) {
         _level3DisabledPortalMesh.traverse((child) => {
             const idx = interactables.indexOf(child);
@@ -1865,13 +1870,13 @@ function _activateLevel3Portal() {
     }
     addPortal(objectsGroup, _gltfLoader, 12, 13, 3, 0, 0, 0.85, 21, 11, 0); // Middle -> Level 3
     // Reset shrine to empty
-    _crystalShrineState = 0;
+    _state.crystalShrineState = 0;
     _swapCrystalShrine();
     showMessage("The crystal shrine blazes with power — the portal to the Abyssal Crypts has opened!");
 }
 
 function _activateLevel4Portal() {
-    _level4PortalEnabled = true;
+    _state.level4PortalEnabled = true;
     if (_level4DisabledPortalMesh) {
         _level4DisabledPortalMesh.traverse((child) => {
             const idx = interactables.indexOf(child);
@@ -1882,7 +1887,7 @@ function _activateLevel4Portal() {
     }
     addPortal(objectsGroup, _gltfLoader, 11, 13, 4, 0, 0, 0.85, 14, 10, 2); // Right -> Level 4
     // Reset shrine to empty
-    _crystalShrineState = 0;
+    _state.crystalShrineState = 0;
     _swapCrystalShrine();
     showMessage("The crystal shrine blazes with power — the portal to the Egg Chamber has opened!");
 }
@@ -2272,30 +2277,30 @@ export function spawnObjectsForLevel() {
         addAnvil, addAlchemyWorkshop, addDroppedTorch, addEtherealEgg, addStairs,
         addTrap1, createWallButton, addArmourStand, addTrainingConsole, addPitLadder,
         // Level 1 state flags
-        starterPortalEnabled: _starterPortalEnabled,
-        starterGateOpened: _starterGateOpened,
-        mummyGateOpened: _mummyGateOpened,
-        mummyEscapeGateOpened: _mummyEscapeGateOpened,
-        crystalShrineState: _crystalShrineState,
-        level1HoleRoomSpawned: _level1HoleRoomSpawned,
-        level1BtnPortcullisOpened: _level1BtnPortcullisOpened,
-        level1OgrePortcullisOpened: _level1OgrePortcullisOpened,
-        level1ShrineGateOpened: _level1ShrineGateOpened,
-        monsterNpcSaved: _monsterNpcSaved,
-        stanceNpcDeparted: _stanceNpcDeparted,
-        setStanceNpcDeparted: (val) => { _stanceNpcDeparted = val; },
+        starterPortalEnabled: _state.starterPortalEnabled,
+        starterGateOpened: _state.starterGateOpened,
+        mummyGateOpened: _state.mummyGateOpened,
+        mummyEscapeGateOpened: _state.mummyEscapeGateOpened,
+        crystalShrineState: _state.crystalShrineState,
+        level1HoleRoomSpawned: _state.level1HoleRoomSpawned,
+        level1BtnPortcullisOpened: _state.level1BtnPortcullisOpened,
+        level1OgrePortcullisOpened: _state.level1OgrePortcullisOpened,
+        level1ShrineGateOpened: _state.level1ShrineGateOpened,
+        monsterNpcSaved: _state.monsterNpcSaved,
+        stanceNpcDeparted: _state.stanceNpcDeparted,
+        setStanceNpcDeparted: (val) => { _state.stanceNpcDeparted = val; },
         // Level 2 state flags
-        level2PortcullisOpened: _level2PortcullisOpened,
-        level2GiantPortcullisOpened: _level2GiantPortcullisOpened,
-        level2HoleClosed: _level2HoleClosed,
+        level2PortcullisOpened: _state.level2PortcullisOpened,
+        level2GiantPortcullisOpened: _state.level2GiantPortcullisOpened,
+        level2HoleClosed: _state.level2HoleClosed,
         // Level 3 state flags
-        level3PortalEnabled: _level3PortalEnabled,
+        level3PortalEnabled: _state.level3PortalEnabled,
         // Level 4 state flags
-        level4PortalEnabled: _level4PortalEnabled,
+        level4PortalEnabled: _state.level4PortalEnabled,
         minotaurDead,
         // State setters (values written back to objects.js module scope)
         setStarterGate: (g) => { _starterGate = g; },
-        setLevel1HoleRoomSpawned: (val) => { _level1HoleRoomSpawned = val; },
+        setLevel1HoleRoomSpawned: (val) => { _state.level1HoleRoomSpawned = val; },
         // Shared refs for custom object loading code in level files
         interactables,
     };
@@ -2557,7 +2562,7 @@ function _applyEggGlow(model, contents) {
 function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.45, initialContents = ['Red Crystal'], offsetX = 0, offsetZ = 0) {
     _statueGridCells.add(`${row},${col}`); // block player movement through this cell
     const persistenceKey = `${window.currentLevel},${col},${row}`;
-    let contents = _emptyAllContainers ? [] : [...initialContents];
+    let contents = [...initialContents];
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
     }
@@ -2684,8 +2689,6 @@ function addWeaponRack(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, 
     const persistenceKey = `${window.currentLevel},${col},${row}`;
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
-    } else if (_emptyAllContainers) {
-        contents = [];
     }
     loader.load(asset('/items/weapon-rack.glb'), (gltf) => {
         const model = gltf.scene;
@@ -2727,8 +2730,6 @@ function addSpellCabinet(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0
     const persistenceKey = `${window.currentLevel},${col},${row}`;
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
-    } else if (_emptyAllContainers) {
-        contents = [];
     }
     loader.load(asset('/items/spell-cabinet.glb'), (gltf) => {
         const model = gltf.scene;
@@ -3042,8 +3043,6 @@ function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, c
     const persistenceKey = `${window.currentLevel},${col},${row}`;
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
-    } else if (_emptyAllContainers) {
-        contents = [];
     }
     loader.load(asset('/items/forge.glb'), (gltf) => {
         const model = gltf.scene;
@@ -5103,8 +5102,6 @@ function addBonePile(scene, loader, col, row, contents = []) {
     const persistenceKey = `${window.currentLevel},${col},${row}`;
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
-    } else if (_emptyAllContainers) {
-        contents = [];
     }
     loader.load(asset('/items/Meshy_AI_Bone_pile_0221211647_texture.glb'), (gltf) => {
         const model = gltf.scene;
@@ -5291,51 +5288,31 @@ export function spawnDroppedItem(col, row, itemName, quantity = 1) {
 /** Returns all gate/portal progression flags. */
 export function getWorldFlags() {
     return {
-        mummyGateOpened: _mummyGateOpened,
-        mummyEscapeGateOpened: _mummyEscapeGateOpened,
-        starterGateOpened: _starterGateOpened,
-        starterPortalEnabled: _starterPortalEnabled,
-        level2PortcullisOpened: _level2PortcullisOpened,
-        level2GiantPortcullisOpened: _level2GiantPortcullisOpened,
-        level2HoleClosed: _level2HoleClosed,
-        level1HoleRoomSpawned: _level1HoleRoomSpawned,
-        level1BtnPortcullisOpened: _level1BtnPortcullisOpened,
-        level1OgrePortcullisOpened: _level1OgrePortcullisOpened,
-        level1ShrineGateOpened: _level1ShrineGateOpened,
-        monsterNpcSaved: _monsterNpcSaved,
-        stanceNpcDeparted: _stanceNpcDeparted,
+        ..._state,
         disarmedTraps: [..._trapDisarmedSet],
-        crystalShrineState: _crystalShrineState,
-        level3PortalEnabled: _level3PortalEnabled,
-        level4PortalEnabled: _level4PortalEnabled,
         seenEssences: [..._seenEssences],
         unlockedRecipes: [..._unlockedRecipes],
         monsterNpcStock: _monsterNpcStock.map(e => ({ ...e })),
     };
 }
 
-export function setLevel1HoleRoomSpawned(val) { _level1HoleRoomSpawned = val; }
-export function setStanceNpcDeparted(val) { _stanceNpcDeparted = val; }
+export function setLevel1HoleRoomSpawned(val) { _state.level1HoleRoomSpawned = val; }
+export function setStanceNpcDeparted(val) { _state.stanceNpcDeparted = val; }
 
 /** Restores gate/portal flags. Call BEFORE spawnObjectsForLevel(). */
 export function setWorldFlags(flags) {
     if (!flags) return;
-    _mummyGateOpened = flags.mummyGateOpened ?? false;
-    _mummyEscapeGateOpened = flags.mummyEscapeGateOpened ?? false;
-    _starterGateOpened = flags.starterGateOpened ?? false;
-    _starterPortalEnabled = flags.starterPortalEnabled ?? false;
-    _level2PortcullisOpened = flags.level2PortcullisOpened ?? false;
-    _level2GiantPortcullisOpened = flags.level2GiantPortcullisOpened ?? false;
-    _level2HoleClosed = flags.level2HoleClosed ?? false;
-    _level1HoleRoomSpawned = flags.level1HoleRoomSpawned ?? false;
-    _level1BtnPortcullisOpened = flags.level1BtnPortcullisOpened ?? false;
-    _level1OgrePortcullisOpened = flags.level1OgrePortcullisOpened ?? false;
-    _level1ShrineGateOpened = flags.level1ShrineGateOpened ?? false;
-    _monsterNpcSaved = flags.monsterNpcSaved ?? false;
-    _stanceNpcDeparted = flags.stanceNpcDeparted ?? false;
-    _crystalShrineState = flags.crystalShrineState ?? 0;
-    _level3PortalEnabled = flags.level3PortalEnabled ?? false;
-    _level4PortalEnabled = flags.level4PortalEnabled ?? false;
+    // Reset _state to its initial defaults, then overlay any keys present in
+    // the incoming flags. This ensures a save with fewer keys doesn't leave
+    // stale values from a prior session on _state.
+    for (const key of Object.keys(_state)) {
+        if (flags[key] !== undefined) {
+            _state[key] = flags[key];
+        } else {
+            // Default: 0 for crystalShrineState (number), false otherwise.
+            _state[key] = (typeof _state[key] === 'number') ? 0 : false;
+        }
+    }
     _seenEssences = new Set(flags.seenEssences ?? []);
     _unlockedRecipes = new Set(flags.unlockedRecipes ?? []);
     _monsterNpcStock = (flags.monsterNpcStock ?? []).map(_normStock).filter(Boolean);
@@ -5351,8 +5328,8 @@ export function setWorldFlags(flags) {
     // The Aqua Man pit lives at (32, 23) on level 2. Restoring the "hole closed"
     // flag must mutate that cell so the pit stops swallowing the party after a
     // save+refresh. (Previously wrote to [17][23] by mistake — giant room, not the pit.)
-    if (_level2HoleClosed) level2Map[32][23] = CELL_FLOOR;
-    if (_level1HoleRoomSpawned) {
+    if (_state.level2HoleClosed) level2Map[32][23] = CELL_FLOOR;
+    if (_state.level1HoleRoomSpawned) {
         for (let r = 24; r <= 26; r++) {
             for (let c = 1; c <= 3; c++) {
                 level1Map[r][c] = CELL_FLOOR;
@@ -5907,9 +5884,8 @@ function _hideAnvilParchmentPicker() {
 // ─────────────────────────────────────────────
 
 /**
- * Capture the non-derived world state. Per-level gate flags (derived from the
- * "cleared" rule) are handled separately by save-level-state.js and are baked
- * into the final flag payload during restore.
+ * Capture this module's world state for a future save system. Pure getter —
+ * no side effects, no orchestration. Pair with `restoreWorldState`.
  */
 export function captureWorldState() {
     return {

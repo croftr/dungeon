@@ -2,8 +2,6 @@
 //  MAIN MENU  — opened/closed with Escape key
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { renderSavesList } from './save-game.js';
-
 let _isOpen = false;
 
 export function initMainMenu() {
@@ -59,10 +57,6 @@ function _anyOverlayOpen() {
     const el = document.getElementById(id);
     return el && window.getComputedStyle(el).display !== 'none';
   });
-}
-
-function _renderSavesList() {
-  renderSavesList('#mm-saves-list');
 }
 
 // ── DOM ───────────────────────────────────────────────────────────────────────
@@ -137,8 +131,6 @@ function _buildModal() {
               </select>
             </div>
           </div>
-          <h3 class="mm-section-title" style="margin-top:1rem">Load Game</h3>
-          <div id="mm-saves-list" class="mm-saves-list"></div>
         </div>
 
       </div>
@@ -151,8 +143,6 @@ function _buildModal() {
 }
 
 function _openMenu() {
-  _renderSavesList();
-
   // Difficulty (read-only — cannot change after game starts)
   const diffEl = document.getElementById('mm-difficulty-display');
   if (diffEl) diffEl.textContent = window.easyMode ? 'Normal' : 'Hard';

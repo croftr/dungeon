@@ -12,13 +12,11 @@ import { getItemDef } from './items.js';
 import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
-import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, setEmptyAllContainers, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems, replenishPotionMerchant } from './objects.js';
+import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems, replenishPotionMerchant } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound, prefetchActionSounds, checkNpcDialogueProximity, setElementFloorSound } from './audio.js';
 import { initBattleLog } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
-import { consumePendingLoad, renderSavesList } from './save-game.js';
-import { autoSaveCheckpoint, loadCheckpoint } from './save-checkpoint.js';
 import { initQuarks, updateQuarks } from './quarks-intro.js';
 import { showHelpDialog } from './help.js';
 import { asset } from './assets.js';
@@ -219,39 +217,31 @@ initParticles(scene, camera);
 // ─────────────────────────────────────────────
 initPlayer(11, 15, camera, 3);
 
-let hasSeenOgreVideo = false;
-let hasSeenPrepVideo = false;
-let hasSeenMinotaurVideo = false;
-let hasSeenMinotaurDeathVideo = false;
-let hasSeenDemonVideo = false;
-let hasSeenAquaManVideo = false;
-let hasSeenCrowWizardVideo = false;
-window.hasSeenTreemanVideo = false;
+// Cutscene "have we seen this video" flags. Single mutable object on window so
+// the save system, monster.js, and gameplay code all read/write the same place.
+// Add a new key here when adding a new cutscene — no other wiring needed.
+window.videoFlags = {
+  hasSeenOgreVideo: false,
+  hasSeenPrepVideo: false,
+  hasSeenMinotaurVideo: false,
+  hasSeenMinotaurDeathVideo: false,
+  hasSeenDemonVideo: false,
+  hasSeenAquaManVideo: false,
+  hasSeenCrowWizardVideo: false,
+  hasSeenTreemanVideo: false,
+};
+const videoFlags = window.videoFlags;
 let prepVideoTimer = null;
 
-// Bridge video flags to save system via window._saveFlags
-window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenMinotaurDeathVideo, hasSeenDemonVideo, hasSeenAquaManVideo, hasSeenCrowWizardVideo };
-
 function captureVideoFlags() {
-  return {
-    hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo,
-    hasSeenMinotaurDeathVideo, hasSeenDemonVideo, hasSeenAquaManVideo,
-    hasSeenCrowWizardVideo,
-    hasSeenTreemanVideo: window.hasSeenTreemanVideo,
-  };
+  return { ...videoFlags };
 }
 
 function restoreVideoFlags(data) {
   if (!data) return;
-  hasSeenOgreVideo = data.hasSeenOgreVideo ?? false;
-  hasSeenPrepVideo = data.hasSeenPrepVideo ?? false;
-  hasSeenMinotaurVideo = data.hasSeenMinotaurVideo ?? false;
-  hasSeenMinotaurDeathVideo = data.hasSeenMinotaurDeathVideo ?? false;
-  hasSeenDemonVideo = data.hasSeenDemonVideo ?? false;
-  hasSeenAquaManVideo = data.hasSeenAquaManVideo ?? false;
-  hasSeenCrowWizardVideo = data.hasSeenCrowWizardVideo ?? false;
-  window.hasSeenTreemanVideo = data.hasSeenTreemanVideo ?? false;
-  window._saveFlags = { hasSeenOgreVideo, hasSeenPrepVideo, hasSeenMinotaurVideo, hasSeenMinotaurDeathVideo, hasSeenDemonVideo, hasSeenAquaManVideo, hasSeenCrowWizardVideo };
+  for (const key of Object.keys(videoFlags)) {
+    videoFlags[key] = !!data[key];
+  }
 }
 
 setCallbacks({
@@ -291,7 +281,7 @@ setCallbacks({
       const inMummyRoom = player.gridCol >= 11 && player.gridCol <= 15
         && player.gridRow >= 1 && player.gridRow <= 5;
 
-      if (inOgreRoom && hasSeenOgreVideo) {
+      if (inOgreRoom && videoFlags.hasSeenOgreVideo) {
         setZoneMusic(asset('/sounds/backing/ogre-room.mp3'));
       } else if (inMummyRoom) {
         setZoneMusic(asset('/sounds/backing/mummy-room.mp3'));
@@ -328,28 +318,28 @@ setCallbacks({
       }
 
       // Treeman video: fires when player first steps into the main treeman chamber
-      if (!window.hasSeenTreemanVideo && player.gridRow === 16 && player.gridCol === 7) {
-        window.hasSeenTreemanVideo = true;
+      if (!videoFlags.hasSeenTreemanVideo && player.gridRow === 16 && player.gridCol === 7) {
+        videoFlags.hasSeenTreemanVideo = true;
         if (window.playTreemanVideo) window.playTreemanVideo();
       }
 
       // Crow Wizard video: fires at the corridor mouth (row 8, col 19) just before the room
-      if (!hasSeenCrowWizardVideo && player.gridRow === 8 && player.gridCol === 19) {
-        hasSeenCrowWizardVideo = true; window._saveFlags.hasSeenCrowWizardVideo = true;
+      if (!videoFlags.hasSeenCrowWizardVideo && player.gridRow === 8 && player.gridCol === 19) {
+        videoFlags.hasSeenCrowWizardVideo = true;
         playCrowWizardVideo();
       }
 
       // Demon video: fires in the passage at row 28, col 7 — just before the demon room
-      if (!hasSeenDemonVideo && player.gridRow === 28 && player.gridCol === 7) {
-        hasSeenDemonVideo = true; window._saveFlags.hasSeenDemonVideo = true;
+      if (!videoFlags.hasSeenDemonVideo && player.gridRow === 28 && player.gridCol === 7) {
+        videoFlags.hasSeenDemonVideo = true;
         playDemonVideo();
       }
     } else if (window.currentLevel === 3) {
       const inMinotaurRoom = player.gridRow >= 8 && player.gridRow <= 14
         && player.gridCol >= 8 && player.gridCol <= 14;
 
-      if (inMinotaurRoom && !hasSeenMinotaurVideo) {
-        hasSeenMinotaurVideo = true; window._saveFlags.hasSeenMinotaurVideo = true;
+      if (inMinotaurRoom && !videoFlags.hasSeenMinotaurVideo) {
+        videoFlags.hasSeenMinotaurVideo = true;
         if (window.playMinotaurVideo) window.playMinotaurVideo();
       }
     } else if (window.currentLevel === 4) {
@@ -461,10 +451,9 @@ setCallbacks({
         // Only play the video the first time the party falls AND the Aqua Man
         // is still alive — once she's dead the narrative reveal is moot.
         const aquaMan = monsters.find(m => m.name === 'Aqua Man' && (m.level ?? 1) === 2);
-        const shouldPlayAquaManVideo = !hasSeenAquaManVideo && !!aquaMan?.alive;
+        const shouldPlayAquaManVideo = !videoFlags.hasSeenAquaManVideo && !!aquaMan?.alive;
         if (shouldPlayAquaManVideo) {
-          hasSeenAquaManVideo = true;
-          window._saveFlags.hasSeenAquaManVideo = true;
+          videoFlags.hasSeenAquaManVideo = true;
           playAquaManVideo(() => {
             // Once the video and its fade-out are complete, release cutscene lock
             window._cutscenePlaying = false;
@@ -559,13 +548,11 @@ initBattleStats();
 initMainMenu();
 initQuests();
 
-// ─────────────────────────────────────────────
-//  SAVE RESTORE — PRE-INIT PHASE
-//  Set up overrides BEFORE objects/monsters init so the first spawn uses saved state.
-// ─────────────────────────────────────────────
-const _pendingSave = consumePendingLoad();
-if (_pendingSave?.recruits) {
-  for (const r of RECRUITS) r.isRecruited = !!_pendingSave.recruits[r.id];
+// Purge any localStorage keys left over from the deleted v7 save system so
+// stale browser state does not haunt new sessions.
+for (let i = localStorage.length - 1; i >= 0; i--) {
+  const k = localStorage.key(i);
+  if (k && k.startsWith('dungeon-save-')) localStorage.removeItem(k);
 }
 
 initRecruits(scene, camera);
@@ -775,7 +762,6 @@ if (preLoadBtn) {
     await handleFirstInteraction();
     preStartScreen.style.display = 'none';
     loadGameScreen.style.display = 'flex';
-    renderSavesList('#load-game-list');
   });
 }
 
@@ -788,8 +774,6 @@ if (loadGameCancelBtn) {
 
 // ── Game Over screen buttons ──
 const gameOverRespawnBtn = document.getElementById('game-over-respawn');
-const gameOverLoadBtn = document.getElementById('game-over-load');
-const gameOverSavesEl = document.getElementById('game-over-saves');
 
 if (gameOverRespawnBtn) {
   gameOverRespawnBtn.addEventListener('click', () => {
@@ -799,19 +783,6 @@ if (gameOverRespawnBtn) {
   });
 }
 
-if (gameOverLoadBtn && gameOverSavesEl) {
-  gameOverLoadBtn.addEventListener('click', () => {
-    const showing = gameOverSavesEl.classList.contains('game-over-saves-visible');
-    if (showing) {
-      gameOverSavesEl.classList.add('game-over-saves-hidden');
-      gameOverSavesEl.classList.remove('game-over-saves-visible');
-    } else {
-      gameOverSavesEl.classList.remove('game-over-saves-hidden');
-      gameOverSavesEl.classList.add('game-over-saves-visible');
-      renderSavesList('#game-over-saves');
-    }
-  });
-}
 
 // ── Screen 2 Options Sound ──
 document.querySelectorAll('#difficulty-select input, #help-toggle').forEach(el => {
@@ -1093,8 +1064,7 @@ const skipOgreBtn = document.getElementById('skip-ogre-btn');
 
 function playOgreVideo() {
   if (!ogreOverlay || !ogreVideo) return;
-  hasSeenOgreVideo = true;
-  window._saveFlags.hasSeenOgreVideo = true;
+  videoFlags.hasSeenOgreVideo = true;
   ogreOverlay.classList.remove('hidden');
 
   // Give the browser a moment to process the display change before animating opacity
@@ -1194,7 +1164,7 @@ const skipTreemanBtn = document.getElementById('skip-treeman-btn');
 let _treemanCallback = null;
 
 window.playTreemanVideo = function (onComplete) {
-  window.hasSeenTreemanVideo = true;
+  videoFlags.hasSeenTreemanVideo = true;
   _treemanCallback = onComplete;
   if (!treemanOverlay || !treemanVideo) {
     if (_treemanCallback) _treemanCallback();
@@ -2182,30 +2152,14 @@ window.loadLevel = function (levelNum) {
     snapshotStarterStash();
   }
 
-  // Advance the "highest dungeon level reached" watermark. Dungeon levels are
-  // 1..5; level 0 is the hub and does not count. Once advanced, any future
-  // return to a lower dungeon level rebuilds it in end state (gates open,
-  // monsters dead, chests empty).
+  // Top up the potion merchant on first entry to each new dungeon level.
   if (levelNum >= 1 && levelNum <= 5) {
     const prevReached = window.currentLevelReached ?? 0;
     if (levelNum > prevReached) {
       const gained = levelNum - prevReached;
       window.currentLevelReached = levelNum;
-      // Slowly top up the potion merchant's stock toward her initial counts.
       for (let i = 0; i < gained; i++) replenishPotionMerchant(2);
     }
-  }
-
-  // Auto-save on dungeon-level transitions. Arena entry/exit, schematic
-  // trials entry/exit, and restore flows are excluded.
-  if (!window._isRestoring
-      && oldLevel !== undefined
-      && oldLevel !== levelNum
-      && levelNum !== ARENA_LEVEL
-      && oldLevel !== ARENA_LEVEL
-      && levelNum !== SCHEMATIC_TRIALS_LEVEL
-      && oldLevel !== SCHEMATIC_TRIALS_LEVEL) {
-    autoSaveCheckpoint();
   }
 
   window.currentLevel = levelNum;
@@ -2343,16 +2297,7 @@ window.loadLevel = function (levelNum) {
 
   // 3. Clear and respawn level objects
   clearObjects(scene);
-
-  // End-state rule: empty chests on levels below the "highest reached" watermark.
-  // Monster alive state persists in-memory across transitions; applyClearedLevelMonsters
-  // only runs on save-load (in loadCheckpoint), not on in-session revisits.
-  const reached = window.currentLevelReached ?? 0;
-  const isCleared = levelNum >= 1 && levelNum <= 5 && levelNum < reached;
-  setEmptyAllContainers(isCleared);
-
   spawnObjectsForLevel();
-  setEmptyAllContainers(false);
   updateRecruitsMeshState();
 
   // 5. Load monster models for this level (skips dead monsters)
@@ -2664,11 +2609,7 @@ window._arenaExit = function (won) {
     changeMapArray(maps[pre.level] ?? level0Map);
     buildLevel(scene);
     clearObjects(scene);
-    const reached = window.currentLevelReached ?? 0;
-    const isCleared = pre.level >= 1 && pre.level <= 5 && pre.level < reached;
-    setEmptyAllContainers(isCleared);
     spawnObjectsForLevel();
-    setEmptyAllContainers(false);
     updateRecruitsMeshState();
     loadMonstersForLevel(scene, pre.level);
     setAmbientLevel(pre.level);
@@ -2786,21 +2727,3 @@ console.log('Map: 0=floor 1=wall 2=start 3=exit | Controls: W/S=move  Q/E=turn  
 // ─────────────────────────────────────────────
 //  SAVE GAME — RESTORE ON LOAD
 // ─────────────────────────────────────────────
-// ─────────────────────────────────────────────
-//  SAVE RESTORE — POST-INIT PHASE
-//  Restore party, gold, position, and level after objects/monsters are initialized.
-//  World state (containers, monsters, flags, recruits) was already applied in the pre-init phase.
-// ─────────────────────────────────────────────
-(function _applyPendingLoad() {
-  const save = _pendingSave;
-  if (!save) return;
-
-  loadCheckpoint(save, {
-    scene,
-    camera,
-    loadLevel: window.loadLevel,
-    restoreVideoFlags,
-    finishIntro,
-  });
-})();
-

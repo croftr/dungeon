@@ -2406,8 +2406,8 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       }
 
       if (m.name === 'Minotaur' && (m.level ?? 1) === 3 && m.id === 300) {
-        if (window._saveFlags && !window._saveFlags.hasSeenMinotaurDeathVideo) {
-          window._saveFlags.hasSeenMinotaurDeathVideo = true;
+        if (window.videoFlags && !window.videoFlags.hasSeenMinotaurDeathVideo) {
+          window.videoFlags.hasSeenMinotaurDeathVideo = true;
           if (window.playMinotaurDeathVideo) window.playMinotaurDeathVideo();
         }
       }
@@ -3388,42 +3388,3 @@ export function restoreMonsterState(data) {
   _killedBosses = new Set(data.killedBosses ?? []);
 }
 
-/**
- * Apply the end-state rule for a cleared level's monsters:
- *   • non-boss monsters respawn to full HP
- *   • boss monsters stay dead only if we have recorded them in _killedBosses
- *   • summoned monsters (e.g. Treeman treekin) are skipped entirely
- *
- * Replaces the old "kill everything on cleared levels" behaviour. Safe to call
- * before loadMonstersForLevel — that function loads meshes for any alive
- * monster without a mesh.
- */
-export function applyClearedLevelMonsters(levelNum) {
-  for (const m of monsters) {
-    if ((m.level ?? 1) !== levelNum) continue;
-    if (m.summoned) continue;
-
-    if (_isBossMonster(m)) {
-      if (_killedBosses.has(_bossKey(m))) {
-        m.alive = false;
-        m.hp = 0;
-      } else {
-        _resetMonsterToSpawnState(m);
-      }
-    } else {
-      _resetMonsterToSpawnState(m);
-    }
-  }
-}
-
-/** Reset a monster's live combat state so it behaves like a freshly spawned instance. */
-function _resetMonsterToSpawnState(m) {
-  m.alive = true;
-  m.hp = m.hpMax;
-  m.engaged = false;
-  m._awakeningUsed = false;
-  m.activeDebuffs = [];
-  m._ps = null;
-  m._cs = null;
-  if (m.hpBarFill) m.hpBarFill.style.width = '100%';
-}
