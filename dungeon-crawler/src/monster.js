@@ -41,16 +41,24 @@ import { showInlineHelp } from './help.js';
 import { asset } from './assets.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  HUNTER'S EYE STATE  — tracks which monster is currently being analysed
+//  HUNTER'S EYE STATE  — ephemeral, NOT saved.
 // ─────────────────────────────────────────────────────────────────────────────
 let _huntersEyeTargetId = null;
-let _droppedBossEssences = new Set();
 
-// Boss monsters (those with an `image` field in monster-defs) that have been
-// killed. Persisted across level revisits and saves: non-boss monsters
-// respawn on level revisit, but killed bosses stay dead. Keyed by
-// `${level}:${id}` since monster IDs overlap across levels.
-let _killedBosses = new Set();
+// ─────────────────────────────────────────────────────────────────────────────
+//  CANONICAL MONSTER COLLECTIONS — save-relevant Sets.
+//
+//  • droppedBossEssences — item names already dropped by a boss kill, so the
+//    same essence is never dropped twice in one playthrough.
+//  • killedBosses — keys `${level}:${id}` for bosses that stay dead across
+//    level revisits and saves (non-boss monsters respawn on level revisit).
+//
+//  Names match the JSON payload keys.
+// ─────────────────────────────────────────────────────────────────────────────
+const _collections = {
+  droppedBossEssences: new Set(),
+  killedBosses: new Set(),
+};
 
 /** True if this monster instance is a "boss" — marked in its def with an image. */
 function _isBossMonster(m) {
@@ -2299,11 +2307,11 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
   if (killedByThisHit) {
     m.alive = false;
     if (m.blobShadow) m.blobShadow.visible = false;
-    if (_isBossMonster(m) && !window._arenaMode) {
-      _killedBosses.add(_bossKey(m));
+    if (_isBossMonster(m) && !window.arenaState.active) {
+      _collections.killedBosses.add(_bossKey(m));
     }
     // In arena mode, fire the victory callback once all arena monsters are dead
-    if (window._arenaMode) {
+    if (window.arenaState.active) {
       const arenaLevel = window.currentLevel;
       const stillAlive = monsters.filter(x => x.alive && (x.level ?? 1) === arenaLevel);
       if (stillAlive.length === 0) {
@@ -2355,9 +2363,9 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       // Arena: only a 50% chance of boss essence, nothing else.
       const droppedItems = [];
       if (m.drops && m.drops.length > 0 && !m.noDrops) {
-        if (window._arenaMode) {
+        if (window.arenaState.active) {
           // Drop gold scaled by arena tier (1-100 at tier 1, up to 1-100*tier)
-          const arenaTier = window._arenaCurrentTier ?? 1;
+          const arenaTier = window.arenaState.tier ?? 1;
           const gold = Math.floor(Math.random() * 100 * arenaTier) + arenaTier;
           droppedItems.push({ name: 'Gold Coins', quantity: gold });
 
@@ -2388,8 +2396,8 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
               // Boss essences only drop on first kill
               const itemName = typeof drop.item === 'string' ? drop.item : drop.item?.name;
               if (itemName && itemName.endsWith(' Essence') && itemName !== 'Life Essence') {
-                if (_droppedBossEssences.has(itemName)) continue;
-                _droppedBossEssences.add(itemName);
+                if (_collections.droppedBossEssences.has(itemName)) continue;
+                _collections.droppedBossEssences.add(itemName);
               }
               droppedItems.push(drop.item);
             }
@@ -2424,7 +2432,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       });
 
       // ── Award XP to living party members (not in arena) ────────
-      if (m.xp > 0 && !window._arenaMode) awardXP(m.xp);
+      if (m.xp > 0 && !window.arenaState.active) awardXP(m.xp);
 
       _playDeathAnimation(m);
     } else {
@@ -3377,14 +3385,14 @@ export function restoreMonsterStates(saved) {
 // ── Save / Restore ────────────────────────────────────────────────────────────
 export function captureMonsterState() {
   return {
-    droppedBossEssences: [..._droppedBossEssences],
-    killedBosses: [..._killedBosses],
+    droppedBossEssences: [..._collections.droppedBossEssences],
+    killedBosses: [..._collections.killedBosses],
   };
 }
 
 export function restoreMonsterState(data) {
   if (!data) return;
-  _droppedBossEssences = new Set(data.droppedBossEssences ?? []);
-  _killedBosses = new Set(data.killedBosses ?? []);
+  _collections.droppedBossEssences = new Set(data.droppedBossEssences ?? []);
+  _collections.killedBosses = new Set(data.killedBosses ?? []);
 }
 

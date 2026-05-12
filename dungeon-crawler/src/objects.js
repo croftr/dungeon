@@ -43,7 +43,7 @@ export function partyHasItem(itemName) {
 }
 
 export function getCrystalShrineState() { return _state.crystalShrineState; }
-export function getSeenEssences() { return _seenEssences; }
+export function getSeenEssences() { return _collections.seenEssences; }
 
 const _clickRaycaster = new THREE.Raycaster();
 const _clickMouse = new THREE.Vector2();
@@ -203,21 +203,34 @@ let _merchantSellBasket = [];
 // Current merchant tab
 let _merchantMode = 'buy';
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  CANONICAL WORLD COLLECTIONS — save-relevant Sets.
+//
+//  Six membership-style state sets live on this object. Kept as Sets for the
+//  ergonomic API (.has / .add / .delete / .size); the save boundary spreads
+//  them to arrays. Names match the JSON payload keys so capture/restore stays
+//  trivial.
+// ─────────────────────────────────────────────────────────────────────────────
+const _collections = {
+  knownAlchemyRecipes: new Set(),  // result item names learned by the party
+  knownForgeRecipes: new Set(),    // result item names learned by the party
+  seenEssences: new Set(),         // monster essences Barnaby has seen
+  unlockedRecipes: new Set(),      // Barnaby-unlocked parchments
+  disarmedTraps: new Set(),        // "row,col" keys of disarmed traps
+  eggEmptied: new Set(),           // "level,row,col" keys of emptied ethereal eggs
+};
+
 const ALCHEMY_SLOTS = 9; // 8 ingredients + 1 result
 const _alchemyContents = Array(ALCHEMY_SLOTS).fill(null);
 let _alchemyModalOpen = false;
-const _knownAlchemyRecipes = new Set(); // result item names learned by the party
 
 // Monster NPC Special Shop State
-let _seenEssences = new Set();
-let _unlockedRecipes = new Set();
 let _monsterNpcStock = BARNABY_DATA.stock.map(_normStock).filter(Boolean); // parchments (HQ n/a)
 
 
 const FORGE_SLOTS = 9; // 8 materials + 1 result
 const _forgeContents = Array(FORGE_SLOTS).fill(null);
 let _forgeModalOpen = false;
-const _knownForgeRecipes = new Set(); // result item names learned by the party
 let _forgeRecipeFilter = 'all';   // 'all' | 'craftable'
 let _alchemyRecipeFilter = 'all'; // 'all' | 'craftable'
 
@@ -276,7 +289,7 @@ function _hasNewEssencesForNpc(questNpcId) {
         if (member.isEmpty) return;
         member.inventory.forEach(item => {
             if (item && item.name.endsWith(' Essence') && item.name !== 'Life Essence') {
-                if (!_seenEssences.has(item.name)) foundNew = true;
+                if (!_collections.seenEssences.has(item.name)) foundNew = true;
             }
         });
     });
@@ -307,15 +320,11 @@ export function snapshotStarterStash() {
 // ─────────────────────────────────────────────
 //  TRAP STATE
 // ─────────────────────────────────────────────
-// Stores "row,col" keys of traps that have been disarmed
-const _trapDisarmedSet = new Set();
 let _activeTrapObj = null; // the trap mesh currently showing the disarm modal
 
 // Container persistence — tracks the contents of every chest, spell cabinet, etc.
 // so items taken/deposited survive level transitions. Keyed by "level,col,row".
 let _containerContentsPersistence = {};
-// Legacy tracking for Ethereal Egg emptied state
-let _eggEmptiedSet = new Set();
 
 let objectsGroup = new THREE.Group();
 
@@ -1970,8 +1979,8 @@ function _fireTrap(trapObj) {
     const key = `${row},${col}`;
 
     // Prevent double-triggering
-    if (_trapDisarmedSet.has(key)) return;
-    _trapDisarmedSet.add(key);
+    if (_collections.disarmedTraps.has(key)) return;
+    _collections.disarmedTraps.add(key);
 
     playTrapSound();
 
@@ -2100,7 +2109,7 @@ function openTrapDisarmModal(trapObj) {
             }
             // Mark disarmed and remove model
             const key = `${_activeTrapObj.userData.gridRow},${_activeTrapObj.userData.gridCol}`;
-            _trapDisarmedSet.add(key);
+            _collections.disarmedTraps.add(key);
 
             const model = _activeTrapObj.userData.modelContainer;
             if (model) {
@@ -2142,7 +2151,7 @@ function openTrapDisarmModal(trapObj) {
 
 function addTrap1(scene, loader, row, col, rotY = 0, scale = 0.6) {
     const key = `${row},${col}`;
-    if (_trapDisarmedSet.has(key)) return; // already disarmed — don't spawn
+    if (_collections.disarmedTraps.has(key)) return; // already disarmed — don't spawn
 
     loader.load(asset('/items/trap1.glb'), (gltf) => {
         const model = gltf.scene;
@@ -3793,9 +3802,9 @@ function _forge() {
         } else {
             const isHQ = outcome === 'hq';
             for (let i = 0; i < 8; i++) _forgeContents[i] = null;
-            const isNew = !_knownForgeRecipes.has(matchedResult);
-            _knownForgeRecipes.delete(matchedResult);
-            _knownForgeRecipes.add(matchedResult);
+            const isNew = !_collections.knownForgeRecipes.has(matchedResult);
+            _collections.knownForgeRecipes.delete(matchedResult);
+            _collections.knownForgeRecipes.add(matchedResult);
             addLogEntry({ type: 'item', subtype: 'forge', itemName: matchedResult, hq: isHQ, materials: usedMaterials, time: Date.now() });
             _renderKnownForgeRecipes();
             setTimeout(() => {
@@ -4097,8 +4106,8 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
 
             let playNewAudio = false;
             essencesHeld.forEach(essence => {
-                if (!_seenEssences.has(essence)) {
-                    _seenEssences.add(essence);
+                if (!_collections.seenEssences.has(essence)) {
+                    _collections.seenEssences.add(essence);
                     playNewAudio = true;
                     const baseName = essence.replace(' Essence', '');
                     for (const suffix of ['Armour Parchment', 'Weapons Parchment']) {
@@ -4624,7 +4633,7 @@ function _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx) {
             _applyEggGlow(_activeShrineLootObj.userData.eggModel, contents);
             if (contents.filter(c => c !== null).length === 0) {
                 const ud = _activeShrineLootObj.userData;
-                _eggEmptiedSet.add(`${window.currentLevel},${ud.gridRow},${ud.gridCol}`);
+                _collections.eggEmptied.add(`${window.currentLevel},${ud.gridRow},${ud.gridCol}`);
             }
         }
         // Save state immediately
@@ -4657,7 +4666,7 @@ function _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx) {
             // If empty, mark as emptied in persistence
             if (contents.filter(c => c !== null).length === 0) {
                 const ud = _activeShrineLootObj.userData;
-                _eggEmptiedSet.add(`${window.currentLevel},${ud.gridRow},${ud.gridCol}`);
+                _collections.eggEmptied.add(`${window.currentLevel},${ud.gridRow},${ud.gridCol}`);
             }
         }
         // Save state immediately
@@ -4825,9 +4834,9 @@ function _transmute() {
         } else {
             const isHQ = outcome === 'hq';
             for (let i = 0; i < 8; i++) _alchemyContents[i] = null;
-            const isNew = !_knownAlchemyRecipes.has(matchedResult);
-            _knownAlchemyRecipes.delete(matchedResult);
-            _knownAlchemyRecipes.add(matchedResult);
+            const isNew = !_collections.knownAlchemyRecipes.has(matchedResult);
+            _collections.knownAlchemyRecipes.delete(matchedResult);
+            _collections.knownAlchemyRecipes.add(matchedResult);
             addLogEntry({ type: 'item', subtype: 'alchemy', itemName: matchedResult, hq: isHQ, ingredients: usedIngredients, time: Date.now() });
             _renderKnownAlchemyRecipes();
             setTimeout(() => {
@@ -5289,9 +5298,9 @@ export function spawnDroppedItem(col, row, itemName, quantity = 1) {
 export function getWorldFlags() {
     return {
         ..._state,
-        disarmedTraps: [..._trapDisarmedSet],
-        seenEssences: [..._seenEssences],
-        unlockedRecipes: [..._unlockedRecipes],
+        disarmedTraps: [..._collections.disarmedTraps],
+        seenEssences: [..._collections.seenEssences],
+        unlockedRecipes: [..._collections.unlockedRecipes],
         monsterNpcStock: _monsterNpcStock.map(e => ({ ...e })),
     };
 }
@@ -5313,18 +5322,10 @@ export function setWorldFlags(flags) {
             _state[key] = (typeof _state[key] === 'number') ? 0 : false;
         }
     }
-    _seenEssences = new Set(flags.seenEssences ?? []);
-    _unlockedRecipes = new Set(flags.unlockedRecipes ?? []);
+    _collections.seenEssences = new Set(flags.seenEssences ?? []);
+    _collections.unlockedRecipes = new Set(flags.unlockedRecipes ?? []);
+    _collections.disarmedTraps = new Set(flags.disarmedTraps ?? []);
     _monsterNpcStock = (flags.monsterNpcStock ?? []).map(_normStock).filter(Boolean);
-    // Migration: old saves used per-item parchment names (e.g. "Ogre Helm Parchment").
-    // If essences were seen but no new-style grouped parchments are in stock, reset
-    // _seenEssences so Barnaby re-offers the correct grouped parchments on next visit.
-    const hasNewStyleParchment = _monsterNpcStock.some(
-        e => e.name.endsWith(' Armour Parchment') || e.name.endsWith(' Weapons Parchment')
-    );
-    if (_seenEssences.size > 0 && !hasNewStyleParchment) {
-        _seenEssences.clear();
-    }
     // The Aqua Man pit lives at (32, 23) on level 2. Restoring the "hole closed"
     // flag must mutate that cell so the pit stops swallowing the party after a
     // save+refresh. (Previously wrote to [17][23] by mistake — giant room, not the pit.)
@@ -5335,10 +5336,6 @@ export function setWorldFlags(flags) {
                 level1Map[r][c] = CELL_FLOOR;
             }
         }
-    }
-    _trapDisarmedSet.clear();
-    if (Array.isArray(flags.disarmedTraps)) {
-        for (const key of flags.disarmedTraps) _trapDisarmedSet.add(key);
     }
 }
 
@@ -5427,11 +5424,11 @@ function _renderKnownAlchemyRecipes() {
     const list = document.getElementById('alchemy-known-recipes-list');
     if (!list) return;
     list.innerHTML = '';
-    if (_knownAlchemyRecipes.size === 0) {
+    if (_collections.knownAlchemyRecipes.size === 0) {
         list.innerHTML = '<div class="bench-no-recipes">No recipes discovered yet.</div>';
         return;
     }
-    const allNames = [..._knownAlchemyRecipes].reverse();
+    const allNames = [..._collections.knownAlchemyRecipes].reverse();
     const filtered = _alchemyRecipeFilter === 'craftable'
         ? allNames.filter(name => {
               const r = POTIONS_DATA.find(p => p.name === name);
@@ -5470,11 +5467,11 @@ function _renderKnownForgeRecipes() {
     const list = document.getElementById('anvil-known-recipes-list');
     if (!list) return;
     list.innerHTML = '';
-    if (_knownForgeRecipes.size === 0) {
+    if (_collections.knownForgeRecipes.size === 0) {
         list.innerHTML = '<div class="bench-no-recipes">No recipes discovered yet.</div>';
         return;
     }
-    const allNames = [..._knownForgeRecipes].reverse();
+    const allNames = [..._collections.knownForgeRecipes].reverse();
     const filtered = _forgeRecipeFilter === 'craftable'
         ? allNames.filter(name => {
               const r = FORGE_DATA.find(r => r.name === name);
@@ -5561,8 +5558,8 @@ function _returnForgeIngredients() {
 
 function _autoPopulateAlchemySlots(recipe) {
     // Move to most recently used
-    _knownAlchemyRecipes.delete(recipe.name);
-    _knownAlchemyRecipes.add(recipe.name);
+    _collections.knownAlchemyRecipes.delete(recipe.name);
+    _collections.knownAlchemyRecipes.add(recipe.name);
     _renderKnownAlchemyRecipes();
 
     // Return any existing ingredient slot contents to inventory
@@ -5597,8 +5594,8 @@ function _autoPopulateAlchemySlots(recipe) {
 
 function _autoPopulateForgeSlots(recipe) {
     // Move to most recently used
-    _knownForgeRecipes.delete(recipe.name);
-    _knownForgeRecipes.add(recipe.name);
+    _collections.knownForgeRecipes.delete(recipe.name);
+    _collections.knownForgeRecipes.add(recipe.name);
     _renderKnownForgeRecipes();
 
     // Return any existing material slot contents to inventory
@@ -5668,10 +5665,10 @@ function _getForgeRecipesForParchment(parchmentType, recipeName, essenceName) {
 
 function _submitParchmentToAlchemy(parchmentDef, memberIdx, invIdx) {
     const names = _getAlchemyRecipesForParchment(parchmentDef.parchmentType);
-    const newCount = names.filter(n => !_knownAlchemyRecipes.has(n)).length;
+    const newCount = names.filter(n => !_collections.knownAlchemyRecipes.has(n)).length;
     names.forEach(n => {
-        _knownAlchemyRecipes.delete(n);
-        _knownAlchemyRecipes.add(n);
+        _collections.knownAlchemyRecipes.delete(n);
+        _collections.knownAlchemyRecipes.add(n);
     });
     party[memberIdx].inventory[invIdx] = null;
     _renderKnownAlchemyRecipes();
@@ -5685,10 +5682,10 @@ function _submitParchmentToAlchemy(parchmentDef, memberIdx, invIdx) {
 
 function _submitParchmentToForge(parchmentDef, memberIdx, invIdx) {
     const names = _getForgeRecipesForParchment(parchmentDef.parchmentType, parchmentDef.recipeName, parchmentDef.essenceName);
-    const newCount = names.filter(n => !_knownForgeRecipes.has(n)).length;
+    const newCount = names.filter(n => !_collections.knownForgeRecipes.has(n)).length;
     names.forEach(n => {
-        _knownForgeRecipes.delete(n);
-        _knownForgeRecipes.add(n);
+        _collections.knownForgeRecipes.delete(n);
+        _collections.knownForgeRecipes.add(n);
     });
     party[memberIdx].inventory[invIdx] = null;
     _renderKnownForgeRecipes();
@@ -5893,9 +5890,9 @@ export function captureWorldState() {
         merchantStock: getMerchantStock(),
         potionMerchantStock: getPotionMerchantStock(),
         stanceMerchantStock: getStanceMerchantStock(),
-        knownAlchemyRecipes: [..._knownAlchemyRecipes],
-        knownForgeRecipes: [..._knownForgeRecipes],
-        eggEmptied: Array.from(_eggEmptiedSet),
+        knownAlchemyRecipes: [..._collections.knownAlchemyRecipes],
+        knownForgeRecipes: [..._collections.knownForgeRecipes],
+        eggEmptied: Array.from(_collections.eggEmptied),
         containerContents: _containerContentsPersistence,
     };
 }
@@ -5906,8 +5903,8 @@ export function restoreWorldState(data) {
     if (data.merchantStock) setMerchantStock(data.merchantStock);
     if (data.potionMerchantStock) setPotionMerchantStock(data.potionMerchantStock);
     if (data.stanceMerchantStock) setStanceMerchantStock(data.stanceMerchantStock);
-    if (data.knownAlchemyRecipes) data.knownAlchemyRecipes.forEach(r => _knownAlchemyRecipes.add(r));
-    if (data.knownForgeRecipes) data.knownForgeRecipes.forEach(r => _knownForgeRecipes.add(r));
-    if (data.eggEmptied) _eggEmptiedSet = new Set(data.eggEmptied);
+    if (data.knownAlchemyRecipes) data.knownAlchemyRecipes.forEach(r => _collections.knownAlchemyRecipes.add(r));
+    if (data.knownForgeRecipes) data.knownForgeRecipes.forEach(r => _collections.knownForgeRecipes.add(r));
+    if (data.eggEmptied) _collections.eggEmptied = new Set(data.eggEmptied);
     if (data.containerContents) _containerContentsPersistence = data.containerContents;
 }

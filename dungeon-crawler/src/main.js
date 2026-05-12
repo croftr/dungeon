@@ -233,6 +233,15 @@ window.videoFlags = {
 const videoFlags = window.videoFlags;
 let prepVideoTimer = null;
 
+// Arena (monster trial) session state. Ephemeral — set on arena entry, cleared
+// on exit. NOT saved: a save mid-arena would be ill-defined; on reload the
+// player is back in the hub regardless.
+//   • active — true while the party is fighting in the arena
+//   • tier   — current monster tier (1..3+) being fought
+//   • pre    — { level, gridRow, gridCol, facing } captured at entry so the
+//              party can be teleported back to the same spot on exit.
+window.arenaState = { active: false, tier: null, pre: null };
+
 function captureVideoFlags() {
   return { ...videoFlags };
 }
@@ -1086,7 +1095,7 @@ function finishOgreVideo() {
   // Start the Ogre Room music as the video fades out — but not if we're in the
   // arena, where the ogre-video element is reused for the arena intro and the
   // arena music must keep playing.
-  if (!window._arenaMode) {
+  if (!window.arenaState.active) {
     setZoneMusic(asset('/sounds/backing/ogre-room.mp3'));
   }
 
@@ -2446,14 +2455,14 @@ window._arenaEnter = function (monsterId) {
   const scaledDef = applyTierScaling(def, tier);
 
   // Save state to restore after the fight
-  window._preArenaState = {
+  window.arenaState.pre = {
     level:   window.currentLevel,
     gridRow: player.gridRow,
     gridCol: player.gridCol,
     facing:  player.facing,
   };
-  window._arenaMode = true;
-  window._arenaCurrentTier = tier;
+  window.arenaState.active = true;
+  window.arenaState.tier = tier;
 
   // Pre-load the party-hit sound buffer so it's ready instantly on first hit
   prefetchBuffer(asset('/sounds/actions/party-hit.mp3'));
@@ -2578,8 +2587,8 @@ window._arenaEnter = function (monsterId) {
 };
 
 window._arenaExit = function (won) {
-  window._arenaMode = false;
-  window._arenaCurrentTier = null;
+  window.arenaState.active = false;
+  window.arenaState.tier = null;
 
   _arenaFade(() => {
     window._isRestoring = true;
@@ -2603,7 +2612,7 @@ window._arenaExit = function (won) {
     }
 
     // Restore pre-arena state
-    const pre = window._preArenaState ?? { level: 0, gridRow: 13, gridCol: 14, facing: 2 };
+    const pre = window.arenaState.pre ?? { level: 0, gridRow: 13, gridCol: 14, facing: 2 };
     window.currentLevel = pre.level;
     const maps = [level0Map, level1Map, level2Map, level3Map, level4Map, level5Map];
     changeMapArray(maps[pre.level] ?? level0Map);
