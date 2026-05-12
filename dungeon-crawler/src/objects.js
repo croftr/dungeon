@@ -5909,6 +5909,7 @@ export function captureWorldState() {
         knownForgeRecipes: [..._collections.knownForgeRecipes],
         eggEmptied: Array.from(_collections.eggEmptied),
         containerContents: _containerContentsPersistence,
+        starterStashItems: _persistedStarterStashItems,
     };
 }
 
@@ -5918,8 +5919,9 @@ export function restoreWorldState(data) {
     if (data.merchantStock) setMerchantStock(data.merchantStock);
     if (data.potionMerchantStock) setPotionMerchantStock(data.potionMerchantStock);
     if (data.stanceMerchantStock) setStanceMerchantStock(data.stanceMerchantStock);
-    if (data.knownAlchemyRecipes) data.knownAlchemyRecipes.forEach(r => _collections.knownAlchemyRecipes.add(r));
-    if (data.knownForgeRecipes) data.knownForgeRecipes.forEach(r => _collections.knownForgeRecipes.add(r));
-    if (data.eggEmptied) _collections.eggEmptied = new Set(data.eggEmptied);
-    if (data.containerContents) _containerContentsPersistence = data.containerContents;
+    _collections.knownAlchemyRecipes = new Set(data.knownAlchemyRecipes ?? []);
+    _collections.knownForgeRecipes = new Set(data.knownForgeRecipes ?? []);
+    _collections.eggEmptied = new Set(data.eggEmptied ?? []);
+    _containerContentsPersistence = data.containerContents ?? {};
+    setPersistedStarterStashItems(data.starterStashItems ?? null);
 }

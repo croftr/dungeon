@@ -19,6 +19,7 @@ import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
 import { initQuarks, updateQuarks } from './quarks-intro.js';
 import { showHelpDialog } from './help.js';
+import { consumePendingLoad, applySavePreInit, applySavePostInit, renderSavesList } from './save.js';
 import { asset } from './assets.js';
 import { initQuests } from './quest.js';
 import { initSlashTrail } from './slash-trail.js';
@@ -557,12 +558,19 @@ initBattleStats();
 initMainMenu();
 initQuests();
 
-// Purge any localStorage keys left over from the deleted v7 save system so
-// stale browser state does not haunt new sessions.
-for (let i = localStorage.length - 1; i >= 0; i--) {
-  const k = localStorage.key(i);
-  if (k && k.startsWith('dungeon-save-')) localStorage.removeItem(k);
-}
+// Session-setting defaults. The splash screen options override these for a
+// fresh game; a loaded save overrides them in applySavePreInit below. Must
+// be set BEFORE consumePendingLoad so the pre-init restore isn't clobbered.
+window.easyMode = false;
+window.helpEnabled = true;
+
+// ─────────────────────────────────────────────
+//  SAVE RESTORE — PRE-INIT PHASE
+//  Apply recruit flags + session settings BEFORE initRecruits/initObjects so
+//  the level spawner uses the saved state. Post-init phase below.
+// ─────────────────────────────────────────────
+const _pendingSave = consumePendingLoad();
+applySavePreInit(_pendingSave);
 
 initRecruits(scene, camera);
 initObjects(scene, camera);
@@ -705,9 +713,6 @@ const loadGameScreen = document.getElementById('load-game-screen');
 const loadGameCancelBtn = document.getElementById('load-game-cancel-btn');
 const startBtn = document.getElementById('start-adventure-btn');
 
-window.easyMode = false;
-window.helpEnabled = true;
-
 function _readStartOptions() {
   const diffRadio = document.querySelector('input[name="difficulty"]:checked');
   window.easyMode = diffRadio ? diffRadio.value === 'normal' : true;
@@ -771,6 +776,7 @@ if (preLoadBtn) {
     await handleFirstInteraction();
     preStartScreen.style.display = 'none';
     loadGameScreen.style.display = 'flex';
+    renderSavesList('#load-game-list', { requireConfirmOnLoad: false });
   });
 }
 
@@ -2734,5 +2740,12 @@ console.log('%c Grid Dungeon Crawler ', 'background:#333;color:#e8c87a;font-size
 console.log('Map: 0=floor 1=wall 2=start 3=exit | Controls: W/S=move  Q/E=turn  A/D=strafe  Arrows=move+turn');
 
 // ─────────────────────────────────────────────
-//  SAVE GAME — RESTORE ON LOAD
+//  SAVE RESTORE — POST-INIT PHASE
 // ─────────────────────────────────────────────
+if (_pendingSave) {
+  applySavePostInit(_pendingSave, {
+    camera,
+    loadLevel: window.loadLevel,
+    finishIntro,
+  });
+}

@@ -2,6 +2,8 @@
 //  MAIN MENU  — opened/closed with Escape key
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { saveToNewSlot, renderSavesList, whyCantSave } from './save.js';
+
 let _isOpen = false;
 
 export function initMainMenu() {
@@ -131,6 +133,15 @@ function _buildModal() {
               </select>
             </div>
           </div>
+
+          <h3 class="mm-section-title" style="margin-top:1rem">Save Game</h3>
+          <div class="mm-save-section" style="margin-bottom:0.5rem;">
+            <button id="mm-save-btn" class="mm-save-action-btn" style="width:100%;padding:10px;background:rgba(40,80,40,0.4);border:1px solid #4a7a4a;color:#d8e8c0;font-family:monospace;font-size:14px;cursor:pointer;border-radius:3px;text-transform:uppercase;letter-spacing:1px;">💾 Save Game Now</button>
+            <div id="mm-save-feedback" style="font-size:12px;color:#8fbf6f;text-align:center;margin-top:6px;min-height:1em;"></div>
+          </div>
+
+          <h3 class="mm-section-title" style="margin-top:1rem">Load Game</h3>
+          <div id="mm-saves-list" class="mm-saves-list"></div>
         </div>
 
       </div>
@@ -140,9 +151,31 @@ function _buildModal() {
 
   overlay.addEventListener('click', (e) => { if (e.target === overlay) _close(); });
   document.getElementById('mm-close-btn').addEventListener('click', _close);
+
+  const saveBtn = document.getElementById('mm-save-btn');
+  const feedbackEl = document.getElementById('mm-save-feedback');
+  if (saveBtn) {
+    saveBtn.addEventListener('click', () => {
+      const blocker = whyCantSave();
+      if (feedbackEl) {
+        if (blocker) {
+          feedbackEl.style.color = '#d88060';
+          feedbackEl.textContent = blocker;
+        } else {
+          const key = saveToNewSlot();
+          feedbackEl.style.color = '#8fbf6f';
+          feedbackEl.textContent = key ? 'Game saved.' : 'Save failed.';
+        }
+        setTimeout(() => { if (feedbackEl) feedbackEl.textContent = ''; }, 2800);
+      }
+      renderSavesList('#mm-saves-list', { requireConfirmOnLoad: true });
+    });
+  }
 }
 
 function _openMenu() {
+  renderSavesList('#mm-saves-list', { requireConfirmOnLoad: true });
+
   // Difficulty (read-only — cannot change after game starts)
   const diffEl = document.getElementById('mm-difficulty-display');
   if (diffEl) diffEl.textContent = window.easyMode ? 'Normal' : 'Hard';
