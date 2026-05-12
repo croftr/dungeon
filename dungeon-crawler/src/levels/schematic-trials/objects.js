@@ -1,8 +1,7 @@
-import * as THREE from 'three';
-import { CELL } from '../../map.js';
+import { addSwirlPortal } from '../swirl-portal.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  SCHEMATIC TRIALS  — side zone reached via portal in Level 2 giant room.
+//  SCHEMATIC TRIALS  — side zone reached via swirl portal in Level 1 SW corner.
 //
 //  Layout: central hub (row 6, col 7) with four alcoves N/S/W/E. Each alcove
 //  holds the reward chest for one of the four merchant schematic quests.
@@ -11,10 +10,12 @@ import { CELL } from '../../map.js';
 //  cannot farm the same trial twice.
 //
 //  Everything in this zone is spawned fresh on entry and torn down on exit by
-//  the standard clearObjects() pass, so it adds zero load to Level 2.
+//  the standard clearObjects() pass, so it adds zero load to Level 1.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const SCHEMATIC_TRIALS_RETURN = { row: 18, col: 4, facing: 1 }; // east-facing, one cell east of the entry portal on the treeman room west wall
+// Where the party lands when they leave the trials — the cell just north of
+// the Level 1 entry swirl, facing south so the portal is visible.
+export const SCHEMATIC_TRIALS_RETURN = { level: 1, row: 21, col: 1, facing: 2 };
 
 export function spawnSchematicTrialsObjects(ctx) {
     const { group, loader, addChest, addPortcullis, addKeyhole, interactables } = ctx;
@@ -46,10 +47,9 @@ export function spawnSchematicTrialsObjects(ctx) {
     addKeyhole(group, loader, 9, 6, 0, 0, -0.85, 6, 10, 'Schematic Key');
 
     // ── Return swirl at the centre of the hub ─────────────────────────────────
-    // A flat floor effect (two stacked, counter-rotating rune rings) replaces
-    // the upright portal model — easier to centre in the room and clearer to
-    // click. Targets Level 2's treeman-room entry portal cell.
-    addSwirlPortal(group, interactables, 7, 6, 2,
+    // Sends the party back to the Level 1 entry swirl in the SW corner.
+    addSwirlPortal(group, interactables, 7, 6,
+        SCHEMATIC_TRIALS_RETURN.level,
         SCHEMATIC_TRIALS_RETURN.row,
         SCHEMATIC_TRIALS_RETURN.col,
         SCHEMATIC_TRIALS_RETURN.facing);
@@ -78,117 +78,4 @@ export function spawnSchematicTrialsObjects(ctx) {
         "Wizard Schematics",
         { name: 'Gold Coins', quantity: 40 },
     ]);
-}
-
-// Flat floor "portal": two stacked rune rings counter-rotating with a glowing
-// disc beneath them. Tagged isPortal so the existing portal click handler
-// (objects.js) teleports the party back to Level 2 with no special-casing.
-function addSwirlPortal(scene, interactables, col, row, targetLevel, targetRow, targetCol, targetFacing) {
-    const x = col * CELL;
-    const z = row * CELL;
-    const swirl = new THREE.Group();
-    swirl.position.set(x, 0.02, z);
-
-    // Soft glow disc on the floor
-    const glow = new THREE.Mesh(
-        new THREE.CircleGeometry(0.95, 48),
-        new THREE.MeshBasicMaterial({
-            color: 0x3a9bff,
-            transparent: true,
-            opacity: 0.55,
-            depthWrite: false,
-            side: THREE.DoubleSide,
-        })
-    );
-    glow.rotation.x = -Math.PI / 2;
-    swirl.add(glow);
-
-    // Two rune rings, drawn as procedural canvas textures
-    const outerRing = _buildRingMesh(0.95, 0x9be8ff, 12);
-    swirl.add(outerRing);
-
-    const innerRing = _buildRingMesh(0.65, 0xffd27a, 8);
-    innerRing.position.y = 0.01; // avoid z-fight with outer ring
-    swirl.add(innerRing);
-
-    // Hit target — clickable plane covering the swirl
-    const hit = new THREE.Mesh(
-        new THREE.PlaneGeometry(1.8, 1.8),
-        new THREE.MeshBasicMaterial({ visible: false, side: THREE.DoubleSide })
-    );
-    hit.rotation.x = -Math.PI / 2;
-    hit.position.y = 0.05;
-    hit.userData = {
-        isPortal: true,
-        targetLevel,
-        targetRow,
-        targetCol,
-        targetFacing,
-        gridRow: row,
-        gridCol: col,
-    };
-    interactables.push(hit);
-    swirl.add(hit);
-
-    // Per-frame rotation — onBeforeRender runs whenever the mesh is rendered,
-    // so we don't need to plug into any global update loop.
-    outerRing.onBeforeRender = () => { outerRing.rotation.z += 0.012; };
-    innerRing.onBeforeRender = () => { innerRing.rotation.z -= 0.02; };
-
-    // Gentle blue-violet point light pulsing above the swirl
-    const light = new THREE.PointLight(0x4aa8ff, 2.5, 4);
-    light.position.set(0, 0.8, 0);
-    swirl.add(light);
-    glow.onBeforeRender = () => {
-        const t = performance.now() * 0.003;
-        light.intensity = 2.0 + Math.sin(t) * 0.6;
-        glow.material.opacity = 0.45 + Math.sin(t) * 0.12;
-    };
-
-    scene.add(swirl);
-}
-
-function _buildRingMesh(radius, color, runeCount) {
-    const size = 256;
-    const canvas = document.createElement('canvas');
-    canvas.width = canvas.height = size;
-    const g = canvas.getContext('2d');
-    const c = size / 2;
-
-    // Outer + inner stroke
-    const cs = `#${color.toString(16).padStart(6, '0')}`;
-    g.strokeStyle = cs;
-    g.lineWidth = 6;
-    g.beginPath(); g.arc(c, c, size * 0.42, 0, Math.PI * 2); g.stroke();
-    g.lineWidth = 3;
-    g.beginPath(); g.arc(c, c, size * 0.30, 0, Math.PI * 2); g.stroke();
-
-    // Rune ticks around the ring
-    g.fillStyle = cs;
-    for (let i = 0; i < runeCount; i++) {
-        const a = (i / runeCount) * Math.PI * 2;
-        const r = size * 0.36;
-        const rx = c + Math.cos(a) * r;
-        const ry = c + Math.sin(a) * r;
-        g.save();
-        g.translate(rx, ry);
-        g.rotate(a + Math.PI / 2);
-        g.fillRect(-3, -10, 6, 20);
-        g.restore();
-    }
-
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.anisotropy = 8;
-
-    const mesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(radius * 2, radius * 2),
-        new THREE.MeshBasicMaterial({
-            map: texture,
-            transparent: true,
-            depthWrite: false,
-            side: THREE.DoubleSide,
-        })
-    );
-    mesh.rotation.x = -Math.PI / 2;
-    return mesh;
 }

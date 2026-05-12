@@ -1,6 +1,7 @@
 import { CELL } from '../../map.js';
 import { asset } from '../../assets.js';
 import { showDramaticUnlock } from '../../dramatic-banner.js';
+import { addSwirlPortal } from '../swirl-portal.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  LEVEL 1 – The Western Dungeon
@@ -27,6 +28,11 @@ export function spawnLevel1Objects(ctx) {
         monsterNpcSaved,
         interactables,
     } = ctx;
+
+    // ── Schematic Trials entry swirl (SW corner alcove at col 1, row 22) ─────
+    // Flat floor portal — teleports the party to the trials hub at (col 7,
+    // row 6) facing north into the N corridor.
+    addSwirlPortal(group, interactables, 1, 22, 50, 6, 7, 0);
 
     // ── Monster NPC ──────────────────────────────────────────────────────────
     // In the hidden basement arrival room at (26, 2).
