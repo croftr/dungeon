@@ -5148,22 +5148,36 @@ function addBonePile(scene, loader, col, row, contents = []) {
     });
 }
 
-export function spawnCorpse(col, row, droppedItems = []) {
-    // Create corpse with 25 inventory slots — fill first slots with any dropped items
-    const corpseContents = [
-        null, null, null, null, null,
-        null, null, null, null, null,
-        null, null, null, null, null,
-        null, null, null, null, null,
-        null, null, null, null, null
-    ];
-
-    // Place dropped items into the first available slots
-    let slotIdx = 0;
-    for (const itemName of droppedItems) {
-        if (slotIdx >= corpseContents.length) break;
-        corpseContents[slotIdx] = itemName;
-        slotIdx++;
+/**
+ * Spawn a corpse (bone pile) at the given grid cell.
+ *
+ * Two call modes:
+ *   • Fresh kill — pass `droppedItems` (a flat list of item names). A new
+ *     25-slot inventory array is built and the items go into the first slots.
+ *   • Reload — pass `existingContents` (an already-built 25-slot array, e.g.
+ *     `m.corpseContents` from a saved monster). It's used directly so that any
+ *     later loot/deposit edits the same array the monster holds a reference to.
+ *
+ * Returns the corpseContents array so callers can stash it on `m.corpseContents`.
+ */
+export function spawnCorpse(col, row, droppedItems = [], existingContents = null) {
+    let corpseContents;
+    if (Array.isArray(existingContents) && existingContents.length > 0) {
+        corpseContents = existingContents;
+    } else {
+        corpseContents = [
+            null, null, null, null, null,
+            null, null, null, null, null,
+            null, null, null, null, null,
+            null, null, null, null, null,
+            null, null, null, null, null
+        ];
+        let slotIdx = 0;
+        for (const itemName of droppedItems) {
+            if (slotIdx >= corpseContents.length) break;
+            corpseContents[slotIdx] = itemName;
+            slotIdx++;
+        }
     }
 
     _gltfLoader.load(asset('/items/Meshy_AI_Bone_pile_0221211647_texture.glb'), (gltf) => {
@@ -5199,6 +5213,7 @@ export function spawnCorpse(col, row, droppedItems = []) {
 
         objectsGroup.add(model);
     });
+    return corpseContents;
 }
 
 export function spawnDroppedItem(col, row, itemName, quantity = 1) {

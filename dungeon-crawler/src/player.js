@@ -52,6 +52,30 @@ export function setCallbacks({ moved, reached, blocked }) {
 }
 
 // ─────────────────────────────────────────────
+//  SAVE / RESTORE
+// ─────────────────────────────────────────────
+export function capturePlayerState() {
+  return {
+    gridRow: player.gridRow,
+    gridCol: player.gridCol,
+    facing: player.facing,
+  };
+}
+
+export function restorePlayerState(data, camera) {
+  if (!data) return;
+  player.gridRow = data.gridRow ?? player.gridRow;
+  player.gridCol = data.gridCol ?? player.gridCol;
+  player.facing = data.facing ?? player.facing;
+  if (camera) {
+    const w = cellToWorld(player.gridRow, player.gridCol);
+    camera.position.set(w.x, w.y, w.z);
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = FACING_ANGLES[player.facing];
+  }
+}
+
+// ─────────────────────────────────────────────
 //  MOVEMENT
 // ─────────────────────────────────────────────
 export function initPlayer(startRow, startCol, camera, facing = 0) {

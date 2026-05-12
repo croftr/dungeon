@@ -1662,8 +1662,15 @@ export function initMonsters(scene) {
 
 export function loadMonstersForLevel(scene, level) {
   monsters.forEach((m) => {
-    if (!m.alive || m.mesh) return; // skip dead or already loaded
     if ((m.level ?? 1) !== level) return;
+    // Re-spawn corpse meshes for dead monsters that still hold loot. The
+    // contents array is shared by reference, so any later loot/deposit edits
+    // the same data the monster will be saved with.
+    if (!m.alive && Array.isArray(m.corpseContents)) {
+      spawnCorpse(m.gridCol, m.gridRow, [], m.corpseContents);
+      return;
+    }
+    if (!m.alive || m.mesh) return; // skip dead or already loaded
     if (window.easyMode && !m._easyModeApplied) {
       m.hp = Math.ceil(m.hp * 0.5);
       m.hpMax = Math.ceil(m.hpMax * 0.5);
@@ -2420,7 +2427,9 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
         }
       }
 
-      spawnCorpse(m.gridCol, m.gridRow, droppedItems);
+      // Store the 25-slot corpse-contents array on the monster so the same
+      // array survives level reloads (spawnCorpse on reload reuses it).
+      m.corpseContents = spawnCorpse(m.gridCol, m.gridRow, droppedItems);
       if (m.hpBarFill) m.hpBarFill.parentElement.style.display = 'none';
       addLogEntry({ type: 'death', target: m.name, killer, damage, time: Date.now() });
 
@@ -3370,23 +3379,42 @@ export function getMonsterStates(level) {
   return result;
 }
 
-/** Restores alive/hp on monster objects. Call BEFORE loadMonstersForLevel. */
-export function restoreMonsterStates(saved) {
-  if (!saved) return;
-  for (const m of monsters) {
-    const s = saved[m.id];
-    if (!s) continue;
-    m.alive = s.alive;
-    m.hp = s.hp;
-    if (s.awakeningUsed) m._awakeningUsed = true;
-  }
-}
-
 // ── Save / Restore ────────────────────────────────────────────────────────────
+
+/**
+ * Capture the per-monster save-relevant fields for every non-summoned monster.
+ * Summoned monsters (Treeman treekin etc) are excluded — they get reset on
+ * level reload anyway and saving mid-summon would be ill-defined.
+ *
+ * Mesh/DOM refs (m.mesh, m.hpBarFill, m.blobShadow) are NOT captured — meshes
+ * are rebuilt by `loadMonstersForLevel` on the restored level.
+ */
 export function captureMonsterState() {
+  const monsterStates = [];
+  for (const m of monsters) {
+    if (m.summoned) continue;
+    monsterStates.push({
+      id: m.id,
+      level: m.level ?? 1,
+      alive: m.alive,
+      hp: m.hp,
+      gridRow: m.gridRow,
+      gridCol: m.gridCol,
+      facing: m.facing,
+      activeDebuffs: m.activeDebuffs ? JSON.parse(JSON.stringify(m.activeDebuffs)) : [],
+      awakeningUsed: !!m._awakeningUsed,
+      cureUsed: !!m._cureUsed,
+      easyModeApplied: !!m._easyModeApplied,
+      // Dropped-item loot left on a dead monster's corpse. Stored here so a
+      // saved corpse re-spawns with the same contents on reload. Null if the
+      // corpse was already fully looted or never had drops.
+      corpseContents: Array.isArray(m.corpseContents) ? [...m.corpseContents] : null,
+    });
+  }
   return {
     droppedBossEssences: [..._collections.droppedBossEssences],
     killedBosses: [..._collections.killedBosses],
+    monsters: monsterStates,
   };
 }
 
@@ -3394,5 +3422,28 @@ export function restoreMonsterState(data) {
   if (!data) return;
   _collections.droppedBossEssences = new Set(data.droppedBossEssences ?? []);
   _collections.killedBosses = new Set(data.killedBosses ?? []);
+  if (Array.isArray(data.monsters)) {
+    const byKey = new Map();
+    for (const s of data.monsters) byKey.set(`${s.level}:${s.id}`, s);
+    for (const m of monsters) {
+      if (m.summoned) continue;
+      const s = byKey.get(`${m.level ?? 1}:${m.id}`);
+      if (!s) continue;
+      m.alive = s.alive;
+      m.hp = s.hp;
+      if (s.gridRow !== undefined) m.gridRow = s.gridRow;
+      if (s.gridCol !== undefined) m.gridCol = s.gridCol;
+      if (s.facing !== undefined) m.facing = s.facing;
+      m.activeDebuffs = Array.isArray(s.activeDebuffs) ? s.activeDebuffs : [];
+      if (s.awakeningUsed) m._awakeningUsed = true;
+      if (s.cureUsed) m._cureUsed = true;
+      if (s.easyModeApplied) m._easyModeApplied = true;
+      m.corpseContents = Array.isArray(s.corpseContents) ? s.corpseContents : null;
+      // Combat scratch state is ephemeral — start fresh.
+      m.engaged = false;
+      m._ps = null;
+      m._cs = null;
+    }
+  }
 }
 
