@@ -1688,6 +1688,13 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
         } else if (_containerContentsPersistence.hasOwnProperty(persistenceKey)) {
             contents = _containerContentsPersistence[persistenceKey];
         }
+        // Register the array reference into the persistence dict. The chest's
+        // userData.contents is set to this same reference below, so any
+        // take/deposit mutation propagates here without explicit sync. The
+        // starter stash has its own _persistedStarterStashItems channel.
+        if (!isStarterStash) {
+            _containerContentsPersistence[persistenceKey] = contents;
+        }
     }
     loader.load(asset(modelPath), (gltf) => {
         const model = gltf.scene;
@@ -2575,6 +2582,7 @@ function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.4
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
     }
+    _containerContentsPersistence[persistenceKey] = contents;
     loader.load(asset('/items/ethereal_egg.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(scale);
@@ -2699,6 +2707,7 @@ function addWeaponRack(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, 
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
     }
+    _containerContentsPersistence[persistenceKey] = contents;
     loader.load(asset('/items/weapon-rack.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.46);
@@ -2740,6 +2749,7 @@ function addSpellCabinet(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
     }
+    _containerContentsPersistence[persistenceKey] = contents;
     loader.load(asset('/items/spell-cabinet.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
@@ -3053,6 +3063,7 @@ function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, c
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
     }
+    _containerContentsPersistence[persistenceKey] = contents;
     loader.load(asset('/items/forge.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.7);
@@ -5112,6 +5123,7 @@ function addBonePile(scene, loader, col, row, contents = []) {
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
     }
+    _containerContentsPersistence[persistenceKey] = contents;
     loader.load(asset('/items/Meshy_AI_Bone_pile_0221211647_texture.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.4);
@@ -5923,5 +5935,11 @@ export function restoreWorldState(data) {
     _collections.knownForgeRecipes = new Set(data.knownForgeRecipes ?? []);
     _collections.eggEmptied = new Set(data.eggEmptied ?? []);
     _containerContentsPersistence = data.containerContents ?? {};
-    setPersistedStarterStashItems(data.starterStashItems ?? null);
+    // Only apply starterStashItems if the field is explicitly present in the
+    // payload. An old save without the field would otherwise clobber the
+    // live `_persistedStarterStashItems` to null, causing the stash to
+    // respawn with the level-def defaults.
+    if ('starterStashItems' in data) {
+        setPersistedStarterStashItems(data.starterStashItems);
+    }
 }

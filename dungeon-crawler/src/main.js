@@ -230,6 +230,7 @@ window.videoFlags = {
   hasSeenAquaManVideo: false,
   hasSeenCrowWizardVideo: false,
   hasSeenTreemanVideo: false,
+  hasSeenL1Intro: false,
 };
 const videoFlags = window.videoFlags;
 let prepVideoTimer = null;
@@ -2103,7 +2104,6 @@ function handleFirstInteraction() {
 // ─────────────────────────────────────────────
 //  LEVEL LOADING
 // ─────────────────────────────────────────────
-let _level1FirstLoad = true; // shows loading screen on first entry to level 1
 
 // In-memory only — tracks which levels have had their "announce on portal" title
 // overlay shown, so we don't show it repeatedly on re-entry within a single session.
@@ -2115,8 +2115,8 @@ window.loadLevel = function (levelNum) {
 
   // First-ever entry into level 1: show a black loading screen for 10 seconds
   // so the GLB assets have time to stream in before the player sees anything.
-  if (levelNum === 1 && _level1FirstLoad) {
-    _level1FirstLoad = false;
+  if (levelNum === 1 && !videoFlags.hasSeenL1Intro) {
+    videoFlags.hasSeenL1Intro = true;
     const overlay = document.getElementById('level-load-overlay');
     const fill = document.getElementById('level-load-bar-fill');
     const goblinVideo = document.getElementById('goblin-run-video');
@@ -2161,9 +2161,12 @@ window.loadLevel = function (levelNum) {
 
   const oldLevel = window.currentLevel;
 
-  // Snapshot the starter-stash contents before L0 is torn down. The stash is
-  // the only persistent bank — all other containers empty on level clear.
-  if (oldLevel === 0 && levelNum !== 0) {
+  // Snapshot the starter-stash contents before L0 is torn down so its state
+  // survives across level visits. Skipped during a save-load: the stash mesh
+  // currently in the scene is the init-time spawn with default contents, and
+  // applySavePostInit has already loaded the correct `_persistedStarterStashItems`
+  // — snapshotting now would clobber the saved data with the defaults.
+  if (oldLevel === 0 && levelNum !== 0 && !window._isRestoring) {
     snapshotStarterStash();
   }
 

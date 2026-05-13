@@ -18,7 +18,7 @@
 //  matching restore* helper.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { capturePartyState, restorePartyState } from './party.js';
+import { capturePartyState, restorePartyState, refreshPartyCards } from './party.js';
 import { capturePlayerState, restorePlayerState } from './player.js';
 import { captureMonsterState, restoreMonsterState } from './monster.js';
 import { captureWorldState, restoreWorldState, snapshotStarterStash } from './objects.js';
@@ -216,6 +216,9 @@ export function applySavePostInit(save, ctx = {}) {
   window._isRestoring = true;
   try {
     restorePartyState(save.party);
+    // restorePartyState mutates the data but doesn't redraw portraits / bars
+    // / gold — refresh the HUD explicitly so the panel reflects the load.
+    refreshPartyCards();
     setQuestLog(save.quests);
     restoreRecruits(save.recruits);
     restoreEssentiary(save.essentiary);

@@ -1372,6 +1372,12 @@ function _loadMonster(m, scene) {
 
     const hpLabel = new CSS2DObject(barWrap);
     hpLabel.position.set(0, 1.8, 0);
+    // Start hidden — `updateMonsters` sets visibility each frame based on
+    // adjacency / fog culling. Without this, the bar would render at its
+    // default `visible = true` for the first frame after spawn, briefly
+    // showing through walls (most noticeable right after a save-load when
+    // the player is dropped in deep on a populated level).
+    hpLabel.visible = false;
     model.add(hpLabel);
     m.hpLabel = hpLabel;
 
