@@ -41,16 +41,24 @@ import { showInlineHelp } from './help.js';
 import { asset } from './assets.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  HUNTER'S EYE STATE  — tracks which monster is currently being analysed
+//  HUNTER'S EYE STATE  — ephemeral, NOT saved.
 // ─────────────────────────────────────────────────────────────────────────────
 let _huntersEyeTargetId = null;
-let _droppedBossEssences = new Set();
 
-// Boss monsters (those with an `image` field in monster-defs) that have been
-// killed. Persisted across level revisits and saves: non-boss monsters
-// respawn on level revisit, but killed bosses stay dead. Keyed by
-// `${level}:${id}` since monster IDs overlap across levels.
-let _killedBosses = new Set();
+// ─────────────────────────────────────────────────────────────────────────────
+//  CANONICAL MONSTER COLLECTIONS — save-relevant Sets.
+//
+//  • droppedBossEssences — item names already dropped by a boss kill, so the
+//    same essence is never dropped twice in one playthrough.
+//  • killedBosses — keys `${level}:${id}` for bosses that stay dead across
+//    level revisits and saves (non-boss monsters respawn on level revisit).
+//
+//  Names match the JSON payload keys.
+// ─────────────────────────────────────────────────────────────────────────────
+const _collections = {
+  droppedBossEssences: new Set(),
+  killedBosses: new Set(),
+};
 
 /** True if this monster instance is a "boss" — marked in its def with an image. */
 function _isBossMonster(m) {
@@ -1364,6 +1372,12 @@ function _loadMonster(m, scene) {
 
     const hpLabel = new CSS2DObject(barWrap);
     hpLabel.position.set(0, 1.8, 0);
+    // Start hidden — `updateMonsters` sets visibility each frame based on
+    // adjacency / fog culling. Without this, the bar would render at its
+    // default `visible = true` for the first frame after spawn, briefly
+    // showing through walls (most noticeable right after a save-load when
+    // the player is dropped in deep on a populated level).
+    hpLabel.visible = false;
     model.add(hpLabel);
     m.hpLabel = hpLabel;
 
@@ -1654,8 +1668,15 @@ export function initMonsters(scene) {
 
 export function loadMonstersForLevel(scene, level) {
   monsters.forEach((m) => {
-    if (!m.alive || m.mesh) return; // skip dead or already loaded
     if ((m.level ?? 1) !== level) return;
+    // Re-spawn corpse meshes for dead monsters that still hold loot. The
+    // contents array is shared by reference, so any later loot/deposit edits
+    // the same data the monster will be saved with.
+    if (!m.alive && Array.isArray(m.corpseContents)) {
+      spawnCorpse(m.gridCol, m.gridRow, [], m.corpseContents);
+      return;
+    }
+    if (!m.alive || m.mesh) return; // skip dead or already loaded
     if (window.easyMode && !m._easyModeApplied) {
       m.hp = Math.ceil(m.hp * 0.5);
       m.hpMax = Math.ceil(m.hpMax * 0.5);
@@ -2299,11 +2320,11 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
   if (killedByThisHit) {
     m.alive = false;
     if (m.blobShadow) m.blobShadow.visible = false;
-    if (_isBossMonster(m) && !window._arenaMode) {
-      _killedBosses.add(_bossKey(m));
+    if (_isBossMonster(m) && !window.arenaState.active) {
+      _collections.killedBosses.add(_bossKey(m));
     }
     // In arena mode, fire the victory callback once all arena monsters are dead
-    if (window._arenaMode) {
+    if (window.arenaState.active) {
       const arenaLevel = window.currentLevel;
       const stillAlive = monsters.filter(x => x.alive && (x.level ?? 1) === arenaLevel);
       if (stillAlive.length === 0) {
@@ -2355,9 +2376,9 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       // Arena: only a 50% chance of boss essence, nothing else.
       const droppedItems = [];
       if (m.drops && m.drops.length > 0 && !m.noDrops) {
-        if (window._arenaMode) {
+        if (window.arenaState.active) {
           // Drop gold scaled by arena tier (1-100 at tier 1, up to 1-100*tier)
-          const arenaTier = window._arenaCurrentTier ?? 1;
+          const arenaTier = window.arenaState.tier ?? 1;
           const gold = Math.floor(Math.random() * 100 * arenaTier) + arenaTier;
           droppedItems.push({ name: 'Gold Coins', quantity: gold });
 
@@ -2388,8 +2409,8 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
               // Boss essences only drop on first kill
               const itemName = typeof drop.item === 'string' ? drop.item : drop.item?.name;
               if (itemName && itemName.endsWith(' Essence') && itemName !== 'Life Essence') {
-                if (_droppedBossEssences.has(itemName)) continue;
-                _droppedBossEssences.add(itemName);
+                if (_collections.droppedBossEssences.has(itemName)) continue;
+                _collections.droppedBossEssences.add(itemName);
               }
               droppedItems.push(drop.item);
             }
@@ -2406,13 +2427,15 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       }
 
       if (m.name === 'Minotaur' && (m.level ?? 1) === 3 && m.id === 300) {
-        if (window._saveFlags && !window._saveFlags.hasSeenMinotaurDeathVideo) {
-          window._saveFlags.hasSeenMinotaurDeathVideo = true;
+        if (window.videoFlags && !window.videoFlags.hasSeenMinotaurDeathVideo) {
+          window.videoFlags.hasSeenMinotaurDeathVideo = true;
           if (window.playMinotaurDeathVideo) window.playMinotaurDeathVideo();
         }
       }
 
-      spawnCorpse(m.gridCol, m.gridRow, droppedItems);
+      // Store the 25-slot corpse-contents array on the monster so the same
+      // array survives level reloads (spawnCorpse on reload reuses it).
+      m.corpseContents = spawnCorpse(m.gridCol, m.gridRow, droppedItems);
       if (m.hpBarFill) m.hpBarFill.parentElement.style.display = 'none';
       addLogEntry({ type: 'death', target: m.name, killer, damage, time: Date.now() });
 
@@ -2424,7 +2447,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       });
 
       // ── Award XP to living party members (not in arena) ────────
-      if (m.xp > 0 && !window._arenaMode) awardXP(m.xp);
+      if (m.xp > 0 && !window.arenaState.active) awardXP(m.xp);
 
       _playDeathAnimation(m);
     } else {
@@ -3362,68 +3385,78 @@ export function getMonsterStates(level) {
   return result;
 }
 
-/** Restores alive/hp on monster objects. Call BEFORE loadMonstersForLevel. */
-export function restoreMonsterStates(saved) {
-  if (!saved) return;
-  for (const m of monsters) {
-    const s = saved[m.id];
-    if (!s) continue;
-    m.alive = s.alive;
-    m.hp = s.hp;
-    if (s.awakeningUsed) m._awakeningUsed = true;
-  }
-}
-
 // ── Save / Restore ────────────────────────────────────────────────────────────
+
+/**
+ * Capture the per-monster save-relevant fields for every non-summoned monster.
+ * Summoned monsters (Treeman treekin etc) are excluded — they get reset on
+ * level reload anyway and saving mid-summon would be ill-defined.
+ *
+ * Mesh/DOM refs (m.mesh, m.hpBarFill, m.blobShadow) are NOT captured — meshes
+ * are rebuilt by `loadMonstersForLevel` on the restored level.
+ */
 export function captureMonsterState() {
+  const monsterStates = [];
+  for (const m of monsters) {
+    if (m.summoned) continue;
+    monsterStates.push({
+      id: m.id,
+      level: m.level ?? 1,
+      alive: m.alive,
+      hp: m.hp,
+      hpMax: m.hpMax,
+      gridRow: m.gridRow,
+      gridCol: m.gridCol,
+      facing: m.facing,
+      activeDebuffs: m.activeDebuffs ? JSON.parse(JSON.stringify(m.activeDebuffs)) : [],
+      awakeningUsed: !!m._awakeningUsed,
+      cureUsed: !!m._cureUsed,
+      easyModeApplied: !!m._easyModeApplied,
+      // Dropped-item loot left on a dead monster's corpse. Stored here so a
+      // saved corpse re-spawns with the same contents on reload. Null if the
+      // corpse was already fully looted or never had drops.
+      corpseContents: Array.isArray(m.corpseContents) ? [...m.corpseContents] : null,
+    });
+  }
   return {
-    droppedBossEssences: [..._droppedBossEssences],
-    killedBosses: [..._killedBosses],
+    droppedBossEssences: [..._collections.droppedBossEssences],
+    killedBosses: [..._collections.killedBosses],
+    monsters: monsterStates,
   };
 }
 
 export function restoreMonsterState(data) {
   if (!data) return;
-  _droppedBossEssences = new Set(data.droppedBossEssences ?? []);
-  _killedBosses = new Set(data.killedBosses ?? []);
-}
-
-/**
- * Apply the end-state rule for a cleared level's monsters:
- *   • non-boss monsters respawn to full HP
- *   • boss monsters stay dead only if we have recorded them in _killedBosses
- *   • summoned monsters (e.g. Treeman treekin) are skipped entirely
- *
- * Replaces the old "kill everything on cleared levels" behaviour. Safe to call
- * before loadMonstersForLevel — that function loads meshes for any alive
- * monster without a mesh.
- */
-export function applyClearedLevelMonsters(levelNum) {
-  for (const m of monsters) {
-    if ((m.level ?? 1) !== levelNum) continue;
-    if (m.summoned) continue;
-
-    if (_isBossMonster(m)) {
-      if (_killedBosses.has(_bossKey(m))) {
-        m.alive = false;
-        m.hp = 0;
-      } else {
-        _resetMonsterToSpawnState(m);
-      }
-    } else {
-      _resetMonsterToSpawnState(m);
+  _collections.droppedBossEssences = new Set(data.droppedBossEssences ?? []);
+  _collections.killedBosses = new Set(data.killedBosses ?? []);
+  if (Array.isArray(data.monsters)) {
+    const byKey = new Map();
+    for (const s of data.monsters) byKey.set(`${s.level}:${s.id}`, s);
+    for (const m of monsters) {
+      if (m.summoned) continue;
+      const s = byKey.get(`${m.level ?? 1}:${m.id}`);
+      if (!s) continue;
+      m.alive = s.alive;
+      m.hp = s.hp;
+      // hpMax must be restored too, otherwise an easy-mode-halved monster
+      // ends up with restored hp (e.g. 50) but a fresh-init hpMax (e.g. 100),
+      // and the HP bar shows partial fill even though the monster is at full
+      // health. easyModeApplied=true also blocks loadMonstersForLevel from
+      // re-halving the fresh hpMax.
+      if (s.hpMax !== undefined) m.hpMax = s.hpMax;
+      if (s.gridRow !== undefined) m.gridRow = s.gridRow;
+      if (s.gridCol !== undefined) m.gridCol = s.gridCol;
+      if (s.facing !== undefined) m.facing = s.facing;
+      m.activeDebuffs = Array.isArray(s.activeDebuffs) ? s.activeDebuffs : [];
+      if (s.awakeningUsed) m._awakeningUsed = true;
+      if (s.cureUsed) m._cureUsed = true;
+      if (s.easyModeApplied) m._easyModeApplied = true;
+      m.corpseContents = Array.isArray(s.corpseContents) ? s.corpseContents : null;
+      // Combat scratch state is ephemeral — start fresh.
+      m.engaged = false;
+      m._ps = null;
+      m._cs = null;
     }
   }
 }
 
-/** Reset a monster's live combat state so it behaves like a freshly spawned instance. */
-function _resetMonsterToSpawnState(m) {
-  m.alive = true;
-  m.hp = m.hpMax;
-  m.engaged = false;
-  m._awakeningUsed = false;
-  m.activeDebuffs = [];
-  m._ps = null;
-  m._cs = null;
-  if (m.hpBarFill) m.hpBarFill.style.width = '100%';
-}

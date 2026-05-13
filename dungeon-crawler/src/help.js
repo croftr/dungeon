@@ -1,10 +1,23 @@
+// Keys of help dialogs the player has already seen. Save-relevant: a loaded
+// game should not re-show help the player has already dismissed.
+const _seenKeys = new Set();
+
+export function captureHelpState() {
+  return { seenKeys: [..._seenKeys] };
+}
+
+export function restoreHelpState(data) {
+  if (!data) return;
+  _seenKeys.clear();
+  for (const k of data.seenKeys ?? []) _seenKeys.add(k);
+}
+
 // Show a one-time contextual help dialog. Does nothing if help is disabled or the key
-// has already been shown this session.
+// has already been shown.
 export function showInlineHelp(key, options = {}) {
   if (!window.helpEnabled) return;
-  if (!window._helpSeen) window._helpSeen = new Set();
-  if (window._helpSeen.has(key)) return;
-  window._helpSeen.add(key);
+  if (_seenKeys.has(key)) return;
+  _seenKeys.add(key);
   showHelpDialog(options);
 }
 

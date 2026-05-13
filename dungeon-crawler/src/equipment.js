@@ -4369,7 +4369,7 @@ export function useHand(memberIndex, hand, silent = false) {
   }
 
 
-  if (result.killed && !window._arenaMode) {
+  if (result.killed && !window.arenaState?.active) {
     showMessage(`${m.name} ${result.crit ? 'obliterates' : 'slays'} the ${target.name} for ${result.damage} dmg!`);
   }
   // Hit/crit feedback is shown by CSS2DObject popups above the monster — no toast needed

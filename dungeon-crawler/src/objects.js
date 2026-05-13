@@ -42,8 +42,8 @@ export function partyHasItem(itemName) {
     return false;
 }
 
-export function getCrystalShrineState() { return _crystalShrineState; }
-export function getSeenEssences() { return _seenEssences; }
+export function getCrystalShrineState() { return _state.crystalShrineState; }
+export function getSeenEssences() { return _collections.seenEssences; }
 
 const _clickRaycaster = new THREE.Raycaster();
 const _clickMouse = new THREE.Vector2();
@@ -84,32 +84,46 @@ export function updateObjects(dt) {
 // ─────────────────────────────────────────────
 //  SARCOPHAGUS STATE
 // ─────────────────────────────────────────────
-let _mummyGateOpened = false;
-let _mummyEscapeGateOpened = false; // true once escape button pressed — keeps entrance open after zone
-let _starterGateOpened = false; // persists across level reloads — once open, never re-closes
-let _starterPortalEnabled = false;
-// Crystal shrine state: 0=empty, 1=red crystal placed, 2=red+blue placed
-let _crystalShrineState = 0;
+// ─────────────────────────────────────────────────────────────────────────────
+//  CANONICAL WORLD STATE — must be captured by the save system.
+//
+//  Every save-relevant gate/portal/NPC progression flag lives on this single
+//  object. Adding a new flag = one line here. The `getWorldFlags` /
+//  `setWorldFlags` boundary just spreads / Object.assigns this object plus a
+//  few side-bags (disarmedTraps, seenEssences, unlockedRecipes, monsterNpcStock)
+//  that still need conversion (Set ↔ array, etc).
+//
+//  Crystal shrine state: 0=empty, 1=red crystal placed, 2=red+blue placed.
+// ─────────────────────────────────────────────────────────────────────────────
+const _state = {
+  mummyGateOpened: false,
+  mummyEscapeGateOpened: false, // true once escape button pressed — keeps entrance open after zone
+  starterGateOpened: false,     // persists across level reloads — once open, never re-closes
+  starterPortalEnabled: false,
+  crystalShrineState: 0,
+  level3PortalEnabled: false,
+  level4PortalEnabled: false,
+  level2PortcullisOpened: false,
+  level2GiantPortcullisOpened: false,
+  level2HoleClosed: false,
+  level1HoleRoomSpawned: false,
+  monsterNpcSaved: false,
+  stanceNpcDeparted: false,
+  level1BtnPortcullisOpened: false,
+  level1OgrePortcullisOpened: false,
+  level1ShrineGateOpened: false,
+};
+
+// Scene/THREE refs — transient, NOT saved.
 let _crystalShrineMesh = null;
 let _crystalShrineScene = null;
 let _crystalShrineLoader = null;
 let _crystalShrineParams = null;
 let _disabledPortalMesh = null;       // level 2 disabled portal mesh
 let _level3DisabledPortalMesh = null; // level 3 disabled portal mesh
-let _level3PortalEnabled = false;
 let _level4DisabledPortalMesh = null; // level 4 disabled portal mesh
-let _level4PortalEnabled = false;
 let _partyConfirmNPCModel = null; // true once the player confirms — prevents re-triggering
 let _starterGate = null; // portcullis behind the party-confirm NPC; opens only via dialogue
-let _level2PortcullisOpened = false;
-let _level2GiantPortcullisOpened = false;
-let _level2HoleClosed = false;
-let _level1HoleRoomSpawned = false;
-let _monsterNpcSaved = false;
-let _stanceNpcDeparted = false;
-let _level1BtnPortcullisOpened = false;
-let _level1OgrePortcullisOpened = false;
-let _level1ShrineGateOpened = false;
 
 let _npcMixer = null;
 let _npcIdleAction = null;
@@ -189,21 +203,36 @@ let _merchantSellBasket = [];
 // Current merchant tab
 let _merchantMode = 'buy';
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  CANONICAL WORLD COLLECTIONS — save-relevant Sets.
+//
+//  Six membership-style state sets live on this object. Kept as Sets for the
+//  ergonomic API (.has / .add / .delete / .size); the save boundary spreads
+//  them to arrays. Names match the JSON payload keys so capture/restore stays
+//  trivial.
+// ─────────────────────────────────────────────────────────────────────────────
+const _collections = {
+  knownAlchemyRecipes: new Set(),  // result item names learned by the party
+  knownForgeRecipes: new Set(),    // result item names learned by the party
+  seenEssences: new Set(),         // monster essences Barnaby has seen
+  unlockedRecipes: new Set(),      // Barnaby-unlocked parchments
+  disarmedTraps: new Set(),        // "row,col" keys of disarmed traps
+  eggEmptied: new Set(),           // "level,row,col" keys of emptied ethereal eggs
+  openedTrialGates: new Set(),     // "col,row" keys of opened schematic-trial portcullises (level 50)
+  spokenToNpcs: new Set(),         // "level,col,row" keys of dialogue NPCs whose first-click line has already played
+};
+
 const ALCHEMY_SLOTS = 9; // 8 ingredients + 1 result
 const _alchemyContents = Array(ALCHEMY_SLOTS).fill(null);
 let _alchemyModalOpen = false;
-const _knownAlchemyRecipes = new Set(); // result item names learned by the party
 
 // Monster NPC Special Shop State
-let _seenEssences = new Set();
-let _unlockedRecipes = new Set();
 let _monsterNpcStock = BARNABY_DATA.stock.map(_normStock).filter(Boolean); // parchments (HQ n/a)
 
 
 const FORGE_SLOTS = 9; // 8 materials + 1 result
 const _forgeContents = Array(FORGE_SLOTS).fill(null);
 let _forgeModalOpen = false;
-const _knownForgeRecipes = new Set(); // result item names learned by the party
 let _forgeRecipeFilter = 'all';   // 'all' | 'craftable'
 let _alchemyRecipeFilter = 'all'; // 'all' | 'craftable'
 
@@ -262,7 +291,7 @@ function _hasNewEssencesForNpc(questNpcId) {
         if (member.isEmpty) return;
         member.inventory.forEach(item => {
             if (item && item.name.endsWith(' Essence') && item.name !== 'Life Essence') {
-                if (!_seenEssences.has(item.name)) foundNew = true;
+                if (!_collections.seenEssences.has(item.name)) foundNew = true;
             }
         });
     });
@@ -272,15 +301,8 @@ function _hasNewEssencesForNpc(questNpcId) {
 // ─────────────────────────────────────────────
 //  SAVE GAME — container tracking
 // ─────────────────────────────────────────────
-// When true, every container spawned by addChest/addPortalActivatorStatue/
-// addWeaponRack/addSpellCabinet/addAnvil/addBonePile spawns with empty contents.
-// Toggled by loadLevel when entering a previously-cleared dungeon level.
-let _emptyAllContainers = false;
-export function setEmptyAllContainers(v) { _emptyAllContainers = !!v; }
-
 // Starter stash persistence — the single chest on Level 0 tagged with title='Stash'
-// is a true persistent bank. Its contents live in this module between level visits
-// and are captured/restored by the save-checkpoint module.
+// is a true persistent bank. Its contents live in this module between level visits.
 let _persistedStarterStashItems = null;
 export function getPersistedStarterStashItems() { return _persistedStarterStashItems; }
 export function setPersistedStarterStashItems(items) {
@@ -300,23 +322,28 @@ export function snapshotStarterStash() {
 // ─────────────────────────────────────────────
 //  TRAP STATE
 // ─────────────────────────────────────────────
-// Stores "row,col" keys of traps that have been disarmed
-const _trapDisarmedSet = new Set();
 let _activeTrapObj = null; // the trap mesh currently showing the disarm modal
 
 // Container persistence — tracks the contents of every chest, spell cabinet, etc.
 // so items taken/deposited survive level transitions. Keyed by "level,col,row".
 let _containerContentsPersistence = {};
-// Legacy tracking for Ethereal Egg emptied state
-let _eggEmptiedSet = new Set();
 
 let objectsGroup = new THREE.Group();
 
+// Spawn generation — bumped by `clearObjects`. Each spawner captures the
+// current value at call time; its async loader callback aborts if the value
+// has advanced (meaning the level was torn down before the GLB finished
+// loading). Without this, orphan meshes from a stale spawn can push
+// themselves into `interactables` and corrupt later state lookups
+// (e.g. `snapshotStarterStash` finding an INITIAL-contents orphan stash mesh
+// alongside the correctly-restored one).
+let _spawnGeneration = 0;
 
 export function clearObjects(scene) {
     scene.remove(objectsGroup);
     objectsGroup = new THREE.Group();
     scene.add(objectsGroup);
+    _spawnGeneration++;
 
     // Clear mixers and intervals to prevent memory leaks and performance lag
     _mixers.length = 0;
@@ -394,7 +421,7 @@ export function initObjects(scene, camera) {
                     if (isInFrontOfPlayer(3, 21, 1)) {
                         playButtonClickSound();
                         _animateButtonPress(obj);
-                        _mummyEscapeGateOpened = true;
+                        _state.mummyEscapeGateOpened = true;
                         const trapDoor = objects.find(o => o.name === 'Portcullis' && o.gridRow === 1 && o.gridCol === 10);
                         if (trapDoor) openPortcullis(trapDoor);
                     } else {
@@ -413,9 +440,9 @@ export function initObjects(scene, camera) {
                 } else if (obj.userData.target === 'close_hole') {
                     if (isInFrontOfPlayer(31, 25, 1)) {
                         playButtonClickSound();
-                        if (!_level2HoleClosed) {
+                        if (!_state.level2HoleClosed) {
                             _animateButtonPress(obj);
-                            _level2HoleClosed = true;
+                            _state.level2HoleClosed = true;
                             dungeonMap[32][23] = CELL_FLOOR;
                             level2Map[32][23] = CELL_FLOOR;
                             buildLevel(objectsGroup.parent);
@@ -499,9 +526,9 @@ export function initObjects(scene, camera) {
                         playButtonClickSound();
                         _animateButtonPress(obj);
                         const p = objects.find(o => o.name === 'Portcullis' && o.gridRow === 6 && o.gridCol === 1);
-                        if (p && !_level1OgrePortcullisOpened) {
+                        if (p && !_state.level1OgrePortcullisOpened) {
                             openPortcullis(p);
-                            _level1OgrePortcullisOpened = true;
+                            _state.level1OgrePortcullisOpened = true;
                             // Trigger the ogre encounter video when the gate opens
                             if (window.playOgreVideo) window.playOgreVideo();
                         }
@@ -517,7 +544,7 @@ export function initObjects(scene, camera) {
                         const p = objects.find(o => o.name === 'Portcullis' && o.gridRow === 7 && o.gridCol === 7);
                         if (p) {
                             openPortcullis(p);
-                            _level1BtnPortcullisOpened = true;
+                            _state.level1BtnPortcullisOpened = true;
                         }
                     } else {
                         showMessage("You can't reach that from here.");
@@ -750,7 +777,7 @@ export function initObjects(scene, camera) {
 
                     // Relocate quest: If this is the monster npc in the pit trap room (now an isShop entity)
                     if (window.currentLevel === 1 && obj.userData.gridRow === 26 && obj.userData.gridCol === 2) {
-                        _monsterNpcSaved = true;
+                        _state.monsterNpcSaved = true;
                         console.log("Antigravity: Monster NPC saved via shop interaction!");
                     }
                 } else {
@@ -776,6 +803,10 @@ export function initObjects(scene, camera) {
                             } else {
                                 obj.userData.clickAudio = null;
                             }
+                            // Record that this NPC's first-click line has played
+                            // so a respawn (level revisit or save-load) doesn't
+                            // replay it.
+                            _collections.spokenToNpcs.add(`${window.currentLevel},${npcCol},${npcRow}`);
 
                             // Consume the one-shot onAudioEnd callback and clear it from all sibling meshes
                             const onAudioEnd = obj.userData.onAudioEnd ?? null;
@@ -829,8 +860,8 @@ export function initObjects(scene, camera) {
 
                     // Relocate quest: If this is the monster npc in the pit trap room
                     if (window.currentLevel === 1 && obj.userData.gridRow === 26 && obj.userData.gridCol === 2) {
-                        _monsterNpcSaved = true;
-                        console.log("Antigravity: Monster NPC saved! _monsterNpcSaved is now true.");
+                        _state.monsterNpcSaved = true;
+                        console.log("Antigravity: Monster NPC saved! _state.monsterNpcSaved is now true.");
                     }
                 }
                 break;
@@ -964,7 +995,7 @@ export function initObjects(scene, camera) {
                                     playKeyLockSound();
                                     setTimeout(() => {
                                         openPortcullis(p);
-                                        _level2GiantPortcullisOpened = true;
+                                        _state.level2GiantPortcullisOpened = true;
                                         if (window.playGiantVideo) {
                                             window.playGiantVideo();
                                         }
@@ -995,10 +1026,10 @@ export function initObjects(scene, camera) {
                                 setTimeout(() => {
                                     openPortcullis(p);
                                     if (window.currentLevel === 2 && p.gridRow === 23 && p.gridCol === 7) {
-                                        _level2PortcullisOpened = true;
+                                        _state.level2PortcullisOpened = true;
                                     }
                                     if (window.currentLevel === 1 && p.gridRow === 10 && p.gridCol === 17) {
-                                        _level1ShrineGateOpened = true;
+                                        _state.level1ShrineGateOpened = true;
                                     }
                                 }, 400);
                                 refreshPartyCards();
@@ -1018,7 +1049,7 @@ export function initObjects(scene, camera) {
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 2 && distCol <= 2) {
                     // Gate already open — nothing more to do
-                    if (_mummyGateOpened) break;
+                    if (_state.mummyGateOpened) break;
 
                     // Show the sarcophagus confirmation modal
                     const overlay = document.getElementById('sarcophagus-overlay');
@@ -1031,9 +1062,9 @@ export function initObjects(scene, camera) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 2 && distCol <= 2) {
-                    if (_crystalShrineState === 2) {
+                    if (_state.crystalShrineState === 2) {
                         showMessage("The shrine radiates with brilliant red and blue energy.");
-                    } else if (_crystalShrineState === 1) {
+                    } else if (_state.crystalShrineState === 1) {
                         // Red placed — look for blue crystal
                         let blueIdx = -1, blueMember = null;
                         for (let i = 0; i < party.length; i++) {
@@ -1044,24 +1075,24 @@ export function initObjects(scene, camera) {
                         }
                         if (blueMember) {
                             blueMember.inventory[blueIdx] = null;
-                            _crystalShrineState = 2;
+                            _state.crystalShrineState = 2;
                             _swapCrystalShrine();
                             playSoundByUrl(asset('/items/crystal-shrine/crystal-portal.mp3'), 0.9);
                             showMessage("The portal opens!");
                             if (window.playCrystalShrineRedBlueVideo) {
                                 window.playCrystalShrineRedBlueVideo(() => {
-                                    if (_starterPortalEnabled && _level3PortalEnabled) {
+                                    if (_state.starterPortalEnabled && _state.level3PortalEnabled) {
                                         _activateLevel4Portal();
-                                    } else if (_starterPortalEnabled) {
+                                    } else if (_state.starterPortalEnabled) {
                                         _activateLevel3Portal();
                                     } else {
                                         _activateStarterPortal();
                                     }
                                 });
                             } else {
-                                if (_starterPortalEnabled && _level3PortalEnabled) {
+                                if (_state.starterPortalEnabled && _state.level3PortalEnabled) {
                                     _activateLevel4Portal();
-                                } else if (_starterPortalEnabled) {
+                                } else if (_state.starterPortalEnabled) {
                                     _activateLevel3Portal();
                                 } else {
                                     _activateStarterPortal();
@@ -1081,7 +1112,7 @@ export function initObjects(scene, camera) {
                         }
                         if (redMember) {
                             redMember.inventory[redIdx] = null;
-                            _crystalShrineState = 1;
+                            _state.crystalShrineState = 1;
                             _swapCrystalShrine();
                             playSoundByUrl(asset('/items/crystal-shrine/crystal-portal.mp3'), 0.9);
                             if (window.playCrystalShrineRedVideo) {
@@ -1249,7 +1280,7 @@ export function initObjects(scene, camera) {
     if (sarcophagusYes) {
         sarcophagusYes.onclick = (e) => {
             e.stopPropagation();
-            _mummyGateOpened = true;
+            _state.mummyGateOpened = true;
 
             // Close the modal immediately
             const overlay = document.getElementById('sarcophagus-overlay');
@@ -1306,7 +1337,7 @@ export function initObjects(scene, camera) {
                 _partyConfirmNPCModel = null;
             }
 
-            _starterGateOpened = true;
+            _state.starterGateOpened = true;
             if (window.playBattlePrepVideo) {
                 window.playBattlePrepVideo(() => {
                     if (_starterGate) openPortcullis(_starterGate);
@@ -1664,18 +1695,30 @@ export function initObjects(scene, camera) {
 
 export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = [], modelPath = asset('/items/Meshy_AI_Treasure_Chest_0221184131_texture.glb'), interactive = true, offsetX = 0, title = 'Chest', scale = 0.3) {
     const isStarterStash = title === 'Stash';
-    const persistenceKey = `${window.currentLevel},${col},${row}`;
+    // Type-prefixed so different container kinds at the same grid cell never
+    // collide. offsetX is included when non-zero so two chests can share a
+    // cell with different visual offsets (e.g. the paired chests in the L1
+    // ogre room) without colliding either.
+    const offsetSuffix = offsetX ? `,${offsetX}` : '';
+    const persistenceKey = `chest:${window.currentLevel},${col},${row}${offsetSuffix}`;
 
     if (interactive) {
         if (isStarterStash && _persistedStarterStashItems !== null) {
             contents = [..._persistedStarterStashItems];
         } else if (_containerContentsPersistence.hasOwnProperty(persistenceKey)) {
             contents = _containerContentsPersistence[persistenceKey];
-        } else if (_emptyAllContainers && !isStarterStash && (!contents || contents.length === 0)) {
-            contents = [];
+        }
+        // Register the array reference into the persistence dict. The chest's
+        // userData.contents is set to this same reference below, so any
+        // take/deposit mutation propagates here without explicit sync. The
+        // starter stash has its own _persistedStarterStashItems channel.
+        if (!isStarterStash) {
+            _containerContentsPersistence[persistenceKey] = contents;
         }
     }
+    const _spawnGen = _spawnGeneration;
     loader.load(asset(modelPath), (gltf) => {
+        if (_spawnGen !== _spawnGeneration) return; // stale; level torn down before load completed
         const model = gltf.scene;
         model.scale.setScalar(scale);
         model.position.set(col * CELL + offsetX, 0.0, row * CELL + offsetZ);
@@ -1781,9 +1824,9 @@ export function addDecoration(scene, loader, col, row, rotY = 0, modelPath, scal
 }
 
 function addCrystalShrine(scene, loader, col, row, rotY, scale, offsetX, offsetZ, offsetY) {
-    const modelPath = _crystalShrineState === 2
+    const modelPath = _state.crystalShrineState === 2
         ? asset('/items/crystal-shrine/crysta-temple-red-and-blue.glb')
-        : _crystalShrineState === 1
+        : _state.crystalShrineState === 1
             ? asset('/items/crystal-shrine/crysta-temple-red.glb')
             : asset('/items/crystal-shrine/crystal-temple-empty.glb');
 
@@ -1837,7 +1880,7 @@ function _swapCrystalShrine() {
 }
 
 function _activateStarterPortal() {
-    _starterPortalEnabled = true;
+    _state.starterPortalEnabled = true;
     if (_disabledPortalMesh) {
         _disabledPortalMesh.traverse((child) => {
             const idx = interactables.indexOf(child);
@@ -1848,13 +1891,13 @@ function _activateStarterPortal() {
     }
     addPortal(objectsGroup, _gltfLoader, 13, 13, 2, 0, 0, 0.85); // Left -> Level 2
     // Reset shrine to empty so it can be reused for the level 3 portal
-    _crystalShrineState = 0;
+    _state.crystalShrineState = 0;
     _swapCrystalShrine();
     showMessage("The crystal shrine blazes with power — a portal has opened!");
 }
 
 function _activateLevel3Portal() {
-    _level3PortalEnabled = true;
+    _state.level3PortalEnabled = true;
     if (_level3DisabledPortalMesh) {
         _level3DisabledPortalMesh.traverse((child) => {
             const idx = interactables.indexOf(child);
@@ -1865,13 +1908,13 @@ function _activateLevel3Portal() {
     }
     addPortal(objectsGroup, _gltfLoader, 12, 13, 3, 0, 0, 0.85, 21, 11, 0); // Middle -> Level 3
     // Reset shrine to empty
-    _crystalShrineState = 0;
+    _state.crystalShrineState = 0;
     _swapCrystalShrine();
     showMessage("The crystal shrine blazes with power — the portal to the Abyssal Crypts has opened!");
 }
 
 function _activateLevel4Portal() {
-    _level4PortalEnabled = true;
+    _state.level4PortalEnabled = true;
     if (_level4DisabledPortalMesh) {
         _level4DisabledPortalMesh.traverse((child) => {
             const idx = interactables.indexOf(child);
@@ -1882,7 +1925,7 @@ function _activateLevel4Portal() {
     }
     addPortal(objectsGroup, _gltfLoader, 11, 13, 4, 0, 0, 0.85, 14, 10, 2); // Right -> Level 4
     // Reset shrine to empty
-    _crystalShrineState = 0;
+    _state.crystalShrineState = 0;
     _swapCrystalShrine();
     showMessage("The crystal shrine blazes with power — the portal to the Egg Chamber has opened!");
 }
@@ -1965,8 +2008,8 @@ function _fireTrap(trapObj) {
     const key = `${row},${col}`;
 
     // Prevent double-triggering
-    if (_trapDisarmedSet.has(key)) return;
-    _trapDisarmedSet.add(key);
+    if (_collections.disarmedTraps.has(key)) return;
+    _collections.disarmedTraps.add(key);
 
     playTrapSound();
 
@@ -2095,7 +2138,7 @@ function openTrapDisarmModal(trapObj) {
             }
             // Mark disarmed and remove model
             const key = `${_activeTrapObj.userData.gridRow},${_activeTrapObj.userData.gridCol}`;
-            _trapDisarmedSet.add(key);
+            _collections.disarmedTraps.add(key);
 
             const model = _activeTrapObj.userData.modelContainer;
             if (model) {
@@ -2137,7 +2180,7 @@ function openTrapDisarmModal(trapObj) {
 
 function addTrap1(scene, loader, row, col, rotY = 0, scale = 0.6) {
     const key = `${row},${col}`;
-    if (_trapDisarmedSet.has(key)) return; // already disarmed — don't spawn
+    if (_collections.disarmedTraps.has(key)) return; // already disarmed — don't spawn
 
     loader.load(asset('/items/trap1.glb'), (gltf) => {
         const model = gltf.scene;
@@ -2272,30 +2315,32 @@ export function spawnObjectsForLevel() {
         addAnvil, addAlchemyWorkshop, addDroppedTorch, addEtherealEgg, addStairs,
         addTrap1, createWallButton, addArmourStand, addTrainingConsole, addPitLadder,
         // Level 1 state flags
-        starterPortalEnabled: _starterPortalEnabled,
-        starterGateOpened: _starterGateOpened,
-        mummyGateOpened: _mummyGateOpened,
-        mummyEscapeGateOpened: _mummyEscapeGateOpened,
-        crystalShrineState: _crystalShrineState,
-        level1HoleRoomSpawned: _level1HoleRoomSpawned,
-        level1BtnPortcullisOpened: _level1BtnPortcullisOpened,
-        level1OgrePortcullisOpened: _level1OgrePortcullisOpened,
-        level1ShrineGateOpened: _level1ShrineGateOpened,
-        monsterNpcSaved: _monsterNpcSaved,
-        stanceNpcDeparted: _stanceNpcDeparted,
-        setStanceNpcDeparted: (val) => { _stanceNpcDeparted = val; },
+        starterPortalEnabled: _state.starterPortalEnabled,
+        starterGateOpened: _state.starterGateOpened,
+        mummyGateOpened: _state.mummyGateOpened,
+        mummyEscapeGateOpened: _state.mummyEscapeGateOpened,
+        crystalShrineState: _state.crystalShrineState,
+        level1HoleRoomSpawned: _state.level1HoleRoomSpawned,
+        level1BtnPortcullisOpened: _state.level1BtnPortcullisOpened,
+        level1OgrePortcullisOpened: _state.level1OgrePortcullisOpened,
+        level1ShrineGateOpened: _state.level1ShrineGateOpened,
+        monsterNpcSaved: _state.monsterNpcSaved,
+        stanceNpcDeparted: _state.stanceNpcDeparted,
+        setStanceNpcDeparted: (val) => { _state.stanceNpcDeparted = val; },
         // Level 2 state flags
-        level2PortcullisOpened: _level2PortcullisOpened,
-        level2GiantPortcullisOpened: _level2GiantPortcullisOpened,
-        level2HoleClosed: _level2HoleClosed,
+        level2PortcullisOpened: _state.level2PortcullisOpened,
+        level2GiantPortcullisOpened: _state.level2GiantPortcullisOpened,
+        level2HoleClosed: _state.level2HoleClosed,
         // Level 3 state flags
-        level3PortalEnabled: _level3PortalEnabled,
+        level3PortalEnabled: _state.level3PortalEnabled,
         // Level 4 state flags
-        level4PortalEnabled: _level4PortalEnabled,
+        level4PortalEnabled: _state.level4PortalEnabled,
         minotaurDead,
+        // Trial-gate state (schematic trials, level 50)
+        openedTrialGates: _collections.openedTrialGates,
         // State setters (values written back to objects.js module scope)
         setStarterGate: (g) => { _starterGate = g; },
-        setLevel1HoleRoomSpawned: (val) => { _level1HoleRoomSpawned = val; },
+        setLevel1HoleRoomSpawned: (val) => { _state.level1HoleRoomSpawned = val; },
         // Shared refs for custom object loading code in level files
         interactables,
     };
@@ -2556,12 +2601,17 @@ function _applyEggGlow(model, contents) {
 
 function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.45, initialContents = ['Red Crystal'], offsetX = 0, offsetZ = 0) {
     _statueGridCells.add(`${row},${col}`); // block player movement through this cell
-    const persistenceKey = `${window.currentLevel},${col},${row}`;
-    let contents = _emptyAllContainers ? [] : [...initialContents];
+    // Prefix with "statue:" so eggs/shrines never collide with a chest sharing
+    // the same grid cell (e.g. the chest + Blue Crystal egg at L2 col 28 row 32).
+    const persistenceKey = `statue:${window.currentLevel},${col},${row}`;
+    let contents = [...initialContents];
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
     }
+    _containerContentsPersistence[persistenceKey] = contents;
+    const _spawnGen = _spawnGeneration;
     loader.load(asset('/items/ethereal_egg.glb'), (gltf) => {
+        if (_spawnGen !== _spawnGeneration) return;
         const model = gltf.scene;
         model.scale.setScalar(scale);
         model.position.set(col * CELL + offsetX, 0.02, row * CELL + offsetZ);
@@ -2681,13 +2731,14 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, sh
 
 
 function addWeaponRack(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, contents = []) {
-    const persistenceKey = `${window.currentLevel},${col},${row}`;
+    const persistenceKey = `rack:${window.currentLevel},${col},${row}`;
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
-    } else if (_emptyAllContainers) {
-        contents = [];
     }
+    _containerContentsPersistence[persistenceKey] = contents;
+    const _spawnGen = _spawnGeneration;
     loader.load(asset('/items/weapon-rack.glb'), (gltf) => {
+        if (_spawnGen !== _spawnGeneration) return;
         const model = gltf.scene;
         model.scale.setScalar(0.46);
         model.position.set(col * CELL + offsetX, 0.02, row * CELL + offsetZ);
@@ -2724,13 +2775,14 @@ function addWeaponRack(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, 
 }
 
 function addSpellCabinet(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, contents = []) {
-    const persistenceKey = `${window.currentLevel},${col},${row}`;
+    const persistenceKey = `cabinet:${window.currentLevel},${col},${row}`;
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
-    } else if (_emptyAllContainers) {
-        contents = [];
     }
+    _containerContentsPersistence[persistenceKey] = contents;
+    const _spawnGen = _spawnGeneration;
     loader.load(asset('/items/spell-cabinet.glb'), (gltf) => {
+        if (_spawnGen !== _spawnGeneration) return;
         const model = gltf.scene;
         model.scale.setScalar(0.7);
         model.position.set(col * CELL + offsetX, 0.0, row * CELL + offsetZ);
@@ -3039,13 +3091,14 @@ export function isDummyCombatActive() {
 }
 
 function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, contents = []) {
-    const persistenceKey = `${window.currentLevel},${col},${row}`;
+    const persistenceKey = `anvil:${window.currentLevel},${col},${row}`;
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
-    } else if (_emptyAllContainers) {
-        contents = [];
     }
+    _containerContentsPersistence[persistenceKey] = contents;
+    const _spawnGen = _spawnGeneration;
     loader.load(asset('/items/forge.glb'), (gltf) => {
+        if (_spawnGen !== _spawnGeneration) return;
         const model = gltf.scene;
         model.scale.setScalar(0.7);
         model.position.set(col * CELL + offsetX, 0.0, row * CELL + offsetZ);
@@ -3199,6 +3252,14 @@ function addPartyConfirmNPC(scene, loader, col, row, rotY = 0, offsetX = 0, offs
 }
 
 function addCustomNPC(scene, loader, col, row, glbPath, dialogue, scale = 0.55, rotY = 0, offsetX = 0, offsetZ = 0, proximityAudio = null, proximityRange = 2) {
+    // Determine the initial clickAudio: if the party has already spoken to
+    // this NPC (tracked in _collections.spokenToNpcs), start with the fallback
+    // line so the first-click intro doesn't replay on respawn / save-load.
+    const firstClickAudio = arguments[12] ?? null;
+    const fallbackClick = arguments[14] ?? null;
+    const npcKey = `${window.currentLevel},${col},${row}`;
+    const alreadySpoken = _collections.spokenToNpcs.has(npcKey);
+    const initialClickAudio = (alreadySpoken && fallbackClick) ? fallbackClick : firstClickAudio;
     loader.load(asset(glbPath), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(scale);
@@ -3215,8 +3276,8 @@ function addCustomNPC(scene, loader, col, row, glbPath, dialogue, scale = 0.55, 
                 child.userData.dialogue = dialogue;
                 child.userData.proximityAudio = proximityAudio;
                 child.userData.proximityRange = proximityRange;
-                child.userData.clickAudio = arguments[12]; // Support for clickAudio in 13th arg
-                child.userData.fallbackClickAudio = arguments[14]; // Support for fallbackClickAudio in 15th arg
+                child.userData.clickAudio = initialClickAudio;
+                child.userData.fallbackClickAudio = fallbackClick;
                 child.userData.onAudioEnd = arguments[15]; // optional one-shot callback after click audio ends
                 interactables.push(child);
                 if (child.material) {
@@ -3283,6 +3344,12 @@ function addDialogueNPC(scene, loader, col, row, dialogue, rotY = 0, offsetX = 0
 export function openPortcullis(p, skipEverything = false) {
     if (p.isOpen) return;
     p.isOpen = true;
+    // Schematic-trial gates (level 50) have no level-specific _state flag —
+    // they're tracked generically here so the open state survives save/load
+    // and level revisits. Other levels' gates use their existing _state flags.
+    if (window.currentLevel === 50) {
+        _collections.openedTrialGates.add(`${p.gridCol},${p.gridRow}`);
+    }
     if (!skipEverything) {
         showMessage("The portcullis slowly grinds open...");
         playGateOpeningSound();
@@ -3794,9 +3861,9 @@ function _forge() {
         } else {
             const isHQ = outcome === 'hq';
             for (let i = 0; i < 8; i++) _forgeContents[i] = null;
-            const isNew = !_knownForgeRecipes.has(matchedResult);
-            _knownForgeRecipes.delete(matchedResult);
-            _knownForgeRecipes.add(matchedResult);
+            const isNew = !_collections.knownForgeRecipes.has(matchedResult);
+            _collections.knownForgeRecipes.delete(matchedResult);
+            _collections.knownForgeRecipes.add(matchedResult);
             addLogEntry({ type: 'item', subtype: 'forge', itemName: matchedResult, hq: isHQ, materials: usedMaterials, time: Date.now() });
             _renderKnownForgeRecipes();
             setTimeout(() => {
@@ -4098,8 +4165,8 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
 
             let playNewAudio = false;
             essencesHeld.forEach(essence => {
-                if (!_seenEssences.has(essence)) {
-                    _seenEssences.add(essence);
+                if (!_collections.seenEssences.has(essence)) {
+                    _collections.seenEssences.add(essence);
                     playNewAudio = true;
                     const baseName = essence.replace(' Essence', '');
                     for (const suffix of ['Armour Parchment', 'Weapons Parchment']) {
@@ -4625,7 +4692,7 @@ function _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx) {
             _applyEggGlow(_activeShrineLootObj.userData.eggModel, contents);
             if (contents.filter(c => c !== null).length === 0) {
                 const ud = _activeShrineLootObj.userData;
-                _eggEmptiedSet.add(`${window.currentLevel},${ud.gridRow},${ud.gridCol}`);
+                _collections.eggEmptied.add(`${window.currentLevel},${ud.gridRow},${ud.gridCol}`);
             }
         }
         // Save state immediately
@@ -4658,7 +4725,7 @@ function _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx) {
             // If empty, mark as emptied in persistence
             if (contents.filter(c => c !== null).length === 0) {
                 const ud = _activeShrineLootObj.userData;
-                _eggEmptiedSet.add(`${window.currentLevel},${ud.gridRow},${ud.gridCol}`);
+                _collections.eggEmptied.add(`${window.currentLevel},${ud.gridRow},${ud.gridCol}`);
             }
         }
         // Save state immediately
@@ -4826,9 +4893,9 @@ function _transmute() {
         } else {
             const isHQ = outcome === 'hq';
             for (let i = 0; i < 8; i++) _alchemyContents[i] = null;
-            const isNew = !_knownAlchemyRecipes.has(matchedResult);
-            _knownAlchemyRecipes.delete(matchedResult);
-            _knownAlchemyRecipes.add(matchedResult);
+            const isNew = !_collections.knownAlchemyRecipes.has(matchedResult);
+            _collections.knownAlchemyRecipes.delete(matchedResult);
+            _collections.knownAlchemyRecipes.add(matchedResult);
             addLogEntry({ type: 'item', subtype: 'alchemy', itemName: matchedResult, hq: isHQ, ingredients: usedIngredients, time: Date.now() });
             _renderKnownAlchemyRecipes();
             setTimeout(() => {
@@ -5100,13 +5167,14 @@ function _hideChestCtxMenu() {
 }
 
 function addBonePile(scene, loader, col, row, contents = []) {
-    const persistenceKey = `${window.currentLevel},${col},${row}`;
+    const persistenceKey = `bone:${window.currentLevel},${col},${row}`;
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
-    } else if (_emptyAllContainers) {
-        contents = [];
     }
+    _containerContentsPersistence[persistenceKey] = contents;
+    const _spawnGen = _spawnGeneration;
     loader.load(asset('/items/Meshy_AI_Bone_pile_0221211647_texture.glb'), (gltf) => {
+        if (_spawnGen !== _spawnGeneration) return;
         const model = gltf.scene;
         model.scale.setScalar(0.4);
         model.position.set(col * CELL, 0.05, row * CELL);
@@ -5142,25 +5210,41 @@ function addBonePile(scene, loader, col, row, contents = []) {
     });
 }
 
-export function spawnCorpse(col, row, droppedItems = []) {
-    // Create corpse with 25 inventory slots — fill first slots with any dropped items
-    const corpseContents = [
-        null, null, null, null, null,
-        null, null, null, null, null,
-        null, null, null, null, null,
-        null, null, null, null, null,
-        null, null, null, null, null
-    ];
-
-    // Place dropped items into the first available slots
-    let slotIdx = 0;
-    for (const itemName of droppedItems) {
-        if (slotIdx >= corpseContents.length) break;
-        corpseContents[slotIdx] = itemName;
-        slotIdx++;
+/**
+ * Spawn a corpse (bone pile) at the given grid cell.
+ *
+ * Two call modes:
+ *   • Fresh kill — pass `droppedItems` (a flat list of item names). A new
+ *     25-slot inventory array is built and the items go into the first slots.
+ *   • Reload — pass `existingContents` (an already-built 25-slot array, e.g.
+ *     `m.corpseContents` from a saved monster). It's used directly so that any
+ *     later loot/deposit edits the same array the monster holds a reference to.
+ *
+ * Returns the corpseContents array so callers can stash it on `m.corpseContents`.
+ */
+export function spawnCorpse(col, row, droppedItems = [], existingContents = null) {
+    let corpseContents;
+    if (Array.isArray(existingContents) && existingContents.length > 0) {
+        corpseContents = existingContents;
+    } else {
+        corpseContents = [
+            null, null, null, null, null,
+            null, null, null, null, null,
+            null, null, null, null, null,
+            null, null, null, null, null,
+            null, null, null, null, null
+        ];
+        let slotIdx = 0;
+        for (const itemName of droppedItems) {
+            if (slotIdx >= corpseContents.length) break;
+            corpseContents[slotIdx] = itemName;
+            slotIdx++;
+        }
     }
 
+    const _spawnGen = _spawnGeneration;
     _gltfLoader.load(asset('/items/Meshy_AI_Bone_pile_0221211647_texture.glb'), (gltf) => {
+        if (_spawnGen !== _spawnGeneration) return;
         const model = gltf.scene;
         model.scale.setScalar(0.4);
         model.position.set(col * CELL, 0.05, row * CELL);
@@ -5193,6 +5277,7 @@ export function spawnCorpse(col, row, droppedItems = []) {
 
         objectsGroup.add(model);
     });
+    return corpseContents;
 }
 
 export function spawnDroppedItem(col, row, itemName, quantity = 1) {
@@ -5291,77 +5376,45 @@ export function spawnDroppedItem(col, row, itemName, quantity = 1) {
 /** Returns all gate/portal progression flags. */
 export function getWorldFlags() {
     return {
-        mummyGateOpened: _mummyGateOpened,
-        mummyEscapeGateOpened: _mummyEscapeGateOpened,
-        starterGateOpened: _starterGateOpened,
-        starterPortalEnabled: _starterPortalEnabled,
-        level2PortcullisOpened: _level2PortcullisOpened,
-        level2GiantPortcullisOpened: _level2GiantPortcullisOpened,
-        level2HoleClosed: _level2HoleClosed,
-        level1HoleRoomSpawned: _level1HoleRoomSpawned,
-        level1BtnPortcullisOpened: _level1BtnPortcullisOpened,
-        level1OgrePortcullisOpened: _level1OgrePortcullisOpened,
-        level1ShrineGateOpened: _level1ShrineGateOpened,
-        monsterNpcSaved: _monsterNpcSaved,
-        stanceNpcDeparted: _stanceNpcDeparted,
-        disarmedTraps: [..._trapDisarmedSet],
-        crystalShrineState: _crystalShrineState,
-        level3PortalEnabled: _level3PortalEnabled,
-        level4PortalEnabled: _level4PortalEnabled,
-        seenEssences: [..._seenEssences],
-        unlockedRecipes: [..._unlockedRecipes],
+        ..._state,
+        disarmedTraps: [..._collections.disarmedTraps],
+        seenEssences: [..._collections.seenEssences],
+        unlockedRecipes: [..._collections.unlockedRecipes],
         monsterNpcStock: _monsterNpcStock.map(e => ({ ...e })),
     };
 }
 
-export function setLevel1HoleRoomSpawned(val) { _level1HoleRoomSpawned = val; }
-export function setStanceNpcDeparted(val) { _stanceNpcDeparted = val; }
+export function setLevel1HoleRoomSpawned(val) { _state.level1HoleRoomSpawned = val; }
+export function setStanceNpcDeparted(val) { _state.stanceNpcDeparted = val; }
 
 /** Restores gate/portal flags. Call BEFORE spawnObjectsForLevel(). */
 export function setWorldFlags(flags) {
     if (!flags) return;
-    _mummyGateOpened = flags.mummyGateOpened ?? false;
-    _mummyEscapeGateOpened = flags.mummyEscapeGateOpened ?? false;
-    _starterGateOpened = flags.starterGateOpened ?? false;
-    _starterPortalEnabled = flags.starterPortalEnabled ?? false;
-    _level2PortcullisOpened = flags.level2PortcullisOpened ?? false;
-    _level2GiantPortcullisOpened = flags.level2GiantPortcullisOpened ?? false;
-    _level2HoleClosed = flags.level2HoleClosed ?? false;
-    _level1HoleRoomSpawned = flags.level1HoleRoomSpawned ?? false;
-    _level1BtnPortcullisOpened = flags.level1BtnPortcullisOpened ?? false;
-    _level1OgrePortcullisOpened = flags.level1OgrePortcullisOpened ?? false;
-    _level1ShrineGateOpened = flags.level1ShrineGateOpened ?? false;
-    _monsterNpcSaved = flags.monsterNpcSaved ?? false;
-    _stanceNpcDeparted = flags.stanceNpcDeparted ?? false;
-    _crystalShrineState = flags.crystalShrineState ?? 0;
-    _level3PortalEnabled = flags.level3PortalEnabled ?? false;
-    _level4PortalEnabled = flags.level4PortalEnabled ?? false;
-    _seenEssences = new Set(flags.seenEssences ?? []);
-    _unlockedRecipes = new Set(flags.unlockedRecipes ?? []);
-    _monsterNpcStock = (flags.monsterNpcStock ?? []).map(_normStock).filter(Boolean);
-    // Migration: old saves used per-item parchment names (e.g. "Ogre Helm Parchment").
-    // If essences were seen but no new-style grouped parchments are in stock, reset
-    // _seenEssences so Barnaby re-offers the correct grouped parchments on next visit.
-    const hasNewStyleParchment = _monsterNpcStock.some(
-        e => e.name.endsWith(' Armour Parchment') || e.name.endsWith(' Weapons Parchment')
-    );
-    if (_seenEssences.size > 0 && !hasNewStyleParchment) {
-        _seenEssences.clear();
+    // Reset _state to its initial defaults, then overlay any keys present in
+    // the incoming flags. This ensures a save with fewer keys doesn't leave
+    // stale values from a prior session on _state.
+    for (const key of Object.keys(_state)) {
+        if (flags[key] !== undefined) {
+            _state[key] = flags[key];
+        } else {
+            // Default: 0 for crystalShrineState (number), false otherwise.
+            _state[key] = (typeof _state[key] === 'number') ? 0 : false;
+        }
     }
+    _collections.seenEssences = new Set(flags.seenEssences ?? []);
+    _collections.unlockedRecipes = new Set(flags.unlockedRecipes ?? []);
+    _collections.disarmedTraps = new Set(flags.disarmedTraps ?? []);
+    _monsterNpcStock = (flags.monsterNpcStock ?? []).map(_normStock).filter(Boolean);
     // The Aqua Man pit lives at (32, 23) on level 2. Restoring the "hole closed"
     // flag must mutate that cell so the pit stops swallowing the party after a
     // save+refresh. (Previously wrote to [17][23] by mistake — giant room, not the pit.)
-    if (_level2HoleClosed) level2Map[32][23] = CELL_FLOOR;
-    if (_level1HoleRoomSpawned) {
+    if (_state.level2HoleClosed) level2Map[32][23] = CELL_FLOOR;
+    if (_state.level1HoleRoomSpawned) {
         for (let r = 24; r <= 26; r++) {
             for (let c = 1; c <= 3; c++) {
                 level1Map[r][c] = CELL_FLOOR;
             }
         }
-    }
-    _trapDisarmedSet.clear();
-    if (Array.isArray(flags.disarmedTraps)) {
-        for (const key of flags.disarmedTraps) _trapDisarmedSet.add(key);
     }
 }
 
@@ -5450,11 +5503,11 @@ function _renderKnownAlchemyRecipes() {
     const list = document.getElementById('alchemy-known-recipes-list');
     if (!list) return;
     list.innerHTML = '';
-    if (_knownAlchemyRecipes.size === 0) {
+    if (_collections.knownAlchemyRecipes.size === 0) {
         list.innerHTML = '<div class="bench-no-recipes">No recipes discovered yet.</div>';
         return;
     }
-    const allNames = [..._knownAlchemyRecipes].reverse();
+    const allNames = [..._collections.knownAlchemyRecipes].reverse();
     const filtered = _alchemyRecipeFilter === 'craftable'
         ? allNames.filter(name => {
               const r = POTIONS_DATA.find(p => p.name === name);
@@ -5493,11 +5546,11 @@ function _renderKnownForgeRecipes() {
     const list = document.getElementById('anvil-known-recipes-list');
     if (!list) return;
     list.innerHTML = '';
-    if (_knownForgeRecipes.size === 0) {
+    if (_collections.knownForgeRecipes.size === 0) {
         list.innerHTML = '<div class="bench-no-recipes">No recipes discovered yet.</div>';
         return;
     }
-    const allNames = [..._knownForgeRecipes].reverse();
+    const allNames = [..._collections.knownForgeRecipes].reverse();
     const filtered = _forgeRecipeFilter === 'craftable'
         ? allNames.filter(name => {
               const r = FORGE_DATA.find(r => r.name === name);
@@ -5584,8 +5637,8 @@ function _returnForgeIngredients() {
 
 function _autoPopulateAlchemySlots(recipe) {
     // Move to most recently used
-    _knownAlchemyRecipes.delete(recipe.name);
-    _knownAlchemyRecipes.add(recipe.name);
+    _collections.knownAlchemyRecipes.delete(recipe.name);
+    _collections.knownAlchemyRecipes.add(recipe.name);
     _renderKnownAlchemyRecipes();
 
     // Return any existing ingredient slot contents to inventory
@@ -5620,8 +5673,8 @@ function _autoPopulateAlchemySlots(recipe) {
 
 function _autoPopulateForgeSlots(recipe) {
     // Move to most recently used
-    _knownForgeRecipes.delete(recipe.name);
-    _knownForgeRecipes.add(recipe.name);
+    _collections.knownForgeRecipes.delete(recipe.name);
+    _collections.knownForgeRecipes.add(recipe.name);
     _renderKnownForgeRecipes();
 
     // Return any existing material slot contents to inventory
@@ -5691,10 +5744,10 @@ function _getForgeRecipesForParchment(parchmentType, recipeName, essenceName) {
 
 function _submitParchmentToAlchemy(parchmentDef, memberIdx, invIdx) {
     const names = _getAlchemyRecipesForParchment(parchmentDef.parchmentType);
-    const newCount = names.filter(n => !_knownAlchemyRecipes.has(n)).length;
+    const newCount = names.filter(n => !_collections.knownAlchemyRecipes.has(n)).length;
     names.forEach(n => {
-        _knownAlchemyRecipes.delete(n);
-        _knownAlchemyRecipes.add(n);
+        _collections.knownAlchemyRecipes.delete(n);
+        _collections.knownAlchemyRecipes.add(n);
     });
     party[memberIdx].inventory[invIdx] = null;
     _renderKnownAlchemyRecipes();
@@ -5708,10 +5761,10 @@ function _submitParchmentToAlchemy(parchmentDef, memberIdx, invIdx) {
 
 function _submitParchmentToForge(parchmentDef, memberIdx, invIdx) {
     const names = _getForgeRecipesForParchment(parchmentDef.parchmentType, parchmentDef.recipeName, parchmentDef.essenceName);
-    const newCount = names.filter(n => !_knownForgeRecipes.has(n)).length;
+    const newCount = names.filter(n => !_collections.knownForgeRecipes.has(n)).length;
     names.forEach(n => {
-        _knownForgeRecipes.delete(n);
-        _knownForgeRecipes.add(n);
+        _collections.knownForgeRecipes.delete(n);
+        _collections.knownForgeRecipes.add(n);
     });
     party[memberIdx].inventory[invIdx] = null;
     _renderKnownForgeRecipes();
@@ -5907,9 +5960,8 @@ function _hideAnvilParchmentPicker() {
 // ─────────────────────────────────────────────
 
 /**
- * Capture the non-derived world state. Per-level gate flags (derived from the
- * "cleared" rule) are handled separately by save-level-state.js and are baked
- * into the final flag payload during restore.
+ * Capture this module's world state for a future save system. Pure getter —
+ * no side effects, no orchestration. Pair with `restoreWorldState`.
  */
 export function captureWorldState() {
     return {
@@ -5917,10 +5969,13 @@ export function captureWorldState() {
         merchantStock: getMerchantStock(),
         potionMerchantStock: getPotionMerchantStock(),
         stanceMerchantStock: getStanceMerchantStock(),
-        knownAlchemyRecipes: [..._knownAlchemyRecipes],
-        knownForgeRecipes: [..._knownForgeRecipes],
-        eggEmptied: Array.from(_eggEmptiedSet),
+        knownAlchemyRecipes: [..._collections.knownAlchemyRecipes],
+        knownForgeRecipes: [..._collections.knownForgeRecipes],
+        eggEmptied: Array.from(_collections.eggEmptied),
+        openedTrialGates: Array.from(_collections.openedTrialGates),
+        spokenToNpcs: Array.from(_collections.spokenToNpcs),
         containerContents: _containerContentsPersistence,
+        starterStashItems: _persistedStarterStashItems,
     };
 }
 
@@ -5930,8 +5985,17 @@ export function restoreWorldState(data) {
     if (data.merchantStock) setMerchantStock(data.merchantStock);
     if (data.potionMerchantStock) setPotionMerchantStock(data.potionMerchantStock);
     if (data.stanceMerchantStock) setStanceMerchantStock(data.stanceMerchantStock);
-    if (data.knownAlchemyRecipes) data.knownAlchemyRecipes.forEach(r => _knownAlchemyRecipes.add(r));
-    if (data.knownForgeRecipes) data.knownForgeRecipes.forEach(r => _knownForgeRecipes.add(r));
-    if (data.eggEmptied) _eggEmptiedSet = new Set(data.eggEmptied);
-    if (data.containerContents) _containerContentsPersistence = data.containerContents;
+    _collections.knownAlchemyRecipes = new Set(data.knownAlchemyRecipes ?? []);
+    _collections.knownForgeRecipes = new Set(data.knownForgeRecipes ?? []);
+    _collections.eggEmptied = new Set(data.eggEmptied ?? []);
+    _collections.openedTrialGates = new Set(data.openedTrialGates ?? []);
+    _collections.spokenToNpcs = new Set(data.spokenToNpcs ?? []);
+    _containerContentsPersistence = data.containerContents ?? {};
+    // Only apply starterStashItems if the field is explicitly present in the
+    // payload. An old save without the field would otherwise clobber the
+    // live `_persistedStarterStashItems` to null, causing the stash to
+    // respawn with the level-def defaults.
+    if ('starterStashItems' in data) {
+        setPersistedStarterStashItems(data.starterStashItems);
+    }
 }

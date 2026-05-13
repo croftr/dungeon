@@ -974,7 +974,7 @@ export function updateAudio(dt) {
 
   // Level 3 (Minotaur level) and the Arena have their own atmospheric music
   // that should not be interrupted by the generic battle track.
-  if (shouldBeInCombat && !isCombatMusicPlaying && _ambientLevel !== 3 && !window._arenaMode) {
+  if (shouldBeInCombat && !isCombatMusicPlaying && _ambientLevel !== 3 && !window.arenaState?.active) {
     _switchToCombatMusic();
   } else if (!shouldBeInCombat && isCombatMusicPlaying) {
     _switchToNormalMusic();

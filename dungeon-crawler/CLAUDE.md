@@ -5,64 +5,59 @@
 - Always work directly on `main`. Do not create new branches unless explicitly asked.
 - Commit changes directly to `main` and do not open PRs unless asked.
 
-## Save Game System (v7 — Checkpoint / Level-State)
+## Save Game
 
-Saves fire automatically on dungeon-level transitions. No manual save, no mid-level save. The saved payload describes *progression*, not a snapshot of every game object — world state is rebuilt by re-running the level spawn code with the right flags.
+The game has a working save/load system. **Any code change that introduces new mutable state must be save-compatible.** The rules below are non-negotiable; full guide and common pitfalls are in [SAVE_GAME.md](SAVE_GAME.md) — read it before adding any persistent flag, set, container, or NPC state.
 
-### Core model
-- Dungeon levels 1–5 have two canonical states: **start** (pristine) and **end** (all gates open, all chests empty; non-boss monsters respawned to full HP; bosses stay dead only if previously killed — see "Boss monsters" below).
-- Level 0 is the hub and never "clears." The Level 0 starter stash is the only persistent bank.
-- `currentLevelReached` is the highest dungeon level the player has entered. On load, every dungeon level `< currentLevelReached` (and ≠ `currentLevel`) is rebuilt in end state; `currentLevel` is rebuilt in start state and the player spawns at its entry portal (`findCell(CELL_START)`).
-- **Monster alive state is in-memory only.** Killed monsters stay dead across in-session level transitions (their `m.alive = false` persists in the `monsters[]` array). `applyClearedLevelMonsters` only runs during `loadCheckpoint` (save-load), not on within-session revisits.
-- Items left in chests on a level that flips to end state are **lost** (by design).
+### The two rules
 
-### Key files
-- `src/save-checkpoint.js` — `captureCheckpoint`, `loadCheckpoint`, `autoSaveCheckpoint`, `SAVE_VERSION = 7`
-- `src/save-level-state.js` — `buildEndStateFlags(clearedLevels)`, per-level flag whitelist
-- `src/monster.js` — `applyClearedLevelMonsters(n)` implements the cleared-level monster transform
-- `src/save-game.js` — thin shim: `listSaves`, `triggerLoad`, `consumePendingLoad`, `deleteSave` + startup purge of pre-v7 keys
-- `src/main.js` — `loadLevel()` calls `autoSaveCheckpoint()` on transitions; `setEmptyAllContainers` + `applyClearedLevelMonsters` apply the end-state transform on cleared levels
-- `src/objects.js` — `setEmptyAllContainers` sentinel + `snapshotStarterStash` / `getPersistedStarterStashItems` for the stash bank
+1. **No hidden state.** Mutable game state must live on a known canonical root (listed below). Never put save-relevant state in module-local `let` bindings, closures, mesh `userData`, DOM attributes, or `window._*` ad-hoc bags — none of these survive a page reload.
+2. **JSON-able values only.** Numbers, strings, booleans, plain objects/arrays. Sets and Maps must be converted at the capture/restore boundary (`[...set]` on capture, `new Set(arr)` on restore). No class instances, THREE.js refs, DOM nodes, or functions.
 
-### How state is captured
-Instead of a registry, `captureCheckpoint()` calls explicit `capture*` / `restore*` helpers on each module:
-| Module | Captures |
-|--------|----------|
-| `party.js` | `capturePartyState` / `restorePartyState` — members, gold, autoAttack flags |
+### Canonical state roots
+
+| Root | What it holds | Module |
+|---|---|---|
+| `party[]` | members, equipment, inventory, skills, gold | `party.js` |
+| `monsters[]` | per-monster alive/hp/hpMax/position/buffs/corpse contents | `monster.js` |
+| `_state` | gate / portal / NPC progression flags, crystal shrine state | `objects.js` |
+| `_collections` (objects.js) | Sets of "things that happened" — known recipes, seen essences, disarmed traps, opened trial gates, spoken-to NPCs, etc. | `objects.js` |
+| `_collections` (monster.js) | dropped boss essences, killed bosses | `monster.js` |
+| `_containerContentsPersistence` | chest/rack/cabinet/anvil/bone-pile contents, keyed by `"<type>:<level>,<col>,<row>"` | `objects.js` |
+| `_persistedStarterStashItems` | Level 0 stash contents (separate channel from the dict above) | `objects.js` |
+| `window.videoFlags` | cutscene seen flags | `main.js` |
+| `window.currentLevel`, `currentLevelReached`, `easyMode`, `helpEnabled` | session settings | `main.js` |
+| `window.arenaState` | ephemeral arena session state — **intentionally NOT saved** | `main.js` |
+
+If your new state doesn't fit any existing root, add a new `capture*` / `restore*` pair to the owning module and wire it into `src/save.js`. **Do not** add free-floating fields to the bundle.
+
+### Capture / restore boundary
+
+Every owning module exposes a pair. `src/save.js`'s `captureSave()` calls them all in order; `applySavePreInit` + `applySavePostInit` mirror on the way back:
+
+| Module | Captures / restores |
+|--------|---------------------|
+| `party.js` | `capturePartyState` / `restorePartyState` |
+| `player.js` | `capturePlayerState` / `restorePlayerState` |
+| `monster.js` | `captureMonsterState` / `restoreMonsterState` |
+| `objects.js` | `captureWorldState` / `restoreWorldState` (and `getWorldFlags` / `setWorldFlags` underneath) |
 | `quest.js` | `getQuestLog` / `setQuestLog` |
-| `recruits.js` | `captureRecruits` / `restoreRecruits` — recruit isRecruited map |
-| `monster.js` | `captureMonsterState` / `restoreMonsterState` — droppedBossEssences, killedBosses |
-| `essentiary.js` | `captureEssentiary` / `restoreEssentiary` — arena monster tiers |
-| `objects.js` | `captureWorldState` / `restoreWorldState` — flags, merchant/potion stock, known recipes |
-| `main.js` | `captureVideoFlags` / `restoreVideoFlags` — cutscene seen flags |
+| `recruits.js` | `captureRecruits` / `restoreRecruits` |
+| `essentiary.js` | `captureEssentiary` / `restoreEssentiary` |
+| `help.js` | `captureHelpState` / `restoreHelpState` |
+| `main.js` | `window.videoFlags` (in-place); inline session bag |
 
-Player position and facing are NOT saved — they derive from the current level's entry portal.
+### Workflow when adding state
 
-### Save slots
-Keyed by `currentLevelReached` (`dungeon-save-lvl-<n>`). Each new checkpoint overwrites the slot for that level tier — so the player has coarse undo between level milestones.
+1. Pick the canonical root from the table above. If none fits, add a new module pair.
+2. Make sure your value is JSON-able. Sets/Maps → convert at the boundary.
+3. If level spawn code reads it, your restore must run *before* `loadLevel` in `applySavePostInit` (the current order already does this — mirror it).
+4. If you add a new container spawner or `loader.load` callback that pushes to `interactables`, **add the spawn-generation guard** (see SAVE_GAME.md "Async loader callbacks").
+5. Test: save → reload → confirm state persists. Especially across level transitions.
 
-### Adding new persistent state
-1. **New party member field** — automatic (party is deep-cloned by `capturePartyState`).
-2. **New module state** — add `captureFoo` / `restoreFoo` exports and call them from `captureCheckpoint` / `loadCheckpoint` in `save-checkpoint.js`.
-3. **New flag that applies to a specific dungeon level in end state** — add it to the whitelist in `getEndStateFlagsForLevel(n)` in `save-level-state.js`.
+### Bundle mechanics (one paragraph)
 
-### What NOT to save
-- Per-level gate flags — derived from the end-state rule.
-- Container contents outside the starter stash — chests on cleared levels are forced empty; chests on the current level are re-spawned fresh.
-- Per-monster HP / alive on cleared levels — `applyClearedLevelMonsters` respawns non-bosses and leaves killed bosses dead on load. Only the global `killedBosses` set is persisted.
-- Player position — derived from `findCell(CELL_START)` on current level.
-
-### Save-load flow
-1. Startup: `save-game.js` purges any pre-v7 keys from localStorage.
-2. Player clicks a save in the Esc menu → `triggerLoad` copies it to `sessionStorage` and reloads the page.
-3. On reload, main.js reads `consumePendingLoad()` → hydrates recruits pre-init → `loadCheckpoint(save)` after init:
-   - Restore party / quests / recruits / monster / essentiary / video.
-   - Build flag payload = saved `worldFlags` ∪ `buildEndStateFlags(cleared levels)`; apply with `setWorldFlags`.
-   - `applyClearedLevelMonsters(l)` for each cleared level.
-   - `window.loadLevel(save.currentLevel)` — spawns start state.
-
-### Boss monsters
-A monster is a "boss" iff its entry in `src/data/monsters.json` has an `image` field. On kill, `_applyDamage` in `monster.js` adds its `${level}:${id}` to the global `_killedBosses` set (captured in the save). On cleared-level rebuild, bosses in that set stay dead; all other monsters respawn to full HP. Summoned monsters (e.g. Treeman treekin, flagged `m.summoned = true`) are skipped entirely.
+`captureSave()` builds a JSON bundle from each module's `capture*` and writes it to `localStorage` under `dungeon-save-<timestamp>`. Saving is blocked in the arena and schematic trials (`whyCantSave()` in `src/save.js`). Loading copies the bundle into `sessionStorage` and reloads the page — this is the cleanup pass; every in-flight tween/scene-object/animation is thrown away by definition, so save only captures durable state. On the new page, `applySavePreInit` runs before `initRecruits`/`initObjects` (so the level spawner uses restored recruit + session state); `applySavePostInit` runs at the end (after `window.loadLevel` is defined) to apply everything else and trigger the loaded level.
 
 ## Architecture Quick Reference
 

@@ -30,7 +30,7 @@
             "interval": 5
         },
         "specialBonuses": [
-            "Lights the way (as a torch)"
+            "Lights the way"
         ]
     },
     {
@@ -80,8 +80,9 @@
         "job": [
             "Barbarian"
         ],
-        "statBonuses": {
-            "strength": 3
+        "hpRegen": {
+            "amount": 1,
+            "interval": 5
         },
         "skillBonuses": {
             "critChance": 0.05

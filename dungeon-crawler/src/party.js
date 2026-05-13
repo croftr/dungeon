@@ -946,7 +946,7 @@ export function setHp(index, value) {
 }
 
 function _showGameOver() {
-  if (window._arenaMode) {
+  if (window.arenaState?.active) {
     window._arenaDefeat?.();
     return;
   }
