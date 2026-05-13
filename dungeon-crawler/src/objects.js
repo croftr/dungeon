@@ -218,6 +218,7 @@ const _collections = {
   unlockedRecipes: new Set(),      // Barnaby-unlocked parchments
   disarmedTraps: new Set(),        // "row,col" keys of disarmed traps
   eggEmptied: new Set(),           // "level,row,col" keys of emptied ethereal eggs
+  openedTrialGates: new Set(),     // "col,row" keys of opened schematic-trial portcullises (level 50)
 };
 
 const ALCHEMY_SLOTS = 9; // 8 ingredients + 1 result
@@ -2314,6 +2315,8 @@ export function spawnObjectsForLevel() {
         // Level 4 state flags
         level4PortalEnabled: _state.level4PortalEnabled,
         minotaurDead,
+        // Trial-gate state (schematic trials, level 50)
+        openedTrialGates: _collections.openedTrialGates,
         // State setters (values written back to objects.js module scope)
         setStarterGate: (g) => { _starterGate = g; },
         setLevel1HoleRoomSpawned: (val) => { _state.level1HoleRoomSpawned = val; },
@@ -3302,6 +3305,12 @@ function addDialogueNPC(scene, loader, col, row, dialogue, rotY = 0, offsetX = 0
 export function openPortcullis(p, skipEverything = false) {
     if (p.isOpen) return;
     p.isOpen = true;
+    // Schematic-trial gates (level 50) have no level-specific _state flag —
+    // they're tracked generically here so the open state survives save/load
+    // and level revisits. Other levels' gates use their existing _state flags.
+    if (window.currentLevel === 50) {
+        _collections.openedTrialGates.add(`${p.gridCol},${p.gridRow}`);
+    }
     if (!skipEverything) {
         showMessage("The portcullis slowly grinds open...");
         playGateOpeningSound();
@@ -5920,6 +5929,7 @@ export function captureWorldState() {
         knownAlchemyRecipes: [..._collections.knownAlchemyRecipes],
         knownForgeRecipes: [..._collections.knownForgeRecipes],
         eggEmptied: Array.from(_collections.eggEmptied),
+        openedTrialGates: Array.from(_collections.openedTrialGates),
         containerContents: _containerContentsPersistence,
         starterStashItems: _persistedStarterStashItems,
     };
@@ -5934,6 +5944,7 @@ export function restoreWorldState(data) {
     _collections.knownAlchemyRecipes = new Set(data.knownAlchemyRecipes ?? []);
     _collections.knownForgeRecipes = new Set(data.knownForgeRecipes ?? []);
     _collections.eggEmptied = new Set(data.eggEmptied ?? []);
+    _collections.openedTrialGates = new Set(data.openedTrialGates ?? []);
     _containerContentsPersistence = data.containerContents ?? {};
     // Only apply starterStashItems if the field is explicitly present in the
     // payload. An old save without the field would otherwise clobber the

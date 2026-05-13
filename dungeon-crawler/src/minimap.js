@@ -290,7 +290,7 @@ const elPos = document.getElementById('st-pos');
 const elFacing = document.getElementById('st-facing');
 const elLevel = document.getElementById('st-level');
 
-const LEVEL_NAMES = {
+export const LEVEL_NAMES = {
   0: 'Crystal Vault',
   1: 'Level 1',
   2: 'Level 2',

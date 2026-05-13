@@ -26,19 +26,11 @@ import { getQuestLog, setQuestLog } from './quest.js';
 import { captureRecruits, restoreRecruits, RECRUITS } from './recruits.js';
 import { captureEssentiary, restoreEssentiary } from './essentiary.js';
 import { captureHelpState, restoreHelpState } from './help.js';
+import { LEVEL_NAMES } from './minimap.js';
 
 export const SAVE_VERSION = 1;
 const SAVE_PREFIX = 'dungeon-save-';
 const PENDING_KEY = 'dungeon-pending-load';
-
-const LEVEL_NAMES = {
-  0: 'Starter Room',
-  1: 'Western Dungeon',
-  2: 'Deep Passage',
-  3: 'Abyssal Crypts',
-  4: 'Forgotten Vault',
-  5: 'Hall of Heroes',
-};
 
 function _levelName(n) {
   return LEVEL_NAMES[n] ?? `Level ${n}`;

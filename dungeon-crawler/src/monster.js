@@ -3404,6 +3404,7 @@ export function captureMonsterState() {
       level: m.level ?? 1,
       alive: m.alive,
       hp: m.hp,
+      hpMax: m.hpMax,
       gridRow: m.gridRow,
       gridCol: m.gridCol,
       facing: m.facing,
@@ -3437,6 +3438,12 @@ export function restoreMonsterState(data) {
       if (!s) continue;
       m.alive = s.alive;
       m.hp = s.hp;
+      // hpMax must be restored too, otherwise an easy-mode-halved monster
+      // ends up with restored hp (e.g. 50) but a fresh-init hpMax (e.g. 100),
+      // and the HP bar shows partial fill even though the monster is at full
+      // health. easyModeApplied=true also blocks loadMonstersForLevel from
+      // re-halving the fresh hpMax.
+      if (s.hpMax !== undefined) m.hpMax = s.hpMax;
       if (s.gridRow !== undefined) m.gridRow = s.gridRow;
       if (s.gridCol !== undefined) m.gridCol = s.gridCol;
       if (s.facing !== undefined) m.facing = s.facing;
