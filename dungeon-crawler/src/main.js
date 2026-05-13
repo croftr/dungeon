@@ -6,7 +6,7 @@ import ELEMENT_FLOORS from './data/element-floors.json';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles, invalidateParticleTextures } from './particles.js';
-import { initMinimap, drawMinimap, updateStatus, showMessage } from './minimap.js';
+import { initMinimap, drawMinimap, updateStatus, showMessage, LEVEL_NAMES } from './minimap.js';
 import { initParty, updateParty, party, refreshPartyCards, autoAttack, autoRangeAttack, setHp, flashPortraitHit, showMemberDamage, isPartyUnseen, resurrectAll, respawnAtHub, getEffectiveElementalResistances } from './party.js';
 import { getItemDef } from './items.js';
 import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
@@ -720,7 +720,7 @@ function _readStartOptions() {
   window.helpEnabled = document.getElementById('help-toggle')?.checked ?? true;
 }
 
-function finishIntro() {
+function finishIntro({ suppressHelp = false } = {}) {
   if (!introOverlay) return;
   fadeOutThemeTune(1500);
   introOverlay.style.transition = 'opacity 1.5s ease';
@@ -735,7 +735,7 @@ function finishIntro() {
     introOverlay.remove();
     startMusic();
 
-    if (window.helpEnabled) {
+    if (window.helpEnabled && !suppressHelp) {
       showHelpDialog({
         text: "Use the keys to move and turn.",
         image: asset("/source/wasd_qe_keys.png"),
@@ -1921,7 +1921,7 @@ function _showLevelTitle(levelNum) {
   const overlay = document.getElementById('level-title-overlay');
   const text = document.getElementById('level-title-text');
   if (!overlay || !text) return;
-  text.textContent = `Level ${levelNum}`;
+  text.textContent = LEVEL_NAMES[levelNum] ?? `Level ${levelNum}`;
   overlay.classList.remove('hidden');
   // Force reflow so the transition fires
   overlay.getBoundingClientRect();
@@ -1933,6 +1933,8 @@ function _showLevelTitle(levelNum) {
     setTimeout(() => overlay.classList.add('hidden'), 800);
   }, 2000);
 }
+// Expose for cross-module use (save-load uses it to announce the loaded level).
+window._showLevelTitle = _showLevelTitle;
 
 function finishPortalVideo() {
   if (!portalOverlay) {

@@ -27,6 +27,7 @@ import { captureRecruits, restoreRecruits, RECRUITS } from './recruits.js';
 import { captureEssentiary, restoreEssentiary } from './essentiary.js';
 import { captureHelpState, restoreHelpState } from './help.js';
 import { LEVEL_NAMES } from './minimap.js';
+import { setAmbientLevel } from './audio.js';
 
 export const SAVE_VERSION = 1;
 const SAVE_PREFIX = 'dungeon-save-';
@@ -237,7 +238,78 @@ export function applySavePostInit(save, ctx = {}) {
     window._isRestoring = false;
   }
 
-  if (ctx.finishIntro) ctx.finishIntro();
+  // Loading a save fires `loadLevel(save.level)` from a cold start — every
+  // GLB on that level is fetched for the first time, which makes the first
+  // few seconds laggy as meshes finalise (especially on the asset-heavy
+  // levels). Show a black "Loading…" overlay with a progress bar over the
+  // top of the intro fade so the player doesn't see a half-rendered scene,
+  // and don't hand control back until assets have had time to settle.
+  _showLoadProgressOverlay(LOAD_OVERLAY_MS, () => {
+    // Once the load overlay fades, announce the level the player landed on
+    // with the same toast + audio used for portal transitions.
+    if (typeof window._showLevelTitle === 'function') {
+      window._showLevelTitle(save.level ?? 0);
+    }
+  });
+
+  if (ctx.finishIntro) ctx.finishIntro({ suppressHelp: true });
+
+  // The post-reload page has no user gesture yet, so the AudioContext is
+  // suspended and the loadLevel-triggered music call is silently queued.
+  // Re-fire setAmbientLevel from inside the first user-gesture handler —
+  // that both resumes the AudioContext and starts the right ambient track.
+  _scheduleAudioUnlockOnFirstGesture(save.level ?? 0);
+}
+
+function _scheduleAudioUnlockOnFirstGesture(levelNum) {
+  const handler = () => {
+    window.removeEventListener('keydown', handler);
+    window.removeEventListener('mousedown', handler);
+    window.removeEventListener('click', handler);
+    setAmbientLevel(levelNum);
+  };
+  window.addEventListener('keydown', handler, { once: true });
+  window.addEventListener('mousedown', handler, { once: true });
+  window.addEventListener('click', handler, { once: true });
+}
+
+// Duration of the post-load progress overlay. Long enough that even the
+// heaviest level (L3 minotaur) has finished streaming its GLBs.
+const LOAD_OVERLAY_MS = 10000;
+
+function _showLoadProgressOverlay(durationMs, onDone) {
+  const overlay = document.getElementById('level-load-overlay');
+  const fill = document.getElementById('level-load-bar-fill');
+  const text = document.getElementById('level-load-text');
+  if (!overlay || !fill) {
+    // No overlay to show; still fire the done callback so dependents proceed.
+    if (onDone) setTimeout(onDone, 0);
+    return;
+  }
+  // If the L1 first-load overlay is already running (save.level === 1 with a
+  // fresh hasSeenL1Intro), don't double-trigger — it'll cover the load for us.
+  // The level-title announcement is still useful, so fire it on its schedule.
+  if (overlay.classList.contains('visible')) {
+    if (onDone) setTimeout(onDone, durationMs);
+    return;
+  }
+  if (text) text.textContent = 'Loading saved game…';
+  overlay.classList.add('visible');
+  // Kick off the progress bar on the next frame so the CSS transition fires.
+  requestAnimationFrame(() => {
+    fill.style.transition = `width ${durationMs}ms linear`;
+    fill.style.width = '100%';
+  });
+  setTimeout(() => {
+    overlay.classList.remove('visible');
+    setTimeout(() => {
+      // Reset the bar so it's ready for any future level-load overlay use.
+      fill.style.transition = 'none';
+      fill.style.width = '0%';
+      if (text) text.textContent = 'Entering the Dungeon…';
+      if (onDone) onDone();
+    }, 400);
+  }, durationMs);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

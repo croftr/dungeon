@@ -219,6 +219,7 @@ const _collections = {
   disarmedTraps: new Set(),        // "row,col" keys of disarmed traps
   eggEmptied: new Set(),           // "level,row,col" keys of emptied ethereal eggs
   openedTrialGates: new Set(),     // "col,row" keys of opened schematic-trial portcullises (level 50)
+  spokenToNpcs: new Set(),         // "level,col,row" keys of dialogue NPCs whose first-click line has already played
 };
 
 const ALCHEMY_SLOTS = 9; // 8 ingredients + 1 result
@@ -329,11 +330,20 @@ let _containerContentsPersistence = {};
 
 let objectsGroup = new THREE.Group();
 
+// Spawn generation — bumped by `clearObjects`. Each spawner captures the
+// current value at call time; its async loader callback aborts if the value
+// has advanced (meaning the level was torn down before the GLB finished
+// loading). Without this, orphan meshes from a stale spawn can push
+// themselves into `interactables` and corrupt later state lookups
+// (e.g. `snapshotStarterStash` finding an INITIAL-contents orphan stash mesh
+// alongside the correctly-restored one).
+let _spawnGeneration = 0;
 
 export function clearObjects(scene) {
     scene.remove(objectsGroup);
     objectsGroup = new THREE.Group();
     scene.add(objectsGroup);
+    _spawnGeneration++;
 
     // Clear mixers and intervals to prevent memory leaks and performance lag
     _mixers.length = 0;
@@ -793,6 +803,10 @@ export function initObjects(scene, camera) {
                             } else {
                                 obj.userData.clickAudio = null;
                             }
+                            // Record that this NPC's first-click line has played
+                            // so a respawn (level revisit or save-load) doesn't
+                            // replay it.
+                            _collections.spokenToNpcs.add(`${window.currentLevel},${npcCol},${npcRow}`);
 
                             // Consume the one-shot onAudioEnd callback and clear it from all sibling meshes
                             const onAudioEnd = obj.userData.onAudioEnd ?? null;
@@ -1681,7 +1695,12 @@ export function initObjects(scene, camera) {
 
 export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = [], modelPath = asset('/items/Meshy_AI_Treasure_Chest_0221184131_texture.glb'), interactive = true, offsetX = 0, title = 'Chest', scale = 0.3) {
     const isStarterStash = title === 'Stash';
-    const persistenceKey = `${window.currentLevel},${col},${row}`;
+    // Type-prefixed so different container kinds at the same grid cell never
+    // collide. offsetX is included when non-zero so two chests can share a
+    // cell with different visual offsets (e.g. the paired chests in the L1
+    // ogre room) without colliding either.
+    const offsetSuffix = offsetX ? `,${offsetX}` : '';
+    const persistenceKey = `chest:${window.currentLevel},${col},${row}${offsetSuffix}`;
 
     if (interactive) {
         if (isStarterStash && _persistedStarterStashItems !== null) {
@@ -1697,7 +1716,9 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
             _containerContentsPersistence[persistenceKey] = contents;
         }
     }
+    const _spawnGen = _spawnGeneration;
     loader.load(asset(modelPath), (gltf) => {
+        if (_spawnGen !== _spawnGeneration) return; // stale; level torn down before load completed
         const model = gltf.scene;
         model.scale.setScalar(scale);
         model.position.set(col * CELL + offsetX, 0.0, row * CELL + offsetZ);
@@ -2580,13 +2601,17 @@ function _applyEggGlow(model, contents) {
 
 function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.45, initialContents = ['Red Crystal'], offsetX = 0, offsetZ = 0) {
     _statueGridCells.add(`${row},${col}`); // block player movement through this cell
-    const persistenceKey = `${window.currentLevel},${col},${row}`;
+    // Prefix with "statue:" so eggs/shrines never collide with a chest sharing
+    // the same grid cell (e.g. the chest + Blue Crystal egg at L2 col 28 row 32).
+    const persistenceKey = `statue:${window.currentLevel},${col},${row}`;
     let contents = [...initialContents];
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
     }
     _containerContentsPersistence[persistenceKey] = contents;
+    const _spawnGen = _spawnGeneration;
     loader.load(asset('/items/ethereal_egg.glb'), (gltf) => {
+        if (_spawnGen !== _spawnGeneration) return;
         const model = gltf.scene;
         model.scale.setScalar(scale);
         model.position.set(col * CELL + offsetX, 0.02, row * CELL + offsetZ);
@@ -2706,12 +2731,14 @@ function addShop(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, sh
 
 
 function addWeaponRack(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, contents = []) {
-    const persistenceKey = `${window.currentLevel},${col},${row}`;
+    const persistenceKey = `rack:${window.currentLevel},${col},${row}`;
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
     }
     _containerContentsPersistence[persistenceKey] = contents;
+    const _spawnGen = _spawnGeneration;
     loader.load(asset('/items/weapon-rack.glb'), (gltf) => {
+        if (_spawnGen !== _spawnGeneration) return;
         const model = gltf.scene;
         model.scale.setScalar(0.46);
         model.position.set(col * CELL + offsetX, 0.02, row * CELL + offsetZ);
@@ -2748,12 +2775,14 @@ function addWeaponRack(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, 
 }
 
 function addSpellCabinet(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, contents = []) {
-    const persistenceKey = `${window.currentLevel},${col},${row}`;
+    const persistenceKey = `cabinet:${window.currentLevel},${col},${row}`;
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
     }
     _containerContentsPersistence[persistenceKey] = contents;
+    const _spawnGen = _spawnGeneration;
     loader.load(asset('/items/spell-cabinet.glb'), (gltf) => {
+        if (_spawnGen !== _spawnGeneration) return;
         const model = gltf.scene;
         model.scale.setScalar(0.7);
         model.position.set(col * CELL + offsetX, 0.0, row * CELL + offsetZ);
@@ -3062,12 +3091,14 @@ export function isDummyCombatActive() {
 }
 
 function addAnvil(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0, contents = []) {
-    const persistenceKey = `${window.currentLevel},${col},${row}`;
+    const persistenceKey = `anvil:${window.currentLevel},${col},${row}`;
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
     }
     _containerContentsPersistence[persistenceKey] = contents;
+    const _spawnGen = _spawnGeneration;
     loader.load(asset('/items/forge.glb'), (gltf) => {
+        if (_spawnGen !== _spawnGeneration) return;
         const model = gltf.scene;
         model.scale.setScalar(0.7);
         model.position.set(col * CELL + offsetX, 0.0, row * CELL + offsetZ);
@@ -3221,6 +3252,14 @@ function addPartyConfirmNPC(scene, loader, col, row, rotY = 0, offsetX = 0, offs
 }
 
 function addCustomNPC(scene, loader, col, row, glbPath, dialogue, scale = 0.55, rotY = 0, offsetX = 0, offsetZ = 0, proximityAudio = null, proximityRange = 2) {
+    // Determine the initial clickAudio: if the party has already spoken to
+    // this NPC (tracked in _collections.spokenToNpcs), start with the fallback
+    // line so the first-click intro doesn't replay on respawn / save-load.
+    const firstClickAudio = arguments[12] ?? null;
+    const fallbackClick = arguments[14] ?? null;
+    const npcKey = `${window.currentLevel},${col},${row}`;
+    const alreadySpoken = _collections.spokenToNpcs.has(npcKey);
+    const initialClickAudio = (alreadySpoken && fallbackClick) ? fallbackClick : firstClickAudio;
     loader.load(asset(glbPath), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(scale);
@@ -3237,8 +3276,8 @@ function addCustomNPC(scene, loader, col, row, glbPath, dialogue, scale = 0.55, 
                 child.userData.dialogue = dialogue;
                 child.userData.proximityAudio = proximityAudio;
                 child.userData.proximityRange = proximityRange;
-                child.userData.clickAudio = arguments[12]; // Support for clickAudio in 13th arg
-                child.userData.fallbackClickAudio = arguments[14]; // Support for fallbackClickAudio in 15th arg
+                child.userData.clickAudio = initialClickAudio;
+                child.userData.fallbackClickAudio = fallbackClick;
                 child.userData.onAudioEnd = arguments[15]; // optional one-shot callback after click audio ends
                 interactables.push(child);
                 if (child.material) {
@@ -5128,12 +5167,14 @@ function _hideChestCtxMenu() {
 }
 
 function addBonePile(scene, loader, col, row, contents = []) {
-    const persistenceKey = `${window.currentLevel},${col},${row}`;
+    const persistenceKey = `bone:${window.currentLevel},${col},${row}`;
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
     }
     _containerContentsPersistence[persistenceKey] = contents;
+    const _spawnGen = _spawnGeneration;
     loader.load(asset('/items/Meshy_AI_Bone_pile_0221211647_texture.glb'), (gltf) => {
+        if (_spawnGen !== _spawnGeneration) return;
         const model = gltf.scene;
         model.scale.setScalar(0.4);
         model.position.set(col * CELL, 0.05, row * CELL);
@@ -5201,7 +5242,9 @@ export function spawnCorpse(col, row, droppedItems = [], existingContents = null
         }
     }
 
+    const _spawnGen = _spawnGeneration;
     _gltfLoader.load(asset('/items/Meshy_AI_Bone_pile_0221211647_texture.glb'), (gltf) => {
+        if (_spawnGen !== _spawnGeneration) return;
         const model = gltf.scene;
         model.scale.setScalar(0.4);
         model.position.set(col * CELL, 0.05, row * CELL);
@@ -5930,6 +5973,7 @@ export function captureWorldState() {
         knownForgeRecipes: [..._collections.knownForgeRecipes],
         eggEmptied: Array.from(_collections.eggEmptied),
         openedTrialGates: Array.from(_collections.openedTrialGates),
+        spokenToNpcs: Array.from(_collections.spokenToNpcs),
         containerContents: _containerContentsPersistence,
         starterStashItems: _persistedStarterStashItems,
     };
@@ -5945,6 +5989,7 @@ export function restoreWorldState(data) {
     _collections.knownForgeRecipes = new Set(data.knownForgeRecipes ?? []);
     _collections.eggEmptied = new Set(data.eggEmptied ?? []);
     _collections.openedTrialGates = new Set(data.openedTrialGates ?? []);
+    _collections.spokenToNpcs = new Set(data.spokenToNpcs ?? []);
     _containerContentsPersistence = data.containerContents ?? {};
     // Only apply starterStashItems if the field is explicitly present in the
     // payload. An old save without the field would otherwise clobber the
