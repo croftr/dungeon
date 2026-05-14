@@ -90,7 +90,7 @@ export function spawnLevel2Objects(ctx) {
     addChest(group, loader, 28, 32, -Math.PI / 2, -0.5, [
         { name: 'Gold Coins', quantity: 50 },
         'Mana Potion', 'Life Essence',
-        "Bloodstone Amulet"
+        "Bloodstone Amulet", "Schematic Key"
     ], asset('/items/chest1.glb'), true, 0.5);
 
     // Ethereal Egg at col 28 south side — side by side with the chest

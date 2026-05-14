@@ -473,7 +473,7 @@
       <!-- Member 0: Aldric -->
       <div class="member-card" id="member-0">
         <div class="member-main">
-          <div class="portrait"><canvas class="portrait-canvas" id="portrait-0" width="84" height="84"></canvas><div class="levelup-indicator" id="levelup-0" title="Level-up skill point available">!</div></div>
+          <div class="portrait"><canvas class="portrait-canvas" id="portrait-0" width="84" height="84"></canvas><div class="levelup-indicator" id="levelup-0" title="Level-up skill point available">⬆</div></div>
           <div class="member-info">
             <div class="status-banner" id="status-banner-0"></div>
             <div class="info-row">
@@ -522,7 +522,7 @@
       <!-- Member 1: Seraphina -->
       <div class="member-card" id="member-1">
         <div class="member-main">
-          <div class="portrait"><canvas class="portrait-canvas" id="portrait-1" width="84" height="84"></canvas><div class="levelup-indicator" id="levelup-1" title="Level-up skill point available">!</div></div>
+          <div class="portrait"><canvas class="portrait-canvas" id="portrait-1" width="84" height="84"></canvas><div class="levelup-indicator" id="levelup-1" title="Level-up skill point available">⬆</div></div>
           <div class="member-info">
             <div class="status-banner" id="status-banner-1"></div>
             <div class="info-row">
@@ -571,7 +571,7 @@
       <!-- Member 2: Dorak -->
       <div class="member-card" id="member-2">
         <div class="member-main">
-          <div class="portrait"><canvas class="portrait-canvas" id="portrait-2" width="84" height="84"></canvas><div class="levelup-indicator" id="levelup-2" title="Level-up skill point available">!</div></div>
+          <div class="portrait"><canvas class="portrait-canvas" id="portrait-2" width="84" height="84"></canvas><div class="levelup-indicator" id="levelup-2" title="Level-up skill point available">⬆</div></div>
           <div class="member-info">
             <div class="status-banner" id="status-banner-2"></div>
             <div class="info-row">
@@ -620,7 +620,7 @@
       <!-- Member 3: Lyra -->
       <div class="member-card" id="member-3">
         <div class="member-main">
-          <div class="portrait"><canvas class="portrait-canvas" id="portrait-3" width="84" height="84"></canvas><div class="levelup-indicator" id="levelup-3" title="Level-up skill point available">!</div></div>
+          <div class="portrait"><canvas class="portrait-canvas" id="portrait-3" width="84" height="84"></canvas><div class="levelup-indicator" id="levelup-3" title="Level-up skill point available">⬆</div></div>
           <div class="member-info">
             <div class="status-banner" id="status-banner-3"></div>
             <div class="info-row">
@@ -1236,11 +1236,9 @@
   <div id="corpse-overlay" class="chest-hidden">
     <div id="corpse-modal">
       <div id="corpse-header" class="chest-header-style">
-        <div id="corpse-pile-nav" class="corpse-pile-nav-hidden">
-          <button id="corpse-pile-prev" aria-label="Previous pile">&#9664;</button>
-          <span id="corpse-pile-indicator">Pile 1 of 1</span>
-          <button id="corpse-pile-next" aria-label="Next pile">&#9654;</button>
-        </div>
+        <button id="corpse-pile-prev" class="corpse-pile-btn corpse-pile-nav-hidden" aria-label="Previous pile">&#9664;</button>
+        <button id="corpse-pile-next" class="corpse-pile-btn corpse-pile-nav-hidden" aria-label="Next pile">&#9654;</button>
+        <span id="corpse-pile-indicator" class="corpse-pile-nav-hidden">1 / 1</span>
         <span id="corpse-sent-label"></span>
         <button id="corpse-close" aria-label="Close">&times;</button>
       </div>

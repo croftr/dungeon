@@ -48,6 +48,11 @@ export function spawnLevel3Objects(ctx) {
         "Crescent Moon Charm"
     ]);
 
+    // Near start portal (row 21, col 10)
+    addChest(group, loader, 10, 21, 0, -0.8, [
+        "Schematic Key"
+    ]);
+
     // ── Portal Activator Eggs ───────────────────────────────────────────────────────────
     // Minotaur room centre — contains Blue Crystal
     addPortalActivatorStatue(group, loader, 11, 11, 0, 0.45, ['Blue Crystal']);

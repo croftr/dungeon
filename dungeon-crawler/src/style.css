@@ -2388,11 +2388,11 @@ label.mm-setting-label {
   background: radial-gradient(circle at 30% 30%, #fff4b0 0%, #f5c542 55%, #b07a1a 100%);
   border: 1.5px solid #fff8c8;
   color: #3a2400;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 900;
   line-height: 18px;
   text-align: center;
-  font-family: serif;
+  font-family: sans-serif;
   box-shadow: 0 0 8px rgba(255, 210, 80, 0.95), 0 0 14px rgba(255, 180, 40, 0.6);
   pointer-events: none;
   z-index: 5;
@@ -2867,8 +2867,11 @@ label.mm-setting-label {
   display: inline-block;
   margin-left: 6px;
   font-size: 14px;
+  line-height: 1;
   color: #ffd040;
   vertical-align: middle;
+  position: relative;
+  top: -2px;
   text-shadow: 0 0 10px rgba(255, 180, 40, 0.9), 0 0 18px rgba(255, 120, 20, 0.55);
   animation: equip-badge-bounce 1s ease-in-out infinite;
 }
@@ -6145,6 +6148,17 @@ label.mm-setting-label {
   color: #e8d89a;
 }
 
+.inv-ctx-give-item.dead {
+  cursor: not-allowed;
+  color: #5a4828;
+  opacity: 0.6;
+}
+
+.inv-ctx-give-item.dead:hover {
+  background: transparent;
+  color: #5a4828;
+}
+
 .inv-ctx-give-item canvas {
   border-radius: 50%;
   flex-shrink: 0;
@@ -7873,41 +7887,67 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   z-index: 1;
 }
 
-#corpse-pile-nav {
+.corpse-pile-btn {
+  background: none;
+  border: 1px solid #4a3a20;
+  color: #888;
+  font-size: 11px;
+  width: 28px;
+  height: 28px;
+  border-radius: 3px;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 2px 8px;
-  background: rgba(0, 0, 0, 0.55);
-  border: 1px solid #5a4a30;
-  border-radius: 4px;
-  color: #e8d8a8;
-  font-family: monospace;
-  font-size: 12px;
-}
-
-#corpse-pile-nav.corpse-pile-nav-hidden {
-  display: none;
-}
-
-#corpse-pile-nav button {
-  background: transparent;
-  border: none;
-  color: #e8d8a8;
-  font-size: 14px;
-  cursor: pointer;
-  padding: 2px 6px;
+  justify-content: center;
   line-height: 1;
+  transition: border-color 0.15s, color 0.15s;
+  z-index: 2;
 }
 
-#corpse-pile-nav button:hover {
-  color: #ffd97a;
+.corpse-pile-btn:hover {
+  border-color: #8a7040;
+  color: #c8a84a;
+}
+
+#corpse-pile-prev {
+  order: 97;
+  margin-left: auto;
+  margin-right: 120px;
+}
+
+#corpse-pile-next {
+  order: 98;
+  margin-right: 52px;
+}
+
+#corpse-close {
+  order: 99;
+}
+
+#corpse-pile-prev {
+  transform: translateX(50px);
+}
+
+#corpse-pile-next {
+  transform: translateX(60px);
 }
 
 #corpse-pile-indicator {
-  min-width: 70px;
-  text-align: center;
-  letter-spacing: 0.5px;
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translate(-50%, 4px);
+  font-family: monospace;
+  font-size: 11px;
+  color: #c8a84a;
+  letter-spacing: 1px;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.95), 0 1px 2px rgba(0, 0, 0, 0.95);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.corpse-pile-nav-hidden {
+  display: none !important;
 }
 
 #corpse-sent-label {

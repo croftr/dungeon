@@ -8,7 +8,7 @@ import { showMessage, drawMinimap, updateStatus } from './minimap.js';
 import { getItemDef, ITEMS } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refreshPartyCards, setHp, applyStatusEffect } from './party.js';
 import { addLogEntry } from './battle-log.js';
-import { playHealSound, playBoneSound, playPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playLearntSound, playSoundByUrl, playQuestAudio, fadeOutQuestAudio, playPartyHitSound, playInventorySortSound, playCraftFailSound, playCraftHqSound, playNpcDialogue, isNpcDialoguePlaying } from './audio.js';
+import { playHealSound, playBoneSound, playPortalSound, playFloorPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playLearntSound, playSoundByUrl, playQuestAudio, fadeOutQuestAudio, playPartyHitSound, playInventorySortSound, playCraftFailSound, playCraftHqSound, playNpcDialogue, isNpcDialoguePlaying } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
 import POTION_MERCHANT_DATA from './data/potion-merchant.json';
 import STANCE_MERCHANT_DATA from './data/stance-npc-merchant.json';
@@ -714,7 +714,11 @@ export function initObjects(scene, camera) {
                     }
 
                     showMessage("You step into the swirling blue portal...");
-                    playPortalSound();
+                    if (obj.userData.isFloorPortal) {
+                        playFloorPortalSound();
+                    } else {
+                        playPortalSound();
+                    }
 
                     if (obj.userData.isArenaExit) {
                         if (window._arenaExit) window._arenaExit(true);
@@ -2495,109 +2499,200 @@ export function spawnArenaPortal(row, col) {
     addPortal(objectsGroup, _gltfLoader, col, row, 0, 0, 0, 0, null, null, null, true);
 }
 
-// Wall-mounted plaque with engraved-style text. Used in the schematic trials
-// to hint at what lies behind each gate before the party spends a key.
-// `rotY` should orient the plaque face outward from the wall it's mounted on;
-// `offsetX`/`offsetZ` push it from the cell centre onto the wall surface.
-function addPlaque(scene, col, row, rotY, offsetX, offsetZ, title, subtitle) {
-    const W = 512, H = 320;
+// Wall-mounted plaque: a weathered stone slab with text chiselled into it.
+// The "engraved" look is faked by drawing the title twice — a dark offset
+// below-right (the shadowed pit of the chisel cut) and a faint highlight
+// above-left (where light catches the upper edge of the cut).
+function addPlaque(scene, col, row, rotY, offsetX, offsetZ, title) {
+    // Two canvases: one is the stone (RGB+alpha, edges feathered), the other
+    // is a wider drop-shadow halo behind it that fades into the wall.
+    const W = 640, H = 256;
     const canvas = document.createElement('canvas');
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
 
-    // Dark stone background with a subtle gradient
-    const bg = ctx.createLinearGradient(0, 0, 0, H);
-    bg.addColorStop(0, '#2a241c');
-    bg.addColorStop(1, '#171310');
-    ctx.fillStyle = bg;
+    // Margin of empty pixels around the slab so the shadow has room to fall off.
+    const PAD = 64;
+    const slabX = PAD, slabY = PAD;
+    const slabW = W - PAD * 2, slabH = H - PAD * 2;
+    const slabCX = slabX + slabW / 2, slabCY = slabY + slabH / 2;
+
+    // --- Drop shadow halo (drawn first, behind everything) ---
+    // Soft elliptical darkening offset slightly down/right.
+    const shadowGrad = ctx.createRadialGradient(
+        slabCX + 6, slabCY + 8, Math.min(slabW, slabH) * 0.2,
+        slabCX + 6, slabCY + 8, Math.max(slabW, slabH) * 0.85
+    );
+    shadowGrad.addColorStop(0, 'rgba(0,0,0,0.55)');
+    shadowGrad.addColorStop(0.6, 'rgba(0,0,0,0.18)');
+    shadowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = shadowGrad;
     ctx.fillRect(0, 0, W, H);
 
-    // Inset bevel frame
-    ctx.strokeStyle = '#5a4a32';
-    ctx.lineWidth = 8;
-    ctx.strokeRect(14, 14, W - 28, H - 28);
-    ctx.strokeStyle = '#0a0807';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(22, 22, W - 44, H - 44);
+    // --- Build the slab on an offscreen canvas, then blit it through a
+    //     feathered alpha mask so the edges fade into the wall texture. ---
+    const slab = document.createElement('canvas');
+    slab.width = slabW; slab.height = slabH;
+    const sctx = slab.getContext('2d');
 
-    // Faint scratch/grain
-    ctx.globalAlpha = 0.08;
-    for (let i = 0; i < 40; i++) {
-        ctx.strokeStyle = Math.random() < 0.5 ? '#000' : '#fff';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        const x = Math.random() * W;
-        const y = Math.random() * H;
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (Math.random() - 0.5) * 80, y + (Math.random() - 0.5) * 12);
-        ctx.stroke();
+    // Mottled stone fill
+    const bg = sctx.createRadialGradient(slabW / 2, slabH / 2, 30, slabW / 2, slabH / 2, slabW / 1.3);
+    bg.addColorStop(0, '#6e6657');
+    bg.addColorStop(1, '#3a342b');
+    sctx.fillStyle = bg;
+    sctx.fillRect(0, 0, slabW, slabH);
+
+    // Per-pixel grain
+    const img = sctx.getImageData(0, 0, slabW, slabH);
+    const d = img.data;
+    for (let i = 0; i < d.length; i += 4) {
+        const n = (Math.random() - 0.5) * 40;
+        d[i] = Math.max(0, Math.min(255, d[i] + n));
+        d[i + 1] = Math.max(0, Math.min(255, d[i + 1] + n));
+        d[i + 2] = Math.max(0, Math.min(255, d[i + 2] + n));
     }
-    ctx.globalAlpha = 1;
+    sctx.putImageData(img, 0, 0);
 
-    // Title — engraved gold
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = 'bold italic 54px Georgia, serif';
-    // shadow (carved depth)
-    ctx.fillStyle = 'rgba(0,0,0,0.85)';
-    ctx.fillText(title, W / 2 + 3, 110 + 3);
-    // gold face
-    const goldGrad = ctx.createLinearGradient(0, 70, 0, 150);
-    goldGrad.addColorStop(0, '#f4d77a');
-    goldGrad.addColorStop(1, '#a4762a');
-    ctx.fillStyle = goldGrad;
-    ctx.fillText(title, W / 2, 110);
-
-    // Divider
-    ctx.strokeStyle = '#6b5530';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(80, 158); ctx.lineTo(W - 80, 158);
-    ctx.stroke();
-
-    // Subtitle / flavour — wrap to two lines if needed
-    ctx.font = 'italic 26px Georgia, serif';
-    ctx.fillStyle = '#cdb892';
-    const words = subtitle.split(' ');
-    const lines = [];
-    let cur = '';
-    for (const w of words) {
-        const test = cur ? cur + ' ' + w : w;
-        if (ctx.measureText(test).width > W - 80 && cur) {
-            lines.push(cur);
-            cur = w;
-        } else {
-            cur = test;
+    // Cracks
+    sctx.strokeStyle = 'rgba(20,15,10,0.55)';
+    for (let i = 0; i < 6; i++) {
+        sctx.lineWidth = 0.5 + Math.random() * 1.2;
+        sctx.beginPath();
+        let x = Math.random() * slabW;
+        let y = Math.random() * slabH;
+        sctx.moveTo(x, y);
+        const segs = 3 + Math.floor(Math.random() * 4);
+        for (let s = 0; s < segs; s++) {
+            x += (Math.random() - 0.5) * 90;
+            y += (Math.random() - 0.5) * 30;
+            sctx.lineTo(x, y);
         }
+        sctx.stroke();
     }
-    if (cur) lines.push(cur);
-    const startY = 210 - (lines.length - 1) * 17;
-    lines.forEach((line, i) => {
-        ctx.fillStyle = 'rgba(0,0,0,0.7)';
-        ctx.fillText(line, W / 2 + 2, startY + i * 36 + 2);
-        ctx.fillStyle = '#e3cfa3';
-        ctx.fillText(line, W / 2, startY + i * 36);
-    });
+
+    // Moss / lichen blobs
+    for (let i = 0; i < 4; i++) {
+        sctx.fillStyle = `rgba(${40 + Math.random() * 30},${50 + Math.random() * 25},${30 + Math.random() * 20},${0.12 + Math.random() * 0.15})`;
+        sctx.beginPath();
+        const cx = Math.random() * slabW;
+        const cy = Math.random() * slabH;
+        const r = 20 + Math.random() * 40;
+        sctx.ellipse(cx, cy, r, r * (0.5 + Math.random() * 0.5), Math.random() * Math.PI, 0, Math.PI * 2);
+        sctx.fill();
+    }
+
+    // Chiselled title
+    sctx.textAlign = 'center';
+    sctx.textBaseline = 'middle';
+    sctx.font = '700 52px "Trajan Pro", "Cinzel", Georgia, serif';
+    const tcx = slabW / 2, tcy = slabH / 2;
+    sctx.fillStyle = 'rgba(8,6,4,0.88)';
+    sctx.fillText(title, tcx + 2, tcy + 2);
+    sctx.fillStyle = 'rgba(15,12,8,0.55)';
+    sctx.fillText(title, tcx + 1, tcy + 1);
+    sctx.globalCompositeOperation = 'lighter';
+    sctx.fillStyle = 'rgba(190,178,148,0.18)';
+    sctx.fillText(title, tcx - 1, tcy - 1);
+    sctx.globalCompositeOperation = 'source-over';
+
+    // Vignette darkening toward the slab edges
+    const vignette = sctx.createRadialGradient(slabW / 2, slabH / 2, slabH * 0.3, slabW / 2, slabH / 2, slabW * 0.65);
+    vignette.addColorStop(0, 'rgba(0,0,0,0)');
+    vignette.addColorStop(1, 'rgba(0,0,0,0.55)');
+    sctx.fillStyle = vignette;
+    sctx.fillRect(0, 0, slabW, slabH);
+
+    // Nail / rivet marks in each corner — small dark pit + bright glint
+    const drawNail = (nx, ny) => {
+        // dark pit
+        sctx.fillStyle = 'rgba(10,7,4,0.9)';
+        sctx.beginPath();
+        sctx.arc(nx, ny, 5, 0, Math.PI * 2);
+        sctx.fill();
+        // wider soft shadow ring
+        sctx.fillStyle = 'rgba(0,0,0,0.35)';
+        sctx.beginPath();
+        sctx.arc(nx, ny, 8, 0, Math.PI * 2);
+        sctx.fill();
+        // metal head glint (upper-left)
+        sctx.fillStyle = 'rgba(180,160,130,0.8)';
+        sctx.beginPath();
+        sctx.arc(nx - 1.2, ny - 1.2, 1.6, 0, Math.PI * 2);
+        sctx.fill();
+    };
+    const nm = 22; // corner inset
+    drawNail(nm, nm);
+    drawNail(slabW - nm, nm);
+    drawNail(nm, slabH - nm);
+    drawNail(slabW - nm, slabH - nm);
+
+    // --- Composite slab onto main canvas with a feathered alpha mask so the
+    //     edges blend into the wall rather than ending in a hard rectangle. ---
+    // Build the mask on a temp canvas: irregular blobby shape + radial fade.
+    const mask = document.createElement('canvas');
+    mask.width = slabW; mask.height = slabH;
+    const mctx = mask.getContext('2d');
+    // Slightly irregular rounded-rect outline for the slab silhouette
+    mctx.fillStyle = '#fff';
+    mctx.beginPath();
+    const r = 14;
+    const points = [
+        [r + Math.random() * 6, Math.random() * 4],
+        [slabW - r - Math.random() * 6, Math.random() * 4],
+        [slabW - Math.random() * 4, r + Math.random() * 6],
+        [slabW - Math.random() * 4, slabH - r - Math.random() * 6],
+        [slabW - r - Math.random() * 6, slabH - Math.random() * 4],
+        [r + Math.random() * 6, slabH - Math.random() * 4],
+        [Math.random() * 4, slabH - r - Math.random() * 6],
+        [Math.random() * 4, r + Math.random() * 6],
+    ];
+    mctx.moveTo(points[0][0], points[0][1]);
+    for (let i = 1; i < points.length; i++) mctx.lineTo(points[i][0], points[i][1]);
+    mctx.closePath();
+    mctx.fill();
+
+    // Multiply by a radial fade so corners fall off softly
+    mctx.globalCompositeOperation = 'destination-in';
+    const fade = mctx.createRadialGradient(slabW / 2, slabH / 2, slabH * 0.35, slabW / 2, slabH / 2, slabW * 0.55);
+    fade.addColorStop(0, 'rgba(255,255,255,1)');
+    fade.addColorStop(0.7, 'rgba(255,255,255,0.9)');
+    fade.addColorStop(1, 'rgba(255,255,255,0)');
+    mctx.fillStyle = fade;
+    mctx.fillRect(0, 0, slabW, slabH);
+    mctx.globalCompositeOperation = 'source-over';
+
+    // Apply the mask to the slab canvas
+    sctx.globalCompositeOperation = 'destination-in';
+    sctx.drawImage(mask, 0, 0);
+    sctx.globalCompositeOperation = 'source-over';
+
+    // Blit the masked slab on top of the shadow halo
+    ctx.drawImage(slab, slabX, slabY);
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.minFilter = THREE.LinearFilter;
     tex.magFilter = THREE.LinearFilter;
     tex.anisotropy = 16;
 
-    const plaqueW = 0.9, plaqueH = 0.56;
+    // Plane covers the whole canvas (including shadow padding); the alpha
+    // outside the slab fades into the wall texture behind it.
+    const plaqueW = 0.78, plaqueH = 0.31;
     const geo = new THREE.PlaneGeometry(plaqueW, plaqueH);
     const mat = new THREE.MeshStandardMaterial({
         map: tex,
-        roughness: 0.85,
-        metalness: 0.15,
-        emissive: 0x221a10,
-        emissiveIntensity: 0.35,
+        roughness: 1.0,
+        metalness: 0.0,
+        transparent: true,
+        alphaTest: 0.01,
+        depthWrite: false,
     });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(col * CELL + offsetX, 1.15, row * CELL + offsetZ);
     mesh.rotation.y = rotY;
     mesh.castShadow = false;
     mesh.receiveShadow = true;
+    // Render slightly in front of the wall to avoid z-fighting at this offset.
+    mesh.renderOrder = 1;
     scene.add(mesh);
 }
 
@@ -4063,7 +4158,7 @@ function _showForgeCtxMenu(x, y, equip, slotIdx, itemDef, isHQ = false) {
     party.filter(m => !m.isEmpty).forEach(target => {
         const targetIdx = party.indexOf(target);
         const row = document.createElement('div');
-        row.className = 'inv-ctx-give-item';
+        row.className = 'inv-ctx-give-item' + (target.isDead ? ' dead' : '');
 
         const canvas = document.createElement('canvas');
         canvas.width = 26;
@@ -4075,17 +4170,19 @@ function _showForgeCtxMenu(x, y, equip, slotIdx, itemDef, isHQ = false) {
 
         row.appendChild(canvas);
         row.appendChild(nameSpan);
-        row.addEventListener('click', () => {
-            const success = equip.addItemToInventory(targetIdx, itemDef.name, 1, { hq: isHQ });
-            if (success) {
-                _forgeContents[slotIdx] = null;
-                _renderForgeSlots();
-                equip.hideTooltip();
-            } else {
-                showForgeMessage(`${target.name}'s inventory is full!`, 'info');
-            }
-            _hideChestCtxMenu();
-        });
+        if (!target.isDead) {
+            row.addEventListener('click', () => {
+                const success = equip.addItemToInventory(targetIdx, itemDef.name, 1, { hq: isHQ });
+                if (success) {
+                    _forgeContents[slotIdx] = null;
+                    _renderForgeSlots();
+                    equip.hideTooltip();
+                } else {
+                    showForgeMessage(`${target.name}'s inventory is full!`, 'info');
+                }
+                _hideChestCtxMenu();
+            });
+        }
         list.appendChild(row);
     });
 
@@ -4210,13 +4307,14 @@ function _bindCorpsePile(piles, index) {
     _activeShrineLootObj = pile.mesh;
     _bindChestSlots(equip, slots, pile.contents);
 
-    const nav = document.getElementById('corpse-pile-nav');
     const indicator = document.getElementById('corpse-pile-indicator');
     const prevBtn = document.getElementById('corpse-pile-prev');
     const nextBtn = document.getElementById('corpse-pile-next');
     if (piles.length > 1) {
-        nav.classList.remove('corpse-pile-nav-hidden');
-        indicator.textContent = `Pile ${index + 1} of ${piles.length}`;
+        prevBtn.classList.remove('corpse-pile-nav-hidden');
+        nextBtn.classList.remove('corpse-pile-nav-hidden');
+        indicator.classList.remove('corpse-pile-nav-hidden');
+        indicator.textContent = `${index + 1} / ${piles.length}`;
         prevBtn.onclick = (e) => {
             e.stopPropagation();
             _bindCorpsePile(piles, (index - 1 + piles.length) % piles.length);
@@ -4226,7 +4324,9 @@ function _bindCorpsePile(piles, index) {
             _bindCorpsePile(piles, (index + 1) % piles.length);
         };
     } else {
-        nav.classList.add('corpse-pile-nav-hidden');
+        prevBtn.classList.add('corpse-pile-nav-hidden');
+        nextBtn.classList.add('corpse-pile-nav-hidden');
+        indicator.classList.add('corpse-pile-nav-hidden');
         prevBtn.onclick = null;
         nextBtn.onclick = null;
     }
@@ -4889,7 +4989,7 @@ function _showChestCtxMenu(x, y, equip, slots, contents, slotIdx, itemDef) {
     party.filter(m => !m.isEmpty).forEach(target => {
         const targetIdx = party.indexOf(target);
         const row = document.createElement('div');
-        row.className = 'inv-ctx-give-item';
+        row.className = 'inv-ctx-give-item' + (target.isDead ? ' dead' : '');
 
         const canvas = document.createElement('canvas');
         canvas.width = 26;
@@ -4901,10 +5001,12 @@ function _showChestCtxMenu(x, y, equip, slots, contents, slotIdx, itemDef) {
 
         row.appendChild(canvas);
         row.appendChild(nameSpan);
-        row.addEventListener('click', () => {
-            _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx);
-            _hideChestCtxMenu();
-        });
+        if (!target.isDead) {
+            row.addEventListener('click', () => {
+                _sendChestItem(equip, slots, contents, slotIdx, itemDef, targetIdx);
+                _hideChestCtxMenu();
+            });
+        }
         list.appendChild(row);
     });
 
@@ -5142,7 +5244,7 @@ function _showAlchemyCtxMenu(x, y, equip, slotIdx, itemDef, isHQ = false) {
     party.filter(m => !m.isEmpty).forEach(target => {
         const targetIdx = party.indexOf(target);
         const row = document.createElement('div');
-        row.className = 'inv-ctx-give-item';
+        row.className = 'inv-ctx-give-item' + (target.isDead ? ' dead' : '');
 
         const canvas = document.createElement('canvas');
         canvas.width = 26;
@@ -5154,17 +5256,19 @@ function _showAlchemyCtxMenu(x, y, equip, slotIdx, itemDef, isHQ = false) {
 
         row.appendChild(canvas);
         row.appendChild(nameSpan);
-        row.addEventListener('click', () => {
-            const success = equip.addItemToInventory(targetIdx, itemDef.name, 1, { hq: isHQ });
-            if (success) {
-                _alchemyContents[slotIdx] = null;
-                _renderAlchemySlots();
-                equip.hideTooltip();
-            } else {
-                showAlchemyMessage(`${target.name}'s inventory is full!`, 'info');
-            }
-            _hideChestCtxMenu();
-        });
+        if (!target.isDead) {
+            row.addEventListener('click', () => {
+                const success = equip.addItemToInventory(targetIdx, itemDef.name, 1, { hq: isHQ });
+                if (success) {
+                    _alchemyContents[slotIdx] = null;
+                    _renderAlchemySlots();
+                    equip.hideTooltip();
+                } else {
+                    showAlchemyMessage(`${target.name}'s inventory is full!`, 'info');
+                }
+                _hideChestCtxMenu();
+            });
+        }
         list.appendChild(row);
     });
 

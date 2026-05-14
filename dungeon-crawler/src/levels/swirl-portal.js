@@ -7,8 +7,10 @@ import { CELL } from '../map.js';
 //  Two stacked, counter-rotating rune rings sit on a glowing disc; an
 //  invisible hit plane sits just above them and is tagged isPortal so the
 //  existing portal click handler (objects.js) teleports the party with no
-//  special-casing. Rotation + pulse run from onBeforeRender, so no global
-//  update-loop wiring is needed.
+//  special-casing. The hit also carries `isFloorPortal: true` so the click
+//  handler plays the floor-portal sound rather than the upright-portal one.
+//  Rotation + pulse run from onBeforeRender, so no global update-loop wiring
+//  is needed.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function addSwirlPortal(scene, interactables, col, row, targetLevel, targetRow, targetCol, targetFacing) {
@@ -48,6 +50,7 @@ export function addSwirlPortal(scene, interactables, col, row, targetLevel, targ
     hit.position.y = 0.05;
     hit.userData = {
         isPortal: true,
+        isFloorPortal: true,
         targetLevel,
         targetRow,
         targetCol,

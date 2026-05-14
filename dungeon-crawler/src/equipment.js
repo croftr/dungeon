@@ -545,15 +545,16 @@ export function getMemberMaxCarry(m) {
 }
 
 export function getMemberEncumbranceLevel(m) {
-  if (!m || m.isEmpty || m.isDead) return 'none';
+  if (!m || m.isEmpty) return 'none';
   return encumbranceLevelFor(getMemberCarryWeight(m), getMemberMaxCarry(m));
 }
 
 // Worst-case encumbrance across the party drives party-wide movement.
+// Dead members still count — their gear keeps weighing the party down until removed.
 export function getPartyEncumbranceLevel() {
   let worst = 'none';
   for (const m of party) {
-    if (!m || m.isEmpty || m.isDead) continue;
+    if (!m || m.isEmpty) continue;
     const lvl = getMemberEncumbranceLevel(m);
     if (lvl === 'overloaded') return 'overloaded';
     if (lvl === 'heavy') worst = 'heavy';
@@ -2480,9 +2481,9 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
     targets.forEach((target) => {
       const targetIdx = party.indexOf(target);
       const row = document.createElement('div');
-      row.className = 'inv-ctx-give-item';
+      row.className = 'inv-ctx-give-item' + (target.isDead ? ' dead' : '');
 
-      // Small portrait
+      // Small portrait (drawPortrait already renders a skull when isDead)
       const canvas = document.createElement('canvas');
       canvas.width = 26;
       canvas.height = 26;
@@ -2493,10 +2494,12 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
 
       row.appendChild(canvas);
       row.appendChild(nameSpan);
-      row.addEventListener('click', () => {
-        transferItem(activeCharIndex, targetIdx, _ctxInvIndex);
-        _hideContextMenu();
-      });
+      if (!target.isDead) {
+        row.addEventListener('click', () => {
+          transferItem(activeCharIndex, targetIdx, _ctxInvIndex);
+          _hideContextMenu();
+        });
+      }
       giveList.appendChild(row);
     });
   }
