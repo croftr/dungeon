@@ -2361,16 +2361,58 @@ label.mm-setting-label {
 
 /* Portrait box */
 .portrait {
+  position: relative;
   flex-shrink: 0;
   width: 84px;
   height: 84px;
   border: 1px solid #5a4a30;
   border-radius: 3px;
-  overflow: hidden;
   background: #0d0a06;
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
   cursor: pointer;
   transition: border-color 0.15s ease;
+}
+
+.portrait .portrait-canvas {
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.levelup-indicator {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fff4b0 0%, #f5c542 55%, #b07a1a 100%);
+  border: 1.5px solid #fff8c8;
+  color: #3a2400;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 18px;
+  text-align: center;
+  font-family: serif;
+  box-shadow: 0 0 8px rgba(255, 210, 80, 0.95), 0 0 14px rgba(255, 180, 40, 0.6);
+  pointer-events: none;
+  z-index: 5;
+  display: none;
+  animation: levelup-pulse 1.4s ease-in-out infinite;
+}
+
+.levelup-indicator.is-active {
+  display: block;
+}
+
+@keyframes levelup-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 8px rgba(255, 210, 80, 0.95), 0 0 14px rgba(255, 180, 40, 0.6);
+  }
+  50% {
+    transform: scale(1.15);
+    box-shadow: 0 0 12px rgba(255, 230, 130, 1), 0 0 22px rgba(255, 200, 60, 0.85);
+  }
 }
 
 .portrait:hover {
@@ -7829,6 +7871,43 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
 #corpse-header > * {
   position: relative;
   z-index: 1;
+}
+
+#corpse-pile-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 8px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid #5a4a30;
+  border-radius: 4px;
+  color: #e8d8a8;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+#corpse-pile-nav.corpse-pile-nav-hidden {
+  display: none;
+}
+
+#corpse-pile-nav button {
+  background: transparent;
+  border: none;
+  color: #e8d8a8;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1;
+}
+
+#corpse-pile-nav button:hover {
+  color: #ffd97a;
+}
+
+#corpse-pile-indicator {
+  min-width: 70px;
+  text-align: center;
+  letter-spacing: 0.5px;
 }
 
 #corpse-sent-label {

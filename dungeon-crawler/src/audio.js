@@ -1037,10 +1037,18 @@ async function _playTrack(url, loop, gen) {
   // Check if the intent has changed while the buffer was loading — if so, abort.
   if (gen !== _musicGen) return;
 
+  const ctx = getCtx();
+  // No user gesture yet (e.g. immediately after a save-load page reload) —
+  // calling source.start() now schedules playback at ctx.currentTime=0 with
+  // our offset, and when the context later auto-resumes the stale source
+  // plays back out-of-phase against the gesture-handler's retry, producing
+  // audible comb-filter distortion (most noticeable on level 4, which has a
+  // non-zero offset). Bail out; the first-gesture handler in save.js will
+  // re-fire setAmbientLevel once the context is running.
+  if (ctx.state !== 'running') return;
+
   // Stop whatever was playing (might have been set by a parallel call)
   _stopCurrent();
-
-  const ctx = getCtx();
   const source = ctx.createBufferSource();
   source.buffer = buffer;
   source.loop = loop;

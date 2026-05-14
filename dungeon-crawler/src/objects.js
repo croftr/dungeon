@@ -2314,6 +2314,7 @@ export function spawnObjectsForLevel() {
         addStatue, addPortalActivatorStatue, addPartyConfirmNPC, addDialogueNPC, addCustomNPC,
         addAnvil, addAlchemyWorkshop, addDroppedTorch, addEtherealEgg, addStairs,
         addTrap1, createWallButton, addArmourStand, addTrainingConsole, addPitLadder,
+        addPlaque,
         // Level 1 state flags
         starterPortalEnabled: _state.starterPortalEnabled,
         starterGateOpened: _state.starterGateOpened,
@@ -2492,6 +2493,112 @@ function addKeyhole(scene, loader, col, row, rotY, offsetX = 0, offsetZ = 0, tar
 
 export function spawnArenaPortal(row, col) {
     addPortal(objectsGroup, _gltfLoader, col, row, 0, 0, 0, 0, null, null, null, true);
+}
+
+// Wall-mounted plaque with engraved-style text. Used in the schematic trials
+// to hint at what lies behind each gate before the party spends a key.
+// `rotY` should orient the plaque face outward from the wall it's mounted on;
+// `offsetX`/`offsetZ` push it from the cell centre onto the wall surface.
+function addPlaque(scene, col, row, rotY, offsetX, offsetZ, title, subtitle) {
+    const W = 512, H = 320;
+    const canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    // Dark stone background with a subtle gradient
+    const bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, '#2a241c');
+    bg.addColorStop(1, '#171310');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Inset bevel frame
+    ctx.strokeStyle = '#5a4a32';
+    ctx.lineWidth = 8;
+    ctx.strokeRect(14, 14, W - 28, H - 28);
+    ctx.strokeStyle = '#0a0807';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(22, 22, W - 44, H - 44);
+
+    // Faint scratch/grain
+    ctx.globalAlpha = 0.08;
+    for (let i = 0; i < 40; i++) {
+        ctx.strokeStyle = Math.random() < 0.5 ? '#000' : '#fff';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        const x = Math.random() * W;
+        const y = Math.random() * H;
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + (Math.random() - 0.5) * 80, y + (Math.random() - 0.5) * 12);
+        ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    // Title — engraved gold
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = 'bold italic 54px Georgia, serif';
+    // shadow (carved depth)
+    ctx.fillStyle = 'rgba(0,0,0,0.85)';
+    ctx.fillText(title, W / 2 + 3, 110 + 3);
+    // gold face
+    const goldGrad = ctx.createLinearGradient(0, 70, 0, 150);
+    goldGrad.addColorStop(0, '#f4d77a');
+    goldGrad.addColorStop(1, '#a4762a');
+    ctx.fillStyle = goldGrad;
+    ctx.fillText(title, W / 2, 110);
+
+    // Divider
+    ctx.strokeStyle = '#6b5530';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(80, 158); ctx.lineTo(W - 80, 158);
+    ctx.stroke();
+
+    // Subtitle / flavour — wrap to two lines if needed
+    ctx.font = 'italic 26px Georgia, serif';
+    ctx.fillStyle = '#cdb892';
+    const words = subtitle.split(' ');
+    const lines = [];
+    let cur = '';
+    for (const w of words) {
+        const test = cur ? cur + ' ' + w : w;
+        if (ctx.measureText(test).width > W - 80 && cur) {
+            lines.push(cur);
+            cur = w;
+        } else {
+            cur = test;
+        }
+    }
+    if (cur) lines.push(cur);
+    const startY = 210 - (lines.length - 1) * 17;
+    lines.forEach((line, i) => {
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillText(line, W / 2 + 2, startY + i * 36 + 2);
+        ctx.fillStyle = '#e3cfa3';
+        ctx.fillText(line, W / 2, startY + i * 36);
+    });
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.minFilter = THREE.LinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.anisotropy = 16;
+
+    const plaqueW = 0.9, plaqueH = 0.56;
+    const geo = new THREE.PlaneGeometry(plaqueW, plaqueH);
+    const mat = new THREE.MeshStandardMaterial({
+        map: tex,
+        roughness: 0.85,
+        metalness: 0.15,
+        emissive: 0x221a10,
+        emissiveIntensity: 0.35,
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(col * CELL + offsetX, 1.15, row * CELL + offsetZ);
+    mesh.rotation.y = rotY;
+    mesh.castShadow = false;
+    mesh.receiveShadow = true;
+    scene.add(mesh);
 }
 
 export function addPortal(scene, loader, col, row, targetLevel, rotY = 0, offsetX = 0, offsetZ = 0, targetRow = null, targetCol = null, targetFacing = null, isArenaExit = false) {
@@ -4084,17 +4191,44 @@ export function isForgeModalOpen() {
 }
 
 export function openCorpseModal(corpseObj) {
-    _activeShrineLootObj = corpseObj;
     _activeSentLabelId = 'corpse-sent-label';
     const overlay = document.getElementById('corpse-overlay');
     overlay.classList.remove('chest-hidden');
     document.getElementById('corpse-sent-label').textContent = '';
 
-    const slots = document.querySelectorAll('.corpse-slot');
-    const contents = corpseObj.userData.contents || [];
+    const ud = corpseObj.userData;
+    const piles = _getBonePilesAtCell(ud.gridCol, ud.gridRow);
+    const startIdx = Math.max(0, piles.findIndex(p => p.pileId === ud.pileId));
+    _bindCorpsePile(piles, startIdx);
+}
 
-    {
-        _bindChestSlots(equip, slots, contents);
+function _bindCorpsePile(piles, index) {
+    const slots = document.querySelectorAll('.corpse-slot');
+    const pile = piles[index];
+    if (!pile) return;
+    // Re-resolve the active mesh so persistence + slot binding work for the selected pile.
+    _activeShrineLootObj = pile.mesh;
+    _bindChestSlots(equip, slots, pile.contents);
+
+    const nav = document.getElementById('corpse-pile-nav');
+    const indicator = document.getElementById('corpse-pile-indicator');
+    const prevBtn = document.getElementById('corpse-pile-prev');
+    const nextBtn = document.getElementById('corpse-pile-next');
+    if (piles.length > 1) {
+        nav.classList.remove('corpse-pile-nav-hidden');
+        indicator.textContent = `Pile ${index + 1} of ${piles.length}`;
+        prevBtn.onclick = (e) => {
+            e.stopPropagation();
+            _bindCorpsePile(piles, (index - 1 + piles.length) % piles.length);
+        };
+        nextBtn.onclick = (e) => {
+            e.stopPropagation();
+            _bindCorpsePile(piles, (index + 1) % piles.length);
+        };
+    } else {
+        nav.classList.add('corpse-pile-nav-hidden');
+        prevBtn.onclick = null;
+        nextBtn.onclick = null;
     }
 }
 
@@ -5166,18 +5300,54 @@ function _hideChestCtxMenu() {
     _chestCtxOpen = false;
 }
 
+let _bonePileIdSeq = 0;
+function _nextPileId() { return ++_bonePileIdSeq; }
+
+// Returns unique bone piles at the given cell, ordered by pileId.
+function _getBonePilesAtCell(col, row) {
+    const seen = new Map();
+    for (const obj of interactables) {
+        const ud = obj.userData;
+        if (!ud || !ud.isBonePile) continue;
+        if (ud.gridCol !== col || ud.gridRow !== row) continue;
+        if (!seen.has(ud.pileId)) {
+            seen.set(ud.pileId, { pileId: ud.pileId, contents: ud.contents, mesh: obj });
+        }
+    }
+    return [...seen.values()].sort((a, b) => a.pileId - b.pileId);
+}
+
+// Small sub-cell XZ offset so stacked piles on the same cell don't perfectly overlap.
+function _stackedPileOffset(col, row) {
+    const count = _getBonePilesAtCell(col, row).length;
+    if (count === 0) return { x: 0, z: 0 };
+    const positions = [
+        { x:  0.18, z:  0.0  },
+        { x: -0.18, z:  0.0  },
+        { x:  0.0,  z:  0.18 },
+        { x:  0.0,  z: -0.18 },
+        { x:  0.14, z:  0.14 },
+        { x: -0.14, z: -0.14 },
+        { x:  0.14, z: -0.14 },
+        { x: -0.14, z:  0.14 },
+    ];
+    return positions[(count - 1) % positions.length];
+}
+
 function addBonePile(scene, loader, col, row, contents = []) {
     const persistenceKey = `bone:${window.currentLevel},${col},${row}`;
     if (_containerContentsPersistence[persistenceKey]) {
         contents = _containerContentsPersistence[persistenceKey];
     }
     _containerContentsPersistence[persistenceKey] = contents;
+    const pileId = _nextPileId();
+    const stagger = _stackedPileOffset(col, row);
     const _spawnGen = _spawnGeneration;
     loader.load(asset('/items/Meshy_AI_Bone_pile_0221211647_texture.glb'), (gltf) => {
         if (_spawnGen !== _spawnGeneration) return;
         const model = gltf.scene;
         model.scale.setScalar(0.4);
-        model.position.set(col * CELL, 0.05, row * CELL);
+        model.position.set(col * CELL + stagger.x, 0.05, row * CELL + stagger.z);
         model.rotation.y = Math.random() * Math.PI * 2;
 
         model.traverse((child) => {
@@ -5185,6 +5355,7 @@ function addBonePile(scene, loader, col, row, contents = []) {
                 child.castShadow = true;
                 child.receiveShadow = true;
                 child.userData.isBonePile = true;
+                child.userData.pileId = pileId;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = contents;
@@ -5242,12 +5413,14 @@ export function spawnCorpse(col, row, droppedItems = [], existingContents = null
         }
     }
 
+    const pileId = _nextPileId();
+    const stagger = _stackedPileOffset(col, row);
     const _spawnGen = _spawnGeneration;
     _gltfLoader.load(asset('/items/Meshy_AI_Bone_pile_0221211647_texture.glb'), (gltf) => {
         if (_spawnGen !== _spawnGeneration) return;
         const model = gltf.scene;
         model.scale.setScalar(0.4);
-        model.position.set(col * CELL, 0.05, row * CELL);
+        model.position.set(col * CELL + stagger.x, 0.05, row * CELL + stagger.z);
         model.rotation.y = Math.random() * Math.PI * 2;
 
         model.traverse((child) => {
@@ -5255,6 +5428,7 @@ export function spawnCorpse(col, row, droppedItems = [], existingContents = null
                 child.castShadow = true;
                 child.receiveShadow = true;
                 child.userData.isBonePile = true;
+                child.userData.pileId = pileId;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.contents = corpseContents;

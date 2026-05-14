@@ -1667,6 +1667,24 @@ export function initMonsters(scene) {
 }
 
 export function loadMonstersForLevel(scene, level) {
+  // Remove any meshes/HP bars left over from monsters on other levels. Without
+  // this, transitioning from (e.g.) level 0 → level 2 leaves the level-0
+  // Training Dummy mesh visible at its world position on the new map.
+  monsters.forEach((m) => {
+    if ((m.level ?? 1) === level) return;
+    if (m.mesh) {
+      if (m.mesh.parent) m.mesh.parent.remove(m.mesh);
+      m.mesh = null;
+    }
+    if (m.hpBarFill) {
+      m.hpBarFill.parentElement?.remove();
+      m.hpBarFill = null;
+    }
+    m.mixer = null;
+    m.actions = {};
+    m.blobShadow = null;
+  });
+
   monsters.forEach((m) => {
     if ((m.level ?? 1) !== level) return;
     // Re-spawn corpse meshes for dead monsters that still hold loot. The

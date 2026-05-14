@@ -18,7 +18,7 @@ import { addSwirlPortal } from '../swirl-portal.js';
 export const SCHEMATIC_TRIALS_RETURN = { level: 1, row: 21, col: 1, facing: 2 };
 
 export function spawnSchematicTrialsObjects(ctx) {
-    const { group, loader, addChest, addPortcullis, addKeyhole, interactables, openedTrialGates } = ctx;
+    const { group, loader, addChest, addPortcullis, addKeyhole, addPlaque, interactables, openedTrialGates } = ctx;
 
     // ── Four locked gates, one outside each alcove ────────────────────────────
     // Each portcullis consumes one Schematic Key. The party starts with four
@@ -31,23 +31,36 @@ export function spawnSchematicTrialsObjects(ctx) {
 
     // North alcove gate (Savage) — portcullis at (col 7, row 4).
     // Keyhole on west wall of corridor cell (col 7, row 5), facing east.
+    // Plaque on the opposite (east) wall hints at what lies beyond.
     addPortcullis(group, loader, 7, 4, 0, wasOpened(7, 4));
     addKeyhole(group, loader, 7, 5, Math.PI / 2, -0.85, 0, 4, 7, 'Schematic Key');
+    addPlaque(group, 7, 5, -Math.PI / 2, 0.99, 0,
+        'Savage Fury',
+        'Bone-bound plates for War Dancers and Barbarians who answer steel with frenzy.');
 
     // South alcove gate (Steel) — portcullis at (col 7, row 9).
     // Keyhole on west wall of corridor cell (col 7, row 8), facing east.
     addPortcullis(group, loader, 7, 9, 0, wasOpened(7, 9));
     addKeyhole(group, loader, 7, 8, Math.PI / 2, -0.85, 0, 9, 7, 'Schematic Key');
+    addPlaque(group, 7, 8, -Math.PI / 2, 0.99, 0,
+        'Steel Vanguard',
+        'Hammered plate, sworn to the line. Bequeathed to Paladins and Warriors.');
 
     // West alcove gate (Trackers) — portcullis at (col 4, row 6).
     // Keyhole on north wall of corridor cell (col 5, row 6), facing south.
     addPortcullis(group, loader, 4, 6, Math.PI / 2, wasOpened(4, 6));
     addKeyhole(group, loader, 5, 6, 0, 0, -0.85, 6, 4, 'Schematic Key');
+    addPlaque(group, 5, 6, Math.PI, 0, 0.99,
+        "Tracker's Guise",
+        'Soft leathers, silent step. Cut for Hunters and Rangers who walk unseen.');
 
     // East alcove gate (Wizard) — portcullis at (col 10, row 6).
     // Keyhole on north wall of corridor cell (col 9, row 6), facing south.
     addPortcullis(group, loader, 10, 6, Math.PI / 2, wasOpened(10, 6));
     addKeyhole(group, loader, 9, 6, 0, 0, -0.85, 6, 10, 'Schematic Key');
+    addPlaque(group, 9, 6, Math.PI, 0, 0.99,
+        "Wizard's Regalia",
+        'Silver-threaded silks, etched with sigils. Robes of Wizards and White Mages.');
 
     // ── Return swirl at the centre of the hub ─────────────────────────────────
     // Sends the party back to the Level 1 entry swirl in the SW corner.

@@ -43,7 +43,6 @@
         "description": "A harmonious prism that grants protection against a wide array of elemental forces.",
         "defence": 0,
         "value": 825,
-        "weight": 0.1,
-        "skillDurationBonusMs": 5000
+        "weight": 0.1
     }
 ]

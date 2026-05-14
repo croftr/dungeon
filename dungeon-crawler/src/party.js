@@ -368,6 +368,12 @@ function refreshMember(m) {
   if (card) card.classList.toggle('member-card--invincible', hasInvincible && !m.isDead);
   if (card) card.classList.toggle('member-card--unseen', hasUnseen && !m.isDead);
 
+  const levelupEl = document.getElementById(`levelup-${i}`);
+  if (levelupEl) {
+    const hasPick = !m.isDead && (m.pendingNodePicks ?? 0) > 0;
+    levelupEl.classList.toggle('is-active', hasPick);
+  }
+
   const nameEl = document.getElementById(`name-${i}`);
   if (nameEl) nameEl.textContent = m.name;
 

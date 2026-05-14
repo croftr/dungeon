@@ -50,8 +50,8 @@
     "xp": 100,
     "attackSpeed": 2,
     "stats": {
-      "strength": 18,
-      "dexterity": 18,
+      "strength": 20,
+      "dexterity": 20,
       "vitality": 9,
       "intelligence": 6,
       "resilience": 8
@@ -1160,13 +1160,13 @@
     "name": "Summoned Skeleton",
     "family": "undead",
     "description": "Dragged from cold earth by fell magic, these shambling remnants fight with reckless abandon and collapse just as quickly. Individually feeble — but they rarely rise alone.",
-    "hp": 65,
+    "hp": 70,
     "defence": 6,
     "xp": 70,
-    "attackSpeed": 1.2,
+    "attackSpeed": 1.5,
     "stats": {
       "strength": 12,
-      "dexterity": 10,
+      "dexterity": 12,
       "vitality": 6,
       "intelligence": 3,
       "resilience": 5
@@ -1244,12 +1244,12 @@
     "description": "A sinister sorcerer wrapped in corvid flesh, the Crow Wizard commands fire and shadow with equal cruelty. Its cawing incantations carry the stench of old magic — and those who hear its shriek often find their courage deserting them entirely.",
     "image": "/monster-images/crow-wizard.webp",
     "hp": 320,
-    "defence": 13,
+    "defence": 14,
     "damageReduction": 0.10,
     "xp": 350,
     "attackSpeed": 1.5,
     "stats": {
-      "strength": 20,
+      "strength": 22,
       "dexterity": 25,
       "vitality": 22,
       "intelligence": 26,

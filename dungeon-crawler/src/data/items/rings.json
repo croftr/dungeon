@@ -80,9 +80,6 @@
             "water": 0.1
         },
         "value": 360,
-        "weight": 0.05,
-        "statBonuses": {
-            "resilience": 1
-        }
+        "weight": 0.05
     }
 ]
