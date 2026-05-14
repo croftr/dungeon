@@ -1692,6 +1692,47 @@ body {
   transform: scale(1.1);
 }
 
+.mm-save-edit-btn {
+  background: none;
+  border: none;
+  color: rgba(232, 200, 122, 0.6);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.15s, transform 0.15s;
+  flex-shrink: 0;
+}
+
+.mm-save-edit-btn:hover {
+  color: rgba(232, 200, 122, 1);
+  transform: scale(1.1);
+}
+
+.mm-save-label {
+  color: #c8a868;
+  font-family: Georgia, serif;
+  font-size: 11px;
+  font-style: italic;
+  letter-spacing: 0.3px;
+}
+
+.mm-save-label-input {
+  background: rgba(20, 16, 10, 0.9);
+  border: 1px solid rgba(232, 200, 122, 0.5);
+  border-radius: 3px;
+  color: #f4e8c1;
+  font-family: Georgia, serif;
+  font-size: 11px;
+  padding: 3px 6px;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.mm-save-label-input:focus {
+  border-color: rgba(232, 200, 122, 0.9);
+}
+
 
 .mm-save-entry:hover {
   background: rgba(232, 200, 122, 0.08);
@@ -7194,16 +7235,6 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   max-height: 50vh;
   overflow-y: auto;
   pointer-events: auto;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-#game-over-saves.game-over-saves-visible {
-  opacity: 1;
-}
-
-.game-over-saves-hidden {
-  display: none;
 }
 
 /* ═══════════════════════════════════════════════

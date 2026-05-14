@@ -953,6 +953,9 @@ function _showGameOver() {
   const el = document.getElementById('game-over');
   if (!el) return;
   el.classList.add('active');
+  import('./save.js').then(({ renderSavesList }) => {
+    renderSavesList('#game-over-saves', { requireConfirmOnLoad: false });
+  });
 }
 
 export function flashPortraitHit(index) {
@@ -1045,28 +1048,6 @@ export function resurrectAll() {
   // Hide Game Over if it was showing
   const el = document.getElementById('game-over');
   if (el) el.classList.remove('active');
-}
-
-export function respawnAtHub() {
-  resurrectAll();
-
-  for (const m of party) {
-    if (m.isEmpty) continue;
-    const floor = getCurrentLevelThreshold(m);
-    if ((m.xp ?? 0) > floor) m.xp = floor;
-  }
-
-  addLogEntry({ type: 'death', target: 'Party', time: Date.now() });
-
-  const el = document.getElementById('game-over');
-  if (el) el.classList.remove('active');
-  const saves = document.getElementById('game-over-saves');
-  if (saves) {
-    saves.classList.add('game-over-saves-hidden');
-    saves.classList.remove('game-over-saves-visible');
-  }
-
-  refreshPartyCards();
 }
 
 let mpRegenTimers = {};    // out-of-combat MP regen: per-member accumulators

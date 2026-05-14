@@ -54,6 +54,7 @@ export function captureSave() {
     savedAt: new Date().toISOString(),
     level: currentLevel,
     levelName: _levelName(currentLevel),
+    label: '',
     party: capturePartyState(),
     player: capturePlayerState(),
     monsters: captureMonsterState(),
@@ -110,28 +111,50 @@ export function saveToNewSlot() {
 //  LIST / DELETE
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Returns [{key, savedAt, level, levelName}, ...] newest-first. */
+/** Returns [{key, savedAt, level, levelName, label, defaultTag}, ...] newest-first. */
 export function listSaves() {
   const results = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (!key || !key.startsWith(SAVE_PREFIX)) continue;
     try {
-      const { version, savedAt, level, levelName } = JSON.parse(localStorage.getItem(key));
+      const { version, savedAt, level, levelName, label } = JSON.parse(localStorage.getItem(key));
       if (version !== SAVE_VERSION) continue;
       results.push({
         key,
         savedAt,
         level,
         levelName: levelName ?? _levelName(level),
+        label: label ?? '',
+        defaultTag: _defaultTagFromKey(key),
       });
     } catch { /* skip corrupt */ }
   }
   return results.sort((a, b) => b.savedAt.localeCompare(a.savedAt));
 }
 
+/** A short unique tag derived from the save's timestamp key, e.g. "#a3f0". */
+function _defaultTagFromKey(key) {
+  const ts = Number(key.slice(SAVE_PREFIX.length));
+  if (!Number.isFinite(ts)) return '';
+  return '#' + (ts & 0xffff).toString(16).padStart(4, '0');
+}
+
 export function deleteSave(key) {
   localStorage.removeItem(key);
+}
+
+/** Update the user-editable label on an existing save. */
+export function updateSaveLabel(key, label) {
+  const raw = localStorage.getItem(key);
+  if (!raw) return;
+  try {
+    const bundle = JSON.parse(raw);
+    bundle.label = String(label ?? '').slice(0, 60);
+    localStorage.setItem(key, JSON.stringify(bundle));
+  } catch (e) {
+    console.warn('[save] failed to update label', e);
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -380,11 +403,14 @@ export function renderSavesList(containerSelector, { requireConfirmOnLoad = fals
     const d = new Date(s.savedAt);
     const date = d.toLocaleDateString([], { month: 'short', day: 'numeric' });
     const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const labelText = s.label ? s.label : s.defaultTag;
     return `<div class="mm-save-entry" data-key="${s.key}">
       <div class="mm-save-info">
-        <span class="mm-save-level">${s.levelName}</span>
+        <span class="mm-save-level">${_escapeHtml(s.levelName)}</span>
+        <span class="mm-save-label" title="Click ✎ to rename">${_escapeHtml(labelText)}</span>
         <span class="mm-save-meta"><span class="mm-save-date">${date}</span><span class="mm-save-time">${time}</span></span>
       </div>
+      <button class="mm-save-edit-btn" aria-label="Rename Save" title="Rename Save">✎</button>
       <button class="mm-save-delete-btn" aria-label="Delete Save" title="Delete Save">✕</button>
     </div>`;
   }).join('');
@@ -401,6 +427,14 @@ export function renderSavesList(containerSelector, { requireConfirmOnLoad = fals
     };
     (info ?? el).addEventListener('click', loadHandler);
 
+    const editBtn = el.querySelector('.mm-save-edit-btn');
+    if (editBtn) {
+      editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        _beginInlineLabelEdit(el, key, () => renderSavesList(containerSelector, { requireConfirmOnLoad }));
+      });
+    }
+
     const delBtn = el.querySelector('.mm-save-delete-btn');
     if (delBtn) {
       delBtn.addEventListener('click', (e) => {
@@ -412,4 +446,45 @@ export function renderSavesList(containerSelector, { requireConfirmOnLoad = fals
       });
     }
   });
+}
+
+function _escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
+}
+
+function _beginInlineLabelEdit(entryEl, key, onDone) {
+  const labelSpan = entryEl.querySelector('.mm-save-label');
+  if (!labelSpan) return;
+  const current = labelSpan.textContent.startsWith('#') ? '' : labelSpan.textContent;
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.maxLength = 60;
+  input.value = current;
+  input.className = 'mm-save-label-input';
+  input.placeholder = 'name this save…';
+  labelSpan.replaceWith(input);
+  input.focus();
+  input.select();
+
+  let done = false;
+  const commit = () => {
+    if (done) return;
+    done = true;
+    updateSaveLabel(key, input.value.trim());
+    onDone?.();
+  };
+  const cancel = () => {
+    if (done) return;
+    done = true;
+    onDone?.();
+  };
+  input.addEventListener('keydown', (e) => {
+    e.stopPropagation();
+    if (e.key === 'Enter') { e.preventDefault(); commit(); }
+    else if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+  });
+  input.addEventListener('click', (e) => e.stopPropagation());
+  input.addEventListener('blur', commit);
 }

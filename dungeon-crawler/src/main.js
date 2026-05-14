@@ -7,7 +7,7 @@ import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES,
 import { initLighting, updateLighting } from './lighting.js';
 import { initParticles, updateParticles, invalidateParticleTextures } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage, LEVEL_NAMES } from './minimap.js';
-import { initParty, updateParty, party, refreshPartyCards, autoAttack, autoRangeAttack, setHp, flashPortraitHit, showMemberDamage, isPartyUnseen, resurrectAll, respawnAtHub, getEffectiveElementalResistances } from './party.js';
+import { initParty, updateParty, party, refreshPartyCards, autoAttack, autoRangeAttack, setHp, flashPortraitHit, showMemberDamage, isPartyUnseen, resurrectAll, getEffectiveElementalResistances } from './party.js';
 import { getItemDef } from './items.js';
 import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
@@ -787,18 +787,6 @@ if (loadGameCancelBtn) {
     preStartScreen.style.display = 'flex';
   });
 }
-
-// ── Game Over screen buttons ──
-const gameOverRespawnBtn = document.getElementById('game-over-respawn');
-
-if (gameOverRespawnBtn) {
-  gameOverRespawnBtn.addEventListener('click', () => {
-    respawnAtHub();
-    window.loadLevel(0);
-    initPlayer(11, 18, camera, 1);
-  });
-}
-
 
 // ── Screen 2 Options Sound ──
 document.querySelectorAll('#difficulty-select input, #help-toggle').forEach(el => {
