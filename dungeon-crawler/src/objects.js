@@ -393,6 +393,24 @@ let _arrivedPortalKey = null;
 let _pendingPortalTimer = null;
 let _pendingPortalKey = null;
 
+function _getPortalFlashOverlay() {
+    let el = document.getElementById('portal-flash');
+    if (el) return el;
+    el = document.createElement('div');
+    el.id = 'portal-flash';
+    Object.assign(el.style, {
+        position: 'fixed',
+        inset: '0',
+        background: 'radial-gradient(circle at center, rgba(120,200,255,0.95) 0%, rgba(20,40,90,0.98) 60%, rgba(0,0,0,1) 100%)',
+        opacity: '0',
+        transition: 'opacity 500ms ease',
+        pointerEvents: 'none',
+        zIndex: '10004',
+    });
+    document.body.appendChild(el);
+    return el;
+}
+
 export function triggerPortal(obj) {
     const targetLevel = obj.userData.targetLevel;
     if (targetLevel === -1) {
@@ -400,10 +418,10 @@ export function triggerPortal(obj) {
         return;
     }
 
-    showMessage("You step into the swirling blue portal...");
     if (obj.userData.isFloorPortal) {
         playFloorPortalSound();
     } else {
+        showMessage("You step into the swirling blue portal...");
         playPortalSound();
     }
 
@@ -448,6 +466,29 @@ export function triggerPortal(obj) {
                 }, 50);
             }
         }
+    }
+
+    // Floor portals get a fade-flash transition: fade a blue glow in, do the
+    // load while the screen is covered, then fade out. Other portals keep
+    // their original instant behaviour (the upright-portal flow plays its own
+    // video overlay on outgoing warps from Level 0).
+    if (obj.userData.isFloorPortal) {
+        setPlayerFrozen(true);
+        _portalCooldownUntil = Date.now() + 2500;
+        const overlay = _getPortalFlashOverlay();
+        // Force reflow so the transition triggers
+        overlay.offsetHeight;
+        overlay.style.opacity = '1';
+        setTimeout(() => {
+            _doLoad();
+            // Hold on the flash a moment after the load so the destination
+            // has a beat to render before fading back in.
+            setTimeout(() => {
+                overlay.style.opacity = '0';
+                setTimeout(() => setPlayerFrozen(false), 500);
+            }, 300);
+        }, 600);
+        return;
     }
 
     if (window.currentLevel === 0 && targetLevel > 0) {
