@@ -4493,10 +4493,10 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
     const portrait = document.getElementById('merchant-portrait');
     if (portrait) {
         let portraitSrc = null;
-        if (questNpcId === 'monster-npc' || shopType === 'barnaby') portraitSrc = asset('/icons/npc-profile/monster-npc-barnaby.png');
-        else if (shopType === 'potions') portraitSrc = asset('/icons/npc-profile/potion-merchant.png');
-        else if (shopType === 'stances') portraitSrc = asset('/icons/npc-profile/stance-npc.png');
-        else if (shopType === 'weapons') portraitSrc = asset('/icons/npc-profile/merchant.png');
+        if (questNpcId === 'monster-npc' || shopType === 'barnaby') portraitSrc = asset('/icons/npc-profile/monster-npc-barnaby.webp');
+        else if (shopType === 'potions') portraitSrc = asset('/icons/npc-profile/potion-merchant.webp');
+        else if (shopType === 'stances') portraitSrc = asset('/icons/npc-profile/stance-npc.webp');
+        else if (shopType === 'weapons') portraitSrc = asset('/icons/npc-profile/merchant.webp');
         if (portraitSrc) {
             portrait.src = portraitSrc;
             portrait.style.display = '';

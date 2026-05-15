@@ -8815,6 +8815,48 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   position: relative;
 }
 
+#merchant-header.merchant-header-stances,
+#merchant-header.merchant-header-barnaby {
+  background-image: url('/images/stance-npc-header.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+
+#merchant-header.merchant-header-stances #merchant-close {
+  background: linear-gradient(145deg, #d8d048 0%, #9a9028 35%, #5a541a 65%, #2e2a0a 100%);
+  border-color: #1a1805;
+  color: #1a1805;
+  text-shadow: 0 1px 0 rgba(255, 255, 200, 0.4);
+}
+
+#merchant-header.merchant-header-stances #merchant-close:hover {
+  background: linear-gradient(145deg, #e8e058 0%, #aaa038 35%, #6a6424 65%, #3e3a14 100%);
+  border-color: #2a2810;
+  color: #000;
+}
+
+#merchant-header.merchant-header-stances #merchant-close:active {
+  background: linear-gradient(145deg, #2e2a0a 0%, #5a541a 35%, #9a9028 65%, #d8d048 100%);
+}
+
+#merchant-header.merchant-header-barnaby #merchant-close {
+  background: linear-gradient(145deg, #c84438 0%, #8a2820 35%, #5a1612 65%, #2e0806 100%);
+  border-color: #1a0403;
+  color: #f4e8d8;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+}
+
+#merchant-header.merchant-header-barnaby #merchant-close:hover {
+  background: linear-gradient(145deg, #d85448 0%, #9a3830 35%, #6a2622 65%, #3e1816 100%);
+  border-color: #2a0a08;
+  color: #ffffff;
+}
+
+#merchant-header.merchant-header-barnaby #merchant-close:active {
+  background: linear-gradient(145deg, #2e0806 0%, #5a1612 35%, #8a2820 65%, #c84438 100%);
+}
 
 #merchant-header.merchant-header-potions #merchant-close {
   background: linear-gradient(145deg, #4a7a52 0%, #2f5538 35%, #1c3a25 65%, #0e2014 100%);

@@ -1818,7 +1818,7 @@
           <span id="merchant-title">Merchant</span>
         </div>
         <div id="merchant-header-actions">
-          <button id="barnaby-essentiary-btn" style="display:none;">&#128214; The Essentiary</button>
+          <button id="barnaby-essentiary-btn" style="display:none;"><img src="/icons/ingredients/life_essence.webp" alt="" /><span>The Essentiary</span></button>
           <button id="merchant-close" aria-label="Close">&times;</button>
         </div>
       </div>
@@ -2487,21 +2487,48 @@
     }
 
     #barnaby-essentiary-btn {
-      background: linear-gradient(180deg, #1e1408 0%, #0e0a04 100%);
-      border: 1px solid #6b4e10;
-      color: #c8a840;
-      font-size: 11px;
-      padding: 5px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(180deg, #3a1a08 0%, #1e0c04 60%, #0a0402 100%);
+      border: 1px solid #8a5418;
+      color: #f0c870;
+      font-family: 'MedievalSharp', 'Cinzel', Georgia, serif;
+      font-size: 14px;
+      padding: 6px 14px 6px 8px;
       cursor: pointer;
-      border-radius: 3px;
-      letter-spacing: 0.05em;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
       white-space: nowrap;
-      transition: background 0.15s, box-shadow 0.15s;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 200, 120, 0.25),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.6),
+        0 1px 2px rgba(0, 0, 0, 0.7);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+      transition: background 0.15s, box-shadow 0.15s, color 0.15s;
+    }
+
+    #barnaby-essentiary-btn img {
+      width: 22px;
+      height: 22px;
+      filter: drop-shadow(0 0 4px rgba(160, 220, 120, 0.7));
     }
 
     #barnaby-essentiary-btn:hover {
-      background: linear-gradient(180deg, #2e2010 0%, #18100a 100%);
-      box-shadow: 0 0 10px rgba(212, 160, 23, 0.3);
+      background: linear-gradient(180deg, #4a2a14 0%, #2e1808 60%, #180a04 100%);
+      border-color: #c08428;
+      color: #ffe8a0;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 220, 140, 0.35),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.6),
+        0 0 12px rgba(212, 160, 23, 0.45);
+    }
+
+    #barnaby-essentiary-btn:active {
+      background: linear-gradient(180deg, #0a0402 0%, #1e0c04 60%, #3a1a08 100%);
+      box-shadow:
+        inset 0 1px 3px rgba(0, 0, 0, 0.6),
+        inset 0 -1px 0 rgba(255, 200, 120, 0.15);
     }
 
     /* ── Special Attacks Section ── */
