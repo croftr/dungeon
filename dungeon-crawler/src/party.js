@@ -1381,8 +1381,13 @@ export function updateParty(dt) {
   const now = performance.now();
   party.forEach(m => {
     if (m.isEmpty || m.isDead || !m.activeDebuffs?.length) return;
-    // Expire finished effects
+    // Expire finished effects — detect if a visual border buff (unseen / invincible)
+    // just expired so we can refresh the card and remove the CSS border class.
+    const hadVisualBuff = m.activeDebuffs.some(
+      d => now >= d.expiresAt && (STATUS_EFFECT_DEFS[d.effectId]?.unseen || STATUS_EFFECT_DEFS[d.effectId]?.invincible)
+    );
     m.activeDebuffs = m.activeDebuffs.filter(d => now < d.expiresAt);
+    if (hadVisualBuff) refreshMember(m);
     // Tick-based effects
     m.activeDebuffs.forEach(d => {
       const def = STATUS_EFFECT_DEFS[d.effectId];

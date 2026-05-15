@@ -4474,12 +4474,21 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
     else if (shopType === 'stances') _activeMerchantAvailable = _stanceMerchantAvailable;
     else _activeMerchantAvailable = _merchantAvailable;
 
-    let title = 'Merchant';
+    let title = 'Quartermaster';
     if (shopType === 'potions') title = 'Apothecary';
     else if (shopType === 'stances') title = 'Stance Master';
     else if (shopType === 'none' || shopType === 'barnaby') title = 'Barnaby';
 
     document.getElementById('merchant-title').textContent = title;
+
+    const header = document.getElementById('merchant-header');
+    if (header) {
+        header.classList.remove('merchant-header-weapons', 'merchant-header-potions', 'merchant-header-stances', 'merchant-header-barnaby');
+        if (questNpcId === 'monster-npc' || shopType === 'barnaby') header.classList.add('merchant-header-barnaby');
+        else if (shopType === 'potions') header.classList.add('merchant-header-potions');
+        else if (shopType === 'stances') header.classList.add('merchant-header-stances');
+        else if (shopType === 'weapons') header.classList.add('merchant-header-weapons');
+    }
 
     const portrait = document.getElementById('merchant-portrait');
     if (portrait) {
@@ -4499,14 +4508,9 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
 
     const modal = document.getElementById('merchant-modal');
     const questPanel = document.getElementById('merchant-quest-panel');
-    if (questNpcId) {
-        modal.classList.add('merchant-has-quests');
-        questPanel.classList.remove('merchant-hidden');
-        renderMerchantQuestPanel(questNpcId);
-    } else {
-        modal.classList.remove('merchant-has-quests');
-        questPanel.classList.add('merchant-hidden');
-    }
+    modal.classList.add('merchant-has-quests');
+    questPanel.classList.remove('merchant-hidden');
+    renderMerchantQuestPanel(questNpcId);
 
     document.getElementById('merchant-overlay').classList.remove('merchant-hidden');
 
