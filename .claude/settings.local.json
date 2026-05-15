@@ -54,7 +54,11 @@
       "Bash(ffmpeg -y -i dungeon-crawler/public/textures/ice-floor.png -c:v libwebp -quality 80 -compression_level 6 dungeon-crawler/public/textures/ice-floor.webp)",
       "Bash(git -C C:/Users/rob/projects/dungeon diff --stat HEAD)",
       "Bash(git -C C:/Users/rob/projects/dungeon log --oneline --all -- dungeon-crawler/src/levels/level0/monsters.js)",
-      "Bash(git -C C:/Users/rob/projects/dungeon log --oneline --all -p -S \"Training Dummy\" -- dungeon-crawler/src/levels/level2/)"
+      "Bash(git -C C:/Users/rob/projects/dungeon log --oneline --all -p -S \"Training Dummy\" -- dungeon-crawler/src/levels/level2/)",
+      "Bash(cd /c/Users/rob/projects/dungeon/dungeon-crawler && ls -la public/items/closed-trap.glb public/items/trap1.glb)",
+      "Bash(npx gltf-transform *)",
+      "Bash(gltf-pipeline -i public/items/closed-trap.glb -o public/items/closed-trap.glb -d --quiet)",
+      "Bash(npx gltf-pipeline *)"
     ]
   }
 }

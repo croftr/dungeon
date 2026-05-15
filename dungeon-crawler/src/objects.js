@@ -4481,6 +4481,22 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
 
     document.getElementById('merchant-title').textContent = title;
 
+    const portrait = document.getElementById('merchant-portrait');
+    if (portrait) {
+        let portraitSrc = null;
+        if (questNpcId === 'monster-npc' || shopType === 'barnaby') portraitSrc = asset('/icons/npc-profile/monster-npc-barnaby.png');
+        else if (shopType === 'potions') portraitSrc = asset('/icons/npc-profile/potion-merchant.png');
+        else if (shopType === 'stances') portraitSrc = asset('/icons/npc-profile/stance-npc.png');
+        else if (shopType === 'weapons') portraitSrc = asset('/icons/npc-profile/merchant.png');
+        if (portraitSrc) {
+            portrait.src = portraitSrc;
+            portrait.style.display = '';
+        } else {
+            portrait.removeAttribute('src');
+            portrait.style.display = 'none';
+        }
+    }
+
     const modal = document.getElementById('merchant-modal');
     const questPanel = document.getElementById('merchant-quest-panel');
     if (questNpcId) {

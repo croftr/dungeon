@@ -2,7 +2,7 @@
   "trap1": {
     "model": "/items/trap1.glb",
     "closedModel": "/items/closed-trap.glb",
-    "scale": 0.6,
+    "scale": 0.4,
     "damage": {
       "1": { "min": 16, "max": 28 },
       "2": { "min": 36, "max": 56 },
