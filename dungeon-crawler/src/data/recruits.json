@@ -37,7 +37,8 @@
             "Minor Rejuvenate Potion"
         ],
         "startingSkills": [
-            "Hunter's Eye"
+            "Hunter's Eye",
+            "Lay Trap"
         ],
         "image": "/heros/elf_ranger_head.jpg",
         "leftHand": "Torch",

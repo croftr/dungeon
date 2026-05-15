@@ -10,7 +10,7 @@ import { initMinimap, drawMinimap, updateStatus, showMessage, LEVEL_NAMES } from
 import { initParty, updateParty, party, refreshPartyCards, autoAttack, autoRangeAttack, setHp, flashPortraitHit, showMemberDamage, isPartyUnseen, resurrectAll, getEffectiveElementalResistances } from './party.js';
 import { getItemDef } from './items.js';
 import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
-import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt } from './monster.js';
+import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt, tickMonsterElementFloorDamage } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems, replenishPotionMerchant } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound, prefetchActionSounds, checkNpcDialogueProximity, setElementFloorSound } from './audio.js';
@@ -73,7 +73,7 @@ document.querySelectorAll('img[data-src]').forEach(img => {
 // Map of level number → video element IDs to preload when entering that level
 const _VIDEO_LEVELS = {
   0: ['battle-prep-video', 'hero-door-video', 'nectar-quest-video', 'crystal-shrine-red-video', 'crystal-shrine-red-blue-video', 'portal-video'],
-  1: ['ogre-video', 'mummy-video', 'goblin-run-video'],
+  1: ['ogre-video', 'mummy-video'],
   2: ['treeman-video', 'demon-video', 'giant-video', 'aqua-man-video', 'stairs-video', 'crow-wizard-video'],
   3: ['minotaur-video', 'minotaur-death-video', 'statue-portal-video', 'egg-video'],
   4: ['stairs-video', 'demon-ogre-video', 'lizard-man-video'],
@@ -646,6 +646,7 @@ function animate(now) {
   updateAudio(dt);
   updateParty(dt);
   tickElementFloorDamage(dt);
+  tickMonsterElementFloorDamage(dt);
 
   // Auto-attack: front row members attack automatically when a monster is in melee range
   if (autoAttack) {
@@ -2109,43 +2110,24 @@ window.loadLevel = function (levelNum) {
     videoFlags.hasSeenL1Intro = true;
     const overlay = document.getElementById('level-load-overlay');
     const fill = document.getElementById('level-load-bar-fill');
-    const goblinVideo = document.getElementById('goblin-run-video');
     // Show overlay immediately
-    overlay.classList.add('visible');
+    if (overlay) overlay.classList.add('visible');
     // Kick off progress bar on next frame so the transition triggers properly
     requestAnimationFrame(() => {
-      fill.style.transition = 'width 10s linear';
-      fill.style.width = '100%';
+      if (fill) {
+        fill.style.transition = 'width 10s linear';
+        fill.style.width = '100%';
+      }
     });
-    // After 10 s, crossfade to the goblin-run video
+    // After 10 s, hide the overlay
     setTimeout(() => {
-      const content = document.getElementById('level-load-content');
-      if (content) content.style.transition = 'opacity 0.5s ease';
-      if (content) content.style.opacity = '0';
-
-      if (goblinVideo) {
-        goblinVideo.style.opacity = '1';
-        goblinVideo.play().catch(() => {});
-
-        const hideOverlay = () => {
-          overlay.classList.remove('visible');
-          setTimeout(() => {
-            fill.style.transition = 'none';
-            fill.style.width = '0%';
-            if (content) { content.style.opacity = ''; content.style.transition = ''; }
-            goblinVideo.style.opacity = '0';
-            goblinVideo.currentTime = 0;
-          }, 400);
-        };
-
-        goblinVideo.addEventListener('ended', hideOverlay, { once: true });
-      } else {
-        overlay.classList.remove('visible');
-        setTimeout(() => {
+      if (overlay) overlay.classList.remove('visible');
+      setTimeout(() => {
+        if (fill) {
           fill.style.transition = 'none';
           fill.style.width = '0%';
-        }, 400);
-      }
+        }
+      }, 400);
     }, 10000);
   }
 

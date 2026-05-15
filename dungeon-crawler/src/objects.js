@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { createBlobShadow } from './blob-shadow.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
-import { CELL, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld, buildLevel, level1Map, level2Map } from './map.js';
+import { CELL, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld, buildLevel, level1Map, level2Map, isPassable } from './map.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, isInFrontOfPlayer, player, FACING_ANGLES, setPlayerFrozen } from './player.js';
 import { showMessage, drawMinimap, updateStatus } from './minimap.js';
@@ -17,7 +17,8 @@ import FORGE_DATA from './data/forge.json';
 import { rollCraftOutcome, isEssenceIngredient, hqDisplayName } from './crafting.js';
 import BARNABY_DATA from './data/barnaby.json';
 import WEAPONS_DATA from './data/items/weapons.json';
-import { triggerMummyAmbush, monsters } from './monster.js';
+import { triggerMummyAmbush, monsters, hitMonster } from './monster.js';
+import TRAPS_DATA from './data/traps.json';
 import * as equip from './equipment.js';
 import { showInlineHelp } from './help.js';
 import { asset } from './assets.js';
@@ -217,6 +218,7 @@ const _collections = {
   seenEssences: new Set(),         // monster essences Barnaby has seen
   unlockedRecipes: new Set(),      // Barnaby-unlocked parchments
   disarmedTraps: new Set(),        // "row,col" keys of disarmed traps
+  laidTraps: [],                   // player-placed traps: { level, row, col, type, rotY }
   eggEmptied: new Set(),           // "level,row,col" keys of emptied ethereal eggs
   openedTrialGates: new Set(),     // "col,row" keys of opened schematic-trial portcullises (level 50)
   spokenToNpcs: new Set(),         // "level,col,row" keys of dialogue NPCs whose first-click line has already played
@@ -1988,53 +1990,116 @@ function addHeroDoor(scene, loader, col, row, rotY = Math.PI, targetLevel = 5) {
 //  TRAP SYSTEM
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Damage per party member by dungeon level. */
-const TRAP_DAMAGE = {
-    1: { min: 16, max: 28 },
-    2: { min: 36, max: 56 },
-    3: { min: 64, max: 90 },
-};
-
 /** Base chance to successfully disarm a trap (15%). */
 const TRAP_DISARM_CHANCE = 0.15;
 
-/** Freeze duration in ms after a trap fires. */
-const TRAP_FREEZE_MS = 10000;
+function _getTrapDef(trapObj) {
+    const type = trapObj.userData.trapType ?? 'trap1';
+    return TRAPS_DATA[type] ?? TRAPS_DATA.trap1;
+}
+
+function _rollTrapDamage(def) {
+    const level = window.currentLevel ?? 1;
+    const range = def.damage?.[level] ?? def.damage?.[1] ?? { min: 1, max: 1 };
+    return Math.floor(range.min + Math.random() * (range.max - range.min + 1));
+}
+
+function _markTrapTriggered(trapObj) {
+    const row = trapObj.userData.gridRow;
+    const col = trapObj.userData.gridCol;
+    const key = `${row},${col}`;
+    _collections.disarmedTraps.add(key);
+    const level = window.currentLevel ?? 0;
+    const lt = _collections.laidTraps;
+    for (let i = lt.length - 1; i >= 0; i--) {
+        if (lt[i].level === level && lt[i].row === row && lt[i].col === col) {
+            lt.splice(i, 1);
+        }
+    }
+}
+
+function _removeTrapModel(trapObj) {
+    const model = trapObj.userData.modelContainer;
+    if (model) {
+        objectsGroup.remove(model);
+        model.traverse((child) => {
+            const idx = interactables.indexOf(child);
+            if (idx !== -1) interactables.splice(idx, 1);
+        });
+    }
+}
 
 /**
- * Fires the trap at (row, col): deals level-scaled damage to the whole party,
- * freezes movement for TRAP_FREEZE_MS, plays the trap sound, and removes the
- * trap model from the scene.
+ * Spawn the closed-trap (sprung) variant at the given cell. Pure visual — not
+ * interactable, no userData hooks. Returns the model so the caller can remove
+ * it later.
+ */
+function _spawnClosedTrapModel(def, row, col, rotY = 0) {
+    if (!def.closedModel) return null;
+    const useScale = def.scale ?? 0.6;
+    const holder = new THREE.Group();
+    holder.position.set(col * CELL, 0.0, row * CELL);
+    holder.rotation.y = rotY;
+    objectsGroup.add(holder);
+    _gltfLoader.load(asset(def.closedModel), (gltf) => {
+        const model = gltf.scene;
+        model.scale.setScalar(useScale);
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }
+        });
+        holder.add(model);
+    });
+    return holder;
+}
+
+/**
+ * Marks the trap as logically triggered (so it won't fire again or respawn on
+ * level reload), swaps the open-trap model for the sprung "closed" variant,
+ * and removes the closed model after `delayMs` (the freeze duration).
+ */
+function _consumeTrap(trapObj, delayMs = 0) {
+    _markTrapTriggered(trapObj);
+    const def = _getTrapDef(trapObj);
+    const row = trapObj.userData.gridRow;
+    const col = trapObj.userData.gridCol;
+    const rotY = trapObj.userData.modelContainer?.rotation?.y ?? 0;
+    _removeTrapModel(trapObj);
+    const closed = _spawnClosedTrapModel(def, row, col, rotY);
+    if (closed && delayMs > 0) {
+        setTimeout(() => objectsGroup.remove(closed), delayMs);
+    } else if (closed) {
+        objectsGroup.remove(closed);
+    }
+}
+
+/**
+ * Fires the trap on the party: deals level-scaled damage to the whole party,
+ * freezes movement, plays the trap sound, and removes the trap model.
  */
 function _fireTrap(trapObj) {
     const row = trapObj.userData.gridRow;
     const col = trapObj.userData.gridCol;
     const key = `${row},${col}`;
-
-    // Prevent double-triggering
     if (_collections.disarmedTraps.has(key)) return;
-    _collections.disarmedTraps.add(key);
 
-    playTrapSound();
-
-    const level = window.currentLevel ?? 0;
-    const dmgRange = TRAP_DAMAGE[level] ?? TRAP_DAMAGE[1];
+    const def = _getTrapDef(trapObj);
+    if (def.triggerSound !== false) playTrapSound();
 
     let damageMessage = 'The trap springs! ';
     let anyHit = false;
     party.forEach((m, i) => {
         if (m.isEmpty || m.isDead) return;
-        const dmg = Math.floor(dmgRange.min + Math.random() * (dmgRange.max - dmgRange.min + 1));
-        const before = m.hp;
-        setHp(i, before - dmg);
+        const dmg = _rollTrapDamage(def);
+        setHp(i, m.hp - dmg);
         damageMessage += `${m.name} takes ${dmg} damage. `;
         anyHit = true;
     });
     if (anyHit) playPartyHitSound();
-
     showMessage(damageMessage.trim());
 
-    // Apply 'trapped' status effect to all living party members + log each one
     party.forEach((m) => {
         if (m.isEmpty || m.isDead) return;
         applyStatusEffect(m.id, 'trapped');
@@ -2048,22 +2113,32 @@ function _fireTrap(trapObj) {
         });
     });
 
-    // Freeze movement for 5 seconds
+    const freezeMs = def.freezeMs ?? 10000;
     setPlayerFrozen(true);
     setTimeout(() => {
         setPlayerFrozen(false);
         showMessage('The party recovers and can move again.');
-    }, TRAP_FREEZE_MS);
+    }, freezeMs);
 
-    // Remove trap model from scene
-    const model = trapObj.userData.modelContainer;
-    if (model) {
-        objectsGroup.remove(model);
-        model.traverse((child) => {
-            const idx = interactables.indexOf(child);
-            if (idx !== -1) interactables.splice(idx, 1);
-        });
-    }
+    if (def.consumeOnTrigger !== false) _consumeTrap(trapObj, freezeMs);
+}
+
+/**
+ * Fires the trap on a monster: damage + immobilize via m.trappedUntil.
+ */
+function _fireTrapOnMonster(trapObj, monster) {
+    const key = `${trapObj.userData.gridRow},${trapObj.userData.gridCol}`;
+    if (_collections.disarmedTraps.has(key)) return;
+
+    const def = _getTrapDef(trapObj);
+    if (def.triggerSound !== false) playTrapSound();
+
+    const dmg = _rollTrapDamage(def);
+    const freezeMs = def.freezeMs ?? 10000;
+    monster.trappedUntil = performance.now() + freezeMs;
+    hitMonster(monster.id, dmg, 'trap');
+
+    if (def.consumeOnTrigger !== false) _consumeTrap(trapObj, freezeMs);
 }
 
 /**
@@ -2075,6 +2150,47 @@ export function checkTrapAtPosition(row, col) {
             obj.userData.gridRow === row &&
             obj.userData.gridCol === col) {
             _fireTrap(obj);
+            return;
+        }
+    }
+}
+
+/**
+ * Places a trap at (row, col). Returns true on success, or a string reason on
+ * failure. Async — model loads in the background but the placement is committed
+ * synchronously via the disarmedTraps reservation? No: the reservation only
+ * happens on trigger. Here we just gate by passability / existing trap.
+ */
+export function placeTrap(type, row, col, rotY = 0) {
+    if (row == null || col == null) return 'no-cell';
+    if (!isPassable(row, col)) return 'blocked';
+    if (isStatueAt(row, col)) return 'blocked';
+    const key = `${row},${col}`;
+    if (_collections.disarmedTraps.has(key)) return 'scarred';
+    for (const obj of interactables) {
+        if (obj.userData.isDamageTrap &&
+            obj.userData.gridRow === row &&
+            obj.userData.gridCol === col) {
+            return 'already-trap';
+        }
+    }
+    if (!TRAPS_DATA[type]) return 'unknown-type';
+    const level = window.currentLevel ?? 0;
+    _collections.laidTraps.push({ level, row, col, type, rotY });
+    addTrap(type, objectsGroup, _gltfLoader, row, col, rotY);
+    return true;
+}
+
+/**
+ * Called from monster.js when a monster commits to a new grid cell. If a trap
+ * exists at that cell, the monster takes damage and is immobilized.
+ */
+export function checkTrapForMonster(monster, row, col) {
+    for (const obj of interactables) {
+        if (obj.userData.isDamageTrap &&
+            obj.userData.gridRow === row &&
+            obj.userData.gridCol === col) {
+            _fireTrapOnMonster(obj, monster);
             return;
         }
     }
@@ -2182,13 +2298,17 @@ function openTrapDisarmModal(trapObj) {
     }
 }
 
-function addTrap1(scene, loader, row, col, rotY = 0, scale = 0.6) {
+function addTrap(type, scene, loader, row, col, rotY = 0, scale = null) {
     const key = `${row},${col}`;
     if (_collections.disarmedTraps.has(key)) return; // already disarmed — don't spawn
 
-    loader.load(asset('/items/trap1.glb'), (gltf) => {
+    const def = TRAPS_DATA[type];
+    if (!def) { console.warn(`Unknown trap type: ${type}`); return; }
+    const useScale = scale ?? def.scale ?? 0.6;
+
+    loader.load(asset(def.model), (gltf) => {
         const model = gltf.scene;
-        model.scale.setScalar(scale);
+        model.scale.setScalar(useScale);
         model.position.set(col * CELL, 0.0, row * CELL);
         model.rotation.y = rotY;
 
@@ -2197,6 +2317,7 @@ function addTrap1(scene, loader, row, col, rotY = 0, scale = 0.6) {
                 child.castShadow = true;
                 child.receiveShadow = true;
                 child.userData.isDamageTrap = true;
+                child.userData.trapType = type;
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.modelContainer = model;
@@ -2218,6 +2339,10 @@ function addTrap1(scene, loader, row, col, rotY = 0, scale = 0.6) {
 
         objectsGroup.add(model);
     });
+}
+
+function addTrap1(scene, loader, row, col, rotY = 0, scale) {
+    addTrap('trap1', scene, loader, row, col, rotY, scale);
 }
 
 function addDroppedTorch(container, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
@@ -2317,7 +2442,7 @@ export function spawnObjectsForLevel() {
         addPortal, addDisabledPortal, addPortcullis, addKeyhole,
         addStatue, addPortalActivatorStatue, addPartyConfirmNPC, addDialogueNPC, addCustomNPC,
         addAnvil, addAlchemyWorkshop, addDroppedTorch, addEtherealEgg, addStairs,
-        addTrap1, createWallButton, addArmourStand, addTrainingConsole, addPitLadder,
+        addTrap1, addTrap, createWallButton, addArmourStand, addTrainingConsole, addPitLadder,
         addPlaque,
         // Level 1 state flags
         starterPortalEnabled: _state.starterPortalEnabled,
@@ -2363,6 +2488,15 @@ export function spawnObjectsForLevel() {
         addDroppedTorch(objectsGroup, _gltfLoader, 1, 7, 0);
         addDroppedTorch(objectsGroup, _gltfLoader, 7, 1, 0);
         addDroppedTorch(objectsGroup, _gltfLoader, 7, 7, 0);
+    }
+
+    // Re-spawn player-laid traps for this level (survives save/load).
+    // addTrap itself skips cells already in disarmedTraps, so triggered laid
+    // traps stay gone — but we also prune laidTraps on consume for clarity.
+    for (const t of _collections.laidTraps) {
+        if (t.level === level) {
+            addTrap(t.type ?? 'trap1', objectsGroup, _gltfLoader, t.row, t.col, t.rotY ?? 0);
+        }
     }
 }
 
@@ -6252,6 +6386,7 @@ export function captureWorldState() {
         eggEmptied: Array.from(_collections.eggEmptied),
         openedTrialGates: Array.from(_collections.openedTrialGates),
         spokenToNpcs: Array.from(_collections.spokenToNpcs),
+        laidTraps: _collections.laidTraps.map(t => ({ ...t })),
         containerContents: _containerContentsPersistence,
         starterStashItems: _persistedStarterStashItems,
     };
@@ -6268,6 +6403,7 @@ export function restoreWorldState(data) {
     _collections.eggEmptied = new Set(data.eggEmptied ?? []);
     _collections.openedTrialGates = new Set(data.openedTrialGates ?? []);
     _collections.spokenToNpcs = new Set(data.spokenToNpcs ?? []);
+    _collections.laidTraps = (data.laidTraps ?? []).map(t => ({ ...t }));
     _containerContentsPersistence = data.containerContents ?? {};
     // Only apply starterStashItems if the field is explicitly present in the
     // payload. An old save without the field would otherwise clobber the

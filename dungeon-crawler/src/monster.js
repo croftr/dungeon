@@ -26,7 +26,9 @@ import { setInCombat, clearCombat, playCritSound, playActionSound, playHitSound,
 import { addLogEntry } from './battle-log.js';
 import { resetBattleStats, recordDamageDealt, recordDamageTaken, recordAttack, showBattleStatsIcon } from './battle-stats.js';
 import { getItemDef } from './items.js';
-import { spawnDroppedItem, isStatueAt, spawnCorpse } from './objects.js';
+import { spawnDroppedItem, isStatueAt, spawnCorpse, checkTrapForMonster } from './objects.js';
+import ELEMENT_FLOORS from './data/element-floors.json';
+import { dungeonMap } from './map.js';
 import { MONSTER_DEFS as D } from './monster-defs.js';
 import { inst } from './monster-factory.js';
 import { level0Monsters } from './levels/level0/monsters.js';
@@ -1795,6 +1797,7 @@ function _updatePatrol(m, dt) {
     m.gridCol = ps.targetCol;
     ps.moving = false;
     ps.waitTimer = (m.patrol.waitTime ?? 2.5) + Math.random() * 2.0;
+    checkTrapForMonster(m, m.gridRow, m.gridCol);
   } else {
     const step = Math.min(spd * dt, dist);
     m.mesh.position.x += (dx / dist) * step;
@@ -1863,6 +1866,7 @@ function _updateChase(m, dt) {
     m.gridRow = cs.targetRow;
     m.gridCol = cs.targetCol;
     cs.moving = false;
+    checkTrapForMonster(m, m.gridRow, m.gridCol);
   } else {
     const step = Math.min(spd * dt, dist);
     m.mesh.position.x += (dx / dist) * step;
@@ -2082,8 +2086,10 @@ export function updateMonsters(dt, playerCamera, scene) {
 
     // Movement when player is out of attack range.
     // Suppressed (sleeping) monsters cannot chase or patrol.
+    // Trapped monsters are immobilised until trappedUntil expires.
+    const isTrapped = m.trappedUntil && performance.now() < m.trappedUntil;
     let isMoving = false;
-    if (!inRange && !isSuppressed) {
+    if (!inRange && !isSuppressed && !isTrapped) {
       if (m.engaged && m.name !== 'Training Dummy') {
         // Combat has started — chase the player
         _updateChase(m, dt);
@@ -2145,6 +2151,8 @@ export function updateMonsters(dt, playerCamera, scene) {
 
       if (isSuppressed) {
         // Monster is asleep (or otherwise suppressed) — cannot attack
+      } else if (isTrapped) {
+        // Monster is caught in a floor trap — cannot attack
       } else if (m.stunUntil && performance.now() < m.stunUntil) {
         // Monster is stunned; cooldown timer doesn't tick down yet
       } else if (window._cutscenePlaying) {
@@ -2165,6 +2173,35 @@ export function updateMonsters(dt, playerCamera, scene) {
       m.attackCooldown = 0;
     }
   });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  ELEMENT-FLOOR DAMAGE TO MONSTERS
+//  Living monsters standing on an elemental floor (ice, lava, etc.) take pure
+//  elemental damage every tickInterval. Monster elemental resistance category
+//  (immune/resist/normal/weak/vulnerable) gates the damage — an iceman on an
+//  ice floor takes zero damage.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const _monsterElementFloorAccum = {};
+
+export function tickMonsterElementFloorDamage(dt) {
+  const currentLevel = window.currentLevel ?? 0;
+  for (const [id, def] of Object.entries(ELEMENT_FLOORS)) {
+    const acc = (_monsterElementFloorAccum[id] ?? 0) + dt;
+    if (acc < def.tickInterval) { _monsterElementFloorAccum[id] = acc; continue; }
+    _monsterElementFloorAccum[id] = acc - def.tickInterval;
+    monsters.forEach((m) => {
+      if (!m.alive) return;
+      if ((m.level ?? 1) !== currentLevel) return;
+      const cell = dungeonMap[m.gridRow]?.[m.gridCol];
+      if (cell !== def.cell) return;
+      const mult = getMonsterElementMultiplier(m, def.element);
+      if (mult <= 0) return;
+      const dmg = Math.max(1, Math.round(def.dps * mult));
+      hitMonster(m.id, dmg, `${def.element}-floor`);
+    });
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

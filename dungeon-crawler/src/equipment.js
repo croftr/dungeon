@@ -17,8 +17,8 @@ import { showMessage } from './minimap.js';
 import RECRUITS_DATA from './data/recruits.json';
 import SETS_DATA from './data/sets.json';
 import SPELL_TYPE_ICONS from './data/spell-type-icons.json';
-import { isInFrontOfPlayer, player } from './player.js';
-import { isAlchemyModalOpen, addItemToAlchemy } from './objects.js';
+import { isInFrontOfPlayer, player, facingDir } from './player.js';
+import { isAlchemyModalOpen, addItemToAlchemy, placeTrap } from './objects.js';
 import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude, calcOnHitChance, calcControlSpellLandChance } from './combat-rules.js';
 import { showStanceMenu, getAvailableStances, getEligibleStances, getSpellCooldownMultiplier, getStanceCureHealBonus, hasStanceDoubleAttack, getStanceDef, setStance } from './stance.js';
 import { playStanceVideo, RECRUITS } from './recruits.js';
@@ -4728,6 +4728,7 @@ function useSkill(memberIndex) {
   if (skill.name === 'True Shot') { _useTrueShot(m, memberIndex); return; }
   if (skill.name === 'Double Attack') { _useDoubleAttack(m, memberIndex); return; }
   if (skill.name === 'Rampart') { _useRampart(m, memberIndex); return; }
+  if (skill.name === 'Lay Trap') { _useLayTrap(m, memberIndex); return; }
   if (skill.name === 'Heal') { _useHealSkill(m, memberIndex); return; }
 
   playSkillSound('magic');
@@ -5387,6 +5388,49 @@ function _useRampart(member, memberIndex) {
   }, rampartDurationMs);
 
   _startSkillCooldownUI(memberIndex, _rampartCooldownEnds[memberIndex]);
+}
+
+// ── Lay Trap (Elrond / Baldur) ────────────────────────────────────────────
+const LAY_TRAP_COOLDOWN_MS = SKILLS_DATA['Lay Trap'].cooldownMs;
+let _layTrapCooldownEnds = [0, 0, 0, 0];
+
+function _useLayTrap(member, memberIndex) {
+  const now = performance.now();
+  if (now < _layTrapCooldownEnds[memberIndex]) {
+    const remaining = Math.ceil((_layTrapCooldownEnds[memberIndex] - now) / 1000);
+    showMessage(`<span style="color:#c07030">Lay Trap</span> — ready in ${remaining}s`, 2000);
+    return;
+  }
+
+  const dir = facingDir();
+  const frontRow = player.gridRow + dir.dz;
+  const frontCol = player.gridCol + dir.dx;
+
+  const result = placeTrap('trap1', frontRow, frontCol);
+  if (result !== true) {
+    const reason = result === 'blocked' ? 'the way is blocked'
+      : result === 'already-trap' ? 'a trap is already there'
+      : result === 'scarred' ? 'the floor is too damaged to set a trap'
+      : 'the trap cannot be placed there';
+    showMessage(`<span style="color:#c07030">Lay Trap</span> — ${reason}.`, 2500);
+    return;
+  }
+
+  _layTrapCooldownEnds[memberIndex] = now + LAY_TRAP_COOLDOWN_MS;
+  lastAttackTimes[`${memberIndex}-skill-Lay Trap`] = now;
+
+  playSkillSound('magic');
+  showMessage(
+    `<span style="color:#c07030">✦ Lay Trap</span> — ${member.name} sets a trap on the floor ahead.`,
+    3000
+  );
+  addLogEntry({ type: 'skill', actor: member.name, skillName: 'Lay Trap' });
+
+  _startSkillCooldownUI(memberIndex, _layTrapCooldownEnds[memberIndex]);
+  // Refresh so whichever skill slot holds Lay Trap (slot 1-6) picks up the
+  // cooldown styling via lastAttackTimes, not just the primary slot that
+  // _startSkillCooldownUI touches directly.
+  refreshPartyCards();
 }
 
 // ── Runic Scholar (Ashar) ────────────────────────────────────────────────

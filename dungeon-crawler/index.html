@@ -423,7 +423,7 @@
     <div id="level-title-text"></div>
   </div>
 
-  <!-- ── LEVEL LOAD OVERLAY (first entry to level 1) ── -->
+  <!-- ── LEVEL LOAD OVERLAY (used for save loading and level transitions) ── -->
   <div id="level-load-overlay">
     <div id="level-load-content">
       <p id="level-load-text">Entering the Dungeon&hellip;</p>
@@ -431,10 +431,6 @@
         <div id="level-load-bar-fill"></div>
       </div>
     </div>
-    <video id="goblin-run-video" preload="none" muted playsinline
-      style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity 0.5s ease;pointer-events:none;">
-      <source data-src="/videos/goblin-run.mp4" type="video/mp4">
-    </video>
   </div>
 
   <canvas id="renderer-canvas"></canvas>

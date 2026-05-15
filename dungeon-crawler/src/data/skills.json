@@ -154,6 +154,14 @@
         "effectTarget": "self",
         "stateKey": "doubleAttack"
     },
+    "Lay Trap": {
+        "type": "utility",
+        "icon": "/skills/lay-trap.webp",
+        "description": "Places a trap on the floor directly in front of the party. Any creature that steps on it takes heavy damage and is immobilised. Cooldown: 60s.",
+        "cooldownMs": 60000,
+        "effectType": "layTrap",
+        "effectTarget": "world"
+    },
     "Rampart": {
         "type": "buff",
         "icon": "/skills/rampart.webp",

@@ -101,8 +101,19 @@
       },
       "icon": "/skills/stats-increase/dexterity_increase.webp",
       "edges": [
-        "n12"
+        "n12",
+        "n27"
       ]
+    },
+    {
+      "id": "n27",
+      "label": "Lay Trap",
+      "type": "skill",
+      "benefit": {
+        "skill": "Lay Trap"
+      },
+      "icon": "/skills/lay-trap.webp",
+      "edges": []
     },
     {
       "id": "n10",
@@ -339,6 +350,10 @@
     "n26": [
       1310,
       580
+    ],
+    "n27": [
+      590,
+      490
     ]
   }
 }
