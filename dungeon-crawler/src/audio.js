@@ -237,6 +237,21 @@ export async function playFloorPortalSound() {
   }
 }
 
+let _portalIdleAudio = null;
+export function setPortalIdleLoop(on) {
+  if (on) {
+    if (_portalIdleAudio) return;
+    _portalIdleAudio = new Audio(asset('/sounds/portal-idle.mp3'));
+    _portalIdleAudio.loop = true;
+    _portalIdleAudio.volume = 0.5;
+    _portalIdleAudio.play().catch(() => {});
+  } else {
+    if (!_portalIdleAudio) return;
+    try { _portalIdleAudio.pause(); } catch {}
+    _portalIdleAudio = null;
+  }
+}
+
 export async function playKeyLockSound() {
   const buffer = await getBuffer(asset('/sounds/actions/key-lock.mp3'));
   if (!buffer) return;

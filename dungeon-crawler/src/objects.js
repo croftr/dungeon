@@ -8,7 +8,7 @@ import { showMessage, drawMinimap, updateStatus } from './minimap.js';
 import { getItemDef, ITEMS } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refreshPartyCards, setHp, applyStatusEffect } from './party.js';
 import { addLogEntry } from './battle-log.js';
-import { playHealSound, playBoneSound, playPortalSound, playFloorPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playLearntSound, playSoundByUrl, playQuestAudio, fadeOutQuestAudio, playPartyHitSound, playInventorySortSound, playCraftFailSound, playCraftHqSound, playNpcDialogue, isNpcDialoguePlaying } from './audio.js';
+import { setPortalIdleLoop, playHealSound, playBoneSound, playPortalSound, playFloorPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playLearntSound, playSoundByUrl, playQuestAudio, fadeOutQuestAudio, playPartyHitSound, playInventorySortSound, playCraftFailSound, playCraftHqSound, playNpcDialogue, isNpcDialoguePlaying } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
 import POTION_MERCHANT_DATA from './data/potion-merchant.json';
 import STANCE_MERCHANT_DATA from './data/stance-npc-merchant.json';
@@ -346,6 +346,12 @@ export function clearObjects(scene) {
     objectsGroup = new THREE.Group();
     scene.add(objectsGroup);
     _spawnGeneration++;
+    setPortalIdleLoop(false);
+    if (_pendingPortalTimer) {
+        clearTimeout(_pendingPortalTimer);
+        _pendingPortalTimer = null;
+        _pendingPortalKey = null;
+    }
 
     // Clear mixers and intervals to prevent memory leaks and performance lag
     _mixers.length = 0;
@@ -373,7 +379,131 @@ function _animateButtonPress(obj) {
         .start();
 }
 
+let _camera = null;
+
+// ─────────────────────────────────────────────
+//  PORTAL TELEPORT
+// ─────────────────────────────────────────────
+// Floor-portal step-on cooldown: when a portal lands the party on another
+// portal cell, the step-on handler is gated by both a timestamp cooldown
+// AND an arrival-cell check. The party must (a) wait out the cooldown and
+// (b) step off the arrival cell before another step-on teleport can fire.
+let _portalCooldownUntil = 0;
+let _arrivedPortalKey = null;
+let _pendingPortalTimer = null;
+let _pendingPortalKey = null;
+
+export function triggerPortal(obj) {
+    const targetLevel = obj.userData.targetLevel;
+    if (targetLevel === -1) {
+        showMessage('YOU ESCAPED!<br><small style="font-size:14px;color:#aaa">The dungeon is conquered.</small>');
+        return;
+    }
+
+    showMessage("You step into the swirling blue portal...");
+    if (obj.userData.isFloorPortal) {
+        playFloorPortalSound();
+    } else {
+        playPortalSound();
+    }
+
+    if (obj.userData.isArenaExit) {
+        if (window._arenaExit) window._arenaExit(true);
+        return;
+    }
+
+    const tr = obj.userData.targetRow;
+    const tc = obj.userData.targetCol;
+    const tf = obj.userData.targetFacing;
+
+    _portalCooldownUntil = Date.now() + 1500;
+    if (tr != null && tc != null) {
+        _arrivedPortalKey = `${targetLevel},${tc},${tr}`;
+    } else {
+        _arrivedPortalKey = null;
+    }
+
+    // Kill any in-flight movement tween so the camera doesn't drift away from
+    // the teleport destination after we reposition it.
+    tweenGroup.removeAll();
+    player.moving = false;
+
+    function _doLoad() {
+        if (window.loadLevel) {
+            window.loadLevel(targetLevel);
+            if (tr != null && tc != null) {
+                setTimeout(() => {
+                    player.gridRow = tr;
+                    player.gridCol = tc;
+                    const w = cellToWorld(tr, tc);
+                    if (_camera) {
+                        _camera.position.set(w.x, w.y, w.z);
+                        if (tf != null) {
+                            player.facing = tf;
+                            _camera.rotation.order = 'YXZ';
+                            _camera.rotation.y = FACING_ANGLES[tf];
+                        }
+                    }
+                    checkFloorPortalStep();
+                }, 50);
+            }
+        }
+    }
+
+    if (window.currentLevel === 0 && targetLevel > 0) {
+        if (window.playPortalVideo) {
+            window.playPortalVideo(() => _doLoad());
+        } else {
+            _doLoad();
+        }
+    } else {
+        _doLoad();
+    }
+}
+
+// Called from main.js's moved() callback after every step. If the party
+// has walked onto a floor portal (and it isn't the one they just arrived
+// on), trigger the teleport.
+export function checkFloorPortalStep() {
+    const curKey = `${window.currentLevel},${player.gridCol},${player.gridRow}`;
+    if (_arrivedPortalKey && _arrivedPortalKey !== curKey) {
+        _arrivedPortalKey = null;
+    }
+    // If a pending teleport was scheduled and the party has walked off that
+    // cell (or onto a different one), cancel it.
+    if (_pendingPortalTimer && _pendingPortalKey !== curKey) {
+        clearTimeout(_pendingPortalTimer);
+        _pendingPortalTimer = null;
+        _pendingPortalKey = null;
+    }
+    const onCooldown = Date.now() < _portalCooldownUntil;
+    const immune = _arrivedPortalKey === curKey || onCooldown;
+    let nearPortal = false;
+    for (const obj of interactables) {
+        const ud = obj.userData;
+        if (!ud || !ud.isPortal || !ud.isFloorPortal) continue;
+        const dr = Math.abs(ud.gridRow - player.gridRow);
+        const dc = Math.abs(ud.gridCol - player.gridCol);
+        if (dr <= 1 && dc <= 1) nearPortal = true;
+        if (dr === 0 && dc === 0 && !immune && !_pendingPortalTimer) {
+            _pendingPortalKey = curKey;
+            _pendingPortalTimer = setTimeout(() => {
+                _pendingPortalTimer = null;
+                _pendingPortalKey = null;
+                // Only fire if the party is still on this cell.
+                const stillHere = `${window.currentLevel},${player.gridCol},${player.gridRow}` === curKey;
+                if (stillHere) {
+                    setPortalIdleLoop(false);
+                    triggerPortal(obj);
+                }
+            }, 2000);
+        }
+    }
+    setPortalIdleLoop(nearPortal);
+}
+
 export function initObjects(scene, camera) {
+    _camera = camera;
     scene.add(objectsGroup);
 
     spawnObjectsForLevel();
@@ -709,58 +839,7 @@ export function initObjects(scene, camera) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
                 if (distRow <= 1 && distCol <= 1) {
-                    const targetLevel = obj.userData.targetLevel;
-                    if (targetLevel === -1) {
-                        showMessage('YOU ESCAPED!<br><small style="font-size:14px;color:#aaa">The dungeon is conquered.</small>');
-                        return;
-                    }
-
-                    showMessage("You step into the swirling blue portal...");
-                    if (obj.userData.isFloorPortal) {
-                        playFloorPortalSound();
-                    } else {
-                        playPortalSound();
-                    }
-
-                    if (obj.userData.isArenaExit) {
-                        if (window._arenaExit) window._arenaExit(true);
-                        return;
-                    }
-
-                    const tr = obj.userData.targetRow;
-                    const tc = obj.userData.targetCol;
-                    const tf = obj.userData.targetFacing;
-
-                    function _doLoad() {
-                        if (window.loadLevel) {
-                            window.loadLevel(targetLevel);
-                            if (tr != null && tc != null) {
-                                setTimeout(() => {
-                                    player.gridRow = tr;
-                                    player.gridCol = tc;
-                                    const w = cellToWorld(tr, tc);
-                                    camera.position.set(w.x, w.y, w.z);
-                                    if (tf != null) {
-                                        player.facing = tf;
-                                        camera.rotation.order = 'YXZ';
-                                        camera.rotation.y = FACING_ANGLES[tf];
-                                    }
-                                }, 50);
-                            }
-                        }
-                    }
-
-                    if (window.currentLevel === 0 && targetLevel > 0) {
-                        // All outgoing warps from the starter room play the portal entry video first
-                        if (window.playPortalVideo) {
-                            window.playPortalVideo(() => _doLoad());
-                        } else {
-                            _doLoad();
-                        }
-                    } else {
-                        // Return portals and all other transitions — load immediately
-                        _doLoad();
-                    }
+                    triggerPortal(obj);
                 } else {
                     showMessage("Step closer to the portal to enter.");
                 }
