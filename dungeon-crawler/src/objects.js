@@ -17,6 +17,8 @@ import FORGE_DATA from './data/forge.json';
 import { rollCraftOutcome, isEssenceIngredient, hqDisplayName } from './crafting.js';
 import BARNABY_DATA from './data/barnaby.json';
 import WEAPONS_DATA from './data/items/weapons.json';
+import SHIELDS_DATA from './data/items/shields.json';
+import AMMO_DATA from './data/items/ammo.json';
 import { triggerMummyAmbush, monsters, hitMonster } from './monster.js';
 import TRAPS_DATA from './data/traps.json';
 import * as equip from './equipment.js';
@@ -179,6 +181,13 @@ function _normStock(entry) {
   if (typeof entry === 'object' && entry.name) return { name: entry.name, hq: !!entry.hq };
   return null;
 }
+// Names of all items from weapons.json + shields.json — used to split the Weapons/Armour sub-tabs
+const _WEAPON_TAB_NAMES = new Set([
+    ...WEAPONS_DATA.map(i => i.name),
+    ...SHIELDS_DATA.map(i => i.name),
+    ...AMMO_DATA.map(i => i.name),
+]);
+
 const MERCHANT_STOCK = MERCHANT_DATA.stock.map(_normStock).filter(Boolean);
 const POTION_MERCHANT_STOCK = POTION_MERCHANT_DATA.stock.map(_normStock).filter(Boolean);
 const STANCE_MERCHANT_STOCK = STANCE_MERCHANT_DATA.stock.map(_normStock).filter(Boolean);
@@ -203,6 +212,8 @@ let _merchantBasket = [];
 let _merchantSellBasket = [];
 // Current merchant tab
 let _merchantMode = 'buy';
+// Active sub-tab for the weapons merchant shop ('weapons' | 'armour')
+let _merchantShopTab = 'weapons';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  CANONICAL WORLD COLLECTIONS — save-relevant Sets.
@@ -1523,6 +1534,12 @@ export function initObjects(scene, camera) {
     const tabSell = document.getElementById('merchant-tab-sell');
     if (tabBuy) tabBuy.onclick = (e) => { e.stopPropagation(); _switchMerchantTab('buy'); };
     if (tabSell) tabSell.onclick = (e) => { e.stopPropagation(); _switchMerchantTab('sell'); };
+
+    // Merchant shop sub-tab buttons (Weapons / Armour)
+    const shopTabWeapons = document.getElementById('merchant-shop-tab-weapons');
+    const shopTabArmour = document.getElementById('merchant-shop-tab-armour');
+    if (shopTabWeapons) shopTabWeapons.onclick = (e) => { e.stopPropagation(); _switchShopTab('weapons'); };
+    if (shopTabArmour) shopTabArmour.onclick = (e) => { e.stopPropagation(); _switchShopTab('armour'); };
 
     // Weapon rack modal close
     const weaponRackCloseBtn = document.getElementById('weapon-rack-close');
@@ -4590,6 +4607,7 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
     _merchantBasket = [];
     _merchantSellBasket = [];
     _merchantMode = 'buy';
+    _merchantShopTab = 'weapons';
     if (shopType === 'potions') _activeMerchantAvailable = _potionMerchantAvailable;
     else if (shopType === 'stances') _activeMerchantAvailable = _stanceMerchantAvailable;
     else _activeMerchantAvailable = _merchantAvailable;
@@ -4695,8 +4713,24 @@ export function openMerchantModal(shopType = 'weapons', questNpcId = null) {
             }
         }
 
+        const shopSubtabs = document.getElementById('merchant-shop-subtabs');
+        if (shopSubtabs) {
+            shopSubtabs.style.display = (shopType === 'weapons') ? 'flex' : 'none';
+            document.getElementById('merchant-shop-tab-weapons')?.classList.add('merchant-shop-subtab-active');
+            document.getElementById('merchant-shop-tab-armour')?.classList.remove('merchant-shop-subtab-active');
+        }
+
         _switchMerchantTab('buy');
     }
+}
+
+function _switchShopTab(tab) {
+    _merchantShopTab = tab;
+    document.getElementById('merchant-shop-tab-weapons')?.classList.toggle('merchant-shop-subtab-active', tab === 'weapons');
+    document.getElementById('merchant-shop-tab-armour')?.classList.toggle('merchant-shop-subtab-active', tab === 'armour');
+    _renderMerchantShop();
+    _renderMerchantBasket();
+    _updateMerchantTotals();
 }
 
 function _switchMerchantTab(mode) {
@@ -4751,7 +4785,16 @@ function _renderMerchantShop() {
             if (idx > -1) displayAvailable.splice(idx, 1);
         }
 
-        displayAvailable.forEach(entry => {
+        // Filter by sub-tab for the weapons merchant, then sort by price ascending
+        let filtered = displayAvailable;
+        if (_activeMerchantAvailable === _merchantAvailable) {
+            filtered = _merchantShopTab === 'weapons'
+                ? filtered.filter(e => _WEAPON_TAB_NAMES.has(e.name))
+                : filtered.filter(e => !_WEAPON_TAB_NAMES.has(e.name));
+        }
+        filtered = filtered.slice().sort((a, b) => _entryPrice(a) - _entryPrice(b));
+
+        filtered.forEach(entry => {
             const { name, hq } = entry;
             const itemDef = getItemDef(name);
             if (!itemDef) return;

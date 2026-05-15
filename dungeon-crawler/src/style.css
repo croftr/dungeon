@@ -5453,7 +5453,7 @@ label.mm-setting-label {
    Side slots use negative/over-100% left to hang outside the body silhouette,
    pushed far enough out that they sit near the four corners of the panel.     */
 #pd-head {
-  top: 10%;
+  top: calc(10% - 30px);
   left: 50%;
 }
 
@@ -5489,25 +5489,25 @@ label.mm-setting-label {
 
 /* right — below neck             */
 #pd-belt {
-  top: 62%;
+  top: calc(62% + 10px);
   left: -22%;
 }
 
 /* left — belt above gauntlets    */
 #pd-hands {
-  top: 78%;
-  left: -22%;
+  top: calc(62% + 10px);
+  left: 122%;
 }
 
 /* left bottom — gauntlets        */
 #pd-ring1 {
-  top: 62%;
-  left: 122%;
+  top: calc(78% + 20px);
+  left: -22%;
 }
 
 /* right near-bottom — ring 1     */
 #pd-ring2 {
-  top: 78%;
+  top: calc(78% + 20px);
   left: 122%;
 }
 
@@ -5524,7 +5524,7 @@ label.mm-setting-label {
 }
 
 #pd-ammo {
-  top: 103%;
+  top: calc(103% + 10px);
   left: -22%;
 }
 
@@ -5613,7 +5613,7 @@ label.mm-setting-label {
 
 /* Relic — bottom-right, mirrors the ammo position on the opposite side */
 #pd-relic {
-  top: 103%;
+  top: calc(103% + 10px);
   left: 122%;
 }
 
@@ -9206,6 +9206,40 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
 
 .merchant-tab:hover:not(.merchant-tab-active) {
   color: #8a7840;
+}
+
+/* ── Merchant shop sub-tabs (Weapons / Armour) ───────────────────────── */
+#merchant-shop-subtabs {
+  display: flex;
+  border-bottom: 1px solid #2a2010;
+  background: rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+  margin-bottom: 4px;
+}
+
+.merchant-shop-subtab {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 0;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #4a3820;
+  font-family: monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.merchant-shop-subtab-active {
+  color: #a87830;
+  border-bottom-color: #a87830;
+}
+
+.merchant-shop-subtab:hover:not(.merchant-shop-subtab-active) {
+  color: #6a5030;
 }
 
 /* ── Merchant sell panels ────────────────────────────────────────────── */
