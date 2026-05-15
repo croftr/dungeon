@@ -3305,14 +3305,24 @@ function _playHitAnimation(m, attackType, killer, elementalBreakdown = null, spe
     return; // Skip standard red flash/knockback for dummy
   }
 
+  // Elemental floor damage (e.g. "fire-floor", "ice-floor") — play the
+  // matching elemental burst instead of blood, so a monster on lava visibly
+  // takes fire damage and a monster on ice visibly takes ice damage.
+  const _floorElementMatch = typeof attackType === 'string' && attackType.endsWith('-floor')
+    ? attackType.slice(0, -'-floor'.length)
+    : null;
+  const _isFloorHit = _floorElementMatch && ELEMENTS[_floorElementMatch];
+
   const _isSpellHit = ['fireball', 'frostbolt', 'waterbolt', 'lightningbolt', 'holybolt', 'darkbolt', 'banishment', 'incinerate'].includes(attackType);
-  if (!_isSpellHit && m.physicalHitSound) {
+  if (!_isSpellHit && !_isFloorHit && m.physicalHitSound) {
     const snd = new Audio(asset(m.physicalHitSound));
     snd.volume = 0.7;
     snd.play().catch(() => {});
   }
 
-  if (attackType === 'fireball' || attackType === 'frostbolt' || attackType === 'waterbolt' || attackType === 'lightningbolt' || attackType === 'holybolt' || attackType === 'darkbolt' || attackType === 'banishment' || attackType === 'incinerate') {
+  if (_isFloorHit) {
+    createElementalBurst(mesh.position, ELEMENTS[_floorElementMatch].color);
+  } else if (attackType === 'fireball' || attackType === 'frostbolt' || attackType === 'waterbolt' || attackType === 'lightningbolt' || attackType === 'holybolt' || attackType === 'darkbolt' || attackType === 'banishment' || attackType === 'incinerate') {
     // Magic spells — recolour the spark by spell element when present, otherwise
     // the existing white→orange spark plays (preserves prior look for non-elemental spells).
     const spellColor = spellElement ? ELEMENTS[spellElement]?.color : null;
