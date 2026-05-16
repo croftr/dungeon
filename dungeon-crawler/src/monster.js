@@ -2168,8 +2168,6 @@ export function updateMonsters(dt, playerCamera, scene) {
 
       if (isSuppressed) {
         // Monster is asleep (or otherwise suppressed) — cannot attack
-      } else if (isTrapped) {
-        // Monster is caught in a floor trap — cannot attack
       } else if (m.stunUntil && performance.now() < m.stunUntil) {
         // Monster is stunned; cooldown timer doesn't tick down yet
       } else if (window._cutscenePlaying) {

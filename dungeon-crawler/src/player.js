@@ -40,6 +40,11 @@ export const player = {
 export let playerFrozen = false;
 export function setPlayerFrozen(val) { playerFrozen = val; }
 
+// Trap immobilization: blocks positional movement (forward/back/strafe) but
+// allows turning and all other actions (attacks, skills, inventory, etc.).
+export let playerTrapped = false;
+export function setPlayerTrapped(val) { playerTrapped = val; }
+
 // Callbacks set by main.js
 let onMoved = () => { };
 let onReached = () => { };
@@ -90,7 +95,7 @@ export function initPlayer(startRow, startCol, camera, facing = 0) {
 }
 
 export function moveForward(camera, sign = 1) {
-  if (player.moving || playerFrozen) return;
+  if (player.moving || playerFrozen || playerTrapped) return;
 
   const moveMs = currentMoveMs();
   if (moveMs === null) {
@@ -167,7 +172,7 @@ export function turnPlayer(camera, sign = 1) {
 // sign =  1 → strafe right (perpendicular clockwise from facing)
 // sign = -1 → strafe left  (perpendicular counter-clockwise from facing)
 export function strafePlayer(camera, sign = 1) {
-  if (player.moving || playerFrozen) return;
+  if (player.moving || playerFrozen || playerTrapped) return;
 
   const moveMs = currentMoveMs();
   if (moveMs === null) {

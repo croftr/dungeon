@@ -106,12 +106,12 @@
   "trapped": {
     "id": "trapped",
     "name": "Trapped",
-    "description": "Caught in a trap — the party cannot move for 10 seconds.",
+    "description": "Caught in a trap — the party cannot move for 10 seconds, but can still attack and use skills.",
     "type": "debuff",
     "icon": "/icons/status-effects/bear-trap.svg",
     "color": "#c07030",
     "duration": 10,
-    "preventsAction": true
+    "preventsAction": false
   },
   "invincibility": {
     "id": "invincibility",

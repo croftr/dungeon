@@ -3,7 +3,7 @@ import { createBlobShadow } from './blob-shadow.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
 import { CELL, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld, buildLevel, level1Map, level2Map, isPassable } from './map.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
-import { tweenGroup, isInFrontOfPlayer, player, FACING_ANGLES, setPlayerFrozen } from './player.js';
+import { tweenGroup, isInFrontOfPlayer, player, FACING_ANGLES, setPlayerFrozen, setPlayerTrapped } from './player.js';
 import { showMessage, drawMinimap, updateStatus } from './minimap.js';
 import { getItemDef, ITEMS } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refreshPartyCards, setHp, applyStatusEffect } from './party.js';
@@ -2252,9 +2252,9 @@ function _fireTrap(trapObj) {
     });
 
     const freezeMs = def.freezeMs ?? 10000;
-    setPlayerFrozen(true);
+    setPlayerTrapped(true);
     setTimeout(() => {
-        setPlayerFrozen(false);
+        setPlayerTrapped(false);
         showMessage('The party recovers and can move again.');
     }, freezeMs);
 
