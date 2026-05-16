@@ -22,7 +22,7 @@ import { isAlchemyModalOpen, addItemToAlchemy, placeTrap } from './objects.js';
 import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude, calcOnHitChance, calcControlSpellLandChance } from './combat-rules.js';
 import { showStanceMenu, getAvailableStances, getEligibleStances, getSpellCooldownMultiplier, getStanceCureHealBonus, hasStanceDoubleAttack, getStanceDef, setStance } from './stance.js';
 import { playStanceVideo, RECRUITS } from './recruits.js';
-import { playCritSound, playSkillSound, playItemSound, playLevelUpConfirmSound, playInventorySortSound, playActionSound } from './audio.js';
+import { playCritSound, playSkillSound, playItemSound, playLevelUpConfirmSound, playInventorySortSound, playActionSound, playSoundByUrl } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { skillsState } from './skills-state.js';
 import { getNextLevelXP, getCurrentLevelThreshold, hydrateSkill } from './leveling.js';
@@ -5419,7 +5419,7 @@ function _useLayTrap(member, memberIndex) {
   _layTrapCooldownEnds[memberIndex] = now + LAY_TRAP_COOLDOWN_MS;
   lastAttackTimes[`${memberIndex}-skill-Lay Trap`] = now;
 
-  playSkillSound('magic');
+  playSoundByUrl('/sounds/actions/skills/set-trap.mp3', 0.8);
   showMessage(
     `<span style="color:#c07030">✦ Lay Trap</span> — ${member.name} sets a trap on the floor ahead.`,
     3000

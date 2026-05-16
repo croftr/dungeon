@@ -303,12 +303,40 @@ export function initInput(camera) {
     'f': () => {
       const wrap = document.getElementById('minimap-wrap');
       if (!wrap.classList.contains('hud-hidden')) toggleFullscreen();
-    }
+    },
+    // Z / X — simulate left / right mouse click at current cursor position
+    'z': () => simulateMouseAction('click', 0),
+    'x': () => simulateMouseAction('contextmenu', 2),
   };
 
   document.addEventListener('keydown', (e) => {
     const handler = keyMap[e.key];
     if (handler) { e.preventDefault(); handler(); }
   });
+}
+
+// Track cursor position so Z/X can fire synthetic clicks at it
+let _lastMouseX = window.innerWidth / 2;
+let _lastMouseY = window.innerHeight / 2;
+window.addEventListener('mousemove', (e) => {
+  _lastMouseX = e.clientX;
+  _lastMouseY = e.clientY;
+});
+
+function simulateMouseAction(type, button) {
+  const target = document.elementFromPoint(_lastMouseX, _lastMouseY);
+  if (!target) return;
+  const evt = new MouseEvent(type, {
+    bubbles: true,
+    cancelable: true,
+    view: window,
+    clientX: _lastMouseX,
+    clientY: _lastMouseY,
+    screenX: _lastMouseX,
+    screenY: _lastMouseY,
+    button,
+    buttons: button === 0 ? 1 : 2,
+  });
+  target.dispatchEvent(evt);
 }
 

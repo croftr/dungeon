@@ -5453,7 +5453,7 @@ label.mm-setting-label {
    Side slots use negative/over-100% left to hang outside the body silhouette,
    pushed far enough out that they sit near the four corners of the panel.     */
 #pd-head {
-  top: calc(10% - 30px);
+  top: calc(10% - 70px);
   left: 50%;
 }
 
@@ -5513,7 +5513,7 @@ label.mm-setting-label {
 
 /* right bottom — ring 2          */
 #pd-legs {
-  top: 64%;
+  top: calc(64% - 10px);
   left: 50%;
 }
 
