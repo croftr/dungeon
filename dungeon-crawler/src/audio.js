@@ -28,7 +28,7 @@ const SOUND_MAP = {
   shoot: { url: asset('/sounds/actions/shoot.mp3'), offset: 0.05 },
   punch: { url: asset('/sounds/actions/bash.mp3'), offset: 0.05 },
   fireball: { url: asset('/sounds/actions/fireball.mp3'), offset: 0.0 },
-  frostbolt: { url: asset('/sounds/actions/fireball.mp3'), offset: 0.0 },
+  frostbolt: { url: asset('/sounds/elements/ice-attack.mp3'), offset: 0.0 },
   waterbolt: { url: asset('/sounds/elements/water.mp3'), offset: 0.0 },
   lightningbolt: { url: asset('/sounds/elements/lightening.mp3'), offset: 0.0 },
   holybolt: { url: asset('/sounds/actions/skills/holy.mp3'), offset: 0.0 },

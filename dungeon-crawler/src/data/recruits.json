@@ -345,7 +345,7 @@
             "strength": 4,
             "dexterity": 6,
             "vitality": 6,
-            "intelligence": 9,
+            "intelligence": 19,
             "resilience": 8
         },
         "bio": "A devoted healer whose presence brings hope to the darkest depths. Seraphina draws upon pure light to mend flesh and soul.",
@@ -373,7 +373,13 @@
         "startingInventory": [
             "Cure Poison Potion",
             "Minor Mana Potion",
-            "Minor Mana Potion"
+            "Minor Mana Potion",
+            "Scroll of Fireball",
+            "Scroll of Frostbolt",
+            "Scroll of Waterbolt",
+            "Scroll of Lightningbolt",
+            "Scroll of Holybolt",
+            "Scroll of Darkbolt"
         ],
         "startingActionSlots": [
             "Cure Poison Potion",

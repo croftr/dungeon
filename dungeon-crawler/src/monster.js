@@ -2288,11 +2288,11 @@ export function showMonsterDamage(monsterId, damage, isCrit, attackType = '') {
   const elemDef = floorElem ? ELEMENTS[floorElem] : null;
   if (elemDef) {
     inner.style.color = elemDef.color;
-    if (elemDef.icon) {
-      const icon = document.createElement('img');
-      icon.src = asset(elemDef.icon);
-      icon.className = 'monster-damage-icon';
-      inner.appendChild(icon);
+    if (elemDef.symbol) {
+      const sym = document.createElement('span');
+      sym.className = 'monster-damage-symbol';
+      sym.textContent = elemDef.symbol;
+      inner.appendChild(sym);
     }
   }
 

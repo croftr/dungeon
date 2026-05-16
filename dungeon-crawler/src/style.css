@@ -7140,10 +7140,10 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   white-space: nowrap;
 }
 
-.monster-damage-icon {
-  width: 32px;
-  height: 32px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.9));
+.monster-damage-symbol {
+  font-size: 32px;
+  line-height: 1;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 1.0);
 }
 
 @keyframes monster-damage-float {
