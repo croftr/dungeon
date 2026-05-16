@@ -6740,6 +6740,28 @@ body.party-targeting-mode .member-card--dead .portrait {
   }
 }
 
+.monster-trapped-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.trapped-glyph {
+  font-size: 20px;
+  display: inline-block;
+  filter: drop-shadow(0 0 6px rgba(255, 180, 60, 0.9));
+  animation: trapped-shake 0.6s ease-in-out infinite;
+}
+
+@keyframes trapped-shake {
+  0%, 100% { transform: translateX(0) rotate(-3deg); }
+  25%      { transform: translateX(-2px) rotate(3deg); }
+  50%      { transform: translateX(0) rotate(-3deg); }
+  75%      { transform: translateX(2px) rotate(3deg); }
+}
+
 .monster-hp-fill {
   height: 100%;
   width: 100%;
@@ -7109,12 +7131,19 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 4px;
   color: #ff4444;
   font-weight: bold;
   font-size: 32px;
   text-shadow: 0 2px 5px rgba(0, 0, 0, 1.0);
   animation: monster-damage-float 0.85s ease-out forwards;
   white-space: nowrap;
+}
+
+.monster-damage-icon {
+  width: 32px;
+  height: 32px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.9));
 }
 
 @keyframes monster-damage-float {

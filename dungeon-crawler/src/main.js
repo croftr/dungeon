@@ -4,7 +4,7 @@ import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { buildLevel, buildTextureZone, buildInnerTextureZone, buildFloorZone, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures } from './map.js';
 import ELEMENT_FLOORS from './data/element-floors.json';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
-import { initLighting, updateLighting } from './lighting.js';
+import { initLighting, updateLighting, applyLevelTheme } from './lighting.js';
 import { initParticles, updateParticles, invalidateParticleTextures } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage, LEVEL_NAMES } from './minimap.js';
 import { initParty, updateParty, party, refreshPartyCards, autoAttack, autoRangeAttack, setHp, flashPortraitHit, showMemberDamage, isPartyUnseen, resurrectAll, getEffectiveElementalResistances } from './party.js';
@@ -2157,6 +2157,9 @@ window.loadLevel = function (levelNum) {
 
   // Switch ambient music to match the new level
   setAmbientLevel(levelNum);
+
+  // Apply per-level lighting palette (ambient/fog/fill colors)
+  applyLevelTheme(scene, lights, levelNum);
 
   // 1. Swap Map Array
   const maps = [level0Map, level1Map, level2Map, level3Map, level4Map, level5Map];

@@ -1445,6 +1445,19 @@ function _loadMonster(m, scene) {
     model.add(entangleLabel);
     m.entangleLabel = entangleLabel;
 
+    // ── Trapped (floor-trap immobilize) indicator ─────────────────────────
+    const trappedDiv = document.createElement('div');
+    trappedDiv.className = 'monster-trapped-indicator';
+    const trapSpan = document.createElement('span');
+    trapSpan.className = 'trapped-glyph';
+    trapSpan.textContent = '🪤';
+    trappedDiv.appendChild(trapSpan);
+    const trappedLabel = new CSS2DObject(trappedDiv);
+    trappedLabel.position.set(0, 2.2, 0);
+    trappedLabel.visible = false;
+    model.add(trappedLabel);
+    m.trappedLabel = trappedLabel;
+
     // ── Sunder Armor (broken defence) indicator (three falling arrows) ───
     const sunderDiv = document.createElement('div');
     sunderDiv.className = 'monster-sunder-indicator';
@@ -1911,6 +1924,7 @@ export function updateMonsters(dt, playerCamera, scene) {
       if (m.stunLabel) m.stunLabel.visible = false;
       if (m.entangleLabel) m.entangleLabel.visible = false;
       if (m.sunderLabel) m.sunderLabel.visible = false;
+      if (m.trappedLabel) m.trappedLabel.visible = false;
       if (_huntersEyeTargetId === m.id) { _hideHuntersEyePanel(); _huntersEyeTargetId = null; }
       if (m.mesh) m.mesh.visible = false;
       return;
@@ -1950,6 +1964,7 @@ export function updateMonsters(dt, playerCamera, scene) {
         if (m.stunLabel) m.stunLabel.visible = false;
         if (m.entangleLabel) m.entangleLabel.visible = false;
         if (m.sunderLabel) m.sunderLabel.visible = false;
+        if (m.trappedLabel) m.trappedLabel.visible = false;
         if (_huntersEyeTargetId === m.id) { _hideHuntersEyePanel(); _huntersEyeTargetId = null; }
         m.mesh.visible = false;
         return;
@@ -1972,6 +1987,7 @@ export function updateMonsters(dt, playerCamera, scene) {
       if (m.stunLabel) m.stunLabel.visible = false;
       if (m.entangleLabel) m.entangleLabel.visible = false;
       if (m.sunderLabel) m.sunderLabel.visible = false;
+      if (m.trappedLabel) m.trappedLabel.visible = false;
       // Re-render once to show the defeated state (only first time after death)
       if (_huntersEyeTargetId === m.id && !m._huntersEyeDefeatedShown) {
         m._huntersEyeDefeatedShown = true;
@@ -2019,6 +2035,7 @@ export function updateMonsters(dt, playerCamera, scene) {
     if (m.stunLabel) m.stunLabel.visible = !isAsleep && !!(m.stunUntil && performance.now() < m.stunUntil);
     if (m.entangleLabel) m.entangleLabel.visible = !!(skillsState.entangle?.active && skillsState.entangle?.targetId === m.id);
     if (m.sunderLabel) m.sunderLabel.visible = !!(skillsState.sunderArmor?.active && skillsState.sunderArmor?.targetId === m.id);
+    if (m.trappedLabel) m.trappedLabel.visible = !isAsleep && !!(m.trappedUntil && performance.now() < m.trappedUntil);
 
     // Check if monster is suppressed by an action-preventing debuff (sleep, frozen, fear, etc.)
     // Expired debuffs have already been filtered above, so no extra time check needed here.
@@ -2264,7 +2281,24 @@ export function showMonsterDamage(monsterId, damage, isCrit, attackType = '') {
   const inner = document.createElement('div');
   inner.className = 'monster-damage-popup' + (isCrit ? ' damage-popup--crit' : '');
   if (attackType.includes('poison')) inner.style.color = '#4dff91';
-  inner.textContent = damage;
+
+  const floorElem = typeof attackType === 'string' && attackType.endsWith('-floor')
+    ? attackType.slice(0, -'-floor'.length)
+    : null;
+  const elemDef = floorElem ? ELEMENTS[floorElem] : null;
+  if (elemDef) {
+    inner.style.color = elemDef.color;
+    if (elemDef.icon) {
+      const icon = document.createElement('img');
+      icon.src = asset(elemDef.icon);
+      icon.className = 'monster-damage-icon';
+      inner.appendChild(icon);
+    }
+  }
+
+  const text = document.createElement('span');
+  text.textContent = damage;
+  inner.appendChild(text);
   wrapper.appendChild(inner);
 
   const label = new CSS2DObject(wrapper);
@@ -2399,7 +2433,13 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
   setTimeout(() => {
     if (!m.mesh) return; // Safeguard if level changed or monster destroyed
 
-    if (!attackType.includes('poison')) {
+    const _floorElem = typeof attackType === 'string' && attackType.endsWith('-floor')
+      ? attackType.slice(0, -'-floor'.length)
+      : null;
+    const _floorElemDef = _floorElem ? ELEMENTS[_floorElem] : null;
+    if (_floorElemDef?.sound) {
+      playSoundByUrl(asset(_floorElemDef.sound), 0.7);
+    } else if (!attackType.includes('poison')) {
       playHitSound();
     }
 
