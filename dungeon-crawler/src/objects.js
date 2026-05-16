@@ -2197,13 +2197,14 @@ function _spawnClosedTrapModel(def, row, col, rotY = 0) {
  * level reload), swaps the open-trap model for the sprung "closed" variant,
  * and removes the closed model after `delayMs` (the freeze duration).
  */
-function _consumeTrap(trapObj, delayMs = 0) {
+function _consumeTrap(trapObj, delayMs = 0, spawnClosed = true) {
     _markTrapTriggered(trapObj);
+    _removeTrapModel(trapObj);
+    if (!spawnClosed) return;
     const def = _getTrapDef(trapObj);
     const row = trapObj.userData.gridRow;
     const col = trapObj.userData.gridCol;
     const rotY = trapObj.userData.modelContainer?.rotation?.y ?? 0;
-    _removeTrapModel(trapObj);
     const closed = _spawnClosedTrapModel(def, row, col, rotY);
     if (closed && delayMs > 0) {
         setTimeout(() => objectsGroup.remove(closed), delayMs);
@@ -2257,7 +2258,7 @@ function _fireTrap(trapObj) {
         showMessage('The party recovers and can move again.');
     }, freezeMs);
 
-    if (def.consumeOnTrigger !== false) _consumeTrap(trapObj, freezeMs);
+    if (def.consumeOnTrigger !== false) _consumeTrap(trapObj, freezeMs, false);
 }
 
 /**
