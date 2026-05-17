@@ -44,6 +44,7 @@ import SKILLS from './data/items/skill-items.json';
 import SPELLBOOKS from './data/items/spellbooks.json';
 import PARCHMENTS from './data/items/parchments.json';
 import STANCE_TOMES from './data/items/stance-tomes.json';
+import TRAPPER_MANUALS from './data/items/trapper-manuals.json';
 import WIZARD_SET from './data/items/wizard-set.json';
 import AETHELGARD_SET from './data/items/aethelgard-set.json';
 import SERAPHIC_SET from './data/items/seraphic-set.json';
@@ -105,6 +106,7 @@ export const ITEMS = [
   ...SPELLBOOKS,
   ...PARCHMENTS,
   ...STANCE_TOMES,
+  ...TRAPPER_MANUALS,
   ...WIZARD_SET,
   ...AETHELGARD_SET,
   ...SERAPHIC_SET,

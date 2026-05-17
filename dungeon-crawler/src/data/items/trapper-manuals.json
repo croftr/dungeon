@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Trapper's Manual",
+    "icon": "/icons/tomes/trappers-manual.webp",
+    "type": "trapper-manual",
+    "description": "Worn ranger's notes on improving trap craft. Study to advance one level of trap mastery. Requires the Lay Trap skill.",
+    "value": 200,
+    "weight": 0.4
+  }
+]

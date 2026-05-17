@@ -598,9 +598,17 @@ export function extendPartyData() {
       const r = RECRUITS_DATA.find(x => x.name === m.name);
       if (r?.skillTree) m.skillTreeId = r.skillTree;
     }
-    if (!m.trapConfig) m.trapConfig = { element: "none", type: "trap1", progression: 0 };
+    if (!m.trapConfig) m.trapConfig = { element: "none", type: "trap1", progression: 0, schemeV2: true };
     if (!m.trapConfig.type) m.trapConfig.type = "trap1";
     if (m.trapConfig.progression == null) m.trapConfig.progression = 0;
+    if (!m.trapConfig.schemeV2) {
+      // One-time reset: old in-dev progression values (1..7 with implicit unlocks)
+      // are incompatible with the new 9-level scheme that prepends two unlock nodes.
+      m.trapConfig.progression = 0;
+      m.trapConfig.type = "trap1";
+      m.trapConfig.element = "none";
+      m.trapConfig.schemeV2 = true;
+    }
 
     if (m.equipment) {
       if (m.equipment.skill2 === undefined) m.equipment.skill2 = null;
@@ -2264,6 +2272,40 @@ function _useStanceTome(memberIndex, invIndex) {
   renderModal(memberIndex);
 }
 
+function _useTrappersManual(memberIndex, invIndex) {
+  const m = party[memberIndex];
+  if (!m || m.isEmpty || m.isDead) return;
+  if (hasEffectFlag(m, 'preventsAction')) {
+    showMessage(`${m.name} cannot use items!`);
+    return;
+  }
+  const item = m.inventory[invIndex];
+  if (!item) return;
+  const def = getItemDef(item.name);
+  if (def?.type !== 'trapper-manual') return;
+
+  if (!_memberHasLayTrap(m)) {
+    showMessage(`${m.name} does not know Lay Trap — the manual is useless to them.`);
+    return;
+  }
+
+  if (!m.trapConfig) m.trapConfig = { element: 'none', type: 'trap1', progression: 0 };
+  if (m.trapConfig.progression == null) m.trapConfig.progression = 0;
+  if (m.trapConfig.progression >= TRAP_PROGRESSION_NODES.length) {
+    showMessage(`${m.name}'s trap mastery is already at maximum.`);
+    return;
+  }
+
+  m.trapConfig.progression += 1;
+  m.inventory[invIndex] = null;
+
+  playSkillSound('magic');
+  showMessage(`${m.name} has advanced to trapping level ${m.trapConfig.progression}/${TRAP_PROGRESSION_NODES.length}!`);
+
+  refreshPartyCards();
+  renderModal(memberIndex);
+}
+
 /**
  * Left-click: equip immediately.
  * Shift+click: quick-give to the next party member.
@@ -2410,6 +2452,15 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
       studyBtn.style.display = 'block';
       studyBtn.onclick = () => {
         _useStanceTome(activeCharIndex, _ctxInvIndex);
+        _hideContextMenu();
+      };
+    }
+  } else if (def?.type === 'trapper-manual') {
+    // Only members with Lay Trap can study a Trapper's Manual.
+    if (studyBtn && _memberHasLayTrap(m)) {
+      studyBtn.style.display = 'block';
+      studyBtn.onclick = () => {
+        _useTrappersManual(activeCharIndex, _ctxInvIndex);
         _hideContextMenu();
       };
     }
@@ -3009,16 +3060,25 @@ function _memberHasLayTrap(m) {
   return skills.some(s => (typeof s === 'string' ? s : s?.name) === 'Lay Trap');
 }
 
+function _canUseSpikeTrap(m) {
+  return (m?.trapConfig?.progression ?? 0) >= 1;
+}
+function _canUseElementalTrap(m) {
+  return (m?.trapConfig?.progression ?? 0) >= 2;
+}
+
 // 7-node progression sequence. Each node bumps either damage or freeze.
 // D = +20% damage, F = +25% freeze duration.
 const TRAP_PROGRESSION_NODES = [
-  { kind: 'damage' }, // 1
-  { kind: 'damage' }, // 2
-  { kind: 'freeze' }, // 3
-  { kind: 'damage' }, // 4
-  { kind: 'damage' }, // 5
-  { kind: 'freeze' }, // 6
-  { kind: 'damage' }, // 7
+  { kind: 'unlock-spike'   }, // 1
+  { kind: 'unlock-element' }, // 2
+  { kind: 'damage' },         // 3
+  { kind: 'damage' },         // 4
+  { kind: 'freeze' },         // 5
+  { kind: 'damage' },         // 6
+  { kind: 'damage' },         // 7
+  { kind: 'freeze' },         // 8
+  { kind: 'damage' },         // 9
 ];
 const TRAP_DAMAGE_PER_NODE = 0.20;
 const TRAP_FREEZE_PER_NODE = 0.25;
@@ -3063,6 +3123,13 @@ function _renderTrapConfigTab(m, memberIndex, force = false) {
   if (!m.trapConfig) m.trapConfig = { element: 'none', type: 'trap1', progression: 0 };
   if (!m.trapConfig.type) m.trapConfig.type = 'trap1';
   if (m.trapConfig.progression == null) m.trapConfig.progression = 0;
+
+  // Auto-revert locked selections if mastery dropped beneath their unlock
+  if (m.trapConfig.type === 'spike' && !_canUseSpikeTrap(m)) m.trapConfig.type = 'trap1';
+  if (m.trapConfig.element && m.trapConfig.element !== 'none' && !_canUseElementalTrap(m)) {
+    m.trapConfig.element = 'none';
+  }
+
   const current = m.trapConfig.element ?? 'none';
   const currentType = m.trapConfig.type;
   const progression = m.trapConfig.progression;
@@ -3086,16 +3153,26 @@ function _renderTrapConfigTab(m, memberIndex, force = false) {
   const freezeSec = (baseFreezeMs * mults.freezeMult / 1000).toFixed(1);
   const baseFreezeSec = (baseFreezeMs / 1000).toFixed(1);
 
+  const elementUnlocked = _canUseElementalTrap(m);
   const elementOptions = _getTrapElementOptions();
   const elementTiles = elementOptions.map(opt => {
     const active = opt.id === current;
-    const border = active ? `3px solid ${opt.color}` : '2px solid #333';
+    const locked = opt.id !== 'none' && !elementUnlocked;
+    const border = active ? `3px solid ${opt.color}` : (locked ? '2px solid #2a2a2a' : '2px solid #333');
     const bg = active ? `${opt.color}22` : '#1a1a1a';
+    const opacity = locked ? '0.4' : '1';
+    const cursor = locked ? 'not-allowed' : 'pointer';
+    const lockHtml = locked
+      ? `<div style="position:absolute;top:4px;right:6px;font-size:11px;color:#aaa;">🔒</div>`
+      : '';
+    const title = locked ? 'Requires Trap Mastery L2 (Elemental Trapper)' : opt.label;
     return `
-      <button class="trapconfig-tile" data-element="${opt.id}" style="
+      <button class="trapconfig-tile" data-element="${opt.id}" ${locked ? 'data-locked="1"' : ''} title="${title}" style="
+        position:relative;
         display:flex;flex-direction:column;align-items:center;justify-content:center;
         width:90px;height:90px;border:${border};background:${bg};
-        border-radius:6px;cursor:pointer;color:#fff;font-family:inherit;">
+        border-radius:6px;cursor:${cursor};color:#fff;font-family:inherit;opacity:${opacity};">
+        ${lockHtml}
         <div style="width:36px;height:36px;border-radius:50%;background:${opt.color};margin-bottom:6px;
           display:flex;align-items:center;justify-content:center;
           font-size:20px;color:#fff;text-shadow:0 0 4px rgba(0,0,0,0.6);
@@ -3104,21 +3181,33 @@ function _renderTrapConfigTab(m, memberIndex, force = false) {
       </button>`;
   }).join('');
 
+  const TYPE_REQUIRES = { spike: m => _canUseSpikeTrap(m) };
+  const TYPE_LOCK_REASON = { spike: 'Requires Trap Mastery L1 (Spike Trap)' };
   const trapTypes = Object.entries(TRAPS_DATA);
   const typeTiles = trapTypes.map(([id, def]) => {
+    const requires = TYPE_REQUIRES[id];
+    const locked = requires ? !requires(m) : false;
     const active = id === currentType;
-    const border = active ? `3px solid #c07030` : '2px solid #333';
+    const border = active ? `3px solid #c07030` : (locked ? '2px solid #2a2a2a' : '2px solid #333');
     const bg = active ? `#c0703022` : '#1a1a1a';
+    const opacity = locked ? '0.4' : '1';
+    const cursor = locked ? 'not-allowed' : 'pointer';
     const d1 = def.damage?.[1];
     const dmgPreview = d1 ? `${d1.min}–${d1.max}` : '—';
     const iconHtml = def.icon
       ? `<img src="${asset(def.icon)}" alt="" style="width:96px;height:96px;object-fit:contain;margin-bottom:6px;pointer-events:none;">`
       : `<div style="width:96px;height:96px;margin-bottom:6px;"></div>`;
+    const lockHtml = locked
+      ? `<div style="position:absolute;top:6px;right:8px;font-size:13px;color:#ddd;">🔒</div>`
+      : '';
+    const title = locked ? TYPE_LOCK_REASON[id] : (def.label ?? id);
     return `
-      <button class="trapconfig-type-tile" data-type="${id}" style="
+      <button class="trapconfig-type-tile" data-type="${id}" ${locked ? 'data-locked="1"' : ''} title="${title}" style="
+        position:relative;
         display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
         width:170px;height:200px;border:${border};background:${bg};
-        border-radius:6px;cursor:pointer;color:#fff;font-family:inherit;padding:10px;">
+        border-radius:6px;cursor:${cursor};color:#fff;font-family:inherit;padding:10px;opacity:${opacity};">
+        ${lockHtml}
         ${iconHtml}
         <div style="font-size:13px;font-weight:bold;margin-bottom:4px;">${def.label ?? id}</div>
         <div style="font-size:11px;color:#aaa;">L1 dmg ${dmgPreview}</div>
@@ -3129,24 +3218,28 @@ function _renderTrapConfigTab(m, memberIndex, force = false) {
   const elementLabel = elementOptions.find(o => o.id === current)?.label ?? 'None';
   const damageTypeStr = current === 'none' ? 'physical' : current;
 
+  const PROG_STYLES = {
+    'unlock-spike':   { accent: '#c07030', symbol: '🪤', label: 'Spike',  tip: 'Unlocks Spike Trap' },
+    'unlock-element': { accent: '#aa66cc', symbol: '✦',  label: 'Elem',   tip: 'Unlocks Elemental Trapper' },
+    'damage':         { accent: '#d05030', symbol: '⚔',  label: 'dmg',    tip: '+20% trap damage' },
+    'freeze':         { accent: '#4090d0', symbol: '❄',  label: 'frz',    tip: '+25% freeze duration' },
+  };
   const progressionTiles = TRAP_PROGRESSION_NODES.map((node, idx) => {
     const level = idx + 1;
     const acquired = progression >= level;
-    const isDmg = node.kind === 'damage';
-    const accent = isDmg ? '#d05030' : '#4090d0';
-    const border = acquired ? `2px solid ${accent}` : '2px dashed #555';
-    const bg = acquired ? `${accent}33` : '#15151a';
-    const symbol = isDmg ? '⚔' : '❄';
+    const st = PROG_STYLES[node.kind] ?? PROG_STYLES.damage;
+    const border = acquired ? `2px solid ${st.accent}` : '2px dashed #555';
+    const bg = acquired ? `${st.accent}33` : '#15151a';
     const opacity = acquired ? '1' : '0.55';
     return `
-      <button class="trapconfig-prog-node" data-level="${level}" title="Click: acquire up to this node. Right-click: drop back to ${level - 1}." style="
+      <div class="trapconfig-prog-node" title="${st.tip}" style="
         display:flex;flex-direction:column;align-items:center;justify-content:center;
         width:60px;height:72px;border:${border};background:${bg};
-        border-radius:6px;cursor:pointer;color:#fff;font-family:inherit;opacity:${opacity};">
+        border-radius:6px;color:#fff;font-family:inherit;opacity:${opacity};">
         <div style="font-size:11px;color:#aaa;">${level}</div>
-        <div style="font-size:22px;color:${accent};">${symbol}</div>
-        <div style="font-size:10px;color:#888;">${isDmg ? 'dmg' : 'frz'}</div>
-      </button>`;
+        <div style="font-size:22px;color:${st.accent};">${st.symbol}</div>
+        <div style="font-size:10px;color:#888;">${st.label}</div>
+      </div>`;
   }).join('');
 
   container.innerHTML = `
@@ -3166,11 +3259,8 @@ function _renderTrapConfigTab(m, memberIndex, force = false) {
         <span style="color:#d05030;">+${Math.round(mults.damageMult * 100 - 100)}% damage</span>,
         <span style="color:#4090d0;">+${Math.round(mults.freezeMult * 100 - 100)}% freeze</span>
       </div>
-      <div style="display:flex;gap:6px;margin-bottom:6px;">
+      <div style="display:flex;gap:6px;margin-bottom:24px;">
         ${progressionTiles}
-      </div>
-      <div style="color:#666;font-size:11px;margin-bottom:24px;">
-        Click a node to acquire up to it. Right-click to drop back one step.
       </div>
 
       <div style="border-top:1px solid #333;padding-top:14px;color:#bbb;">
@@ -3193,26 +3283,15 @@ function _renderTrapConfigTab(m, memberIndex, force = false) {
 
   container.querySelectorAll('.trapconfig-tile').forEach(btn => {
     btn.addEventListener('click', () => {
+      if (btn.dataset.locked) return;
       m.trapConfig.element = btn.dataset.element;
       _renderTrapConfigTab(m, memberIndex, true);
     });
   });
   container.querySelectorAll('.trapconfig-type-tile').forEach(btn => {
     btn.addEventListener('click', () => {
+      if (btn.dataset.locked) return;
       m.trapConfig.type = btn.dataset.type;
-      _renderTrapConfigTab(m, memberIndex, true);
-    });
-  });
-  container.querySelectorAll('.trapconfig-prog-node').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const lvl = parseInt(btn.dataset.level, 10);
-      m.trapConfig.progression = lvl;
-      _renderTrapConfigTab(m, memberIndex, true);
-    });
-    btn.addEventListener('contextmenu', (e) => {
-      e.preventDefault();
-      const lvl = parseInt(btn.dataset.level, 10);
-      m.trapConfig.progression = Math.max(0, lvl - 1);
       _renderTrapConfigTab(m, memberIndex, true);
     });
   });

@@ -18,6 +18,7 @@
       "icon": "/skills/stats-increase/dexterity_increase.webp",
       "edges": [
         "n3",
+        "n27",
         "n18",
         "n21",
         "n24"
@@ -101,8 +102,7 @@
       },
       "icon": "/skills/stats-increase/dexterity_increase.webp",
       "edges": [
-        "n12",
-        "n27"
+        "n12"
       ]
     },
     {
@@ -352,8 +352,8 @@
       580
     ],
     "n27": [
-      590,
-      490
+      110,
+      220
     ]
   }
 }
