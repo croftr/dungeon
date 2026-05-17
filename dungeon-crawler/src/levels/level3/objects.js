@@ -48,17 +48,17 @@ export function spawnLevel3Objects(ctx) {
         "Crescent Moon Charm"
     ]);
 
-    // Near start portal (row 21, col 10)
-    addChest(group, loader, 10, 21, 0, -0.8, [
+    // Against the east wall of start chamber (row 21, col 12)
+    addChest(group, loader, 12, 21, -Math.PI / 2, 0.3, [
         "Schematic Key"
-    ]);
+    ], undefined, true, 0.5);
 
     // ── Portal Activator Eggs ───────────────────────────────────────────────────────────
     // Minotaur room centre — contains Blue Crystal
-    addPortalActivatorStatue(group, loader, 11, 11, 0, 0.45, ['Blue Crystal']);
+    addPortalActivatorStatue(group, loader, 9, 11, 0, 0.45, ['Blue Crystal']);
 
-    // Alcove at col 20, row 19 — contains Red Crystal
-    addPortalActivatorStatue(group, loader, 20, 19, 0, 0.45, ['Red Crystal']);
+    // End of elemental corridor (col 18, row 10) — contains Red Crystal
+    addPortalActivatorStatue(group, loader, 18, 10, 0, 0.45, ['Red Crystal']);
 
     // ── Trap ──────────────────────────────────────────────────────────────────
     // Guards the entry corridor to the central minotaur room

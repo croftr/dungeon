@@ -377,6 +377,7 @@ export function calcMonsterDamage(monster, character, characterDefence = 0, elem
   // the player→monster path; RES is reserved for magic and afflictions.
   const vit = character.stats?.vitality ?? 0;
   const afterCurve = Math.floor(raw * MITIGATION_K / (MITIGATION_K + vit));
+  if (elementResistance >= 1) return 0;
   let dmg = Math.max(1, afterCurve - characterDefence);
   if (elementResistance) dmg = Math.max(1, Math.round(dmg * (1 - elementResistance)));
   return window.easyMode ? Math.max(1, Math.floor(dmg * 0.5)) : dmg;

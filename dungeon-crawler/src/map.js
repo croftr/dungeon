@@ -16,6 +16,10 @@ export const CELL_STAIRS_UP = 6;
 export const CELL_BLACK_WALL = 7;
 export const CELL_LAVA = 8;
 export const CELL_ICE = 9;
+export const CELL_HOLY = 10;
+export const CELL_DARK = 11;
+export const CELL_LIGHTNING = 12;
+export const CELL_WATER = 13;
 
 import { level0Map } from './levels/level0/map.js';
 import { level1Map } from './levels/level1/map.js';

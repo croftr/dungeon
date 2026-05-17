@@ -65,12 +65,12 @@
         },
         "bio": "A sworn defender of the light. Alaric's unflinching faith and heavy mace make him a bastion against the encroaching darkness.",
         "baseElementalResistances": {
-            "holy": 0,
-            "dark": 0,
-            "fire": 0,
-            "ice": 0,
-            "lightning": 0,
-            "water": 0
+            "holy": 100,
+            "dark": 100,
+            "fire": 100,
+            "ice": 100,
+            "lightning": 100,
+            "water": 100
         },
         "stances": [
             "inquisitor",
@@ -373,13 +373,7 @@
         "startingInventory": [
             "Cure Poison Potion",
             "Minor Mana Potion",
-            "Minor Mana Potion",
-            "Scroll of Fireball",
-            "Scroll of Frostbolt",
-            "Scroll of Waterbolt",
-            "Scroll of Lightningbolt",
-            "Scroll of Holybolt",
-            "Scroll of Darkbolt"
+            "Minor Mana Potion"
         ],
         "startingActionSlots": [
             "Cure Poison Potion",

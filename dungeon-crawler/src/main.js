@@ -599,9 +599,8 @@ function tickElementFloorDamage(dt) {
   let currentFloorSound = null;
 
   for (const [id, def] of Object.entries(ELEMENT_FLOORS)) {
-    if (cell === def.cell) {
-      if (def.element === 'fire') currentFloorSound = '/sounds/elements/lava-floor.mp3';
-      else if (def.element === 'ice') currentFloorSound = '/sounds/elements/ice-floor.mp3';
+    if (cell === def.cell && def.sound) {
+      currentFloorSound = def.sound;
     }
 
     if (cell !== def.cell) { _elementFloorTickAccum[id] = def.tickInterval; continue; }

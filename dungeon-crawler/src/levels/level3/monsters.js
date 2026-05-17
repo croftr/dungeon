@@ -9,11 +9,11 @@ import { asset } from '../../assets.js';
 export const level3Monsters = [
   // ── Central Chamber ─────────────────────────────────────────────────────
   // Minotaur boss patrols the central room
-  inst(D.minotaur, 300, 11, 11,
+  inst(D.minotaur, 300, 11, 8,
     asset('/monsters/minotaur/Meshy_AI_Animation_Idle_03_withSkin.glb'),
     asset('/monsters/minotaur/Meshy_AI_Animation_Attack_withSkin.glb'),
     asset('/monsters/minotaur/minator-attack.mp3'), 0.8, 0, 0, 3,
-    { bounds: { minRow: 9, maxRow: 13, minCol: 8, maxCol: 14 }, speed: 0.6, waitTime: 1.5 },
+    { bounds: { minRow: 9, maxRow: 13, minCol: 7, maxCol: 10 }, speed: 0.6, waitTime: 1.5 },
     asset('/monsters/minotaur/Meshy_AI_Animation_Dead_withSkin.glb'),
     asset('/monsters/minotaur/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
     asset('/monsters/minotaur/Meshy_AI_Animation_Walking_withSkin.glb'),
@@ -166,6 +166,15 @@ export const level3Monsters = [
     asset('/monsters/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb'),
     asset('/monsters/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb'),
     asset('/monsters/demon/Meshy_AI_Animation_Walking_withSkin.glb')),
+
+  // ── Elemental Shrine Guard (Goblin by Red Crystal shrine) ──────────────
+  inst(D.goblin, 360, 11, 18,
+    asset('/monsters/goblin-animation/goblin-alert.glb'),
+    asset('/monsters/goblin-animation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb'),
+    asset('/monsters/goblin-animation/goblin-attack.wav'), 0.45, 0, 0, 3, null,
+    asset('/monsters/goblin-animation/Meshy_AI_Animation_Dead_withSkin.glb'),
+    asset('/monsters/goblin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
+    asset('/monsters/goblin-animation/Meshy_AI_Animation_Walking_withSkin.glb')),
 
   // ── Corridor Patrols (2 Crocodile Warriors) ─────────────────────────────
   // West vertical corridor, mid-section

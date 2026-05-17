@@ -4,13 +4,47 @@
     "element": "fire",
     "dps": 6,
     "tickInterval": 1.0,
-    "texture": "/textures/lava-floor.webp"
+    "texture": "/textures/elemental-floor/lava-floor.webp",
+    "sound": "/sounds/elements/lava-floor.mp3"
   },
   "ice": {
     "cell": 9,
     "element": "ice",
     "dps": 6,
     "tickInterval": 1.0,
-    "texture": "/textures/ice-floor.webp"
+    "texture": "/textures/elemental-floor/ice-floor.webp",
+    "sound": "/sounds/elements/ice-floor.mp3"
+  },
+  "holy": {
+    "cell": 10,
+    "element": "holy",
+    "dps": 6,
+    "tickInterval": 1.0,
+    "texture": "/textures/elemental-floor/holy-floor.png",
+    "sound": "/sounds/actions/skills/holy.mp3"
+  },
+  "dark": {
+    "cell": 11,
+    "element": "dark",
+    "dps": 6,
+    "tickInterval": 1.0,
+    "texture": "/textures/elemental-floor/dark-floor.png",
+    "sound": "/sounds/elements/dark.mp3"
+  },
+  "lightning": {
+    "cell": 12,
+    "element": "lightning",
+    "dps": 6,
+    "tickInterval": 1.0,
+    "texture": "/textures/elemental-floor/lightening-floor.png",
+    "sound": "/sounds/elements/lightening.mp3"
+  },
+  "water": {
+    "cell": 13,
+    "element": "water",
+    "dps": 6,
+    "tickInterval": 1.0,
+    "texture": "/textures/elemental-floor/water-floor.png",
+    "sound": "/sounds/elements/water.mp3"
   }
 }
