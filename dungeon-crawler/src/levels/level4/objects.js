@@ -28,7 +28,7 @@ export function spawnLevel4Objects(ctx) {
 
     // ── Chest ─────────────────────────────────────────────────────────────────
     // North-east corner of the vault room — contains Aether-Glass Silt.
-    addChest(group, loader, 13, 3, 0, -0.8, ['Aether-Glass Silt']);
+    addChest(group, loader, 13, 3, 0, -0.8, ['Aether-Glass Silt', "Trapper's Manual", "Trapper's Manual"]);
 
     // ── Decorations ───────────────────────────────────────────────────────────
     if (ctx.addDecoration) {

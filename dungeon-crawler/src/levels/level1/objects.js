@@ -80,7 +80,7 @@ export function spawnLevel1Objects(ctx) {
     // 2nd Chest in the Northwest room
     addChest(group, loader, 5, 1, 0, -0.65, [
         { name: 'Gold Coins', quantity: 10 },
-        "Ring of Vigour", "Travelling Cloak", "Iron Helm"
+        "Ring of Vigour", "Travelling Cloak", "Iron Helm", "Trapper's Manual"
     ], undefined, true, 0.35);
 
     // Chest in the mummy room (secret east chamber)

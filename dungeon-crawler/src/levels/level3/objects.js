@@ -28,7 +28,7 @@ export function spawnLevel3Objects(ctx) {
     // ── Spell Cabinet ─────────────────────────────────────────────────────────
     // North-East room (row 3, col 19)
     addSpellCabinet(group, loader, 19, 2, 0, 0.45, -1.0, [
-        "Scroll of Sleep"
+        "Scroll of Sleep", "Trapper's Manual"
     ]);
 
     // ── Chests ────────────────────────────────────────────────────────────────
@@ -50,7 +50,7 @@ export function spawnLevel3Objects(ctx) {
 
     // Against the east wall of start chamber (row 21, col 12)
     addChest(group, loader, 12, 21, -Math.PI / 2, 0.3, [
-        "Schematic Key"
+        "Schematic Key", "Trapper's Manual"
     ], undefined, true, 0.5);
 
     // ── Portal Activator Eggs ───────────────────────────────────────────────────────────
