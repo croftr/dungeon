@@ -228,6 +228,7 @@ function _getCat(entry) {
   if (entry.type === 'encumbrance') return 'effect';
   if (entry.type === 'tick') return 'effect'; // both poison ticks and regen ticks
   if (entry.type === 'reflect') return 'attack';
+  if (entry.type === 'trap') return 'attack';
   if (entry.type === 'potion') return 'item';
   if (entry.type === 'item') return 'item';
   return 'attack';
@@ -346,6 +347,15 @@ function _buildRowHtml(e) {
     const dir = e.actor === 'monster' ? '↓' : '↑';
     return `<span class="bl-badge">☠</span>` +
       `<span class="bl-who" style="max-width: none; flex: 1;">${dir} <b>${e.target}</b> afflicted: <b>${e.effectName}</b> by ${e.attacker}</span>`;
+  }
+
+  // ── Trap damage (player-laid or dungeon hazard) ────────────────────────────
+  if (e.type === 'trap') {
+    const trapLabel = e.trapLabel || 'Trap';
+    const elem = e.element ? ` (${e.element})` : '';
+    const dmgStr = e.amount > 0 ? `<b>${e.amount}</b> dmg` : `<b>no</b> dmg`;
+    return `<span class="bl-badge">🪤</span>` +
+      `<span class="bl-who" style="max-width: none; flex: 1;">${trapLabel}${elem} → <b>${e.target}</b> ${dmgStr}</span>`;
   }
 
   // ── Retribution reflect damage ─────────────────────────────────────────────

@@ -2280,10 +2280,12 @@ export function showMonsterDamage(monsterId, damage, isCrit, attackType = '') {
   inner.className = 'monster-damage-popup' + (isCrit ? ' damage-popup--crit' : '');
   if (attackType.includes('poison')) inner.style.color = '#4dff91';
 
-  const floorElem = typeof attackType === 'string' && attackType.endsWith('-floor')
-    ? attackType.slice(0, -'-floor'.length)
-    : null;
-  const elemDef = floorElem ? ELEMENTS[floorElem] : null;
+  let typedElem = null;
+  if (typeof attackType === 'string') {
+    if (attackType.endsWith('-floor')) typedElem = attackType.slice(0, -'-floor'.length);
+    else if (attackType.endsWith('-trap')) typedElem = attackType.slice(0, -'-trap'.length);
+  }
+  const elemDef = typedElem ? ELEMENTS[typedElem] : null;
   if (elemDef) {
     inner.style.color = elemDef.color;
     if (elemDef.symbol) {

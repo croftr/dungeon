@@ -983,13 +983,19 @@ export function flashPortraitCrit(index) {
 }
 
 /** Float a red damage number above the member's portrait when they are hit. */
-export function showMemberDamage(memberIndex, damage, isCrit) {
+export function showMemberDamage(memberIndex, damage, isCrit, element = null) {
   const memberTop = document.querySelector(`#member-${memberIndex} .member-main`);
   if (!memberTop) return;
   const popup = document.createElement('span');
   popup.className = 'damage-popup damage-popup--incoming' +
     (isCrit ? ' damage-popup--crit' : '');
-  popup.textContent = damage;
+  const elemDef = element ? ELEMENTS[element] : null;
+  if (elemDef) {
+    popup.style.color = elemDef.color;
+    popup.textContent = `${elemDef.symbol ?? ''} ${damage}`.trim();
+  } else {
+    popup.textContent = damage;
+  }
   memberTop.appendChild(popup);
   setTimeout(() => popup.remove(), 900);
 }

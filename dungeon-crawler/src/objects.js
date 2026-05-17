@@ -6,7 +6,7 @@ import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, isInFrontOfPlayer, player, FACING_ANGLES, setPlayerFrozen, setPlayerTrapped } from './player.js';
 import { showMessage, drawMinimap, updateStatus } from './minimap.js';
 import { getItemDef, ITEMS } from './items.js';
-import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refreshPartyCards, setHp, applyStatusEffect } from './party.js';
+import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refreshPartyCards, setHp, applyStatusEffect, showMemberDamage, flashPortraitHit } from './party.js';
 import { addLogEntry } from './battle-log.js';
 import { setPortalIdleLoop, playHealSound, playBoneSound, playPortalSound, playFloorPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playLearntSound, playSoundByUrl, playQuestAudio, fadeOutQuestAudio, playPartyHitSound, playInventorySortSound, playCraftFailSound, playCraftHqSound, playNpcDialogue, isNpcDialoguePlaying } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
@@ -20,6 +20,7 @@ import WEAPONS_DATA from './data/items/weapons.json';
 import SHIELDS_DATA from './data/items/shields.json';
 import AMMO_DATA from './data/items/ammo.json';
 import { triggerMummyAmbush, monsters, hitMonster } from './monster.js';
+import { getMonsterElementMultiplier, getElementColorHex } from './elements.js';
 import TRAPS_DATA from './data/traps.json';
 import * as equip from './equipment.js';
 import { showInlineHelp } from './help.js';
@@ -2135,10 +2136,37 @@ function _getTrapDef(trapObj) {
     return TRAPS_DATA[type] ?? TRAPS_DATA.trap1;
 }
 
-function _rollTrapDamage(def) {
-    const level = window.currentLevel ?? 1;
-    const range = def.damage?.[level] ?? def.damage?.[1] ?? { min: 1, max: 1 };
-    return Math.floor(range.min + Math.random() * (range.max - range.min + 1));
+// Look up the laidTraps record for a placed trap (so we can read layerLevel/element).
+function _getLaidTrapRecord(trapObj) {
+    const row = trapObj.userData.gridRow;
+    const col = trapObj.userData.gridCol;
+    const level = window.currentLevel ?? 0;
+    return _collections.laidTraps.find(t => t.level === level && t.row === row && t.col === col) ?? null;
+}
+
+function _rollTrapDamage(def, trapObj = null) {
+    const dungeonLevel = window.currentLevel ?? 1;
+    const tierKeys = Object.keys(def.damage ?? {}).map(Number).filter(Number.isFinite);
+    const maxTier = tierKeys.length ? Math.max(...tierKeys) : 1;
+    const effectiveLevel = Math.min(maxTier, Math.max(1, dungeonLevel));
+    const range = def.damage?.[effectiveLevel] ?? def.damage?.[1] ?? { min: 1, max: 1 };
+    const base = Math.floor(range.min + Math.random() * (range.max - range.min + 1));
+    const laid = trapObj ? _getLaidTrapRecord(trapObj) : null;
+    const dmgMult = laid?.damageMult ?? 1;
+    return Math.max(1, Math.round(base * dmgMult));
+}
+
+function _getTrapFreezeMs(def, trapObj) {
+    const base = def.freezeMs ?? 10000;
+    const laid = trapObj ? _getLaidTrapRecord(trapObj) : null;
+    const mult = laid?.freezeMult ?? 1;
+    return Math.round(base * mult);
+}
+
+function _getTrapElement(trapObj) {
+    const laid = _getLaidTrapRecord(trapObj);
+    const e = laid?.element;
+    return (e && e !== 'none') ? e : null;
 }
 
 function _markTrapTriggered(trapObj) {
@@ -2171,7 +2199,7 @@ function _removeTrapModel(trapObj) {
  * interactable, no userData hooks. Returns the model so the caller can remove
  * it later.
  */
-function _spawnClosedTrapModel(def, row, col, rotY = 0) {
+function _spawnClosedTrapModel(def, row, col, rotY = 0, element = null) {
     if (!def.closedModel) return null;
     const useScale = def.scale ?? 0.6;
     const holder = new THREE.Group();
@@ -2187,6 +2215,7 @@ function _spawnClosedTrapModel(def, row, col, rotY = 0) {
                 child.receiveShadow = true;
             }
         });
+        _applyTrapElementTint(model, element);
         holder.add(model);
     });
     return holder;
@@ -2198,6 +2227,7 @@ function _spawnClosedTrapModel(def, row, col, rotY = 0) {
  * and removes the closed model after `delayMs` (the freeze duration).
  */
 function _consumeTrap(trapObj, delayMs = 0, spawnClosed = true) {
+    const element = _getTrapElement(trapObj);
     _markTrapTriggered(trapObj);
     _removeTrapModel(trapObj);
     if (!spawnClosed) return;
@@ -2205,7 +2235,7 @@ function _consumeTrap(trapObj, delayMs = 0, spawnClosed = true) {
     const row = trapObj.userData.gridRow;
     const col = trapObj.userData.gridCol;
     const rotY = trapObj.userData.modelContainer?.rotation?.y ?? 0;
-    const closed = _spawnClosedTrapModel(def, row, col, rotY);
+    const closed = _spawnClosedTrapModel(def, row, col, rotY, element);
     if (closed && delayMs > 0) {
         setTimeout(() => objectsGroup.remove(closed), delayMs);
     } else if (closed) {
@@ -2226,12 +2256,29 @@ function _fireTrap(trapObj) {
     const def = _getTrapDef(trapObj);
     if (def.triggerSound !== false) playTrapSound();
 
-    let damageMessage = 'The trap springs! ';
+    const element = _getTrapElement(trapObj);
+    let damageMessage = element
+        ? `The ${element} trap springs! `
+        : 'The trap springs! ';
     let anyHit = false;
     party.forEach((m, i) => {
         if (m.isEmpty || m.isDead) return;
-        const dmg = _rollTrapDamage(def);
+        let dmg = _rollTrapDamage(def, trapObj);
+        if (element) {
+            const resist = m.elementalResistances?.[element] ?? 0;
+            dmg = Math.max(1, Math.round(dmg * (1 - resist)));
+        }
         setHp(i, m.hp - dmg);
+        showMemberDamage(i, dmg, false, element);
+        flashPortraitHit(i);
+        addLogEntry({
+            type: 'trap',
+            target: m.name,
+            amount: dmg,
+            element: element ?? null,
+            trapLabel: def.label ?? 'Trap',
+            time: Date.now(),
+        });
         damageMessage += `${m.name} takes ${dmg} damage. `;
         anyHit = true;
     });
@@ -2251,7 +2298,7 @@ function _fireTrap(trapObj) {
         });
     });
 
-    const freezeMs = def.freezeMs ?? 10000;
+    const freezeMs = _getTrapFreezeMs(def, trapObj);
     setPlayerTrapped(true);
     setTimeout(() => {
         setPlayerTrapped(false);
@@ -2271,10 +2318,24 @@ function _fireTrapOnMonster(trapObj, monster) {
     const def = _getTrapDef(trapObj);
     if (def.triggerSound !== false) playTrapSound();
 
-    const dmg = _rollTrapDamage(def);
-    const freezeMs = def.freezeMs ?? 10000;
+    const element = _getTrapElement(trapObj);
+    let dmg = _rollTrapDamage(def, trapObj);
+    if (element) {
+        const mult = getMonsterElementMultiplier(monster, element);
+        if (mult <= 0) dmg = 0;
+        else dmg = Math.max(1, Math.round(dmg * mult));
+    }
+    const freezeMs = _getTrapFreezeMs(def, trapObj);
     monster.trappedUntil = performance.now() + freezeMs;
-    hitMonster(monster.id, dmg, 'trap');
+    if (dmg > 0) hitMonster(monster.id, dmg, element ? `${element}-trap` : 'trap');
+    addLogEntry({
+        type: 'trap',
+        target: monster.name,
+        amount: dmg,
+        element: element ?? null,
+        trapLabel: def.label ?? 'Trap',
+        time: Date.now(),
+    });
 
     if (def.consumeOnTrigger !== false) _consumeTrap(trapObj, freezeMs);
 }
@@ -2299,7 +2360,7 @@ export function checkTrapAtPosition(row, col) {
  * synchronously via the disarmedTraps reservation? No: the reservation only
  * happens on trigger. Here we just gate by passability / existing trap.
  */
-export function placeTrap(type, row, col, rotY = 0) {
+export function placeTrap(type, row, col, rotY = 0, opts = {}) {
     if (row == null || col == null) return 'no-cell';
     if (!isPassable(row, col)) return 'blocked';
     if (isStatueAt(row, col)) return 'blocked';
@@ -2314,8 +2375,11 @@ export function placeTrap(type, row, col, rotY = 0) {
     }
     if (!TRAPS_DATA[type]) return 'unknown-type';
     const level = window.currentLevel ?? 0;
-    _collections.laidTraps.push({ level, row, col, type, rotY });
-    addTrap(type, objectsGroup, _gltfLoader, row, col, rotY);
+    const element = (opts.element && opts.element !== 'none') ? opts.element : null;
+    const damageMult = opts.damageMult ?? 1;
+    const freezeMult = opts.freezeMult ?? 1;
+    _collections.laidTraps.push({ level, row, col, type, rotY, element, damageMult, freezeMult });
+    addTrap(type, objectsGroup, _gltfLoader, row, col, rotY, null, element);
     return true;
 }
 
@@ -2436,7 +2500,30 @@ function openTrapDisarmModal(trapObj) {
     }
 }
 
-function addTrap(type, scene, loader, row, col, rotY = 0, scale = null) {
+function _applyTrapElementTint(model, element) {
+    if (!element) return;
+    const color = getElementColorHex(element);
+    if (color == null) return;
+    model.traverse((child) => {
+        if (child.isMesh && child.material) {
+            const mats = Array.isArray(child.material) ? child.material : [child.material];
+            const cloned = mats.map(mat => {
+                const m = mat.clone();
+                if ('emissive' in m) {
+                    m.emissive = new THREE.Color(color);
+                    m.emissiveIntensity = 0.6;
+                }
+                return m;
+            });
+            child.material = Array.isArray(child.material) ? cloned : cloned[0];
+        }
+    });
+    const light = new THREE.PointLight(color, 0.8, 1.5);
+    light.position.set(0, 0.3, 0);
+    model.add(light);
+}
+
+function addTrap(type, scene, loader, row, col, rotY = 0, scale = null, element = null) {
     const key = `${row},${col}`;
     if (_collections.disarmedTraps.has(key)) return; // already disarmed — don't spawn
 
@@ -2475,6 +2562,7 @@ function addTrap(type, scene, loader, row, col, rotY = 0, scale = null) {
             }
         });
 
+        _applyTrapElementTint(model, element);
         objectsGroup.add(model);
     });
 }
@@ -2633,7 +2721,7 @@ export function spawnObjectsForLevel() {
     // traps stay gone — but we also prune laidTraps on consume for clarity.
     for (const t of _collections.laidTraps) {
         if (t.level === level) {
-            addTrap(t.type ?? 'trap1', objectsGroup, _gltfLoader, t.row, t.col, t.rotY ?? 0);
+            addTrap(t.type ?? 'trap1', objectsGroup, _gltfLoader, t.row, t.col, t.rotY ?? 0, null, t.element ?? null);
         }
     }
 }

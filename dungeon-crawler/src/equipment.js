@@ -10,6 +10,7 @@ import POTIONS from './data/items/potions.json';
 import FORGE from './data/forge.json';
 import WEAPONS from './data/items/weapons.json';
 import SKILLS_DATA from './data/skills.json';
+import TRAPS_DATA from './data/traps.json';
 import { asset } from './assets.js';
 import { playAction } from './actions.js';
 import { attackMonster, monsters, getInRangeMonster, setHuntersEyeTarget, getHuntersEyeTargetId, applyMonsterStatusEffect } from './monster.js';
@@ -597,6 +598,9 @@ export function extendPartyData() {
       const r = RECRUITS_DATA.find(x => x.name === m.name);
       if (r?.skillTree) m.skillTreeId = r.skillTree;
     }
+    if (!m.trapConfig) m.trapConfig = { element: "none", type: "trap1", progression: 0 };
+    if (!m.trapConfig.type) m.trapConfig.type = "trap1";
+    if (m.trapConfig.progression == null) m.trapConfig.progression = 0;
 
     if (m.equipment) {
       if (m.equipment.skill2 === undefined) m.equipment.skill2 = null;
@@ -808,9 +812,20 @@ function renderModal(memberIndex) {
       : 'Skill Tree';
   }
 
+  // ── Trap Config tab — only visible for members who know Lay Trap ──
+  const tcTabBtn = document.getElementById('equip-tab-trapconfig');
+  if (tcTabBtn) {
+    const showTc = _memberHasLayTrap(m);
+    tcTabBtn.style.display = showTc ? '' : 'none';
+    if (!showTc && _activeEquipTab === 'trapconfig') {
+      _switchEquipTab('inventory');
+    }
+  }
+
   // Re-render active non-inventory tab when switching members
   if (_activeEquipTab === 'skilltree') _renderSkillTreeTab(m, memberIndex);
   else if (_activeEquipTab === 'stances') _renderStancesTab(m, memberIndex);
+  else if (_activeEquipTab === 'trapconfig') _renderTrapConfigTab(m, memberIndex);
 
   // ── Job display (top of center column) ──
   const jobEl = document.getElementById('char-job-display');
@@ -2956,10 +2971,12 @@ function _wireCharDevTabs() {
 function _wireEquipTabs() {
   if (_equipTabsWired) return;
   _equipTabsWired = true;
-  document.querySelectorAll('#equip-tab-bar .equip-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      _switchEquipTab(btn.dataset.equipTab);
-    });
+  const bar = document.getElementById('equip-tab-bar');
+  if (!bar) return;
+  bar.addEventListener('click', (e) => {
+    const btn = e.target.closest('.equip-tab');
+    if (!btn || !bar.contains(btn)) return;
+    _switchEquipTab(btn.dataset.equipTab);
   });
 }
 
@@ -2971,15 +2988,234 @@ function _switchEquipTab(tab) {
   const inventory = document.getElementById('equip-body');
   const skilltree = document.getElementById('equip-skilltree-panel');
   const stances = document.getElementById('equip-stances-panel');
+  const trapconfig = document.getElementById('equip-trapconfig-panel');
   if (inventory) inventory.classList.toggle('equip-tab-panel--hidden', tab !== 'inventory');
   if (skilltree) skilltree.classList.toggle('equip-tab-panel--hidden', tab !== 'skilltree');
   if (stances) stances.classList.toggle('equip-tab-panel--hidden', tab !== 'stances');
+  if (trapconfig) trapconfig.classList.toggle('equip-tab-panel--hidden', tab !== 'trapconfig');
 
   if (activeCharIndex !== null) {
     const m = party[activeCharIndex];
     if (tab === 'skilltree') _renderSkillTreeTab(m, activeCharIndex);
     else if (tab === 'stances') _renderStancesTab(m, activeCharIndex);
+    else if (tab === 'trapconfig') _renderTrapConfigTab(m, activeCharIndex);
   }
+}
+
+function _memberHasLayTrap(m) {
+  if (!m || m.isEmpty) return false;
+  const skills = m.skills;
+  if (!Array.isArray(skills)) return false;
+  return skills.some(s => (typeof s === 'string' ? s : s?.name) === 'Lay Trap');
+}
+
+// 7-node progression sequence. Each node bumps either damage or freeze.
+// D = +20% damage, F = +25% freeze duration.
+const TRAP_PROGRESSION_NODES = [
+  { kind: 'damage' }, // 1
+  { kind: 'damage' }, // 2
+  { kind: 'freeze' }, // 3
+  { kind: 'damage' }, // 4
+  { kind: 'damage' }, // 5
+  { kind: 'freeze' }, // 6
+  { kind: 'damage' }, // 7
+];
+const TRAP_DAMAGE_PER_NODE = 0.20;
+const TRAP_FREEZE_PER_NODE = 0.25;
+
+function _getTrapProgressionMults(progression) {
+  const lvl = Math.max(0, Math.min(TRAP_PROGRESSION_NODES.length, progression | 0));
+  let dmg = 0, frz = 0;
+  for (let i = 0; i < lvl; i++) {
+    if (TRAP_PROGRESSION_NODES[i].kind === 'damage') dmg++;
+    else frz++;
+  }
+  return {
+    damageMult: 1 + dmg * TRAP_DAMAGE_PER_NODE,
+    freezeMult: 1 + frz * TRAP_FREEZE_PER_NODE,
+    damageNodes: dmg,
+    freezeNodes: frz,
+  };
+}
+
+function _getTrapElementOptions() {
+  const opts = [{ id: 'none', label: 'None', color: '#888888', symbol: '∅' }];
+  for (const id of ELEMENT_IDS) {
+    const e = ELEMENTS[id];
+    opts.push({ id, label: e.name ?? id, color: e.color ?? '#888', symbol: e.symbol ?? '' });
+  }
+  return opts;
+}
+
+let _lastTrapConfigKey = null;
+function _renderTrapConfigTab(m, memberIndex, force = false) {
+  const container = document.getElementById('trapconfig-container');
+  if (!container) return;
+
+  if (!_memberHasLayTrap(m)) {
+    const key = `noskill|${memberIndex}|${m?.name}`;
+    if (!force && key === _lastTrapConfigKey) return;
+    _lastTrapConfigKey = key;
+    container.innerHTML = `<div style="padding:20px;color:#aaa;">${m.name} does not know the Lay Trap skill.</div>`;
+    return;
+  }
+
+  if (!m.trapConfig) m.trapConfig = { element: 'none', type: 'trap1', progression: 0 };
+  if (!m.trapConfig.type) m.trapConfig.type = 'trap1';
+  if (m.trapConfig.progression == null) m.trapConfig.progression = 0;
+  const current = m.trapConfig.element ?? 'none';
+  const currentType = m.trapConfig.type;
+  const progression = m.trapConfig.progression;
+
+  const key = `${memberIndex}|${current}|${currentType}|${progression}|${window.currentLevel ?? 1}`;
+  if (!force && key === _lastTrapConfigKey) return;
+  _lastTrapConfigKey = key;
+
+  const dungeonLevel = window.currentLevel ?? 1;
+  const typeDef = TRAPS_DATA[currentType] ?? TRAPS_DATA.trap1;
+  const tierKeys = Object.keys(typeDef.damage ?? {}).map(Number).filter(Number.isFinite);
+  const maxTier = tierKeys.length ? Math.max(...tierKeys) : 1;
+  const eff = Math.min(maxTier, Math.max(1, dungeonLevel));
+  const baseRange = typeDef.damage?.[eff] ?? { min: 0, max: 0 };
+  const mults = _getTrapProgressionMults(progression);
+  const range = {
+    min: Math.max(1, Math.round(baseRange.min * mults.damageMult)),
+    max: Math.max(1, Math.round(baseRange.max * mults.damageMult)),
+  };
+  const baseFreezeMs = typeDef.freezeMs ?? 0;
+  const freezeSec = (baseFreezeMs * mults.freezeMult / 1000).toFixed(1);
+  const baseFreezeSec = (baseFreezeMs / 1000).toFixed(1);
+
+  const elementOptions = _getTrapElementOptions();
+  const elementTiles = elementOptions.map(opt => {
+    const active = opt.id === current;
+    const border = active ? `3px solid ${opt.color}` : '2px solid #333';
+    const bg = active ? `${opt.color}22` : '#1a1a1a';
+    return `
+      <button class="trapconfig-tile" data-element="${opt.id}" style="
+        display:flex;flex-direction:column;align-items:center;justify-content:center;
+        width:90px;height:90px;border:${border};background:${bg};
+        border-radius:6px;cursor:pointer;color:#fff;font-family:inherit;">
+        <div style="width:36px;height:36px;border-radius:50%;background:${opt.color};margin-bottom:6px;
+          display:flex;align-items:center;justify-content:center;
+          font-size:20px;color:#fff;text-shadow:0 0 4px rgba(0,0,0,0.6);
+          box-shadow:0 0 8px ${opt.color};">${opt.symbol ?? ''}</div>
+        <div style="font-size:12px;">${opt.label}</div>
+      </button>`;
+  }).join('');
+
+  const trapTypes = Object.entries(TRAPS_DATA);
+  const typeTiles = trapTypes.map(([id, def]) => {
+    const active = id === currentType;
+    const border = active ? `3px solid #c07030` : '2px solid #333';
+    const bg = active ? `#c0703022` : '#1a1a1a';
+    const d1 = def.damage?.[1];
+    const dmgPreview = d1 ? `${d1.min}–${d1.max}` : '—';
+    const iconHtml = def.icon
+      ? `<img src="${asset(def.icon)}" alt="" style="width:96px;height:96px;object-fit:contain;margin-bottom:6px;pointer-events:none;">`
+      : `<div style="width:96px;height:96px;margin-bottom:6px;"></div>`;
+    return `
+      <button class="trapconfig-type-tile" data-type="${id}" style="
+        display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+        width:170px;height:200px;border:${border};background:${bg};
+        border-radius:6px;cursor:pointer;color:#fff;font-family:inherit;padding:10px;">
+        ${iconHtml}
+        <div style="font-size:13px;font-weight:bold;margin-bottom:4px;">${def.label ?? id}</div>
+        <div style="font-size:11px;color:#aaa;">L1 dmg ${dmgPreview}</div>
+        <div style="font-size:11px;color:#aaa;">freeze ${((def.freezeMs ?? 0) / 1000).toFixed(1)}s</div>
+      </button>`;
+  }).join('');
+
+  const elementLabel = elementOptions.find(o => o.id === current)?.label ?? 'None';
+  const damageTypeStr = current === 'none' ? 'physical' : current;
+
+  const progressionTiles = TRAP_PROGRESSION_NODES.map((node, idx) => {
+    const level = idx + 1;
+    const acquired = progression >= level;
+    const isDmg = node.kind === 'damage';
+    const accent = isDmg ? '#d05030' : '#4090d0';
+    const border = acquired ? `2px solid ${accent}` : '2px dashed #555';
+    const bg = acquired ? `${accent}33` : '#15151a';
+    const symbol = isDmg ? '⚔' : '❄';
+    const opacity = acquired ? '1' : '0.55';
+    return `
+      <button class="trapconfig-prog-node" data-level="${level}" title="Click: acquire up to this node. Right-click: drop back to ${level - 1}." style="
+        display:flex;flex-direction:column;align-items:center;justify-content:center;
+        width:60px;height:72px;border:${border};background:${bg};
+        border-radius:6px;cursor:pointer;color:#fff;font-family:inherit;opacity:${opacity};">
+        <div style="font-size:11px;color:#aaa;">${level}</div>
+        <div style="font-size:22px;color:${accent};">${symbol}</div>
+        <div style="font-size:10px;color:#888;">${isDmg ? 'dmg' : 'frz'}</div>
+      </button>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div style="padding:20px;color:#ddd;max-width:760px;margin:0 auto;">
+      <div style="color:#aaa;margin-bottom:8px;">Trap type:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px;">
+        ${typeTiles}
+      </div>
+
+      <div style="color:#aaa;margin-bottom:8px;">Element (replaces damage type):</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px;">
+        ${elementTiles}
+      </div>
+
+      <div style="color:#aaa;margin-bottom:8px;">
+        Trap mastery (level ${progression}/${TRAP_PROGRESSION_NODES.length}) —
+        <span style="color:#d05030;">+${Math.round(mults.damageMult * 100 - 100)}% damage</span>,
+        <span style="color:#4090d0;">+${Math.round(mults.freezeMult * 100 - 100)}% freeze</span>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:6px;">
+        ${progressionTiles}
+      </div>
+      <div style="color:#666;font-size:11px;margin-bottom:24px;">
+        Click a node to acquire up to it. Right-click to drop back one step.
+      </div>
+
+      <div style="border-top:1px solid #333;padding-top:14px;color:#bbb;">
+        <div>Next trap laid by <span style="color:#fff;">${m.name}</span>:</div>
+        <div style="margin-top:6px;">
+          Type: <span style="color:#fff;">${typeDef.label ?? currentType}</span>
+        </div>
+        <div>
+          Damage: <span style="color:#fff;">${range.min}–${range.max}</span>
+          (dungeon-level ${dungeonLevel} base ${baseRange.min}–${baseRange.max}, ×${mults.damageMult.toFixed(2)})
+        </div>
+        <div>Freeze: <span style="color:#fff;">${freezeSec}s</span> (base ${baseFreezeSec}s, ×${mults.freezeMult.toFixed(2)})</div>
+        <div>Damage type: <span style="color:#fff;text-transform:capitalize;">${damageTypeStr}</span></div>
+        <div style="color:#888;font-size:12px;margin-top:10px;">
+          Element ${elementLabel === 'None' ? 'is off' : `(${elementLabel})`} — monster elemental resistances will apply.
+        </div>
+      </div>
+    </div>
+  `;
+
+  container.querySelectorAll('.trapconfig-tile').forEach(btn => {
+    btn.addEventListener('click', () => {
+      m.trapConfig.element = btn.dataset.element;
+      _renderTrapConfigTab(m, memberIndex, true);
+    });
+  });
+  container.querySelectorAll('.trapconfig-type-tile').forEach(btn => {
+    btn.addEventListener('click', () => {
+      m.trapConfig.type = btn.dataset.type;
+      _renderTrapConfigTab(m, memberIndex, true);
+    });
+  });
+  container.querySelectorAll('.trapconfig-prog-node').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const lvl = parseInt(btn.dataset.level, 10);
+      m.trapConfig.progression = lvl;
+      _renderTrapConfigTab(m, memberIndex, true);
+    });
+    btn.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      const lvl = parseInt(btn.dataset.level, 10);
+      m.trapConfig.progression = Math.max(0, lvl - 1);
+      _renderTrapConfigTab(m, memberIndex, true);
+    });
+  });
 }
 
 function _renderSkillTreeTab(m, memberIndex, force = false) {
@@ -5406,7 +5642,10 @@ function _useLayTrap(member, memberIndex) {
   const frontRow = player.gridRow + dir.dz;
   const frontCol = player.gridCol + dir.dx;
 
-  const result = placeTrap('trap1', frontRow, frontCol);
+  const element = member.trapConfig?.element ?? 'none';
+  const trapType = member.trapConfig?.type ?? 'trap1';
+  const { damageMult, freezeMult } = _getTrapProgressionMults(member.trapConfig?.progression ?? 0);
+  const result = placeTrap(trapType, frontRow, frontCol, 0, { element, damageMult, freezeMult });
   if (result !== true) {
     const reason = result === 'blocked' ? 'the way is blocked'
       : result === 'already-trap' ? 'a trap is already there'

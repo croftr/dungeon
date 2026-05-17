@@ -1,7 +1,7 @@
 {
   "trap1": {
-    "model": "/items/trap1.glb",
-    "closedModel": "/items/closed-trap.glb",
+    "model": "/items/traps/trap1.glb",
+    "closedModel": "/items/traps/closed-trap.glb",
     "scale": 0.4,
     "damage": {
       "1": { "min": 16, "max": 28 },
@@ -12,6 +12,23 @@
     "disarmable": true,
     "consumeOnTrigger": true,
     "triggerSound": true,
-    "label": "Trap"
+    "label": "Bear Trap",
+    "icon": "/icons/bear-trap.webp"
+  },
+  "spike": {
+    "model": "/items/traps/spike-trap-set.glb",
+    "closedModel": "/items/traps/spike-trap-triggered.glb",
+    "scale": 0.4,
+    "damage": {
+      "1": { "min": 32, "max": 56 },
+      "2": { "min": 72, "max": 112 },
+      "3": { "min": 128, "max": 180 }
+    },
+    "freezeMs": 5000,
+    "disarmable": true,
+    "consumeOnTrigger": true,
+    "triggerSound": true,
+    "label": "Spike Trap",
+    "icon": "/icons/spike-trap.webp"
   }
 }
