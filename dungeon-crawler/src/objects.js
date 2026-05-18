@@ -2262,6 +2262,7 @@ function _fireTrap(trapObj) {
     const col = trapObj.userData.gridCol;
     const key = `${row},${col}`;
     if (_collections.disarmedTraps.has(key)) return;
+    if (trapObj.userData.armedAt && performance.now() < trapObj.userData.armedAt) return;
 
     const def = _getTrapDef(trapObj);
     if (def.triggerSound !== false) playTrapSound();
@@ -2324,6 +2325,7 @@ function _fireTrap(trapObj) {
 function _fireTrapOnMonster(trapObj, monster) {
     const key = `${trapObj.userData.gridRow},${trapObj.userData.gridCol}`;
     if (_collections.disarmedTraps.has(key)) return;
+    if (trapObj.userData.armedAt && performance.now() < trapObj.userData.armedAt) return;
 
     const def = _getTrapDef(trapObj);
     if (def.triggerSound !== false) playTrapSound();
@@ -2388,8 +2390,9 @@ export function placeTrap(type, row, col, rotY = 0, opts = {}) {
     const element = (opts.element && opts.element !== 'none') ? opts.element : null;
     const damageMult = opts.damageMult ?? 1;
     const freezeMult = opts.freezeMult ?? 1;
-    _collections.laidTraps.push({ level, row, col, type, rotY, element, damageMult, freezeMult });
-    addTrap(type, objectsGroup, _gltfLoader, row, col, rotY, null, element);
+    const delay = opts.delay ?? false;
+    _collections.laidTraps.push({ level, row, col, type, rotY, element, damageMult, freezeMult, delay });
+    addTrap(type, objectsGroup, _gltfLoader, row, col, rotY, null, element, delay);
     return true;
 }
 
@@ -2533,7 +2536,7 @@ function _applyTrapElementTint(model, element) {
     model.add(light);
 }
 
-function addTrap(type, scene, loader, row, col, rotY = 0, scale = null, element = null) {
+function addTrap(type, scene, loader, row, col, rotY = 0, scale = null, element = null, delay = false) {
     const key = `${row},${col}`;
     if (_collections.disarmedTraps.has(key)) return; // already disarmed — don't spawn
 
@@ -2556,6 +2559,7 @@ function addTrap(type, scene, loader, row, col, rotY = 0, scale = null, element 
                 child.userData.gridRow = row;
                 child.userData.gridCol = col;
                 child.userData.modelContainer = model;
+                if (delay) child.userData.armedAt = performance.now() + 2000;
                 interactables.push(child);
                 if (child.material) {
                     const mats = Array.isArray(child.material) ? child.material : [child.material];

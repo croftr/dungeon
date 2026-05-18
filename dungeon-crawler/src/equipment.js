@@ -3079,19 +3079,23 @@ function _canUseSpikeTrap(m) {
 function _canUseElementalTrap(m) {
   return (m?.trapConfig?.progression ?? 0) >= 2;
 }
+function _canUseTriggerDelay(m) {
+  return (m?.trapConfig?.progression ?? 0) >= 4;
+}
 
-// 7-node progression sequence. Each node bumps either damage or freeze.
+// 10-node progression sequence. Each node bumps either damage, freeze, or unlocks a feature.
 // D = +20% damage, F = +25% freeze duration.
 const TRAP_PROGRESSION_NODES = [
   { kind: 'unlock-spike'   }, // 1
   { kind: 'unlock-element' }, // 2
   { kind: 'damage' },         // 3
-  { kind: 'damage' },         // 4
-  { kind: 'freeze' },         // 5
-  { kind: 'damage' },         // 6
+  { kind: 'trigger-delay' },  // 4
+  { kind: 'damage' },         // 5
+  { kind: 'freeze' },         // 6
   { kind: 'damage' },         // 7
-  { kind: 'freeze' },         // 8
-  { kind: 'damage' },         // 9
+  { kind: 'damage' },         // 8
+  { kind: 'freeze' },         // 9
+  { kind: 'damage' },         // 10
 ];
 const TRAP_DAMAGE_PER_NODE = 0.20;
 const TRAP_FREEZE_PER_NODE = 0.25;
@@ -3155,15 +3159,17 @@ function _renderTrapConfigTab(m, memberIndex, force = false) {
     return;
   }
 
-  if (!m.trapConfig) m.trapConfig = { element: 'none', type: 'trap1', progression: 0 };
+  if (!m.trapConfig) m.trapConfig = { element: 'none', type: 'trap1', progression: 0, delay: false };
   if (!m.trapConfig.type) m.trapConfig.type = 'trap1';
   if (m.trapConfig.progression == null) m.trapConfig.progression = 0;
+  if (m.trapConfig.delay == null) m.trapConfig.delay = false;
 
   // Auto-revert locked selections if mastery dropped beneath their unlock
   if (m.trapConfig.type === 'spike' && !_canUseSpikeTrap(m)) m.trapConfig.type = 'trap1';
   if (m.trapConfig.element && m.trapConfig.element !== 'none' && !_canUseElementalTrap(m)) {
     m.trapConfig.element = 'none';
   }
+  if (m.trapConfig.delay && !_canUseTriggerDelay(m)) m.trapConfig.delay = false;
 
   const current = m.trapConfig.element ?? 'none';
   const currentType = m.trapConfig.type;
@@ -3171,7 +3177,7 @@ function _renderTrapConfigTab(m, memberIndex, force = false) {
 
   const highlightLevel = (_recentTrapUnlock && _recentTrapUnlock.memberIndex === memberIndex)
     ? _recentTrapUnlock.level : 0;
-  const key = `${memberIndex}|${current}|${currentType}|${progression}|${window.currentLevel ?? 1}|hl${highlightLevel}`;
+  const key = `${memberIndex}|${current}|${currentType}|${m.trapConfig.delay}|${progression}|${window.currentLevel ?? 1}|hl${highlightLevel}`;
   if (!force && key === _lastTrapConfigKey) return;
   _lastTrapConfigKey = key;
 
@@ -3218,6 +3224,9 @@ function _renderTrapConfigTab(m, memberIndex, force = false) {
       </button>`;
   }).join('');
 
+  const delayUnlocked = _canUseTriggerDelay(m);
+  const currentDelay = m.trapConfig.delay ?? false;
+
   const TYPE_REQUIRES = { spike: m => _canUseSpikeTrap(m) };
   const TYPE_LOCK_REASON = { spike: 'Requires Trap Mastery L1 (Spike Trap)' };
   const trapTypes = Object.entries(TRAPS_DATA);
@@ -3238,18 +3247,40 @@ function _renderTrapConfigTab(m, memberIndex, force = false) {
       ? `<div style="position:absolute;top:6px;right:8px;font-size:13px;color:#ddd;">🔒</div>`
       : '';
     const title = locked ? TYPE_LOCK_REASON[id] : (def.label ?? id);
+
+    const toggleActive = currentDelay && delayUnlocked && !locked;
+    const delayOpacity = delayUnlocked ? (locked ? '0.4' : '1') : '0.3';
+    const delayCursor = (delayUnlocked && !locked) ? 'pointer' : 'not-allowed';
+    const toggleBorder = toggleActive ? '1px solid #50c080' : '1px solid #444';
+    const toggleBg = toggleActive ? '#50c08022' : 'transparent';
+    const toggleColor = toggleActive ? '#50c080' : '#888';
+    const toggleIcon = currentDelay ? '⏱ 2s' : '⚡ Inst';
+    const toggleTitle = delayUnlocked ? 'Toggle 2s arming delay' : 'Requires Trap Mastery L4 (Trigger Delay)';
+
+    const delayToggleHtml = `
+      <button class="trapconfig-delay-toggle" data-locked="${(!delayUnlocked || locked) ? '1' : ''}" title="${toggleTitle}" style="
+        width: 100%; height: 28px; border-radius: 4px; border: ${toggleBorder}; background: ${toggleBg};
+        color: ${toggleColor}; font-size: 11px; font-weight: bold; cursor: ${delayCursor}; opacity: ${delayOpacity};
+        display: flex; align-items: center; justify-content: center; margin-top: 6px; font-family: inherit; transition: all 0.2s;">
+        Delay: ${toggleIcon}
+      </button>
+    `;
+
     return `
-      <button class="trapconfig-type-tile" data-type="${id}" ${locked ? 'data-locked="1"' : ''} title="${title}" style="
-        position:relative;
-        display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
-        width:170px;height:200px;border:${border};background:${bg};
-        border-radius:6px;cursor:${cursor};color:#fff;font-family:inherit;padding:10px;opacity:${opacity};">
-        ${lockHtml}
-        ${iconHtml}
-        <div style="font-size:13px;font-weight:bold;margin-bottom:4px;">${def.label ?? id}</div>
-        <div style="font-size:11px;color:#aaa;">L1 dmg ${dmgPreview}</div>
-        <div style="font-size:11px;color:#aaa;">freeze ${((def.freezeMs ?? 0) / 1000).toFixed(1)}s</div>
-      </button>`;
+      <div style="display:flex; flex-direction:column; width:170px;">
+        <button class="trapconfig-type-tile" data-type="${id}" ${locked ? 'data-locked="1"' : ''} title="${title}" style="
+          position:relative;
+          display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+          width:100%;height:166px;border:${border};background:${bg};
+          border-radius:6px;cursor:${cursor};color:#fff;font-family:inherit;padding:10px;opacity:${opacity};">
+          ${lockHtml}
+          ${iconHtml}
+          <div style="font-size:13px;font-weight:bold;margin-bottom:4px;">${def.label ?? id}</div>
+          <div style="font-size:11px;color:#aaa;">L1 dmg ${dmgPreview}</div>
+          <div style="font-size:11px;color:#aaa;">freeze ${((def.freezeMs ?? 0) / 1000).toFixed(1)}s</div>
+        </button>
+        ${delayToggleHtml}
+      </div>`;
   }).join('');
 
   const elementLabel = elementOptions.find(o => o.id === current)?.label ?? 'None';
@@ -3258,6 +3289,7 @@ function _renderTrapConfigTab(m, memberIndex, force = false) {
   const PROG_STYLES = {
     'unlock-spike':   { accent: '#c07030', symbol: '🪤', label: 'Spike',  tip: 'Unlocks Spike Trap' },
     'unlock-element': { accent: '#aa66cc', symbol: '✦',  label: 'Elem',   tip: 'Unlocks Elemental Trapper' },
+    'trigger-delay':  { accent: '#50c080', symbol: '⏱',  label: 'delay',  tip: 'Unlocks Trigger Delay' },
     'damage':         { accent: '#d05030', symbol: '⚔',  label: 'dmg',    tip: '+20% trap damage' },
     'freeze':         { accent: '#4090d0', symbol: '❄',  label: 'frz',    tip: '+25% freeze duration' },
   };
@@ -3287,7 +3319,7 @@ function _renderTrapConfigTab(m, memberIndex, force = false) {
   container.innerHTML = `
     <div style="padding:20px;color:#ddd;max-width:760px;margin:0 auto;">
       <div style="color:#aaa;margin-bottom:8px;">Trap type:</div>
-      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px;">
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px;align-items:flex-start;">
         ${typeTiles}
       </div>
 
@@ -3334,6 +3366,13 @@ function _renderTrapConfigTab(m, memberIndex, force = false) {
     btn.addEventListener('click', () => {
       if (btn.dataset.locked) return;
       m.trapConfig.type = btn.dataset.type;
+      _renderTrapConfigTab(m, memberIndex, true);
+    });
+  });
+  container.querySelectorAll('.trapconfig-delay-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.locked) return;
+      m.trapConfig.delay = !m.trapConfig.delay;
       _renderTrapConfigTab(m, memberIndex, true);
     });
   });
@@ -5765,8 +5804,9 @@ function _useLayTrap(member, memberIndex) {
 
   const element = member.trapConfig?.element ?? 'none';
   const trapType = member.trapConfig?.type ?? 'trap1';
+  const delay = member.trapConfig?.delay ?? false;
   const { damageMult, freezeMult } = _getTrapProgressionMults(member.trapConfig?.progression ?? 0);
-  const result = placeTrap(trapType, frontRow, frontCol, 0, { element, damageMult, freezeMult });
+  const result = placeTrap(trapType, frontRow, frontCol, 0, { element, damageMult, freezeMult, delay });
   if (result !== true) {
     const reason = result === 'blocked' ? 'the way is blocked'
       : result === 'already-trap' ? 'a trap is already there'
