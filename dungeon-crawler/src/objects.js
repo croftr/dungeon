@@ -33,6 +33,7 @@ import { spawnLevel4Objects } from './levels/level4/objects.js';
 import { spawnLevel5Objects } from './levels/level5/objects.js';
 import { spawnSchematicTrialsObjects } from './levels/schematic-trials/objects.js';
 import { showNpcChoice, openQuestDialog, renderMerchantQuestPanel } from './quest.js';
+import { saveToAutoSlot } from './save.js';
 
 export const objects = [];
 export const interactables = [];
@@ -761,7 +762,16 @@ export function initObjects(scene, camera) {
                 if (distRow <= 1 && distCol <= 1) {
                     resurrectAll();
                     playHealSound();
-                    showMessage("The glowing crystals pulse with life-giving energy!");
+                    // Auto-save on contact with the blue crystal. saveToAutoSlot
+                    // writes to a fixed slot keyed "dungeon-save-autosave", so
+                    // repeated clicks overwrite the same entry — the auto-save
+                    // never accumulates. whyCantSave() is honored internally,
+                    // so the call is a no-op in the arena / schematic trials.
+                    const autosaveKey = saveToAutoSlot();
+                    const autosaveSuffix = autosaveKey
+                        ? '<br><span style="font-size:0.85em;opacity:0.75;">(Crystal Shrine Auto Save)</span>'
+                        : '';
+                    showMessage("The glowing crystals pulse with life-giving energy!" + autosaveSuffix);
 
                     // Small flash of light animation
                     if (obj.userData.light) {

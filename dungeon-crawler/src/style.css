@@ -3199,6 +3199,32 @@ label.mm-setting-label {
   50% { transform: translateY(-4px); }
 }
 
+/* ── Trap-config: newly-unlocked mastery node pulse ── */
+@keyframes trap-node-unlock-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 8px rgba(255, 215, 80, 0.65),
+      0 0 16px rgba(255, 160, 40, 0.35);
+    transform: scale(1);
+    border-color: rgba(255, 200, 80, 0.85);
+  }
+  50% {
+    box-shadow:
+      0 0 16px rgba(255, 230, 120, 0.95),
+      0 0 28px rgba(255, 180, 50, 0.7),
+      0 0 44px rgba(255, 140, 30, 0.45);
+    transform: scale(1.08);
+    border-color: rgba(255, 230, 120, 1);
+  }
+}
+
+.trapconfig-prog-node--just-unlocked {
+  animation: trap-node-unlock-pulse 0.9s ease-in-out infinite;
+  border-width: 3px !important;
+  border-style: solid !important;
+  z-index: 3;
+}
+
 /* ── Tab panels ── */
 .equip-tab-panel {
   flex: 1;

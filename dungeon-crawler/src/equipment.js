@@ -2298,12 +2298,25 @@ function _useTrappersManual(memberIndex, invIndex) {
 
   m.trapConfig.progression += 1;
   m.inventory[invIndex] = null;
+  const newLevel = m.trapConfig.progression;
 
   playSkillSound('magic');
-  showMessage(`${m.name} has advanced to trapping level ${m.trapConfig.progression}/${TRAP_PROGRESSION_NODES.length}!`);
+  showMessage(`${m.name} has advanced to trapping level ${newLevel}/${TRAP_PROGRESSION_NODES.length}!`);
+
+  // Flash the newly-unlocked node and auto-switch to the Trap Config tab so
+  // the player can see what they just gained.
+  _flashTrapNodeUnlock(memberIndex, newLevel);
+  if (activeCharIndex === memberIndex && _activeEquipTab !== 'trapconfig') {
+    _switchEquipTab('trapconfig');
+  }
 
   refreshPartyCards();
   renderModal(memberIndex);
+  // Force a re-render of the trap-config panel so the highlight shows up
+  // even if the cache key happened to match (it won't, but be defensive).
+  if (activeCharIndex === memberIndex && _activeEquipTab === 'trapconfig') {
+    _renderTrapConfigTab(m, memberIndex, true);
+  }
 }
 
 /**
@@ -3108,6 +3121,28 @@ function _getTrapElementOptions() {
 }
 
 let _lastTrapConfigKey = null;
+// Tracks the trap-mastery node that was *just* unlocked (via Trapper's Manual)
+// so _renderTrapConfigTab can apply a temporary highlight to it.
+//   { memberIndex, level } | null
+let _recentTrapUnlock = null;
+let _recentTrapUnlockTimer = null;
+const _RECENT_TRAP_UNLOCK_MS = 3500;
+
+function _flashTrapNodeUnlock(memberIndex, level) {
+  _recentTrapUnlock = { memberIndex, level };
+  if (_recentTrapUnlockTimer) clearTimeout(_recentTrapUnlockTimer);
+  _recentTrapUnlockTimer = setTimeout(() => {
+    _recentTrapUnlock = null;
+    _recentTrapUnlockTimer = null;
+    // If the modal is still open on this member with the trap-config tab,
+    // re-render to drop the highlight.
+    if (activeCharIndex === memberIndex && _activeEquipTab === 'trapconfig') {
+      const m = party[memberIndex];
+      if (m) _renderTrapConfigTab(m, memberIndex, true);
+    }
+  }, _RECENT_TRAP_UNLOCK_MS);
+}
+
 function _renderTrapConfigTab(m, memberIndex, force = false) {
   const container = document.getElementById('trapconfig-container');
   if (!container) return;
@@ -3134,7 +3169,9 @@ function _renderTrapConfigTab(m, memberIndex, force = false) {
   const currentType = m.trapConfig.type;
   const progression = m.trapConfig.progression;
 
-  const key = `${memberIndex}|${current}|${currentType}|${progression}|${window.currentLevel ?? 1}`;
+  const highlightLevel = (_recentTrapUnlock && _recentTrapUnlock.memberIndex === memberIndex)
+    ? _recentTrapUnlock.level : 0;
+  const key = `${memberIndex}|${current}|${currentType}|${progression}|${window.currentLevel ?? 1}|hl${highlightLevel}`;
   if (!force && key === _lastTrapConfigKey) return;
   _lastTrapConfigKey = key;
 
@@ -3228,11 +3265,16 @@ function _renderTrapConfigTab(m, memberIndex, force = false) {
     const level = idx + 1;
     const acquired = progression >= level;
     const st = PROG_STYLES[node.kind] ?? PROG_STYLES.damage;
+    const justUnlocked = highlightLevel === level;
     const border = acquired ? `2px solid ${st.accent}` : '2px dashed #555';
     const bg = acquired ? `${st.accent}33` : '#15151a';
     const opacity = acquired ? '1' : '0.55';
+    const cls = justUnlocked
+      ? 'trapconfig-prog-node trapconfig-prog-node--just-unlocked'
+      : 'trapconfig-prog-node';
     return `
-      <div class="trapconfig-prog-node" title="${st.tip}" style="
+      <div class="${cls}" data-level="${level}" title="${st.tip}" style="
+        position:relative;
         display:flex;flex-direction:column;align-items:center;justify-content:center;
         width:60px;height:72px;border:${border};background:${bg};
         border-radius:6px;color:#fff;font-family:inherit;opacity:${opacity};">

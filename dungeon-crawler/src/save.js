@@ -33,6 +33,14 @@ export const SAVE_VERSION = 1;
 const SAVE_PREFIX = 'dungeon-save-';
 const PENDING_KEY = 'dungeon-pending-load';
 
+// Fixed key for the auto-save slot triggered by the blue crystal shrine on
+// level 0. Using a constant (non-timestamped) key means the slot overwrites
+// itself each time, so the auto-save never accumulates more than one entry.
+// It still starts with SAVE_PREFIX so listSaves() / renderSavesList() pick it
+// up in the saves list alongside manual saves.
+const AUTOSAVE_KEY = `${SAVE_PREFIX}autosave`;
+export const AUTOSAVE_LABEL = 'Crystal Shrine Auto Save';
+
 function _levelName(n) {
   return LEVEL_NAMES[n] ?? `Level ${n}`;
 }
@@ -105,6 +113,27 @@ export function saveToNewSlot() {
     return null;
   }
   return key;
+}
+
+/**
+ * Write to the dedicated auto-save slot, overwriting any previous auto-save.
+ * Used by passive checkpoints (e.g. the blue crystal shrine on Level 0) so a
+ * single auto-save slot is maintained alongside the player's manual saves.
+ * Honors whyCantSave() so the same guard rules apply.
+ *
+ * Returns the storage key on success, or null on failure.
+ */
+export function saveToAutoSlot(label = AUTOSAVE_LABEL) {
+  if (whyCantSave()) return null;
+  const bundle = captureSave();
+  bundle.label = label;
+  try {
+    localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(bundle));
+  } catch (e) {
+    console.warn('[save] failed to write autosave', e);
+    return null;
+  }
+  return AUTOSAVE_KEY;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
