@@ -1231,6 +1231,27 @@ function _formatSkillPotency(skillName, member) {
 const TOOLTIP_OFFSET_X = 14;
 const TOOLTIP_OFFSET_Y = 14;
 
+/**
+ * Shared helper — renders elemental resistances as a list of `detail-onhit-item`
+ * rows, matching the style used in regular item tooltips.
+ * @param {Object} resistances  e.g. { fire: 0.05, ice: 0.05, ... }
+ * @returns {string}  HTML string
+ */
+function _renderElementalResistancesHtml(resistances) {
+  return Object.entries(resistances).map(([elem, val]) => {
+    const elemDef = ELEMENTS[elem];
+    const color = elemDef?.color ?? '#c8b080';
+    const symbol = elemDef?.symbol ?? '';
+    const name = elemDef?.name ?? elem;
+    const sign = val >= 0 ? '+' : '';
+    const pct = Math.round(val * 100);
+    return `<div class="detail-onhit-item" style="--onhit-color:${color}">
+        <span><span style="color:${color};">${symbol}</span> ${name} Res</span>
+        <span>${sign}${pct}%</span>
+      </div>`;
+  }).join('');
+}
+
 function positionTooltip(mouseX, mouseY, preferAbove = false) {
   const panel = document.getElementById('item-detail-panel');
   const pw = panel.offsetWidth || 190;
@@ -1293,8 +1314,9 @@ function populateTooltip(obj, showBuyPrice = false) {
 
   if (isStatusEffect) {
     if (obj.setDef) {
-      slotEl.textContent = 'Set Bonus';
-      slotEl.style.color = '#f5c84a';
+      // Name already includes "Set Bonus" (e.g. "Wizard's Regalia Set Bonus"),
+      // so clear the slot line to avoid the redundant subtitle.
+      slotEl.textContent = '';
       actionEl.textContent = '';
       descEl.textContent = '';
       statsEl.style.display = 'flex';
@@ -1331,15 +1353,9 @@ function populateTooltip(obj, showBuyPrice = false) {
       }
 
       if (b.elementalResistances) {
+        // Use the shared helper so symbols, colours and layout match item tooltips.
         html += '<div class="detail-elemdmg-list" style="display:flex;flex-direction:column;gap:4px;margin-top:4px;">';
-        html += Object.entries(b.elementalResistances).map(([elem, val]) => {
-          const elemDef = ELEMENTS[elem];
-          const color = elemDef?.color ?? '#c8b080';
-          const symbol = elemDef?.symbol ?? '';
-          const name = elemDef?.name ?? elem;
-          const sign = val >= 0 ? '+' : '';
-          return `<div class="detail-elemdmg-item"><span>${symbol} ${name} Resist</span><span style="color:${color}">${sign}${Math.round(val * 100)}%</span></div>`;
-        }).join('');
+        html += _renderElementalResistancesHtml(b.elementalResistances);
         html += '</div>';
       }
 
@@ -1717,18 +1733,7 @@ function populateTooltip(obj, showBuyPrice = false) {
   // Elemental resistances rider — extra resistance, per element.
   if (hasElementalResistances) {
     const listEl = document.getElementById('detail-row-elemres');
-    listEl.innerHTML = Object.entries(def.elementalResistances).map(([elem, value]) => {
-      const elemDef = ELEMENTS[elem];
-      const color = elemDef?.color ?? '#c8b080';
-      const symbol = elemDef?.symbol ?? '';
-      const label = elemDef?.name ?? elem.charAt(0).toUpperCase() + elem.slice(1);
-      const sign = value >= 0 ? '+' : '';
-      const pct = Math.round(value * 100);
-      return `<div class="detail-onhit-item" style="--onhit-color:${color}">
-        <span><span style="color:${color};">${symbol}</span> ${label} Res</span>
-        <span>${sign}${pct}%</span>
-      </div>`;
-    }).join('');
+    listEl.innerHTML = _renderElementalResistancesHtml(def.elementalResistances);
   }
 
   // On-hit effects apply to both weapons AND ammo

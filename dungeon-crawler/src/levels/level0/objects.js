@@ -33,7 +33,7 @@ export function spawnLevel0Objects(ctx) {
         "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Elixir of Enlightenment",
         "Scroll of Waterbolt",
         "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence",
-        "Tome of the Viperseeker",
+        "Tome of the Viperseeker", "Wizard's Hat", "Wizard's Robe", "Wizard's Gloves", "Wizard's Boots", "Wizard's Leggings",
         "Trapper's Manual", "Trapper's Manual", "Trapper's Manual",
         "Trapper's Manual", "Trapper's Manual", "Trapper's Manual",
         "Trapper's Manual", "Trapper's Manual", "Trapper's Manual",
