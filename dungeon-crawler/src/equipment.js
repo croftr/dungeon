@@ -290,8 +290,16 @@ export function formatSetBonusText(setDef) {
   }
   if (b.skillBonuses) {
     Object.entries(b.skillBonuses).forEach(([key, val]) => {
-      const sign = val >= 0 ? '+' : '';
-      parts.push(`${sign}${val} ${key}`);
+      if (key === 'shieldBlock') {
+        const sign = val >= 0 ? '+' : '';
+        parts.push(`shieldBlock ${sign}${val}`);
+      } else if (key === 'critChanceBonus') {
+        const sign = val >= 0 ? '+' : '';
+        parts.push(`critChanceBonus ${sign}${Math.round(val * 100)}%`);
+      } else {
+        const sign = val >= 0 ? '+' : '';
+        parts.push(`${sign}${val} ${key}`);
+      }
     });
   }
   return parts.join(', ');
@@ -1284,6 +1292,61 @@ function populateTooltip(obj, showBuyPrice = false) {
   }
 
   if (isStatusEffect) {
+    if (obj.setDef) {
+      slotEl.textContent = 'Set Bonus';
+      slotEl.style.color = '#f5c84a';
+      actionEl.textContent = '';
+      descEl.textContent = '';
+      statsEl.style.display = 'flex';
+      statsEl.style.flexDirection = 'column';
+      statsEl.style.gap = '4px';
+
+      const setDef = obj.setDef;
+      const b = setDef.bonus || {};
+      let html = '';
+
+      if (b.statBonuses || b.skillBonuses) {
+        html += '<div class="detail-skillbonus-list" style="display:flex;flex-direction:column;gap:4px;">';
+        if (b.statBonuses) {
+          html += Object.entries(b.statBonuses)
+            .filter(([, v]) => v !== 0)
+            .map(([stat, v]) => {
+              const labelMap = { hp: 'Max HP', mp: 'Max MP', sp: 'Max SP' };
+              const label = labelMap[stat] ?? (stat.charAt(0).toUpperCase() + stat.slice(1));
+              const color = v > 0 ? '#70c870' : '#c87070';
+              const sign = v > 0 ? '+' : '';
+              return `<div class="detail-skillbonus-item" style="--sb-color:${color}"><span>${label}</span><span>${sign}${v}</span></div>`;
+            }).join('');
+        }
+        if (b.skillBonuses) {
+          const BONUS_LABELS = { all: 'All Skills', healing: 'Healing', buff: 'Buff', debuff: 'Debuff', fire: 'Fire Magic', shieldBlock: 'Shield Block', trapDamage: 'Trap Damage', critChanceBonus: 'Crit Chance' };
+          html += Object.entries(b.skillBonuses).map(([key, val]) => {
+            const label = BONUS_LABELS[key] ?? key;
+            const sign = val >= 0 ? '+' : '';
+            const valStr = key === 'critChanceBonus' ? `${sign}${Math.round(val * 100)}%` : `${sign}${val}`;
+            return `<div class="detail-skillbonus-item"><span>${label}</span><span>${valStr}</span></div>`;
+          }).join('');
+        }
+        html += '</div>';
+      }
+
+      if (b.elementalResistances) {
+        html += '<div class="detail-elemdmg-list" style="display:flex;flex-direction:column;gap:4px;margin-top:4px;">';
+        html += Object.entries(b.elementalResistances).map(([elem, val]) => {
+          const elemDef = ELEMENTS[elem];
+          const color = elemDef?.color ?? '#c8b080';
+          const symbol = elemDef?.symbol ?? '';
+          const name = elemDef?.name ?? elem;
+          const sign = val >= 0 ? '+' : '';
+          return `<div class="detail-elemdmg-item"><span>${symbol} ${name} Resist</span><span style="color:${color}">${sign}${Math.round(val * 100)}%</span></div>`;
+        }).join('');
+        html += '</div>';
+      }
+
+      statsEl.innerHTML = html;
+      return;
+    }
+
     const isDebuff = obj.type === 'debuff';
     slotEl.textContent = isDebuff ? 'Debuff' : 'Buff';
     slotEl.style.color = isDebuff ? '#c06060' : '#60c060';
@@ -2300,22 +2363,30 @@ function _useTrappersManual(memberIndex, invIndex) {
   m.inventory[invIndex] = null;
   const newLevel = m.trapConfig.progression;
 
-  playSkillSound('magic');
   showMessage(`${m.name} has advanced to trapping level ${newLevel}/${TRAP_PROGRESSION_NODES.length}!`);
 
-  // Flash the newly-unlocked node and auto-switch to the Trap Config tab so
-  // the player can see what they just gained.
-  _flashTrapNodeUnlock(memberIndex, newLevel);
-  if (activeCharIndex === memberIndex && _activeEquipTab !== 'trapconfig') {
-    _switchEquipTab('trapconfig');
-  }
+  const finishManual = () => {
+    playSkillSound('magic');
+    // Flash the newly-unlocked node and auto-switch to the Trap Config tab so
+    // the player can see what they just gained.
+    _flashTrapNodeUnlock(memberIndex, newLevel);
+    if (activeCharIndex === memberIndex && _activeEquipTab !== 'trapconfig') {
+      _switchEquipTab('trapconfig');
+    }
 
-  refreshPartyCards();
-  renderModal(memberIndex);
-  // Force a re-render of the trap-config panel so the highlight shows up
-  // even if the cache key happened to match (it won't, but be defensive).
-  if (activeCharIndex === memberIndex && _activeEquipTab === 'trapconfig') {
-    _renderTrapConfigTab(m, memberIndex, true);
+    refreshPartyCards();
+    renderModal(memberIndex);
+    // Force a re-render of the trap-config panel so the highlight shows up
+    // even if the cache key happened to match (it won't, but be defensive).
+    if (activeCharIndex === memberIndex && _activeEquipTab === 'trapconfig') {
+      _renderTrapConfigTab(m, memberIndex, true);
+    }
+  };
+
+  if (typeof window.playTrapperVideo === 'function') {
+    window.playTrapperVideo(finishManual);
+  } else {
+    finishManual();
   }
 }
 
@@ -5806,7 +5877,8 @@ function _useLayTrap(member, memberIndex) {
   const trapType = member.trapConfig?.type ?? 'trap1';
   const delay = member.trapConfig?.delay ?? false;
   const { damageMult, freezeMult } = _getTrapProgressionMults(member.trapConfig?.progression ?? 0);
-  const result = placeTrap(trapType, frontRow, frontCol, 0, { element, damageMult, freezeMult, delay });
+  const trapDamageBonus = member.skillBonuses?.['trapDamage'] ?? 0;
+  const result = placeTrap(trapType, frontRow, frontCol, 0, { element, damageMult, freezeMult, delay, trapDamageBonus });
   if (result !== true) {
     const reason = result === 'blocked' ? 'the way is blocked'
       : result === 'already-trap' ? 'a trap is already there'

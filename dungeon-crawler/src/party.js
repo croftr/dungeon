@@ -1584,6 +1584,7 @@ function updateStatusBanners() {
           ...setBonusBase,
           name: synthName,
           description: formatSetBonusText(setDef),
+          setDef: setDef
         };
         entries.push({ name: synthName, def: synthDef, fromStatusEffects: true });
       });

@@ -202,6 +202,9 @@
                 "dexterity": 1,
                 "resilience": 1
             },
+            "skillBonuses": {
+                "shieldBlock": 1
+            },
             "elementalResistances": {
                 "fire": 0.05,
                 "ice": 0.05,
@@ -229,6 +232,9 @@
                 "intelligence": 1,
                 "resilience": 1
             },
+            "skillBonuses": {
+                "trapDamage": 1
+            },
             "elementalResistances": {
                 "fire": 0.05,
                 "ice": 0.05,
@@ -255,6 +261,9 @@
                 "vitality": 1,
                 "intelligence": 1,
                 "resilience": 1
+            },
+            "skillBonuses": {
+                "critChanceBonus": 0.01
             },
             "elementalResistances": {
                 "fire": 0.05,

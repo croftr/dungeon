@@ -1061,6 +1061,60 @@ function showCharacterSelection() {
 }
 
 // ─────────────────────────────────────────────
+//  TRAPPER'S MANUAL VIDEO OVERLAY
+// ─────────────────────────────────────────────
+const trapperOverlay = document.getElementById('trapper-video-overlay');
+const trapperVideo = document.getElementById('trapper-video');
+const skipTrapperBtn = document.getElementById('skip-trapper-btn');
+
+window.playTrapperVideo = function (onComplete) {
+  if (!trapperOverlay || !trapperVideo) {
+    if (onComplete) onComplete();
+    return;
+  }
+  let _cb = onComplete;
+  trapperOverlay.classList.remove('hidden');
+
+  function finishTrapperVideo() {
+    trapperOverlay.style.opacity = '0';
+    const startVol = trapperVideo.volume;
+    const fadeInterval = setInterval(() => {
+      if (trapperVideo.volume > 0.05) {
+        trapperVideo.volume -= 0.05;
+      } else {
+        trapperVideo.volume = 0;
+        clearInterval(fadeInterval);
+      }
+    }, 50);
+    setTimeout(() => {
+      trapperVideo.pause();
+      clearInterval(fadeInterval);
+      trapperVideo.volume = startVol;
+      trapperOverlay.classList.add('hidden');
+      if (_cb) { _cb(); _cb = null; }
+    }, 1500);
+  }
+
+  if (skipTrapperBtn) skipTrapperBtn.onclick = (e) => { if (e) e.stopPropagation(); finishTrapperVideo(); };
+  if (trapperVideo) trapperVideo.onended = finishTrapperVideo;
+
+  setTimeout(() => {
+    trapperOverlay.style.opacity = '1';
+    trapperVideo.muted = false;
+    trapperVideo.volume = 1;
+    // ensure src is loaded if we use lazy loading
+    if (trapperVideo.querySelector('source').dataset.src && !trapperVideo.querySelector('source').src) {
+      trapperVideo.querySelector('source').src = window.asset ? window.asset(trapperVideo.querySelector('source').dataset.src) : trapperVideo.querySelector('source').dataset.src;
+      trapperVideo.load();
+    }
+    trapperVideo.play().catch(e => {
+      console.warn("Trapper video play failed:", e);
+      finishTrapperVideo();
+    });
+  }, 50);
+};
+
+// ─────────────────────────────────────────────
 //  OGRE VIDEO OVERLAY
 // ─────────────────────────────────────────────
 const ogreOverlay = document.getElementById('ogre-video-overlay');

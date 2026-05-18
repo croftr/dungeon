@@ -2163,7 +2163,8 @@ function _rollTrapDamage(def, trapObj = null) {
     const base = Math.floor(range.min + Math.random() * (range.max - range.min + 1));
     const laid = trapObj ? _getLaidTrapRecord(trapObj) : null;
     const dmgMult = laid?.damageMult ?? 1;
-    return Math.max(1, Math.round(base * dmgMult));
+    const flatBonus = laid?.trapDamageBonus ?? 0;
+    return Math.max(1, Math.round(base * dmgMult) + flatBonus);
 }
 
 function _getTrapFreezeMs(def, trapObj) {
@@ -2391,7 +2392,8 @@ export function placeTrap(type, row, col, rotY = 0, opts = {}) {
     const damageMult = opts.damageMult ?? 1;
     const freezeMult = opts.freezeMult ?? 1;
     const delay = opts.delay ?? false;
-    _collections.laidTraps.push({ level, row, col, type, rotY, element, damageMult, freezeMult, delay });
+    const trapDamageBonus = opts.trapDamageBonus ?? 0;
+    _collections.laidTraps.push({ level, row, col, type, rotY, element, damageMult, freezeMult, delay, trapDamageBonus });
     addTrap(type, objectsGroup, _gltfLoader, row, col, rotY, null, element, delay);
     return true;
 }

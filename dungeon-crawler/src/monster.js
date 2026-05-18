@@ -2609,7 +2609,8 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     const dexCrit = getDexCritChanceBonus(char);
     const stanceCrit = getCritChanceBonus(char);
     const equipCrit = char.skillBonuses?.['critChance'] ?? 0;
-    return CRIT_CHANCE + stanceCrit + dexCrit + spellCrit + equipCrit;
+    const equipCritBonus = char.skillBonuses?.['critChanceBonus'] ?? 0;
+    return CRIT_CHANCE + stanceCrit + dexCrit + spellCrit + equipCrit + equipCritBonus;
   }
 
   const isCrit = Math.random() < getTotalCritChance(character, isMagic);
@@ -3095,7 +3096,7 @@ function _applyMonsterDamage(monster, opts = {}) {
   const blockChance = Math.max(
     leftItem?.blockChance ?? 0,
     rightItem?.blockChance ?? 0
-  ) + shieldMasterBlockBonus + (target.skillBonuses?.['blockChance'] ?? 0);
+  ) + shieldMasterBlockBonus + (target.skillBonuses?.['blockChance'] ?? 0) + (hasShield ? (target.skillBonuses?.['shieldBlock'] ?? 0) : 0);
 
   if (blockChance > 0 && Math.random() * 100 < blockChance) {
     blocked = true;
