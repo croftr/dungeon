@@ -1303,8 +1303,13 @@ function populateTooltip(obj, showBuyPrice = false) {
   const descEl = document.getElementById('item-detail-desc');
   const statsEl = document.getElementById('item-detail-stats');
 
-  // Reset any inline colour override on slotEl from previous calls
+  // Reset any inline style overrides that may have been applied by a previous set-bonus tooltip call
   slotEl.style.color = '';
+  slotEl.style.display = '';
+  actionEl.style.display = '';
+  descEl.style.display = '';
+  statsEl.style.borderTop = '';
+  statsEl.style.paddingTop = '';
 
   if (obj.name === 'Gold Coins' && obj.quantity) {
     nameEl.textContent = `${obj.quantity} ${obj.name}`;
@@ -1314,14 +1319,17 @@ function populateTooltip(obj, showBuyPrice = false) {
 
   if (isStatusEffect) {
     if (obj.setDef) {
-      // Name already includes "Set Bonus" (e.g. "Wizard's Regalia Set Bonus"),
-      // so clear the slot line to avoid the redundant subtitle.
-      slotEl.textContent = '';
-      actionEl.textContent = '';
-      descEl.textContent = '';
+      // Name already includes "Set Bonus" (e.g. "Wizard's Regalia Set Bonus").
+      // Hide the slot/action/desc rows entirely so their flex-gap doesn't create
+      // a blank space under the title, and strip the stats border/padding too.
+      slotEl.style.display = 'none';
+      actionEl.style.display = 'none';
+      descEl.style.display = 'none';
       statsEl.style.display = 'flex';
       statsEl.style.flexDirection = 'column';
       statsEl.style.gap = '4px';
+      statsEl.style.borderTop = 'none';
+      statsEl.style.paddingTop = '0';
 
       const setDef = obj.setDef;
       const b = setDef.bonus || {};
