@@ -22,6 +22,18 @@ export const CATEGORY_MULT = {
   vulnerable: 2.0,
 };
 
+// Softer multipliers used by traps. Traps already roll big damage numbers and
+// apply the element multiplier to the *entire* hit (unlike weapons, where only
+// the elemental rider is scaled). Without softening, a vulnerable target eats
+// 2× a large base roll and gets one-shot. See objects.js:_fireTrapOnMonster.
+export const TRAP_CATEGORY_MULT = {
+  immune: 0,
+  resist: 0.5,
+  normal: 1,
+  weak: 1.25,
+  vulnerable: 1.5,
+};
+
 const PLAYER_RESIST_CAP = 0.9;
 
 export function getMonsterElementMultiplier(monster, element) {
@@ -30,6 +42,16 @@ export function getMonsterElementMultiplier(monster, element) {
   if (own != null) return CATEGORY_MULT[own] ?? 1;
   const fam = MONSTER_FAMILIES[monster?.family]?.elementalResistances?.[element];
   if (fam != null) return CATEGORY_MULT[fam] ?? 1;
+  return 1;
+}
+
+// Trap-specific variant — same lookup logic, softer multipliers.
+export function getMonsterTrapElementMultiplier(monster, element) {
+  if (!element || element === 'physical') return 1;
+  const own = monster?.elementalResistances?.[element];
+  if (own != null) return TRAP_CATEGORY_MULT[own] ?? 1;
+  const fam = MONSTER_FAMILIES[monster?.family]?.elementalResistances?.[element];
+  if (fam != null) return TRAP_CATEGORY_MULT[fam] ?? 1;
   return 1;
 }
 

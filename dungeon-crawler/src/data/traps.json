@@ -4,9 +4,9 @@
     "closedModel": "/items/traps/closed-trap.glb",
     "scale": 0.4,
     "damage": {
-      "1": { "min": 16, "max": 28 },
-      "2": { "min": 36, "max": 56 },
-      "3": { "min": 64, "max": 90 }
+      "1": { "min": 8, "max": 14 },
+      "2": { "min": 18, "max": 28 },
+      "3": { "min": 32, "max": 45 }
     },
     "freezeMs": 10000,
     "disarmable": true,
@@ -20,9 +20,9 @@
     "closedModel": "/items/traps/spike-trap-triggered.glb",
     "scale": 0.4,
     "damage": {
-      "1": { "min": 32, "max": 56 },
-      "2": { "min": 72, "max": 112 },
-      "3": { "min": 128, "max": 180 }
+      "1": { "min": 16, "max": 28 },
+      "2": { "min": 36, "max": 56 },
+      "3": { "min": 64, "max": 90 }
     },
     "freezeMs": 5000,
     "disarmable": true,

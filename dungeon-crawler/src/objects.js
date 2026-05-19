@@ -20,7 +20,7 @@ import WEAPONS_DATA from './data/items/weapons.json';
 import SHIELDS_DATA from './data/items/shields.json';
 import AMMO_DATA from './data/items/ammo.json';
 import { triggerMummyAmbush, monsters, hitMonster } from './monster.js';
-import { getMonsterElementMultiplier, getElementColorHex } from './elements.js';
+import { getMonsterElementMultiplier, getMonsterTrapElementMultiplier, getElementColorHex } from './elements.js';
 import TRAPS_DATA from './data/traps.json';
 import * as equip from './equipment.js';
 import { showInlineHelp } from './help.js';
@@ -2334,7 +2334,9 @@ function _fireTrapOnMonster(trapObj, monster) {
     const element = _getTrapElement(trapObj);
     let dmg = _rollTrapDamage(def, trapObj);
     if (element) {
-        const mult = getMonsterElementMultiplier(monster, element);
+        // Traps use softer category multipliers than weapons because the whole
+        // hit (not just an elemental rider) is scaled. See elements.js.
+        const mult = getMonsterTrapElementMultiplier(monster, element);
         if (mult <= 0) dmg = 0;
         else dmg = Math.max(1, Math.round(dmg * mult));
     }
