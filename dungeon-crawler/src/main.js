@@ -335,8 +335,9 @@ setCallbacks({
         if (window.playTreemanVideo) window.playTreemanVideo();
       }
 
-      // Crow Wizard video: fires at the corridor mouth (row 8, col 19) just before the room
-      if (!videoFlags.hasSeenCrowWizardVideo && player.gridRow === 8 && player.gridCol === 19) {
+      // Crow Wizard video: fires once the party is a step inside the room (row 8, col 21),
+      // past the flanking skeletons and with a clear sightline to the wizard at the back.
+      if (!videoFlags.hasSeenCrowWizardVideo && player.gridRow === 8 && player.gridCol === 21) {
         videoFlags.hasSeenCrowWizardVideo = true;
         playCrowWizardVideo();
       }

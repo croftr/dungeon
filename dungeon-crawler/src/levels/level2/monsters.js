@@ -72,7 +72,7 @@ export const level2Monsters = [
     glbStandUp: asset('/monsters/summoned-skeleton/standing-up.glb'),
   }),
 
-  inst(D.crow_wizard, 450, 8, 22,
+  inst(D.crow_wizard, 450, 8, 25,
     asset('/monsters/crow-wizard/idle.glb'),
     asset('/monsters/crow-wizard/standard-attack.glb'),
     asset('/monsters/crow-wizard/standard-attack.mp3'),

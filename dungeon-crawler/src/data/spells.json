@@ -283,7 +283,7 @@
         "delay": 4,
         "mpCost": 12,
         "icon": "/icons/spells/resist-fire.webp",
-        "description": "Conjures a magical barrier around the entire party, reducing fire damage taken by 30% for 6 seconds.",
+        "description": "Conjures a magical barrier around the entire party, reducing fire damage taken by 30% for 30 seconds.",
         "value": 0,
         "weight": 0
     },
@@ -298,7 +298,7 @@
         "delay": 4,
         "mpCost": 12,
         "icon": "/icons/spells/resist-ice.webp",
-        "description": "Conjures a magical barrier around the entire party, reducing ice damage taken by 30% for 6 seconds.",
+        "description": "Conjures a magical barrier around the entire party, reducing ice damage taken by 30% for 30 seconds.",
         "value": 0,
         "weight": 0
     },
@@ -313,7 +313,7 @@
         "delay": 4,
         "mpCost": 12,
         "icon": "/icons/spells/resist-lightning.webp",
-        "description": "Conjures a magical barrier around the entire party, reducing lightning damage taken by 30% for 6 seconds.",
+        "description": "Conjures a magical barrier around the entire party, reducing lightning damage taken by 30% for 30 seconds.",
         "value": 0,
         "weight": 0
     },
@@ -328,7 +328,7 @@
         "delay": 4,
         "mpCost": 12,
         "icon": "/icons/spells/resist-water.webp",
-        "description": "Conjures a magical barrier around the entire party, reducing water damage taken by 30% for 6 seconds.",
+        "description": "Conjures a magical barrier around the entire party, reducing water damage taken by 30% for 30 seconds.",
         "value": 0,
         "weight": 0
     }

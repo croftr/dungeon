@@ -39,7 +39,7 @@ const PENDING_KEY = 'dungeon-pending-load';
 // It still starts with SAVE_PREFIX so listSaves() / renderSavesList() pick it
 // up in the saves list alongside manual saves.
 const AUTOSAVE_KEY = `${SAVE_PREFIX}autosave`;
-export const AUTOSAVE_LABEL = 'Crystal Shrine Auto Save';
+export const AUTOSAVE_LABEL = 'Auto Save';
 
 function _levelName(n) {
   return LEVEL_NAMES[n] ?? `Level ${n}`;

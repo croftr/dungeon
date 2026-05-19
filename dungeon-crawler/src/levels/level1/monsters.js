@@ -77,12 +77,6 @@ export const level1Monsters = [
     asset('/monsters/iceMan-animation/Meshy_AI_Animation_Dead_withSkin.glb'),
     asset('/monsters/iceMan-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb')),
 
-  // Training dummy in the big east room
-  inst(D.dummy, 10, 11, 20,
-    asset('/monsters/dummy-annimation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
-    asset('/monsters/dummy-annimation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb'),
-    null, 0.5),
-
   // Ogre in the north-west room — on patrol
   inst(D.ogre, 21, 2, 2,
     asset('/monsters/ogre/Meshy_AI_Animation_Idle_withSkin.glb'),
