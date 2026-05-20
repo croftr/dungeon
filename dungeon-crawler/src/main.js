@@ -2325,14 +2325,21 @@ window.loadLevel = function (levelNum) {
     );
   }
 
-  // Level 4: vault area (rows 0–5) and the passage corridor (rows 6–11) use demon-wall / black-stone2.
-  // Entry room (rows 12–15) uses default textures.
+  // Level 4: demon-wall / black-stone2 textures cover all areas EXCEPT the
+  // entry room (rows 12–15, cols 6–14) which uses default stone/floor textures.
+  //
+  // Zones covered:
+  //   rows  0–11  all cols          — vault, passage, east boss room, east connector
+  //   rows 12–16  cols 0–2          — west connector corridor (narrow south tunnel)
+  //   rows 17–26  cols 0–11         — west boss room (Lizard Man lair) + its perimeter walls
   if (levelNum === 4) {
     const wallCells = [];
     const floorCells = [];
     level4Map.forEach((row, r) => row.forEach((cell, c) => {
-      if (r <= 11) {
-        // Everything north of the entry room (rows 0-11) uses demon-vault textures
+      const inNorthZone     = r <= 11;
+      const inWestConnector = r >= 12 && r <= 16 && c <= 2;
+      const inWestBossRoom  = r >= 17 && r <= 26 && c <= 11;
+      if (inNorthZone || inWestConnector || inWestBossRoom) {
         if (cell === 1 || cell === 7) wallCells.push([r, c]);
         else if (cell !== CELL_HOLE) floorCells.push([r, c]);
       }

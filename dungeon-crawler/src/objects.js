@@ -690,6 +690,28 @@ export function initObjects(scene, camera) {
                     } else {
                         showMessage("You can't reach that from here.");
                     }
+                } else if (obj.userData.target === 'teleport_level4_test') {
+                    // TEST BUTTON — pillar west face at (row 11, col 11) in the starter room.
+                    // Player at (row 11, col 10) facing east presses it.
+                    if (isInFrontOfPlayer(11, 11, 1)) {
+                        playButtonClickSound();
+                        _animateButtonPress(obj);
+                        if (window.loadLevel) {
+                            window.loadLevel(4);
+                            setTimeout(() => {
+                                player.gridRow = 15;
+                                player.gridCol = 10;
+                                player.facing = 0; // North
+                                const w = cellToWorld(15, 10);
+                                camera.position.set(w.x, w.y, w.z);
+                                camera.rotation.order = 'YXZ';
+                                camera.rotation.y = FACING_ANGLES[player.facing];
+                                showMessage("Teleported to Level 4.");
+                            }, 50);
+                        }
+                    } else {
+                        showMessage("You can't reach that from here.");
+                    }
                 } else if (obj.userData.portcullisRow !== undefined) {
                     // Generic portcullis button — used by Hall of Heroes and any future levels.
                     // wallRow/wallCol: the wall cell the player must face (1 step away).

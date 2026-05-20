@@ -1,4 +1,5 @@
 import { asset } from '../../assets.js';
+import { CELL } from '../../map.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  LEVEL 0 – The Starter Room
@@ -15,6 +16,7 @@ export function spawnLevel0Objects(ctx) {
         addPartyConfirmNPC,
         addAnvil, addAlchemyWorkshop, addDroppedTorch, addTrap1, addCustomNPC, addDialogueNPC,
         addDecoration, addCrystalShrine, addHeroDoor, addTrainingConsole,
+        createWallButton,
         starterPortalEnabled, starterGateOpened,
         level3PortalEnabled, level4PortalEnabled,
         setStarterGate,
@@ -30,7 +32,7 @@ export function spawnLevel0Objects(ctx) {
     addChest(group, loader, 13.4, 10, Math.PI / 2, -0.1, [
         { name: 'Gold Coins', quantity: 10000 },
         'Potion of Unseen', 'Potion of Unseen', "Elixir of Rage", "Elixir of Rage",
-        "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Elixir of Enlightenment",
+        "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Elixir of Enlightenment",
         "Scroll of Waterbolt",
         "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence",
         "Tome of the Viperseeker", "Wizard's Hat", "Wizard's Robe", "Wizard's Gloves", "Wizard's Boots", "Wizard's Leggings",
@@ -122,6 +124,13 @@ export function spawnLevel0Objects(ctx) {
     // ── Training Console — next to the training dummy at (7, 23) ────────────
     addTrainingConsole(group, loader, 22, 7, Math.PI);
 
+    // ── TEST BUTTON — west face of the pillar at (row 11, col 11) ────────────
+    // Player stands at (row 11, col 10) facing east to press it.
+    // Transports straight to Level 4 for layout testing.
+    const { group: lv4TestBtn } = createWallButton(-1, { target: 'teleport_level4_test' }, 'x');
+    lv4TestBtn.position.set(11 * CELL - 1.0, 1.25, 11 * CELL);
+    group.add(lv4TestBtn);
+
     // ── Stance NPC + shelf — only appear after completing the level 2 dialogue
     if (stanceNpcDeparted) {
         addShop(group, loader, 23, 13, -Math.PI / 2 + 0.45, 0, 0, 'stances',
@@ -152,6 +161,4 @@ export function spawnLevel0Objects(ctx) {
             ]
         });
     }
-
-
 }

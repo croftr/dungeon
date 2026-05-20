@@ -48,6 +48,13 @@ export function spawnLevel3Objects(ctx) {
         "Crescent Moon Charm"
     ]);
 
+    // Secret Room (row 6, col 15)
+    addChest(group, loader, 15, 6, -Math.PI / 2, 0.7, [
+        "Flame Axe",
+        "Flame Dagger",
+        "Flame Arrows"
+    ]);
+
     // Against the east wall of start chamber (row 21, col 12)
     addChest(group, loader, 12, 21, -Math.PI / 2, 0.3, [
         "Schematic Key", "Trapper's Manual"
