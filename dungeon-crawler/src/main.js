@@ -2332,6 +2332,7 @@ window.loadLevel = function (levelNum) {
   //   rows  0–11  all cols          — vault, passage, east boss room, east connector
   //   rows 12–16  cols 0–2          — west connector corridor (narrow south tunnel)
   //   rows 17–26  cols 0–11         — west boss room (Lizard Man lair) + its perimeter walls
+  //   all rows    cols 15+          — eastern walls and extended boundary walls
   if (levelNum === 4) {
     const wallCells = [];
     const floorCells = [];
@@ -2339,7 +2340,8 @@ window.loadLevel = function (levelNum) {
       const inNorthZone     = r <= 11;
       const inWestConnector = r >= 12 && r <= 16 && c <= 2;
       const inWestBossRoom  = r >= 17 && r <= 26 && c <= 11;
-      if (inNorthZone || inWestConnector || inWestBossRoom) {
+      const inEastZone      = c >= 15;
+      if (inNorthZone || inWestConnector || inWestBossRoom || inEastZone) {
         if (cell === 1 || cell === 7) wallCells.push([r, c]);
         else if (cell !== CELL_HOLE) floorCells.push([r, c]);
       }
