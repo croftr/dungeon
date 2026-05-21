@@ -1019,31 +1019,32 @@ function _triggerTreemanAwakening(treeman, scene) {
 }
 
 /**
- * Triggers the Crow Wizard's "Restoration" — forces the cure animation,
- * plays the healing particle effect, and fully restores HP. Called once when
- * HP drops below 50%.
+ * Triggers the Crow Wizard's "Restoration" — plays the cure animation,
+ * spawns the healing particle effect, and restores `healAmount` HP
+ * (clamped to hpMax). Called probabilistically from triggerMonsterAttack,
+ * so multiple casts per fight are possible.
+ *
+ * `healAmount` is sourced from monsters.json (Crow Wizard's `crowCure`
+ * specialAttack entry — `healAmount` field). Edit there to retune.
  */
-function _triggerCrowWizardCure(crowWizard) {
-  if (crowWizard._cureUsed) return;
-
+function _triggerCrowWizardCure(crowWizard, healAmount) {
   const variant = crowWizard.attackVariants?.find(v => v && v.name === 'crowCure');
   if (!variant || !variant.action) {
     crowWizard._cureRetries = (crowWizard._cureRetries ?? 0) + 1;
     if (crowWizard._cureRetries <= 10) {
-      setTimeout(() => _triggerCrowWizardCure(crowWizard), 300);
+      setTimeout(() => _triggerCrowWizardCure(crowWizard, healAmount), 300);
     } else {
       // Animation never loaded — apply cure immediately so the mechanic still fires
-      crowWizard._cureUsed = true;
       showMessage(`<b>${crowWizard.name}</b> channels a powerful Restoration!`, 3000);
       playSoundByUrl(asset('/sounds/actions/skills/cure.mp3'), 0.8);
       if (crowWizard.mesh) createCrowWizardCure(crowWizard.mesh.position);
-      crowWizard.hp = crowWizard.hpMax;
-      if (crowWizard.hpBarFill) crowWizard.hpBarFill.style.width = '100%';
+      crowWizard.hp = Math.min(crowWizard.hpMax, crowWizard.hp + healAmount);
+      if (crowWizard.hpBarFill) {
+        crowWizard.hpBarFill.style.width = `${(crowWizard.hp / crowWizard.hpMax) * 100}%`;
+      }
     }
     return;
   }
-
-  crowWizard._cureUsed = true;
 
   const attackAction = variant.action;
   attackAction.reset();
@@ -1062,8 +1063,10 @@ function _triggerCrowWizardCure(crowWizard) {
     playSoundByUrl(asset('/sounds/actions/skills/cure.mp3'), 0.8);
     if (crowWizard.mesh) createCrowWizardCure(crowWizard.mesh.position);
     if (crowWizard.alive) {
-      crowWizard.hp = crowWizard.hpMax;
-      if (crowWizard.hpBarFill) crowWizard.hpBarFill.style.width = '100%';
+      crowWizard.hp = Math.min(crowWizard.hpMax, crowWizard.hp + healAmount);
+      if (crowWizard.hpBarFill) {
+        crowWizard.hpBarFill.style.width = `${(crowWizard.hp / crowWizard.hpMax) * 100}%`;
+      }
     }
   }, duration * pts * 1000);
 }
@@ -2400,12 +2403,6 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
     _triggerTreemanAwakening(m, _sceneRef);
   }
 
-  // Crow Wizard "Restoration" — triggers once when HP drops below 50%, fully heals
-  if (m.name === 'Crow Wizard' && !m._cureUsed && m.alive
-    && hpBefore > m.hpMax / 2 && hpAfter <= m.hpMax / 2) {
-    _triggerCrowWizardCure(m);
-  }
-
   if (killedByThisHit) {
     m.alive = false;
     if (m.blobShadow) m.blobShadow.visible = false;
@@ -2791,6 +2788,18 @@ export function triggerMonsterAttack(monsterId) {
   if (isPartyUnseen()) return;
 
   if (m.name !== 'Training Dummy' || m.drainStamina) setInCombat();
+
+  // Self-heal spell — any monster whose JSON specialAttacks list contains an
+  // entry with `selfHeal: true` rolls `castChance` per attack and, on success
+  // (and only when wounded), casts the heal instead of attacking. Frequency
+  // and HP restored are entirely tunable from monsters.json.
+  const _healSpec = m.specialAttacks?.find(s => s && s.selfHeal);
+  if (_healSpec && m.hp < m.hpMax && Math.random() < (_healSpec.castChance ?? 0)) {
+    if (m.name === 'Crow Wizard') {
+      _triggerCrowWizardCure(m, _healSpec.healAmount ?? 0);
+      return;
+    }
+  }
 
   // ── Pick attack variant (or fall back to single attack) ──
   let attackAction, soundTimings, damageTimings, attackSound, activeVariant;
@@ -3516,7 +3525,6 @@ export function captureMonsterState() {
       facing: m.facing,
       activeDebuffs: m.activeDebuffs ? JSON.parse(JSON.stringify(m.activeDebuffs)) : [],
       awakeningUsed: !!m._awakeningUsed,
-      cureUsed: !!m._cureUsed,
       easyModeApplied: !!m._easyModeApplied,
       // Dropped-item loot left on a dead monster's corpse. Stored here so a
       // saved corpse re-spawns with the same contents on reload. Null if the
@@ -3555,7 +3563,6 @@ export function restoreMonsterState(data) {
       if (s.facing !== undefined) m.facing = s.facing;
       m.activeDebuffs = Array.isArray(s.activeDebuffs) ? s.activeDebuffs : [];
       if (s.awakeningUsed) m._awakeningUsed = true;
-      if (s.cureUsed) m._cureUsed = true;
       if (s.easyModeApplied) m._easyModeApplied = true;
       m.corpseContents = Array.isArray(s.corpseContents) ? s.corpseContents : null;
       // Combat scratch state is ephemeral — start fresh.

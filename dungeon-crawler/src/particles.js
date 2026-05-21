@@ -1056,7 +1056,8 @@ export function createCrowWizardCure(position) {
     const py = position ? position.y : 0;
     const pz = position ? position.z : 0;
 
-    // Radiant gold-green healing aura rising upward
+    // Pure white healing aura rising upward — bright at the core, fading
+    // into a soft cool-white as particles drift up.
     const aura = new Proton.Emitter();
     aura.rate = new Proton.Rate(new Proton.Span(18, 28), new Proton.Span(0.025));
     aura.addInitialize(new Proton.Mass(1));
@@ -1067,12 +1068,12 @@ export function createCrowWizardCure(position) {
         new THREE.SpriteMaterial({ map: sparkTexture, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })
     )));
     aura.addInitialize(new Proton.Position(new Proton.PointZone(px, py + 0.3, pz)));
-    aura.addBehaviour(new Proton.Alpha(0.8, 0.0));
+    aura.addBehaviour(new Proton.Alpha(0.9, 0.0));
     aura.addBehaviour(new Proton.Scale(1.6, 0.2));
-    aura.addBehaviour(new Proton.Color('#88ff44', '#ffdd00'));
+    aura.addBehaviour(new Proton.Color('#ffffff', '#e8f4ff'));
     aura.addBehaviour(new Proton.RandomDrift(1.0, 0.8, 1.0, 0.04));
 
-    // Gold sparkle motes circling overhead
+    // Bright white sparkle motes drifting overhead
     const sparkles = new Proton.Emitter();
     sparkles.rate = new Proton.Rate(new Proton.Span(10, 16), new Proton.Span(0.04));
     sparkles.addInitialize(new Proton.Mass(1));
@@ -1085,7 +1086,7 @@ export function createCrowWizardCure(position) {
     sparkles.addInitialize(new Proton.Position(new Proton.PointZone(px, py + 1.0, pz)));
     sparkles.addBehaviour(new Proton.Alpha(1.0, 0.0));
     sparkles.addBehaviour(new Proton.Scale(0.6, 0.05));
-    sparkles.addBehaviour(new Proton.Color('#ffffff', '#aaff66'));
+    sparkles.addBehaviour(new Proton.Color('#ffffff', '#ffffff'));
     sparkles.addBehaviour(new Proton.RandomDrift(1.5, 1.0, 1.5, 0.05));
 
     aura.emit();     proton.addEmitter(aura);

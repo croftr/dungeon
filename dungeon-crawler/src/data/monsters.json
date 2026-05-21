@@ -1249,7 +1249,7 @@
     "xp": 350,
     "attackSpeed": 1.5,
     "stats": {
-      "strength": 22,
+      "strength": 23,
       "dexterity": 25,
       "vitality": 22,
       "intelligence": 26,
@@ -1281,6 +1281,14 @@
             "durationSec": 10
           }
         ]
+      },
+      {
+        "name": "crowCure",
+        "displayName": "Restoration",
+        "description": "Channels restorative magic to heal itself mid-fight. Triggers randomly while wounded.",
+        "selfHeal": true,
+        "castChance": 0.05,
+        "healAmount": 100
       }
     ],
     "drops": [
