@@ -131,6 +131,13 @@ export function spawnLevel0Objects(ctx) {
     lv4TestBtn.position.set(11 * CELL - 1.0, 1.25, 11 * CELL);
     group.add(lv4TestBtn);
 
+    // ── ESSENTIARY TEST BUTTON — east face of the wall at (row 12, col 8) ─────
+    // Player stands at (row 12, col 9) facing west to press it.
+    // Opens the Essentiary screen with all monsters unlocked.
+    const { group: essentiaryBtn } = createWallButton(1, { target: 'essentiary_unlock_all' }, 'x');
+    essentiaryBtn.position.set(8 * CELL + 1.0, 1.25, 12 * CELL);
+    group.add(essentiaryBtn);
+
     // ── Stance NPC + shelf — only appear after completing the level 2 dialogue
     if (stanceNpcDeparted) {
         addShop(group, loader, 23, 13, -Math.PI / 2 + 0.45, 0, 0, 'stances',

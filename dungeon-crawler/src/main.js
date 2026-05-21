@@ -1633,6 +1633,7 @@ const _ARENA_INTRO_VIDEOS = {
   'minotaur':          { overlay: 'minotaur-arena-video-overlay',        video: 'minotaur-arena-video',        skip: 'skip-minotaur-arena-btn',        src: '/videos/minotaur-arena.mp4' },
   'giant':             { overlay: 'giant-arena-video-overlay',           video: 'giant-arena-video',           skip: 'skip-giant-arena-btn',           src: '/videos/giant-arena.mp4' },
   'treeman':           { overlay: 'treeman-arena-video-overlay',         video: 'treeman-arena-video',         skip: 'skip-treeman-arena-btn',         src: '/videos/treeman-arena.mp4' },
+  'iron_warden':       { overlay: 'iron-warden-arena-video-overlay',      video: 'iron-warden-arena-video',      skip: 'skip-iron-warden-arena-btn',      src: '/videos/iron-warden-arena.mp4' },
 };
 
 function _playArenaIntroVideo(monsterId, onFinish) {

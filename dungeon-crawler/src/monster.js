@@ -5,7 +5,7 @@ import { tweenGroup, player } from './player.js';
 import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createIceCloud, createCrocodileSparkle, createHellSpawn, createBloodSplatter, createGreenBloodSplatter, createCrowWizardFireAoe, createCrowWizardCure, createCrowWizardFear, createElementalBurst } from './particles.js';
 import { ELEMENTS, getMonsterElementMultiplier } from './elements.js';
 import MONSTER_FAMILIES from './data/monster-families.json';
-import { CELL, isPassable } from './map.js';
+import { CELL, isPassable, elementFloorCellId, spawnElementFloorAt } from './map.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { party, setHp, addGold, flashPortraitHit, showMemberDamage, showMemberHeal, refreshPartyCards, applyStatusEffect, getEffectiveStats, getEffectiveStatusResistances, getEffectiveElementalResistances, getDefenceModifier, describeEffect, isPartyInvincible, isPartyUnseen } from './party.js';
@@ -60,6 +60,10 @@ let _huntersEyeTargetId = null;
 const _collections = {
   droppedBossEssences: new Set(),
   killedBosses: new Set(),
+  // Element-floor tiles spawned by monster spells at runtime (e.g. Crow Wizard's
+  // Flaming Floor). Each entry is the string "<level>:<row>,<col>". Re-applied
+  // on level entry by `loadMonstersForLevel`, captured in save bundles.
+  spawnedFireFloors: new Set(),
 };
 
 /** True if this monster instance is a "boss" — marked in its def with an image. */
@@ -816,7 +820,21 @@ _applyMultiAttacks('Crow Wizard', [
     sound: asset('/monsters/crow-wizard/standard-attack.mp3'),
     soundTimings: [0.5],
     damageTimings: [0.5],
-    weight: 0,  // never picked randomly — triggered by half-HP only
+    weight: 0,  // never picked randomly — pre-rolled via JSON castChance
+  },
+  {
+    name: 'crowFlamingFloor',
+    glb: asset('/monsters/crow-wizard/flaming-floor.glb'),
+    sound: asset('/monsters/crow-wizard/special-attack.mp3'),
+    soundTimings: [0.5],
+    damageTimings: [0.5],
+    weight: 0,  // never picked randomly — pre-rolled via JSON castChance
+    // Marked as a "special" so the damage-timing branch routes through the
+    // status-attack path; with damageMultiplier 0 and no onHitEffects the
+    // body deals no harm — the actual mechanic (floor spawn) is handled by
+    // the per-variant block in triggerMonsterAttack.
+    specialAttack: true,
+    damageMultiplier: 0,
   },
 ]);
 
@@ -1069,6 +1087,45 @@ function _triggerCrowWizardCure(crowWizard, healAmount) {
       }
     }
   }, duration * pts * 1000);
+}
+
+/**
+ * Spawn an element-floor tile in the grid cell directly in front of the
+ * monster. "In front" is computed as the adjacent cell in the dominant axial
+ * direction toward the player — diagonal positions break ties by row.
+ *
+ * The resulting tile reuses the existing element-floor mechanics (damage tick,
+ * pass-through, visuals) from element-floors.json + map.js — no separate
+ * damage path needed. Also records the cell in `_collections.spawnedFireFloors`
+ * so it persists across level transitions and save/load.
+ *
+ * `elementName` is e.g. "fire" — looked up against ELEMENT_FLOORS.element.
+ * Returns true if a tile was actually spawned.
+ */
+function _spawnFloorInFrontOf(monster, elementName) {
+  if (!monster || !monster.alive) return false;
+  const dRow = player.gridRow - monster.gridRow;
+  const dCol = player.gridCol - monster.gridCol;
+  let stepR = 0, stepC = 0;
+  if (Math.abs(dRow) >= Math.abs(dCol)) {
+    stepR = Math.sign(dRow);
+    // Player on same row as wizard — fall back to columnar step
+    if (stepR === 0) stepC = Math.sign(dCol);
+  } else {
+    stepC = Math.sign(dCol);
+  }
+  // Wizard and player on exact same cell shouldn't normally happen; bail.
+  if (stepR === 0 && stepC === 0) return false;
+  const targetRow = monster.gridRow + stepR;
+  const targetCol = monster.gridCol + stepC;
+  const cellId = elementFloorCellId(elementName);
+  if (cellId == null) return false;
+  if (!_sceneRef) return false;
+  const ok = spawnElementFloorAt(_sceneRef, targetRow, targetCol, cellId);
+  if (!ok) return false;
+  const level = monster.level ?? 1;
+  _collections.spawnedFireFloors.add(`${level}:${targetRow},${targetCol}`);
+  return true;
 }
 
 /**
@@ -1720,6 +1777,23 @@ export function loadMonstersForLevel(scene, level) {
     }
     _loadMonster(m, scene);
   });
+
+  // Re-apply any persistent element-floor tiles that monsters spawned on
+  // earlier visits to this level (Crow Wizard Flaming Floor etc). Runs after
+  // `buildLevel`, so we add the visual tile and mutate dungeonMap directly;
+  // `spawnElementFloorAt` is idempotent so duplicate calls (same-session
+  // level revisits where dungeonMap already holds the mutation) are safe.
+  const fireFloorCell = elementFloorCellId('fire');
+  if (fireFloorCell != null) {
+    for (const key of _collections.spawnedFireFloors) {
+      const [lvlStr, coords] = key.split(':');
+      if (Number(lvlStr) !== level) continue;
+      const [rowStr, colStr] = (coords ?? '').split(',');
+      const r = Number(rowStr), c = Number(colStr);
+      if (!Number.isFinite(r) || !Number.isFinite(c)) continue;
+      spawnElementFloorAt(scene, r, c, fireFloorCell);
+    }
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2801,17 +2875,39 @@ export function triggerMonsterAttack(monsterId) {
     }
   }
 
+  // Floor-spawn spells — any specialAttacks entry with `spawnsElementFloor`
+  // pre-rolls `castChance`. On success we force that variant by name so it
+  // runs through the normal attack/animation flow; the per-variant block
+  // below performs the floor spawn at the damage timing. Cast chance is
+  // tunable from monsters.json.
+  let _forcedVariantName = null;
+  for (const fs of (m.specialAttacks ?? [])) {
+    if (!fs || !fs.spawnsElementFloor) continue;
+    if (Math.random() < (fs.castChance ?? 0)) {
+      _forcedVariantName = fs.name;
+      break;
+    }
+  }
+
   // ── Pick attack variant (or fall back to single attack) ──
   let attackAction, soundTimings, damageTimings, attackSound, activeVariant;
 
   if (m.attackVariants && m.attackVariants.length > 0) {
     let variant;
-    if (m.name === 'Ogre' && m.attackVariants.length >= 2) {
-      if (m._lastAttackIdx === undefined) m._lastAttackIdx = -1;
-      m._lastAttackIdx = (m._lastAttackIdx + 1) % m.attackVariants.length;
-      variant = m.attackVariants[m._lastAttackIdx];
-    } else {
-      variant = _pickWeightedVariant(m.attackVariants);
+    // A forced variant (from a pre-rolled spell like Flaming Floor) wins over
+    // the weighted picker. If the named variant isn't loaded yet we fall back
+    // to the normal pick so the monster still acts.
+    if (_forcedVariantName) {
+      variant = m.attackVariants.find(v => v && v.name === _forcedVariantName);
+    }
+    if (!variant) {
+      if (m.name === 'Ogre' && m.attackVariants.length >= 2) {
+        if (m._lastAttackIdx === undefined) m._lastAttackIdx = -1;
+        m._lastAttackIdx = (m._lastAttackIdx + 1) % m.attackVariants.length;
+        variant = m.attackVariants[m._lastAttackIdx];
+      } else {
+        variant = _pickWeightedVariant(m.attackVariants);
+      }
     }
     if (variant) {
       attackAction = variant.action;
@@ -2897,6 +2993,22 @@ export function triggerMonsterAttack(monsterId) {
         const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.45;
         setTimeout(() => { if (m.alive) createCrowWizardFear(m.mesh.position); }, duration * pts * 1000);
         showMessage(`<b>${m.name}</b> strikes with Shadow Talons!`, 2000);
+      }
+      if (variant.name === 'crowFlamingFloor' && m.mesh) {
+        const duration = attackAction.getClip().duration;
+        const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
+        // Look up the JSON spec so the element to spawn is data-driven —
+        // change `spawnsElementFloor` in monsters.json to retarget the spell.
+        const spec = m.specialAttacks?.find(s => s && s.name === 'crowFlamingFloor');
+        const elementName = spec?.spawnsElementFloor ?? 'fire';
+        setTimeout(() => {
+          if (!m.alive) return;
+          // Tiny fire flourish at the wizard so the cast reads visually even
+          // before the floor tile appears.
+          createCrowWizardFireAoe(m.mesh.position);
+          _spawnFloorInFrontOf(m, elementName);
+        }, duration * pts * 1000);
+        showMessage(`<b>${m.name}</b> conjures a Flaming Floor!`, 2000);
       }
       if (variant.name === 'wardenBolt' && m.mesh) {
         const duration = attackAction.getClip().duration;
@@ -3535,6 +3647,7 @@ export function captureMonsterState() {
   return {
     droppedBossEssences: [..._collections.droppedBossEssences],
     killedBosses: [..._collections.killedBosses],
+    spawnedFireFloors: [..._collections.spawnedFireFloors],
     monsters: monsterStates,
   };
 }
@@ -3543,6 +3656,7 @@ export function restoreMonsterState(data) {
   if (!data) return;
   _collections.droppedBossEssences = new Set(data.droppedBossEssences ?? []);
   _collections.killedBosses = new Set(data.killedBosses ?? []);
+  _collections.spawnedFireFloors = new Set(data.spawnedFireFloors ?? []);
   if (Array.isArray(data.monsters)) {
     const byKey = new Map();
     for (const s of data.monsters) byKey.set(`${s.level}:${s.id}`, s);

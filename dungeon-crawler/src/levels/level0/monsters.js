@@ -26,7 +26,7 @@ const _ironWarden = inst(D.iron_warden, 11, 11, 21,
     asset('/monsters/iron-warden/idle.glb'),
     asset('/monsters/iron-warden/standard-attack.glb'),
     asset('/monsters/iron-warden/attack-sound.mp3'),
-    0.45, 0, 0, 0,
+    0.5625, 0, 0, -1,
     null, // patrol
     asset('/monsters/iron-warden/dying.glb'),
     asset('/monsters/iron-warden/getting-hit.glb'),
@@ -34,4 +34,4 @@ const _ironWarden = inst(D.iron_warden, 11, 11, 21,
     null, // glbIdleAlt
     asset('/monsters/iron-warden/combat-idle.glb'));
 
-export const level0Monsters = [_dummy];
+export const level0Monsters = [_dummy, _ironWarden];

@@ -295,6 +295,51 @@ export function cellToWorld(row, col) {
 
 let currentMapMeshes = [];
 
+/**
+ * Look up the cell id for an element-floor entry by its `element` field
+ * (e.g. "fire" → the lava entry's cell id). Returns null if no entry matches.
+ * Lets gameplay code reference floors by element name rather than the
+ * registry's internal key.
+ */
+export function elementFloorCellId(elementName) {
+  for (const [, def] of Object.entries(ELEMENT_FLOORS)) {
+    if (def.element === elementName) return def.cell;
+  }
+  return null;
+}
+
+/**
+ * Spawn an element-floor tile at runtime (e.g. a Crow Wizard's Flaming Floor).
+ *
+ * Mutates `dungeonMap[row][col]` to the given cell id and adds the visual
+ * overlay tile to the scene. The mesh is tracked in `currentMapMeshes` so it
+ * gets cleaned up the next time `buildLevel` runs.
+ *
+ * Idempotent: if the target cell is already this element floor, the function
+ * is a no-op (used by save-restore paths where dungeonMap may still hold the
+ * mutation in-session). Refuses to overwrite walls or non-floor structural
+ * cells — only `CELL_FLOOR` and existing element floors are valid targets.
+ *
+ * Returns true if a tile was spawned (or was already present), false if the
+ * target cell was not a valid floor to convert.
+ */
+export function spawnElementFloorAt(scene, row, col, cellId) {
+  if (row < 0 || row >= ROWS || col < 0 || col >= COLS) return false;
+  const existing = dungeonMap[row][col];
+  if (existing === cellId) return true; // already mutated this session
+  // Only convert ordinary floor tiles (avoid stomping start/exit/holes/walls)
+  if (existing !== CELL_FLOOR) return false;
+  const mat = _elementFloorMatByCell[cellId];
+  if (!mat) return false;
+  dungeonMap[row][col] = cellId;
+  const tile = new THREE.Mesh(tileGeo, mat);
+  tile.rotation.set(-Math.PI / 2, 0, 0);
+  tile.position.set(col * CELL, 0.012, row * CELL);
+  scene.add(tile);
+  currentMapMeshes.push(tile);
+  return true;
+}
+
 export function buildLevel(scene) {
   currentMapMeshes.forEach(mesh => scene.remove(mesh));
   currentMapMeshes = [];

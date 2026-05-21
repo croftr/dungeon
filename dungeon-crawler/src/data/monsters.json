@@ -1176,6 +1176,7 @@
   "iron_warden": {
     "name": "Iron Warden",
     "family": "elemental",
+    "image": "/monster-images/iron-warden.webp",
     "description": "An ancient construct of living iron, forged to guard the deepest vaults. Its armoured shell deflects blades and arrows with contemptuous ease — but the elemental energies coursing through its core are also its greatest weakness.",
     "hp": 320,
     "defence": 80,
@@ -1196,7 +1197,7 @@
     "elementalResistances": {
       "fire": "vulnerable",
       "ice": "vulnerable",
-      "lightning": "vulnerable",
+      "lightning": "immune",
       "water": "vulnerable",
       "holy": "vulnerable",
       "dark": "vulnerable"
@@ -1287,8 +1288,15 @@
         "displayName": "Restoration",
         "description": "Channels restorative magic to heal itself mid-fight. Triggers randomly while wounded.",
         "selfHeal": true,
-        "castChance": 0.05,
+        "castChance": 0.08,
         "healAmount": 100
+      },
+      {
+        "name": "crowFlamingFloor",
+        "displayName": "Flaming Floor",
+        "description": "Conjures a searing patch of fire on the ground in front of the wizard. Anyone standing on it suffers fire damage each tick until they move.",
+        "spawnsElementFloor": "fire",
+        "castChance": 0.08
       }
     ],
     "drops": [
