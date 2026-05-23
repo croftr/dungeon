@@ -1296,6 +1296,8 @@ function _loadMonster(m, scene) {
   _gltfLoader.load(baseGlb, (gltf) => {
     // If monster was killed (e.g. save restore) before model finished loading, discard
     if (!m.alive) return;
+    // Level changed before this async callback fired — don't add a stale mesh to the wrong scene
+    if ((m.level ?? 1) !== (window.currentLevel ?? 0)) return;
 
     const model = gltf.scene;
     m.mesh = model;
