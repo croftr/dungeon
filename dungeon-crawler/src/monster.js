@@ -2024,7 +2024,9 @@ export function updateMonsters(dt, playerCamera, scene) {
           const { minRow, maxRow, minCol, maxCol } = m._triggerBounds;
           if (player.gridRow >= minRow && player.gridRow <= maxRow
               && player.gridCol >= minCol && player.gridCol <= maxCol) {
-            _triggerSkeletonRise(m);
+            if (!m._waitForCrowVideo || window._crowWizardVideoDone) {
+              _triggerSkeletonRise(m);
+            }
           }
         }
       }

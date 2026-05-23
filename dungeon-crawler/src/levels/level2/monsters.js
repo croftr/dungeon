@@ -83,6 +83,7 @@ export const level2Monsters = [
     asset('/monsters/summoned-skeleton/walking.glb')), {
     _dormant: true,
     _triggerBounds: { minRow: 7, maxRow: 9, minCol: 28, maxCol: 35 },
+    _waitForCrowVideo: true,
     glbStandUp: asset('/monsters/summoned-skeleton/standing-up.glb'),
   }),
 
@@ -96,6 +97,7 @@ export const level2Monsters = [
     asset('/monsters/summoned-skeleton/walking.glb')), {
     _dormant: true,
     _triggerBounds: { minRow: 7, maxRow: 9, minCol: 28, maxCol: 35 },
+    _waitForCrowVideo: true,
     glbStandUp: asset('/monsters/summoned-skeleton/standing-up.glb'),
   }),
 

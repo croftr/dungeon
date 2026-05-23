@@ -233,6 +233,9 @@ window.videoFlags = {
   hasSeenL1Intro: false,
 };
 const videoFlags = window.videoFlags;
+// Ephemeral runtime flag: true once the crow wizard video has fully finished (or was already seen on load).
+// Not saved — reconstructed from hasSeenCrowWizardVideo on restore.
+window._crowWizardVideoDone = false;
 let prepVideoTimer = null;
 
 // Arena (monster trial) session state. Ephemeral — set on arena entry, cleared
@@ -253,6 +256,7 @@ function restoreVideoFlags(data) {
   for (const key of Object.keys(videoFlags)) {
     videoFlags[key] = !!data[key];
   }
+  if (videoFlags.hasSeenCrowWizardVideo) window._crowWizardVideoDone = true;
 }
 
 setCallbacks({
@@ -335,9 +339,10 @@ setCallbacks({
         if (window.playTreemanVideo) window.playTreemanVideo();
       }
 
-      // Crow Wizard video: fires once the party is a step inside the room (row 8, col 31),
-      // past the flanking skeletons and with a clear sightline to the wizard at the back.
-      if (!videoFlags.hasSeenCrowWizardVideo && player.gridRow === 8 && player.gridCol === 31) {
+      // Crow Wizard video: fires when the party is two steps inside the room (row 8, col 32),
+      // giving a clear sightline to the wizard before the skeletons rise.
+      // Skeletons are gated on window._crowWizardVideoDone and will not rise until the video ends.
+      if (!videoFlags.hasSeenCrowWizardVideo && player.gridRow === 8 && player.gridCol === 32) {
         videoFlags.hasSeenCrowWizardVideo = true;
         playCrowWizardVideo();
       }
@@ -1567,6 +1572,7 @@ function finishCrowWizardVideo() {
     clearInterval(fadeInterval);
     crowWizardVideo.volume = startVol;
     crowWizardOverlay.classList.add('hidden');
+    window._crowWizardVideoDone = true;
   }, 1500);
 }
 

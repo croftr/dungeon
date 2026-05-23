@@ -520,6 +520,31 @@ function refreshMember(m) {
     if (slotEl) slotEl.classList.toggle('slot-has-alt-ammo', isRanged && hasAltAmmo);
   }
 
+  // Trap element indicator on whichever skill slot holds Lay Trap
+  const trapElement = m.trapConfig?.element;
+  const hasTrapElement = !!(trapElement && trapElement !== 'none');
+  for (const [slotId, skillName] of [
+    [`slot-sk-${i}`, skName],
+    [`slot-sk2-${i}`, sk2Name],
+    [`slot-sk3-${i}`, sk3Name],
+    [`slot-sk4-${i}`, sk4Name],
+    [`slot-sk5-${i}`, sk5Name],
+    [`slot-sk6-${i}`, sk6Name],
+  ]) {
+    const isLayTrap = skillName === 'Lay Trap';
+    const dot = isLayTrap
+      ? _getAmmoIndicatorEl(slotId)
+      : document.getElementById(slotId)?.querySelector('.ammo-type-dot');
+    if (!dot) continue;
+    if (isLayTrap && hasTrapElement) {
+      dot.style.background = _ammoIndicatorColor(trapElement);
+      dot.style.display = '';
+      dot.title = `Trap element: ${ELEMENTS[trapElement]?.name ?? trapElement}`;
+    } else {
+      dot.style.display = 'none';
+    }
+  }
+
   if (!m.cooldownTimers) m.cooldownTimers = {};
 
   if (lhSlot) {
