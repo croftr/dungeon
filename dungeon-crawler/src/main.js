@@ -304,11 +304,11 @@ setCallbacks({
       // Prep video triggers ONLY when confirming the NPC modal now,
       // so we remove the position-based trigger entirely.
     } else if (window.currentLevel === 2) {
-      // Demon room: south section of the passage (rows 31-34 after +15 map shift)
+      // Demon room: south section of the passage
       const inDemonRoom = player.gridRow >= 31 && player.gridRow <= 34
-        && player.gridCol >= 3 && player.gridCol <= 8;
-      // Aqua man pit arrival area (rows 37-41 after +15 map shift)
-      const inAquaManRoom = player.gridCol === 3 && player.gridRow >= 37 && player.gridRow <= 41;
+        && player.gridCol >= 13 && player.gridCol <= 18;
+      // Aqua man pit arrival area
+      const inAquaManRoom = player.gridCol === 13 && player.gridRow >= 37 && player.gridRow <= 41;
 
       if (inAquaManRoom) {
         setZoneMusic(asset('/sounds/water.mp3'));
@@ -330,20 +330,20 @@ setCallbacks({
       }
 
       // Treeman video: fires when player first steps into the main treeman chamber
-      if (!videoFlags.hasSeenTreemanVideo && player.gridRow === 16 && player.gridCol === 7) {
+      if (!videoFlags.hasSeenTreemanVideo && player.gridRow === 16 && player.gridCol === 17) {
         videoFlags.hasSeenTreemanVideo = true;
         if (window.playTreemanVideo) window.playTreemanVideo();
       }
 
-      // Crow Wizard video: fires once the party is a step inside the room (row 8, col 21),
+      // Crow Wizard video: fires once the party is a step inside the room (row 8, col 31),
       // past the flanking skeletons and with a clear sightline to the wizard at the back.
-      if (!videoFlags.hasSeenCrowWizardVideo && player.gridRow === 8 && player.gridCol === 21) {
+      if (!videoFlags.hasSeenCrowWizardVideo && player.gridRow === 8 && player.gridCol === 31) {
         videoFlags.hasSeenCrowWizardVideo = true;
         playCrowWizardVideo();
       }
 
-      // Demon video: fires in the passage at row 28, col 7 — just before the demon room
-      if (!videoFlags.hasSeenDemonVideo && player.gridRow === 28 && player.gridCol === 7) {
+      // Demon video: fires in the passage at row 28, col 17 — just before the demon room
+      if (!videoFlags.hasSeenDemonVideo && player.gridRow === 28 && player.gridCol === 17) {
         videoFlags.hasSeenDemonVideo = true;
         playDemonVideo();
       }
@@ -479,10 +479,10 @@ setCallbacks({
 
         // 2. Wait 1 second for the scream/land sound sequence before teleporting the party.
         setTimeout(() => {
-          // Teleport to pit arrival chamber (row 37, col 3)
+          // Teleport to pit arrival chamber (row 37, col 13)
           player.gridRow = 37;
-          player.gridCol = 3;
-          const w = cellToWorld(37, 3);
+          player.gridCol = 13;
+          const w = cellToWorld(37, 13);
           camera.position.set(w.x, w.y, w.z);
           
           // Face South (2) towards the new passage
@@ -511,10 +511,10 @@ setCallbacks({
 
           // Teleport while the video is covering the screen
           setTimeout(() => {
-            // Teleport to far end of original passage (row 32, col 24) — shifted +15
+            // Teleport to far end of original passage (row 32, col 34)
             player.gridRow = 32;
-            player.gridCol = 24;
-            const w = cellToWorld(32, 24);
+            player.gridCol = 34;
+            const w = cellToWorld(32, 34);
             camera.position.set(w.x, w.y, w.z);
             // Face East (1) back towards the demon room
             player.facing = 1;
@@ -2269,12 +2269,12 @@ window.loadLevel = function (levelNum) {
       scene,
       // Wall cells: left col (2) and right col (4) flanking the corridor, plus north cap
       [
-        [36, 2], [37, 2], [38, 2], [39, 2], [40, 2], [41, 2],
-        [36, 4], [37, 4], [38, 4], [39, 4], [40, 4], [41, 4],
-        [36, 3],
+        [36, 12], [37, 12], [38, 12], [39, 12], [40, 12], [41, 12],
+        [36, 14], [37, 14], [38, 14], [39, 14], [40, 14], [41, 14],
+        [36, 13],
       ],
       // Floor cells: the walkable corridor column
-      [[37, 3], [38, 3], [39, 3], [40, 3], [41, 3]],
+      [[37, 13], [38, 13], [39, 13], [40, 13], [41, 13]],
       asset('/textures/wet-wall.webp'),
       asset('/textures/black-stone2.webp')
     );
@@ -2285,20 +2285,20 @@ window.loadLevel = function (levelNum) {
       scene,
       [
         // approach corridor walls
-        [7,15],[7,16],[7,17],[7,18],[7,19],
-        [9,15],[9,16],[9,17],[9,18],[9,19],
-        // crow room perimeter ([6,24] omitted — now the north doorway)
-        [6,20],[6,21],[6,22],[6,23],[6,25],
-        [10,20],[10,21],[10,22],[10,23],[10,24],[10,25],
-        [7,26],[8,26],[9,26],
+        [7, 25],[7, 26],[7, 27],[7, 28],[7, 29],
+        [9, 25],[9, 26],[9, 27],[9, 28],[9, 29],
+        // crow room perimeter ([6, 34] omitted — now the north doorway)
+        [6, 30],[6, 31],[6, 32],[6, 33],[6, 35],
+        [10, 30],[10, 31],[10, 32],[10, 33],[10, 34],[10, 35],
+        [7, 36],[8, 36],[9, 36],
         // north exit corridor sides (col 24, rows 4–6)
-        [4,23],[4,25],
-        [5,23],[5,25],
+        [4, 33],[4, 35],
+        [5, 33],[5, 35],
         // annex room perimeter
-        [0,22],[0,23],[0,24],[0,25],[0,26],   // north (map edge)
-        [1,21],[2,21],[3,21],                  // west wall
-        [1,27],[2,27],[3,27],                  // east wall
-        [3,22],[3,23],[3,25],[3,26],           // south wall (doorway at [3,24])
+        [0, 32],[0, 33],[0, 34],[0, 35],[0, 36],   // north (map edge)
+        [1, 31],[2, 31],[3, 31],                  // west wall
+        [1, 37],[2, 37],[3, 37],                  // east wall
+        [3, 32],[3, 33],[3, 35],[3, 36],           // south wall (doorway at [3, 34])
       ],
       [],
       asset('/textures/crow-wall.webp'),
@@ -2307,12 +2307,12 @@ window.loadLevel = function (levelNum) {
 
     // Level 2: Ice area (inner walls only)
     const iceFloors = [
-      [7, 2], [7, 3], [7, 4], [7, 9], [7, 10], [7, 11], [7, 12], [7, 13], [7, 14],
-      [8, 2], [8, 3], [8, 4], [8, 5], [8, 6], [8, 7], [8, 8], [8, 9], [8, 10], [8, 11], [8, 12], [8, 13], [8, 14],
-      [9, 2], [9, 3], [9, 4], [9, 9], [9, 10], [9, 11], [9, 12], [9, 13], [9, 14],
+      [7, 12], [7, 13], [7, 14], [7, 19], [7, 20], [7, 21], [7, 22], [7, 23], [7, 24],
+      [8, 12], [8, 13], [8, 14], [8, 15], [8, 16], [8, 17], [8, 18], [8, 19], [8, 20], [8, 21], [8, 22], [8, 23], [8, 24],
+      [9, 12], [9, 13], [9, 14], [9, 19], [9, 20], [9, 21], [9, 22], [9, 23], [9, 24],
       // Ice gauntlet: corridor south of mushroom room and reward room with chest
-      [10, 3], [11, 3], [12, 3], [13, 3],
-      [14, 2], [14, 3], [14, 4]
+      [10, 13], [11, 13], [12, 13], [13, 13],
+      [14, 12], [14, 13], [14, 14]
     ];
     buildFloorZone(
       scene,

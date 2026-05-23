@@ -124,9 +124,9 @@ export function spawnLevel0Objects(ctx) {
     // ── Training Console — next to the training dummy at (7, 23) ────────────
     addTrainingConsole(group, loader, 22, 7, Math.PI);
 
-    // ── TEST BUTTON — west face of the pillar at (row 11, col 11) ────────────
+    // ── WARP BUTTON — west face of the pillar at (row 11, col 11) ───────────
     // Player stands at (row 11, col 10) facing east to press it.
-    // Transports straight to Level 4 for layout testing.
+    // Opens a teleport menu to choose a destination level.
     const { group: lv4TestBtn } = createWallButton(-1, { target: 'teleport_level4_test' }, 'x');
     lv4TestBtn.position.set(11 * CELL - 1.0, 1.25, 11 * CELL);
     group.add(lv4TestBtn);

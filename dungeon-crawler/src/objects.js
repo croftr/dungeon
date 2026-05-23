@@ -110,6 +110,7 @@ const _state = {
   level4PortalEnabled: false,
   level2PortcullisOpened: false,
   level2GiantPortcullisOpened: false,
+  level2WardenGateOpened: false,
   level2HoleClosed: false,
   level1HoleRoomSpawned: false,
   monsterNpcSaved: false,
@@ -556,6 +557,59 @@ export function checkFloorPortalStep() {
     setPortalIdleLoop(nearPortal);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  TELEPORT MENU  — shown when the warp button in the starter room is pressed.
+// ─────────────────────────────────────────────────────────────────────────────
+const _TELEPORT_DESTINATIONS = [
+    { label: 'Level 2 — The Tomb',            level: 2  },
+    { label: 'Level 3 — The Abyssal Crypts',  level: 3  },
+    { label: 'Level 4 — The Egg Chamber',     level: 4  },
+    { label: 'Hall of Heroes',                level: 5  },
+    { label: 'Level 50 — Schematic Trials',   level: 50 },
+];
+
+function _showTeleportMenu() {
+    let menu = document.getElementById('teleport-menu');
+    if (!menu) {
+        menu = document.createElement('div');
+        menu.id = 'teleport-menu';
+        menu.className = 'hidden';
+        menu.innerHTML = `<div class="tm-title">⟡ Warp Stone</div><div id="tm-options"></div><div class="tm-cancel">✕  Cancel  (Esc)</div>`;
+        document.body.appendChild(menu);
+        menu.querySelector('.tm-cancel').addEventListener('click', _hideTeleportMenu);
+    }
+
+    const optionsEl = menu.querySelector('#tm-options');
+    optionsEl.innerHTML = '';
+    for (const dest of _TELEPORT_DESTINATIONS) {
+        const btn = document.createElement('div');
+        btn.className = 'tm-option';
+        btn.textContent = dest.label;
+        btn.addEventListener('click', () => {
+            _hideTeleportMenu();
+            if (window.loadLevel) window.loadLevel(dest.level);
+        });
+        optionsEl.appendChild(btn);
+    }
+
+    menu.classList.remove('hidden');
+    setPlayerFrozen(true);
+
+    const onKey = (e) => {
+        if (e.key === 'Escape') { _hideTeleportMenu(); document.removeEventListener('keydown', onKey); }
+    };
+    document.addEventListener('keydown', onKey);
+    menu._onKey = onKey;
+}
+
+function _hideTeleportMenu() {
+    const menu = document.getElementById('teleport-menu');
+    if (!menu) return;
+    menu.classList.add('hidden');
+    if (menu._onKey) { document.removeEventListener('keydown', menu._onKey); menu._onKey = null; }
+    setPlayerFrozen(false);
+}
+
 export function initObjects(scene, camera) {
     _camera = camera;
     scene.add(objectsGroup);
@@ -614,23 +668,23 @@ export function initObjects(scene, camera) {
                         showMessage("You can't reach that from here.");
                     }
                 } else if (obj.userData.target === 'demon_room') {
-                    // Player at (33, 3) facing west presses button on east face of col-2 wall
-                    if (isInFrontOfPlayer(33, 2, 1)) {
+                    // Player at (33, 13) facing west presses button on east face of col-12 wall (shifted +10 from col 2)
+                    if (isInFrontOfPlayer(33, 12, 1)) {
                         playButtonClickSound();
                         _animateButtonPress(obj);
-                        const vaultDoor = objects.find(o => o.name === 'Portcullis' && o.gridRow === 32 && o.gridCol === 2);
+                        const vaultDoor = objects.find(o => o.name === 'Portcullis' && o.gridRow === 32 && o.gridCol === 12);
                         if (vaultDoor) openPortcullis(vaultDoor);
                     } else {
                         showMessage("You can't reach that from here.");
                     }
                 } else if (obj.userData.target === 'close_hole') {
-                    if (isInFrontOfPlayer(31, 25, 1)) {
+                    if (isInFrontOfPlayer(31, 35, 1)) {
                         playButtonClickSound();
                         if (!_state.level2HoleClosed) {
                             _animateButtonPress(obj);
                             _state.level2HoleClosed = true;
-                            dungeonMap[32][23] = CELL_FLOOR;
-                            level2Map[32][23] = CELL_FLOOR;
+                            dungeonMap[32][33] = CELL_FLOOR;
+                            level2Map[32][33] = CELL_FLOOR;
                             buildLevel(objectsGroup.parent);
                             showMessage("You hear mechanisms grinding. The pit is closed.");
                         } else {
@@ -678,9 +732,9 @@ export function initObjects(scene, camera) {
                             // Delay position overwrite to happen after loadLevel resets the player.
                             setTimeout(() => {
                                 player.gridRow = 19;
-                                player.gridCol = 6;
+                                player.gridCol = 16;
                                 player.facing = 2; // South
-                                const w = cellToWorld(19, 6);
+                                const w = cellToWorld(19, 16);
                                 camera.position.set(w.x, w.y, w.z);
                                 camera.rotation.order = 'YXZ';
                                 camera.rotation.y = FACING_ANGLES[player.facing];
@@ -691,24 +745,12 @@ export function initObjects(scene, camera) {
                         showMessage("You can't reach that from here.");
                     }
                 } else if (obj.userData.target === 'teleport_level4_test') {
-                    // TEST BUTTON — pillar west face at (row 11, col 11) in the starter room.
+                    // WARP BUTTON — pillar west face at (row 11, col 11) in the starter room.
                     // Player at (row 11, col 10) facing east presses it.
                     if (isInFrontOfPlayer(11, 11, 1)) {
                         playButtonClickSound();
                         _animateButtonPress(obj);
-                        if (window.loadLevel) {
-                            window.loadLevel(4);
-                            setTimeout(() => {
-                                player.gridRow = 15;
-                                player.gridCol = 10;
-                                player.facing = 0; // North
-                                const w = cellToWorld(15, 10);
-                                camera.position.set(w.x, w.y, w.z);
-                                camera.rotation.order = 'YXZ';
-                                camera.rotation.y = FACING_ANGLES[player.facing];
-                                showMessage("Teleported to Level 4.");
-                            }, 50);
-                        }
+                        _showTeleportMenu();
                     } else {
                         showMessage("You can't reach that from here.");
                     }
@@ -724,7 +766,12 @@ export function initObjects(scene, camera) {
                             o.name === 'Portcullis' &&
                             o.gridRow === obj.userData.portcullisRow &&
                             o.gridCol === obj.userData.portcullisCol);
-                        if (p) openPortcullis(p);
+                        if (p) {
+                            openPortcullis(p);
+                            if (window.currentLevel === 2 && p.gridRow === 4 && p.gridCol === 6) {
+                                _state.level2WardenGateOpened = true;
+                            }
+                        }
                     } else {
                         showMessage("You can't reach that from here.");
                     }
@@ -1147,7 +1194,7 @@ export function initObjects(scene, camera) {
                     const p = objects.find(o => o.name === 'Portcullis' && o.gridRow === obj.userData.targetRow && o.gridCol === obj.userData.targetCol);
                     if (p) {
                         if (!p.isOpen) {
-                            if (p.gridRow === 30 && p.gridCol === 9) {
+                            if (p.gridRow === 30 && p.gridCol === 19) {
                                 let keyFound = false;
                                 for (let i = 0; i < party.length; i++) {
                                     if (party[i] && !party[i].isEmpty && party[i].inventory) {
@@ -1195,7 +1242,7 @@ export function initObjects(scene, camera) {
                                 playKeyLockSound();
                                 setTimeout(() => {
                                     openPortcullis(p);
-                                    if (window.currentLevel === 2 && p.gridRow === 23 && p.gridCol === 7) {
+                                    if (window.currentLevel === 2 && p.gridRow === 23 && p.gridCol === 17) {
                                         _state.level2PortcullisOpened = true;
                                     }
                                     if (window.currentLevel === 1 && p.gridRow === 10 && p.gridCol === 17) {
@@ -2726,6 +2773,7 @@ export function spawnObjectsForLevel() {
         // Level 2 state flags
         level2PortcullisOpened: _state.level2PortcullisOpened,
         level2GiantPortcullisOpened: _state.level2GiantPortcullisOpened,
+        level2WardenGateOpened: _state.level2WardenGateOpened,
         level2HoleClosed: _state.level2HoleClosed,
         // Level 3 state flags
         level3PortalEnabled: _state.level3PortalEnabled,
@@ -6129,10 +6177,10 @@ export function setWorldFlags(flags) {
     _collections.unlockedRecipes = new Set(flags.unlockedRecipes ?? []);
     _collections.disarmedTraps = new Set(flags.disarmedTraps ?? []);
     _monsterNpcStock = (flags.monsterNpcStock ?? []).map(_normStock).filter(Boolean);
-    // The Aqua Man pit lives at (32, 23) on level 2. Restoring the "hole closed"
+    // The Aqua Man pit lives at (32, 33) on level 2. Restoring the "hole closed"
     // flag must mutate that cell so the pit stops swallowing the party after a
-    // save+refresh. (Previously wrote to [17][23] by mistake — giant room, not the pit.)
-    if (_state.level2HoleClosed) level2Map[32][23] = CELL_FLOOR;
+    // save+refresh. (Shifted to col 33 from col 23 due to column shift).
+    if (_state.level2HoleClosed) level2Map[32][33] = CELL_FLOOR;
     if (_state.level1HoleRoomSpawned) {
         for (let r = 24; r <= 26; r++) {
             for (let c = 1; c <= 3; c++) {
