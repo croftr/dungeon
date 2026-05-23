@@ -48,8 +48,8 @@ export function spawnLevel1Objects(ctx) {
             onGreeting: () => {
                 setTimeout(() => {
                     showDramaticUnlock(
-                        'Essence Crafting Unlocked',
-                        'Harvest essences from fallen foes and forge them into powerful gear at the anvil in town'
+                        'Essentiary Unlocked',
+                        'The Essentiary is a compendium of all monsters you have encountered, with information on their stats, abilities, and lore. You can access it from the menu to review monsters youve met and plan for future encounters.'
                     );
                 }, 2000);
             }
