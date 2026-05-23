@@ -48,6 +48,55 @@ export const party = [
 
 export let partyGold = 0;
 
+function _memberCardHTML(i) {
+  return `
+      <div class="member-card" id="member-${i}">
+        <div class="member-main">
+          <div class="portrait"><canvas class="portrait-canvas" id="portrait-${i}" width="84" height="84"></canvas><div class="levelup-indicator" id="levelup-${i}" title="Level-up skill point available">⬆</div></div>
+          <div class="member-info">
+            <div class="status-banner" id="status-banner-${i}"></div>
+            <div class="info-row">
+              <div class="bars">
+                <div class="bar-row">
+                  <div class="bar-track">
+                    <div class="bar-fill bar-hp" id="bar-hp-${i}"></div><span class="bar-value" id="val-hp-${i}"></span>
+                  </div>
+                </div>
+                <div class="bar-row">
+                  <div class="bar-track">
+                    <div class="bar-fill bar-mp" id="bar-mp-${i}"></div><span class="bar-value" id="val-mp-${i}"></span>
+                  </div>
+                </div>
+                <div class="bar-row">
+                  <div class="bar-track">
+                    <div class="bar-fill bar-sp" id="bar-sp-${i}"></div><span class="bar-value" id="val-sp-${i}"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="slot-group slot-group--hands">
+                <div class="equip-slot" id="slot-lh-${i}"><span class="slot-label">L</span><span class="slot-item" id="item-lh-${i}"></span></div>
+                <div class="equip-slot" id="slot-rh-${i}"><span class="slot-label">R</span><span class="slot-item" id="item-rh-${i}"></span></div>
+              </div>
+            </div>
+          </div>
+          <div class="slot-group slot-group--actions">
+            <div class="equip-slot" id="slot-sk-${i}"><span class="slot-label">A</span><span class="slot-item" id="item-sk-${i}"></span></div>
+            <div class="equip-slot" id="slot-sk2-${i}"><span class="slot-label">A</span><span class="slot-item" id="item-sk2-${i}"></span></div>
+            <div class="equip-slot" id="slot-sk3-${i}"><span class="slot-label">A</span><span class="slot-item" id="item-sk3-${i}"></span></div>
+            <div class="equip-slot" id="slot-sk4-${i}"><span class="slot-label">A</span><span class="slot-item" id="item-sk4-${i}"></span></div>
+            <div class="equip-slot" id="slot-sk5-${i}"><span class="slot-label">A</span><span class="slot-item" id="item-sk5-${i}"></span></div>
+            <div class="equip-slot" id="slot-sk6-${i}"><span class="slot-label">A</span><span class="slot-item" id="item-sk6-${i}"></span></div>
+          </div>
+        </div>
+      </div>`;
+}
+
+export function buildPartyPanel() {
+  const panel = document.getElementById('party-panel');
+  if (!panel) return;
+  panel.innerHTML = [0, 1, 2, 3].map(_memberCardHTML).join('');
+}
+
 export let autoAttack = true;
 export function setAutoAttack(val) { autoAttack = val; }
 
