@@ -44,5 +44,33 @@
         "defence": 0,
         "value": 825,
         "weight": 0.1
+    },
+    {
+        "name": "Storm Pendant",
+        "slot": "neck",
+        "attackType": null,
+        "baseDamage": null,
+        "elementalResistances": {
+            "lightning": 0.3
+        },
+        "icon": "/icons/neck/storm_pendant.webp",
+        "description": "A copper pendant set with an amber gemstone that draws away static charge. Provides significant lightning resistance.",
+        "defence": 0,
+        "value": 650,
+        "weight": 0.1
+    },
+    {
+        "name": "Iron Pendant",
+        "slot": "neck",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/neck/iron_pendant.webp",
+        "description": "A simple pendant forged from sturdy iron. Grants a small boost to physical vitality.",
+        "defence": 0,
+        "value": 150,
+        "weight": 0.2,
+        "statBonuses": {
+            "hp": 1
+        }
     }
 ]

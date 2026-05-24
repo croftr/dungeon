@@ -81,5 +81,31 @@
         },
         "value": 360,
         "weight": 0.05
+    },
+    {
+        "name": "Storm Ring",
+        "slot": "ring1",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/rings/storm_ring.webp",
+        "description": "A copper band set with a crackling sapphire stone. Protects the wearer against electrical forces.",
+        "elementalResistances": {
+            "lightning": 0.2
+        },
+        "value": 360,
+        "weight": 0.05
+    },
+    {
+        "name": "Iron Ring",
+        "slot": "ring1",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/rings/iron_ring.webp",
+        "description": "A basic ring forged from solid iron. Grants a small boost to physical vitality.",
+        "value": 100,
+        "weight": 0.1,
+        "statBonuses": {
+            "hp": 1
+        }
     }
 ]

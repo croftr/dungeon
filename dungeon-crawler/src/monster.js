@@ -312,6 +312,7 @@ export function getInRangeMonster() {
   // Collect all passable-reachable adjacent monsters
   const candidates = monsters.filter((m) => {
     if (!m.alive) return false;
+    if (m._frozen) return false;
     if ((m.level ?? 1) !== currentLevel) return false;
     const distRow = Math.abs(m.gridRow - player.gridRow);
     const distCol = Math.abs(m.gridCol - player.gridCol);
@@ -892,6 +893,16 @@ _applyMultiAttacks('Iron Warden', [
     damageMultiplier: 0.8,
     specialOnHitEffects: [{ effectId: 'stun', chance: 0.15 }],
   },
+  {
+    name: 'lighteningFloor',
+    glb: asset('/monsters/iron-warden/level2-spell.glb'),
+    sound: asset('/monsters/iron-warden/attack-sound.mp3'),
+    soundTimings: [0.5],
+    damageTimings: [0.5],
+    weight: 0,  // never picked randomly — pre-rolled via JSON castChance
+    specialAttack: true,
+    damageMultiplier: 0,
+  },
 ]);
 
 function _pickWeightedVariant(variants) {
@@ -1311,6 +1322,8 @@ function _loadMonster(m, scene) {
     // Apply initial facing direction before combat (lookAtPlayer takes over once engaged)
     if (m.faceNorth) model.lookAt(wx, 0, wz - 10);
     else if (m.faceSouth) model.lookAt(wx, 0, wz + 10);
+    else if (m.faceEast) model.lookAt(wx + 10, 0, wz);
+    else if (m.faceWest) model.lookAt(wx - 10, 0, wz);
 
     m.lookAtPlayer = (playerPos) => {
       model.lookAt(playerPos.x, model.position.y, playerPos.z);
@@ -2056,6 +2069,11 @@ export function updateMonsters(dt, playerCamera, scene) {
 
     if (m.mesh) m.mesh.visible = true;
 
+    if (m._frozen) {
+      if (m.mixer) m.mixer.timeScale = 0;
+      return;
+    }
+
     // Update animation mixer (crucial for death animation)
     if (m.mixer) m.mixer.update(dt);
 
@@ -2416,6 +2434,13 @@ export function showCritIndicator(monsterId, damage) {
 export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, killer = null, elementalBreakdown = null, spellElement = null) {
   const m = monsters.find((x) => x.id === monsterId && x.alive);
   if (!m) return { hit: false, damage: 0, killed: false, monsterHp: 0 };
+
+  // Frozen monsters (statues) absorb hits without taking damage.
+  // Play the iron-clang hit sound to give physical feedback, then bail.
+  if (m._frozen) {
+    setTimeout(() => { if (m.mesh) playHitSound(); }, 250);
+    return { hit: false, damage: 0, killed: false, monsterHp: m.hp };
+  }
 
   // Any hit — including ranged — triggers the monster to chase if it survives.
   // If this is the first hit on a fresh monster (not already engaged) and we're
@@ -3014,6 +3039,18 @@ export function triggerMonsterAttack(monsterId) {
         }, duration * pts * 1000);
         showMessage(`<b>${m.name}</b> conjures a Flaming Floor!`, 2000);
       }
+      if (variant.name === 'lighteningFloor' && m.mesh) {
+        const duration = attackAction.getClip().duration;
+        const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
+        const spec = m.specialAttacks?.find(s => s && s.name === 'lighteningFloor');
+        const elementName = spec?.spawnsElementFloor ?? 'lightning';
+        setTimeout(() => {
+          if (!m.alive) return;
+          createElementalBurst(m.mesh.position, ELEMENTS['lightning'].color);
+          _spawnFloorInFrontOf(m, elementName);
+        }, duration * pts * 1000);
+        showMessage(`<b>${m.name}</b> conjures a Lightning Floor!`, 2000);
+      }
       if (variant.name === 'wardenBolt' && m.mesh) {
         const duration = attackAction.getClip().duration;
         const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
@@ -3325,9 +3362,9 @@ function _applyMonsterDamage(monster, opts = {}) {
   // magnitude is stored as a percentage (e.g. 10 = 10% reduction), capped at 100%.
   const sanctuaryUp = skillsState.sanctuary.active &&
     performance.now() < skillsState.sanctuary.expiresAt;
+  const sanctuaryReduction = sanctuaryUp ? Math.min(skillsState.sanctuary.magnitude, 100) : 0;
   if (sanctuaryUp) {
-    const reductionMultiplier = 1 - Math.min(skillsState.sanctuary.magnitude, 100) / 100;
-    damage = Math.max(1, Math.floor(damage * reductionMultiplier));
+    damage = Math.max(1, Math.floor(damage * (1 - sanctuaryReduction / 100)));
   }
 
   // Invincibility — party cannot take damage
@@ -3344,7 +3381,7 @@ function _applyMonsterDamage(monster, opts = {}) {
     return;
   }
 
-  setHp(target.id, target.hp - damage);
+  setHp(target.id, target.hp - damage, monster.name);
   flashPortraitHit(target.id);
   playPartyHitSound();
   if (isCrit) playCritSound('bash');
@@ -3388,6 +3425,7 @@ function _applyMonsterDamage(monster, opts = {}) {
     attackElement: (attackElement && attackElement !== 'physical') ? attackElement : null,
     elementResistance: elementResistance || 0,
     elementalBreakdown: Object.keys(incomingBreakdown).length > 0 ? incomingBreakdown : null,
+    sanctuaryReduction: sanctuaryReduction || null,
   });
 
   // Apply on-hit status effects defined on this monster type (or override for special attacks)

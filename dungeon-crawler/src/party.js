@@ -1004,14 +1004,15 @@ window.onPartyChanged = () => {
 // ─────────────────────────────────────────────
 //  PUBLIC API
 // ─────────────────────────────────────────────
-export function setHp(index, value) {
+export function setHp(index, value, killer = null) {
   const m = party[index];
   if (!m) return;
+  const prevHp = m.hp;
   m.hp = Math.max(0, Math.min(m.hpMax, value));
 
   if (m.hp === 0 && !m.isDead) {
     m.isDead = true;
-    addLogEntry({ type: 'death', target: m.name, time: Date.now() });
+    addLogEntry({ type: 'death', target: m.name, killer: killer || null, damage: prevHp, time: Date.now() });
     const canvas = document.getElementById(`portrait-${m.id}`);
     if (canvas) drawPortrait(canvas, m);
     const deathAudio = new Audio('sounds/actions/death.mp3');
@@ -1481,7 +1482,7 @@ export function updateParty(dt) {
           ? d.customTickValue
           : (def.tickDamage || 0);
         if (hpAmount !== 0) {
-          setHp(m.id, m.hp - hpAmount);
+          setHp(m.id, m.hp - hpAmount, hpAmount > 0 ? (def.name ?? d.effectId) : null);
           // Only log damage ticks (poison, etc.); skip healing ticks (regeneration)
           // to keep the battle log clean and focused on combat actions.
           if (hpAmount > 0) {

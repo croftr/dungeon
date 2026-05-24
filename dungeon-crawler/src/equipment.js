@@ -2181,7 +2181,7 @@ function _applyPotionEffect(m, item) {
         const newHp = Math.min(m.hpMax, m.hp + (value || 0));
         setHp(m.id, newHp);
         hpRestored += newHp - oldHp;
-        results.push(`${newHp - oldHp} HP`);
+        results.push(`${Math.round(newHp - oldHp)} HP`);
         mainSound = 'heal';
         break;
       }
@@ -4252,7 +4252,7 @@ function _executeAoEDebuffSpell(caster, casterIndex, hand, spellDef) {
 
   // Collect all alive monsters within 1 grid square of the player
   const aoeTargets = monsters.filter(m =>
-    m.alive &&
+    m.alive && !m._frozen &&
     Math.abs(m.gridRow - player.gridRow) <= 1 &&
     Math.abs(m.gridCol - player.gridCol) <= 1
   );
@@ -4319,7 +4319,7 @@ function _executeLineSpell(caster, casterIndex, hand, spellDef) {
     if (currentHit >= hits) return;
 
     // Find monsters currently in the line (it might change each tick if they move)
-    const targets = monsters.filter(m => m.alive && isInFrontOfPlayer(m.gridRow, m.gridCol, maxRange));
+    const targets = monsters.filter(m => m.alive && !m._frozen && isInFrontOfPlayer(m.gridRow, m.gridCol, maxRange));
 
     targets.forEach(target => {
       // Use attackMonster, passing spellDef as the faux weaponDef to carry the damage formula
@@ -4398,7 +4398,7 @@ function _executeRejuvenate(caster, spellDef, target) {
     actor: caster.name,
     skillName: 'Rejuvenate',
     target: target.name,
-    finalDamage: -actualHeal
+    finalDamage: -Math.round(actualHeal)
   });
 
   refreshPartyCards();
@@ -4436,7 +4436,7 @@ function _executeHeal(caster, spellDef, target) {
     actor: caster.name,
     skillName: 'Heal',
     target: target.name,
-    finalDamage: -actualHeal // healing is negative damage in logs usually or just descriptive
+    finalDamage: -Math.round(actualHeal)
   });
 
   refreshPartyCards();
@@ -4514,7 +4514,7 @@ function _showDamagePopup(slotEl, damage, isCrit) {
 
 /** Returns the alive monster closest to the player along the forward ray, up to maxRange cells. */
 function _closestMonsterInFront(maxRange) {
-  const inFront = monsters.filter(t => t.alive && isInFrontOfPlayer(t.gridRow, t.gridCol, maxRange));
+  const inFront = monsters.filter(t => t.alive && !t._frozen && isInFrontOfPlayer(t.gridRow, t.gridCol, maxRange));
   if (inFront.length === 0) return null;
   return inFront.reduce((best, t) => {
     const td = Math.abs(t.gridRow - player.gridRow) + Math.abs(t.gridCol - player.gridCol);

@@ -376,6 +376,26 @@
         "stackCount": 10
     },
     {
+        "name": "Iron Warden Essence",
+        "slot": "loot",
+        "icon": "/icons/ingredients/iron_warden_essence.webp",
+        "description": "A metallic, crackling lightning orb containing the core essence of an Iron Warden.",
+        "value": 0,
+        "weight": 0.1,
+        "sellable": false,
+        "stackCount": 10
+    },
+    {
+        "name": "Charged Lodestone",
+        "slot": "loot",
+        "icon": "/icons/ingredients/charged_lodestone.webp",
+        "description": "A naturally magnetic lodestone infused with crackling electrical energy. Vital for forging lightning-infused gear.",
+        "value": 150,
+        "weight": 1.5,
+        "sellable": true,
+        "stackCount": 10
+    },
+    {
         "name": "Rage Cap",
         "slot": "loot",
         "icon": "/icons/ingredients/rage_cap.webp",

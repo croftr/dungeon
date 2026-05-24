@@ -58,7 +58,9 @@
       "Bash(cd /c/Users/rob/projects/dungeon/dungeon-crawler && ls -la public/items/closed-trap.glb public/items/trap1.glb)",
       "Bash(npx gltf-transform *)",
       "Bash(gltf-pipeline -i public/items/closed-trap.glb -o public/items/closed-trap.glb -d --quiet)",
-      "Bash(npx gltf-pipeline *)"
+      "Bash(npx gltf-pipeline *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git add *)"
     ]
   }
 }

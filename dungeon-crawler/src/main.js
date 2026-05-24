@@ -14,7 +14,7 @@ import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttac
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems, replenishPotionMerchant, checkFloorPortalStep } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound, prefetchActionSounds, checkNpcDialogueProximity, setElementFloorSound } from './audio.js';
-import { initBattleLog } from './battle-log.js';
+import { initBattleLog, addLogEntry } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
 import { initQuarks, updateQuarks } from './quarks-intro.js';
@@ -74,7 +74,7 @@ document.querySelectorAll('img[data-src]').forEach(img => {
 const _VIDEO_LEVELS = {
   0: ['battle-prep-video', 'hero-door-video', 'nectar-quest-video', 'crystal-shrine-red-video', 'crystal-shrine-red-blue-video', 'portal-video'],
   1: ['ogre-video', 'mummy-video'],
-  2: ['treeman-video', 'demon-video', 'giant-video', 'aqua-man-video', 'stairs-video', 'crow-wizard-video'],
+  2: ['treeman-video', 'demon-video', 'giant-video', 'aqua-man-video', 'stairs-video', 'crow-wizard-video', 'statue-knights-video'],
   3: ['minotaur-video', 'minotaur-death-video', 'statue-portal-video', 'egg-video'],
   4: ['stairs-video', 'demon-ogre-video', 'lizard-man-video'],
 };
@@ -387,9 +387,10 @@ setCallbacks({
       party.forEach((m, i) => {
         if (m.isEmpty || m.isDead) return;
         const dmg = 8 + Math.floor(Math.random() * 8); // 8–15
-        setHp(i, m.hp - dmg);
+        setHp(i, m.hp - dmg, 'Fall Damage');
         showMemberDamage(i, dmg, false);
         flashPortraitHit(i);
+        addLogEntry({ time: Date.now(), type: 'tick', target: m.name, effectId: 'fall', effectName: 'Fall Damage', amount: dmg });
       });
       playPartyHitSound();
 
@@ -458,9 +459,10 @@ setCallbacks({
         party.forEach((m, i) => {
           if (m.isEmpty || m.isDead) return;
           const dmg = 8 + Math.floor(Math.random() * 8); // 8–15
-          setHp(i, m.hp - dmg);
+          setHp(i, m.hp - dmg, 'Fall Damage');
           showMemberDamage(i, dmg, false);
           flashPortraitHit(i);
+          addLogEntry({ time: Date.now(), type: 'tick', target: m.name, effectId: 'fall', effectName: 'Fall Damage', amount: dmg });
         });
         playPartyHitSound();
 
@@ -614,15 +616,17 @@ function tickElementFloorDamage(dt) {
     const acc = (_elementFloorTickAccum[id] ?? def.tickInterval) + dt;
     if (acc < def.tickInterval) { _elementFloorTickAccum[id] = acc; continue; }
     _elementFloorTickAccum[id] = acc - def.tickInterval;
+    const floorLabel = id.charAt(0).toUpperCase() + id.slice(1) + ' Floor';
     let anyHit = false;
     party.forEach((m, i) => {
       if (!m || m.isEmpty || m.isDead) return;
       const resistance = getEffectiveElementalResistances(m)[def.element] ?? 0;
       if (resistance >= 1) return;
       const dmg = Math.max(1, Math.round(def.dps * (1 - resistance)));
-      setHp(i, m.hp - dmg);
+      setHp(i, m.hp - dmg, floorLabel);
       showMemberDamage(i, dmg, false);
       flashPortraitHit(i);
+      addLogEntry({ time: Date.now(), type: 'tick', target: m.name, effectId: id, effectName: floorLabel, amount: dmg });
       anyHit = true;
     });
     if (anyHit) playPartyHitSound();
@@ -659,7 +663,7 @@ function animate(now) {
   if (autoAttack) {
     const currentLevel = window.currentLevel ?? 0;
     const hasTarget = monsters.some(t =>
-      t.alive &&
+      t.alive && !t._frozen &&
       (t.level ?? 1) === currentLevel &&
       isInFrontOfPlayer(t.gridRow, t.gridCol, 1) &&
       isPassable(t.gridRow, t.gridCol) &&
@@ -684,7 +688,7 @@ function animate(now) {
   if (autoRangeAttack) {
     const currentLevel = window.currentLevel ?? 0;
     const hasRangedTarget = monsters.some(t =>
-      t.alive &&
+      t.alive && !t._frozen &&
       (t.level ?? 1) === currentLevel &&
       isInFrontOfPlayer(t.gridRow, t.gridCol, 4) &&
       isPassable(t.gridRow, t.gridCol) &&
@@ -1580,6 +1584,64 @@ if (skipCrowWizardBtn) skipCrowWizardBtn.addEventListener('click', (e) => { e.st
 if (crowWizardVideo) crowWizardVideo.addEventListener('ended', finishCrowWizardVideo);
 
 // ─────────────────────────────────────────────
+//  STATUE KNIGHTS VIDEO OVERLAY
+// ─────────────────────────────────────────────
+const statueKnightsOverlay = document.getElementById('statue-knights-video-overlay');
+const statueKnightsVideo = document.getElementById('statue-knights-video');
+const skipStatueKnightsBtn = document.getElementById('skip-statue-knights-btn');
+let _statueKnightsCallback = null;
+
+window.playStatueKnightsVideo = function (onComplete) {
+  _statueKnightsCallback = onComplete;
+  if (!statueKnightsOverlay || !statueKnightsVideo) {
+    if (_statueKnightsCallback) _statueKnightsCallback();
+    return;
+  }
+  statueKnightsVideo.currentTime = 0;
+  statueKnightsVideo.volume = 1;
+  statueKnightsOverlay.classList.remove('hidden');
+  setTimeout(() => {
+    statueKnightsOverlay.style.opacity = '1';
+    statueKnightsVideo.play().catch(e => {
+      console.warn('Statue knights video play failed:', e);
+      finishStatueKnightsVideo();
+    });
+  }, 50);
+};
+
+function finishStatueKnightsVideo() {
+  if (!statueKnightsOverlay) {
+    if (_statueKnightsCallback) _statueKnightsCallback();
+    return;
+  }
+  statueKnightsOverlay.style.opacity = '0';
+
+  const startVol = statueKnightsVideo.volume;
+  const fadeInterval = setInterval(() => {
+    if (statueKnightsVideo.volume > 0.05) {
+      statueKnightsVideo.volume -= 0.05;
+    } else {
+      statueKnightsVideo.volume = 0;
+      clearInterval(fadeInterval);
+    }
+  }, 50);
+
+  setTimeout(() => {
+    statueKnightsVideo.pause();
+    clearInterval(fadeInterval);
+    statueKnightsVideo.volume = startVol;
+    statueKnightsOverlay.classList.add('hidden');
+    if (_statueKnightsCallback) {
+      _statueKnightsCallback();
+      _statueKnightsCallback = null;
+    }
+  }, 1500);
+}
+
+if (skipStatueKnightsBtn) skipStatueKnightsBtn.addEventListener('click', (e) => { e.stopPropagation(); finishStatueKnightsVideo(); });
+if (statueKnightsVideo) statueKnightsVideo.addEventListener('ended', finishStatueKnightsVideo);
+
+// ─────────────────────────────────────────────
 //  OTTER VIDEO SEQUENCE
 // ─────────────────────────────────────────────
 window.playOtterVideoSequence = function() {
@@ -2310,6 +2372,18 @@ window.loadLevel = function (levelNum) {
       [],
       asset('/textures/crow-wall.webp'),
       null
+    );
+
+    // Level 2: Iron Warden room (cols 7-9, rows 3-5) + chest room behind portcullis (cols 3-5, rows 3-5)
+    buildFloorZone(
+      scene,
+      [
+        [3,3],[3,4],[3,5],   [3,7],[3,8],[3,9],
+        [4,3],[4,4],[4,5],[4,6],[4,7],[4,8],[4,9],
+        [5,3],[5,4],[5,5],   [5,7],[5,8],[5,9],
+      ],
+      asset('/textures/swamp-floor.png'),
+      'swamp'
     );
 
     // Level 2: Ice area (inner walls only)

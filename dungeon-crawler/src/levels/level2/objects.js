@@ -34,6 +34,9 @@ export function spawnLevel2Objects(ctx) {
     // Closed portcullis at col 6, row 4 in the divided room (cols 3-5 and 7-9 separated by col 6)
     addPortcullis(group, loader, 6, 4, Math.PI / 2, level2WardenGateOpened);
 
+    // Bear trap in the chest room — springs when the wardens come alive
+    if (!level2WardenGateOpened) addTrap1(group, loader, 4, 5);
+
     // Button to open the gate, placed on the south face of the north wall of the anteroom at col 8, row 2
     const { group: gateBtn } = createWallButton(+1, {
         portcullisRow: 4,

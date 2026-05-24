@@ -68,7 +68,8 @@ export function spawnLevel1Objects(ctx) {
     // Chest at the end of the long north passage
     addChest(group, loader, 7, 1, 0, -0.7, [
         { name: 'Gold Coins', quantity: 10 },
-        'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Ring of Wisdom', 'Worn Boots', "Scroll of Cure Poison"
+        'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Ring of Wisdom', "Iron pendant",
+        "Iron ring"
     ]);
 
     // Chest in the Northwest room — far northeast corner
@@ -115,7 +116,7 @@ export function spawnLevel1Objects(ctx) {
     // ── Spell Cabinet ────────────────────────────────────────────────────────
     // Goblin room — moved west away from the passage at col 17
     addSpellCabinet(group, loader, 15, 11, 0, 0, -0.7, [
-        "Scroll of Resist Poison", "Potions Parchment"
+        "Scroll of Resist Poison", "Scroll of Cure Poison", "Potions Parchment"
     ]);
 
     // Dead-end passage near the zombie room

@@ -3,7 +3,19 @@ import { changeZoom, changeSize, toggleFullscreen, resetPan } from './minimap.js
 import { getPartyMoveMs } from './equipment.js';
 
 export const tweenGroup = new Group();
-import { isPassable, cellToWorld, CELL_EXIT, dungeonMap } from './map.js';
+import { isPassable, cellToWorld, CELL_EXIT, dungeonMap, getFloorZoneAtCell } from './map.js';
+import { playSoundByUrl } from './audio.js';
+import { asset } from './assets.js';
+
+// Floor zone definitions — add new zones here to give any buildFloorZone area
+// special behaviour without touching player movement code.
+const FLOOR_ZONE_DEFS = {
+  swamp: {
+    sound: '/sounds/elements/swamp.mp3',
+    soundVolume: 0.6,
+    speedFactor: 2, // multiplies move duration (2 = half speed)
+  },
+};
 
 // ─────────────────────────────────────────────
 //  CONSTANTS
@@ -21,10 +33,31 @@ const DIR = [
 
 const MOVE_MS = 300; // baseline tween duration; encumbrance can stretch or block movement (see getPartyMoveMs)
 
-// Resolves the active per-cell move duration. null = blocked (overloaded party).
-function currentMoveMs() {
+// Resolves the active per-cell move duration, optionally scaled by a floor zone.
+// Returns null when the party is overloaded (blocked).
+function currentMoveMs(destRow, destCol) {
   const ms = getPartyMoveMs();
-  return ms;
+  if (ms === null) return null;
+  const zone = destRow != null ? getFloorZoneAtCell(destRow, destCol) : null;
+  const def = zone ? FLOOR_ZONE_DEFS[zone] : null;
+  return def ? ms * def.speedFactor : ms;
+}
+
+let _floorZoneSource = null;
+
+function stopFloorZoneSound() {
+  if (_floorZoneSource) {
+    try { _floorZoneSource.stop(); } catch (_) {}
+    _floorZoneSource = null;
+  }
+}
+
+async function playFloorZoneSound(row, col) {
+  stopFloorZoneSound();
+  const zone = getFloorZoneAtCell(row, col);
+  const def = zone ? FLOOR_ZONE_DEFS[zone] : null;
+  if (!def?.sound) return;
+  _floorZoneSource = await playSoundByUrl(asset(def.sound), def.soundVolume ?? 0.6) ?? null;
 }
 
 // ─────────────────────────────────────────────
@@ -97,16 +130,16 @@ export function initPlayer(startRow, startCol, camera, facing = 0) {
 export function moveForward(camera, sign = 1) {
   if (player.moving || playerFrozen || playerTrapped) return;
 
-  const moveMs = currentMoveMs();
+  const dir = DIR[player.facing];
+  const newRow = player.gridRow + dir.dz * sign;
+  const newCol = player.gridCol + dir.dx * sign;
+
+  const moveMs = currentMoveMs(newRow, newCol);
   if (moveMs === null) {
     // Overloaded — party can't move at all.
     bumpFeedback(camera);
     return;
   }
-
-  const dir = DIR[player.facing];
-  const newRow = player.gridRow + dir.dz * sign;
-  const newCol = player.gridCol + dir.dx * sign;
 
   if (!isPassable(newRow, newCol) || isBlocked(newRow, newCol)) {
     bumpFeedback(camera);
@@ -117,12 +150,15 @@ export function moveForward(camera, sign = 1) {
   player.gridRow = newRow;
   player.gridCol = newCol;
 
+  playFloorZoneSound(newRow, newCol);
+
   const target = cellToWorld(newRow, newCol);
 
   new Tween(camera.position, tweenGroup)
     .to({ x: target.x, z: target.z }, moveMs)
     .easing(Easing.Quadratic.InOut)
     .onComplete(() => {
+      stopFloorZoneSound();
       player.moving = false;
       onMoved();
       if (dungeonMap[newRow][newCol] === CELL_EXIT) onReached();
@@ -174,17 +210,17 @@ export function turnPlayer(camera, sign = 1) {
 export function strafePlayer(camera, sign = 1) {
   if (player.moving || playerFrozen || playerTrapped) return;
 
-  const moveMs = currentMoveMs();
-  if (moveMs === null) {
-    bumpFeedback(camera);
-    return;
-  }
-
   // The strafe direction is 90° to the right of current facing (+1 turn),
   // or 90° to the left (-1 turn), without changing player.facing.
   const strafeDir = DIR[((player.facing + sign) + 4) % 4];
   const newRow = player.gridRow + strafeDir.dz;
   const newCol = player.gridCol + strafeDir.dx;
+
+  const moveMs = currentMoveMs(newRow, newCol);
+  if (moveMs === null) {
+    bumpFeedback(camera);
+    return;
+  }
 
   if (!isPassable(newRow, newCol) || isBlocked(newRow, newCol)) {
     bumpFeedback(camera);
@@ -195,12 +231,15 @@ export function strafePlayer(camera, sign = 1) {
   player.gridRow = newRow;
   player.gridCol = newCol;
 
+  playFloorZoneSound(newRow, newCol);
+
   const target = cellToWorld(newRow, newCol);
 
   new Tween(camera.position, tweenGroup)
     .to({ x: target.x, z: target.z }, moveMs)
     .easing(Easing.Quadratic.InOut)
     .onComplete(() => {
+      stopFloorZoneSound();
       player.moving = false;
       onMoved();
       if (dungeonMap[newRow][newCol] === CELL_EXIT) onReached();

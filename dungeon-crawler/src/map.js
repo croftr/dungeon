@@ -340,9 +340,24 @@ export function spawnElementFloorAt(scene, row, col, cellId) {
   return true;
 }
 
+// ─────────────────────────────────────────────
+//  FLOOR ZONE REGISTRY
+// ─────────────────────────────────────────────
+const _floorZoneMap = {};
+
+export function registerFloorZoneCells(cells, zoneType) {
+  for (const [r, c] of cells) _floorZoneMap[`${r},${c}`] = zoneType;
+}
+
+export function getFloorZoneAtCell(r, c) {
+  return _floorZoneMap[`${r},${c}`] ?? null;
+}
+
 export function buildLevel(scene) {
   currentMapMeshes.forEach(mesh => scene.remove(mesh));
   currentMapMeshes = [];
+  // Clear floor zone registry for the new level
+  for (const k of Object.keys(_floorZoneMap)) delete _floorZoneMap[k];
 
   let wallCount = 0, blackWallCount = 0, floorCount = 0, ceilCount = 0;
   for (let row = 0; row < ROWS; row++) {
@@ -482,7 +497,7 @@ export function buildTextureZone(scene, wallCells, floorCells, wallTexPath, floo
   }
 }
 
-export function buildFloorZone(scene, floorCells, texPath) {
+export function buildFloorZone(scene, floorCells, texPath, zoneType = null) {
   const loader = new THREE.TextureLoader();
   loader.setCrossOrigin('anonymous');
   const tex = loader.load(texPath);
@@ -495,6 +510,7 @@ export function buildFloorZone(scene, floorCells, texPath) {
     tile.position.set(c * CELL, 0.005, r * CELL);
     scene.add(tile); currentMapMeshes.push(tile);
   }
+  if (zoneType) registerFloorZoneCells(floorCells, zoneType);
 }
 
 export function buildInnerTextureZone(scene, floorCells, wallTexPath) {

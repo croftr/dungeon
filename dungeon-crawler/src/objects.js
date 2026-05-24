@@ -767,9 +767,24 @@ export function initObjects(scene, camera) {
                             o.gridRow === obj.userData.portcullisRow &&
                             o.gridCol === obj.userData.portcullisCol);
                         if (p) {
-                            openPortcullis(p);
                             if (window.currentLevel === 2 && p.gridRow === 4 && p.gridCol === 6) {
-                                _state.level2WardenGateOpened = true;
+                                // Play the statue knights video; open the gate and unfreeze the
+                                // wardens only after the video finishes (or is skipped).
+                                const activate = () => {
+                                    openPortcullis(p);
+                                    _state.level2WardenGateOpened = true;
+                                    monsters.filter(m => m.id === 900 || m.id === 901).forEach(m => {
+                                        m._frozen = false;
+                                        if (m.mixer) m.mixer.timeScale = 1;
+                                    });
+                                };
+                                if (window.playStatueKnightsVideo) {
+                                    window.playStatueKnightsVideo(activate);
+                                } else {
+                                    activate();
+                                }
+                            } else {
+                                openPortcullis(p);
                             }
                         }
                     } else {
@@ -4574,6 +4589,7 @@ function _renderForgeSlots() {
                     _forgeContents[i] = null;
                     _renderForgeSlots();
                     equip.hideTooltip();
+                    playItemSound(itemName);
                 } else {
                     showForgeMessage(`${party[defaultIdx].name}'s inventory is full!`, 'info');
                 }
@@ -4625,6 +4641,7 @@ function _showForgeCtxMenu(x, y, equip, slotIdx, itemDef, isHQ = false) {
                     _forgeContents[slotIdx] = null;
                     _renderForgeSlots();
                     equip.hideTooltip();
+                    playItemSound(itemDef.name);
                 } else {
                     showForgeMessage(`${target.name}'s inventory is full!`, 'info');
                 }
@@ -4693,6 +4710,7 @@ function _showForgeItemPicker(x, y, slotIdx) {
                 _renderForgeSlots();
                 _hideForgeItemPicker();
                 equip.hideTooltip();
+                playItemSound(itemName);
             };
 
             equip.attachTooltipListeners(slot, () => ({ name: def.name, description: `Held by ${member.name}. Click to add to forge.` }));
@@ -5701,6 +5719,7 @@ function _renderAlchemySlots() {
                         _alchemyContents[i] = null;
                         _renderAlchemySlots();
                         equip.hideTooltip();
+                        playItemSound(itemName);
                     } else {
                         showAlchemyMessage(`${party[defaultIdx].name}'s inventory is full!`, 'info');
                     }
@@ -5757,6 +5776,7 @@ function _showAlchemyCtxMenu(x, y, equip, slotIdx, itemDef, isHQ = false) {
                     _alchemyContents[slotIdx] = null;
                     _renderAlchemySlots();
                     equip.hideTooltip();
+                    playItemSound(itemDef.name);
                 } else {
                     showAlchemyMessage(`${target.name}'s inventory is full!`, 'info');
                 }
@@ -5830,6 +5850,7 @@ function _showAlchemyItemPicker(x, y, slotIdx) {
                     _renderAlchemySlots();
                     _hideAlchemyItemPicker();
                     equip.hideTooltip();
+                    playItemSound(itemName);
                 };
 
                 equip.attachTooltipListeners(slot, () => ({ name: def.name, description: `Held by ${member.name}. Click to add to workshop.` }));
@@ -6771,5 +6792,12 @@ export function restoreWorldState(data) {
     // respawn with the level-def defaults.
     if ('starterStashItems' in data) {
         setPersistedStarterStashItems(data.starterStashItems);
+    }
+    // If the warden gate was already opened in this save, immediately unfreeze monsters 900/901
+    if (_state.level2WardenGateOpened) {
+        monsters.filter(m => m.id === 900 || m.id === 901).forEach(m => {
+            m._frozen = false;
+            if (m.mixer) m.mixer.timeScale = 1;
+        });
     }
 }

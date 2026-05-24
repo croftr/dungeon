@@ -30,6 +30,7 @@ let _activeFilter = 'all';
 
 /** Add one combat event. Trims the store to MAX_LOG and updates the panel. */
 export function addLogEntry(entry) {
+  if (entry.time == null) entry.time = Date.now();
   _log.unshift(entry);
   if (_log.length > MAX_LOG) _log.pop();
   _prependRow(entry);
@@ -66,6 +67,8 @@ function _buildPanel() {
     <div class="bl-filter-bar" id="bl-filter-bar">
       <button class="bl-filter-btn bl-filter-btn--active" data-filter="all">All</button>
       <button class="bl-filter-btn" data-filter="attack">Attacks</button>
+      <button class="bl-filter-btn" data-filter="attack-out">Atk Out</button>
+      <button class="bl-filter-btn" data-filter="attack-in">Atk In</button>
       <button class="bl-filter-btn" data-filter="magic">Magic</button>
       <button class="bl-filter-btn" data-filter="skill">Skills</button>
       <button class="bl-filter-btn" data-filter="effect">Effects</button>
@@ -156,7 +159,7 @@ function _downloadCsv() {
     } else if (type === 'tick') {
       action = e.effectName || '';
       damage = e.amount != null ? e.amount : '';
-      result = e.amount < 0 ? 'Regen' : 'Poison';
+      result = e.amount < 0 ? 'Regen' : 'Damage';
     } else if (type === 'reflect') {
       action = 'Reflect';
       damage = e.amount != null ? e.amount : '';
@@ -173,6 +176,11 @@ function _downloadCsv() {
       action = e.itemName || '';
       result = 'Use';
       details = e.description || '';
+    } else if (type === 'trap') {
+      action = e.trapLabel || 'Trap';
+      result = e.amount > 0 ? 'Hit' : 'Miss';
+      damage = e.amount > 0 ? e.amount : '';
+      details = e.element || '';
     } else {
       // Attack
       action = e.attackType || 'attack';
@@ -184,7 +192,7 @@ function _downloadCsv() {
         result = e.crit ? 'Crit' : 'Hit';
         damage = e.finalDamage != null ? e.finalDamage : '';
       }
-      details = _formula(e).replace(/"/g, '""'); // Escaping quotes for CSV
+      details = _formula(e).replace(/<[^>]*>/g, '').replace(/"/g, '""');
     }
 
     return [
@@ -274,6 +282,7 @@ function _prependRow(entry) {
 
   row.className = 'bl-row ' + typeClass + (isIncoming ? ' bl--incoming' : '');
   row.dataset.cat = cat;
+  row.dataset.dir = isIncoming ? 'in' : 'out';
   if (entry.effectColor) row.style.borderLeftColor = entry.effectColor;
   row.innerHTML = _buildRowHtml(entry);
   container.prepend(row);
@@ -344,9 +353,8 @@ function _buildRowHtml(e) {
 
   // ── Status effect applied ──────────────────────────────────────────────────
   if (e.type === 'status-effect') {
-    const dir = e.actor === 'monster' ? '↓' : '↑';
     return `<span class="bl-badge">☠</span>` +
-      `<span class="bl-who" style="max-width: none; flex: 1;">${dir} <b>${e.target}</b> afflicted: <b>${e.effectName}</b> by ${e.attacker}</span>`;
+      `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.target}</b> afflicted: <b>${e.effectName}</b> by ${e.attacker}</span>`;
   }
 
   // ── Trap damage (player-laid or dungeon hazard) ────────────────────────────
@@ -415,7 +423,6 @@ function _buildRowHtml(e) {
 
   // ── Standard attack / hit / miss / block / crit ───────────────────────────
   const badge = e.blocked ? '🛡' : (e.crit ? '⚡' : e.hit ? '●' : '○');
-  const dir = e.actor === 'monster' ? '↓' : '';
   let type;
   if (e.specialName) {
     type = e.isAoe ? `${e.specialName} [AoE]` : e.specialName;
@@ -453,7 +460,7 @@ function _buildRowHtml(e) {
   const formula = _formula(e);
 
   return `<span class="bl-badge">${badge}</span>` +
-    `<span class="bl-who">${dir}<b>${e.attacker}</b>→${e.target}</span>` +
+    `<span class="bl-who"><b>${e.attacker}</b> → ${e.target}</span>` +
     `<span class="bl-type">${type}</span>` +
     `<span class="bl-dmg">${dmgPart}</span>` +
     `<span class="bl-calc">${formula}</span>`;
@@ -493,11 +500,22 @@ function _formula(e) {
   const defMit = e.defenceMitigation ?? 0;
   const grossRaw = e.statBonus + e.baseBonus;
   const afterRes = Math.floor(grossRaw * (100 - e.mitigation) / 100);
-  const raw = afterRes - defMit;
+  const physBase = e.preCritDamage != null ? e.preCritDamage : Math.max(1, afterRes - defMit);
   const crit = e.crit ? ` ×${e.critMultiplier}` : '';
   const stunText = e.stunned ? ' (Stunned!)' : '';
   const poisonText = e.poisoned ? ' (Poisoned!)' : '';
   const defStr = defMit > 0 ? `−def${defMit}` : '';
   const mitLabel = e.mitigationLabel ?? 'res';
-  return `(STR${e.statBonus}+${e.baseBonus}−${mitLabel}${e.mitigation}%${defStr}=${raw}${crit})${stunText}${poisonText}`;
+  const physBadge = e.attackElement
+    ? _elemBadge(e.attackElement, `${physBase}${crit}`, false)
+    : `<span class="bl-elem" style="color:#b0a090;" title="Physical">⚔${physBase}${crit}</span>`;
+  let riderStr = '';
+  if (e.elementalBreakdown) {
+    const parts = Object.entries(e.elementalBreakdown).filter(([, v]) => v);
+    if (parts.length > 0) riderStr = ' ' + parts.map(([id, v]) => _elemBadge(id, v, true)).join(' ');
+  }
+  const sanctStr = e.sanctuaryReduction
+    ? ` <span class="bl-elem" style="color:#a0c8ff;" title="Sanctuary">🛡−${e.sanctuaryReduction}%</span>`
+    : '';
+  return `(STR${e.statBonus}+${e.baseBonus}−${mitLabel}${e.mitigation}%${defStr} ${physBadge}${riderStr}${sanctStr})${stunText}${poisonText}`;
 }

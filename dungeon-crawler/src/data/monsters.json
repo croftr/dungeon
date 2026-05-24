@@ -1185,22 +1185,22 @@
     "attackSpeed": 1.2,
     "physicalHitSound": "/monsters/iron-warden/getting-hit-sound.mp3",
     "stats": {
-      "strength": 22,
+      "strength": 6,
       "dexterity": 10,
       "vitality": 20,
       "intelligence": 18,
       "resilience": 30
     },
     "elementalDamage": {
-      "lightning": 5
+      "lightning": 45
     },
     "elementalResistances": {
-      "fire": "vulnerable",
-      "ice": "vulnerable",
+      "fire": "weak",
+      "ice": "weak",
       "lightning": "immune",
       "water": "vulnerable",
-      "holy": "vulnerable",
-      "dark": "vulnerable"
+      "holy": "weak",
+      "dark": "weak"
     },
     "specialAttacks": [
       {
@@ -1222,6 +1222,13 @@
             "chance": 0.15
           }
         ]
+      },
+      {
+        "name": "lighteningFloor",
+        "displayName": "Lightning Floor",
+        "description": "Channels electrical energy into the ground in front of it, creating a crackling patch of lightning that shocks anyone standing on it.",
+        "spawnsElementFloor": "lightning",
+        "castChance": 0.05
       }
     ],
     "drops": [
@@ -1236,8 +1243,17 @@
       {
         "item": "Life Berry",
         "chance": 0.2
+      },
+      {
+        "item": "Iron Warden Essence",
+        "chance": 1
+      },
+      {
+        "item": "Charged Lodestone",
+        "chance": 0.4
       }
-    ]
+    ],
+    "uniqueArenaItem": "Charged Lodestone"
   },
   "crow_wizard": {
     "name": "Crow Wizard",

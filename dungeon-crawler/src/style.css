@@ -10085,6 +10085,16 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   display: none;
 }
 
+#battle-log-panel[data-filter="attack-out"] .bl-row:not([data-cat="attack"]),
+#battle-log-panel[data-filter="attack-out"] .bl-row[data-cat="attack"][data-dir="in"] {
+  display: none;
+}
+
+#battle-log-panel[data-filter="attack-in"] .bl-row:not([data-cat="attack"]),
+#battle-log-panel[data-filter="attack-in"] .bl-row[data-cat="attack"][data-dir="out"] {
+  display: none;
+}
+
 .bl-entries {
   flex: 1;
   overflow-y: auto;

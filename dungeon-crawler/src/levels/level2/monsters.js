@@ -10,7 +10,8 @@ export const level2Monsters = [
 
   // ── NEW PASSAGE GUARDIANS ─────────────────────────────────────────────────
   // Iron Wardens flanking the portcullis gate in the new room (rows 3 & 5, col 7)
-  inst(D.iron_warden, 900, 3, 7,
+  // _frozen: true — stationary until the gate button is pressed
+  Object.assign(inst(D.iron_warden, 900, 3, 7,
     asset('/monsters/iron-warden/idle.glb'),
     asset('/monsters/iron-warden/standard-attack.glb'),
     asset('/monsters/iron-warden/attack-sound.mp3'),
@@ -20,9 +21,9 @@ export const level2Monsters = [
     asset('/monsters/iron-warden/getting-hit.glb'),
     asset('/monsters/iron-warden/walking.glb'),
     null,
-    asset('/monsters/iron-warden/combat-idle.glb')),
+    asset('/monsters/iron-warden/combat-idle.glb')), { _frozen: true, faceEast: true }),
 
-  inst(D.iron_warden, 901, 5, 7,
+  Object.assign(inst(D.iron_warden, 901, 5, 7,
     asset('/monsters/iron-warden/idle.glb'),
     asset('/monsters/iron-warden/standard-attack.glb'),
     asset('/monsters/iron-warden/attack-sound.mp3'),
@@ -32,7 +33,7 @@ export const level2Monsters = [
     asset('/monsters/iron-warden/getting-hit.glb'),
     asset('/monsters/iron-warden/walking.glb'),
     null,
-    asset('/monsters/iron-warden/combat-idle.glb')),
+    asset('/monsters/iron-warden/combat-idle.glb')), { _frozen: true, faceEast: true }),
 
   // ── NEW PRE-TREEMAN DUNGEON ───────────────────────────────────────────────
 
