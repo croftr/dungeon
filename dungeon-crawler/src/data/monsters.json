@@ -1178,11 +1178,11 @@
     "family": "elemental",
     "image": "/monster-images/iron-warden.webp",
     "description": "An ancient construct of living iron, forged to guard the deepest vaults. Its armoured shell deflects blades and arrows with contemptuous ease — but the elemental energies coursing through its core are also its greatest weakness.",
-    "hp": 320,
+    "hp": 400,
     "defence": 80,
     "damageReduction": 0.90,
     "xp": 280,
-    "attackSpeed": 1.2,
+    "attackSpeed": 1.5,
     "physicalHitSound": "/monsters/iron-warden/getting-hit-sound.mp3",
     "stats": {
       "strength": 6,
@@ -1208,7 +1208,8 @@
         "displayName": "Arc Bolt",
         "description": "Channels a focused bolt of lightning at a single party member, dealing heavy lightning damage.",
         "aoe": false,
-        "damageMultiplier": 1.4
+        "damageMultiplier": 1.4,
+        "elementalDamage": { "lightning": 35 }
       },
       {
         "name": "wardenShockwave",
@@ -1216,6 +1217,7 @@
         "description": "Releases a pulsing shockwave of magnetic energy that strikes all party members with lightning damage.",
         "aoe": true,
         "damageMultiplier": 0.8,
+        "elementalDamage": { "lightning": 25 },
         "onHitEffects": [
           {
             "effectId": "stun",

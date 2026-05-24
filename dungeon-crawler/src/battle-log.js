@@ -128,7 +128,7 @@ function _downloadCsv() {
   const rows = _log.map(e => {
     const time = e.time ? new Date(e.time).toLocaleTimeString() : '';
     const type = e.type || 'attack';
-    const actor = e.actor || e.attacker || e.killer || e.actorName || '';
+    const actor = e.attacker || e.killer || e.actor || e.actorName || '';
     const target = e.target || '';
     let action = '';
     let result = '';
@@ -139,7 +139,7 @@ function _downloadCsv() {
       action = 'Death';
       damage = e.damage != null ? e.damage : '';
       result = 'Killed';
-      details = e.killer ? `Killed by ${e.killer}` : '';
+      details = '';
     } else if (type === 'levelup') {
       action = 'Level Up';
       result = `Level ${e.level}`;

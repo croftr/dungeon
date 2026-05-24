@@ -1200,7 +1200,7 @@ function transferItem(fromIdx, toIdx, invIndex) {
  * skill for a given party member, factoring in their current stats and equipment.
  * Returns null for skills that have no meaningful magnitude (e.g. utility skills).
  */
-function _formatSkillPotency(skillName, member) {
+export function _formatSkillPotency(skillName, member) {
   const skillDef = SKILLS_DATA[skillName];
   if (!skillDef || (!skillDef.magnitude && !skillDef.magnitudeFormula)) return null;
   const mag = resolveSkillMagnitude(skillName, skillDef, member);
@@ -1386,7 +1386,7 @@ function populateTooltip(obj, showBuyPrice = false) {
     descEl.textContent = obj.description;
     const skillRows = [];
     if (obj.type === 'buff' && obj.durationMs != null) skillRows.push(`<div class="detail-stat-row"><span>Duration</span><span>${obj.durationMs / 1000}s</span></div>`);
-    if (obj.potency) skillRows.push(`<div class="detail-stat-row"><span>Current Power</span><span style="color:#c0a0f8">${obj.potency}</span></div>`);
+    if (obj.potency) skillRows.push(`<div class="detail-stat-row"><span style="color:#c0a0f8">${obj.potency}</span></div>`);
     statsEl.style.display = skillRows.length ? 'flex' : 'none';
     statsEl.style.flexDirection = 'column';
     statsEl.innerHTML = skillRows.join('');
@@ -5549,15 +5549,17 @@ function _useHolyRadiance(member, memberIndex) {
       const before = m.hp;
       setHp(m.id, Math.min(m.hp + holyRadianceHeal, m.hpMax));
       const actualHeal = m.hp - before;
-      if (actualHeal > 0) showMemberHeal(i, actualHeal);
-      healed++;
+      if (actualHeal > 0) {
+        showMemberHeal(i, actualHeal);
+        addLogEntry({ time: Date.now(), type: 'skill', actor: member.name, skillName: 'Holy Radiance', target: m.name, finalDamage: -Math.round(actualHeal) });
+        healed++;
+      }
     }
   });
 
   if (healed > 0) {
     playSkillSound('holy');
     triggerHolyRadianceEffect();
-    addLogEntry({ type: 'skill', actor: member.name, skillName: 'Holy Radiance' });
   }
 
   _startSkillCooldownUI(memberIndex, _holyRadianceCooldownEnd);
@@ -6179,11 +6181,12 @@ function attachPaperdollListeners() {
       const m = party[activeCharIndex];
       let item = m.equipment[key] ?? null;
       
-      if (item && key === 'skill') {
-        // If it's a skill, grab the full definition from SKILLS_DATA or m.skills
-        const skillDef = SKILLS_DATA[item.name] || {};
-        const potency = _formatSkillPotency(item.name, m);
-        return { ...skillDef, name: item.name, isSkill: true, potency };
+      if (item && key.startsWith('skill')) {
+        const skillDef = SKILLS_DATA[item.name];
+        if (skillDef) {
+          const potency = _formatSkillPotency(item.name, m);
+          return { ...skillDef, name: item.name, isSkill: true, potency };
+        }
       }
       
       return item;

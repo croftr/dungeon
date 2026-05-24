@@ -1,5 +1,5 @@
 import { getItemDef } from './items.js';
-import { renderItemIcon, attachTooltipListeners, hideTooltip, rotateAmmo, clearAutoAttackTimers, clearAutoRangeAttackTimers, updateEffectiveStats, refreshEquipmentModal, getMemberEncumbranceLevel, getMemberCarryWeight, getMemberMaxCarry, formatSetBonusText } from './equipment.js';
+import { renderItemIcon, attachTooltipListeners, hideTooltip, rotateAmmo, clearAutoAttackTimers, clearAutoRangeAttackTimers, updateEffectiveStats, refreshEquipmentModal, getMemberEncumbranceLevel, getMemberCarryWeight, getMemberMaxCarry, formatSetBonusText, _formatSkillPotency } from './equipment.js';
 import SETS_DATA from './data/sets.json';
 import { addLogEntry } from './battle-log.js';
 import { isInCombat, playGoldSound, playPartyHitSound, playActionSound } from './audio.js';
@@ -737,12 +737,22 @@ function refreshMember(m) {
       return m.equipment.rightHand ?? null;
     }, true, false, HUD_TOOLTIP_DELAY);
   }
-  if (skSlot)  attachTooltipListeners(skSlot,  () => m.equipment?.skill  ?? null, true, false, HUD_TOOLTIP_DELAY);
-  if (sk2Slot) attachTooltipListeners(sk2Slot, () => m.equipment?.skill2 ?? null, true, false, HUD_TOOLTIP_DELAY);
-  if (sk3Slot) attachTooltipListeners(sk3Slot, () => m.equipment?.skill3 ?? null, true, false, HUD_TOOLTIP_DELAY);
-  if (sk4Slot) attachTooltipListeners(sk4Slot, () => m.equipment?.skill4 ?? null, true, false, HUD_TOOLTIP_DELAY);
-  if (sk5Slot) attachTooltipListeners(sk5Slot, () => m.equipment?.skill5 ?? null, true, false, HUD_TOOLTIP_DELAY);
-  if (sk6Slot) attachTooltipListeners(sk6Slot, () => m.equipment?.skill6 ?? null, true, false, HUD_TOOLTIP_DELAY);
+  const getSkillTooltipData = (item) => {
+    if (!item) return null;
+    const skillDef = SKILLS_DATA[item.name];
+    if (skillDef) {
+      const potency = _formatSkillPotency(item.name, m);
+      return { ...skillDef, name: item.name, isSkill: true, potency };
+    }
+    return item;
+  };
+
+  if (skSlot)  attachTooltipListeners(skSlot,  () => getSkillTooltipData(m.equipment?.skill  ?? null), true, false, HUD_TOOLTIP_DELAY);
+  if (sk2Slot) attachTooltipListeners(sk2Slot, () => getSkillTooltipData(m.equipment?.skill2 ?? null), true, false, HUD_TOOLTIP_DELAY);
+  if (sk3Slot) attachTooltipListeners(sk3Slot, () => getSkillTooltipData(m.equipment?.skill3 ?? null), true, false, HUD_TOOLTIP_DELAY);
+  if (sk4Slot) attachTooltipListeners(sk4Slot, () => getSkillTooltipData(m.equipment?.skill4 ?? null), true, false, HUD_TOOLTIP_DELAY);
+  if (sk5Slot) attachTooltipListeners(sk5Slot, () => getSkillTooltipData(m.equipment?.skill5 ?? null), true, false, HUD_TOOLTIP_DELAY);
+  if (sk6Slot) attachTooltipListeners(sk6Slot, () => getSkillTooltipData(m.equipment?.skill6 ?? null), true, false, HUD_TOOLTIP_DELAY);
 }
 
 // ─────────────────────────────────────────────
