@@ -136,5 +136,61 @@
         "description": "Arrows tipped with magical ice shards that shatter upon impact, chilling the air.",
         "value": 350,
         "weight": 1.1
+    },
+    {
+        "name": "Lightning Arrows",
+        "slot": "ammo",
+        "attackType": null,
+        "baseDamage": null,
+        "damageModifier": 1.0,
+        "damageType": "lightning",
+        "elementalDamage": { "lightning": 5 },
+        "ammoType": "arrow",
+        "icon": "/icons/ammo/lightning_arrows.webp",
+        "description": "Arrows wreathed in bright yellow electricity that crackle and spark upon release.",
+        "value": 350,
+        "weight": 1.1
+    },
+    {
+        "name": "Water Arrows",
+        "slot": "ammo",
+        "attackType": null,
+        "baseDamage": null,
+        "damageModifier": 1.0,
+        "damageType": "water",
+        "elementalDamage": { "water": 5 },
+        "ammoType": "arrow",
+        "icon": "/icons/ammo/water_arrows.webp",
+        "description": "Arrows tipped with condensed magical water that splash forcefully upon impact.",
+        "value": 350,
+        "weight": 1.1
+    },
+    {
+        "name": "Holy Arrows",
+        "slot": "ammo",
+        "attackType": null,
+        "baseDamage": null,
+        "damageModifier": 1.0,
+        "damageType": "holy",
+        "elementalDamage": { "holy": 5 },
+        "ammoType": "arrow",
+        "icon": "/icons/ammo/holy_arrows.webp",
+        "description": "Arrows blessed with radiant, pure golden light, dealing holy damage to foes.",
+        "value": 350,
+        "weight": 1.1
+    },
+    {
+        "name": "Dark Arrows",
+        "slot": "ammo",
+        "attackType": null,
+        "baseDamage": null,
+        "damageModifier": 1.0,
+        "damageType": "dark",
+        "elementalDamage": { "dark": 5 },
+        "ammoType": "arrow",
+        "icon": "/icons/ammo/dark_arrows.webp",
+        "description": "Arrows wreathed in shadows and sinister dark energy, dealing dark damage to foes.",
+        "value": 350,
+        "weight": 1.1
     }
 ]

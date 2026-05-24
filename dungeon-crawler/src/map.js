@@ -369,6 +369,20 @@ export function buildLevel(scene) {
       else ceilCount++;
     }
   }
+  // Count extra boundary walls needed — one for each direction a floor/non-wall
+  // cell touches the map edge, so the player never sees through to a black void.
+  let boundaryWallCount = 0;
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const cell = dungeonMap[row][col];
+      if (cell === CELL_WALL || cell === CELL_BLACK_WALL) continue;
+      if (col === 0) boundaryWallCount++;
+      if (col === COLS - 1) boundaryWallCount++;
+      if (row === 0) boundaryWallCount++;
+      if (row === ROWS - 1) boundaryWallCount++;
+    }
+  }
+  wallCount += boundaryWallCount;
 
   const rng = mulberry32(0xa117e45);
 
@@ -459,6 +473,32 @@ export function buildLevel(scene) {
           tile.position.set(wx, 0.012, wz);
           scene.add(tile); currentMapMeshes.push(tile);
         }
+      }
+    }
+  }
+
+  // Place boundary walls just outside the map edge for any floor cell that
+  // touches the border, giving them the same stone texture as interior walls.
+  dummy.rotation.set(0, 0, 0);
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const cell = dungeonMap[r][c];
+      if (cell === CELL_WALL || cell === CELL_BLACK_WALL) continue;
+      if (c === 0) {
+        dummy.position.set(-CELL, WALL_H / 2, r * CELL); dummy.updateMatrix();
+        wallIM.setMatrixAt(wI++, dummy.matrix);
+      }
+      if (c === COLS - 1) {
+        dummy.position.set(COLS * CELL, WALL_H / 2, r * CELL); dummy.updateMatrix();
+        wallIM.setMatrixAt(wI++, dummy.matrix);
+      }
+      if (r === 0) {
+        dummy.position.set(c * CELL, WALL_H / 2, -CELL); dummy.updateMatrix();
+        wallIM.setMatrixAt(wI++, dummy.matrix);
+      }
+      if (r === ROWS - 1) {
+        dummy.position.set(c * CELL, WALL_H / 2, ROWS * CELL); dummy.updateMatrix();
+        wallIM.setMatrixAt(wI++, dummy.matrix);
       }
     }
   }

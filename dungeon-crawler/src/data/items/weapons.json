@@ -663,7 +663,7 @@
         "attackType": "swipe",
         "weaponType": "dagger",
         "staminaDrain": 1,
-        "baseDamage": 12,
+        "baseDamage": 7,
         "damageType": "fire",
         "elementalDamage": {
             "fire": 4
@@ -761,5 +761,89 @@
         "description": "A massive two-handed axe carved from a single block of magical ice. It emits a constant aura of frost.",
         "value": 1200,
         "weight": 6.5
+    },
+    {
+        "name": "Lightning Dagger",
+        "slot": "hand",
+        "attackType": "swipe",
+        "weaponType": "dagger",
+        "staminaDrain": 1,
+        "baseDamage": 7,
+        "damageType": "lightning",
+        "elementalDamage": {
+            "lightning": 4
+        },
+        "delay": 1.8,
+        "statWeights": {
+            "str": 0.2,
+            "dex": 0.8
+        },
+        "icon": "/icons/weapons/lightning_dagger.webp",
+        "description": "A razor-sharp dagger crackling with electricity. It leaves a trail of sparks with every strike.",
+        "value": 450,
+        "weight": 0.5
+    },
+    {
+        "name": "Water Dagger",
+        "slot": "hand",
+        "attackType": "swipe",
+        "weaponType": "dagger",
+        "staminaDrain": 1,
+        "baseDamage": 8,
+        "damageType": "water",
+        "elementalDamage": {
+            "water": 4
+        },
+        "delay": 1.8,
+        "statWeights": {
+            "str": 0.2,
+            "dex": 0.8
+        },
+        "icon": "/icons/weapons/water_dagger.webp",
+        "description": "A blade of condensed magical water, holding a flowing, lethal edge.",
+        "value": 450,
+        "weight": 0.5
+    },
+    {
+        "name": "Holy Dagger",
+        "slot": "hand",
+        "attackType": "swipe",
+        "weaponType": "dagger",
+        "staminaDrain": 1,
+        "baseDamage": 7,
+        "damageType": "holy",
+        "elementalDamage": {
+            "holy": 4
+        },
+        "delay": 1.8,
+        "statWeights": {
+            "str": 0.2,
+            "dex": 0.8
+        },
+        "icon": "/icons/weapons/holy_dagger.webp",
+        "description": "A razor-sharp dagger blessed with holy golden light, leaving a trail of sparks with every strike.",
+        "value": 450,
+        "weight": 0.5
+    },
+    {
+        "name": "Dark Dagger",
+        "slot": "hand",
+        "attackType": "swipe",
+        "weaponType": "dagger",
+        "staminaDrain": 1,
+        "baseDamage": 8,
+        "damageType": "dark",
+        "elementalDamage": {
+            "dark": 4
+        },
+        "delay": 1.8,
+        "statWeights": {
+            "str": 0.2,
+            "dex": 0.8
+        },
+        "icon": "/icons/weapons/dark_dagger.webp",
+        "description": "A blade of dark obsidian, wreathed in a sinister, shadowy shroud.",
+        "value": 450,
+        "weight": 0.5
     }
 ]

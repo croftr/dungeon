@@ -571,13 +571,13 @@
         ]
       }
     ],
-    "hp": 450,
+    "hp": 500,
     "defence": 14,
     "damageReduction": 0.12,
     "xp": 1200,
     "attackSpeed": 1.8,
     "stats": {
-      "strength": 34,
+      "strength": 32,
       "dexterity": 30,
       "vitality": 55,
       "intelligence": 10,
@@ -1209,7 +1209,9 @@
         "description": "Channels a focused bolt of lightning at a single party member, dealing heavy lightning damage.",
         "aoe": false,
         "damageMultiplier": 1.4,
-        "elementalDamage": { "lightning": 35 }
+        "elementalDamage": {
+          "lightning": 35
+        }
       },
       {
         "name": "wardenShockwave",
@@ -1217,7 +1219,9 @@
         "description": "Releases a pulsing shockwave of magnetic energy that strikes all party members with lightning damage.",
         "aoe": true,
         "damageMultiplier": 0.8,
-        "elementalDamage": { "lightning": 25 },
+        "elementalDamage": {
+          "lightning": 25
+        },
         "onHitEffects": [
           {
             "effectId": "stun",
