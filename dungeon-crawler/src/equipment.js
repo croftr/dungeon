@@ -2660,6 +2660,7 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
       if (!target.isDead) {
         row.addEventListener('click', () => {
           transferItem(activeCharIndex, targetIdx, _ctxInvIndex);
+          if (item) playItemSound(item.name);
           _hideContextMenu();
         });
       }

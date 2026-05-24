@@ -56,6 +56,7 @@ const ITEM_SOUNDS = {
   'spell-assigned': asset('/sounds/actions/spell-assinged.mp3'),
   'berry': asset('/sounds/actions/inventory-item.mp3'),
   'fungus': asset('/sounds/actions/fungus.mp3'),
+  'essence': asset('/sounds/actions/essence.mp3'),
 };
 
 const bufferCache = new Map();
@@ -575,6 +576,10 @@ export async function playItemSound(itemName, slot = '') {
 
   if (!url && (itemName === 'Ice Cap' || itemName === 'Rag Cap')) {
     url = ITEM_SOUNDS['fungus'];
+  }
+
+  if (!url && lowerName.endsWith('essence')) {
+    url = ITEM_SOUNDS['essence'];
   }
 
   if (!url) return;
