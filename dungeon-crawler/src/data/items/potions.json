@@ -317,5 +317,35 @@
         ],
         "value": 110,
         "weight": 0.3
+    },
+    {
+        "name": "Elixir of Foritude",
+        "icon": "/icons/potions/elixir_of_foritude.svg",
+        "description": "A swirling yellow brew that smells of damp earth and iron. For 60 seconds, VIT and RES are increased by 5.",
+        "type": "potion",
+        "effect": {
+            "type": "stat-boost",
+            "stats": {
+                "vitality": 5,
+                "resilience": 5
+            },
+            "duration": 60
+        },
+        "ingredients": [
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Congealed Slime",
+                "quantity": 1
+            },
+            {
+                "name": "Fermented Sugar",
+                "quantity": 1
+            }
+        ],
+        "value": 110,
+        "weight": 0.3
     }
 ]

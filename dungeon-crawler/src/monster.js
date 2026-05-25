@@ -905,6 +905,32 @@ _applyMultiAttacks('Iron Warden', [
   },
 ]);
 
+_applyMultiAttacks('Swamp Monster', [
+  {
+    name: 'swampStrike',
+    glb: asset('/monsters/swamp-monster/attack.glb'),
+    sound: asset('/monsters/swamp-monster/attack.mp3'),
+    soundTimings: [0.4],
+    damageTimings: [0.4],
+    weight: 4,
+  },
+  {
+    name: 'swampToxicBite',
+    glb: asset('/monsters/swamp-monster/special-attack.glb'),
+    sound: asset('/monsters/swamp-monster/special-attack.mp3'),
+    soundTimings: [0.30],   // sound plays on launch
+    damageTimings: [0.65],  // impact delayed — slime glob travelling
+    weight: 2,
+    damageMultiplier: 1.3,
+    specialAttack: true,
+    specialAttackType: 'randomAny',   // targets one random party member
+    specialOnHitEffects: [
+      { effectId: 'slow',   chance: 0.75, durationSec: 10 },
+      { effectId: 'poison', chance: 0.55, durationSec: 12 },
+    ],
+  },
+]);
+
 function _pickWeightedVariant(variants) {
   const loaded = variants.filter(v => v != null);
   if (loaded.length === 0) return null;
@@ -2101,7 +2127,7 @@ export function updateMonsters(dt, playerCamera, scene) {
       if (m._nextTauntAt == null) m._nextTauntAt = now + 8000 + Math.random() * 12000;
       if (now >= m._nextTauntAt) {
         const tDist = Math.max(Math.abs(m.gridRow - player.gridRow), Math.abs(m.gridCol - player.gridCol));
-        if (tDist <= 4) playSoundByUrl(m.tauntSound, 0.6);
+        if (tDist <= (m.tauntSoundRadius ?? 4)) playSoundByUrl(m.tauntSound, 0.6);
         m._nextTauntAt = now + 15000 + Math.random() * 20000;
       }
     }
@@ -2998,6 +3024,12 @@ export function triggerMonsterAttack(monsterId) {
         const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
         setTimeout(() => { if (m.alive) createPoisonCloud(m.mesh.position); }, duration * pts * 1000);
         showMessage(`<b>${m.name}</b> releases a toxic poison cloud!`, 2000);
+      }
+      if (variant.name === 'swampToxicBite' && m.mesh) {
+        const duration = attackAction.getClip().duration;
+        const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
+        setTimeout(() => { if (m.alive) createPoisonCloud(m.mesh.position); }, duration * pts * 1000);
+        showMessage(`<b>${m.name}</b> hurls a glob of corrosive slime!`, 2000);
       }
       if (variant.name === 'iceCloud' && m.mesh) {
         const duration = attackAction.getClip().duration;

@@ -1359,5 +1359,80 @@
       }
     ],
     "uniqueArenaItem": "Crow Talon"
+  },
+  "swamp_monster": {
+    "name": "Swamp Monster",
+    "family": "aquatic",
+    "description": "A hulking horror that rose from the fetid depths of the dungeon swamp. Its hide has absorbed so much toxic bog-magic that elemental forces simply wash over it without effect. Those who enter its lair find their movements sluggish and their spells useless.",
+    "hp": 280,
+    "defence": 12,
+    "damageReduction": 0.10,
+    "xp": 200,
+    "attackSpeed": 1.5,
+    "stats": {
+      "strength": 22,
+      "dexterity": 10,
+      "vitality": 30,
+      "intelligence": 6,
+      "resilience": 20
+    },
+    "elementalResistances": {
+      "fire": "immune",
+      "ice": "immune",
+      "holy": "immune",
+      "dark": "immune",
+      "lightning": "immune",
+      "water": "immune"
+    },
+    "specialAttacks": [
+      {
+        "name": "swampToxicBite",
+        "displayName": "Slime Spit",
+        "description": "Launches a glob of corrosive slime at one target — the toxic ooze clings on impact, slowing movement and poisoning the wound.",
+        "aoe": false,
+        "damageMultiplier": 1.3,
+        "onHitEffects": [
+          {
+            "effectId": "slow",
+            "chance": 0.75,
+            "durationSec": 10
+          },
+          {
+            "effectId": "poison",
+            "chance": 0.55,
+            "durationSec": 12
+          }
+        ]
+      }
+    ],
+    "drops": [
+      {
+        "item": "Life Essence",
+        "chance": 0.6
+      },
+      {
+        "item": "Poison Vial",
+        "chance": 0.5
+      },
+      {
+        "item": "Life Berry",
+        "chance": 0.2
+      },
+      {
+        "item": "Mana Berry",
+        "chance": 0.15
+      },
+      {
+        "item": "Congealed Slime",
+        "chance": 0.5
+      },
+      {
+        "item": {
+          "name": "Gold Coins",
+          "quantity": 8
+        },
+        "chance": 0.4
+      }
+    ]
   }
 }

@@ -13,7 +13,7 @@ const FLOOR_ZONE_DEFS = {
   swamp: {
     sound: '/sounds/elements/swamp.mp3',
     soundVolume: 0.6,
-    speedFactor: 2, // multiplies move duration (2 = half speed)
+    speedFactor: 4, // multiplies move duration (4 = quarter speed / 75% reduction)
   },
 };
 

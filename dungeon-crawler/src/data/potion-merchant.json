@@ -6,6 +6,7 @@
         "Cure Poison Potion",
         "Cure Poison Potion",
         "Elixir of Rage",
+        "Elixir of Foritude",
         "Elixir of Enlightenment",
         {
             "name": "Elixir of Rage",
@@ -15,6 +16,10 @@
             "name": "Elixir of Enlightenment",
             "hq": true
         },
+        {
+            "name": "Elixir of Foritude",
+            "hq": true
+        },
         "Life Berry",
         "Life Berry",
         "Life Berry",
@@ -30,6 +35,9 @@
         "Rage Cap",
         "Ice Cap",
         "Ice Cap",
-        "Ice Cap"
+        "Ice Cap",
+        "Congealed Slime",
+        "Congealed Slime",
+        "Congealed Slime"
     ]
 }

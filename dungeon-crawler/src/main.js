@@ -13,7 +13,7 @@ import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAtta
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt, tickMonsterElementFloorDamage } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems, replenishPotionMerchant, checkFloorPortalStep } from './objects.js';
-import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound, prefetchActionSounds, checkNpcDialogueProximity, setElementFloorSound } from './audio.js';
+import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, setZoneSilence, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound, prefetchActionSounds, checkNpcDialogueProximity, setElementFloorSound } from './audio.js';
 import { initBattleLog, addLogEntry } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
 import { initMainMenu } from './main-menu.js';
@@ -42,15 +42,15 @@ window.currentLevel = 0;
 const ARENA_LEVEL = 99;
 const SCHEMATIC_TRIALS_LEVEL = 50;
 const ARENA_MAP = [
-  [1,1,1,1,1,1,1,1,1],
-  [1,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,1],
-  [1,0,0,8,0,9,0,0,1],
-  [1,0,0,0,0,0,0,0,1],
-  [1,0,0,0,0,0,0,0,1],
-  [1,0,0,0,2,0,0,0,1],
-  [1,1,1,1,1,1,1,1,1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 8, 0, 9, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 0, 2, 0, 0, 0, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1],
 ];
 
 // Patch hardcoded asset paths in index.html to use CDN base URL.
@@ -353,13 +353,18 @@ setCallbacks({
         playDemonVideo();
       }
     } else if (window.currentLevel === 3) {
-      const inMinotaurRoom = player.gridRow >= 12 && player.gridRow <= 18
+      const inMinotaurRoom = player.gridRow >= 14 && player.gridRow <= 20
         && player.gridCol >= 8 && player.gridCol <= 14;
 
       if (inMinotaurRoom && !videoFlags.hasSeenMinotaurVideo) {
         videoFlags.hasSeenMinotaurVideo = true;
         if (window.playMinotaurVideo) window.playMinotaurVideo();
       }
+
+      // Swamp room — silence all background music while inside
+      const inSwampRoom = player.gridRow >= 1 && player.gridRow <= 5
+        && player.gridCol >= 1 && player.gridCol <= 18;
+      setZoneSilence(inSwampRoom);
     } else if (window.currentLevel === 4) {
       setZoneMusic(null);
     } else if (window.currentLevel === 5) {
@@ -491,7 +496,7 @@ setCallbacks({
           player.gridCol = 13;
           const w = cellToWorld(37, 13);
           camera.position.set(w.x, w.y, w.z);
-          
+
           // Face South (2) towards the new passage
           player.facing = 2;
           camera.rotation.order = 'YXZ';
@@ -844,15 +849,15 @@ function showCharacterSelection() {
     const full = selectedIds.size >= 4;
     const canAdd = !isSelected && full;
     const expertise = getSkillExpertise(r.skillTree);
-    const jobIcon  = asset(`/skills/jobs/${r.job.toLowerCase().replace(/\s+/g, '-')}.webp`);
-    const raceKey  = r.race.toLowerCase().includes('elf') ? 'elf' : r.race.toLowerCase();
+    const jobIcon = asset(`/skills/jobs/${r.job.toLowerCase().replace(/\s+/g, '-')}.webp`);
+    const raceKey = r.race.toLowerCase().includes('elf') ? 'elf' : r.race.toLowerCase();
     const raceIcon = asset(`/skills/race/${raceKey}.webp`);
     const stats = [
-      { label: 'STR', val: r.stats.strength    },
-      { label: 'DEX', val: r.stats.dexterity   },
-      { label: 'VIT', val: r.stats.vitality    },
+      { label: 'STR', val: r.stats.strength },
+      { label: 'DEX', val: r.stats.dexterity },
+      { label: 'VIT', val: r.stats.vitality },
       { label: 'INT', val: r.stats.intelligence },
-      { label: 'RES', val: r.stats.resilience  },
+      { label: 'RES', val: r.stats.resilience },
     ];
     return `
       <div class="cs-detail-hero-header">
@@ -882,8 +887,8 @@ function showCharacterSelection() {
         ${expertise.entries.length === 1 ? `
         <div class="cs-highlight-badge">
           ${expertise.entries[0].icon
-            ? `<img class="cs-highlight-icon-img" src="${asset(expertise.entries[0].icon)}" alt="" />`
-            : `<div class="cs-highlight-icon">&#10022;</div>`}
+          ? `<img class="cs-highlight-icon-img" src="${asset(expertise.entries[0].icon)}" alt="" />`
+          : `<div class="cs-highlight-icon">&#10022;</div>`}
           <div class="cs-highlight-badge-value">Weapon Skills:<br>${expertise.entries[0].name}</div>
         </div>` : ''}
       </div>
@@ -967,7 +972,7 @@ function showCharacterSelection() {
     activeRecruitId = recruitId;
     const r = RECRUITS.find(x => x.id === recruitId);
     if (!r) return;
-    
+
     // Update Video
     emptyState.style.display = 'none';
     mainVideo.style.display = 'block';
@@ -979,7 +984,7 @@ function showCharacterSelection() {
       mainVideo.load();
       mainVideo.play().catch(e => console.warn('Hero video autoplay prevented', e));
     }
-    
+
     // Update Info
     infoContainer.style.display = 'flex';
     infoContainer.innerHTML = detailHTML(r);
@@ -1006,7 +1011,7 @@ function showCharacterSelection() {
 
   function updateUI() {
     const full = selectedIds.size >= 4;
-    
+
     miniCards.forEach(card => {
       const id = card.dataset.recruitId;
       const isSelected = selectedIds.has(id);
@@ -1371,7 +1376,7 @@ function finishBattlePrepVideo() {
       _battlePrepCallback = null;
     }
     // Remove the option to drop party members after this dramatic event
-    
+
   }, 1500);
 }
 
@@ -1644,7 +1649,7 @@ if (statueKnightsVideo) statueKnightsVideo.addEventListener('ended', finishStatu
 // ─────────────────────────────────────────────
 //  OTTER VIDEO SEQUENCE
 // ─────────────────────────────────────────────
-window.playOtterVideoSequence = function() {
+window.playOtterVideoSequence = function () {
   const ogreOverlay = document.getElementById('demon-ogre-video-overlay');
   const ogreVid = document.getElementById('demon-ogre-video');
   const lizardOverlay = document.getElementById('lizard-man-video-overlay');
@@ -1692,24 +1697,24 @@ window.playOtterVideoSequence = function() {
 //  ARENA INTRO VIDEO
 // ─────────────────────────────────────────────
 const _ARENA_INTRO_VIDEOS = {
-  'demon_ogre':        { overlay: 'demon-ogre-video-overlay',            video: 'demon-ogre-video',            skip: 'skip-demon-ogre-btn',            src: '/videos/demon-ogre.mp4' },
-  'lizardMan':         { overlay: 'lizard-man-video-overlay',            video: 'lizard-man-video',            skip: 'skip-lizard-man-btn',            src: '/videos/lizard-man.mp4' },
-  'ogre':              { overlay: 'ogre-arena-video-overlay',            video: 'ogre-arena-video',            skip: 'skip-ogre-arena-btn',            src: '/videos/ogre.mp4' },
-  'aqua_man':          { overlay: 'aqua-man-arena-video-overlay',        video: 'aqua-man-arena-video',        skip: 'skip-aqua-man-arena-btn',        src: '/videos/aqua-man-arena.mp4' },
+  'demon_ogre': { overlay: 'demon-ogre-video-overlay', video: 'demon-ogre-video', skip: 'skip-demon-ogre-btn', src: '/videos/demon-ogre.mp4' },
+  'lizardMan': { overlay: 'lizard-man-video-overlay', video: 'lizard-man-video', skip: 'skip-lizard-man-btn', src: '/videos/lizard-man.mp4' },
+  'ogre': { overlay: 'ogre-arena-video-overlay', video: 'ogre-arena-video', skip: 'skip-ogre-arena-btn', src: '/videos/ogre.mp4' },
+  'aqua_man': { overlay: 'aqua-man-arena-video-overlay', video: 'aqua-man-arena-video', skip: 'skip-aqua-man-arena-btn', src: '/videos/aqua-man-arena.mp4' },
   'crocodile_warrior': { overlay: 'crocodile-warrior-arena-video-overlay', video: 'crocodile-warrior-arena-video', skip: 'skip-crocodile-warrior-arena-btn', src: '/videos/crocodile-warrior-arena.mp4' },
-  'crow_wizard':       { overlay: 'crow-wizard-arena-video-overlay',     video: 'crow-wizard-arena-video',     skip: 'skip-crow-wizard-arena-btn',     src: '/videos/crow-wizard-arena.mp4' },
-  'demon':             { overlay: 'demon-arena-video-overlay',           video: 'demon-arena-video',           skip: 'skip-demon-arena-btn',           src: '/videos/demon-arena.mp4' },
-  'minotaur':          { overlay: 'minotaur-arena-video-overlay',        video: 'minotaur-arena-video',        skip: 'skip-minotaur-arena-btn',        src: '/videos/minotaur-arena.mp4' },
-  'giant':             { overlay: 'giant-arena-video-overlay',           video: 'giant-arena-video',           skip: 'skip-giant-arena-btn',           src: '/videos/giant-arena.mp4' },
-  'treeman':           { overlay: 'treeman-arena-video-overlay',         video: 'treeman-arena-video',         skip: 'skip-treeman-arena-btn',         src: '/videos/treeman-arena.mp4' },
-  'iron_warden':       { overlay: 'iron-warden-arena-video-overlay',      video: 'iron-warden-arena-video',      skip: 'skip-iron-warden-arena-btn',      src: '/videos/iron-warden-arena.mp4' },
+  'crow_wizard': { overlay: 'crow-wizard-arena-video-overlay', video: 'crow-wizard-arena-video', skip: 'skip-crow-wizard-arena-btn', src: '/videos/crow-wizard-arena.mp4' },
+  'demon': { overlay: 'demon-arena-video-overlay', video: 'demon-arena-video', skip: 'skip-demon-arena-btn', src: '/videos/demon-arena.mp4' },
+  'minotaur': { overlay: 'minotaur-arena-video-overlay', video: 'minotaur-arena-video', skip: 'skip-minotaur-arena-btn', src: '/videos/minotaur-arena.mp4' },
+  'giant': { overlay: 'giant-arena-video-overlay', video: 'giant-arena-video', skip: 'skip-giant-arena-btn', src: '/videos/giant-arena.mp4' },
+  'treeman': { overlay: 'treeman-arena-video-overlay', video: 'treeman-arena-video', skip: 'skip-treeman-arena-btn', src: '/videos/treeman-arena.mp4' },
+  'iron_warden': { overlay: 'iron-warden-arena-video-overlay', video: 'iron-warden-arena-video', skip: 'skip-iron-warden-arena-btn', src: '/videos/iron-warden-arena.mp4' },
 };
 
 function _playArenaIntroVideo(monsterId, onFinish) {
   const cfg = _ARENA_INTRO_VIDEOS[monsterId];
   if (!cfg) { onFinish?.(); return; }
   const overlay = document.getElementById(cfg.overlay);
-  const vid     = document.getElementById(cfg.video);
+  const vid = document.getElementById(cfg.video);
   const skipBtn = document.getElementById(cfg.skip);
   if (!overlay || !vid) { onFinish?.(); return; }
 
@@ -1956,7 +1961,7 @@ function finishHeroDoorVideo() {
     if (_heroDoorVideoCallback) _heroDoorVideoCallback();
     return;
   }
-  
+
   // Hide the video overlay and pause the video
   heroDoorVideoOverlay.style.opacity = '0';
   setTimeout(() => {
@@ -1969,13 +1974,13 @@ function finishHeroDoorVideo() {
   const overlay = document.getElementById('level-load-overlay');
   const fill = document.getElementById('level-load-bar-fill');
   const text = document.getElementById('level-load-text');
-  
+
   if (overlay && fill) {
     if (text) text.textContent = 'Entering the Hall of Heroes\u2026';
     fill.style.transition = 'none';
     fill.style.width = '0%';
     overlay.classList.add('visible');
-    
+
     // Smooth progress bar over 3 seconds
     requestAnimationFrame(() => {
       fill.style.transition = 'width 3s linear';
@@ -2298,13 +2303,13 @@ window.loadLevel = function (levelNum) {
     buildTextureZone(
       scene,
       [
-        [0,0],[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],
-        [1,0],[1,6],
-        [2,0],[2,6],
-        [3,0],[3,6],
-        [4,0],[4,6],
-        [5,0],[5,6],
-        [6,0],[6,2],[6,3],[6,4],[6,5],[6,6],
+        [0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6],
+        [1, 0], [1, 6],
+        [2, 0], [2, 6],
+        [3, 0], [3, 6],
+        [4, 0], [4, 6],
+        [5, 0], [5, 6],
+        [6, 0], [6, 2], [6, 3], [6, 4], [6, 5], [6, 6],
       ],
       [],
       asset('/textures/ogre-wall.webp'),
@@ -2313,12 +2318,12 @@ window.loadLevel = function (levelNum) {
 
     // Level 1: Mushroom area (inner walls only)
     const mFloors = [
-      [11,11], [11,12], [11,13],
-      [12,11], [12,12], [12,13],
-      [13,12], [14,12],
-      [15,9], [15,10], [15,11], [15,12], [15,13], [15,14],
-      [16,9], [17,9], [18,9], [19,9],
-      [16,13], [17,11], [17,12], [17,13], [18,11], [19,11], [19,12], [19,13]
+      [11, 11], [11, 12], [11, 13],
+      [12, 11], [12, 12], [12, 13],
+      [13, 12], [14, 12],
+      [15, 9], [15, 10], [15, 11], [15, 12], [15, 13], [15, 14],
+      [16, 9], [17, 9], [18, 9], [19, 9],
+      [16, 13], [17, 11], [17, 12], [17, 13], [18, 11], [19, 11], [19, 12], [19, 13]
     ];
     buildFloorZone(
       scene,
@@ -2354,20 +2359,20 @@ window.loadLevel = function (levelNum) {
       scene,
       [
         // approach corridor walls
-        [7, 25],[7, 26],[7, 27],[7, 28],[7, 29],
-        [9, 25],[9, 26],[9, 27],[9, 28],[9, 29],
+        [7, 25], [7, 26], [7, 27], [7, 28], [7, 29],
+        [9, 25], [9, 26], [9, 27], [9, 28], [9, 29],
         // crow room perimeter ([6, 34] omitted — now the north doorway)
-        [6, 30],[6, 31],[6, 32],[6, 33],[6, 35],
-        [10, 30],[10, 31],[10, 32],[10, 33],[10, 34],[10, 35],
-        [7, 36],[8, 36],[9, 36],
+        [6, 30], [6, 31], [6, 32], [6, 33], [6, 35],
+        [10, 30], [10, 31], [10, 32], [10, 33], [10, 34], [10, 35],
+        [7, 36], [8, 36], [9, 36],
         // north exit corridor sides (col 24, rows 4–6)
-        [4, 33],[4, 35],
-        [5, 33],[5, 35],
+        [4, 33], [4, 35],
+        [5, 33], [5, 35],
         // annex room perimeter
-        [0, 32],[0, 33],[0, 34],[0, 35],[0, 36],   // north (map edge)
-        [1, 31],[2, 31],[3, 31],                  // west wall
-        [1, 37],[2, 37],[3, 37],                  // east wall
-        [3, 32],[3, 33],[3, 35],[3, 36],           // south wall (doorway at [3, 34])
+        [0, 32], [0, 33], [0, 34], [0, 35], [0, 36],   // north (map edge)
+        [1, 31], [2, 31], [3, 31],                  // west wall
+        [1, 37], [2, 37], [3, 37],                  // east wall
+        [3, 32], [3, 33], [3, 35], [3, 36],           // south wall (doorway at [3, 34])
       ],
       [],
       asset('/textures/crow-wall.webp'),
@@ -2378,11 +2383,11 @@ window.loadLevel = function (levelNum) {
     buildFloorZone(
       scene,
       [
-        [3,3],[3,4],[3,5],   [3,7],[3,8],[3,9],
-        [4,3],[4,4],[4,5],[4,6],[4,7],[4,8],[4,9],
-        [5,3],[5,4],[5,5],   [5,7],[5,8],[5,9],
+        [3, 3], [3, 4], [3, 5], [3, 7], [3, 8], [3, 9],
+        [4, 3], [4, 4], [4, 5], [4, 6], [4, 7], [4, 8], [4, 9],
+        [5, 3], [5, 4], [5, 5], [5, 7], [5, 8], [5, 9],
       ],
-      asset('/textures/swamp-floor.png'),
+      asset('/textures/swamp-floor.webp'),
       'swamp'
     );
 
@@ -2407,17 +2412,25 @@ window.loadLevel = function (levelNum) {
     );
   }
 
-  // Level 3: swamp room (rows 1-3, cols 1-6) — reached via 2-cell passage north of the NW corner room
+  // Level 3: swamp room (rows 1-5, cols 1-18) — reached via 2-cell passage north of the NW corner room
   if (levelNum === 3) {
+    const swampFloors = [
+      [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7], [1, 8], [1, 9], [1,10], [1,11], [1,12], [1,13], [1,14], [1,15], [1,16], [1,17], [1,18],
+      [2, 1], [2, 2], [2, 3], [2, 4], [2, 5], [2, 6], [2, 7], [2, 8], [2, 9], [2,10], [2,11], [2,12], [2,13], [2,14], [2,15], [2,16], [2,17], [2,18],
+      [3, 1], [3, 2], [3, 3], [3, 4], [3, 5], [3, 6], [3, 7], [3, 8], [3, 9], [3,10], [3,11], [3,12], [3,13], [3,14], [3,15], [3,16], [3,17], [3,18],
+      [4, 1], [4, 2], [4, 3], [4, 4], [4, 5], [4, 6], [4, 7], [4, 8], [4, 9], [4,10], [4,11], [4,12], [4,13], [4,14], [4,15], [4,16], [4,17], [4,18],
+      [5, 1], [5, 2], [5, 3], [5, 4], [5, 5], [5, 6], [5, 7], [5, 8], [5, 9], [5,10], [5,11], [5,12], [5,13], [5,14], [5,15], [5,16], [5,17], [5,18],
+    ];
     buildFloorZone(
       scene,
-      [
-        [1,1],[1,2],[1,3],[1,4],[1,5],[1,6],
-        [2,1],[2,2],[2,3],[2,4],[2,5],[2,6],
-        [3,1],[3,2],[3,3],[3,4],[3,5],[3,6],
-      ],
-      asset('/textures/swamp-floor.png'),
+      swampFloors,
+      asset('/textures/swamp-floor.webp'),
       'swamp'
+    );
+    buildInnerTextureZone(
+      scene,
+      swampFloors,
+      asset('/textures/wet-wall.webp')
     );
   }
 
@@ -2433,10 +2446,10 @@ window.loadLevel = function (levelNum) {
     const wallCells = [];
     const floorCells = [];
     level4Map.forEach((row, r) => row.forEach((cell, c) => {
-      const inNorthZone     = r <= 11;
+      const inNorthZone = r <= 11;
       const inWestConnector = r >= 12 && r <= 16 && c <= 2;
-      const inWestBossRoom  = r >= 17 && r <= 26 && c <= 11;
-      const inEastZone      = c >= 15;
+      const inWestBossRoom = r >= 17 && r <= 26 && c <= 11;
+      const inEastZone = c >= 15;
       if (inNorthZone || inWestConnector || inWestBossRoom || inEastZone) {
         if (cell === 1 || cell === 7) wallCells.push([r, c]);
         else if (cell !== CELL_HOLE) floorCells.push([r, c]);
@@ -2580,10 +2593,10 @@ function _arenaFade(cb) {
 
 function _showArenaResult(text, className) {
   const overlay = document.getElementById('arena-result-overlay');
-  const banner  = document.getElementById('arena-result-banner');
+  const banner = document.getElementById('arena-result-banner');
   if (!overlay || !banner) return;
   banner.textContent = text;
-  banner.className   = className;
+  banner.className = className;
   overlay.classList.remove('hidden');
   requestAnimationFrame(() => banner.classList.add('result-show'));
   setTimeout(() => {
@@ -2600,10 +2613,10 @@ window._arenaEnter = function (monsterId) {
 
   // Save state to restore after the fight
   window.arenaState.pre = {
-    level:   window.currentLevel,
+    level: window.currentLevel,
     gridRow: player.gridRow,
     gridCol: player.gridCol,
-    facing:  player.facing,
+    facing: player.facing,
   };
   window.arenaState.active = true;
   window.arenaState.tier = tier;
@@ -2673,7 +2686,7 @@ window._arenaEnter = function (monsterId) {
     const start = findCell(CELL_START);
     player.gridRow = start.row;
     player.gridCol = start.col;
-    player.facing  = 0; // North
+    player.facing = 0; // North
     const w = cellToWorld(start.row, start.col);
     camera.position.set(w.x, w.y, w.z);
     camera.rotation.order = 'YXZ';
@@ -2687,8 +2700,8 @@ window._arenaEnter = function (monsterId) {
     // The fall-blackout fades out after this callback returns, so the loading
     // overlay takes over and covers the canvas until the GLB is ready.
     const loadOverlay = document.getElementById('level-load-overlay');
-    const loadText    = document.getElementById('level-load-text');
-    const loadFill    = document.getElementById('level-load-bar-fill');
+    const loadText = document.getElementById('level-load-text');
+    const loadFill = document.getElementById('level-load-bar-fill');
     if (loadOverlay && arenaMonster) {
       if (loadText) loadText.textContent = 'Entering the Arena\u2026';
       if (loadFill) { loadFill.style.transition = 'none'; loadFill.style.width = '0%'; }
@@ -2770,7 +2783,7 @@ window._arenaExit = function (won) {
 
     player.gridRow = pre.gridRow;
     player.gridCol = pre.gridCol;
-    player.facing  = pre.facing;
+    player.facing = pre.facing;
     const w = cellToWorld(pre.gridRow, pre.gridCol);
     camera.position.set(w.x, w.y, w.z);
     camera.rotation.order = 'YXZ';

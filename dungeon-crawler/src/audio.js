@@ -474,6 +474,7 @@ export function setAmbientLevel(level) {
   _zoneTrack = null;          // clear any room override when changing levels
   _zonePlaylist = null;
   _zonePlaylistIndex = 0;
+  _zoneSilence = false;       // clear any room silence when changing levels
   currentMusicIndex = 0;
 
   // Level 3 and the Arena never play the generic combat track — switch to
@@ -497,6 +498,23 @@ export function setAmbientLevel(level) {
 let _zoneTrack = null;
 let _zonePlaylist = null;
 let _zonePlaylistIndex = 0;
+let _zoneSilence = false;
+
+/**
+ * Silence all ambient/zone music for a specific room area.
+ * Pass true to silence, false to restore normal playback.
+ * Combat music is unaffected and will still play when combat starts.
+ */
+export function setZoneSilence(active) {
+  if (_zoneSilence === active) return; // no change
+  _zoneSilence = active;
+  if (!isCombatMusicPlaying) {
+    _musicGen++;
+    _stopCurrent();
+    if (!active) _playNextTrack();
+  }
+}
+
 export function setZoneMusic(urlOrArray) {
   if (Array.isArray(urlOrArray)) {
     const key = urlOrArray.join('|');
@@ -1070,6 +1088,7 @@ function _switchToNormalMusic() {
 
 function _playNextTrack() {
   if (isCombatMusicPlaying) return;
+  if (_zoneSilence) return; // room silence — stay quiet until cleared
   // Zone playlist: rotate through tracks without looping
   if (_zonePlaylist) {
     _playTrack(_zonePlaylist[_zonePlaylistIndex], false, _musicGen);

@@ -412,5 +412,15 @@
         "value": 20,
         "weight": 0.1,
         "sellable": true
+    },
+    {
+        "name": "Congealed Slime",
+        "slot": "loot",
+        "icon": "/icons/ingredients/congealed_slime.webp",
+        "description": "A thick, gooey glob of congealed green slime. A common alchemical ingredient.",
+        "value": 30,
+        "weight": 0.3,
+        "sellable": true,
+        "stackCount": 10
     }
 ]
