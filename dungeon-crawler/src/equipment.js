@@ -1,7 +1,7 @@
 import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getAttackSpeedMultiplier, hasEffectFlag, breakPartyUnseen, showMemberHeal, showMemberSpHeal, getEffectiveStats, getEffectiveElementalResistances } from './party.js';
 import { ELEMENTS, ELEMENT_IDS, getPrimaryAttackElement } from './elements.js';
 import { showInlineHelp } from './help.js';
-import { getItemDef, canUseItemByJob, normalizeJob } from './items.js';
+import { getItemDef, canUseItemByJob, normalizeJob, isJewelry } from './items.js';
 import { getHqDefenceBonus, scaleHqPotionEffect, getHqEffectBonus, hqDisplayName } from './crafting.js';
 import { SPELLS } from './spells.js';
 import { STATUS_EFFECT_DEFS } from './status-effects.js';
@@ -1186,6 +1186,10 @@ function transferItem(fromIdx, toIdx, invIndex) {
 
   showMessage(`${from.name} gives ${item.name} to ${to.name}.`);
 
+  if (isJewelry(item.name)) {
+    playItemSound(item.name);
+  }
+
   // Refresh the current view
   renderModal(activeCharIndex);
   refreshPartyCards();
@@ -1981,6 +1985,10 @@ function _equipItem(memberIndex, invIndex) {
     return;
   }
 
+  if (isJewelry(item.name)) {
+    playItemSound(item.name);
+  }
+
   updateEffectiveStats(m);
   renderModal(memberIndex);
   refreshPartyCards();
@@ -2660,7 +2668,7 @@ function _showContextMenu(cursorX, cursorY, invIndex) {
       if (!target.isDead) {
         row.addEventListener('click', () => {
           transferItem(activeCharIndex, targetIdx, _ctxInvIndex);
-          if (item) playItemSound(item.name);
+          if (item && !isJewelry(item.name)) playItemSound(item.name);
           _hideContextMenu();
         });
       }
@@ -2885,6 +2893,10 @@ function onPaperdollSlotClick(e) {
     if (fi !== -1) m.inventory[fi] = d.hq ? { name: d.name, slot: d.slot, hq: true } : { name: d.name, slot: d.slot };
   });
 
+  if (isJewelry(item.name)) {
+    playItemSound(item.name);
+  }
+
   updateEffectiveStats(m);
   renderModal(activeCharIndex);
 }
@@ -2969,6 +2981,9 @@ function _confirmDrop() {
     party[_dropPendingCharIndex].inventory[_dropPendingInvIndex] = null;
     addLogEntry({ type: 'item', subtype: 'drop', itemName: dropItem.name, time: Date.now() });
     showMessage(`Dropped ${dropItem.name}.`);
+    if (isJewelry(dropItem.name)) {
+      playItemSound(dropItem.name);
+    }
     renderModal(_dropPendingCharIndex);
   }
   _hideDropConfirm();

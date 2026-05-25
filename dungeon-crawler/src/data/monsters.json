@@ -851,6 +851,14 @@
       "intelligence": 6,
       "resilience": 6
     },
+    "elementalResistances": {
+      "fire": "resist",
+      "ice": "resist",
+      "lightning": "resist",
+      "water": "resist",
+      "holy": "resist",
+      "dark": "resist"
+    },
     "drops": [
       {
         "item": "Life Essence",
@@ -901,8 +909,12 @@
       "ice": 4
     },
     "elementalResistances": {
+      "fire": "weak",
       "ice": "immune",
-      "fire": "weak"
+      "lightning": "resist",
+      "water": "resist",
+      "holy": "resist",
+      "dark": "resist"
     },
     "drops": [
       {

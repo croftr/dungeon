@@ -6,12 +6,14 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { asset } from './assets.js';
+import { isJewelry } from './items.js';
 
 export function prefetchActionSounds() {
   prefetchBuffer(asset('/sounds/actions/swipe.mp3'));
   prefetchBuffer(asset('/sounds/actions/bash.mp3'));
   prefetchBuffer(asset('/sounds/actions/shoot.mp3'));
   prefetchBuffer(asset('/sounds/crit1.mp3'));
+  prefetchBuffer(asset('/sounds/actions/jewelary.mp3'));
 }
 
 let audioCtx = null;
@@ -580,6 +582,10 @@ export async function playItemSound(itemName, slot = '') {
 
   if (!url && lowerName.endsWith('essence')) {
     url = ITEM_SOUNDS['essence'];
+  }
+
+  if (!url && isJewelry(itemName)) {
+    url = asset('/sounds/actions/jewelary.mp3');
   }
 
   if (!url) return;

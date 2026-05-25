@@ -164,3 +164,11 @@ export function canUseItemByJob(member, itemDef) {
   const allowed = Array.isArray(itemDef.job) ? itemDef.job : [itemDef.job];
   return allowed.some(j => normalizeJob(j) === memberJob);
 }
+
+export function isJewelry(itemName) {
+  if (!itemName) return false;
+  const lowerName = itemName.toLowerCase();
+  return RINGS.some((r) => r.name.toLowerCase() === lowerName) ||
+         NECK.some((n) => n.name.toLowerCase() === lowerName);
+}
+

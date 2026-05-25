@@ -353,7 +353,7 @@ setCallbacks({
         playDemonVideo();
       }
     } else if (window.currentLevel === 3) {
-      const inMinotaurRoom = player.gridRow >= 8 && player.gridRow <= 14
+      const inMinotaurRoom = player.gridRow >= 12 && player.gridRow <= 18
         && player.gridCol >= 8 && player.gridCol <= 14;
 
       if (inMinotaurRoom && !videoFlags.hasSeenMinotaurVideo) {
@@ -2404,6 +2404,20 @@ window.loadLevel = function (levelNum) {
       scene,
       iceFloors,
       asset('/textures/ice-wall.webp')
+    );
+  }
+
+  // Level 3: swamp room (rows 1-3, cols 1-6) — reached via 2-cell passage north of the NW corner room
+  if (levelNum === 3) {
+    buildFloorZone(
+      scene,
+      [
+        [1,1],[1,2],[1,3],[1,4],[1,5],[1,6],
+        [2,1],[2,2],[2,3],[2,4],[2,5],[2,6],
+        [3,1],[3,2],[3,3],[3,4],[3,5],[3,6],
+      ],
+      asset('/textures/swamp-floor.png'),
+      'swamp'
     );
   }
 

@@ -68,8 +68,8 @@ export function spawnLevel1Objects(ctx) {
     // Chest at the end of the long north passage
     addChest(group, loader, 7, 1, 0, -0.7, [
         { name: 'Gold Coins', quantity: 10 },
-        'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Ring of Wisdom', "Iron pendant",
-        "Iron ring"
+        'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Ring of Wisdom', "Iron Pendant",
+        "Iron Ring"
     ]);
 
     // Chest in the Northwest room — far northeast corner
