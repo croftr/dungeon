@@ -920,7 +920,7 @@ _applyMultiAttacks('Swamp Monster', [
     sound: asset('/monsters/swamp-monster/special-attack.mp3'),
     soundTimings: [0.30],   // sound plays on launch
     damageTimings: [0.65],  // impact delayed — slime glob travelling
-    weight: 2,
+    weight: 1,
     damageMultiplier: 1.3,
     specialAttack: true,
     specialAttackType: 'randomAny',   // targets one random party member

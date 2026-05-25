@@ -1401,6 +1401,10 @@
             "effectId": "poison",
             "chance": 0.55,
             "durationSec": 12
+          },
+          {
+            "effectId": "rot",
+            "chance": 0.55
           }
         ]
       }
