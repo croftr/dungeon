@@ -22,16 +22,17 @@ export const CATEGORY_MULT = {
   vulnerable: 2.0,
 };
 
-// Softer multipliers used by traps. Traps already roll big damage numbers and
-// apply the element multiplier to the *entire* hit (unlike weapons, where only
-// the elemental rider is scaled). Without softening, a vulnerable target eats
-// 2× a large base roll and gets one-shot. See objects.js:_fireTrapOnMonster.
+// Elemental trap multipliers. Elemental traps apply a base penalty (see
+// ELEMENTAL_TRAP_BASE_PENALTY in objects.js) so they deal less than non-elemental
+// by default. Full weak/vulnerable multipliers here ensure they pay off when the
+// monster actually has the weakness. Net effective ratios vs a non-elemental trap:
+//   normal → 0.75×  resist → 0.375×  weak → 1.125×  vulnerable → 1.5×
 export const TRAP_CATEGORY_MULT = {
   immune: 0,
   resist: 0.5,
   normal: 1,
-  weak: 1.25,
-  vulnerable: 1.5,
+  weak: 1.5,
+  vulnerable: 2.0,
 };
 
 const PLAYER_RESIST_CAP = 0.9;

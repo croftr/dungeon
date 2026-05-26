@@ -1368,14 +1368,14 @@
     "name": "Swamp Monster",
     "family": "aquatic",
     "description": "A hulking horror that rose from the fetid depths of the dungeon swamp. Its hide has absorbed so much toxic bog-magic that elemental forces simply wash over it without effect. Those who enter its lair find their movements sluggish and their spells useless.",
-    "hp": 280,
+    "hp": 500,
     "defence": 12,
     "damageReduction": 0.10,
     "xp": 200,
     "attackSpeed": 1.5,
     "stats": {
-      "strength": 22,
-      "dexterity": 10,
+      "strength": 25,
+      "dexterity": 15,
       "vitality": 30,
       "intelligence": 6,
       "resilience": 20

@@ -1477,8 +1477,12 @@ export function updateParty(dt) {
     const hadVisualBuff = m.activeDebuffs.some(
       d => now >= d.expiresAt && (STATUS_EFFECT_DEFS[d.effectId]?.unseen || STATUS_EFFECT_DEFS[d.effectId]?.invincible)
     );
+    const hadStatBoostBuff = m.activeDebuffs.some(
+      d => now >= d.expiresAt && d.inlineDef?.statModifiers
+    );
     m.activeDebuffs = m.activeDebuffs.filter(d => now < d.expiresAt);
-    if (hadVisualBuff) refreshMember(m);
+    if (hadStatBoostBuff) updateEffectiveStats(m);
+    if (hadVisualBuff || hadStatBoostBuff) refreshMember(m);
     // Tick-based effects
     m.activeDebuffs.forEach(d => {
       const def = STATUS_EFFECT_DEFS[d.effectId];

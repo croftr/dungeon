@@ -2435,8 +2435,12 @@ function _fireTrapOnMonster(trapObj, monster) {
     const element = _getTrapElement(trapObj);
     let dmg = _rollTrapDamage(def, trapObj);
     if (element) {
-        // Traps use softer category multipliers than weapons because the whole
-        // hit (not just an elemental rider) is scaled. See elements.js.
+        // Elemental traps are weaker than non-elemental by default (0.75× base)
+        // so non-elemental traps win against normal/resistant mobs. The higher
+        // weak/vulnerable multipliers in TRAP_CATEGORY_MULT make elemental traps
+        // pay off only when the monster actually has the weakness.
+        const ELEMENTAL_TRAP_BASE_PENALTY = 0.75;
+        dmg = Math.max(1, Math.round(dmg * ELEMENTAL_TRAP_BASE_PENALTY));
         const mult = getMonsterTrapElementMultiplier(monster, element);
         if (mult <= 0) dmg = 0;
         else dmg = Math.max(1, Math.round(dmg * mult));

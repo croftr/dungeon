@@ -486,7 +486,21 @@ export function updateEffectiveStats(m) {
 
   // Recalculate hpMax/mpMax/spMax from the (now equipment-boosted) stats,
   // then add any direct pool bonuses from item statBonuses (hp/mp/sp keys).
-  const derived = calcDerivedMaxStats(newStats);
+  // Also fold in active stat-boost buff modifiers so temporary VIT/RES buffs
+  // raise the max HP/SP for their duration (m.stats stays equipment-only).
+  const buffNow = performance.now();
+  const statsForMaxCalc = { ...newStats };
+  (m.activeDebuffs ?? []).forEach(d => {
+    if (buffNow >= d.expiresAt) return;
+    const mods = d.inlineDef?.statModifiers;
+    if (!mods) return;
+    for (const [stat, val] of Object.entries(mods)) {
+      if (statsForMaxCalc[stat] !== undefined) {
+        statsForMaxCalc[stat] = Math.max(0, statsForMaxCalc[stat] + val);
+      }
+    }
+  });
+  const derived = calcDerivedMaxStats(statsForMaxCalc);
   m.hpMax = derived.hpMax + directHpBonus;
   m.mpMax = derived.mpMax + directMpBonus;
   m.spMax = derived.spMax + directSpBonus;
@@ -2248,6 +2262,7 @@ function _applyPotionEffect(m, item) {
         const statParts = Object.entries(stats).map(([s, v]) => `${STAT_ABBR[s] ?? s.toUpperCase()} ${v > 0 ? '+' : ''}${v}`);
         results.push(`${statParts.join(', ')} for ${duration}s`);
         mainSound = 'magic';
+        updateEffectiveStats(m);
         break;
       }
     }

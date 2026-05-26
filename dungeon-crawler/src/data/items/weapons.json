@@ -642,7 +642,7 @@
         "attackType": "swipe",
         "weaponType": "axe",
         "staminaDrain": 1,
-        "baseDamage": 13,
+        "baseDamage": 12,
         "damageType": "fire",
         "elementalDamage": {
             "fire": 6

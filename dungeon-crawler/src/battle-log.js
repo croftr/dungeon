@@ -422,7 +422,7 @@ function _buildRowHtml(e) {
   }
 
   // ── Standard attack / hit / miss / block / crit ───────────────────────────
-  const badge = e.blocked ? '🛡' : (e.crit ? '⚡' : e.hit ? '●' : '○');
+  const badge = e.blocked ? '🛡' : (e.crit ? '✸' : e.hit ? '●' : '○');
   let type;
   if (e.specialName) {
     type = e.isAoe ? `${e.specialName} [AoE]` : e.specialName;
@@ -477,9 +477,12 @@ function _formula(e) {
 
   if (e.actor === 'player') {
     const stat = ['fireball', 'frostbolt', 'waterbolt', 'lightningbolt', 'holybolt', 'darkbolt', 'banishment', 'incinerate'].includes(e.attackType) ? 'INT' : (e.statLabel ?? 'STR');
-    const ammoLine = e.ammoModifier && e.ammoModifier !== 1 ? ` ×${e.ammoModifier}ammo` : '';
+    const ammoMod = e.ammoModifier && e.ammoModifier !== 1 ? e.ammoModifier : 1;
+    const ammoLine = ammoMod !== 1 ? ` ×${ammoMod}ammo` : '';
     const drText = e.damageReduction ? ` ×${Math.round((1 - e.damageReduction) * 100)}%dr` : '';
-    const rawBase = e.damageReduction ? Math.round((e.statBonus + e.weaponBase) * (1 - e.damageReduction)) : (e.statBonus + e.weaponBase);
+    const baseSum = e.statBonus + e.weaponBase;
+    const afterAmmo = ammoMod !== 1 ? Math.round(baseSum * ammoMod) : baseSum;
+    const rawBase = e.damageReduction ? Math.round(afterAmmo * (1 - e.damageReduction)) : afterAmmo;
     // Multiplicative soak from VIT (physical) or RES (magic), then flat defence
     // (physical only; magic ignores defence).
     const soakLabel = e.statSoakLabel ?? 'vit';
