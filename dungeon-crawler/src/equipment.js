@@ -23,7 +23,7 @@ import { isAlchemyModalOpen, addItemToAlchemy, placeTrap } from './objects.js';
 import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude, calcOnHitChance, calcControlSpellLandChance } from './combat-rules.js';
 import { showStanceMenu, getAvailableStances, getEligibleStances, getSpellCooldownMultiplier, getStanceCureHealBonus, hasStanceDoubleAttack, getStanceDef, setStance } from './stance.js';
 import { playStanceVideo, RECRUITS } from './recruits.js';
-import { playCritSound, playSkillSound, playItemSound, playLevelUpConfirmSound, playInventorySortSound, playActionSound, playSoundByUrl } from './audio.js';
+import { playCritSound, playSkillSound, playItemSound, playLevelUpConfirmSound, playInventorySortSound, playActionSound, playSoundByUrl, playRelicSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { skillsState } from './skills-state.js';
 import { getNextLevelXP, getCurrentLevelThreshold, hydrateSkill } from './leveling.js';
@@ -1870,9 +1870,14 @@ function _equipItem(memberIndex, invIndex) {
 
   if (item.slot === 'bothHands') {
     // Spells in hands are not real inventory items — exclude from displaced count
-    const displaced = [m.equipment.leftHand, m.equipment.rightHand]
-      .filter((d) => d !== null && d.slot !== 'spell')
-      .filter((d, idx, arr) => arr.indexOf(d) === idx);
+    const rawDisplaced = [m.equipment.leftHand, m.equipment.rightHand]
+      .filter((d) => d !== null && d.slot !== 'spell');
+    // Deduplicate: a bothHands weapon occupies both slots; after save/restore the two
+    // slots hold separate object instances (JSON round-trip breaks reference equality),
+    // so dedup by slot type rather than by reference.
+    const displaced = rawDisplaced.filter((d, idx) =>
+      d.slot !== 'bothHands' || rawDisplaced.findIndex(x => x.slot === 'bothHands') === idx
+    );
 
     const freeSlots = m.inventory.filter(i => i === null).length;
     if (displaced.length > freeSlots) {
@@ -1987,6 +1992,8 @@ function _equipItem(memberIndex, invIndex) {
 
   if (isJewelry(item.name)) {
     playItemSound(item.name);
+  } else if (item.slot === 'relic') {
+    playRelicSound();
   }
 
   updateEffectiveStats(m);

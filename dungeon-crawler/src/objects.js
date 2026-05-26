@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { createBlobShadow } from './blob-shadow.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
-import { CELL, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld, buildLevel, level1Map, level2Map, isPassable } from './map.js';
+import { CELL, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld, buildLevel, level1Map, level2Map, isPassable, spawnElementFloorAt, elementFloorCellId } from './map.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, isInFrontOfPlayer, player, FACING_ANGLES, setPlayerFrozen, setPlayerTrapped } from './player.js';
 import { showMessage, drawMinimap, updateStatus } from './minimap.js';
@@ -19,7 +19,7 @@ import BARNABY_DATA from './data/barnaby.json';
 import WEAPONS_DATA from './data/items/weapons.json';
 import SHIELDS_DATA from './data/items/shields.json';
 import AMMO_DATA from './data/items/ammo.json';
-import { triggerMummyAmbush, monsters, hitMonster } from './monster.js';
+import { triggerMummyAmbush, monsters, hitMonster, recordLightningFloorSpawn } from './monster.js';
 import { getMonsterElementMultiplier, getMonsterTrapElementMultiplier, getElementColorHex } from './elements.js';
 import TRAPS_DATA from './data/traps.json';
 import * as equip from './equipment.js';
@@ -201,6 +201,13 @@ for (const it of POTION_MERCHANT_STOCK) {
   const k = `${it.name}|${it.hq ? 1 : 0}`;
   POTION_MERCHANT_INITIAL_COUNTS.set(k, (POTION_MERCHANT_INITIAL_COUNTS.get(k) ?? 0) + 1);
 }
+
+// Level-gated stock unlocks — items added to the pool when the player reaches a dungeon level
+const POTION_LEVEL_UNLOCKS = (POTION_MERCHANT_DATA.levelUnlocks ?? [])
+  .map(u => ({ minLevel: u.minLevel, stock: u.stock.map(_normStock).filter(Boolean) }))
+  .sort((a, b) => a.minLevel - b.minLevel);
+
+let _potionMerchantUnlockedLevels = new Set();
 
 // Items still available for sale (items bought are removed permanently)
 let _merchantAvailable = [...MERCHANT_STOCK];
@@ -777,6 +784,16 @@ export function initObjects(scene, camera) {
                                         m._frozen = false;
                                         if (m.mixer) m.mixer.timeScale = 1;
                                     });
+                                    // Spawn permanent lightning floor under each Iron Warden
+                                    // (row 3 col 7 and row 5 col 7, level 2).
+                                    const lightningCell = elementFloorCellId('lightning');
+                                    if (lightningCell != null) {
+                                        [[3, 7], [5, 7]].forEach(([r, c]) => {
+                                            if (spawnElementFloorAt(scene, r, c, lightningCell)) {
+                                                recordLightningFloorSpawn(2, r, c);
+                                            }
+                                        });
+                                    }
                                 };
                                 if (window.playStatueKnightsVideo) {
                                     window.playStatueKnightsVideo(activate);
@@ -5174,7 +5191,7 @@ function _renderMerchantPartyItems() {
                 if (_merchantSellBasket.some(e => e.charIndex === ci && e.invIndex === invIdx)) return;
 
                 const def = getItemDef(item.name);
-                if (!def) return;
+                if (!def || def.sellable === false) return;
 
                 const stackQty = item.count ?? 1;
                 const sellPrice = _getMerchantSellPrice(item.name, !!item.hq) * stackQty;
@@ -6241,12 +6258,30 @@ export function getPotionMerchantStock() { return _potionMerchantAvailable.map(e
 /** Restores potion merchant stock. Accepts legacy string-array saves via _normStock. */
 export function setPotionMerchantStock(stock) { if (stock) _potionMerchantAvailable = stock.map(_normStock).filter(Boolean); }
 
+function _applyPotionLevelUnlock(minLevel, addToAvailable) {
+  const unlock = POTION_LEVEL_UNLOCKS.find(u => u.minLevel === minLevel);
+  if (!unlock) return;
+  for (const it of unlock.stock) {
+    const k = `${it.name}|${it.hq ? 1 : 0}`;
+    POTION_MERCHANT_INITIAL_COUNTS.set(k, (POTION_MERCHANT_INITIAL_COUNTS.get(k) ?? 0) + 1);
+    if (addToAvailable) _potionMerchantAvailable.push({ name: it.name, hq: it.hq });
+  }
+  _potionMerchantUnlockedLevels.add(minLevel);
+}
+
 /**
  * Tops up the potion merchant's stock toward initial counts. Adds at most `units`
  * items per call, preferring slots with the largest deficit so refill stays balanced.
  * Never exceeds the per-slot initial count, so unbought stock stays unchanged.
+ * Unlocks any level-gated stock for levels the player has now reached.
  */
 export function replenishPotionMerchant(units = 2) {
+  const currentLevel = window.currentLevelReached ?? 0;
+  for (const unlock of POTION_LEVEL_UNLOCKS) {
+    if (unlock.minLevel <= currentLevel && !_potionMerchantUnlockedLevels.has(unlock.minLevel)) {
+      _applyPotionLevelUnlock(unlock.minLevel, true);
+    }
+  }
   const cur = new Map();
   for (const it of _potionMerchantAvailable) {
     const k = `${it.name}|${it.hq ? 1 : 0}`;
@@ -6761,6 +6796,7 @@ export function captureWorldState() {
         flags: getWorldFlags(),
         merchantStock: getMerchantStock(),
         potionMerchantStock: getPotionMerchantStock(),
+        potionMerchantUnlockedLevels: [..._potionMerchantUnlockedLevels],
         stanceMerchantStock: getStanceMerchantStock(),
         knownAlchemyRecipes: [..._collections.knownAlchemyRecipes],
         knownForgeRecipes: [..._collections.knownForgeRecipes],
@@ -6778,6 +6814,8 @@ export function restoreWorldState(data) {
     setWorldFlags(data.flags ?? null);
     if (data.merchantStock) setMerchantStock(data.merchantStock);
     if (data.potionMerchantStock) setPotionMerchantStock(data.potionMerchantStock);
+    _potionMerchantUnlockedLevels = new Set(data.potionMerchantUnlockedLevels ?? []);
+    for (const level of _potionMerchantUnlockedLevels) _applyPotionLevelUnlock(level, false);
     if (data.stanceMerchantStock) setStanceMerchantStock(data.stanceMerchantStock);
     _collections.knownAlchemyRecipes = new Set(data.knownAlchemyRecipes ?? []);
     _collections.knownForgeRecipes = new Set(data.knownForgeRecipes ?? []);

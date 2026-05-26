@@ -65,7 +65,10 @@
       "Bash(Select-Object Name, FullName)",
       "Read(//mnt/c/Users/rob/projects/dungeon/**)",
       "Bash(ls public/monsters-compressed/crow-wizard/)",
-      "PowerShell(Copy-Item \"C:\\\\Users\\\\rob\\\\projects\\\\dungeon\\\\dungeon-crawler\\\\public\\\\monsters-tmp-crow-wizard\\\\crow-wizard\\\\flaming-floor.glb\" -Destination \"C:\\\\Users\\\\rob\\\\projects\\\\dungeon\\\\dungeon-crawler\\\\public\\\\monsters\\\\crow-wizard\\\\flaming-floor.glb\" -Force)"
+      "PowerShell(Copy-Item \"C:\\\\Users\\\\rob\\\\projects\\\\dungeon\\\\dungeon-crawler\\\\public\\\\monsters-tmp-crow-wizard\\\\crow-wizard\\\\flaming-floor.glb\" -Destination \"C:\\\\Users\\\\rob\\\\projects\\\\dungeon\\\\dungeon-crawler\\\\public\\\\monsters\\\\crow-wizard\\\\flaming-floor.glb\" -Force)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\rob\\\\projects\\\\dungeon\\\\dungeon-crawler\\\\src\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)"
     ]
   }
 }

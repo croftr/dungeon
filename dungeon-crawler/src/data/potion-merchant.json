@@ -5,21 +5,6 @@
         "Minor Mana Potion",
         "Cure Poison Potion",
         "Cure Poison Potion",
-        "Elixir of Rage",
-        "Elixir of Foritude",
-        "Elixir of Enlightenment",
-        {
-            "name": "Elixir of Rage",
-            "hq": true
-        },
-        {
-            "name": "Elixir of Enlightenment",
-            "hq": true
-        },
-        {
-            "name": "Elixir of Foritude",
-            "hq": true
-        },
         "Life Berry",
         "Life Berry",
         "Life Berry",
@@ -29,15 +14,38 @@
         "Fermented Sugar",
         "Fermented Sugar",
         "Poison Vial",
-        "Poison Vial",
-        "Rage Cap",
-        "Rage Cap",
-        "Rage Cap",
-        "Ice Cap",
-        "Ice Cap",
-        "Ice Cap",
-        "Congealed Slime",
-        "Congealed Slime",
-        "Congealed Slime"
+        "Poison Vial"
+    ],
+    "levelUnlocks": [
+        {
+            "minLevel": 2,
+            "stock": [
+                "Elixir of Rage",
+                { "name": "Elixir of Rage", "hq": true },
+                "Rage Cap",
+                "Rage Cap",
+                "Rage Cap"
+            ]
+        },
+        {
+            "minLevel": 3,
+            "stock": [
+                "Elixir of Enlightenment",
+                { "name": "Elixir of Enlightenment", "hq": true },
+                "Ice Cap",
+                "Ice Cap",
+                "Ice Cap"
+            ]
+        },
+        {
+            "minLevel": 4,
+            "stock": [
+                "Elixir of Foritude",
+                { "name": "Elixir of Foritude", "hq": true },
+                "Congealed Slime",
+                "Congealed Slime",
+                "Congealed Slime"
+            ]
+        }
     ]
 }

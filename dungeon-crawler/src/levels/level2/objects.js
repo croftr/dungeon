@@ -192,6 +192,7 @@ export function spawnLevel2Objects(ctx) {
                             model.userData.talkAction.reset().fadeIn(0.2).play();
                         }
                         // Shifted NpcDialogue from col 24 -> 34
+                        setTimeout(() => {
                         playNpcDialogue(1, 34, '/npcs/stance-npc/outro.mp3', 0.8, () => {
                             _despawnWithFlash(model, group, () => {
                                 setStanceNpcDeparted(true);
@@ -201,6 +202,7 @@ export function spawnLevel2Objects(ctx) {
                                 );
                             });
                         });
+                        }, 2000);
                     };
                 });
             }

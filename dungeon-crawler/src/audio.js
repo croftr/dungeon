@@ -1265,6 +1265,23 @@ export async function playLearntSound() {
   }
 }
 
+export async function playRelicSound() {
+  const buffer = await getBuffer(asset('/sounds/items/relic.mp3'));
+  if (!buffer) return;
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.85;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playRelicSound failed:', err);
+  }
+}
+
 export async function playSuccessSound() {
   const buffer = await getBuffer(asset('/sounds/items/success.mp3'));
   if (!buffer) return;

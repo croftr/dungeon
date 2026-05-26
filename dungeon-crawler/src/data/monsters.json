@@ -1292,7 +1292,11 @@
     },
     "elementalResistances": {
       "ice": "weak",
-      "fire": "resist"
+      "water": "weak",
+      "fire": "immune",
+      "holy": "resist",
+      "lightning": "resist",
+      "dark": "resist"
     },
     "specialAttacks": [
       {
@@ -1428,7 +1432,11 @@
       },
       {
         "item": "Congealed Slime",
-        "chance": 0.5
+        "chance": 1
+      },
+      {
+        "item": "Congealed Slime",
+        "chance": 1
       },
       {
         "item": {

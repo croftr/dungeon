@@ -64,6 +64,9 @@ const _collections = {
   // Flaming Floor). Each entry is the string "<level>:<row>,<col>". Re-applied
   // on level entry by `loadMonstersForLevel`, captured in save bundles.
   spawnedFireFloors: new Set(),
+  // Lightning floor tiles placed permanently when the Iron Warden gate is opened.
+  // Same key format: "<level>:<row>,<col>".
+  spawnedLightningFloors: new Set(),
 };
 
 /** True if this monster instance is a "boss" — marked in its def with an image. */
@@ -1166,6 +1169,15 @@ function _spawnFloorInFrontOf(monster, elementName) {
 }
 
 /**
+ * Records a lightning floor tile spawned by a scripted world event (e.g. the
+ * Iron Warden gate activation) so it persists across level transitions and
+ * save/load. Call after `spawnElementFloorAt` succeeds.
+ */
+export function recordLightningFloorSpawn(level, row, col) {
+  _collections.spawnedLightningFloors.add(`${level}:${row},${col}`);
+}
+
+/**
  * Triggers a dormant skeleton's rise-from-floor sequence.
  * Plays the stand-up animation and raise sound, then activates the monster.
  * Retries if the animation hasn't finished loading yet.
@@ -1833,6 +1845,18 @@ export function loadMonstersForLevel(scene, level) {
       const r = Number(rowStr), c = Number(colStr);
       if (!Number.isFinite(r) || !Number.isFinite(c)) continue;
       spawnElementFloorAt(scene, r, c, fireFloorCell);
+    }
+  }
+
+  const lightningFloorCell = elementFloorCellId('lightning');
+  if (lightningFloorCell != null) {
+    for (const key of _collections.spawnedLightningFloors) {
+      const [lvlStr, coords] = key.split(':');
+      if (Number(lvlStr) !== level) continue;
+      const [rowStr, colStr] = (coords ?? '').split(',');
+      const r = Number(rowStr), c = Number(colStr);
+      if (!Number.isFinite(r) || !Number.isFinite(c)) continue;
+      spawnElementFloorAt(scene, r, c, lightningFloorCell);
     }
   }
 }
@@ -3722,6 +3746,7 @@ export function captureMonsterState() {
     droppedBossEssences: [..._collections.droppedBossEssences],
     killedBosses: [..._collections.killedBosses],
     spawnedFireFloors: [..._collections.spawnedFireFloors],
+    spawnedLightningFloors: [..._collections.spawnedLightningFloors],
     monsters: monsterStates,
   };
 }
@@ -3731,6 +3756,7 @@ export function restoreMonsterState(data) {
   _collections.droppedBossEssences = new Set(data.droppedBossEssences ?? []);
   _collections.killedBosses = new Set(data.killedBosses ?? []);
   _collections.spawnedFireFloors = new Set(data.spawnedFireFloors ?? []);
+  _collections.spawnedLightningFloors = new Set(data.spawnedLightningFloors ?? []);
   if (Array.isArray(data.monsters)) {
     const byKey = new Map();
     for (const s of data.monsters) byKey.set(`${s.level}:${s.id}`, s);
