@@ -71,7 +71,8 @@ export function getPrimaryAttackElement(weaponDef, ammoDef = null) {
   const pickLargest = (map) => {
     if (!map) return null;
     let bestId = null, bestVal = -Infinity;
-    for (const [id, val] of Object.entries(map)) {
+    for (const [key, val] of Object.entries(map)) {
+      const id = key.endsWith('Percent') ? key.slice(0, -7) : key;
       if (val > bestVal) { bestVal = val; bestId = id; }
     }
     return bestVal > 0 ? bestId : null;

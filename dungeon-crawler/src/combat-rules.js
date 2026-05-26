@@ -201,21 +201,26 @@ export function monsterHitChance(monster, character) {
  * @param {object} monster    Monster (needs defence, stats.vitality, stats.resilience)
  * @returns {number}          Final damage (minimum 1)
  */
-export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef = null, weaponIsHQ = false) {
-  // Stat weights on the weapon determine how much STR vs DEX contributes to damage.
-  // Defaults to pure STR (bare-hand punch or any weapon without the field).
+// Sum of (stat * weight) for each entry in the weapon's statWeights. Bare-hand
+// defaults to pure STR. Used by physical damage AND elemental riders so the
+// same scaling rules apply to both.
+function getWeaponStatBonus(character, weaponDef) {
   const strW = weaponDef?.statWeights?.str ?? 1.0;
   const dexW = weaponDef?.statWeights?.dex ?? 0.0;
   const intW = weaponDef?.statWeights?.intelligence ?? 0.0;
   const vitW = weaponDef?.statWeights?.vitality ?? 0.0;
   const resW = weaponDef?.statWeights?.resilience ?? 0.0;
-  const statBonus = Math.floor(
+  return Math.floor(
     (character.stats?.strength ?? 10) * strW +
     (character.stats?.dexterity ?? 10) * dexW +
     (character.stats?.intelligence ?? 10) * intW +
     (character.stats?.vitality ?? 10) * vitW +
     (character.stats?.resilience ?? 10) * resW
   );
+}
+
+export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef = null, weaponIsHQ = false) {
+  const statBonus = getWeaponStatBonus(character, weaponDef);
   let passiveBonus = 0;
   if (character.skills) {
     character.skills.forEach(skill => {
@@ -287,19 +292,32 @@ export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef 
 export function getElementalRiderBreakdown(character, monster, weaponDef, ammoDef) {
   const breakdown = {};
   let total = 0;
-  const sources = [weaponDef?.elementalDamage, ammoDef?.elementalDamage];
-  for (const src of sources) {
-    if (!src) continue;
-    for (const [element, value] of Object.entries(src)) {
+  // Aggregate flat damage per element first, then apply the weapon's stat
+  // scaling once per element (not once per source) so weapon + ammo riders of
+  // the same element don't double-count the stat bonus.
+  const weaponBase = weaponDef?.baseDamage ?? 0;
+  const statBonus = getWeaponStatBonus(character, weaponDef);
+  const flatByElement = {};
+  const maps = [weaponDef?.elementalDamage, ammoDef?.elementalDamage];
+  for (const map of maps) {
+    if (!map) continue;
+    for (const [key, value] of Object.entries(map)) {
       if (!value) continue;
-      const monMult = getMonsterElementMultiplier(monster, element);
-      if (monMult === 0) continue;
-      const stanceMult = getStanceElementMultiplier(character, element);
-      const rider = Math.round(value * monMult * stanceMult);
-      if (rider === 0) continue;
-      breakdown[element] = (breakdown[element] ?? 0) + rider;
-      total += rider;
+      const isPercent = key.endsWith('Percent');
+      const element = isPercent ? key.slice(0, -7) : key;
+      const flat = isPercent ? (value / 100) * weaponBase : value;
+      if (!flat) continue;
+      flatByElement[element] = (flatByElement[element] ?? 0) + flat;
     }
+  }
+  for (const [element, flat] of Object.entries(flatByElement)) {
+    const monMult = getMonsterElementMultiplier(monster, element);
+    if (monMult === 0) continue;
+    const stanceMult = getStanceElementMultiplier(character, element);
+    const rider = Math.round((flat + statBonus) * monMult * stanceMult);
+    if (rider <= 0) continue;
+    breakdown[element] = rider;
+    total += rider;
   }
   return { breakdown, total };
 }

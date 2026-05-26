@@ -1744,15 +1744,18 @@ function populateTooltip(obj, showBuyPrice = false) {
   // Elemental damage rider — extra damage on top of base, per element.
   if (hasElementalDamage) {
     const listEl = document.getElementById('detail-row-elemdmg');
-    listEl.innerHTML = Object.entries(def.elementalDamage).map(([elem, value]) => {
+    listEl.innerHTML = Object.entries(def.elementalDamage).map(([key, value]) => {
+      const isPercent = key.endsWith('Percent');
+      const elem = isPercent ? key.slice(0, -7) : key;
       const elemDef = ELEMENTS[elem];
       const color = elemDef?.color ?? '#c8b080';
       const symbol = elemDef?.symbol ?? '';
       const label = elemDef?.name ?? elem.charAt(0).toUpperCase() + elem.slice(1);
       const sign = value >= 0 ? '+' : '';
+      const valueText = isPercent ? `${sign}${value}% dmg` : `${sign}${value} dmg`;
       return `<div class="detail-onhit-item" style="--onhit-color:${color}">
         <span><span style="color:${color};">${symbol}</span> ${label}</span>
-        <span>${sign}${value} dmg</span>
+        <span>${valueText}</span>
       </div>`;
     }).join('');
   }

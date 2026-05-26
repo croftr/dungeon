@@ -1191,7 +1191,7 @@
     "image": "/monster-images/iron-warden.webp",
     "description": "An ancient construct of living iron, forged to guard the deepest vaults. Its armoured shell deflects blades and arrows with contemptuous ease — but the elemental energies coursing through its core are also its greatest weakness.",
     "hp": 400,
-    "defence": 80,
+    "defence": 180,
     "damageReduction": 0.90,
     "xp": 280,
     "attackSpeed": 1.5,
