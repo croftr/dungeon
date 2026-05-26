@@ -20,8 +20,8 @@ import SETS_DATA from './data/sets.json';
 import SPELL_TYPE_ICONS from './data/spell-type-icons.json';
 import { isInFrontOfPlayer, player, facingDir } from './player.js';
 import { isAlchemyModalOpen, addItemToAlchemy, placeTrap } from './objects.js';
-import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude, calcOnHitChance, calcControlSpellLandChance } from './combat-rules.js';
-import { showStanceMenu, getAvailableStances, getEligibleStances, getSpellCooldownMultiplier, getStanceCureHealBonus, hasStanceDoubleAttack, getStanceDef, setStance } from './stance.js';
+import { canMelee, resolveSkillMagnitude, resolveSpellMagnitude, calcOnHitChance, calcControlSpellLandChance, CRIT_CHANCE, CRIT_MULTIPLIER, getDexCritChanceBonus, getSpellCritChanceBonus, getPlayerDodgeChance } from './combat-rules.js';
+import { showStanceMenu, getAvailableStances, getEligibleStances, getSpellCooldownMultiplier, getStanceCureHealBonus, hasStanceDoubleAttack, getStanceDef, setStance, getCritChanceBonus } from './stance.js';
 import { playStanceVideo, RECRUITS } from './recruits.js';
 import { playCritSound, playSkillSound, playItemSound, playLevelUpConfirmSound, playInventorySortSound, playActionSound, playSoundByUrl, playRelicSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
@@ -853,7 +853,8 @@ function renderModal(memberIndex) {
   }
 
   // Re-render active non-inventory tab when switching members
-  if (_activeEquipTab === 'skilltree') _renderSkillTreeTab(m, memberIndex);
+  if (_activeEquipTab === 'stats') _renderStatsTab(m, memberIndex);
+  else if (_activeEquipTab === 'skilltree') _renderSkillTreeTab(m, memberIndex);
   else if (_activeEquipTab === 'stances') _renderStancesTab(m, memberIndex);
   else if (_activeEquipTab === 'trapconfig') _renderTrapConfigTab(m, memberIndex);
 
@@ -3172,20 +3173,231 @@ function _switchEquipTab(tab) {
     btn.classList.toggle('equip-tab--active', btn.dataset.equipTab === tab);
   });
   const inventory = document.getElementById('equip-body');
+  const stats = document.getElementById('equip-stats-panel');
   const skilltree = document.getElementById('equip-skilltree-panel');
   const stances = document.getElementById('equip-stances-panel');
   const trapconfig = document.getElementById('equip-trapconfig-panel');
   if (inventory) inventory.classList.toggle('equip-tab-panel--hidden', tab !== 'inventory');
+  if (stats) stats.classList.toggle('equip-tab-panel--hidden', tab !== 'stats');
   if (skilltree) skilltree.classList.toggle('equip-tab-panel--hidden', tab !== 'skilltree');
   if (stances) stances.classList.toggle('equip-tab-panel--hidden', tab !== 'stances');
   if (trapconfig) trapconfig.classList.toggle('equip-tab-panel--hidden', tab !== 'trapconfig');
 
   if (activeCharIndex !== null) {
     const m = party[activeCharIndex];
-    if (tab === 'skilltree') _renderSkillTreeTab(m, activeCharIndex);
+    if (tab === 'stats') _renderStatsTab(m, activeCharIndex);
+    else if (tab === 'skilltree') _renderSkillTreeTab(m, activeCharIndex);
     else if (tab === 'stances') _renderStancesTab(m, activeCharIndex);
     else if (tab === 'trapconfig') _renderTrapConfigTab(m, activeCharIndex);
   }
+}
+
+// ─────────────────────────────────────────────
+//  STATS TAB
+// ─────────────────────────────────────────────
+function _renderStatsTab(m, _memberIndex) {
+  const body = document.getElementById('equip-stats-body');
+  if (!body || !m || m.isEmpty) { if (body) body.innerHTML = ''; return; }
+
+  const fmtPct = (v) => `${Math.round(v * 100)}%`;
+  const sign = (v) => (v >= 0 ? '+' : '');
+
+  // ── Core attributes (eff vs base coloring) ──
+  const effStats = getEffectiveStats(m);
+  const STAT_KEYS = [
+    ['strength', 'Strength'],
+    ['dexterity', 'Dexterity'],
+    ['vitality', 'Vitality'],
+    ['intelligence', 'Intelligence'],
+    ['resilience', 'Resilience'],
+  ];
+  const attrRows = STAT_KEYS.map(([key, label]) => {
+    const baseVal = m.stats?.[key] ?? 0;
+    const effVal = effStats[key] ?? 0;
+    const color = effVal > baseVal ? '#60c060' : (effVal < baseVal ? '#c06060' : '');
+    return `<div class="stat-row"><span class="stat-name">${label}</span><span class="stat-value" style="color:${color};">${effVal}</span></div>`;
+  }).join('');
+
+  // ── Vitals ──
+  const carry = getMemberCarryWeight(m);
+  const maxCarry = getMemberMaxCarry(m);
+  const encLvl = getMemberEncumbranceLevel(m);
+  const encLabel = encLvl === 'overloaded' ? 'Overloaded' : (encLvl === 'heavy' ? 'Heavy' : 'Normal');
+  const encColor = encLvl === 'overloaded' ? '#ff5050' : (encLvl === 'heavy' ? '#e0c040' : '');
+  const vitalsRows = `
+    <div class="stat-row"><span class="stat-name">HP</span><span class="stat-value">${m.hp} / ${m.hpMax}</span></div>
+    <div class="stat-row"><span class="stat-name">MP</span><span class="stat-value">${m.mp} / ${m.mpMax}</span></div>
+    <div class="stat-row"><span class="stat-name">SP</span><span class="stat-value">${m.sp ?? 100} / ${m.spMax ?? 100}</span></div>
+    <div class="stat-row"><span class="stat-name">Carry Weight</span><span class="stat-value">${carry.toFixed(1)} / ${maxCarry.toFixed(1)} kg</span></div>
+    <div class="stat-row"><span class="stat-name">Encumbrance</span><span class="stat-value" style="color:${encColor};">${encLabel}</span></div>
+  `;
+
+  // ── Defence ──
+  let totalDef = 0;
+  const counted = new Set();
+  let hasShield = false;
+  let shieldBlockChance = 0;
+  let leftBlock = 0, rightBlock = 0;
+  Object.entries(m.equipment ?? {}).forEach(([slot, item]) => {
+    if (item && !counted.has(item)) {
+      counted.add(item);
+      const def = getItemDef(item.name);
+      if (def?.defence) totalDef += def.defence;
+      if (item.hq) totalDef += getHqDefenceBonus(def);
+      if (def?.weaponType === 'shield') hasShield = true;
+      if (def?.weaponType === 'shield' || def?.blockChance) {
+        if (slot === 'leftHand') leftBlock = def?.blockChance ?? 0;
+        if (slot === 'rightHand') rightBlock = def?.blockChance ?? 0;
+      }
+    }
+  });
+  let shieldMasterDef = 0;
+  let shieldMasterBlockBonus = 0;
+  if (m.skills?.length) {
+    m.skills.forEach(skill => {
+      const name = typeof skill === 'string' ? skill : skill.name;
+      const skillDef = SKILLS_DATA[name];
+      if (skillDef?.isPassive && skillDef.effectType === 'shieldMasterBonus' && hasShield) {
+        shieldMasterDef += skillDef.defenceBonus ?? 0;
+        shieldMasterBlockBonus += skillDef.blockChanceBonus ?? 0;
+      }
+    });
+  }
+  totalDef += shieldMasterDef;
+  const rampart = skillsState.rampart;
+  if (rampart?.active && rampart.actorName === m.name && performance.now() < rampart.expiresAt) {
+    totalDef = Math.round(totalDef * (rampart.magnitude || 2));
+  }
+  shieldBlockChance = Math.max(leftBlock, rightBlock)
+    + shieldMasterBlockBonus
+    + (m.skillBonuses?.['blockChance'] ?? 0)
+    + (hasShield ? (m.skillBonuses?.['shieldBlock'] ?? 0) : 0);
+  const dodgeChance = getPlayerDodgeChance(m);
+
+  const defenceRows = `
+    <div class="stat-row"><span class="stat-name">Defence</span><span class="stat-value" style="color:#fff;font-weight:bold;">${totalDef}</span></div>
+    <div class="stat-row"><span class="stat-name">Shield Block</span><span class="stat-value">${shieldBlockChance > 0 ? Math.round(shieldBlockChance) + '%' : '—'}</span></div>
+    <div class="stat-row"><span class="stat-name">Dodge</span><span class="stat-value">${dodgeChance > 0 ? fmtPct(dodgeChance) : '—'}</span></div>
+  `;
+
+  // ── Offence ──
+  const physCrit = CRIT_CHANCE + getDexCritChanceBonus(m) + getCritChanceBonus(m)
+    + (m.skillBonuses?.['critChance'] ?? 0)
+    + (m.skillBonuses?.['critChanceBonus'] ?? 0);
+  const spellCrit = physCrit + getSpellCritChanceBonus(m);
+  const bowDmg = m.skillBonuses?.['bowDamage'] ?? 0;
+  const trapDmg = m.skillBonuses?.['trapDamage'] ?? 0;
+  const offenceRows = `
+    <div class="stat-row"><span class="stat-name">Crit Chance (physical)</span><span class="stat-value">${fmtPct(physCrit)}</span></div>
+    <div class="stat-row"><span class="stat-name">Crit Chance (spell)</span><span class="stat-value">${fmtPct(spellCrit)}</span></div>
+    <div class="stat-row"><span class="stat-name">Crit Damage</span><span class="stat-value">×${CRIT_MULTIPLIER}</span></div>
+    ${bowDmg ? `<div class="stat-row"><span class="stat-name">Bow Damage Bonus</span><span class="stat-value">${sign(bowDmg)}${bowDmg}</span></div>` : ''}
+    ${trapDmg ? `<div class="stat-row"><span class="stat-name">Trap Damage Bonus</span><span class="stat-value">${sign(trapDmg)}${trapDmg}</span></div>` : ''}
+  `;
+
+  // ── Elemental resistances ──
+  const elemResist = getEffectiveElementalResistances(m);
+  const elemRows = ELEMENT_IDS.map(id => {
+    const def = ELEMENTS[id];
+    const value = elemResist[id] ?? 0;
+    const pct = Math.round(value * 100);
+    const valueColor = pct > 0 ? def.color : (pct < 0 ? '#e84a1f' : '#5a4a30');
+    return `<div class="stat-row"><span class="stat-name"><span style="color:${def.color};">${def.symbol}</span> ${def.name}</span><span class="stat-value" style="color:${valueColor};">${pct}%</span></div>`;
+  }).join('');
+
+  // ── Status resistances ──
+  const resistances = m.statusResistances || {};
+  const statusEntries = Object.entries(resistances).filter(([, v]) => v > 0);
+  const statusRows = statusEntries.length
+    ? statusEntries.map(([effectId, value]) => {
+        const def = STATUS_EFFECT_DEFS[effectId];
+        const name = def?.name ?? effectId;
+        return `<div class="stat-row"><span class="stat-name">Resist ${name}</span><span class="stat-value">${Math.round(value * 100)}%</span></div>`;
+      }).join('')
+    : `<div class="stat-row" style="opacity:0.6;"><span class="stat-name">None</span><span class="stat-value"></span></div>`;
+
+  // ── Regeneration ──
+  const relic = m.equipment?.relic;
+  const relicDef = relic ? getItemDef(relic.name) : null;
+  const hpRegen = relicDef?.hpRegen;
+  const arCount = m.skills?.filter(s => (typeof s === 'string' ? s : s.name) === 'Arcane Reservoir').length ?? 0;
+  const mpInterval = arCount >= 3 ? 0.5 : arCount === 2 ? (1.0 / 1.4) : arCount === 1 ? (1.0 / 1.2) : 1.0;
+  const mpPerMin = Math.round(60 / mpInterval);
+  const regenRows = `
+    <div class="stat-row"><span class="stat-name">HP Regen</span><span class="stat-value">${hpRegen?.amount && hpRegen?.interval ? `${hpRegen.amount} every ${hpRegen.interval}s` : '—'}</span></div>
+    <div class="stat-row"><span class="stat-name">MP Regen (out of combat)</span><span class="stat-value">${mpPerMin} / min${arCount > 0 ? ` (Arcane Reservoir ×${arCount})` : ''}</span></div>
+  `;
+
+  // ── Skill / spell power bonuses ──
+  const SB_LABELS = {
+    all: 'All Skills', healing: 'Healing', buff: 'Buff', debuff: 'Debuff',
+    fire: 'Fire Magic', ice: 'Ice Magic', lightning: 'Lightning Magic',
+    water: 'Water Magic', earth: 'Earth Magic', holy: 'Holy Magic',
+    dark: 'Dark Magic', arcane: 'Arcane Magic',
+    shieldBlock: 'Shield Block %', trapDamage: 'Trap Damage', bowDamage: 'Bow Damage',
+    critChance: 'Crit Chance', critChanceBonus: 'Crit Chance',
+    dodgeChance: 'Dodge Chance', blockChance: 'Block Chance',
+    'direct-damage': 'Direct Damage Spells',
+  };
+  const SB_EXCLUDE = new Set(['shieldBlock', 'trapDamage', 'bowDamage', 'critChance', 'critChanceBonus', 'dodgeChance', 'blockChance']);
+  const sbEntries = Object.entries(m.skillBonuses ?? {}).filter(([k, v]) => v && !SB_EXCLUDE.has(k));
+  const sbRows = sbEntries.length
+    ? sbEntries.map(([key, val]) => {
+        const label = SB_LABELS[key] ?? key;
+        const valStr = (key === 'critChance' || key === 'critChanceBonus' || key === 'dodgeChance')
+          ? `${sign(val)}${Math.round(val * 100)}%`
+          : `${sign(val)}${val}`;
+        return `<div class="stat-row"><span class="stat-name">${label}</span><span class="stat-value">${valStr}</span></div>`;
+      }).join('')
+    : `<div class="stat-row" style="opacity:0.6;"><span class="stat-name">None</span><span class="stat-value"></span></div>`;
+
+  // ── Misc ──
+  const miscRows = `
+    ${m.job ? `<div class="stat-row"><span class="stat-name">Job</span><span class="stat-value">${m.job}</span></div>` : ''}
+    ${m.stance ? `<div class="stat-row"><span class="stat-name">Stance</span><span class="stat-value">${getStanceDef?.(m.stance)?.name ?? m.stance}</span></div>` : ''}
+    <div class="stat-row"><span class="stat-name">Level</span><span class="stat-value">${m.level ?? 0}</span></div>
+  `;
+
+  body.innerHTML = `
+    <div class="equip-stats-grid">
+      <section class="equip-stats-group">
+        <h3 class="equip-stats-h">Core Attributes</h3>
+        ${attrRows}
+      </section>
+      <section class="equip-stats-group">
+        <h3 class="equip-stats-h">Vitals</h3>
+        ${vitalsRows}
+      </section>
+      <section class="equip-stats-group">
+        <h3 class="equip-stats-h">Defence</h3>
+        ${defenceRows}
+      </section>
+      <section class="equip-stats-group">
+        <h3 class="equip-stats-h">Offence</h3>
+        ${offenceRows}
+      </section>
+      <section class="equip-stats-group">
+        <h3 class="equip-stats-h">Elemental Resistances</h3>
+        ${elemRows}
+      </section>
+      <section class="equip-stats-group">
+        <h3 class="equip-stats-h">Status Resistances</h3>
+        ${statusRows}
+      </section>
+      <section class="equip-stats-group">
+        <h3 class="equip-stats-h">Regeneration</h3>
+        ${regenRows}
+      </section>
+      <section class="equip-stats-group">
+        <h3 class="equip-stats-h">Skill &amp; Spell Power</h3>
+        ${sbRows}
+      </section>
+      <section class="equip-stats-group">
+        <h3 class="equip-stats-h">Profile</h3>
+        ${miscRows}
+      </section>
+    </div>
+  `;
 }
 
 function _memberHasLayTrap(m) {

@@ -85,7 +85,7 @@
             "interval": 5
         },
         "skillBonuses": {
-            "critChance": 0.05
+            "critChance": 0.01
         }
     },
     {
