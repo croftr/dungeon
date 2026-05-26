@@ -17,6 +17,76 @@
         "weight": 0.6
     },
     {
+        "name": "Mace",
+        "slot": "hand",
+        "attackType": "bash",
+        "weaponType": "mace",
+        "staminaDrain": 1,
+        "baseDamage": 15,
+        "delay": 2,
+        "statWeights": {
+            "str": 1,
+            "dex": 0
+        },
+        "icon": "/icons/weapons/mace.webp",
+        "description": "An iron mace with a flanged head. Excellent against armoured foes.",
+        "value": 135,
+        "weight": 2.2
+    },
+    {
+        "name": "Silver Mace",
+        "slot": "hand",
+        "attackType": "bash",
+        "weaponType": "mace",
+        "staminaDrain": 1,
+        "baseDamage": 18,
+        "delay": 2,
+        "statWeights": {
+            "str": 1,
+            "dex": 0
+        },
+        "familyBonus": [
+            {
+                "family": "undead",
+                "bonus": 2
+            }
+        ],
+        "icon": "/icons/weapons/silver_mace.webp",
+        "description": "A mace forged from pure silver, blessed with divine power. Grants sanctuary and holy radiance bonuses.",
+        "value": 450,
+        "weight": 2,
+        "skillBonuses": {
+            "Holy Radiance": 20
+        }
+    },
+    {
+        "name": "Celestial Vindicator Greatmace",
+        "slot": "hand",
+        "attackType": "bash",
+        "weaponType": "mace",
+        "staminaDrain": 1.5,
+        "baseDamage": 22,
+        "delay": 2.2,
+        "statWeights": {
+            "str": 1,
+            "dex": 0
+        },
+        "familyBonus": [
+            {
+                "family": "undead",
+                "bonus": 10
+            }
+        ],
+        "icon": "/icons/weapons/celestial_vindicator_mace.webp",
+        "description": "A massive two-handed mace of radiant white metal and silver. A core of holy yellow energy pulses within the head, ready to shatter evil.",
+        "value": 2000,
+        "weight": 12,
+        "skillBonuses": {
+            "Holy Radiance": 10,
+            "Sanctuary": 5
+        }
+    },
+    {
         "name": "Dagger",
         "slot": "hand",
         "attackType": "swipe",
@@ -144,263 +214,6 @@
         "weight": 0.4
     },
     {
-        "name": "Sword",
-        "slot": "hand",
-        "attackType": "swipe",
-        "weaponType": "sword",
-        "staminaDrain": 1,
-        "baseDamage": 10,
-        "delay": 2,
-        "statWeights": {
-            "str": 0.5,
-            "dex": 0.5
-        },
-        "icon": "/icons/weapons/sword.webp",
-        "description": "A straight iron sword. The classic weapon of choice for adventurers.",
-        "value": 195,
-        "weight": 1.8
-    },
-    {
-        "name": "Mace",
-        "slot": "hand",
-        "attackType": "bash",
-        "weaponType": "mace",
-        "staminaDrain": 1,
-        "baseDamage": 15,
-        "delay": 2,
-        "statWeights": {
-            "str": 1,
-            "dex": 0
-        },
-        "icon": "/icons/weapons/mace.webp",
-        "description": "An iron mace with a flanged head. Excellent against armoured foes.",
-        "value": 135,
-        "weight": 2.2
-    },
-    {
-        "name": "Silver Mace",
-        "slot": "hand",
-        "attackType": "bash",
-        "weaponType": "mace",
-        "staminaDrain": 1,
-        "baseDamage": 18,
-        "delay": 2,
-        "statWeights": {
-            "str": 1,
-            "dex": 0
-        },
-        "familyBonus": [
-            {
-                "family": "undead",
-                "bonus": 2
-            }
-        ],
-        "icon": "/icons/weapons/silver_mace.webp",
-        "description": "A mace forged from pure silver, blessed with divine power. Grants sanctuary and holy radiance bonuses.",
-        "value": 450,
-        "weight": 2,
-        "skillBonuses": {
-            "Holy Radiance": 20
-        }
-    },
-    {
-        "name": "Axe",
-        "slot": "hand",
-        "attackType": "swipe",
-        "weaponType": "axe",
-        "staminaDrain": 1,
-        "baseDamage": 10,
-        "delay": 2,
-        "statWeights": {
-            "str": 0.8,
-            "dex": 0.2
-        },
-        "icon": "/icons/weapons/axe.webp",
-        "description": "A heavy war axe. Slower than a sword but hits with devastating force.",
-        "value": 150,
-        "weight": 2.8
-    },
-    {
-        "name": "Dwarven Axe",
-        "slot": "hand",
-        "attackType": "swipe",
-        "weaponType": "axe",
-        "staminaDrain": 1,
-        "baseDamage": 12,
-        "delay": 2,
-        "statWeights": {
-            "str": 0.9,
-            "dex": 0.1
-        },
-        "icon": "/icons/weapons/dwarven_axe.webp",
-        "description": "A mastercrafted battle axe of dwarven design. Its heavy iron head is engraved with ancient runes of power.",
-        "value": 300,
-        "weight": 3.5
-    },
-    {
-        "name": "Oak Staff",
-        "slot": "hand",
-        "rightHandOnly": true,
-        "attackType": "bash",
-        "weaponType": "staff",
-        "staminaDrain": 1,
-        "baseDamage": 1,
-        "delay": 4,
-        "statWeights": {
-            "intelligence": 1.0
-        },
-        "icon": "/icons/weapons/oak_staff.webp",
-        "description": "A gnarled wooden staff. A reliable melee weapon for wizards who want to bash enemies.",
-        "value": 54,
-        "weight": 1.5,
-        "elementalDamage": {
-            "holy": 7
-        },
-        "statBonuses": {
-            "mp": 2
-        }
-    },
-    {
-        "name": "Short Bow",
-        "slot": "hand",
-        "rightHandOnly": true,
-        "attackType": "shoot",
-        "weaponType": "bow",
-        "staminaDrain": 2,
-        "baseDamage": 15,
-        "delay": 4,
-        "statWeights": {
-            "str": 0.2,
-            "dex": 0.8
-        },
-        "icon": "/icons/weapons/short_bow.webp",
-        "description": "A recurve hunting bow. Loose to strike enemies at range.",
-        "value": 120,
-        "weight": 1.2
-    },
-    {
-        "name": "Longbow",
-        "slot": "hand",
-        "rightHandOnly": true,
-        "attackType": "shoot",
-        "weaponType": "bow",
-        "staminaDrain": 2,
-        "baseDamage": 20,
-        "delay": 4,
-        "statWeights": {
-            "str": 0.3,
-            "dex": 0.7
-        },
-        "icon": "/icons/weapons/longbow.webp",
-        "description": "A tall yew longbow. Tremendous range and power.",
-        "value": 225,
-        "weight": 1.8
-    },
-    {
-        "name": "Crossbow",
-        "slot": "hand",
-        "rightHandOnly": true,
-        "attackType": "shoot",
-        "weaponType": "crossbow",
-        "staminaDrain": 2,
-        "baseDamage": 20,
-        "delay": 6,
-        "statWeights": {
-            "str": 0.5,
-            "dex": 0.5
-        },
-        "icon": "/icons/weapons/wooden-crossbow.webp",
-        "description": "A mechanical bow that fires powerful bolts. Highly effective at range.",
-        "value": 240,
-        "weight": 3.5
-    },
-    {
-        "name": "Dwarf Crossbow",
-        "slot": "hand",
-        "rightHandOnly": true,
-        "attackType": "shoot",
-        "weaponType": "crossbow",
-        "staminaDrain": 2,
-        "baseDamage": 26,
-        "delay": 5.5,
-        "statWeights": {
-            "str": 0.6,
-            "dex": 0.4
-        },
-        "icon": "/icons/weapons/dwarf_crossbow.webp",
-        "description": "A heavy, short-limbed mechanical crossbow made of dark iron and reinforced with brass dwarven runes. Robust and deadly.",
-        "value": 480,
-        "weight": 4.2
-    },
-    {
-        "name": "Greatsword",
-        "slot": "bothHands",
-        "attackType": "swipe",
-        "weaponType": "twoHanded",
-        "staminaDrain": 2,
-        "baseDamage": 24,
-        "delay": 5,
-        "statWeights": {
-            "str": 0.7,
-            "dex": 0.3
-        },
-        "icon": "/icons/weapons/greatsword.webp",
-        "description": "A massive two-handed blade that cleaves through enemies in a single arc.",
-        "value": 450,
-        "weight": 5.5
-    },
-    {
-        "name": "Tridant",
-        "slot": "bothHands",
-        "attackType": "swipe",
-        "weaponType": "twoHanded",
-        "staminaDrain": 1,
-        "baseDamage": 20,
-        "delay": 4,
-        "statWeights": {
-            "str": 0.8,
-            "dex": 0.2
-        },
-        "icon": "/icons/weapons/tridant.webp",
-        "description": "A two-handed tridant. Slow to swing but crushes stone and bone alike.",
-        "value": 390,
-        "weight": 7
-    },
-    {
-        "name": "Greataxe",
-        "slot": "bothHands",
-        "attackType": "swipe",
-        "weaponType": "twoHanded",
-        "staminaDrain": 2,
-        "baseDamage": 20,
-        "delay": 5,
-        "statWeights": {
-            "str": 0.8,
-            "dex": 0.2
-        },
-        "icon": "/icons/weapons/greataxe.webp",
-        "description": "A massive two-handed axe that cleaves through enemies in a single arc.",
-        "value": 450,
-        "weight": 5.5
-    },
-    {
-        "name": "War Hammer",
-        "slot": "bothHands",
-        "attackType": "bash",
-        "weaponType": "twoHanded",
-        "staminaDrain": 2,
-        "baseDamage": 22,
-        "delay": 5,
-        "statWeights": {
-            "str": 0.9,
-            "dex": 0.1
-        },
-        "icon": "/icons/weapons/war_hammer.webp",
-        "description": "A two-handed war hammer. Slow to swing but crushes stone and bone alike.",
-        "value": 390,
-        "weight": 7
-    },
-    {
         "name": "Amethyst Wardancer Dagger",
         "slot": "hand",
         "attackType": "swipe",
@@ -409,255 +222,14 @@
         "baseDamage": 10,
         "delay": 0.5,
         "statWeights": {
-            "str": 0.0,
-            "dex": 1.0
+            "str": 0,
+            "dex": 1
         },
         "icon": "/icons/weapons/wardancer_dagger.webp",
         "description": "A legendary elven blade that feels weightless in the hand. Its amethyst-infused edge can slice through the toughest mail with ease.",
         "value": 1500,
         "weight": 0.2,
         "skillBonuses": {}
-    },
-    {
-        "name": "Celestial Vindicator Greatmace",
-        "slot": "hand",
-        "attackType": "bash",
-        "weaponType": "mace",
-        "staminaDrain": 1.5,
-        "baseDamage": 22,
-        "delay": 2.2,
-        "statWeights": {
-            "str": 1.0,
-            "dex": 0.0
-        },
-        "familyBonus": [
-            {
-                "family": "undead",
-                "bonus": 10
-            }
-        ],
-        "icon": "/icons/weapons/celestial_vindicator_mace.webp",
-        "description": "A massive two-handed mace of radiant white metal and silver. A core of holy yellow energy pulses within the head, ready to shatter evil.",
-        "value": 2000,
-        "weight": 12,
-        "skillBonuses": {
-            "Holy Radiance": 10,
-            "Sanctuary": 5
-        }
-    },
-    {
-        "name": "Ironpeak Battleaxe",
-        "slot": "hand",
-        "type": "weapon",
-        "attackType": "swipe",
-        "baseDamage": 14,
-        "icon": "/icons/weapons/dwarf_battleaxe.webp",
-        "description": "A heavy, double-bladed dwarf battleaxe inscribed with glowing iron runes of power.",
-        "value": 2200,
-        "weight": 6.0,
-        "scaling": {
-            "strength": 0.8
-        }
-    },
-    {
-        "name": "Sylvan Elderwood Bow",
-        "slot": "hand",
-        "rightHandOnly": true,
-        "type": "weapon",
-        "attackType": "shoot",
-        "weaponType": "bow",
-        "staminaDrain": 2,
-        "baseDamage": 26,
-        "delay": 3.8,
-        "statWeights": {
-            "str": 0.2,
-            "dex": 0.8
-        },
-        "icon": "/icons/weapons/sylvan_bow.webp",
-        "description": "A legendary longbow carved from the heartwood of an ancient magical tree. It hums with immense power.",
-        "value": 2200,
-        "weight": 1.5
-    },
-    {
-        "name": "Mountain Stalker Crossbow",
-        "slot": "hand",
-        "rightHandOnly": true,
-        "type": "weapon",
-        "attackType": "shoot",
-        "weaponType": "crossbow",
-        "staminaDrain": 2,
-        "baseDamage": 30,
-        "delay": 5.2,
-        "statWeights": {
-            "str": 0.5,
-            "dex": 0.5
-        },
-        "icon": "/icons/weapons/mountain_crossbow.webp",
-        "description": "A high-tension crossbow made of reinforced steel and dark oak, capable of piercing dragon scales.",
-        "value": 2400,
-        "weight": 5.0
-    },
-    {
-        "name": "Aethelgard Grand Staff",
-        "slot": "hand",
-        "rightHandOnly": true,
-        "type": "weapon",
-        "attackType": "bash",
-        "weaponType": "staff",
-        "staminaDrain": 1,
-        "baseDamage": 2,
-        "delay": 3.0,
-        "statWeights": {
-            "intelligence": 1.0
-        },
-        "icon": "/icons/weapons/archmage_staff.webp",
-        "description": "A staff made of pure crystal and solidified mana, crackling with arcane force.",
-        "value": 2400,
-        "weight": 2.0,
-        "elementalDamage": {
-            "fire": 25
-        },
-        "statBonuses": {
-            "intelligence": 4
-        },
-        "skillBonuses": {
-            "fire": 2
-        }
-    },
-    {
-        "name": "Life Staff",
-        "slot": "hand",
-        "rightHandOnly": true,
-        "type": "weapon",
-        "attackType": "bash",
-        "weaponType": "staff",
-        "staminaDrain": 1,
-        "baseDamage": 1,
-        "delay": 3.2,
-        "statWeights": {
-            "intelligence": 1.0
-        },
-        "elementalDamage": {
-            "holy": 15
-        },
-        "icon": "/icons/weapons/life_staff.webp",
-        "description": "A staff crafted from living elderwood, pulsing with the essence of vitality and magic. It restores and bolsters the life force of its wielder.",
-        "value": 1800,
-        "weight": 2.5,
-        "statBonuses": {
-            "hp": 2,
-            "mp": 2
-        }
-    },
-    {
-        "name": "Life Orb",
-        "slot": "hand",
-        "leftHandOnly": true,
-        "type": "weapon",
-        "attackType": "orb",
-        "weaponType": "orb",
-        "staminaDrain": 0,
-        "baseDamage": 0,
-        "delay": 3.2,
-        "statWeights": {
-            "intelligence": 1.0
-        },
-        "elementalResistances": {
-            "dark": 0.2
-        },
-        "icon": "/icons/weapons/life_orb.webp",
-        "description": "A radiant crystal orb that pulses with the essence of vitality. It bolsters the wielder's health and mana without the need for physical strike.",
-        "value": 2000,
-        "weight": 0.8,
-        "statBonuses": {
-            "hp": 2,
-            "mp": 2
-        }
-    },
-    {
-        "name": "Ogre Head Orb",
-        "slot": "hand",
-        "leftHandOnly": true,
-        "type": "weapon",
-        "attackType": "orb",
-        "weaponType": "orb",
-        "staminaDrain": 0,
-        "baseDamage": 0,
-        "delay": 3.2,
-        "statWeights": {
-            "intelligence": 1.0
-        },
-        "elementalResistances": {
-            "fire": 0.1,
-            "ice": 0.1
-        },
-        "icon": "/icons/weapons/ogre_head_orb.webp",
-        "description": "A gruesome orb made from an ogre's head. It pulses with raw, untamed power, granting the wielder enhanced strength and resilience.",
-        "value": 2000,
-        "weight": 0.8,
-        "statBonuses": {
-            "hp": 5,
-            "mp": 2,
-            "vitality": 1
-        }
-    },
-    {
-        "name": "Storm-Reaver Greataxe",
-        "slot": "bothHands",
-        "type": "weapon",
-        "attackType": "swipe",
-        "weaponType": "twoHanded",
-        "staminaDrain": 3,
-        "baseDamage": 35,
-        "delay": 6.0,
-        "statWeights": {
-            "str": 1.0
-        },
-        "icon": "/icons/weapons/stormreaver_axe.webp",
-        "description": "A massive two-handed axe of serrated iron, capable of cleaving an ogre in twain.",
-        "value": 2600,
-        "weight": 12.0
-    },
-    {
-        "name": "Barbarian's Club",
-        "slot": "bothHands",
-        "attackType": "bash",
-        "weaponType": "twoHanded",
-        "staminaDrain": 2,
-        "baseDamage": 26,
-        "delay": 5.0,
-        "statWeights": {
-            "str": 1.0,
-            "dex": 0.0
-        },
-        "statBonuses": {
-            "strength": 2
-        },
-        "icon": "/icons/weapons/barbarians_club.webp",
-        "description": "A devastating war club crafted from giant timber and reinforced with crude iron bands.",
-        "value": 1500,
-        "weight": 15.0
-    },
-    {
-        "name": "Flame Axe",
-        "slot": "hand",
-        "attackType": "swipe",
-        "weaponType": "axe",
-        "staminaDrain": 1,
-        "baseDamage": 12,
-        "damageType": "fire",
-        "elementalDamage": {
-            "fire": 6
-        },
-        "delay": 2,
-        "statWeights": {
-            "str": 0.8,
-            "dex": 0.2
-        },
-        "icon": "/icons/weapons/flame_axe.webp",
-        "description": "A heavy battle axe that glows with internal heat. Its blade is perpetually wreathed in flames.",
-        "value": 650,
-        "weight": 3.0
     },
     {
         "name": "Flame Dagger",
@@ -681,27 +253,6 @@
         "weight": 0.5
     },
     {
-        "name": "Ice Axe",
-        "slot": "hand",
-        "attackType": "swipe",
-        "weaponType": "axe",
-        "staminaDrain": 1,
-        "baseDamage": 13,
-        "damageType": "ice",
-        "elementalDamage": {
-            "ice": 6
-        },
-        "delay": 2,
-        "statWeights": {
-            "str": 0.8,
-            "dex": 0.2
-        },
-        "icon": "/icons/weapons/ice_axe.webp",
-        "description": "A battle axe forged from eternal ice. Its blade is freezing to the touch.",
-        "value": 650,
-        "weight": 3.0
-    },
-    {
         "name": "Ice Dagger",
         "slot": "hand",
         "attackType": "swipe",
@@ -721,48 +272,6 @@
         "description": "A shard of magically hardened ice, sharpened to a lethal edge.",
         "value": 450,
         "weight": 0.5
-    },
-    {
-        "name": "Flame Greataxe",
-        "slot": "bothHands",
-        "attackType": "swipe",
-        "weaponType": "twoHanded",
-        "staminaDrain": 2,
-        "baseDamage": 25,
-        "damageType": "fire",
-        "elementalDamage": {
-            "fire": 10
-        },
-        "delay": 5,
-        "statWeights": {
-            "str": 0.8,
-            "dex": 0.2
-        },
-        "icon": "/icons/weapons/flame_greataxe.webp",
-        "description": "A massive two-handed axe that burns with an inextinguishable flame. Its heavy head is wreathed in fire.",
-        "value": 1200,
-        "weight": 6.5
-    },
-    {
-        "name": "Ice Greataxe",
-        "slot": "bothHands",
-        "attackType": "swipe",
-        "weaponType": "twoHanded",
-        "staminaDrain": 2,
-        "baseDamage": 25,
-        "damageType": "ice",
-        "elementalDamage": {
-            "ice": 10
-        },
-        "delay": 5,
-        "statWeights": {
-            "str": 0.8,
-            "dex": 0.2
-        },
-        "icon": "/icons/weapons/ice_greataxe.webp",
-        "description": "A massive two-handed axe carved from a single block of magical ice. It emits a constant aura of frost.",
-        "value": 1200,
-        "weight": 6.5
     },
     {
         "name": "Lightning Dagger",
@@ -847,5 +356,497 @@
         "description": "A blade of dark obsidian, wreathed in a sinister, shadowy shroud.",
         "value": 450,
         "weight": 0.5
+    },
+    {
+        "name": "Sword",
+        "slot": "hand",
+        "attackType": "swipe",
+        "weaponType": "sword",
+        "staminaDrain": 1,
+        "baseDamage": 10,
+        "delay": 2,
+        "statWeights": {
+            "str": 0.5,
+            "dex": 0.5
+        },
+        "icon": "/icons/weapons/sword.webp",
+        "description": "A straight iron sword. The classic weapon of choice for adventurers.",
+        "value": 195,
+        "weight": 1.8
+    },
+    {
+        "name": "Axe",
+        "slot": "hand",
+        "attackType": "swipe",
+        "weaponType": "axe",
+        "staminaDrain": 1,
+        "baseDamage": 10,
+        "delay": 2,
+        "statWeights": {
+            "str": 0.8,
+            "dex": 0.2
+        },
+        "icon": "/icons/weapons/axe.webp",
+        "description": "A heavy war axe. Slower than a sword but hits with devastating force.",
+        "value": 150,
+        "weight": 2.8
+    },
+    {
+        "name": "Dwarven Axe",
+        "slot": "hand",
+        "attackType": "swipe",
+        "weaponType": "axe",
+        "staminaDrain": 1,
+        "baseDamage": 12,
+        "delay": 2,
+        "statWeights": {
+            "str": 0.9,
+            "dex": 0.1
+        },
+        "icon": "/icons/weapons/dwarven_axe.webp",
+        "description": "A mastercrafted battle axe of dwarven design. Its heavy iron head is engraved with ancient runes of power.",
+        "value": 300,
+        "weight": 3.5
+    },
+    {
+        "name": "Ironpeak Battleaxe",
+        "slot": "hand",
+        "type": "weapon",
+        "attackType": "swipe",
+        "baseDamage": 14,
+        "icon": "/icons/weapons/dwarf_battleaxe.webp",
+        "description": "A heavy, double-bladed dwarf battleaxe inscribed with glowing iron runes of power.",
+        "value": 2200,
+        "weight": 6,
+        "scaling": {
+            "strength": 0.8
+        },
+        "weaponType": "axe"
+    },
+    {
+        "name": "Flame Axe",
+        "slot": "hand",
+        "attackType": "swipe",
+        "weaponType": "axe",
+        "staminaDrain": 1,
+        "baseDamage": 12,
+        "damageType": "fire",
+        "elementalDamage": {
+            "fire": 6
+        },
+        "delay": 2,
+        "statWeights": {
+            "str": 0.8,
+            "dex": 0.2
+        },
+        "icon": "/icons/weapons/flame_axe.webp",
+        "description": "A heavy battle axe that glows with internal heat. Its blade is perpetually wreathed in flames.",
+        "value": 650,
+        "weight": 3
+    },
+    {
+        "name": "Ice Axe",
+        "slot": "hand",
+        "attackType": "swipe",
+        "weaponType": "axe",
+        "staminaDrain": 1,
+        "baseDamage": 13,
+        "damageType": "ice",
+        "elementalDamage": {
+            "ice": 6
+        },
+        "delay": 2,
+        "statWeights": {
+            "str": 0.8,
+            "dex": 0.2
+        },
+        "icon": "/icons/weapons/ice_axe.webp",
+        "description": "A battle axe forged from eternal ice. Its blade is freezing to the touch.",
+        "value": 650,
+        "weight": 3
+    },
+    {
+        "name": "Oak Staff",
+        "slot": "hand",
+        "rightHandOnly": true,
+        "attackType": "bash",
+        "weaponType": "staff",
+        "staminaDrain": 1,
+        "baseDamage": 1,
+        "delay": 4,
+        "statWeights": {
+            "intelligence": 1
+        },
+        "icon": "/icons/weapons/oak_staff.webp",
+        "description": "A gnarled wooden staff. A reliable melee weapon for wizards who want to bash enemies.",
+        "value": 54,
+        "weight": 1.5,
+        "elementalDamage": {
+            "holy": 7
+        },
+        "statBonuses": {
+            "mp": 2
+        }
+    },
+    {
+        "name": "Aethelgard Grand Staff",
+        "slot": "hand",
+        "rightHandOnly": true,
+        "type": "weapon",
+        "attackType": "bash",
+        "weaponType": "staff",
+        "staminaDrain": 1,
+        "baseDamage": 2,
+        "delay": 3,
+        "statWeights": {
+            "intelligence": 1
+        },
+        "icon": "/icons/weapons/archmage_staff.webp",
+        "description": "A staff made of pure crystal and solidified mana, crackling with arcane force.",
+        "value": 2400,
+        "weight": 2,
+        "elementalDamage": {
+            "fire": 25
+        },
+        "statBonuses": {
+            "intelligence": 4
+        },
+        "skillBonuses": {
+            "fire": 2
+        }
+    },
+    {
+        "name": "Life Staff",
+        "slot": "hand",
+        "rightHandOnly": true,
+        "type": "weapon",
+        "attackType": "bash",
+        "weaponType": "staff",
+        "staminaDrain": 1,
+        "baseDamage": 1,
+        "delay": 3.2,
+        "statWeights": {
+            "intelligence": 1
+        },
+        "elementalDamage": {
+            "holy": 15
+        },
+        "icon": "/icons/weapons/life_staff.webp",
+        "description": "A staff crafted from living elderwood, pulsing with the essence of vitality and magic. It restores and bolsters the life force of its wielder.",
+        "value": 1800,
+        "weight": 2.5,
+        "statBonuses": {
+            "hp": 2,
+            "mp": 2
+        }
+    },
+    {
+        "name": "Life Orb",
+        "slot": "hand",
+        "leftHandOnly": true,
+        "type": "weapon",
+        "attackType": "orb",
+        "weaponType": "orb",
+        "staminaDrain": 0,
+        "baseDamage": 0,
+        "delay": 3.2,
+        "statWeights": {
+            "intelligence": 1
+        },
+        "elementalResistances": {
+            "dark": 0.2
+        },
+        "icon": "/icons/weapons/life_orb.webp",
+        "description": "A radiant crystal orb that pulses with the essence of vitality. It bolsters the wielder's health and mana without the need for physical strike.",
+        "value": 2000,
+        "weight": 0.8,
+        "statBonuses": {
+            "hp": 2,
+            "mp": 2
+        }
+    },
+    {
+        "name": "Ogre Head Orb",
+        "slot": "hand",
+        "leftHandOnly": true,
+        "type": "weapon",
+        "attackType": "orb",
+        "weaponType": "orb",
+        "staminaDrain": 0,
+        "baseDamage": 0,
+        "delay": 3.2,
+        "statWeights": {
+            "intelligence": 1
+        },
+        "elementalResistances": {
+            "fire": 0.1,
+            "ice": 0.1
+        },
+        "icon": "/icons/weapons/ogre_head_orb.webp",
+        "description": "A gruesome orb made from an ogre's head. It pulses with raw, untamed power, granting the wielder enhanced strength and resilience.",
+        "value": 2000,
+        "weight": 0.8,
+        "statBonuses": {
+            "hp": 5,
+            "mp": 2,
+            "vitality": 1
+        }
+    },
+    {
+        "name": "Short Bow",
+        "slot": "hand",
+        "rightHandOnly": true,
+        "attackType": "shoot",
+        "weaponType": "bow",
+        "staminaDrain": 2,
+        "baseDamage": 15,
+        "delay": 4,
+        "statWeights": {
+            "str": 0.2,
+            "dex": 0.8
+        },
+        "icon": "/icons/weapons/short_bow.webp",
+        "description": "A recurve hunting bow. Loose to strike enemies at range.",
+        "value": 120,
+        "weight": 1.2
+    },
+    {
+        "name": "Longbow",
+        "slot": "hand",
+        "rightHandOnly": true,
+        "attackType": "shoot",
+        "weaponType": "bow",
+        "staminaDrain": 2,
+        "baseDamage": 20,
+        "delay": 4,
+        "statWeights": {
+            "str": 0.3,
+            "dex": 0.7
+        },
+        "icon": "/icons/weapons/longbow.webp",
+        "description": "A tall yew longbow. Tremendous range and power.",
+        "value": 225,
+        "weight": 1.8
+    },
+    {
+        "name": "Sylvan Elderwood Bow",
+        "slot": "hand",
+        "rightHandOnly": true,
+        "type": "weapon",
+        "attackType": "shoot",
+        "weaponType": "bow",
+        "staminaDrain": 2,
+        "baseDamage": 26,
+        "delay": 3.8,
+        "statWeights": {
+            "str": 0.2,
+            "dex": 0.8
+        },
+        "icon": "/icons/weapons/sylvan_bow.webp",
+        "description": "A legendary longbow carved from the heartwood of an ancient magical tree. It hums with immense power.",
+        "value": 2200,
+        "weight": 1.5
+    },
+    {
+        "name": "Crossbow",
+        "slot": "hand",
+        "rightHandOnly": true,
+        "attackType": "shoot",
+        "weaponType": "crossbow",
+        "staminaDrain": 2,
+        "baseDamage": 20,
+        "delay": 6,
+        "statWeights": {
+            "str": 0.5,
+            "dex": 0.5
+        },
+        "icon": "/icons/weapons/wooden-crossbow.webp",
+        "description": "A mechanical bow that fires powerful bolts. Highly effective at range.",
+        "value": 240,
+        "weight": 3.5
+    },
+    {
+        "name": "Dwarf Crossbow",
+        "slot": "hand",
+        "rightHandOnly": true,
+        "attackType": "shoot",
+        "weaponType": "crossbow",
+        "staminaDrain": 2,
+        "baseDamage": 26,
+        "delay": 5.5,
+        "statWeights": {
+            "str": 0.6,
+            "dex": 0.4
+        },
+        "icon": "/icons/weapons/dwarf_crossbow.webp",
+        "description": "A heavy, short-limbed mechanical crossbow made of dark iron and reinforced with brass dwarven runes. Robust and deadly.",
+        "value": 480,
+        "weight": 4.2
+    },
+    {
+        "name": "Mountain Stalker Crossbow",
+        "slot": "hand",
+        "rightHandOnly": true,
+        "type": "weapon",
+        "attackType": "shoot",
+        "weaponType": "crossbow",
+        "staminaDrain": 2,
+        "baseDamage": 30,
+        "delay": 5.2,
+        "statWeights": {
+            "str": 0.5,
+            "dex": 0.5
+        },
+        "icon": "/icons/weapons/mountain_crossbow.webp",
+        "description": "A high-tension crossbow made of reinforced steel and dark oak, capable of piercing dragon scales.",
+        "value": 2400,
+        "weight": 5
+    },
+    {
+        "name": "Greatsword",
+        "slot": "bothHands",
+        "attackType": "swipe",
+        "weaponType": "twoHanded",
+        "staminaDrain": 2,
+        "baseDamage": 24,
+        "delay": 5,
+        "statWeights": {
+            "str": 0.7,
+            "dex": 0.3
+        },
+        "icon": "/icons/weapons/greatsword.webp",
+        "description": "A massive two-handed blade that cleaves through enemies in a single arc.",
+        "value": 450,
+        "weight": 5.5
+    },
+    {
+        "name": "Tridant",
+        "slot": "bothHands",
+        "attackType": "swipe",
+        "weaponType": "twoHanded",
+        "staminaDrain": 1,
+        "baseDamage": 20,
+        "delay": 4,
+        "statWeights": {
+            "str": 0.8,
+            "dex": 0.2
+        },
+        "icon": "/icons/weapons/tridant.webp",
+        "description": "A two-handed tridant. Slow to swing but crushes stone and bone alike.",
+        "value": 390,
+        "weight": 7
+    },
+    {
+        "name": "Greataxe",
+        "slot": "bothHands",
+        "attackType": "swipe",
+        "weaponType": "twoHanded",
+        "staminaDrain": 2,
+        "baseDamage": 20,
+        "delay": 5,
+        "statWeights": {
+            "str": 0.8,
+            "dex": 0.2
+        },
+        "icon": "/icons/weapons/greataxe.webp",
+        "description": "A massive two-handed axe that cleaves through enemies in a single arc.",
+        "value": 450,
+        "weight": 5.5
+    },
+    {
+        "name": "War Hammer",
+        "slot": "bothHands",
+        "attackType": "bash",
+        "weaponType": "twoHanded",
+        "staminaDrain": 2,
+        "baseDamage": 22,
+        "delay": 5,
+        "statWeights": {
+            "str": 0.9,
+            "dex": 0.1
+        },
+        "icon": "/icons/weapons/war_hammer.webp",
+        "description": "A two-handed war hammer. Slow to swing but crushes stone and bone alike.",
+        "value": 390,
+        "weight": 7
+    },
+    {
+        "name": "Storm-Reaver Greataxe",
+        "slot": "bothHands",
+        "type": "weapon",
+        "attackType": "swipe",
+        "weaponType": "twoHanded",
+        "staminaDrain": 3,
+        "baseDamage": 35,
+        "delay": 6,
+        "statWeights": {
+            "str": 1
+        },
+        "icon": "/icons/weapons/stormreaver_axe.webp",
+        "description": "A massive two-handed axe of serrated iron, capable of cleaving an ogre in twain.",
+        "value": 2600,
+        "weight": 12
+    },
+    {
+        "name": "Barbarian's Club",
+        "slot": "bothHands",
+        "attackType": "bash",
+        "weaponType": "twoHanded",
+        "staminaDrain": 2,
+        "baseDamage": 26,
+        "delay": 5,
+        "statWeights": {
+            "str": 1,
+            "dex": 0
+        },
+        "statBonuses": {
+            "strength": 2
+        },
+        "icon": "/icons/weapons/barbarians_club.webp",
+        "description": "A devastating war club crafted from giant timber and reinforced with crude iron bands.",
+        "value": 1500,
+        "weight": 15
+    },
+    {
+        "name": "Flame Greataxe",
+        "slot": "bothHands",
+        "attackType": "swipe",
+        "weaponType": "twoHanded",
+        "staminaDrain": 2,
+        "baseDamage": 25,
+        "damageType": "fire",
+        "elementalDamage": {
+            "fire": 10
+        },
+        "delay": 5,
+        "statWeights": {
+            "str": 0.8,
+            "dex": 0.2
+        },
+        "icon": "/icons/weapons/flame_greataxe.webp",
+        "description": "A massive two-handed axe that burns with an inextinguishable flame. Its heavy head is wreathed in fire.",
+        "value": 1200,
+        "weight": 6.5
+    },
+    {
+        "name": "Ice Greataxe",
+        "slot": "bothHands",
+        "attackType": "swipe",
+        "weaponType": "twoHanded",
+        "staminaDrain": 2,
+        "baseDamage": 25,
+        "damageType": "ice",
+        "elementalDamage": {
+            "ice": 10
+        },
+        "delay": 5,
+        "statWeights": {
+            "str": 0.8,
+            "dex": 0.2
+        },
+        "icon": "/icons/weapons/ice_greataxe.webp",
+        "description": "A massive two-handed axe carved from a single block of magical ice. It emits a constant aura of frost.",
+        "value": 1200,
+        "weight": 6.5
     }
 ]
