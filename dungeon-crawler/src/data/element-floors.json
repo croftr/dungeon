@@ -20,7 +20,7 @@
     "element": "holy",
     "dps": 6,
     "tickInterval": 1.0,
-    "texture": "/textures/elemental-floor/holy-floor.png",
+    "texture": "/textures/elemental-floor/holy-floor.webp",
     "sound": "/sounds/actions/skills/holy.mp3"
   },
   "dark": {
@@ -28,7 +28,7 @@
     "element": "dark",
     "dps": 6,
     "tickInterval": 1.0,
-    "texture": "/textures/elemental-floor/dark-floor.png",
+    "texture": "/textures/elemental-floor/dark-floor.webp",
     "sound": "/sounds/elements/dark.mp3"
   },
   "lightning": {
@@ -36,7 +36,7 @@
     "element": "lightning",
     "dps": 6,
     "tickInterval": 1.0,
-    "texture": "/textures/elemental-floor/lightening-floor.png",
+    "texture": "/textures/elemental-floor/lightening-floor.webp",
     "sound": "/sounds/elements/lightening.mp3"
   },
   "water": {
@@ -44,7 +44,7 @@
     "element": "water",
     "dps": 6,
     "tickInterval": 1.0,
-    "texture": "/textures/elemental-floor/water-floor.png",
+    "texture": "/textures/elemental-floor/water-floor.webp",
     "sound": "/sounds/elements/water.mp3"
   }
 }

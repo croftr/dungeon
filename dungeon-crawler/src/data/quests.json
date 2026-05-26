@@ -133,12 +133,31 @@
     ]
   },
   {
+    "id": "elixir-of-foritude",
+    "name": "A Vial of Foritude",
+    "giver": "potion-merchant",
+    "text": "My last bottle of Elixir of Foritude — that swirling yellow brew — was taken by a clumsy oaf who knocked it right off the shelf. If you can bring me one, I'll see you right with fifty gold. You keep the elixir; I just need to know the stock is there.",
+    "requiredItems": [
+      "Elixir of Foritude"
+    ],
+    "keepRequiredItems": true,
+    "completionText": "That earthy, iron smell — yes, that's the one. Here's your fifty gold, as promised. Keep hold of it; your bones will thank you long before mine will.",
+    "completionRewards": [
+      {
+        "name": "Gold Coins",
+        "quantity": 50
+      },
+      "Congealed Slime"
+    ]
+  },
+  {
     "id": "oracles-marrow",
     "name": "The Oracle's Marrow",
     "giver": "potion-merchant",
     "prerequisiteQuests": [
       "elixir-of-rage",
-      "elixir-of-enlightenment"
+      "elixir-of-enlightenment",
+      "elixir-of-foritude"
     ],
     "text": "Bring me a single vial of Starlight Nectar. It is liquid radiance, gathered only on the solstice and rarer than a dragon’s heart-blood. I know its resting place, but my bones are too brittle for the climb.Take this key; it will recognize the lock and part the stone for you. But heed my warning: the Vault is the private larder of Kargen the Cloud-Walker. He is a giant of the ancient peaks, and he has a short temper for thieves.",
     "audio": "/npcs/potion-merchant/necter-quest.mp3",
