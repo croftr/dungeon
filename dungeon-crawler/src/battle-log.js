@@ -19,7 +19,7 @@ function _elemBadge(elementId, value, signed = true) {
   const def = ELEMENTS[elementId];
   if (!def) return '';
   const sign = signed && value >= 0 ? '+' : '';
-  const num = value != null ? `${sign}${value}` : '';
+  const num = value != null ? `${sign}${typeof value === 'number' ? Math.round(value) : value}` : '';
   return `<span class="bl-elem" style="color:${def.color};" title="${def.name}">${def.symbol}${num}</span>`;
 }
 
@@ -137,7 +137,7 @@ function _downloadCsv() {
 
     if (type === 'death') {
       action = 'Death';
-      damage = e.damage != null ? e.damage : '';
+      damage = e.damage != null ? Math.round(e.damage) : '';
       result = 'Killed';
       details = '';
     } else if (type === 'levelup') {
@@ -145,7 +145,7 @@ function _downloadCsv() {
       result = `Level ${e.level}`;
     } else if (type === 'skill') {
       action = e.skillName || '';
-      damage = (e.finalDamage != null) ? e.finalDamage : '';
+      damage = (e.finalDamage != null) ? Math.round(e.finalDamage) : '';
       result = (e.finalDamage != null && e.finalDamage < 0) ? 'Heal' : 'Skill';
       details = e.note || '';
     } else if (type === 'status-effect') {
@@ -158,11 +158,11 @@ function _downloadCsv() {
       details = (e.carry != null && e.max != null) ? `${e.carry.toFixed(1)} / ${e.max.toFixed(1)} kg` : '';
     } else if (type === 'tick') {
       action = e.effectName || '';
-      damage = e.amount != null ? e.amount : '';
+      damage = e.amount != null ? Math.round(e.amount) : '';
       result = e.amount < 0 ? 'Regen' : 'Damage';
     } else if (type === 'reflect') {
       action = 'Reflect';
-      damage = e.amount != null ? e.amount : '';
+      damage = e.amount != null ? Math.round(e.amount) : '';
       result = 'Reflected';
     } else if (type === 'item') {
       const st = e.subtype || 'loot';
@@ -179,7 +179,7 @@ function _downloadCsv() {
     } else if (type === 'trap') {
       action = e.trapLabel || 'Trap';
       result = e.amount > 0 ? 'Hit' : 'Miss';
-      damage = e.amount > 0 ? e.amount : '';
+      damage = e.amount > 0 ? Math.round(e.amount) : '';
       details = e.element || '';
     } else {
       // Attack
@@ -190,7 +190,7 @@ function _downloadCsv() {
         result = 'Miss';
       } else {
         result = e.crit ? 'Crit' : 'Hit';
-        damage = e.finalDamage != null ? e.finalDamage : '';
+        damage = e.finalDamage != null ? Math.round(e.finalDamage) : '';
       }
       details = _formula(e).replace(/<[^>]*>/g, '').replace(/"/g, '""');
     }
@@ -313,7 +313,7 @@ const TYPE_ABBR = {
 function _buildRowHtml(e) {
   // ── Death ──────────────────────────────────────────────────────────────────
   if (e.type === 'death') {
-    const dmgText = e.damage != null ? ` for <b>${e.damage}</b> dmg` : '';
+    const dmgText = e.damage != null ? ` for <b>${Math.round(e.damage)}</b> dmg` : '';
     const killText = e.killer
       ? `<b>${e.killer}</b> slays <b>${e.target}</b>${dmgText}!`
       : `<b>${e.target}</b> has been slain!`;
@@ -331,7 +331,7 @@ function _buildRowHtml(e) {
   if (e.type === 'skill') {
     const targetText = e.target ? ` → <b>${e.target}</b>` : '';
     const healText = (e.finalDamage != null && e.finalDamage < 0)
-      ? ` <span class="bl-heal-amt">+${Math.abs(e.finalDamage)}</span>` : '';
+      ? ` <span class="bl-heal-amt">+${Math.round(Math.abs(e.finalDamage))}</span>` : '';
     const noteText = e.note ? ` <span class="bl-skill-note">(${e.note})</span>` : '';
     return `<span class="bl-badge">✦</span>` +
       `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.actor}</b> uses <b>${e.skillName}</b>${targetText}${healText}${noteText}</span>`;
@@ -361,7 +361,7 @@ function _buildRowHtml(e) {
   if (e.type === 'trap') {
     const trapLabel = e.trapLabel || 'Trap';
     const elem = e.element ? ` (${e.element})` : '';
-    const dmgStr = e.amount > 0 ? `<b>${e.amount}</b> dmg` : `<b>no</b> dmg`;
+    const dmgStr = e.amount > 0 ? `<b>${Math.round(e.amount)}</b> dmg` : `<b>no</b> dmg`;
     return `<span class="bl-badge">🪤</span>` +
       `<span class="bl-who" style="max-width: none; flex: 1;">${trapLabel}${elem} → <b>${e.target}</b> ${dmgStr}</span>`;
   }
@@ -369,14 +369,14 @@ function _buildRowHtml(e) {
   // ── Retribution reflect damage ─────────────────────────────────────────────
   if (e.type === 'reflect') {
     return `<span class="bl-badge">⟲</span>` +
-      `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.attacker}</b> reflects <b>${e.amount}</b> dmg → <b>${e.target}</b></span>`;
+      `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.attacker}</b> reflects <b>${Math.round(e.amount)}</b> dmg → <b>${e.target}</b></span>`;
   }
 
   // ── Status effect tick (poison damage / regen heal) ────────────────────────
   if (e.type === 'tick') {
     const isHeal = e.amount < 0;
     const badge = isHeal ? '♥' : '☣';
-    const amt = Math.abs(e.amount);
+    const amt = Math.round(Math.abs(e.amount));
     const verb = isHeal ? `+${amt} HP` : `−${amt} HP`;
     return `<span class="bl-badge">${badge}</span>` +
       `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.target}</b> [${e.effectName}] ${verb}</span>`;
@@ -452,9 +452,9 @@ function _buildRowHtml(e) {
     const monsterResistTrail = (e.actor === 'monster' && e.attackElement && e.elementResistance > 0)
       ? ` <span class="bl-elem-resist">(res ${Math.round(e.elementResistance * 100)}%)</span>` : '';
     if (e.crit) {
-      dmgPart = `${elemPrefix}${monsterElemPrefix}<b>CRIT! ${e.finalDamage}</b><span style="font-size:10px;">dmg</span>${elemTrail}${monsterResistTrail}`;
+      dmgPart = `${elemPrefix}${monsterElemPrefix}<b>CRIT! ${Math.round(e.finalDamage)}</b><span style="font-size:10px;">dmg</span>${elemTrail}${monsterResistTrail}`;
     } else {
-      dmgPart = `${elemPrefix}${monsterElemPrefix}<b>${e.finalDamage}</b> dmg${elemTrail}${monsterResistTrail}`;
+      dmgPart = `${elemPrefix}${monsterElemPrefix}<b>${Math.round(e.finalDamage)}</b> dmg${elemTrail}${monsterResistTrail}`;
     }
   }
   const formula = _formula(e);
