@@ -704,6 +704,22 @@ function refreshMember(m) {
     }
   }
 
+  // Mark each action slot with its allowed type so CSS can show a faded
+  // type icon when the slot is empty and constrained.
+  const _slotTypeMap = [
+    [skSlot, 'skill'],
+    [sk2Slot, 'skill2'],
+    [sk3Slot, 'skill3'],
+    [sk4Slot, 'skill4'],
+    [sk5Slot, 'skill5'],
+    [sk6Slot, 'skill6'],
+  ];
+  for (const [el, key] of _slotTypeMap) {
+    if (!el) continue;
+    const t = (m.actionSlotTypes && m.actionSlotTypes[key]) || 'any';
+    el.dataset.slotType = t;
+  }
+
   if (sk6Slot) {
     sk6Slot.classList.toggle('slot-empty', !sk6Name);
     const sk6Def = sk6Name ? getSkillOrSpellDef(sk6Name) : null;

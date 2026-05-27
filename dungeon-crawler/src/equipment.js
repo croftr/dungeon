@@ -632,6 +632,11 @@ export function extendPartyData() {
       m.trapConfig.schemeV2 = true;
     }
 
+    if (!m.actionSlotTypes) m.actionSlotTypes = {};
+    for (const sk of ['skill', 'skill2', 'skill3', 'skill4', 'skill5', 'skill6']) {
+      if (!m.actionSlotTypes[sk]) m.actionSlotTypes[sk] = 'any';
+    }
+
     if (m.equipment) {
       if (m.equipment.skill2 === undefined) m.equipment.skill2 = null;
       if (m.equipment.skill3 === undefined) m.equipment.skill3 = null;
@@ -2722,6 +2727,99 @@ function _hideContextMenu() {
 }
 
 // ─────────────────────────────────────────────
+//  ACTION SLOT TYPE HELPERS
+// ─────────────────────────────────────────────
+
+const ACTION_SLOT_KEYS = ['skill', 'skill2', 'skill3', 'skill4', 'skill5', 'skill6'];
+const SLOT_TYPE_ORDER = ['any', 'potion', 'skill', 'direct-damage', 'healing', 'buff', 'debuff'];
+const SLOT_TYPE_LABELS = {
+  'any': 'Any',
+  'potion': 'Potion',
+  'skill': 'Skill',
+  'direct-damage': 'Direct Damage',
+  'healing': 'Healing',
+  'buff': 'Buff',
+  'debuff': 'Debuff',
+};
+
+function _isSkillSlot(slotKey) {
+  return ACTION_SLOT_KEYS.includes(slotKey);
+}
+
+// Defensive: older saves don't have actionSlotTypes since extendPartyData
+// doesn't re-run after load. Initialize lazily on first access.
+function _ensureActionSlotTypes(m) {
+  if (!m.actionSlotTypes) m.actionSlotTypes = {};
+  for (const sk of ACTION_SLOT_KEYS) {
+    if (!m.actionSlotTypes[sk]) m.actionSlotTypes[sk] = 'any';
+  }
+}
+
+// Classify a currently-equipped action-slot item into a kind for filtering
+// purposes. Returns 'potion' | 'skill' | 'spell-<type>' | null.
+function _classifySlotItem(item) {
+  if (!item) return null;
+  if (getItemDef(item.name)?.type === 'potion') return 'potion';
+  if (item.slot === 'spell') {
+    const def = SPELLS.find(s => s.name === item.name);
+    return 'spell-' + (def?.type ?? 'direct-damage');
+  }
+  return 'skill';
+}
+
+// Resolve an effective slot-type filter: prefer the currently-equipped item's
+// kind, otherwise fall back to the slot's stored type.
+function _resolveSlotFilter(m, slotKey) {
+  _ensureActionSlotTypes(m);
+  const current = m.equipment?.[slotKey];
+  if (current) {
+    const kind = _classifySlotItem(current);
+    if (kind === 'potion') return 'potion';
+    if (kind === 'skill') return 'skill';
+    if (kind?.startsWith('spell-')) return kind.slice('spell-'.length); // sub-type
+  }
+  return m.actionSlotTypes[slotKey] ?? 'any';
+}
+
+function _filteredPotions(m) {
+  return (m.inventory || [])
+    .filter(it => it && getItemDef(it.name)?.type === 'potion')
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function _filteredSkills(m) {
+  return (m.skills || [])
+    .filter(s => !SKILLS_DATA[s.name]?.isPassive)
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function _filteredSpellsByType(m, spellType /* null = all */) {
+  return (m.spells || [])
+    .filter(s => spellType == null || (SPELLS.find(x => x.name === s.name)?.type === spellType))
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+// Returns equipped item back to inventory if it's a potion (skills/spells
+// just clear). Used when changing a slot's allowed type strands an item.
+function _evictSlotItem(m, slotKey) {
+  const existing = m.equipment?.[slotKey];
+  if (!existing) return true;
+  if (getItemDef(existing.name)?.type === 'potion') {
+    const free = m.inventory.indexOf(null);
+    if (free === -1) {
+      showMessage('Inventory full — cannot change slot type!');
+      return false;
+    }
+    m.inventory[free] = existing;
+  }
+  m.equipment[slotKey] = null;
+  return true;
+}
+
+// ─────────────────────────────────────────────
 //  SKILL / SPELL SWITCH MENU
 // ─────────────────────────────────────────────
 
@@ -2867,8 +2965,156 @@ function _showSkillSwitchMenu(x, y, memberIndex, mode, hand = null) {
 }
 
 function _hideSkillSwitchMenu() {
-  document.getElementById('skill-switch-menu').classList.add('skill-sw-hidden');
+  const menu = document.getElementById('skill-switch-menu');
+  menu.classList.add('skill-sw-hidden');
+  menu.classList.remove('skill-sw-no-header');
   _skillSwMenuCtx = null;
+}
+
+// Right-click on an action slot — popover (no title bar) filtered by either
+// the currently-equipped item's kind, or the slot's allowed type if empty.
+function _showActionSlotContextMenu(x, y, memberIndex, slotKey) {
+  const m = party[memberIndex];
+  if (!m || m.isEmpty) return;
+  const current = m.equipment?.[slotKey];
+  const filter = _resolveSlotFilter(m, slotKey);
+
+  // Build sections based on filter
+  const sections = []; // [{label, items, kind}]
+  if (filter === 'any') {
+    const potions = _filteredPotions(m);
+    const skills = _filteredSkills(m);
+    if (potions.length) sections.push({ label: 'Potions', items: potions, kind: 'potion' });
+    if (skills.length) sections.push({ label: 'Skills', items: skills, kind: 'skill' });
+    for (const t of ['direct-damage', 'healing', 'buff', 'debuff']) {
+      const spells = _filteredSpellsByType(m, t);
+      if (spells.length) sections.push({ label: SLOT_TYPE_LABELS[t], items: spells, kind: 'spell' });
+    }
+  } else if (filter === 'potion') {
+    const items = _filteredPotions(m);
+    if (items.length) sections.push({ label: 'Potions', items, kind: 'potion' });
+  } else if (filter === 'skill') {
+    const items = _filteredSkills(m);
+    if (items.length) sections.push({ label: 'Skills', items, kind: 'skill' });
+  } else {
+    // spell sub-type
+    const items = _filteredSpellsByType(m, filter);
+    if (items.length) sections.push({ label: SLOT_TYPE_LABELS[filter] ?? filter, items, kind: 'spell' });
+  }
+
+  if (!sections.length && !current) return;
+
+  _skillSwMenuCtx = { memberIndex, mode: 'actionSlot', hand: slotKey };
+  const menu = document.getElementById('skill-switch-menu');
+  menu.innerHTML = '';
+  menu.classList.add('skill-sw-no-header');
+
+  // Clear Slot — when there's something to clear
+  if (current) {
+    const clearRow = document.createElement('div');
+    clearRow.className = 'skill-sw-item skill-sw-clear';
+    const span = document.createElement('span');
+    span.textContent = '✕  Clear Slot';
+    clearRow.appendChild(span);
+    clearRow.addEventListener('click', () => {
+      const ctx = _skillSwMenuCtx;
+      if (!ctx) return;
+      const member = party[ctx.memberIndex];
+      if (!member) return;
+      if (_evictSlotItem(member, ctx.hand)) refreshPartyCards();
+      _hideSkillSwitchMenu();
+    });
+    menu.appendChild(clearRow);
+    if (sections.length) {
+      const div = document.createElement('div');
+      div.className = 'skill-sw-divider';
+      menu.appendChild(div);
+    }
+  }
+
+  const currentName = current?.name;
+  let firstSection = true;
+  for (const section of sections) {
+    if (!firstSection) {
+      const div = document.createElement('div');
+      div.className = 'skill-sw-divider';
+      menu.appendChild(div);
+    }
+    firstSection = false;
+    if (filter === 'any') {
+      const hdr = document.createElement('div');
+      hdr.className = 'skill-sw-section-header';
+      hdr.textContent = section.label;
+      menu.appendChild(hdr);
+    }
+    for (const item of section.items) {
+      const isActive = item.name === currentName;
+      const row = document.createElement('div');
+      row.className = 'skill-sw-item' + (isActive ? ' skill-sw-active' : '');
+      if (item.icon) {
+        const img = document.createElement('img');
+        img.src = asset(item.icon);
+        img.alt = item.name;
+        row.appendChild(img);
+      }
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = item.name;
+      row.appendChild(nameSpan);
+      if (isActive) {
+        const check = document.createElement('span');
+        check.className = 'skill-sw-check';
+        check.textContent = '✓';
+        row.appendChild(check);
+      }
+      const kind = section.kind;
+      row.addEventListener('click', () => {
+        const ctx = _skillSwMenuCtx;
+        if (!ctx) return;
+        const member = party[ctx.memberIndex];
+        if (!member) return;
+        const slot = ctx.hand;
+        if (kind === 'potion') {
+          const invIdx = member.inventory.findIndex(inv => inv && inv.name === item.name);
+          if (invIdx === -1) { _hideSkillSwitchMenu(); return; }
+          const displaced = member.equipment[slot];
+          member.equipment[slot] = item;
+          if (displaced && getItemDef(displaced.name)?.type === 'potion') {
+            member.inventory[invIdx] = displaced;
+          } else {
+            member.inventory[invIdx] = null;
+          }
+        } else if (kind === 'spell') {
+          const prev = member.equipment[slot];
+          if (prev && getItemDef(prev.name)?.type === 'potion') {
+            const free = member.inventory.indexOf(null);
+            if (free !== -1) member.inventory[free] = prev;
+          }
+          member.equipment[slot] = { name: item.name, slot: 'spell' };
+          playItemSound('spell-assigned');
+        } else {
+          // skill
+          const prev = member.equipment[slot];
+          if (prev && getItemDef(prev.name)?.type === 'potion') {
+            const free = member.inventory.indexOf(null);
+            if (free !== -1) member.inventory[free] = prev;
+          }
+          member.equipment[slot] = { name: item.name, slot: 'skill', icon: item.icon };
+        }
+        refreshPartyCards();
+        _hideSkillSwitchMenu();
+      });
+      menu.appendChild(row);
+    }
+  }
+
+  menu.classList.remove('skill-sw-hidden');
+  const menuRect = menu.getBoundingClientRect();
+  let left = x;
+  let top = y;
+  if (left + menuRect.width > window.innerWidth) left = window.innerWidth - menuRect.width - 8;
+  if (top + menuRect.height > window.innerHeight) top = window.innerHeight - menuRect.height - 8;
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
 }
 
 // Clicking a body slot with an item → move it to first free inventory cell
@@ -5290,25 +5536,109 @@ function openActionSlotPicker(memberIndex, slotKey) {
   if (!overlay || !body) return;
 
   title.textContent = `${m.name} — Equip Action Slot`;
+  _renderActionSlotPickerBody();
+  overlay.classList.remove('action-slot-picker-hidden');
+}
+
+function _renderActionSlotPickerBody() {
+  const ctx = _pickerCtx;
+  if (!ctx) return;
+  const m = party[ctx.memberIndex];
+  if (!m) return;
+  _ensureActionSlotTypes(m);
+  const body = document.getElementById('action-slot-picker-body');
+  if (!body) return;
   body.innerHTML = '';
 
-  const skills = (m.skills || []).filter(s => !SKILLS_DATA[s.name]?.isPassive);
-  const spells = m.spells || [];
-  const potions = (m.inventory || []).filter(item => item && getItemDef(item.name)?.type === 'potion');
+  const slotType = m.actionSlotTypes[ctx.slotKey] ?? 'any';
 
-  function addSection(label, items) {
-    if (!items.length) return;
+  // ── Slot-type selector ────────────────────────────────────────────
+  const selectorWrap = document.createElement('div');
+  selectorWrap.className = 'asp-type-selector';
+  const selectorLabel = document.createElement('div');
+  selectorLabel.className = 'asp-type-selector-label';
+  selectorLabel.textContent = 'Slot Type';
+  selectorWrap.appendChild(selectorLabel);
+  const chips = document.createElement('div');
+  chips.className = 'asp-type-chips';
+  for (const t of SLOT_TYPE_ORDER) {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'asp-type-chip' + (t === slotType ? ' active' : '');
+    const icon = SPELL_TYPE_ICONS[t];
+    chip.innerHTML = icon
+      ? `<span style="color:${icon.color}">${icon.symbol}</span> ${SLOT_TYPE_LABELS[t]}`
+      : SLOT_TYPE_LABELS[t];
+    chip.addEventListener('click', () => {
+      if (t === slotType) return;
+      // Auto-unequip current item if it doesn't match the new type
+      const current = m.equipment?.[ctx.slotKey];
+      if (current && t !== 'any') {
+        const kind = _classifySlotItem(current);
+        const matches =
+          (t === 'potion' && kind === 'potion') ||
+          (t === 'skill' && kind === 'skill') ||
+          (kind === 'spell-' + t);
+        if (!matches) {
+          if (!_evictSlotItem(m, ctx.slotKey)) return;
+        }
+      }
+      m.actionSlotTypes[ctx.slotKey] = t;
+      refreshPartyCards();
+      _renderActionSlotPickerBody();
+    });
+    chips.appendChild(chip);
+  }
+  selectorWrap.appendChild(chips);
+  body.appendChild(selectorWrap);
+
+  const div = document.createElement('div');
+  div.className = 'asp-divider';
+  body.appendChild(div);
+
+  // ── Filtered, sorted item list ────────────────────────────────────
+  const sections = []; // [{label, items, kind}]
+  if (slotType === 'any') {
+    const potions = _filteredPotions(m);
+    const skills = _filteredSkills(m);
+    if (potions.length) sections.push({ label: 'Potions', items: potions, kind: 'potion' });
+    if (skills.length) sections.push({ label: 'Skills', items: skills, kind: 'skill' });
+    for (const t of ['direct-damage', 'healing', 'buff', 'debuff']) {
+      const spells = _filteredSpellsByType(m, t);
+      if (spells.length) {
+        const icon = SPELL_TYPE_ICONS[t];
+        sections.push({ label: SLOT_TYPE_LABELS[t], items: spells, kind: 'spell', icon });
+      }
+    }
+  } else if (slotType === 'potion') {
+    const items = _filteredPotions(m);
+    if (items.length) sections.push({ label: 'Potions', items, kind: 'potion' });
+  } else if (slotType === 'skill') {
+    const items = _filteredSkills(m);
+    if (items.length) sections.push({ label: 'Skills', items, kind: 'skill' });
+  } else {
+    const items = _filteredSpellsByType(m, slotType);
+    if (items.length) sections.push({ label: SLOT_TYPE_LABELS[slotType], items, kind: 'spell', icon: SPELL_TYPE_ICONS[slotType] });
+  }
+
+  let firstSection = true;
+  for (const section of sections) {
+    if (!firstSection) {
+      const d = document.createElement('div');
+      d.className = 'asp-divider';
+      body.appendChild(d);
+    }
+    firstSection = false;
     const hdr = document.createElement('div');
     hdr.className = 'asp-section-header';
-    hdr.textContent = label;
+    hdr.textContent = section.label;
     body.appendChild(hdr);
-    items.forEach(item => {
+    for (const item of section.items) {
       const row = document.createElement('div');
       row.className = 'asp-item';
       const def = item.slot === 'spell' ? null : getItemDef(item.name);
       const iconSrc = item.icon || def?.icon || null;
       if (iconSrc) {
-        // Wrap in a relatively-positioned container so the HQ badge can overlay the icon.
         const iconWrap = document.createElement('div');
         iconWrap.className = 'asp-item-icon';
         const img = document.createElement('img');
@@ -5326,59 +5656,52 @@ function openActionSlotPicker(memberIndex, slotKey) {
       const nameSpan = document.createElement('span');
       nameSpan.textContent = item.hq ? hqDisplayName(item.name) : item.name;
       row.appendChild(nameSpan);
+      const kind = section.kind;
       row.addEventListener('click', () => {
-        const ctx = _pickerCtx;
-        if (!ctx) return;
-        const member = party[ctx.memberIndex];
+        const cx = _pickerCtx;
+        if (!cx) return;
+        const member = party[cx.memberIndex];
         if (!member) return;
-        const isPotion = getItemDef(item.name)?.type === 'potion';
-        if (isPotion) {
-          // Remove from inventory and place in action slot; displace existing to inventory
+        if (kind === 'potion') {
           const invIdx = member.inventory.findIndex(inv => inv && inv.name === item.name);
           if (invIdx === -1) { closeActionSlotPicker(); return; }
-          const displaced = member.equipment[ctx.slotKey];
-          member.equipment[ctx.slotKey] = item;
-          member.inventory[invIdx] = displaced; // displaced could be null or a skill ref (just drop it)
-          if (displaced && getItemDef(displaced.name)?.type !== 'potion') {
-            // Skills/spells don't go to inventory — just clear
+          const displaced = member.equipment[cx.slotKey];
+          member.equipment[cx.slotKey] = item;
+          if (displaced && getItemDef(displaced.name)?.type === 'potion') {
+            member.inventory[invIdx] = displaced;
+          } else {
             member.inventory[invIdx] = null;
           }
+        } else if (kind === 'spell') {
+          const prev = member.equipment[cx.slotKey];
+          if (prev && getItemDef(prev.name)?.type === 'potion') {
+            const free = member.inventory.indexOf(null);
+            if (free !== -1) member.inventory[free] = prev;
+          }
+          member.equipment[cx.slotKey] = { name: item.name, slot: 'spell' };
+          playItemSound('spell-assigned');
         } else {
-          const isSpell = member.spells?.some(s => s.name === item.name);
-          member.equipment[ctx.slotKey] = isSpell
-            ? { name: item.name, slot: 'spell' }
-            : { name: item.name, slot: 'skill', icon: item.icon };
+          const prev = member.equipment[cx.slotKey];
+          if (prev && getItemDef(prev.name)?.type === 'potion') {
+            const free = member.inventory.indexOf(null);
+            if (free !== -1) member.inventory[free] = prev;
+          }
+          member.equipment[cx.slotKey] = { name: item.name, slot: 'skill', icon: item.icon };
         }
         refreshPartyCards();
         closeActionSlotPicker();
       });
       body.appendChild(row);
-    });
+    }
   }
 
-  addSection('Skills', skills);
-  if (skills.length && spells.length) {
-    const div = document.createElement('div');
-    div.className = 'asp-divider';
-    body.appendChild(div);
-  }
-  addSection('Spells', spells);
-  if ((skills.length || spells.length) && potions.length) {
-    const div = document.createElement('div');
-    div.className = 'asp-divider';
-    body.appendChild(div);
-  }
-  addSection('Potions', potions);
-
-  if (!skills.length && !spells.length && !potions.length) {
+  if (!sections.length) {
     const empty = document.createElement('div');
     empty.className = 'asp-item';
     empty.style.color = '#5a4a28';
-    empty.textContent = 'Nothing available to equip.';
+    empty.textContent = 'Nothing available for this slot type.';
     body.appendChild(empty);
   }
-
-  overlay.classList.remove('action-slot-picker-hidden');
 }
 
 function closeActionSlotPicker() {
@@ -6546,7 +6869,7 @@ function attachCardListeners() {
         e.stopPropagation();
         const m = party[i];
         if (!m || m.isEmpty) return;
-        _showSkillSwitchMenu(e.clientX, e.clientY, i, 'unified', slotKey);
+        _showActionSlotContextMenu(e.clientX, e.clientY, i, slotKey);
       });
     });
 

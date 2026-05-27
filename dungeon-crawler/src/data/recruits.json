@@ -367,8 +367,7 @@
         ],
         "startingSpells": [
             "Heal",
-            "Banishment",
-            "Shell"
+            "Banishment"
         ],
         "startingInventory": [
             "Cure Poison Potion",
