@@ -3020,6 +3020,21 @@ label.mm-setting-label {
   z-index: 1;
 }
 
+/* Action slots (the 6 small skill/spell slots) stay clickable on cooldown so
+   the player can right-click to swap. Left-click is gated at the JS level by
+   the per-ability cooldown timer, so use is still blocked. The ::after dim
+   overlay also passes events through. */
+[id^="slot-sk"].slot-inactive,
+[id^="slot-sk"].slot-cooling-down,
+[id^="slot-sk"].slot-no-mp {
+  pointer-events: auto;
+}
+[id^="slot-sk"].slot-inactive::after,
+[id^="slot-sk"].slot-cooling-down::after,
+[id^="slot-sk"].slot-no-mp::after {
+  pointer-events: none;
+}
+
 
 /* ── Runic Scholar primed — arcane purple glow on the skill slot ─────────── */
 @keyframes runic-pulse {
