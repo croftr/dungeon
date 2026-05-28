@@ -422,5 +422,14 @@
         "weight": 0.3,
         "sellable": true,
         "stackCount": 10
+    },
+    {
+        "name": "Mummified Hand",
+        "slot": "loot",
+        "icon": "/icons/key/mummified_hand.webp",
+        "description": "A dried, ancient severed hand. It feels strangely heavy and cold.",
+        "value": 100,
+        "weight": 0.5,
+        "sellable": true
     }
 ]

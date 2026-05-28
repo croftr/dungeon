@@ -48,6 +48,7 @@ function buildWorldPayload(overrides = {}) {
       level1BtnPortcullisOpened: false,
       level1OgrePortcullisOpened: false,
       level1ShrineGateOpened: false,
+      level1SarcophagusRoomGateOpened: false,
       // Collections that live inside flags (legacy getWorldFlags shape)
       disarmedTraps: [],
       seenEssences: [],
@@ -101,6 +102,7 @@ describe('round-trip: objects.js', () => {
         level1BtnPortcullisOpened: true,
         level1OgrePortcullisOpened: true,
         level1ShrineGateOpened: true,
+        level1SarcophagusRoomGateOpened: true,
         disarmedTraps: [],
         seenEssences: [],
         unlockedRecipes: [],

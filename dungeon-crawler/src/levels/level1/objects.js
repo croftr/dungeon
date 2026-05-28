@@ -25,6 +25,7 @@ export function spawnLevel1Objects(ctx) {
         level1BtnPortcullisOpened,
         level1OgrePortcullisOpened,
         level1ShrineGateOpened,
+        level1SarcophagusRoomGateOpened,
         monsterNpcSaved,
         interactables,
     } = ctx;
@@ -126,8 +127,10 @@ export function spawnLevel1Objects(ctx) {
         'Minor Potions Parchment'
     ]);
 
-    // New room north of the mushroom section
-    addSpellCabinet(group, loader, 12, 11, 0, 0, -0.7, [
+    // Spell Cabinet at the far north of the room, reached via a long thin
+    // corridor (row 11–14 col 12) gated by the mushroom quartet. Two flanking
+    // mushrooms (ids 72/73) sit either side of the cabinet at (9, 11)/(9, 13).
+    addSpellCabinet(group, loader, 12, 9, 0, 0, -0.7, [
         'Scroll of Resist Fear', 'Scroll of Frostbolt'
     ]);
 
@@ -176,6 +179,22 @@ export function spawnLevel1Objects(ctx) {
     // ── Statues ───────────────────────────────────────────────────────────────
     // Statue in the center of the 5x5 room
     addStatue(group, loader, 13, 3);
+
+    // ── Sarcophagus Room Southern Extension ────────────────────────────────────
+    // Portcullis on the south wall at col 13, row 5
+    addPortcullis(group, loader, 13, 5, 0, level1SarcophagusRoomGateOpened);
+
+    // Wall button on the north face of the wall at col 12, row 5
+    // Player stands at (row 4, col 12) facing south to press it.
+    // The wall at (5, 12) faces north, so protrusionDir = -1, axis = 'z'.
+    const { group: sarcophagusGateBtn } = createWallButton(-1, { target: 'sarcophagus_room_gate' }, 'z');
+    sarcophagusGateBtn.position.set(12 * CELL, 1.25, 5 * CELL - 1.0);
+    group.add(sarcophagusGateBtn);
+
+    // Chest at the back of the small room at col 13, row 7 (offset south by 0.7 to sit near the south wall)
+    addChest(group, loader, 13, 7, 0, 0.7, [
+        "Mummified Hand"
+    ]);
 
     // Portal Activator Statue in the mummy room — contains Red Crystal
     addPortalActivatorStatue(group, loader, 19, 2, 0);

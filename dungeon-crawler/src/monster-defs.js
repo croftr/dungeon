@@ -1,5 +1,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
-//  MONSTER DEFINITIONS  — edit data/monsters.json to tune all monsters.
-//  This file is a thin re-export wrapper for backward compatibility.
+//  MONSTER DEFINITIONS  — edit data/monsters.json for solo monsters and
+//  data/monster-groups.json for grouped formations (e.g. quartets).
+//  This file merges both sources into a single MONSTER_DEFS map.
 // ─────────────────────────────────────────────────────────────────────────────
-export { default as MONSTER_DEFS } from './data/monsters.json';
+import SOLO from './data/monsters.json';
+import GROUPS from './data/monster-groups.json';
+
+export const MONSTER_DEFS = { ...SOLO, ...GROUPS };

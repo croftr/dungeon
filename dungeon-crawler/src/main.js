@@ -2317,10 +2317,15 @@ window.loadLevel = function (levelNum) {
     );
 
     // Level 1: Mushroom area (inner walls only)
+    // Spell Cab Room sits at rows 9–10 cols 11–13 (cabinet at row 9 col 12,
+    // flanked by mushrooms at (9,11) and (9,13)). A long thin one-cell-wide
+    // corridor at col 12 spans rows 11–14, gated by the mushroom quartet.
+    // The wider east–west corridor at row 15 and the southern mushroom alcoves
+    // continue to share the fungal texture set.
     const mFloors = [
-      [11, 11], [11, 12], [11, 13],
-      [12, 11], [12, 12], [12, 13],
-      [13, 12], [14, 12],
+      [9, 11], [9, 12], [9, 13],
+      [10, 11], [10, 12], [10, 13],
+      [11, 12], [12, 12], [13, 12], [14, 12],
       [15, 9], [15, 10], [15, 11], [15, 12], [15, 13], [15, 14],
       [16, 9], [17, 9], [18, 9], [19, 9],
       [16, 13], [17, 11], [17, 12], [17, 13], [18, 11], [19, 11], [19, 12], [19, 13]
@@ -2838,7 +2843,7 @@ window.addEventListener('mousemove', (e) => {
   let keyItemIcon = null;
   for (let hit of intersects) {
     const ud = hit.object.userData;
-    if (ud && (ud.isButton || ud.isChest || ud.isArmorStand || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDialogueNPC || ud.isDamageTrap || ud.isEgg || ud.isTeleportTorch || ud.isAlchemyWorkshop || ud.isAnvil || ud.isShop || ud.isDroppedItem || ud.isHeroDoor || ud.isCrystalShrine || ud.isPortalActivatorStatue || ud.isKeyhole || ud.isPitLadder)) {
+    if (ud && (ud.isButton || ud.isChest || ud.isArmorStand || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDialogueNPC || ud.isDamageTrap || ud.isEgg || ud.isTeleportTorch || ud.isAlchemyWorkshop || ud.isAnvil || ud.isShop || ud.isDroppedItem || ud.isHeroDoor || ud.isCrystalShrine || ud.isPortalActivatorStatue || ud.isKeyhole || ud.isPitLadder || ud.isStatue)) {
       if (hit.object.visible) {
         isHoveringInteractable = true;
         if (ud.isButton) hoveredBtn = hit.object;
@@ -2854,6 +2859,11 @@ window.addEventListener('mousemove', (e) => {
             if (def?.icon) keyItemIcon = asset(def.icon);
           } else if (state === 1 && partyHasItem('Blue Crystal')) {
             const def = getItemDef('Blue Crystal');
+            if (def?.icon) keyItemIcon = asset(def.icon);
+          }
+        } else if (ud.isStatue) {
+          if (!getWorldFlags().mummyGateOpened && partyHasItem('Mummified Hand')) {
+            const def = getItemDef('Mummified Hand');
             if (def?.icon) keyItemIcon = asset(def.icon);
           }
         }

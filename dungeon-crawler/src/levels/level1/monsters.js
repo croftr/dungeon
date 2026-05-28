@@ -1,4 +1,4 @@
-import { inst } from '../../monster-factory.js';
+import { inst, instQuartet } from '../../monster-factory.js';
 import { MONSTER_DEFS as D } from '../../monster-defs.js';
 import { asset } from '../../assets.js';
 
@@ -105,7 +105,24 @@ export const level1Monsters = [
     asset('/monsters/treekin-animation/Meshy_AI_Animation_Dead_withSkin.glb'),
     asset('/monsters/treekin-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb')),
 
-  inst(D.mushroom, 62, 15, 10,
+  // (single mushroom previously at row 15 col 10 removed — replaced by the
+  // quartet that gates the spell cabinet room from the south corridor.)
+
+  // Mummy quartet guarding the small chest room south of the Sarcophagus
+  // chamber. Player drops through the portcullis at (5, 13) and lands
+  // face-to-face with them at (6, 13), with the chest at (7, 13) beyond.
+  instQuartet(D.mummy, 110, 6, 13,
+    asset('/monsters/mummy-annimation/Meshy_AI_Animation_Idle_withSkin.glb'),
+    asset('/monsters/mummy-annimation/Meshy_AI_Animation_Double_Combo_Attack_withSkin.glb'),
+    asset('/monsters/mummy-annimation/mummy-attack.mp3'), 0.45, 0, 0, 1, null,
+    asset('/monsters/mummy-annimation/Meshy_AI_Animation_Dead_withSkin.glb'),
+    null,
+    asset('/monsters/mummy-annimation/Meshy_AI_Animation_Walking_withSkin.glb')),
+
+  // Mushroom quartet sitting in the long thin corridor (col 12, rows 11–14)
+  // that leads north to the Spell Cabinet room. Player must defeat all four
+  // here, then the two mushrooms flanking the cabinet inside the room.
+  instQuartet(D.mushroom, 75, 13, 12,
     asset('/monsters/mushroom/idle.glb'),
     asset('/monsters/mushroom/attack.glb'),
     null, 0.45, 0, 0, 1, null,
@@ -220,8 +237,9 @@ export const level1Monsters = [
     null,
     asset('/monsters/zombie-animation/zombie-combat-idle.glb')),
 
-  // Mushrooms guarding the Scroll of Resist Fear cabinet (rows 11-12, col 11)
-  inst(D.mushroom, 72, 11, 11,
+  // Mushrooms flanking the Spell Cabinet at the north end of the room
+  // (row 9, cols 11 & 13 — cabinet sits between them at row 9 col 12).
+  inst(D.mushroom, 72, 9, 11,
     asset('/monsters/mushroom/idle.glb'),
     asset('/monsters/mushroom/attack.glb'),
     null, 0.45, 0, 0, 1, null,
@@ -231,7 +249,7 @@ export const level1Monsters = [
     null,
     asset('/monsters/mushroom/combat-idle.glb')),
 
-  inst(D.mushroom, 73, 11, 13,
+  inst(D.mushroom, 73, 9, 13,
     asset('/monsters/mushroom/idle.glb'),
     asset('/monsters/mushroom/attack.glb'),
     null, 0.45, 0, 0, 1, null,

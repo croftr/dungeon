@@ -118,6 +118,7 @@ const _state = {
   level1BtnPortcullisOpened: false,
   level1OgrePortcullisOpened: false,
   level1ShrineGateOpened: false,
+  level1SarcophagusRoomGateOpened: false,
 };
 
 // Scene/THREE refs — transient, NOT saved.
@@ -822,6 +823,19 @@ export function initObjects(scene, camera) {
                     } else {
                         showMessage("You can't reach that from here.");
                     }
+                } else if (obj.userData.target === 'sarcophagus_room_gate') {
+                    // Player at (4, 12) facing south presses button on north face of col-12 row-5 wall
+                    if (isInFrontOfPlayer(5, 12, 1)) {
+                        playButtonClickSound();
+                        _animateButtonPress(obj);
+                        const p = objects.find(o => o.name === 'Portcullis' && o.gridRow === 5 && o.gridCol === 13);
+                        if (p && !_state.level1SarcophagusRoomGateOpened) {
+                            openPortcullis(p);
+                            _state.level1SarcophagusRoomGateOpened = true;
+                        }
+                    } else {
+                        showMessage("You can't reach that from here.");
+                    }
                 } else {
                     // Check if player is facing the wall at (8, 8) from (8, 7)
                     if (isInFrontOfPlayer(8, 8, 1)) {
@@ -1300,6 +1314,30 @@ export function initObjects(scene, camera) {
                     // Gate already open — nothing more to do
                     if (_state.mummyGateOpened) break;
 
+                    // Check for Mummified Hand in party inventory
+                    let hasHand = false;
+                    for (let i = 0; i < party.length; i++) {
+                        if (party[i] && !party[i].isEmpty && party[i].inventory) {
+                            if (party[i].inventory.some(item => item && item.name === 'Mummified Hand')) {
+                                hasHand = true;
+                                break;
+                            }
+                        }
+                    }
+                    const textEl = document.getElementById('sarcophagus-text');
+                    const yesBtn = document.getElementById('sarcophagus-yes');
+                    if (textEl) {
+                        const baseText = "The ancient stone pulses like a slow, dusty heart. Nestled deep within the carvings is a hollow, hand-shaped indentation that thrums with a cold energy as you approach.";
+                        if (hasHand) {
+                            textEl.innerHTML = baseText + "<br><br>Insert severed mummified hand?";
+                        } else {
+                            textEl.innerHTML = baseText;
+                        }
+                    }
+                    if (yesBtn) {
+                        yesBtn.style.display = hasHand ? 'inline-block' : 'none';
+                    }
+
                     // Show the sarcophagus confirmation modal
                     const overlay = document.getElementById('sarcophagus-overlay');
                     if (overlay) overlay.classList.remove('chest-hidden');
@@ -1530,6 +1568,23 @@ export function initObjects(scene, camera) {
         sarcophagusYes.onclick = (e) => {
             e.stopPropagation();
             _state.mummyGateOpened = true;
+
+            // Find and consume the Mummified Hand
+            let handIdx = -1, handMember = null;
+            for (let i = 0; i < party.length; i++) {
+                if (party[i] && !party[i].isEmpty && party[i].inventory) {
+                    const idx = party[i].inventory.findIndex(item => item && item.name === 'Mummified Hand');
+                    if (idx !== -1) {
+                        handIdx = idx;
+                        handMember = party[i];
+                        break;
+                    }
+                }
+            }
+            if (handMember) {
+                handMember.inventory[handIdx] = null;
+                refreshPartyCards();
+            }
 
             // Close the modal immediately
             const overlay = document.getElementById('sarcophagus-overlay');
@@ -2803,6 +2858,7 @@ export function spawnObjectsForLevel() {
         level1BtnPortcullisOpened: _state.level1BtnPortcullisOpened,
         level1OgrePortcullisOpened: _state.level1OgrePortcullisOpened,
         level1ShrineGateOpened: _state.level1ShrineGateOpened,
+        level1SarcophagusRoomGateOpened: _state.level1SarcophagusRoomGateOpened,
         monsterNpcSaved: _state.monsterNpcSaved,
         stanceNpcDeparted: _state.stanceNpcDeparted,
         setStanceNpcDeparted: (val) => { _state.stanceNpcDeparted = val; },

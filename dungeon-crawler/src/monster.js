@@ -366,6 +366,227 @@ monsters.forEach(m => {
   }
 });
 
+// ── Formation init ──────────────────────────────────────────────────────────
+// For monsters with `formation: "quartet"`, the def's `hp` is interpreted as
+// per-sub HP. We expand into a `members` array of 4 sub-monsters (one per
+// 2×2 sub-slot) and inflate the aggregate `hp`/`hpMax` to the sum so legacy
+// code paths (HP bars, save data, etc.) still see meaningful totals.
+//   subSlot 0 = front-Left   subSlot 1 = front-Right
+//   subSlot 2 = back-Left    subSlot 3 = back-Right
+monsters.forEach(m => {
+  if (m.formation === 'quartet' && !m.members) {
+    const perSubHp = m.hpMax;
+    m.members = [0, 1, 2, 3].map(i => ({
+      subSlot: i,
+      hp: perSubHp,
+      hpMax: perSubHp,
+      alive: true,
+    }));
+    m.hpMax = perSubHp * 4;
+    m.hp = m.hpMax;
+  }
+});
+
+// ── Formation helpers ───────────────────────────────────────────────────────
+// Sub-slot 0 lives on `m.mesh`; sub-slots 1–3 live on `m.subMeshes[0..2]`.
+function _quartetSubMesh(m, subSlot) {
+  if (subSlot === 0) return m.mesh;
+  return m.subMeshes?.[subSlot - 1] ?? null;
+}
+
+// Active monster front-line for a quartet: [FL_member, FR_member]. A back-row
+// sub steps up if its front-row partner is dead. Each entry may be null if
+// the whole column is wiped.
+function _quartetActiveFront(m) {
+  const live = i => (m.members?.[i]?.alive ? m.members[i] : null);
+  return [live(0) || live(2), live(1) || live(3)];
+}
+
+// Pick which sub-monster a party attacker in `col` (0 = left col / slots 0,2,
+// 1 = right col / slots 1,3) hits. Same-column front first, then same-column
+// back, then cross-column fallback (front then back) when the same column is
+// wiped — mirrors the party's BACKUP_PAIRS behaviour.
+function _quartetPickTargetForAttackerCol(m, col) {
+  const same = col === 0 ? [0, 2] : [1, 3];
+  const other = col === 0 ? [1, 3] : [0, 2];
+  for (const i of same)  if (m.members?.[i]?.alive) return m.members[i];
+  for (const i of other) if (m.members?.[i]?.alive) return m.members[i];
+  return null;
+}
+
+// Mirror of _quartetPickTargetForAttackerCol but for a monster attacking the
+// party: returns an alive party member in `col` (front first, then back),
+// falling back to the other column when both same-column members are dead.
+function _partyColumnTarget(col) {
+  const same = col === 0 ? [0, 2] : [1, 3];
+  const other = col === 0 ? [1, 3] : [0, 2];
+  const live = i => {
+    const p = party[i];
+    return (p && !p.isEmpty && !p.isDead) ? p : null;
+  };
+  for (const i of same)  if (live(i)) return party[i];
+  for (const i of other) if (live(i)) return party[i];
+  return null;
+}
+
+// Reposition a quartet's four sub-meshes so the player's view of the formation
+// matches the logical sub-slot layout: subSlot 0 always sits at the player's
+// front-left, 1 at player's front-right, 2 at back-left, 3 at back-right.
+// Called every frame so the formation stays oriented toward the player even if
+// they walk around the side of the tile.
+//
+//   "forward" (toward the monster, away from player) snaps to the dominant
+//   axis of the monster→player vector. "right" is 90° CW from forward in grid
+//   space (drow, dcol) → (dcol, -drow).
+//
+//   sub offset = ±0.5 * forward (away/toward player) ± 0.5 * right (player's
+//   right/left), expressed in world units.
+//
+// The formation's "center" lives at m._formationX / m._formationZ — a smooth
+// world-space anchor that movement code (patrol / chase) tweens, while
+// gridRow/gridCol only update on cell-snap. This keeps sub-meshes interpolating
+// smoothly between tiles instead of teleporting on commit.
+//
+// Rear-rank step-up: when a front-row sub (slot 0/1) dies, its back-row
+// partner (slot 2/3) slides forward to take its place visually. The dead
+// front-row mesh hides so the live back sub isn't overlapping a corpse. Each
+// sub's displayed offset (member._offX/_offZ) tweens toward its target so the
+// step-up reads as a smooth advance rather than a teleport.
+const _SUB_SIGNS = [[-1, -1], [-1, 1], [1, -1], [1, 1]]; // FL, FR, BL, BR (fwdSign, rgtSign)
+const _STEPUP_SPEED = 4; // world units per second for the rear-rank slide
+function _repositionQuartetSubMeshes(m, playerRow, playerCol, dt = 0) {
+  if (!Array.isArray(m.members)) return;
+  if (m._formationX == null) {
+    m._formationX = m.gridCol * CELL + (m.offsetX ?? 0);
+    m._formationZ = m.gridRow * CELL + (m.offsetZ ?? 0);
+  }
+  const drow = m.gridRow - playerRow; // points from player toward monster
+  const dcol = m.gridCol - playerCol;
+  let fwdRow, fwdCol;
+  if (Math.abs(drow) >= Math.abs(dcol)) {
+    fwdRow = Math.sign(drow) || -1;
+    fwdCol = 0;
+  } else {
+    fwdRow = 0;
+    fwdCol = Math.sign(dcol) || 1;
+  }
+  const rgtRow = fwdCol;
+  const rgtCol = -fwdRow;
+  const H = 0.5;
+  const slotOffset = (slot) => {
+    const [fS, rS] = _SUB_SIGNS[slot];
+    return [(fS * fwdCol + rS * rgtCol) * H, (fS * fwdRow + rS * rgtRow) * H];
+  };
+
+  // Per-member target offset + visibility, with the rear-rank step-up rule.
+  // For each column: if the front-row member is dead and the back-row partner
+  // is alive, the back partner targets the front slot and the dead front mesh
+  // is hidden (no corpse overlapping the new occupant).
+  const targets = [null, null, null, null];
+  const hideFlag = [false, false, false, false];
+  for (const col of [0, 1]) {
+    const frontSlot = col;     // 0 or 1
+    const backSlot = col + 2;  // 2 or 3
+    const front = m.members[frontSlot];
+    const back = m.members[backSlot];
+    if (front.alive) {
+      targets[frontSlot] = slotOffset(frontSlot);
+      targets[backSlot]  = slotOffset(backSlot);
+    } else if (back.alive) {
+      // Front dead, back steps up.
+      targets[frontSlot] = slotOffset(frontSlot); // corpse "target" stays at FL
+      hideFlag[frontSlot] = true;                  // but we hide it
+      targets[backSlot]  = slotOffset(frontSlot); // back slides to front
+    } else {
+      // Both dead — corpses stay where they fell.
+      targets[frontSlot] = slotOffset(frontSlot);
+      targets[backSlot]  = slotOffset(backSlot);
+    }
+  }
+
+  const baseX = m._formationX;
+  const baseZ = m._formationZ;
+  for (let i = 0; i < 4; i++) {
+    const member = m.members[i];
+    if (!member) continue;
+    const [tx, tz] = targets[i];
+    // Lazy-init smooth displayed offset to current target so the formation
+    // pops into place on first frame instead of sliding in from origin.
+    if (member._offX == null) {
+      member._offX = tx;
+      member._offZ = tz;
+    } else if (member._offX !== tx || member._offZ !== tz) {
+      const dx = tx - member._offX;
+      const dz = tz - member._offZ;
+      const dist = Math.sqrt(dx * dx + dz * dz);
+      if (dist <= _STEPUP_SPEED * dt || dt <= 0) {
+        member._offX = tx;
+        member._offZ = tz;
+      } else {
+        const step = _STEPUP_SPEED * dt / dist;
+        member._offX += dx * step;
+        member._offZ += dz * step;
+      }
+    }
+    // Two visibility flags: _stepupHidden is owned by this function (covered
+    // by a back-row replacement), _hideMesh is owned by callers (e.g. fallback
+    // when a sub dies without a death animation). The visibility setter
+    // unions them.
+    member._stepupHidden = hideFlag[i];
+    const sub = _quartetSubMesh(m, i);
+    if (sub) sub.position.set(baseX + member._offX, sub.position.y, baseZ + member._offZ);
+  }
+}
+
+// ── Movement abstraction (formation-aware) ─────────────────────────────────
+// For solo monsters the moving thing is m.mesh.position. For quartet formations
+// it's the virtual center m._formationX/m._formationZ, around which
+// _repositionQuartetSubMeshes lays out the four sub-meshes every frame. These
+// helpers let _updatePatrol / _updateChase work uniformly on both.
+function _moverPos(m) {
+  if (m.formation === 'quartet') {
+    if (m._formationX == null) {
+      m._formationX = m.gridCol * CELL + (m.offsetX ?? 0);
+      m._formationZ = m.gridRow * CELL + (m.offsetZ ?? 0);
+    }
+    return { x: m._formationX, z: m._formationZ };
+  }
+  return { x: m.mesh.position.x, z: m.mesh.position.z };
+}
+
+function _setMoverPos(m, x, z) {
+  if (m.formation === 'quartet') {
+    m._formationX = x;
+    m._formationZ = z;
+  } else if (m.mesh) {
+    m.mesh.position.x = x;
+    m.mesh.position.z = z;
+  }
+}
+
+function _addMoverPos(m, dx, dz) {
+  if (m.formation === 'quartet') {
+    m._formationX = (m._formationX ?? 0) + dx;
+    m._formationZ = (m._formationZ ?? 0) + dz;
+  } else if (m.mesh) {
+    m.mesh.position.x += dx;
+    m.mesh.position.z += dz;
+  }
+}
+
+// Rotate the formation (or solo mesh) to face a world-space target. Each sub
+// rotates around its own position so the whole 2×2 turns as a unit.
+function _setMoverLookAt(m, targetX, targetZ) {
+  if (m.formation === 'quartet' && m.members) {
+    for (let i = 0; i < 4; i++) {
+      const sub = _quartetSubMesh(m, i);
+      if (sub) sub.lookAt(targetX, sub.position.y, targetZ);
+    }
+  } else if (m.mesh) {
+    m.mesh.lookAt(targetX, m.mesh.position.y, targetZ);
+  }
+}
+
 // ── Multi-attack variant definitions ────────────────────────────────────────
 // Post-process monsters that have multiple attack animations.
 // Each variant defines its own GLB, sound, sound timings, and damage timings.
@@ -1338,6 +1559,175 @@ function _updateStatsPanel(m) {
 }
 
 
+// Loads slots 1–3 of a quartet as visual sub-meshes with their own action
+// maps (idle + walk + death) so each mushroom can walk in formation and play
+// its own death animation. Also attaches a per-sub HP bar.
+//
+// subSlot 0 lives on m.mesh and reuses m.mixer / m.actions (set up by
+// _loadMonster); only slots 1–3 are spawned here.
+function _spawnQuartetSubMeshes(m, scene, glbUrl, offsets) {
+  m.subMeshes = [null, null, null];
+  m.subMixers = [null, null, null];
+  for (let i = 1; i < 4; i++) {
+    const [ox, oz] = offsets[i];
+    _gltfLoader.load(glbUrl, (gltf) => {
+      if (!m.alive) return;
+      if ((m.level ?? 1) !== (window.currentLevel ?? 0)) return;
+      const sub = gltf.scene;
+      sub.scale.setScalar(m.scale);
+      const wx = m.gridCol * CELL + (m.offsetX ?? 0) + ox;
+      const wz = m.gridRow * CELL + (m.offsetZ ?? 0) + oz;
+      sub.position.set(wx, 0.0, wz);
+      sub.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+          if (child.material) {
+            child.material.transparent = false;
+            child.material.depthWrite = true;
+          }
+        }
+      });
+      const _blob = createBlobShadow(0.55);
+      _blob.scale.setScalar(1 / (m.scale ?? 1));
+      _blob.position.y = 0.05 / (m.scale ?? 1);
+      sub.add(_blob);
+      const mixer = new THREE.AnimationMixer(sub);
+      const member = m.members?.[i];
+      const memberActions = {};
+      if (gltf.animations && gltf.animations.length > 0) {
+        const idleAction = mixer.clipAction(gltf.animations[0]);
+        idleAction.play();
+        memberActions.idle = idleAction;
+      }
+      if (member) {
+        member.mixer = mixer;
+        member.actions = memberActions;
+        member._animState = 'idle';
+      }
+      scene.add(sub);
+      m.subMeshes[i - 1] = sub;
+      m.subMixers[i - 1] = mixer;
+
+      // Walk animation — loaded onto this sub's mixer so the mushroom plays
+      // its walk cycle (not just glide) while the formation moves.
+      if (m.glbWalk && member) {
+        _gltfLoader.load(m.glbWalk, (walkGltf) => {
+          if (walkGltf.animations && walkGltf.animations.length > 0) {
+            memberActions.walk = mixer.clipAction(walkGltf.animations[0]);
+          }
+        });
+      }
+
+      // Death animation — clamps on the final frame so the sub stays as a
+      // corpse in the formation tile.
+      if (m.glbDeath && member) {
+        _gltfLoader.load(m.glbDeath, (deathGltf) => {
+          if (deathGltf.animations && deathGltf.animations.length > 0) {
+            const deathAction = mixer.clipAction(deathGltf.animations[0]);
+            deathAction.setLoop(THREE.LoopOnce, 1);
+            deathAction.clampWhenFinished = true;
+            memberActions.death = deathAction;
+          }
+        });
+      }
+
+      // Attack animation — so the right-column sub (or back-row substitutes)
+      // actually swings when it fans out a hit instead of just silently
+      // damaging the party.
+      if (m.glbAttack && member) {
+        _gltfLoader.load(m.glbAttack, (attackGltf) => {
+          if (attackGltf.animations && attackGltf.animations.length > 0) {
+            const attackAction = mixer.clipAction(attackGltf.animations[0]);
+            attackAction.setLoop(THREE.LoopOnce, 1);
+            attackAction.clampWhenFinished = false;
+            // Cross-fade back to idle when the swing finishes.
+            mixer.addEventListener('finished', (e) => {
+              if (e.action === attackAction && memberActions.idle) {
+                memberActions.idle.reset().play();
+                attackAction.crossFadeTo(memberActions.idle, 0.2, false);
+                member._animState = 'idle';
+              }
+            });
+            memberActions.attack = attackAction;
+          }
+        });
+      }
+
+      // Per-sub HP bar (mirrors the main mesh's bar from _loadMonster).
+      if (member) {
+        const barWrap = document.createElement('div');
+        barWrap.className = 'monster-hp-bar';
+        const barFill = document.createElement('div');
+        barFill.className = 'monster-hp-fill';
+        barWrap.appendChild(barFill);
+        const hpLabel = new CSS2DObject(barWrap);
+        hpLabel.position.set(0, 1.8, 0);
+        hpLabel.visible = false;
+        sub.add(hpLabel);
+        member.hpBarFill = barFill;
+        member.hpLabel = hpLabel;
+        // Sync initial fill (e.g. after save restore left this sub damaged).
+        if (member.hp < member.hpMax) {
+          barFill.style.width = `${Math.max(0, (member.hp / member.hpMax) * 100)}%`;
+        }
+        // If restored dead from save, snap to death pose immediately.
+        if (!member.alive && memberActions.death) {
+          memberActions.death.reset().play();
+          memberActions.death.time = memberActions.death.getClip().duration;
+          mixer.update(0);
+        }
+      }
+    });
+  }
+}
+
+// Plays the death animation on a single quartet sub. The mesh stays visible
+// in its final clamped frame so the formation tile reads as "some mushrooms
+// dead, some alive" instead of teleport-poof.
+function _playQuartetSubDeath(m, member) {
+  if (!member || !member.actions) return;
+  // Stop idle/walk so the death anim takes over cleanly.
+  if (member.actions.idle) member.actions.idle.stop();
+  if (member.actions.walk) member.actions.walk.stop();
+  if (member.actions.death) {
+    member.actions.death.reset().play();
+    member._animState = 'dead';
+  } else {
+    // No death anim available — fall back to hiding the mesh. Use the
+    // formation visibility flag so the per-frame visibility loop respects it.
+    member._hideMesh = true;
+    member._animState = 'dead';
+  }
+}
+
+function _disposeQuartetSubMeshes(m) {
+  if (!m.subMeshes) return;
+  for (const sub of m.subMeshes) {
+    if (sub && sub.parent) sub.parent.remove(sub);
+  }
+  m.subMeshes = null;
+  m.subMixers = null;
+  // Drop per-sub HP bar DOM nodes (CSS2DObject DOM elements live outside the
+  // THREE graph, so removing the mesh doesn't unmount them by itself).
+  if (m.members) {
+    for (const member of m.members) {
+      if (member.hpBarFill) member.hpBarFill.parentElement?.remove();
+      member.hpBarFill = null;
+      member.hpLabel = null;
+      member.mixer = null;
+      member.actions = null;
+      member._animState = null;
+      member._offX = null;
+      member._offZ = null;
+      member._hideMesh = false;
+      member._stepupHidden = false;
+    }
+  }
+  m._formationX = null;
+  m._formationZ = null;
+}
+
 function _loadMonster(m, scene) {
   // Load the idle/walking GLB as the base mesh (fall back to hit or attack GLB for mesh-only monsters like the dummy)
   const baseGlb = m.glbIdle || m.glbHit || m.glbAttack;
@@ -1353,8 +1743,16 @@ function _loadMonster(m, scene) {
 
     model.scale.setScalar(m.scale);
 
-    const wx = m.gridCol * CELL + (m.offsetX ?? 0);
-    const wz = m.gridRow * CELL + (m.offsetZ ?? 0);
+    // Formation monsters (e.g. quartet) occupy a single tile but the main mesh
+    // sits in the front-left sub-slot rather than the tile centre. Sub-slot
+    // offsets are applied in world units (CELL=2 → ±0.5 puts each sub in its
+    // own quadrant). Sub-meshes for slots 1/2/3 are loaded below.
+    const SUB_OFFSETS = [[-0.5, -0.5], [0.5, -0.5], [-0.5, 0.5], [0.5, 0.5]];
+    const isQuartet = m.formation === 'quartet';
+    const [sx, sz] = isQuartet ? SUB_OFFSETS[0] : [0, 0];
+
+    const wx = m.gridCol * CELL + (m.offsetX ?? 0) + sx;
+    const wz = m.gridRow * CELL + (m.offsetZ ?? 0) + sz;
     model.position.set(wx, 0.0, wz);
 
     // Apply initial facing direction before combat (lookAtPlayer takes over once engaged)
@@ -1365,7 +1763,14 @@ function _loadMonster(m, scene) {
 
     m.lookAtPlayer = (playerPos) => {
       model.lookAt(playerPos.x, model.position.y, playerPos.z);
+      if (m.subMeshes) {
+        for (const sub of m.subMeshes) {
+          if (sub) sub.lookAt(playerPos.x, sub.position.y, playerPos.z);
+        }
+      }
     };
+
+    if (isQuartet) _spawnQuartetSubMeshes(m, scene, baseGlb, SUB_OFFSETS);
 
     model.traverse((child) => {
       if (child.isMesh) {
@@ -1400,6 +1805,16 @@ function _loadMonster(m, scene) {
     m.blobShadow = _blob;
 
     m.mixer = new THREE.AnimationMixer(model);
+
+    // For quartet formations, sub 0's animation state lives on members[0] and
+    // shares the main mesh's mixer + actions. The per-sub anim transitions in
+    // updateMonsters read member.actions, so the alias has to be in place
+    // before any actions are added below.
+    if (isQuartet && m.members?.[0]) {
+      m.members[0].mixer = m.mixer;
+      m.members[0].actions = m.actions;
+      m.members[0]._animState = 'idle';
+    }
 
     if (gltf.animations && gltf.animations.length > 0 && m.glbIdle) {
       const idleAction = m.mixer.clipAction(gltf.animations[0]);
@@ -1496,9 +1911,19 @@ function _loadMonster(m, scene) {
     model.add(hpLabel);
     m.hpLabel = hpLabel;
 
+    // For quartet formations, the main mesh's bar represents subSlot 0's HP
+    // (not the aggregate sum). Bind it on members[0] so the per-sub update
+    // path in hitMonster targets this same bar uniformly.
+    if (isQuartet && m.members?.[0]) {
+      m.members[0].hpBarFill = barFill;
+      m.members[0].hpLabel = hpLabel;
+    }
+
     // If HP was reduced before loading (e.g. save restore), sync the bar
-    if (m.hp < m.hpMax) {
-      barFill.style.width = `${Math.max(0, (m.hp / m.hpMax) * 100)}%`;
+    const initHp = (isQuartet && m.members?.[0]) ? m.members[0].hp : m.hp;
+    const initHpMax = (isQuartet && m.members?.[0]) ? m.members[0].hpMax : m.hpMax;
+    if (initHp < initHpMax) {
+      barFill.style.width = `${Math.max(0, (initHp / initHpMax) * 100)}%`;
     }
 
     // ── Hunter's Eye stats panel (CSS2DObject) ─────────────────────────
@@ -1804,6 +2229,7 @@ export function loadMonstersForLevel(scene, level) {
       if (m.mesh.parent) m.mesh.parent.remove(m.mesh);
       m.mesh = null;
     }
+    if (m.subMeshes) _disposeQuartetSubMeshes(m);
     if (m.hpBarFill) {
       m.hpBarFill.parentElement?.remove();
       m.hpBarFill = null;
@@ -1826,6 +2252,12 @@ export function loadMonstersForLevel(scene, level) {
     if (window.easyMode && !m._easyModeApplied) {
       m.hp = Math.ceil(m.hp * 0.5);
       m.hpMax = Math.ceil(m.hpMax * 0.5);
+      if (Array.isArray(m.members)) {
+        for (const s of m.members) {
+          s.hp = Math.ceil(s.hp * 0.5);
+          s.hpMax = Math.ceil(s.hpMax * 0.5);
+        }
+      }
       m._easyModeApplied = true;
     }
     _loadMonster(m, scene);
@@ -1938,16 +2370,16 @@ function _updatePatrol(m, dt) {
   // ── moving toward the adjacent target cell ───────────────────────────────
   const targetX = ps.targetCol * CELL + (m.offsetX ?? 0);
   const targetZ = ps.targetRow * CELL + (m.offsetZ ?? 0);
-  const dx = targetX - m.mesh.position.x;
-  const dz = targetZ - m.mesh.position.z;
+  const cur = _moverPos(m);
+  const dx = targetX - cur.x;
+  const dz = targetZ - cur.z;
   const dist = Math.sqrt(dx * dx + dz * dz);
 
   if (dist < 0.05) {
     // Snap to exact cell centre and commit the new grid position.
     // gridRow/gridCol are ONLY updated here (on arrival), never mid-step,
     // so inRange checks always reference a true cell centre.
-    m.mesh.position.x = targetX;
-    m.mesh.position.z = targetZ;
+    _setMoverPos(m, targetX, targetZ);
     m.gridRow = ps.targetRow;
     m.gridCol = ps.targetCol;
     ps.moving = false;
@@ -1955,10 +2387,9 @@ function _updatePatrol(m, dt) {
     checkTrapForMonster(m, m.gridRow, m.gridCol);
   } else {
     const step = Math.min(spd * dt, dist);
-    m.mesh.position.x += (dx / dist) * step;
-    m.mesh.position.z += (dz / dist) * step;
+    _addMoverPos(m, (dx / dist) * step, (dz / dist) * step);
     // Face the direction of travel (lookAt convention matches lookAtPlayer)
-    m.mesh.lookAt(targetX, m.mesh.position.y, targetZ);
+    _setMoverLookAt(m, targetX, targetZ);
   }
 }
 
@@ -2011,22 +2442,21 @@ function _updateChase(m, dt) {
   // Slide toward the target cell
   const targetX = cs.targetCol * CELL + (m.offsetX ?? 0);
   const targetZ = cs.targetRow * CELL + (m.offsetZ ?? 0);
-  const dx = targetX - m.mesh.position.x;
-  const dz = targetZ - m.mesh.position.z;
+  const cur = _moverPos(m);
+  const dx = targetX - cur.x;
+  const dz = targetZ - cur.z;
   const dist = Math.sqrt(dx * dx + dz * dz);
 
   if (dist < 0.05) {
-    m.mesh.position.x = targetX;
-    m.mesh.position.z = targetZ;
+    _setMoverPos(m, targetX, targetZ);
     m.gridRow = cs.targetRow;
     m.gridCol = cs.targetCol;
     cs.moving = false;
     checkTrapForMonster(m, m.gridRow, m.gridCol);
   } else {
     const step = Math.min(spd * dt, dist);
-    m.mesh.position.x += (dx / dist) * step;
-    m.mesh.position.z += (dz / dist) * step;
-    m.mesh.lookAt(targetX, m.mesh.position.y, targetZ);
+    _addMoverPos(m, (dx / dist) * step, (dz / dist) * step);
+    _setMoverLookAt(m, targetX, targetZ);
   }
 }
 
@@ -2075,12 +2505,17 @@ export function updateMonsters(dt, playerCamera, scene) {
     // If dead and mesh is already gone, skip
     if (!m.alive && !m.mesh) return;
 
+    // Formation sub-meshes (quartet slots 1–3): keep them in scene after the
+    // parent dies so the death-pose mushrooms stay as corpses on the tile.
+    // Final cleanup happens at level transition via loadMonstersForLevel.
+
     // Dormant monsters are hidden until the player enters their trigger bounds
     if (m._dormant) {
       if (m._rising) {
         // Rise animation playing — update mixer but skip all combat logic
         if (m.mesh) m.mesh.visible = true;
         if (m.mixer) m.mixer.update(dt);
+        if (m.subMixers) for (const sm of m.subMixers) { if (sm) sm.update(dt); }
       } else {
         if (m.mesh) m.mesh.visible = false;
         if (m._triggerBounds) {
@@ -2103,6 +2538,7 @@ export function updateMonsters(dt, playerCamera, scene) {
       if (dx * dx + dz * dz > FOG_CULL_SQ) {
         if (m.mixer && m.mixer.timeScale !== 0) m.mixer.timeScale = 0;
         if (m.hpLabel) m.hpLabel.visible = false;
+        if (m.members) for (const member of m.members) { if (member.hpLabel) member.hpLabel.visible = false; }
         if (m.statsLabel) m.statsLabel.visible = false;
         if (m.sleepLabel) m.sleepLabel.visible = false;
         if (m.stunLabel) m.stunLabel.visible = false;
@@ -2111,6 +2547,7 @@ export function updateMonsters(dt, playerCamera, scene) {
         if (m.trappedLabel) m.trappedLabel.visible = false;
         if (_huntersEyeTargetId === m.id) { _hideHuntersEyePanel(); _huntersEyeTargetId = null; }
         m.mesh.visible = false;
+        if (m.subMeshes) for (const sub of m.subMeshes) { if (sub) sub.visible = false; }
         return;
       }
       // Resume if returning into range
@@ -2119,6 +2556,19 @@ export function updateMonsters(dt, playerCamera, scene) {
 
     if (m.mesh) m.mesh.visible = true;
 
+    // Formation: keep meshes oriented so the player sees subSlot 0 at their
+    // front-left, etc. Dead subs stay visible in their clamped death pose
+    // unless they've been "covered" by a back-row partner stepping up —
+    // _repositionQuartetSubMeshes flags those as member._hideMesh.
+    if (m.members) {
+      if (player) _repositionQuartetSubMeshes(m, player.gridRow, player.gridCol, dt);
+      for (let i = 0; i < 4; i++) {
+        const sub = _quartetSubMesh(m, i);
+        const member = m.members[i];
+        if (sub) sub.visible = !(member._hideMesh || member._stepupHidden);
+      }
+    }
+
     if (m._frozen) {
       if (m.mixer) m.mixer.timeScale = 0;
       return;
@@ -2126,11 +2576,13 @@ export function updateMonsters(dt, playerCamera, scene) {
 
     // Update animation mixer (crucial for death animation)
     if (m.mixer) m.mixer.update(dt);
+    if (m.subMixers) for (const sm of m.subMixers) { if (sm) sm.update(dt); }
 
     // If dead, we stop here (no attacks, no patrol, no labels)
     // Hunter's Eye panel stays visible for dead targets — shows defeated state.
     if (!m.alive) {
       if (m.hpLabel) m.hpLabel.visible = false;
+      if (m.members) for (const member of m.members) { if (member.hpLabel) member.hpLabel.visible = false; }
       if (m.statsLabel) m.statsLabel.visible = false;
       if (m.sleepLabel) m.sleepLabel.visible = false;
       if (m.stunLabel) m.stunLabel.visible = false;
@@ -2242,6 +2694,13 @@ export function updateMonsters(dt, playerCamera, scene) {
     // HP bar is only visible when the party is engaged in melee range with
     // this monster — same adjacency check used for proximity attacks.
     if (m.hpLabel) m.hpLabel.visible = inRange;
+    // Quartet sub-bars follow the same rule, but a dead sub keeps its bar
+    // hidden (its mesh is hidden too, so the bar would just dangle).
+    if (m.members) {
+      for (const member of m.members) {
+        if (member.hpLabel) member.hpLabel.visible = inRange && member.alive;
+      }
+    }
 
     // Auto-deactivate Hunter's Eye only for alive monsters that go out of range
     // Dead monsters keep their panel visible until a new fight or manual dismiss.
@@ -2292,6 +2751,32 @@ export function updateMonsters(dt, playerCamera, scene) {
               playSoundByUrl(asset('/monsters/minotaur/scream.mp3'), 0.8);
             }
           }
+        }
+      }
+    }
+
+    // Quartet sub-meshes (slots 1–3): mirror the main transition so each
+    // mushroom walks/idles in lock-step with the formation. Sub 0 is already
+    // handled above via the shared m.actions.
+    if (m.members) {
+      for (let i = 1; i < 4; i++) {
+        const member = m.members[i];
+        if (!member.alive || !member.actions || !member.actions.idle) continue;
+        // Don't interrupt death or attack animations.
+        if (member._animState === 'dead' || member._animState === 'attack') continue;
+        const isSwinging = member.actions.attack && member.actions.attack.isRunning();
+        if (isSwinging) continue;
+        const hasWalk = !!member.actions.walk;
+        if (isMoving && hasWalk) {
+          if (member._animState !== 'walk') {
+            member.actions.walk.reset().play();
+            member.actions.idle.crossFadeTo(member.actions.walk, 0.3, true);
+            member._animState = 'walk';
+          }
+        } else if (member._animState === 'walk' && hasWalk) {
+          member.actions.idle.reset().play();
+          member.actions.walk.crossFadeTo(member.actions.idle, 0.3, true);
+          member._animState = 'idle';
         }
       }
     }
@@ -2415,9 +2900,15 @@ export function applyMonsterStatusEffect(monsterId, effectId, caster = null, dur
 //  HIT / DAMAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function showMonsterDamage(monsterId, damage, isCrit, attackType = '') {
+export function showMonsterDamage(monsterId, damage, isCrit, attackType = '', subSlot = null) {
   const m = monsters.find(x => x.id === monsterId);
-  if (!m || !m.mesh) return;
+  if (!m) return;
+  // For quartets, anchor the popup to the sub-mesh that actually got hit so it
+  // floats over the right mushroom instead of the front-left slot every time.
+  const anchor = (subSlot != null && m.formation === 'quartet')
+    ? (_quartetSubMesh(m, subSlot) || m.mesh)
+    : m.mesh;
+  if (!anchor) return;
 
   // We use a wrapper div because CSS2DObject takes control of the element's transform.
   // If we animate 'transform' on the same element, they fight and the world-position
@@ -2453,10 +2944,10 @@ export function showMonsterDamage(monsterId, damage, isCrit, attackType = '') {
   const label = new CSS2DObject(wrapper);
   // Place it near mid-body (HP bar is 1.8) so it can float up through the model
   label.position.set(0, 1.5, 0);
-  m.mesh.add(label);
+  anchor.add(label);
 
   setTimeout(() => {
-    if (m.mesh) m.mesh.remove(label);
+    if (anchor.parent) anchor.remove(label);
   }, 850);
 }
 
@@ -2481,9 +2972,39 @@ export function showCritIndicator(monsterId, damage) {
   }, 1400);
 }
 
-export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, killer = null, elementalBreakdown = null, spellElement = null) {
+export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, killer = null, elementalBreakdown = null, spellElement = null, subSlot = null, aoe = false) {
   const m = monsters.find((x) => x.id === monsterId && x.alive);
   if (!m) return { hit: false, damage: 0, killed: false, monsterHp: 0 };
+
+  // AoE on a quartet splashes every alive sub with the same damage. We recurse
+  // once per sub with aoe=false to land each hit through the normal pipeline
+  // (damage popup, HP bar, per-sub death anim, drops). Caller gets back an
+  // aggregate summary.
+  if (aoe && m.formation === 'quartet' && Array.isArray(m.members) && subSlot == null) {
+    const alive = m.members.filter(s => s.alive);
+    if (alive.length === 0) return { hit: false, damage: 0, killed: false, monsterHp: m.hp };
+    let totalDamage = 0;
+    let monsterKilled = false;
+    for (const sub of alive) {
+      const r = hitMonster(monsterId, finalDamage, attackType, isCrit, killer, elementalBreakdown, spellElement, sub.subSlot, false);
+      totalDamage += r.damage;
+      if (r.killed) monsterKilled = true;
+    }
+    return { hit: true, damage: totalDamage, killed: monsterKilled, monsterHp: m.hp };
+  }
+
+  // Resolve the sub-member for quartet-style formations. If no explicit subSlot
+  // was passed (e.g. DoTs, traps), pick the first alive sub so damage still
+  // lands somewhere sensible.
+  let member = null;
+  if (m.formation === 'quartet' && Array.isArray(m.members)) {
+    if (subSlot != null && m.members[subSlot]?.alive) {
+      member = m.members[subSlot];
+    } else {
+      member = m.members.find(s => s.alive) || null;
+    }
+    if (!member) return { hit: false, damage: 0, killed: false, monsterHp: m.hp };
+  }
 
   // Frozen monsters (statues) absorb hits without taking damage.
   // Play the iron-clang hit sound to give physical feedback, then bail.
@@ -2540,7 +3061,19 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
 
   const damage = Math.max(1, finalDamage);
   const hpBefore = m.hp;
-  m.hp = Math.max(0, m.hp - damage);
+  let subKilledByThisHit = false;
+  if (member) {
+    const memberHpBefore = member.hp;
+    member.hp = Math.max(0, member.hp - damage);
+    if (memberHpBefore > 0 && member.hp === 0) {
+      member.alive = false;
+      subKilledByThisHit = true;
+    }
+    // Aggregate parent HP = sum of surviving sub HPs.
+    m.hp = m.members.reduce((sum, s) => sum + s.hp, 0);
+  } else {
+    m.hp = Math.max(0, m.hp - damage);
+  }
   const hpAfter = m.hp;
   const killedByThisHit = (hpBefore > 0 && hpAfter === 0);
 
@@ -2598,10 +3131,39 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       showCritIndicator(monsterId, finalDamage);
     }
 
-    showMonsterDamage(monsterId, damage, isCrit, attackType);
+    showMonsterDamage(monsterId, damage, isCrit, attackType, member?.subSlot ?? null);
 
-    // Update the HP bar above the monster's head
-    if (m.hpBarFill) {
+    // ── Sub-death ─────────────────────────────────────────────────────────
+    // Each quartet sub awards XP and rolls drops independently so killing
+    // each mushroom feels rewarding. Drops accumulate in m._accumulatedDrops
+    // and the full corpse spawns on the final sub's death below.
+    if (subKilledByThisHit) {
+      _playQuartetSubDeath(m, member);
+      if (!window.arenaState.active) {
+        if (m.xp > 0) awardXP(m.xp);
+        if (m.drops && m.drops.length > 0 && !m.noDrops) {
+          m._accumulatedDrops = m._accumulatedDrops || [];
+          for (const drop of m.drops) {
+            if (Math.random() < drop.chance) {
+              const itemName = typeof drop.item === 'string' ? drop.item : drop.item?.name;
+              if (itemName && itemName.endsWith(' Essence') && itemName !== 'Life Essence') {
+                if (_collections.droppedBossEssences.has(itemName)) continue;
+                _collections.droppedBossEssences.add(itemName);
+              }
+              m._accumulatedDrops.push(drop.item);
+            }
+          }
+        }
+      }
+    }
+
+    // Update the HP bar above the monster's head. For quartets, each member
+    // owns its own bar showing only its own HP; for solo monsters the existing
+    // aggregate bar logic applies.
+    if (member && member.hpBarFill) {
+      const pct = member.hpMax > 0 ? (member.hp / member.hpMax) * 100 : 0;
+      member.hpBarFill.style.width = `${pct}%`;
+    } else if (!member && m.hpBarFill) {
       const pct = m.hpMax > 0 ? (hpAfter / m.hpMax) * 100 : 0;
       m.hpBarFill.style.width = `${pct}%`;
     }
@@ -2619,8 +3181,11 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       // ── Drop table roll ─────────────────────────────────────────────────────
       // Roll each entry in the monster's drops table independently.
       // Arena: only a 50% chance of boss essence, nothing else.
-      const droppedItems = [];
-      if (m.drops && m.drops.length > 0 && !m.noDrops) {
+      // Quartets: drops were already rolled per-sub above; reuse the accumulator
+      // so the corpse holds one item pile for all four mushrooms.
+      const isQuartetDeath = m.formation === 'quartet' && Array.isArray(m.members);
+      const droppedItems = isQuartetDeath ? (m._accumulatedDrops || []) : [];
+      if (!isQuartetDeath && m.drops && m.drops.length > 0 && !m.noDrops) {
         if (window.arenaState.active) {
           // Drop gold scaled by arena tier (1-100 at tier 1, up to 1-100*tier)
           const arenaTier = window.arenaState.tier ?? 1;
@@ -2684,6 +3249,25 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       if (m.hpBarFill) m.hpBarFill.parentElement.style.display = 'none';
       addLogEntry({ type: 'death', target: m.name, killer, damage, time: Date.now() });
 
+      // Quartet: once the corpse / bone pile spawns, fade out the four
+      // dead-pose mushroom meshes so the tile reads as a single loot pile
+      // instead of being littered with mushroom bodies. The delay gives the
+      // last sub's death animation time to play out first, then we both
+      // flag-hide them (so the per-frame visibility loop keeps them hidden
+      // through any race) and physically remove them from the scene.
+      if (isQuartetDeath) {
+        setTimeout(() => {
+          if (Array.isArray(m.members)) {
+            for (const member of m.members) member._hideMesh = true;
+          }
+          if (m.mesh) {
+            if (m.mesh.parent) m.mesh.parent.remove(m.mesh);
+            m.mesh = null;
+          }
+          if (m.subMeshes) _disposeQuartetSubMeshes(m);
+        }, 1500);
+      }
+
       // Show battle summary icon now that the fight is over
       showBattleStatsIcon(m.name);
 
@@ -2692,9 +3276,14 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       });
 
       // ── Award XP to living party members (not in arena) ────────
-      if (m.xp > 0 && !window.arenaState.active) awardXP(m.xp);
+      // For quartets the per-sub block above awarded XP per mushroom, so we
+      // skip the aggregate award here.
+      if (m.xp > 0 && !window.arenaState.active && !isQuartetDeath) awardXP(m.xp);
 
-      _playDeathAnimation(m);
+      // Quartet: each sub already played its own death anim via the per-sub
+      // block above, so we skip the main death anim play here (it would just
+      // re-trigger the already-clamped action on sub 0).
+      if (!isQuartetDeath) _playDeathAnimation(m);
     } else {
       _playHitAnimation(m, attackType, killer, elementalBreakdown, spellElement);
     }
@@ -2870,7 +3459,26 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     spellElement,
   };
 
-  const result = hitMonster(monsterId, damage, attackType, isCrit, character.name, elementalBreakdown, spellElement);
+  // Quartet targeting:
+  //   * Magic spells splash the whole formation (aoe=true) — feels right when
+  //     you fireball a clump of 4 mushrooms.
+  //   * Physical attacks use the column rule: party left column (slots 0,2)
+  //     hits monster left column (subs 0,2) — front first, then back partner,
+  //     then cross-column fallback when the same column is wiped.
+  let subSlot = null;
+  let quartetAoe = false;
+  if (m.formation === 'quartet') {
+    if (isMagic) {
+      quartetAoe = true;
+    } else {
+      const attackerIdx = party.indexOf(character);
+      const attackerCol = attackerIdx >= 0 ? (attackerIdx % 2) : 0;
+      const targetMember = _quartetPickTargetForAttackerCol(m, attackerCol);
+      if (targetMember) subSlot = targetMember.subSlot;
+    }
+  }
+
+  const result = hitMonster(monsterId, damage, attackType, isCrit, character.name, elementalBreakdown, spellElement, subSlot, quartetAoe);
 
   let stunned = false;
   if (attackType === 'shield-bash' && result.hit && !result.killed) {
@@ -3138,6 +3746,26 @@ export function triggerMonsterAttack(monsterId) {
     const fromAction = (m.actions.walk && m._animState === 'walk') ? m.actions.walk : (m._activeIdle || m.actions.idle);
     if (fromAction) fromAction.crossFadeTo(attackAction, 0.2, true);
 
+    // Quartet: the main mesh (sub 0) plays attackAction above. The other
+    // active front sub also swings — trigger its attack anim on its own mixer
+    // so both mushrooms in the front row visibly attack at the same time.
+    if (m.formation === 'quartet' && m.members) {
+      const [mfl, mfr] = _quartetActiveFront(m);
+      for (const swinger of [mfl, mfr]) {
+        if (!swinger || swinger.subSlot === 0) continue; // sub 0 already handled
+        const act = swinger.actions?.attack;
+        if (!act) continue;
+        act.reset();
+        act.setEffectiveTimeScale(1);
+        act.setEffectiveWeight(1);
+        act.play();
+        const subFrom = (swinger._animState === 'walk' && swinger.actions.walk)
+          ? swinger.actions.walk : swinger.actions.idle;
+        if (subFrom) subFrom.crossFadeTo(act, 0.2, true);
+        swinger._animState = 'attack';
+      }
+    }
+
     // ── Sound scheduling ──
     if (attackSound) {
       const _playAttackSound = () => {
@@ -3270,8 +3898,31 @@ function _applyMonsterDamage(monster, opts = {}) {
   // opts.isAoe — whether this hit is part of an AoE special attack
   // opts.damageType — element of this attack (e.g. "fire"). Falls back to monster.damageType for basic attacks. null/"physical" = no element.
   // opts.elementalDamage — additive elemental rider map for special attacks. Basic attacks fall back to monster.elementalDamage.
-  const { forceTarget, onHitEffectsOverride, damageMultiplier, specialName, isAoe, damageType, elementalDamage } = opts;
-  const isSpecial = forceTarget !== undefined;
+  const { forceTarget, onHitEffectsOverride, damageMultiplier, specialName, isAoe, damageType, elementalDamage, _quartetBasic } = opts;
+  // `isSpecial` means the caller picked a target outside the directional logic,
+  // i.e. an AoE/special-attack hit. Quartet basic-attack fan-out also passes
+  // `forceTarget` but is *not* a special — _quartetBasic flags that path.
+  const isSpecial = forceTarget !== undefined && !_quartetBasic;
+
+  // Quartet basic attack: each alive monster front-line sub swings at its
+  // matching party column. Both front-row subs hit in the same cycle (up to
+  // 2 swings/round). Back-row subs step up when their front partner is dead.
+  if (monster.formation === 'quartet' && monster.members && forceTarget === undefined) {
+    const [mfl, mfr] = _quartetActiveFront(monster);
+    const targets = [];
+    if (mfl) {
+      const pTarget = _partyColumnTarget(0);
+      if (pTarget) targets.push(pTarget);
+    }
+    if (mfr) {
+      const pTarget = _partyColumnTarget(1);
+      if (pTarget) targets.push(pTarget);
+    }
+    for (const t of targets) {
+      _applyMonsterDamage(monster, { ...opts, forceTarget: t, _quartetBasic: true });
+    }
+    return;
+  }
 
   // Target whoever is on the face of the formation the monster is attacking from.
   // Falls back to any alive member if that face is completely wiped.
@@ -3740,6 +4391,11 @@ export function captureMonsterState() {
       // saved corpse re-spawns with the same contents on reload. Null if the
       // corpse was already fully looted or never had drops.
       corpseContents: Array.isArray(m.corpseContents) ? [...m.corpseContents] : null,
+      // Quartet-style formations: per-sub HP/alive state. Plain objects so the
+      // save bundle stays JSON-safe.
+      members: Array.isArray(m.members)
+        ? m.members.map(s => ({ subSlot: s.subSlot, hp: s.hp, hpMax: s.hpMax, alive: s.alive }))
+        : null,
     });
   }
   return {
@@ -3779,6 +4435,18 @@ export function restoreMonsterState(data) {
       if (s.awakeningUsed) m._awakeningUsed = true;
       if (s.easyModeApplied) m._easyModeApplied = true;
       m.corpseContents = Array.isArray(s.corpseContents) ? s.corpseContents : null;
+      // Restore per-sub state for quartet formations. The fresh init step
+      // already populated m.members at module load; we overwrite from save.
+      if (Array.isArray(s.members) && Array.isArray(m.members)) {
+        for (const ss of s.members) {
+          const target = m.members[ss.subSlot];
+          if (target) {
+            target.hp = ss.hp;
+            target.hpMax = ss.hpMax;
+            target.alive = ss.alive;
+          }
+        }
+      }
       // Combat scratch state is ephemeral — start fresh.
       m.engaged = false;
       m._ps = null;

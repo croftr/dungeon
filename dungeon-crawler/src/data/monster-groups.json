@@ -1,0 +1,3 @@
+{
+  "_comment": "Formations are now created per-instance via instQuartet() in monster-factory.js — pass any solo def from monsters.json and the system handles per-sub HP/XP/drops automatically. This file is reserved for any future bespoke group defs (e.g. heterogeneous mobs) that don't fit the per-instance pattern."
+}
