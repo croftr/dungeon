@@ -41,7 +41,7 @@ export function spawnLevel0Objects(ctx) {
         "Trapper's Manual", "Trapper's Manual", "Trapper's Manual",
         "Flame Axe", "Flame Dagger", "Flame Arrows",
         "Ice Axe", "Ice Dagger", "Ice Arrows",
-        "Flame Greataxe", "Ice Greataxe",
+        "Flame Greataxe", "Ice Greataxe", "Mummified Hand",
         "Iron Ore", "Iron Ore", "Ogre Helm Parchment", "Crocodilian Boots Parchment",
         "Schematic Key", "Schematic Key", "Schematic Key", "Schematic Key",
         "Three Eyed Familiar", "Testament of Faith", "Talisman of the Wind", "Bulwark of the Ancestors", "Bloodstone Amulet", "Tracker's Medallion", "Crescent Moon Charm"

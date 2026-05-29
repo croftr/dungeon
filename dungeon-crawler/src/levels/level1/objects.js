@@ -69,7 +69,7 @@ export function spawnLevel1Objects(ctx) {
     // Chest at the end of the long north passage
     addChest(group, loader, 7, 1, 0, -0.7, [
         { name: 'Gold Coins', quantity: 10 },
-        'Leather Gloves', 'Cloth Trousers', 'Worn Boots', 'Ring of Wisdom', "Iron Pendant",
+        'Leather Gloves', 'Cloth Trousers', 'Worn Boots', "Iron Pendant",
         "Iron Ring"
     ]);
 
@@ -87,7 +87,7 @@ export function spawnLevel1Objects(ctx) {
 
     // Chest in the mummy room (secret east chamber)
     addChest(group, loader, 19, 1, 0, -0.7, [
-        'Chain Shirt', 'Iron Gauntlets', 'Chainmail Leggings', 'Iron-Shod Boots', 'Healers Vest'
+        'Chain Shirt', 'Iron Gauntlets', 'Chainmail Leggings', 'Iron-Shod Boots'
     ]);
 
     // Chest at the end of the new passage in the southwest
@@ -192,8 +192,10 @@ export function spawnLevel1Objects(ctx) {
     group.add(sarcophagusGateBtn);
 
     // Chest at the back of the small room at col 13, row 7 (offset south by 0.7 to sit near the south wall)
-    addChest(group, loader, 13, 7, 0, 0.7, [
-        "Mummified Hand"
+    addChest(group, loader, 13, 7, Math.PI, 0.7, [
+        "Mummified Hand",
+        'Healers Vest',
+        'Ring of Wisdom'
     ]);
 
     // Portal Activator Statue in the mummy room — contains Red Crystal

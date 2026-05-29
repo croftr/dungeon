@@ -1042,9 +1042,9 @@ function renderModal(memberIndex) {
   if (hpFill) hpFill.style.width = pctHelper(m.hp, m.hpMax);
   if (mpFill) mpFill.style.width = pctHelper(m.mp, m.mpMax);
   if (spFill) spFill.style.width = pctHelper(m.sp ?? 100, m.spMax ?? 100);
-  if (hpVal) hpVal.textContent = `${m.hp}/${m.hpMax}`;
-  if (mpVal) mpVal.textContent = `${m.mp}/${m.mpMax}`;
-  if (spVal) spVal.textContent = `${m.sp ?? 100}/${m.spMax ?? 100}`;
+  if (hpVal) hpVal.textContent = `${Math.ceil(m.hp)}/${m.hpMax}`;
+  if (mpVal) mpVal.textContent = `${Math.ceil(m.mp)}/${m.mpMax}`;
+  if (spVal) spVal.textContent = `${Math.ceil(m.sp ?? 100)}/${m.spMax ?? 100}`;
 
 
   // Remove the spells container if it exists (from previous turn)
@@ -3474,9 +3474,9 @@ function _renderStatsTab(m, _memberIndex) {
   const encLabel = encLvl === 'overloaded' ? 'Overloaded' : (encLvl === 'heavy' ? 'Heavy' : 'Normal');
   const encColor = encLvl === 'overloaded' ? '#ff5050' : (encLvl === 'heavy' ? '#e0c040' : '');
   const vitalsRows = `
-    <div class="stat-row"><span class="stat-name">HP</span><span class="stat-value">${m.hp} / ${m.hpMax}</span></div>
-    <div class="stat-row"><span class="stat-name">MP</span><span class="stat-value">${m.mp} / ${m.mpMax}</span></div>
-    <div class="stat-row"><span class="stat-name">SP</span><span class="stat-value">${m.sp ?? 100} / ${m.spMax ?? 100}</span></div>
+    <div class="stat-row"><span class="stat-name">HP</span><span class="stat-value">${Math.ceil(m.hp)} / ${m.hpMax}</span></div>
+    <div class="stat-row"><span class="stat-name">MP</span><span class="stat-value">${Math.ceil(m.mp)} / ${m.mpMax}</span></div>
+    <div class="stat-row"><span class="stat-name">SP</span><span class="stat-value">${Math.ceil(m.sp ?? 100)} / ${m.spMax ?? 100}</span></div>
     <div class="stat-row"><span class="stat-name">Carry Weight</span><span class="stat-value">${carry.toFixed(1)} / ${maxCarry.toFixed(1)} kg</span></div>
     <div class="stat-row"><span class="stat-name">Encumbrance</span><span class="stat-value" style="color:${encColor};">${encLabel}</span></div>
   `;

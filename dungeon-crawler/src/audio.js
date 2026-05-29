@@ -59,6 +59,7 @@ const ITEM_SOUNDS = {
   'berry': asset('/sounds/actions/inventory-item.mp3'),
   'fungus': asset('/sounds/actions/fungus.mp3'),
   'essence': asset('/sounds/actions/essence.mp3'),
+  'Mummified Hand': asset('/sounds/items/mummy-hand.mp3'),
 };
 
 const bufferCache = new Map();
@@ -576,6 +577,10 @@ export async function playItemSound(itemName, slot = '') {
   // Specific check for parchment/scroll sound
   if (!url && (lowerName.includes('parchment') || slot === 'parchment' || lowerName.includes('scroll'))) {
     url = ITEM_SOUNDS['scroll'];
+  }
+
+  if (!url && lowerName === 'mummified hand') {
+    url = ITEM_SOUNDS['Mummified Hand'];
   }
 
   if (!url && (lowerName.includes('potion') || lowerName.includes('elixir') || slot === 'potion')) {

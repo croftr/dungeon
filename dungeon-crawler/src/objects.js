@@ -1590,6 +1590,7 @@ export function initObjects(scene, camera) {
             const overlay = document.getElementById('sarcophagus-overlay');
             if (overlay) overlay.classList.add('chest-hidden');
 
+            playItemSound('Mummified Hand');
             playGateOpeningSound();
 
             // Engage mummies 
