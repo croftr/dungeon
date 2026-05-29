@@ -36,6 +36,58 @@ function _getAmmoIndicatorEl(slotId) {
   return dot;
 }
 
+// Lazily injects (and returns) the small indicator dot used to show that a
+// weapon/shield has a weapon skill (and whether it is ready or on cooldown).
+// Sits in the top-left corner of the party-card hand slot.
+function _getWeaponSkillIndicatorEl(slotId) {
+  const slot = document.getElementById(slotId);
+  if (!slot) return null;
+  let dot = slot.querySelector('.weapon-skill-dot');
+  if (!dot) {
+    dot = document.createElement('span');
+    dot.className = 'weapon-skill-dot';
+    slot.appendChild(dot);
+  }
+  return dot;
+}
+
+// Updates the weapon-skill indicator + cooldown state for one hand slot.
+//   slotId  — DOM id of the slot (e.g. "slot-lh-0")
+//   def     — resolved item def occupying the slot (or null)
+//   cdKey   — lastAttackTimes key holding the weapon-skill cooldown timestamp
+//   m       — the party member (for scheduling a refresh on cooldown expiry)
+//   timerKey— m.cooldownTimers key used for the refresh timeout
+function _updateWeaponSkillIndicator(slotId, def, cdKey, m, timerKey) {
+  const slot = document.getElementById(slotId);
+  if (!slot) return;
+  const ws = def?.weaponSkill ?? null;
+  slot.classList.toggle('slot-has-wskill', !!ws);
+  const dot = slot.querySelector('.weapon-skill-dot');
+  if (!ws) {
+    if (dot) dot.style.display = 'none';
+    return;
+  }
+  const el = dot ?? _getWeaponSkillIndicatorEl(slotId);
+  if (!el) return;
+  el.style.display = '';
+  el.title = ws.name;
+
+  const cooldownMs = ws.cooldownMs ?? 60000;
+  const lastUsed = lastAttackTimes[cdKey];
+  const remaining = lastUsed === undefined ? 0 : (cooldownMs - (performance.now() - lastUsed));
+  const ready = remaining <= 0;
+  el.classList.toggle('is-ready', ready);
+  el.classList.toggle('is-cooling', !ready);
+
+  // Refresh the HUD once the cooldown expires so the dot flips back to ready.
+  if (!ready && m.cooldownTimers && !m.cooldownTimers[timerKey]) {
+    m.cooldownTimers[timerKey] = setTimeout(() => {
+      m.cooldownTimers[timerKey] = null;
+      refreshMember(m);
+    }, remaining);
+  }
+}
+
 // ─────────────────────────────────────────────
 //  PARTY DATA  — 4 members
 // ─────────────────────────────────────────────
@@ -611,6 +663,19 @@ function refreshMember(m) {
       }, remaining);
     }
   }
+
+  // Weapon-skill indicators (right-click activated special attacks). The skill
+  // belongs to whichever item actually occupies the slot; bothHands weapons
+  // mirror to the right slot and share the left-hand cooldown key.
+  _updateWeaponSkillIndicator(`slot-lh-${i}`, lhDef, `${i}-left-wskill`, m, 'wskill-left');
+  _updateWeaponSkillIndicator(
+    `slot-rh-${i}`,
+    lhBothHands ? lhDef : rhDef,
+    lhBothHands ? `${i}-left-wskill` : `${i}-right-wskill`,
+    m,
+    'wskill-right',
+  );
+
   if (skSlot) {
     skSlot.classList.toggle('slot-empty', !skName);
     skSlot.classList.toggle('skill-runic-active', !!m.runicScholarActive);

@@ -1002,6 +1002,62 @@ function _spawnLightningboltImpact(pos, tex) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
+//  LIGHTNING STRIKE — weapon-skill discharge (cold blue/white palette)
+//  A blue electric burst at the target. Used by the Elven Dagger weapon skill.
+// ══════════════════════════════════════════════════════════════════════════
+export function triggerLightningStrikeEffect(travelCells = 1) {
+    if (!batchRenderer || !sceneRef || !cameraRef) return;
+    const tex = createGlowTexture();
+    const dir = new THREE.Vector3();
+    cameraRef.getWorldDirection(dir);
+
+    const WORLD_PER_CELL = 2;
+    const travelDist = Math.max(0.5, travelCells * WORLD_PER_CELL);
+    const pos = new THREE.Vector3().copy(cameraRef.position).addScaledVector(dir, travelDist);
+
+    // Sharp outward discharge — fast, bright, electric blue
+    const discharge = new ParticleSystem({
+        duration: 0.4, looping: false,
+        startLife: new IntervalValue(0.1, 0.5),
+        startSpeed: new IntervalValue(3.0, 10.0),
+        startSize: new IntervalValue(0.05, 0.22),
+        startColor: new ConstantColor(new Vector4(0.6, 0.85, 1.0, 1)),
+        worldSpace: true, maxParticle: 140,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(110), cycle: 1, interval: 0.005, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.2, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex),
+        startTileIndex: new ConstantValue(0), uTileCount: 1, vTileCount: 1,
+        renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    discharge.addBehavior(new ColorOverLife(new ColorRange(
+        new Vector4(0.9, 0.97, 1.0, 1),    // blinding blue-white flash
+        new Vector4(0.1, 0.35, 0.9, 0),    // fades to deep blue
+    )));
+    discharge.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(0.2, 1.0, 0.6, 0), 0]])));
+    _spawn(discharge, pos, 1.2);
+
+    // Secondary lingering sparks
+    const sparks = new ParticleSystem({
+        duration: 0.6, looping: false,
+        startLife: new IntervalValue(0.2, 0.6),
+        startSpeed: new IntervalValue(1.0, 4.0),
+        startSize: new IntervalValue(0.02, 0.08),
+        startColor: new ConstantColor(new Vector4(0.7, 0.9, 1.0, 1)),
+        worldSpace: true, maxParticle: 60,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0.05, count: new ConstantValue(45), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.35, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex),
+        startTileIndex: new ConstantValue(0), uTileCount: 1, vTileCount: 1,
+        renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    sparks.addBehavior(new ColorOverLife(new ColorRange(new Vector4(0.7, 0.9, 1.0, 1), new Vector4(0.15, 0.3, 0.7, 0))));
+    sparks.addBehavior(new SizeOverLife(FADE_OUT));
+    _spawn(sparks, pos, 1.5);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
 //  HOLYBOLT — radiant divine orb (holy element, warm gold/white palette)
 //  Blazing golden sphere flying forward, bursting in a sunburst on impact
 // ══════════════════════════════════════════════════════════════════════════

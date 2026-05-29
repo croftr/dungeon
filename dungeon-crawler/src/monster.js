@@ -3486,7 +3486,8 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
       const name = typeof s === 'string' ? s : s.name;
       return SKILLS_DATA[name]?.effectType === 'shieldMasterBonus';
     }).length;
-    const stunChance = SHIELD_BASH_STUN_CHANCE + shieldMasterLevels * 0.01;
+    // Weapon-skill bashes (e.g. Warden's Shield "Holy Bash") can guarantee the stun.
+    const stunChance = weaponDef?.guaranteedStun ? 1 : SHIELD_BASH_STUN_CHANCE + shieldMasterLevels * 0.01;
     if (Math.random() < stunChance) {
       stunned = true;
       m.stunUntil = performance.now() + SHIELD_BASH_STUN_DURATION_MS;

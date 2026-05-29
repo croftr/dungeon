@@ -87,7 +87,17 @@
         "description": "A heavy, reinforced shield used by the keepers of the deep. Provides exceptional protection.",
         "defence": 2,
         "value": 300,
-        "weight": 4.0
+        "weight": 4.0,
+        "weaponSkill": {
+            "name": "Holy Bash",
+            "cooldownMs": 60000,
+            "vfx": "holy-strike",
+            "sound": "/sounds/attacks/weapon-skill.mp3",
+            "elementalDamage": {
+                "holy": 10
+            },
+            "guaranteedStun": true
+        }
     },
     {
         "name": "Ironpeak Round Shield",

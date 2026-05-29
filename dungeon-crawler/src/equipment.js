@@ -44,6 +44,7 @@ import {
   triggerFrostboltEffect,
   triggerWaterboltEffect,
   triggerLightningboltEffect,
+  triggerLightningStrikeEffect,
   triggerHolyboltEffect,
   triggerDarkboltEffect,
   triggerRegenerationEffect,
@@ -144,6 +145,24 @@ function _dispatchSpellVFX(attackType, target = null) {
     default:
       playSkillSound('magic');
       triggerDefaultSpellEffect();
+      break;
+  }
+}
+
+// Maps a weaponSkill.vfx id → the 3D particle effect played on the hit.
+// Add new entries here as new weapon skills are introduced in item JSON.
+function _dispatchWeaponSkillVFX(vfxId, target = null) {
+  const dist = target
+    ? Math.abs(target.gridRow - player.gridRow) + Math.abs(target.gridCol - player.gridCol)
+    : 1;
+  switch (vfxId) {
+    case 'lightning-strike':
+      triggerLightningStrikeEffect(dist);
+      break;
+    case 'holy-strike':
+      triggerHolyboltEffect(dist);
+      break;
+    default:
       break;
   }
 }
@@ -5358,6 +5377,160 @@ export function useHand(memberIndex, hand, silent = false) {
 }
 
 // ─────────────────────────────────────────────
+//  WEAPON SKILLS
+// ─────────────────────────────────────────────
+// A weapon skill is a special, data-driven attack attached to some weapons and
+// shields via a `weaponSkill` block in the item JSON. It is triggered by
+// right-clicking the item's slot in the party panel, fires a single augmented
+// attack (extra elemental damage, optional guaranteed stun + dedicated VFX),
+// then enters a long independent cooldown so it cannot be spammed.
+//
+//   item.weaponSkill = {
+//     name: "Lightning Strike",      // shown in the battle log / toast
+//     cooldownMs: 60000,             // independent of the weapon's attack delay
+//     vfx: "lightning-strike",       // → _dispatchWeaponSkillVFX
+//     elementalDamage: { ... },      // added on top of the weapon's normal stats
+//     guaranteedStun: true           // optional — forces a shield-bash stun
+//   }
+//
+// The cooldown timestamp is stored in `lastAttackTimes` under
+// `${memberIndex}-${hand}-wskill` so the party HUD can read it for the slot
+// indicator. Like all attack cooldowns it is ephemeral (not saved).
+const DEFAULT_WEAPON_SKILL_COOLDOWN_MS = 60000;
+
+/** Returns the weaponSkill cooldown key for a member's hand slot. */
+export function weaponSkillCooldownKey(memberIndex, hand) {
+  return `${memberIndex}-${hand}-wskill`;
+}
+
+export function useWeaponSkill(memberIndex, hand) {
+  const m = party[memberIndex];
+  if (!m || m.isDead) return;
+  if (hasEffectFlag(m, 'preventsAction')) {
+    showMessage(`${m.name} cannot act!`);
+    return;
+  }
+
+  const slotKey = hand === 'right' ? 'rightHand' : 'leftHand';
+  const item = m.equipment?.[slotKey];
+  const def = item ? getItemDef(item.name) : null;
+  const ws = def?.weaponSkill;
+  if (!ws) return; // no weapon skill on this item
+
+  // A weapon skill can either augment the weapon's own attack (extra elemental
+  // damage / guaranteed stun via `elementalDamage`/`guaranteedStun`), or cast an
+  // existing spell by name (`spell`) exactly as this member would — same
+  // magnitude formula, element, etc. — just with no mana cost.
+  const spellSource = ws.spell ? getItemDef(ws.spell) : null;
+  const sourceDef = spellSource ?? def;
+  const attackType = sourceDef?.attackType ?? null;
+  if (!attackType) return;
+
+  // Independent weapon-skill cooldown.
+  const cdKey = weaponSkillCooldownKey(memberIndex, hand);
+  const cooldownMs = ws.cooldownMs ?? DEFAULT_WEAPON_SKILL_COOLDOWN_MS;
+  const now = performance.now();
+  if (lastAttackTimes[cdKey] && now - lastAttackTimes[cdKey] < cooldownMs) {
+    showMessage(`${ws.name} is still recharging!`);
+    return;
+  }
+
+  // Ranged attack types (incl. damage spells) reach the back rows; melee skills
+  // require a front-row position (or a stepped-up back-row member).
+  const isRanged = attackType === ACTIONS.SHOOT || attackType === ACTIONS.FIREBALL || attackType === ACTIONS.FROSTBOLT || attackType === ACTIONS.WATERBOLT || attackType === ACTIONS.LIGHTNINGBOLT || attackType === ACTIONS.HOLYBOLT || attackType === ACTIONS.DARKBOLT || attackType === ACTIONS.BANISHMENT || attackType === 'incinerate';
+  if (!isRanged && !canMelee(party, memberIndex)) {
+    showMessage(`${m.name} is in the back row — can't reach the enemy!`);
+    return;
+  }
+
+  const target = _closestMonsterInFront(isRanged ? 4 : 1);
+
+  // Start the cooldown immediately and refresh the HUD so the indicator flips.
+  lastAttackTimes[cdKey] = now;
+  refreshPartyCards();
+
+  breakPartyUnseen(`${m.name} unleashes ${ws.name} — the cloak of shadow disperses!`);
+
+  // Build the definition used for this single attack. Everything is sourced
+  // from the JSON so numbers/effects can be tweaked without code changes.
+  let skillDef;
+  if (spellSource) {
+    // Spell-based: cast the spell exactly as this member would, but free.
+    // mpCost 0 means no mana is drained while the magnitude formula (e.g.
+    // intelligence) still resolves against the caster's own stats.
+    skillDef = { ...spellSource, mpCost: 0 };
+  } else {
+    // Elemental-rider: the weapon's normal stats plus the skill's extra
+    // elemental damage and any guaranteed-stun flag.
+    const mergedElemental = { ...(def.elementalDamage ?? {}) };
+    for (const [elemId, amount] of Object.entries(ws.elementalDamage ?? {})) {
+      mergedElemental[elemId] = (mergedElemental[elemId] ?? 0) + amount;
+    }
+    skillDef = {
+      ...def,
+      elementalDamage: mergedElemental,
+      guaranteedStun: ws.guaranteedStun ?? def.guaranteedStun ?? false,
+    };
+  }
+
+  // Play the swing/cast animation + sound, then the matching VFX. Spell-based
+  // skills reuse the spell's own VFX dispatcher; elemental skills use theirs.
+  const ammoItem = m.equipment?.ammo;
+  const ammoDef = ammoItem ? getItemDef(ammoItem.name) : null;
+  const swipeElement = getPrimaryAttackElement(skillDef, ammoDef);
+  playAction(attackType, hand, memberIndex, swipeElement);
+  if (ws.sound) playSoundByUrl(ws.sound);
+  if (spellSource) {
+    _dispatchSpellVFX(attackType, target);
+  } else {
+    _dispatchWeaponSkillVFX(ws.vfx, target);
+  }
+
+  if (!target) {
+    showMessage(`${m.name} uses ${ws.name}!`);
+    return;
+  }
+
+  const result = attackMonster(target.id, m, skillDef, attackType, ammoDef, !!item?.hq);
+
+  addLogEntry({
+    time: Date.now(),
+    actor: 'player',
+    attacker: m.name,
+    target: result.monsterName || target.name,
+    attackType,
+    hitChance: result.hitChance ?? 0,
+    hit: result.hit,
+    crit: result.crit,
+    weaponBase: result.formula?.weaponBase ?? 0,
+    statBonus: result.formula?.statBonus ?? 0,
+    statLabel: result.formula?.statLabel ?? 'STR',
+    statSoakPct: result.formula?.statSoakPct ?? 0,
+    statSoakLabel: result.formula?.statSoakLabel ?? 'vit',
+    defence: result.formula?.defence ?? 0,
+    damageReduction: result.formula?.damageReduction ?? 0,
+    preCritDamage: result.formula?.preCritDamage ?? 0,
+    finalDamage: result.damage,
+    critMultiplier: result.formula?.critMultiplier ?? 1,
+    stunned: result.stunned ?? false,
+    poisoned: result.poisoned ?? false,
+    sundered: result.sundered ?? false,
+    ammoModifier: result.formula?.ammoModifier ?? null,
+    berserkMultiplier: result.formula?.berserkMultiplier ?? 1.0,
+    warcryMultiplier: result.formula?.warcryMultiplier ?? 1.0,
+    elementalBreakdown: result.formula?.elementalBreakdown ?? null,
+    spellElement: result.formula?.spellElement ?? null,
+    weaponSkillName: ws.name,
+  });
+
+  _logAppliedEffects(m.name, result.monsterName || target.name, result.stunned, result.appliedEffects);
+
+  if (result.hit) {
+    showMessage(`${m.name} uses <b>${ws.name}</b> on the ${target.name}!`);
+  }
+}
+
+// ─────────────────────────────────────────────
 //  AUTO-ATTACK TICK
 // ─────────────────────────────────────────────
 // How long after a weapon's cooldown expires before auto-attack fires (ms).
@@ -6835,6 +7008,11 @@ function attachCardListeners() {
         e.stopPropagation();
         const m = party[i];
         if (!m || m.isEmpty) return;
+        // Weapon skill: right-click an item that defines one to activate it.
+        const lhItem = m.equipment?.leftHand;
+        if (lhItem) {
+          try { if (getItemDef(lhItem.name)?.weaponSkill) { useWeaponSkill(i, 'left'); return; } } catch (err) { /* ignore */ }
+        }
         if (m.equipment?.leftHand?.slot === 'spell' && m.spells?.length) {
           _showSkillSwitchMenu(e.clientX, e.clientY, i, 'spell', 'leftHand');
         }
@@ -6850,6 +7028,14 @@ function attachCardListeners() {
         e.stopPropagation();
         const m = party[i];
         if (!m || m.isEmpty) return;
+        // bothHands weapons mirror to the left slot — drive the skill off whichever
+        // hand actually holds a weaponSkill item.
+        const lh = m.equipment?.leftHand;
+        const lhBoth = lh ? (() => { try { return getItemDef(lh.name)?.slot === 'bothHands'; } catch { return false; } })() : false;
+        const rhItem = lhBoth ? lh : m.equipment?.rightHand;
+        if (rhItem) {
+          try { if (getItemDef(rhItem.name)?.weaponSkill) { useWeaponSkill(i, lhBoth ? 'left' : 'right'); return; } } catch (err) { /* ignore */ }
+        }
         if (m.equipment?.rightHand?.slot === 'spell' && m.spells?.length) {
           _showSkillSwitchMenu(e.clientX, e.clientY, i, 'spell', 'rightHand');
         }

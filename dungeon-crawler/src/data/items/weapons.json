@@ -117,7 +117,16 @@
         "icon": "/icons/weapons/elven-dagger.webp",
         "description": "A short, double-edged blade. Quick and easy to slip past armour.",
         "value": 60,
-        "weight": 0.4
+        "weight": 0.4,
+        "weaponSkill": {
+            "name": "Lightning Strike",
+            "cooldownMs": 60000,
+            "vfx": "lightning-strike",
+            "sound": "/sounds/attacks/weapon-skill.mp3",
+            "elementalDamage": {
+                "lightning": 20
+            }
+        }
     },
     {
         "name": "Demon Blade",
@@ -486,6 +495,11 @@
         },
         "statBonuses": {
             "mp": 2
+        },
+        "weaponSkill": {
+            "name": "Banishment",
+            "cooldownMs": 60000,
+            "spell": "Banishment"
         }
     },
     {
@@ -513,6 +527,11 @@
         },
         "skillBonuses": {
             "fire": 2
+        },
+        "weaponSkill": {
+            "name": "Fireball",
+            "cooldownMs": 60000,
+            "spell": "Fireball"
         }
     },
     {
@@ -538,6 +557,11 @@
         "statBonuses": {
             "hp": 2,
             "mp": 2
+        },
+        "weaponSkill": {
+            "name": "Banishment",
+            "cooldownMs": 60000,
+            "spell": "Banishment"
         }
     },
     {

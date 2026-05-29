@@ -6177,6 +6177,53 @@ label.mm-setting-label {
   box-shadow: 0 0 0 1px #c8a84a, 0 0 4px rgba(200, 168, 74, 0.7);
 }
 
+/* ── Weapon-skill indicator (right-click special attack) ─────────────────────
+   Small diamond in the top-left corner of a hand slot. Bright/pulsing when the
+   skill is ready, dimmed when on cooldown. */
+.equip-slot .weapon-skill-dot {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 7px;
+  height: 7px;
+  transform: rotate(45deg);
+  border: 1px solid rgba(0, 0, 0, 0.7);
+  background: #555;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.equip-slot .weapon-skill-dot.is-ready {
+  background: #ffd24a;
+  box-shadow: 0 0 4px 1px rgba(255, 210, 74, 0.9);
+  animation: weaponSkillReadyPulse 1.4s ease-in-out infinite;
+}
+
+.equip-slot .weapon-skill-dot.is-cooling {
+  background: #3a3a3a;
+  box-shadow: none;
+  animation: none;
+}
+
+@keyframes weaponSkillReadyPulse {
+  0%, 100% {
+    box-shadow: 0 0 3px 1px rgba(255, 210, 74, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 6px 2px rgba(255, 210, 74, 1);
+  }
+}
+
+/* Keep weapon-skill slots clickable while the weapon's normal attack is on
+   cooldown so the player can still right-click to fire the (independently timed)
+   weapon skill. Left-click attacks remain gated by the JS cooldown check. */
+.equip-slot.slot-has-wskill.slot-cooling-down {
+  pointer-events: auto;
+}
+.equip-slot.slot-has-wskill.slot-cooling-down::after {
+  pointer-events: none;
+}
+
 /* Brief pulse animation triggered when the player rotates ammo */
 @keyframes ammoRotateFlash {
   0% {

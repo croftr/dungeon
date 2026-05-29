@@ -33,18 +33,9 @@ export function spawnLevel0Objects(ctx) {
         { name: 'Gold Coins', quantity: 10000 },
         'Potion of Unseen', 'Potion of Unseen', "Elixir of Rage", "Elixir of Rage",
         "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Elixir of Enlightenment",
-        "Iron Warden Essence", "Charged Lodestone",
         "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence",
-        "Tome of the Viperseeker", "Wizard's Hat", "Wizard's Robe", "Wizard's Gloves", "Wizard's Boots", "Wizard's Leggings",
-        "Trapper's Manual", "Trapper's Manual", "Trapper's Manual",
-        "Trapper's Manual", "Trapper's Manual", "Trapper's Manual",
-        "Trapper's Manual", "Trapper's Manual", "Trapper's Manual",
-        "Flame Axe", "Flame Dagger", "Flame Arrows",
-        "Ice Axe", "Ice Dagger", "Ice Arrows",
-        "Flame Greataxe", "Ice Greataxe", "Mummified Hand",
-        "Iron Ore", "Iron Ore", "Ogre Helm Parchment", "Crocodilian Boots Parchment",
-        "Schematic Key", "Schematic Key", "Schematic Key", "Schematic Key",
-        "Three Eyed Familiar", "Testament of Faith", "Talisman of the Wind", "Bulwark of the Ancestors", "Bloodstone Amulet", "Tracker's Medallion", "Crescent Moon Charm"
+        "Tome of the Viperseeker", "Elven Dagger", "Warden's Shield", "Oak Staff",
+        "Mummified Hand", "Iron Ore", "Iron Ore"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in the east room (center) ────────────────────────────────────
