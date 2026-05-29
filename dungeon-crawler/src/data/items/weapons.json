@@ -122,7 +122,6 @@
             "name": "Lightning Strike",
             "cooldownMs": 60000,
             "vfx": "lightning-strike",
-            "sound": "/sounds/attacks/weapon-skill.mp3",
             "elementalDamage": {
                 "lightning": 20
             }
@@ -650,7 +649,14 @@
         "icon": "/icons/weapons/longbow.webp",
         "description": "A tall yew longbow. Tremendous range and power.",
         "value": 225,
-        "weight": 1.8
+        "weight": 1.8,
+        "weaponSkill": {
+            "name": "Flaming Shot",
+            "cooldownMs": 60000,
+            "elementalDamage": {
+                "fire": 20
+            }
+        }
     },
     {
         "name": "Sylvan Elderwood Bow",
@@ -758,7 +764,14 @@
         "icon": "/icons/weapons/tridant.webp",
         "description": "A two-handed tridant. Slow to swing but crushes stone and bone alike.",
         "value": 390,
-        "weight": 7
+        "weight": 7,
+        "weaponSkill": {
+            "name": "Tidal Wave",
+            "cooldownMs": 60000,
+            "elementalDamage": {
+                "water": 40
+            }
+        }
     },
     {
         "name": "Greataxe",

@@ -92,7 +92,6 @@
             "name": "Holy Bash",
             "cooldownMs": 60000,
             "vfx": "holy-strike",
-            "sound": "/sounds/attacks/weapon-skill.mp3",
             "elementalDamage": {
                 "holy": 10
             },

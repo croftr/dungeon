@@ -5397,6 +5397,8 @@ export function useHand(memberIndex, hand, silent = false) {
 // `${memberIndex}-${hand}-wskill` so the party HUD can read it for the slot
 // indicator. Like all attack cooldowns it is ephemeral (not saved).
 const DEFAULT_WEAPON_SKILL_COOLDOWN_MS = 60000;
+// Played when a (non-spell) weapon skill has no explicit `sound` in its JSON.
+const DEFAULT_WEAPON_SKILL_SOUND = '/sounds/attacks/weapon-skill.mp3';
 
 /** Returns the weaponSkill cooldown key for a member's hand slot. */
 export function weaponSkillCooldownKey(memberIndex, hand) {
@@ -5479,7 +5481,11 @@ export function useWeaponSkill(memberIndex, hand) {
   const ammoDef = ammoItem ? getItemDef(ammoItem.name) : null;
   const swipeElement = getPrimaryAttackElement(skillDef, ammoDef);
   playAction(attackType, hand, memberIndex, swipeElement);
-  if (ws.sound) playSoundByUrl(ws.sound);
+  // Sound: an explicit `sound` always wins. Otherwise rider-style skills fall
+  // back to the generic weapon-skill sting, while spell-based skills keep the
+  // spell's own native sound (already played by playAction) — no default sting.
+  const wsSound = ws.sound ?? (spellSource ? null : DEFAULT_WEAPON_SKILL_SOUND);
+  if (wsSound) playSoundByUrl(wsSound);
   if (spellSource) {
     _dispatchSpellVFX(attackType, target);
   } else {
