@@ -1058,6 +1058,118 @@ export function triggerLightningStrikeEffect(travelCells = 1) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════
+//  HOLY STRIKE — weapon-skill burst (pure white radiant flash)
+//  Used by holy weapon skills (e.g. "Holy Smite", "Holy Bash").
+// ══════════════════════════════════════════════════════════════════════════
+export function triggerHolyStrikeEffect(travelCells = 1) {
+    if (!batchRenderer || !sceneRef || !cameraRef) return;
+    const tex = createGlowTexture();
+    const dir = new THREE.Vector3();
+    cameraRef.getWorldDirection(dir);
+
+    const WORLD_PER_CELL = 2;
+    const travelDist = Math.max(0.5, travelCells * WORLD_PER_CELL);
+    const pos = new THREE.Vector3().copy(cameraRef.position).addScaledVector(dir, travelDist);
+
+    // Radiant white flash bursting outward
+    const burst = new ParticleSystem({
+        duration: 0.5, looping: false,
+        startLife: new IntervalValue(0.2, 0.7),
+        startSpeed: new IntervalValue(2.5, 9.0),
+        startSize: new IntervalValue(0.08, 0.3),
+        startColor: new ConstantColor(new Vector4(1.0, 1.0, 1.0, 1)),
+        worldSpace: true, maxParticle: 150,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(110), cycle: 1, interval: 0.005, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.22, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex),
+        startTileIndex: new ConstantValue(0), uTileCount: 1, vTileCount: 1,
+        renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    burst.addBehavior(new ColorOverLife(new ColorRange(
+        new Vector4(1.0, 1.0, 1.0, 1),     // pure white core
+        new Vector4(0.85, 0.9, 1.0, 0),    // fades to faint cool-white
+    )));
+    burst.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(0.3, 1.0, 0.7, 0), 0]])));
+    _spawn(burst, pos, 1.5);
+
+    // Lingering soft white motes
+    const motes = new ParticleSystem({
+        duration: 0.7, looping: false,
+        startLife: new IntervalValue(0.3, 0.8),
+        startSpeed: new IntervalValue(0.5, 2.5),
+        startSize: new IntervalValue(0.03, 0.12),
+        startColor: new ConstantColor(new Vector4(1.0, 1.0, 1.0, 1)),
+        worldSpace: true, maxParticle: 60,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0.05, count: new ConstantValue(45), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.35, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex),
+        startTileIndex: new ConstantValue(0), uTileCount: 1, vTileCount: 1,
+        renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    motes.addBehavior(new ColorOverLife(new ColorRange(new Vector4(1, 1, 1, 1), new Vector4(0.8, 0.85, 1.0, 0))));
+    motes.addBehavior(new SizeOverLife(FADE_OUT));
+    _spawn(motes, pos, 1.5);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+//  WATER STRIKE — weapon-skill burst (blue surging splash)
+//  Used by water weapon skills (e.g. "Tidal Wave").
+// ══════════════════════════════════════════════════════════════════════════
+export function triggerWaterStrikeEffect(travelCells = 1) {
+    if (!batchRenderer || !sceneRef || !cameraRef) return;
+    const tex = createGlowTexture();
+    const dir = new THREE.Vector3();
+    cameraRef.getWorldDirection(dir);
+
+    const WORLD_PER_CELL = 2;
+    const travelDist = Math.max(0.5, travelCells * WORLD_PER_CELL);
+    const pos = new THREE.Vector3().copy(cameraRef.position).addScaledVector(dir, travelDist);
+
+    // Surging splash — heavy outward burst of blue water
+    const splash = new ParticleSystem({
+        duration: 0.5, looping: false,
+        startLife: new IntervalValue(0.15, 0.6),
+        startSpeed: new IntervalValue(3.0, 9.0),
+        startSize: new IntervalValue(0.08, 0.3),
+        startColor: new ConstantColor(new Vector4(0.4, 0.7, 1.0, 1)),
+        worldSpace: true, maxParticle: 160,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0, count: new ConstantValue(120), cycle: 1, interval: 0.005, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.25, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex),
+        startTileIndex: new ConstantValue(0), uTileCount: 1, vTileCount: 1,
+        renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    splash.addBehavior(new ColorOverLife(new ColorRange(
+        new Vector4(0.8, 0.95, 1.0, 1),    // bright foam-white
+        new Vector4(0.1, 0.35, 0.85, 0),   // fades to deep blue
+    )));
+    splash.addBehavior(new SizeOverLife(new PiecewiseBezier([[new Bezier(0.3, 1.0, 0.6, 0), 0]])));
+    _spawn(splash, pos, 1.4);
+
+    // Lingering droplets
+    const droplets = new ParticleSystem({
+        duration: 0.7, looping: false,
+        startLife: new IntervalValue(0.3, 0.7),
+        startSpeed: new IntervalValue(1.0, 4.0),
+        startSize: new IntervalValue(0.03, 0.12),
+        startColor: new ConstantColor(new Vector4(0.5, 0.8, 1.0, 1)),
+        worldSpace: true, maxParticle: 70,
+        emissionOverTime: new ConstantValue(0),
+        emissionBursts: [{ time: 0.04, count: new ConstantValue(50), cycle: 1, interval: 0.01, probability: 1 }],
+        shape: new SphereEmitter({ radius: 0.4, thickness: 1, arc: Math.PI * 2 }),
+        material: _mat(tex),
+        startTileIndex: new ConstantValue(0), uTileCount: 1, vTileCount: 1,
+        renderMode: RenderMode.BillBoard, renderOrder: 2,
+    });
+    droplets.addBehavior(new ColorOverLife(new ColorRange(new Vector4(0.6, 0.85, 1.0, 1), new Vector4(0.15, 0.3, 0.7, 0))));
+    droplets.addBehavior(new SizeOverLife(FADE_OUT));
+    _spawn(droplets, pos, 1.6);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
 //  HOLYBOLT — radiant divine orb (holy element, warm gold/white palette)
 //  Blazing golden sphere flying forward, bursting in a sunburst on impact
 // ══════════════════════════════════════════════════════════════════════════

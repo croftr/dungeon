@@ -45,6 +45,8 @@ import {
   triggerWaterboltEffect,
   triggerLightningboltEffect,
   triggerLightningStrikeEffect,
+  triggerHolyStrikeEffect,
+  triggerWaterStrikeEffect,
   triggerHolyboltEffect,
   triggerDarkboltEffect,
   triggerRegenerationEffect,
@@ -160,7 +162,13 @@ function _dispatchWeaponSkillVFX(vfxId, target = null) {
       triggerLightningStrikeEffect(dist);
       break;
     case 'holy-strike':
-      triggerHolyboltEffect(dist);
+      triggerHolyStrikeEffect(dist);
+      break;
+    case 'water-strike':
+      triggerWaterStrikeEffect(dist);
+      break;
+    case 'fire-line':
+      triggerIncinerateEffect();
       break;
     default:
       break;
@@ -1518,6 +1526,7 @@ function populateTooltip(obj, showBuyPrice = false) {
         <div id="detail-row-familybonus" class="detail-familybonus-list"></div>
         <div id="detail-row-elemdmg" class="detail-elemdmg-list"></div>
         <div id="detail-row-elemres" class="detail-elemdmg-list"></div>
+        <div id="detail-row-weaponskill" class="detail-weaponskill-list"></div>
     `;
 
   if (isCustom) {
@@ -1608,6 +1617,7 @@ function populateTooltip(obj, showBuyPrice = false) {
   const hasFamilyBonus = def?.familyBonus && (Array.isArray(def.familyBonus) ? def.familyBonus.length > 0 : Object.keys(def.familyBonus).length > 0);
   const hasElementalDamage = def?.elementalDamage && Object.keys(def.elementalDamage).length > 0;
   const hasElementalResistances = def?.elementalResistances && Object.keys(def.elementalResistances).length > 0;
+  const hasWeaponSkill = def?.weaponSkill != null;
   const hasStaminaDrain = def?.staminaDrain != null;
   const hasDelay = def?.delay != null;
   const hasBonusList = hasStatBonus || hasSkillBonus || hasSkillDurationBonus || hasTrapDisarmBonus || hasHpRegen || hasSpecialBonuses;
@@ -1624,6 +1634,7 @@ function populateTooltip(obj, showBuyPrice = false) {
   document.getElementById('detail-row-familybonus').style.display = hasFamilyBonus ? 'flex' : 'none';
   document.getElementById('detail-row-elemdmg').style.display = hasElementalDamage ? 'flex' : 'none';
   document.getElementById('detail-row-elemres').style.display = hasElementalResistances ? 'flex' : 'none';
+  document.getElementById('detail-row-weaponskill').style.display = hasWeaponSkill ? 'flex' : 'none';
   document.getElementById('detail-row-scaling').style.display = hasScaling ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-mod').style.display = isAmmo ? 'flex' : 'none';
   document.getElementById('detail-row-ammo-type').style.display = isAmmo ? 'flex' : 'none';
@@ -1808,6 +1819,46 @@ function populateTooltip(obj, showBuyPrice = false) {
         <span>${pct} chance</span>
       </div>`;
     }).join('');
+  }
+
+  // Weapon skill — right-click special attack (data-driven from def.weaponSkill)
+  if (hasWeaponSkill) {
+    const ws = def.weaponSkill;
+    const listEl = document.getElementById('detail-row-weaponskill');
+    const cdSec = Math.round((ws.cooldownMs ?? 60000) / 1000);
+    const lines = [];
+
+    // Spell-based skill: casts an existing spell with no mana cost
+    if (ws.spell) {
+      const spellName = getItemDef(ws.spell)?.name ?? ws.spell;
+      lines.push(`<div class="detail-onhit-item"><span>Casts ${spellName}</span><span>no mana</span></div>`);
+    }
+
+    // Extra elemental damage riders
+    if (ws.elementalDamage) {
+      for (const [key, value] of Object.entries(ws.elementalDamage)) {
+        const elemDef = ELEMENTS[key];
+        const color = elemDef?.color ?? '#c8b080';
+        const symbol = elemDef?.symbol ?? '';
+        const label = elemDef?.name ?? (key.charAt(0).toUpperCase() + key.slice(1));
+        const sign = value >= 0 ? '+' : '';
+        lines.push(`<div class="detail-onhit-item" style="--onhit-color:${color}">
+          <span><span style="color:${color};">${symbol}</span> ${label}</span>
+          <span>${sign}${value} dmg</span>
+        </div>`);
+      }
+    }
+
+    // Guaranteed stun rider
+    if (ws.guaranteedStun) {
+      lines.push(`<div class="detail-onhit-item" style="--onhit-color:#e8d24a"><span>Stun</span><span>guaranteed</span></div>`);
+    }
+
+    listEl.innerHTML = `
+      <div class="detail-weaponskill-header">⚔ ${ws.name}</div>
+      ${lines.join('')}
+      <div class="detail-weaponskill-meta">Right-click to use · ${cdSec}s cooldown</div>
+    `;
   }
 }
 
@@ -5480,7 +5531,9 @@ export function useWeaponSkill(memberIndex, hand) {
   const ammoItem = m.equipment?.ammo;
   const ammoDef = ammoItem ? getItemDef(ammoItem.name) : null;
   const swipeElement = getPrimaryAttackElement(skillDef, ammoDef);
-  playAction(attackType, hand, memberIndex, swipeElement);
+  // `hideAttackAnim` lets a skill replace the weapon's normal swing/shoot
+  // animation entirely with its own VFX (e.g. a fire line instead of an arrow).
+  if (!ws.hideAttackAnim) playAction(attackType, hand, memberIndex, swipeElement);
   // Sound: an explicit `sound` always wins. Otherwise rider-style skills fall
   // back to the generic weapon-skill sting, while spell-based skills keep the
   // spell's own native sound (already played by playAction) — no default sting.

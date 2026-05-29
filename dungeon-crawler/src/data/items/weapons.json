@@ -31,7 +31,15 @@
         "icon": "/icons/weapons/mace.webp",
         "description": "An iron mace with a flanged head. Excellent against armoured foes.",
         "value": 135,
-        "weight": 2.2
+        "weight": 2.2,
+        "weaponSkill": {
+            "name": "Holy Smite",
+            "cooldownMs": 60000,
+            "vfx": "holy-strike",
+            "elementalDamage": {
+                "holy": 10
+            }
+        }
     },
     {
         "name": "Silver Mace",
@@ -57,6 +65,14 @@
         "weight": 2,
         "skillBonuses": {
             "Holy Radiance": 20
+        },
+        "weaponSkill": {
+            "name": "Holy Smite",
+            "cooldownMs": 60000,
+            "vfx": "holy-strike",
+            "elementalDamage": {
+                "holy": 20
+            }
         }
     },
     {
@@ -84,6 +100,14 @@
         "skillBonuses": {
             "Holy Radiance": 10,
             "Sanctuary": 5
+        },
+        "weaponSkill": {
+            "name": "Holy Smite",
+            "cooldownMs": 60000,
+            "vfx": "holy-strike",
+            "elementalDamage": {
+                "holy": 40
+            }
         }
     },
     {
@@ -653,6 +677,8 @@
         "weaponSkill": {
             "name": "Flaming Shot",
             "cooldownMs": 60000,
+            "vfx": "fire-line",
+            "hideAttackAnim": true,
             "elementalDamage": {
                 "fire": 20
             }
@@ -768,6 +794,7 @@
         "weaponSkill": {
             "name": "Tidal Wave",
             "cooldownMs": 60000,
+            "vfx": "water-strike",
             "elementalDamage": {
                 "water": 40
             }

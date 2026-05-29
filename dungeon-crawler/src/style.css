@@ -6679,6 +6679,33 @@ label.mm-setting-label {
   padding-top: 5px;
 }
 
+/* Weapon-skill list — right-click special attack details */
+.detail-weaponskill-list {
+  display: none;
+  /* shown via JS when hasWeaponSkill */
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  margin-top: 1px;
+  border-top: 1px solid #3a2a10;
+  padding-top: 5px;
+}
+
+.detail-weaponskill-header {
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffd24a;
+  margin-bottom: 1px;
+}
+
+.detail-weaponskill-meta {
+  font-size: 10px;
+  font-style: italic;
+  opacity: 0.7;
+  color: #c8b080;
+  margin-top: 1px;
+}
+
 /* Family bonus list — extra damage vs a monster family */
 .detail-familybonus-list {
   display: none;
