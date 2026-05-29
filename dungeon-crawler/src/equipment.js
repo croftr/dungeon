@@ -5479,12 +5479,28 @@ export function useWeaponSkill(memberIndex, hand) {
   const attackType = sourceDef?.attackType ?? null;
   if (!attackType) return;
 
+  const now = performance.now();
+
   // Independent weapon-skill cooldown.
   const cdKey = weaponSkillCooldownKey(memberIndex, hand);
   const cooldownMs = ws.cooldownMs ?? DEFAULT_WEAPON_SKILL_COOLDOWN_MS;
-  const now = performance.now();
   if (lastAttackTimes[cdKey] && now - lastAttackTimes[cdKey] < cooldownMs) {
     showMessage(`${ws.name} is still recharging!`);
+    return;
+  }
+
+  // Also gated by the weapon's normal attack cooldown: if you couldn't swing the
+  // weapon right now, you can't fire its skill either. Mirrors the effective
+  // delay computed in useHand (whirlwind / war dance / attack-speed modifiers).
+  let normalDelaySec = def.delay ?? 2;
+  const ww = skillsState.whirlwind;
+  if (ww.active && ww.actorName === m.name && now < ww.expiresAt) normalDelaySec *= ww.magnitude;
+  const wd = skillsState.warDance;
+  if (wd.active && now < wd.expiresAt) normalDelaySec *= wd.magnitude;
+  normalDelaySec *= getAttackSpeedMultiplier(m);
+  const normalKey = `${memberIndex}-${hand}`;
+  if (lastAttackTimes[normalKey] && now - lastAttackTimes[normalKey] < normalDelaySec * 1000) {
+    showMessage(`${def.name} is still recovering from its last attack!`);
     return;
   }
 
@@ -5546,7 +5562,6 @@ export function useWeaponSkill(memberIndex, hand) {
   }
 
   if (!target) {
-    showMessage(`${m.name} uses ${ws.name}!`);
     return;
   }
 
@@ -5579,14 +5594,15 @@ export function useWeaponSkill(memberIndex, hand) {
     warcryMultiplier: result.formula?.warcryMultiplier ?? 1.0,
     elementalBreakdown: result.formula?.elementalBreakdown ?? null,
     spellElement: result.formula?.spellElement ?? null,
-    weaponSkillName: ws.name,
+    // Show the skill name as the action label for both kinds. Rider-style skills
+    // are physical, so tag them to stay under the Attacks filter; spell-based
+    // skills (banishment/fireball) are INT-scaled magic and fall through to the
+    // Magic filter via their attackType.
+    specialName: ws.name,
+    weaponSkill: !spellSource,
   });
 
   _logAppliedEffects(m.name, result.monsterName || target.name, result.stunned, result.appliedEffects);
-
-  if (result.hit) {
-    showMessage(`${m.name} uses <b>${ws.name}</b> on the ${target.name}!`);
-  }
 }
 
 // ─────────────────────────────────────────────

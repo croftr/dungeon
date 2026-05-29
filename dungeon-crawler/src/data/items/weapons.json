@@ -678,7 +678,6 @@
             "name": "Flaming Shot",
             "cooldownMs": 60000,
             "vfx": "fire-line",
-            "hideAttackAnim": true,
             "elementalDamage": {
                 "fire": 20
             }

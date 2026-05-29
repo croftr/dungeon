@@ -230,6 +230,8 @@ function _getCat(entry) {
     // Spells (heals, debuff spells) → magic; active abilities → skill
     return SPELL_SKILL_NAMES.has(entry.skillName) ? 'magic' : 'skill';
   }
+  // Weapon skills always count as attacks, even when they cast a spell.
+  if (entry.weaponSkill) return 'attack';
   // Damage spells logged as attack entries
   if (entry.actor === 'player' && SPELL_ATTACK_TYPES.has(entry.attackType)) return 'magic';
   if (entry.type === 'status-effect') return 'effect';

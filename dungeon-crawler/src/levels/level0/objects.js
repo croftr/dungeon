@@ -34,7 +34,7 @@ export function spawnLevel0Objects(ctx) {
         'Potion of Unseen', 'Potion of Unseen', "Elixir of Rage", "Elixir of Rage",
         "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Elixir of Enlightenment",
         "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence",
-        "Tome of the Viperseeker", "Elven Dagger", "Warden's Shield", "Oak Staff",
+        "Tome of the Viperseeker", "Elven Dagger", "Warden's Shield", "Oak Staff", "Longbow", "Flame Arrows",
         "Mummified Hand", "Iron Ore", "Iron Ore"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
