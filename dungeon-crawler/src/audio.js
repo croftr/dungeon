@@ -922,7 +922,11 @@ export async function playQuestAudio(url, volume = 0.8) {
     const source   = ctx.createBufferSource();
     source.buffer  = buffer;
     const gainNode = ctx.createGain();
-    gainNode.gain.value = volume;
+    let finalVolume = volume;
+    if (typeof url === 'string' && url.includes('stance-npc')) {
+      finalVolume = Math.min(2.0, volume * 1.4);
+    }
+    gainNode.gain.value = finalVolume;
     source.connect(gainNode);
     gainNode.connect(ctx.destination);
     source.addEventListener('ended', () => {
@@ -993,7 +997,11 @@ export async function playNpcDialogue(row, col, url, volume = 0.8, onEnded = nul
     const source   = ctx.createBufferSource();
     source.buffer  = buffer;
     const gainNode = ctx.createGain();
-    gainNode.gain.value = volume;
+    let finalVolume = volume;
+    if (typeof url === 'string' && url.includes('stance-npc')) {
+      finalVolume = Math.min(2.0, volume * 1.4);
+    }
+    gainNode.gain.value = finalVolume;
     source.connect(gainNode);
     gainNode.connect(ctx.destination);
     source.addEventListener('ended', () => {

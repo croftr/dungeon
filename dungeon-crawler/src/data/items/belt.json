@@ -19,13 +19,7 @@
         "description": "A wide belt with multiple loops and pouches for quick-draw access. Boosts the potency of all skills.",
         "defence": 2,
         "value": 75,
-        "weight": 0.5,
-        "skillBonuses": {
-            "all": 1
-        },
-        "statusResistances": {
-            "poison": 0.25
-        }
+        "weight": 0.5
     },
     {
         "name": "Ogre Girdle",

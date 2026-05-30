@@ -1278,15 +1278,15 @@
     "family": "avian",
     "description": "A sinister sorcerer wrapped in corvid flesh, the Crow Wizard commands fire and shadow with equal cruelty. Its cawing incantations carry the stench of old magic — and those who hear its shriek often find their courage deserting them entirely.",
     "image": "/monster-images/crow-wizard.webp",
-    "hp": 320,
-    "defence": 14,
+    "hp": 400,
+    "defence": 16,
     "damageReduction": 0.10,
     "xp": 350,
-    "attackSpeed": 1.5,
+    "attackSpeed": 2,
     "stats": {
-      "strength": 23,
+      "strength": 25,
       "dexterity": 25,
-      "vitality": 22,
+      "vitality": 25,
       "intelligence": 26,
       "resilience": 38
     },
@@ -1368,17 +1368,17 @@
     "name": "Swamp Monster",
     "family": "aquatic",
     "description": "A hulking horror that rose from the fetid depths of the dungeon swamp. Its hide has absorbed so much toxic bog-magic that elemental forces simply wash over it without effect. Those who enter its lair find their movements sluggish and their spells useless.",
-    "hp": 500,
-    "defence": 12,
+    "hp": 700,
+    "defence": 15,
     "damageReduction": 0.10,
     "xp": 200,
     "attackSpeed": 1.5,
     "stats": {
       "strength": 25,
       "dexterity": 15,
-      "vitality": 30,
+      "vitality": 35,
       "intelligence": 6,
-      "resilience": 20
+      "resilience": 25
     },
     "elementalResistances": {
       "fire": "immune",

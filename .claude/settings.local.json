@@ -70,7 +70,10 @@
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(Sort-Object)",
       "Bash(cd /c/Users/rob/projects/dungeon/dungeon-crawler && cat package.json | grep -A6 '\"scripts\"')",
-      "Bash(npx vitest *)"
+      "Bash(npx vitest *)",
+      "Bash(docker --version)",
+      "Bash(docker compose *)",
+      "Bash(docker exec *)"
     ]
   }
 }

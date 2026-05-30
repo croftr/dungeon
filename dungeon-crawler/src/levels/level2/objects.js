@@ -123,7 +123,7 @@ export function spawnLevel2Objects(ctx) {
     // Chest at col 38 north side (shifted from col 28 -> 38)
     addChest(group, loader, 38, 32, -Math.PI / 2, -0.5, [
         { name: 'Gold Coins', quantity: 50 },
-        'Mana Potion', 'Life Essence',
+        'Mana Potion',
         "Bloodstone Amulet", "Schematic Key"
     ], asset('/items/chest1.glb'), true, 0.5);
 
@@ -193,15 +193,15 @@ export function spawnLevel2Objects(ctx) {
                         }
                         // Shifted NpcDialogue from col 24 -> 34
                         setTimeout(() => {
-                        playNpcDialogue(1, 34, '/npcs/stance-npc/outro.mp3', 0.8, () => {
-                            _despawnWithFlash(model, group, () => {
-                                setStanceNpcDeparted(true);
-                                showDramaticUnlock(
-                                    'Stances Unlocked',
-                                    'A new tutor has set up shop in town — visit him to learn combat stances'
-                                );
+                            playNpcDialogue(1, 34, '/npcs/stance-npc/outro.mp3', 0.8, () => {
+                                _despawnWithFlash(model, group, () => {
+                                    setStanceNpcDeparted(true);
+                                    showDramaticUnlock(
+                                        'Stances Unlocked',
+                                        'A new tutor has set up shop in town — visit him to learn combat stances'
+                                    );
+                                });
                             });
-                        });
                         }, 2000);
                     };
                 });
