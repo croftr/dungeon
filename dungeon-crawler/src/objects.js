@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { createBlobShadow } from './blob-shadow.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
-import { CELL, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld, buildLevel, level1Map, level2Map, isPassable, spawnElementFloorAt, elementFloorCellId } from './map.js';
+import { CELL, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld, buildLevel, level1Map, level2Map, isPassable, spawnElementFloorAt, elementFloorCellId, CROW_REALM_LEVEL } from './map.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, isInFrontOfPlayer, player, FACING_ANGLES, setPlayerFrozen, setPlayerTrapped } from './player.js';
 import { showMessage, drawMinimap, updateStatus } from './minimap.js';
@@ -32,6 +32,7 @@ import { spawnLevel3Objects } from './levels/level3/objects.js';
 import { spawnLevel4Objects } from './levels/level4/objects.js';
 import { spawnLevel5Objects } from './levels/level5/objects.js';
 import { spawnSchematicTrialsObjects } from './levels/schematic-trials/objects.js';
+import { spawnCrowRealmObjects } from './levels/crow-realm/objects.js';
 import { showNpcChoice, openQuestDialog, renderMerchantQuestPanel } from './quest.js';
 import { saveToAutoSlot } from './save.js';
 
@@ -109,6 +110,7 @@ const _state = {
   level3PortalEnabled: false,
   level4PortalEnabled: false,
   level2PortcullisOpened: false,
+  crowRealmPortcullisOpened: false,
   level2GiantPortcullisOpened: false,
   level2WardenGateOpened: false,
   level2HoleClosed: false,
@@ -415,6 +417,14 @@ let _arrivedPortalKey = null;
 let _pendingPortalTimer = null;
 let _pendingPortalKey = null;
 
+// Mist-portal step gating: tracks the party's previous cell (to tell whether
+// they're entering or leaving the misty threshold), a short post-action
+// cooldown, and whether the confirm modal is currently open.
+let _mistPrevRow = null;
+let _mistPrevCol = null;
+let _mistCooldownUntil = 0;
+let _mistConfirmOpen = false;
+
 function _getPortalFlashOverlay() {
     let el = document.getElementById('portal-flash');
     if (el) return el;
@@ -563,6 +573,195 @@ export function checkFloorPortalStep() {
         }
     }
     setPortalIdleLoop(nearPortal);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  MIST PORTAL  — a confirm-gated, in-level threshold (see mist-portal.js).
+//  Walking into the curtain (from the near side) or clicking it pops a
+//  "proceed into the mist?" modal; on confirm the party warps across.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// The cell the party is bounced back to if they decline (the cell "behind" the
+// curtain relative to the entering direction).
+function _mistBackCell(ud) {
+    const s = Math.sign(ud.enterDir) || 1;
+    return ud.axis === 'ew'
+        ? { row: ud.gridRow, col: ud.gridCol - s }
+        : { row: ud.gridRow - s, col: ud.gridCol };
+}
+
+// True when the party currently sits on the "dungeon" (pre-mist) side of the
+// curtain — used so a click only offers entry from the correct side.
+function _onMistNearSide(ud) {
+    const s = Math.sign(ud.enterDir) || 1;
+    return ud.axis === 'ew'
+        ? (s > 0 ? player.gridCol <= ud.gridCol : player.gridCol >= ud.gridCol)
+        : (s > 0 ? player.gridRow <= ud.gridRow : player.gridRow >= ud.gridRow);
+}
+
+// Called from main.js's moved() after every step. Prompts only when the party
+// steps onto the curtain cell while moving in the entering direction (so they
+// can walk back out freely without being re-prompted).
+export function checkMistPortalStep() {
+    const curRow = player.gridRow;
+    const curCol = player.gridCol;
+    const prevRow = _mistPrevRow;
+    const prevCol = _mistPrevCol;
+    _mistPrevRow = curRow;
+    _mistPrevCol = curCol;
+
+    if (_mistConfirmOpen || Date.now() < _mistCooldownUntil) return;
+
+    for (const obj of interactables) {
+        const ud = obj.userData;
+        if (!ud || !ud.isMistPortal) continue;
+        if (curRow !== ud.gridRow || curCol !== ud.gridCol) continue;
+
+        const s = Math.sign(ud.enterDir) || 1;
+        let entering;
+        if (ud.axis === 'ew') {
+            entering = prevCol != null && Math.sign(curCol - prevCol) === s;
+        } else {
+            entering = prevRow != null && Math.sign(curRow - prevRow) === s;
+        }
+        if (entering) showMistConfirm(obj);
+        return;
+    }
+}
+
+// Builds (once) and shows the misty confirm modal.
+function showMistConfirm(obj) {
+    if (_mistConfirmOpen) return;
+    _mistConfirmOpen = true;
+    setPlayerFrozen(true);
+    playPortalSound();
+
+    let overlay = document.getElementById('mist-confirm-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'mist-confirm-overlay';
+        Object.assign(overlay.style, {
+            position: 'fixed', inset: '0', zIndex: '10005',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(20,16,34,0.55)', backdropFilter: 'blur(2px)',
+        });
+        overlay.innerHTML = `
+            <div style="
+                min-width:300px; max-width:420px; padding:26px 28px;
+                border:1px solid #6f5fa6; border-radius:12px; text-align:center;
+                background:radial-gradient(circle at 50% 0%, rgba(120,104,190,0.45), rgba(24,20,40,0.96));
+                box-shadow:0 0 40px rgba(150,130,230,0.5); color:#e8e2ff;
+                font-family:inherit;">
+                <div style="font-size:22px; font-weight:700; letter-spacing:0.5px; margin-bottom:10px;">
+                    A Wall of Mist
+                </div>
+                <div style="font-size:15px; line-height:1.5; opacity:0.9; margin-bottom:22px;">
+                    A shifting curtain of pale mist bars the way. Something stirs beyond it.
+                </div>
+                <div style="display:flex; gap:12px; justify-content:center;">
+                    <button id="mist-confirm-yes" style="
+                        flex:1; padding:11px 14px; font-size:15px; cursor:pointer;
+                        border:none; border-radius:8px; color:#1a1430; font-weight:700;
+                        background:linear-gradient(180deg,#cdbcff,#9d86e6);">
+                        Proceed into the mist
+                    </button>
+                    <button id="mist-confirm-no" style="
+                        padding:11px 16px; font-size:15px; cursor:pointer;
+                        border:1px solid #6f5fa6; border-radius:8px; color:#d8d2f0;
+                        background:rgba(60,52,96,0.6);">
+                        Not yet
+                    </button>
+                </div>
+            </div>`;
+        // Swallow background clicks so they don't fall through to the 3D
+        // raycast click handler on window.
+        overlay.addEventListener('click', (e) => e.stopPropagation());
+        document.body.appendChild(overlay);
+    }
+    overlay.style.display = 'flex';
+
+    const closeOverlay = () => { overlay.style.display = 'none'; };
+
+    const yesBtn = overlay.querySelector('#mist-confirm-yes');
+    const noBtn = overlay.querySelector('#mist-confirm-no');
+    // Replace handlers each open so they bind to the current obj.
+    yesBtn.onclick = (e) => {
+        e.stopPropagation();
+        closeOverlay();
+        _mistConfirmOpen = false;
+        _warpThroughMist(obj);
+    };
+    noBtn.onclick = (e) => {
+        e.stopPropagation();
+        closeOverlay();
+        _mistConfirmOpen = false;
+        // Step the party back off the curtain cell so they aren't re-prompted.
+        const back = _mistBackCell(obj.userData);
+        if (isPassable(back.row, back.col)) {
+            player.gridRow = back.row;
+            player.gridCol = back.col;
+            const w = cellToWorld(back.row, back.col);
+            if (_camera) _camera.position.set(w.x, w.y, w.z);
+            _mistPrevRow = back.row;
+            _mistPrevCol = back.col;
+        }
+        _mistCooldownUntil = Date.now() + 600;
+        setPlayerFrozen(false);
+        drawMinimap();
+        updateStatus();
+    };
+}
+
+// Fade-flash warp across the curtain. If the mist carries a `targetLevel`
+// different from the current one it loads that level on demand (which tears the
+// old one down); otherwise it's a same-level reposition.
+function _warpThroughMist(obj) {
+    const ud = obj.userData;
+    const tr = ud.enterRow;
+    const tc = ud.enterCol;
+    const tf = ud.enterFacing;
+    const targetLevel = ud.targetLevel;
+    const crossLevel = targetLevel != null && targetLevel !== window.currentLevel;
+
+    setPlayerFrozen(true);
+    _mistCooldownUntil = Date.now() + 2500;
+    tweenGroup.removeAll();
+    player.moving = false;
+    playFloorPortalSound();
+
+    const overlay = _getPortalFlashOverlay();
+    overlay.offsetHeight; // force reflow so the opacity transition fires
+    overlay.style.opacity = '1';
+    setTimeout(() => {
+        // Load (and build) the destination level while the screen is covered.
+        // This is also what unloads the level we're leaving.
+        if (crossLevel && window.loadLevel) window.loadLevel(targetLevel);
+
+        player.gridRow = tr;
+        player.gridCol = tc;
+        const w = cellToWorld(tr, tc);
+        if (_camera) {
+            _camera.position.set(w.x, w.y, w.z);
+            if (tf != null) {
+                player.facing = tf;
+                _camera.rotation.order = 'YXZ';
+                _camera.rotation.y = FACING_ANGLES[tf];
+            }
+        }
+        _mistPrevRow = tr;
+        _mistPrevCol = tc;
+        drawMinimap();
+        updateStatus();
+        // First arrival into the crow realm — roll the cinematic after a short
+        // beat so the party glimpses the realm before the video takes over.
+        if (targetLevel === CROW_REALM_LEVEL && window.playCrowRealmVideo) {
+            setTimeout(() => window.playCrowRealmVideo(), 1500);
+        }
+        setTimeout(() => {
+            overlay.style.opacity = '0';
+            setTimeout(() => setPlayerFrozen(false), 500);
+        }, 300);
+    }, 600);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1013,6 +1212,19 @@ export function initObjects(scene, camera) {
                     showMessage("An ornate door stands before you. Approach to enter.");
                 }
                 break;
+            } else if (obj.userData.isMistPortal) {
+                const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
+                const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
+                if (distRow <= 1 && distCol <= 1) {
+                    if (_onMistNearSide(obj.userData)) {
+                        showMistConfirm(obj);
+                    } else {
+                        showMessage("The mist swirls silently behind you.");
+                    }
+                } else {
+                    showMessage("A wall of shifting mist blocks the passage ahead.");
+                }
+                break;
             } else if (obj.userData.isPortal) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
@@ -1293,6 +1505,9 @@ export function initObjects(scene, camera) {
                                     }
                                     if (window.currentLevel === 1 && p.gridRow === 10 && p.gridCol === 17) {
                                         _state.level1ShrineGateOpened = true;
+                                    }
+                                    if (window.currentLevel === CROW_REALM_LEVEL && p.gridRow === 4 && p.gridCol === 34) {
+                                        _state.crowRealmPortcullisOpened = true;
                                     }
                                 }, 400);
                                 refreshPartyCards();
@@ -2863,6 +3078,7 @@ export function spawnObjectsForLevel() {
         monsterNpcSaved: _state.monsterNpcSaved,
         stanceNpcDeparted: _state.stanceNpcDeparted,
         setStanceNpcDeparted: (val) => { _state.stanceNpcDeparted = val; },
+        crowRealmPortcullisOpened: _state.crowRealmPortcullisOpened,
         // Level 2 state flags
         level2PortcullisOpened: _state.level2PortcullisOpened,
         level2GiantPortcullisOpened: _state.level2GiantPortcullisOpened,
@@ -2889,6 +3105,7 @@ export function spawnObjectsForLevel() {
     else if (level === 4) spawnLevel4Objects(ctx);
     else if (level === 5) spawnLevel5Objects(ctx);
     else if (level === 50) spawnSchematicTrialsObjects(ctx);
+    else if (level === CROW_REALM_LEVEL) spawnCrowRealmObjects(ctx);
     else if (level === 99) {
         // Arena – place 4 torches evenly around the edge
         addDroppedTorch(objectsGroup, _gltfLoader, 1, 1, 0);

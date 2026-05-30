@@ -431,5 +431,14 @@
         "value": 100,
         "weight": 0.5,
         "sellable": true
+    },
+    {
+        "name": "Crow Key",
+        "slot": "key",
+        "icon": "/icons/key/crow-key.webp",
+        "description": "A mysterious key shaped like a crow's beak. It seems to resonate with shadow magic.",
+        "value": 500,
+        "weight": 0.1,
+        "sellable": false
     }
 ]

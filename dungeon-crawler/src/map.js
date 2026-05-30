@@ -43,6 +43,11 @@ export function changeMapArray(newMapArray) {
 export const CELL = 2;    // units per grid cell
 export const WALL_H = 2;    // wall height
 
+// Out-of-band level numbers for self-contained, load-on-demand areas (mirrors
+// the Schematic Trials at 50). The Crow Realm is reached only via the mist
+// portal on level 2 and is fully torn down again on return.
+export const CROW_REALM_LEVEL = 60;
+
 /** Seeded pseudo-random — same seed → same map every time. */
 function mulberry32(seed) {
   return function () {
@@ -552,6 +557,22 @@ export function buildFloorZone(scene, floorCells, texPath, zoneType = null) {
   }
   if (zoneType) registerFloorZoneCells(floorCells, zoneType);
 }
+
+export function buildCeilingZone(scene, floorCells, texPath) {
+  const loader = new THREE.TextureLoader();
+  loader.setCrossOrigin('anonymous');
+  const tex = loader.load(texPath);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.anisotropy = 16;
+  const mat = new THREE.MeshLambertMaterial({ map: tex });
+  for (const [r, c] of floorCells) {
+    const tile = new THREE.Mesh(tileGeo, mat);
+    tile.rotation.set(Math.PI / 2, 0, 0);
+    tile.position.set(c * CELL, WALL_H - 0.005, r * CELL);
+    scene.add(tile); currentMapMeshes.push(tile);
+  }
+}
+
 
 export function buildInnerTextureZone(scene, floorCells, wallTexPath) {
   const loader = new THREE.TextureLoader();

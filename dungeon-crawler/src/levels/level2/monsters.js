@@ -71,48 +71,9 @@ export const level2Monsters = [
     asset('/monsters/iceMan-animation/Meshy_AI_Animation_Dead_withSkin.glb'),
     asset('/monsters/iceMan-animation/Meshy_AI_Animation_Hit_Reaction_1_withSkin.glb')),
 
-  // Crow Wizard room — east of Room B, accessed via corridor (row 8, cols 25-29); room rows 7-9 cols 30-35
-  // Two summoned skeletons flank the entrance — dormant until the player enters
-  // Shifted trigger bounds from cols 18-25 to cols 28-35, and coordinates to col 30
-  Object.assign(inst(D.summoned_skeleton, 451, 7, 30,
-    asset('/monsters/summoned-skeleton/idle.glb'),
-    asset('/monsters/summoned-skeleton/attack.glb'),
-    asset('/monsters/summoned-skeleton/skeleton-attack.mp3'),
-    0.45, 0, 0, 2, null,
-    asset('/monsters/summoned-skeleton/dead.glb'),
-    asset('/monsters/summoned-skeleton/getting-hit.glb'),
-    asset('/monsters/summoned-skeleton/walking.glb')), {
-    _dormant: true,
-    _triggerBounds: { minRow: 7, maxRow: 9, minCol: 28, maxCol: 35 },
-    _waitForCrowVideo: true,
-    glbStandUp: asset('/monsters/summoned-skeleton/standing-up.glb'),
-  }),
-
-  Object.assign(inst(D.summoned_skeleton, 452, 9, 30,
-    asset('/monsters/summoned-skeleton/idle.glb'),
-    asset('/monsters/summoned-skeleton/attack.glb'),
-    asset('/monsters/summoned-skeleton/skeleton-attack.mp3'),
-    0.45, 0, 0, 2, null,
-    asset('/monsters/summoned-skeleton/dead.glb'),
-    asset('/monsters/summoned-skeleton/getting-hit.glb'),
-    asset('/monsters/summoned-skeleton/walking.glb')), {
-    _dormant: true,
-    _triggerBounds: { minRow: 7, maxRow: 9, minCol: 28, maxCol: 35 },
-    _waitForCrowVideo: true,
-    glbStandUp: asset('/monsters/summoned-skeleton/standing-up.glb'),
-  }),
-
-  // Shifted from col 25 to col 35
-  inst(D.crow_wizard, 450, 8, 35,
-    asset('/monsters/crow-wizard/idle.glb'),
-    asset('/monsters/crow-wizard/standard-attack.glb'),
-    asset('/monsters/crow-wizard/standard-attack.mp3'),
-    0.5, 0, 0, 2, null,
-    asset('/monsters/crow-wizard/dead.glb'),
-    asset('/monsters/crow-wizard/getting-hit.glb'),
-    asset('/monsters/crow-wizard/walking.glb'),
-    null,
-    asset('/monsters/crow-wizard/combat-idle.glb')),
+  // Crow Wizard + Summoned Crows now live in the on-demand Crow Realm
+  // (src/levels/crow-realm/), entered via the mist portal. They are no longer
+  // part of Level 2 so their assets aren't loaded until the party warps in.
 
   // Ice Mushroom room — west of Room B, accessed via corridor through row 8 (cols 12-14, rows 7-9)
   // Shifted from col 3 to col 13

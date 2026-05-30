@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import { buildLevel, buildTextureZone, buildInnerTextureZone, buildFloorZone, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures } from './map.js';
+import { buildLevel, buildTextureZone, buildInnerTextureZone, buildFloorZone, buildCeilingZone, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures, CROW_REALM_LEVEL } from './map.js';
 import ELEMENT_FLOORS from './data/element-floors.json';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
 import { initLighting, updateLighting, applyLevelTheme } from './lighting.js';
@@ -12,7 +12,7 @@ import { getItemDef } from './items.js';
 import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt, tickMonsterElementFloorDamage } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
-import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems, replenishPotionMerchant, checkFloorPortalStep } from './objects.js';
+import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems, replenishPotionMerchant, checkFloorPortalStep, checkMistPortalStep } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, setZoneSilence, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound, prefetchActionSounds, checkNpcDialogueProximity, setElementFloorSound } from './audio.js';
 import { initBattleLog, addLogEntry } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
@@ -28,6 +28,7 @@ import { getSkillExpertise } from './skill-tree.js';
 import { MONSTER_DEFS } from './monster-defs.js';
 import { inst } from './monster-factory.js';
 import { schematicTrialsMap } from './levels/schematic-trials/map.js';
+import { crowRealmMap, CROW_FLOOR_CELLS, CROW_WALL_CELLS } from './levels/crow-realm/map.js';
 
 import './style.css';
 
@@ -74,9 +75,10 @@ document.querySelectorAll('img[data-src]').forEach(img => {
 const _VIDEO_LEVELS = {
   0: ['battle-prep-video', 'hero-door-video', 'nectar-quest-video', 'crystal-shrine-red-video', 'crystal-shrine-red-blue-video', 'portal-video'],
   1: ['ogre-video', 'mummy-video'],
-  2: ['treeman-video', 'demon-video', 'giant-video', 'aqua-man-video', 'stairs-video', 'crow-wizard-video', 'statue-knights-video'],
+  2: ['treeman-video', 'demon-video', 'giant-video', 'aqua-man-video', 'stairs-video', 'statue-knights-video'],
   3: ['minotaur-video', 'minotaur-death-video', 'statue-portal-video', 'egg-video'],
   4: ['stairs-video', 'demon-ogre-video', 'lizard-man-video'],
+  [CROW_REALM_LEVEL]: ['crow-realm-video'],
 };
 const _loadedVideoIds = new Set();
 
@@ -228,14 +230,11 @@ window.videoFlags = {
   hasSeenMinotaurDeathVideo: false,
   hasSeenDemonVideo: false,
   hasSeenAquaManVideo: false,
-  hasSeenCrowWizardVideo: false,
+  hasSeenCrowRealmVideo: false,
   hasSeenTreemanVideo: false,
   hasSeenL1Intro: false,
 };
 const videoFlags = window.videoFlags;
-// Ephemeral runtime flag: true once the crow wizard video has fully finished (or was already seen on load).
-// Not saved — reconstructed from hasSeenCrowWizardVideo on restore.
-window._crowWizardVideoDone = false;
 let prepVideoTimer = null;
 
 // Arena (monster trial) session state. Ephemeral — set on arena entry, cleared
@@ -256,7 +255,6 @@ function restoreVideoFlags(data) {
   for (const key of Object.keys(videoFlags)) {
     videoFlags[key] = !!data[key];
   }
-  if (videoFlags.hasSeenCrowWizardVideo) window._crowWizardVideoDone = true;
 }
 
 setCallbacks({
@@ -265,6 +263,7 @@ setCallbacks({
     updateStatus();
     checkNpcDialogueProximity(player.gridRow, player.gridCol);
     checkFloorPortalStep();
+    checkMistPortalStep();
     // ── Level 0/1 walk-through transitions ───────────────────────────────────
     // Level 0 → Level 1: stepping west to (row 13, col 7) after gate is open
     if (window.currentLevel === 0 && player.gridRow === 13 && player.gridCol === 7) {
@@ -339,13 +338,8 @@ setCallbacks({
         if (window.playTreemanVideo) window.playTreemanVideo();
       }
 
-      // Crow Wizard video: fires when the party is two steps inside the room (row 8, col 32),
-      // giving a clear sightline to the wizard before the skeletons rise.
-      // Skeletons are gated on window._crowWizardVideoDone and will not rise until the video ends.
-      if (!videoFlags.hasSeenCrowWizardVideo && player.gridRow === 8 && player.gridCol === 32) {
-        videoFlags.hasSeenCrowWizardVideo = true;
-        playCrowWizardVideo();
-      }
+      // (The crow-realm video now fires from the mist-portal warp — see
+      // _warpThroughMist in objects.js / window.playCrowRealmVideo below.)
 
       // Demon video: fires in the passage at row 28, col 17 — just before the demon room
       if (!videoFlags.hasSeenDemonVideo && player.gridRow === 28 && player.gridCol === 17) {
@@ -1541,52 +1535,56 @@ if (skipDemonBtn) skipDemonBtn.addEventListener('click', (e) => { e.stopPropagat
 if (demonVideo) demonVideo.addEventListener('ended', finishDemonVideo);
 
 // ─────────────────────────────────────────────
-//  CROW WIZARD VIDEO
+//  CROW REALM VIDEO  — plays once, the first time the party proceeds through
+//  the mist portal into the crow area (triggered from objects.js after warp).
 // ─────────────────────────────────────────────
-const crowWizardOverlay = document.getElementById('crow-wizard-video-overlay');
-const crowWizardVideo = document.getElementById('crow-wizard-video');
-const skipCrowWizardBtn = document.getElementById('skip-crow-wizard-btn');
+const crowRealmOverlay = document.getElementById('crow-realm-video-overlay');
+const crowRealmVideo = document.getElementById('crow-realm-video');
+const skipCrowRealmBtn = document.getElementById('skip-crow-realm-btn');
 
-function playCrowWizardVideo() {
-  if (!crowWizardOverlay || !crowWizardVideo) return;
-  crowWizardOverlay.classList.remove('hidden');
+function playCrowRealmVideo() {
+  if (videoFlags.hasSeenCrowRealmVideo) return;
+  videoFlags.hasSeenCrowRealmVideo = true;
+  if (!crowRealmOverlay || !crowRealmVideo) return;
+  crowRealmOverlay.classList.remove('hidden');
 
   setTimeout(() => {
-    crowWizardOverlay.style.opacity = '1';
-    crowWizardVideo.muted = false;
-    crowWizardVideo.volume = 1;
-    crowWizardVideo.play().catch(e => {
-      console.warn("Crow Wizard video play failed:", e);
-      finishCrowWizardVideo();
+    crowRealmOverlay.style.opacity = '1';
+    crowRealmVideo.muted = false;
+    crowRealmVideo.volume = 1;
+    crowRealmVideo.play().catch(e => {
+      console.warn("Crow Realm video play failed:", e);
+      finishCrowRealmVideo();
     });
   }, 50);
 }
 
-function finishCrowWizardVideo() {
-  if (!crowWizardOverlay) return;
-  crowWizardOverlay.style.opacity = '0';
+function finishCrowRealmVideo() {
+  if (!crowRealmOverlay) return;
+  crowRealmOverlay.style.opacity = '0';
 
-  const startVol = crowWizardVideo.volume;
+  const startVol = crowRealmVideo.volume;
   const fadeInterval = setInterval(() => {
-    if (crowWizardVideo.volume > 0.05) {
-      crowWizardVideo.volume -= 0.05;
+    if (crowRealmVideo.volume > 0.05) {
+      crowRealmVideo.volume -= 0.05;
     } else {
-      crowWizardVideo.volume = 0;
+      crowRealmVideo.volume = 0;
       clearInterval(fadeInterval);
     }
   }, 50);
 
   setTimeout(() => {
-    crowWizardVideo.pause();
+    crowRealmVideo.pause();
     clearInterval(fadeInterval);
-    crowWizardVideo.volume = startVol;
-    crowWizardOverlay.classList.add('hidden');
-    window._crowWizardVideoDone = true;
+    crowRealmVideo.volume = startVol;
+    crowRealmOverlay.classList.add('hidden');
   }, 1500);
 }
 
-if (skipCrowWizardBtn) skipCrowWizardBtn.addEventListener('click', (e) => { e.stopPropagation(); finishCrowWizardVideo(); });
-if (crowWizardVideo) crowWizardVideo.addEventListener('ended', finishCrowWizardVideo);
+window.playCrowRealmVideo = playCrowRealmVideo;
+
+if (skipCrowRealmBtn) skipCrowRealmBtn.addEventListener('click', (e) => { e.stopPropagation(); finishCrowRealmVideo(); });
+if (crowRealmVideo) crowRealmVideo.addEventListener('ended', finishCrowRealmVideo);
 
 // ─────────────────────────────────────────────
 //  STATUE KNIGHTS VIDEO OVERLAY
@@ -2293,6 +2291,7 @@ window.loadLevel = function (levelNum) {
   // 1. Swap Map Array
   const maps = [level0Map, level1Map, level2Map, level3Map, level4Map, level5Map];
   maps[SCHEMATIC_TRIALS_LEVEL] = schematicTrialsMap;
+  maps[CROW_REALM_LEVEL] = crowRealmMap;
   changeMapArray(maps[levelNum] ?? level0Map);
 
   // 2. Rebuild map meshes for walls/floors
@@ -2358,31 +2357,8 @@ window.loadLevel = function (levelNum) {
       asset('/textures/black-stone2.webp')
     );
 
-    // Level 2: Crow Wizard room (rows 7–9, cols 20–25) + approach corridor (row 8, cols 15–19)
-    // + north exit corridor (col 24, rows 4–6) + annex room (rows 1–3, cols 22–26)
-    buildTextureZone(
-      scene,
-      [
-        // approach corridor walls
-        [7, 25], [7, 26], [7, 27], [7, 28], [7, 29],
-        [9, 25], [9, 26], [9, 27], [9, 28], [9, 29],
-        // crow room perimeter ([6, 34] omitted — now the north doorway)
-        [6, 30], [6, 31], [6, 32], [6, 33], [6, 35],
-        [10, 30], [10, 31], [10, 32], [10, 33], [10, 34], [10, 35],
-        [7, 36], [8, 36], [9, 36],
-        // north exit corridor sides (col 24, rows 4–6)
-        [4, 33], [4, 35],
-        [5, 33], [5, 35],
-        // annex room perimeter
-        [0, 32], [0, 33], [0, 34], [0, 35], [0, 36],   // north (map edge)
-        [1, 31], [2, 31], [3, 31],                  // west wall
-        [1, 37], [2, 37], [3, 37],                  // east wall
-        [3, 32], [3, 33], [3, 35], [3, 36],           // south wall (doorway at [3, 34])
-      ],
-      [],
-      asset('/textures/crow-wall.webp'),
-      null
-    );
+    // (The crow region's textures moved to the Crow Realm build below — that
+    // whole area is now an on-demand level reached via the mist portal.)
 
     // Level 2: Iron Warden room (cols 7-9, rows 3-5) + chest room behind portcullis (cols 3-5, rows 3-5)
     buildFloorZone(
@@ -2414,6 +2390,24 @@ window.loadLevel = function (levelNum) {
       scene,
       iceFloors,
       asset('/textures/ice-wall.webp')
+    );
+  }
+
+  // Crow Realm (on-demand level): crow wall/floor/ceiling textures over the
+  // whole region. Cell lists live in crow-realm/map.js (shared with the Level 2
+  // wall-off and the map geometry).
+  if (levelNum === CROW_REALM_LEVEL) {
+    buildTextureZone(
+      scene,
+      CROW_WALL_CELLS,
+      CROW_FLOOR_CELLS,
+      asset('/textures/crow-wall.webp'),
+      asset('/textures/crow-floor.webp')
+    );
+    buildCeilingZone(
+      scene,
+      CROW_FLOOR_CELLS,
+      asset('/textures/crow-ceiling.webp')
     );
   }
 
@@ -2531,6 +2525,12 @@ window.loadLevel = function (levelNum) {
     player.facing = 0;
     camera.rotation.order = 'YXZ';
     camera.rotation.y = FACING_ANGLES[player.facing];
+  } else if (levelNum === CROW_REALM_LEVEL) {
+    // Crow Realm — face east down the entry corridor (the mist warp also sets
+    // this, but keep a sane default if the level is ever loaded directly).
+    player.facing = 1;
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = FACING_ANGLES[player.facing];
   } else if (levelNum === 0 && oldLevel === 5) {
     // Returning from Hall of Heroes — place near the hero door, face north
     player.gridRow = 14;
@@ -2575,6 +2575,11 @@ window.loadLevel = function (levelNum) {
 
   // Schematic Trials — borrow the demon-room track for an arcane feel
   if (levelNum === SCHEMATIC_TRIALS_LEVEL) {
+    setZoneMusic(asset('/sounds/backing/demon-room.mp3'));
+  }
+
+  // Crow Realm — eerie demon-room track
+  if (levelNum === CROW_REALM_LEVEL) {
     setZoneMusic(asset('/sounds/backing/demon-room.mp3'));
   }
 };

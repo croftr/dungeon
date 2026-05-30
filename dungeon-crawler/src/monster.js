@@ -36,6 +36,7 @@ import { level1Monsters } from './levels/level1/monsters.js';
 import { level2Monsters } from './levels/level2/monsters.js';
 import { level3Monsters } from './levels/level3/monsters.js';
 import { level4Monsters } from './levels/level4/monsters.js';
+import { crowRealmMonsters } from './levels/crow-realm/monsters.js';
 import { skillsState } from './skills-state.js';
 import SKILLS_DATA from './data/skills.json';
 import { awardXP } from './leveling.js';
@@ -357,6 +358,7 @@ export const monsters = [
   ...level2Monsters,
   ...level3Monsters,
   ...level4Monsters,
+  ...crowRealmMonsters,
 ];
 
 // ── Assign Block Animations ─────────────────────────────────────────────────
@@ -1063,6 +1065,44 @@ _applyMultiAttacks('Crow Wizard', [
   },
 ]);
 
+// Summoned Crow — one basic attack, but it cycles through all four attack
+// animations (see the rotation special-case in triggerMonsterAttack) purely
+// for visual variety. All variants are identical plain melee hits.
+_applyMultiAttacks('Summoned Crow', [
+  {
+    name: 'peck1',
+    glb: asset('/monsters/summoned-crow/attack1.glb'),
+    sound: asset('/monsters/summoned-crow/attack.mp3'),
+    soundTimings: [0.3],
+    damageTimings: [0.3],
+    weight: 1,
+  },
+  {
+    name: 'peck2',
+    glb: asset('/monsters/summoned-crow/attack2.glb'),
+    sound: asset('/monsters/summoned-crow/attack.mp3'),
+    soundTimings: [0.3],
+    damageTimings: [0.3],
+    weight: 1,
+  },
+  {
+    name: 'peck3',
+    glb: asset('/monsters/summoned-crow/attack3.glb'),
+    sound: asset('/monsters/summoned-crow/attack.mp3'),
+    soundTimings: [0.3],
+    damageTimings: [0.3],
+    weight: 1,
+  },
+  {
+    name: 'peck4',
+    glb: asset('/monsters/summoned-crow/attack4.glb'),
+    sound: asset('/monsters/summoned-crow/attack.mp3'),
+    soundTimings: [0.3],
+    damageTimings: [0.3],
+    weight: 1,
+  },
+]);
+
 _applyMultiAttacks('Demon Spawn', [
   {
     name: 'demonSpawnAttack',
@@ -1165,6 +1205,21 @@ function _pickWeightedVariant(variants) {
     if (roll <= 0) return v;
   }
   return loaded[loaded.length - 1];
+}
+
+// Cycles a holder through its attack variants one at a time (rather than a
+// weighted random roll), so every animation is shown in turn. `seed` staggers
+// the starting index per holder — this is what keeps the members of a quartet
+// from all swinging the same animation in lock-step. Skips empty slots since
+// variants load asynchronously into a sparse array.
+function _nextRotatingVariant(holder, variants, seed = 0) {
+  if (!variants || variants.length === 0) return null;
+  if (holder._lastAttackIdx === undefined) holder._lastAttackIdx = seed - 1;
+  for (let tries = 0; tries < variants.length; tries++) {
+    holder._lastAttackIdx = (holder._lastAttackIdx + 1) % variants.length;
+    if (variants[holder._lastAttackIdx]) return variants[holder._lastAttackIdx];
+  }
+  return null;
 }
 
 let _nextSummonId = 800;
@@ -1398,47 +1453,6 @@ export function recordLightningFloorSpawn(level, row, col) {
   _collections.spawnedLightningFloors.add(`${level}:${row},${col}`);
 }
 
-/**
- * Triggers a dormant skeleton's rise-from-floor sequence.
- * Plays the stand-up animation and raise sound, then activates the monster.
- * Retries if the animation hasn't finished loading yet.
- */
-function _triggerSkeletonRise(m) {
-  const riseAction = m.actions.standUp;
-  if (!riseAction) {
-    m._riseRetries = (m._riseRetries ?? 0) + 1;
-    if (m._riseRetries <= 15) {
-      setTimeout(() => _triggerSkeletonRise(m), 200);
-    } else {
-      // Animation never loaded — activate immediately
-      m._dormant = false;
-      m.engaged = true;
-    }
-    return;
-  }
-
-  m._rising = true;
-  playSoundByUrl(asset('/monsters/summoned-skeleton/raise-skeleon.mp3'), 0.8);
-
-  if (m.actions.idle) m.actions.idle.stop();
-  riseAction.reset();
-  riseAction.setEffectiveTimeScale(1);
-  riseAction.setEffectiveWeight(1);
-  riseAction.setLoop(THREE.LoopOnce, 1);
-  riseAction.clampWhenFinished = true;
-  riseAction.play();
-
-  const duration = riseAction.getClip().duration;
-  setTimeout(() => {
-    m._dormant = false;
-    m._rising = false;
-    m.engaged = true;
-    if (m.actions.idle) {
-      m.actions.idle.reset().play();
-      riseAction.crossFadeTo(m.actions.idle, 0.3, true);
-    }
-  }, duration * 1000);
-}
 
 /** Triggers the mummies to start chasing the player immediately. */
 export function triggerMummyAmbush() {
@@ -1578,6 +1592,9 @@ function _spawnQuartetSubMeshes(m, scene, glbUrl, offsets) {
       const wx = m.gridCol * CELL + (m.offsetX ?? 0) + ox;
       const wz = m.gridRow * CELL + (m.offsetZ ?? 0) + oz;
       sub.position.set(wx, 0.0, wz);
+      // Match the main mesh's idle yaw nudge (see _loadMonster). lookAtPlayer
+      // overrides this once the party is in range.
+      if (m.idleYaw) sub.rotation.y += m.idleYaw;
       sub.traverse((child) => {
         if (child.isMesh) {
           child.castShadow = true;
@@ -1604,10 +1621,34 @@ function _spawnQuartetSubMeshes(m, scene, glbUrl, offsets) {
         member.mixer = mixer;
         member.actions = memberActions;
         member._animState = 'idle';
+        member._activeIdle = memberActions.idle;
       }
       scene.add(sub);
       m.subMeshes[i - 1] = sub;
       m.subMixers[i - 1] = mixer;
+
+      // Alternate idle — loaded onto this sub's mixer so each sub can swap
+      // between the two idle animations on its own loop, independently of the
+      // other members (mirrors the main mesh's idle variety).
+      if (m.glbIdleAlt && member) {
+        _gltfLoader.load(m.glbIdleAlt, (altGltf) => {
+          if (altGltf.animations && altGltf.animations.length > 0) {
+            memberActions.idleAlt = mixer.clipAction(altGltf.animations[0]);
+          }
+        });
+        // When an idle clip finishes a loop, randomly cross-fade to the other
+        // idle (only while genuinely idling — not mid-walk/attack/death).
+        mixer.addEventListener('loop', (e) => {
+          if (member._animState !== 'idle' || !memberActions.idleAlt) return;
+          if (e.action !== memberActions.idle && e.action !== memberActions.idleAlt) return;
+          const next = (Math.random() < 0.25) ? memberActions.idle : memberActions.idleAlt;
+          if (next !== e.action) {
+            next.reset().play();
+            e.action.crossFadeTo(next, 0.4, true);
+            member._activeIdle = next;
+          }
+        });
+      }
 
       // Walk animation — loaded onto this sub's mixer so the mushroom plays
       // its walk cycle (not just glide) while the formation moves.
@@ -1632,25 +1673,41 @@ function _spawnQuartetSubMeshes(m, scene, glbUrl, offsets) {
         });
       }
 
-      // Attack animation — so the right-column sub (or back-row substitutes)
+      // Attack animations — so the right-column sub (or back-row substitutes)
       // actually swings when it fans out a hit instead of just silently
-      // damaging the party.
-      if (m.glbAttack && member) {
-        _gltfLoader.load(m.glbAttack, (attackGltf) => {
-          if (attackGltf.animations && attackGltf.animations.length > 0) {
-            const attackAction = mixer.clipAction(attackGltf.animations[0]);
-            attackAction.setLoop(THREE.LoopOnce, 1);
-            attackAction.clampWhenFinished = false;
-            // Cross-fade back to idle when the swing finishes.
-            mixer.addEventListener('finished', (e) => {
-              if (e.action === attackAction && memberActions.idle) {
-                memberActions.idle.reset().play();
-                attackAction.crossFadeTo(memberActions.idle, 0.2, false);
-                member._animState = 'idle';
-              }
-            });
-            memberActions.attack = attackAction;
+      // damaging the party. Every *basic* (non-special) attack variant is
+      // loaded onto this sub's own mixer so it can rotate through them
+      // independently of the other members (see _nextRotatingVariant). Special
+      // / AoE casts are skipped — sub damage is driven by slot 0; the subs only
+      // need their plain swing anims.
+      const _subAttacks = (m.attacks && m.attacks.length > 0)
+        ? m.attacks.filter(a => !a.specialAttack)
+        : (m.glbAttack ? [{ glb: m.glbAttack, name: 'attack' }] : []);
+      if (member && _subAttacks.length > 0) {
+        member.attackVariants = [];
+        // One finished listener crossfades back to idle for whichever variant
+        // just played.
+        mixer.addEventListener('finished', (e) => {
+          const isAttack = member.attackVariants?.some(v => v && v.action === e.action);
+          if (isAttack && memberActions.idle) {
+            memberActions.idle.reset().play();
+            e.action.crossFadeTo(memberActions.idle, 0.2, false);
+            member._animState = 'idle';
+            member._activeIdle = memberActions.idle;
           }
+        });
+        _subAttacks.forEach((atkDef, idx) => {
+          _gltfLoader.load(atkDef.glb, (attackGltf) => {
+            if (attackGltf.animations && attackGltf.animations.length > 0) {
+              const attackAction = mixer.clipAction(attackGltf.animations[0]);
+              attackAction.setLoop(THREE.LoopOnce, 1);
+              attackAction.clampWhenFinished = false;
+              member.attackVariants[idx] = { action: attackAction, name: atkDef.name };
+              // Keep memberActions.attack pointing at a valid action so the
+              // isRunning() walk/idle guards in updateMonsters stay correct.
+              if (idx === 0) memberActions.attack = attackAction;
+            }
+          });
         });
       }
 
@@ -1760,6 +1817,9 @@ function _loadMonster(m, scene) {
     else if (m.faceSouth) model.lookAt(wx, 0, wz + 10);
     else if (m.faceEast) model.lookAt(wx + 10, 0, wz);
     else if (m.faceWest) model.lookAt(wx - 10, 0, wz);
+    // Extra idle yaw nudge (radians). lookAtPlayer overrides this once engaged,
+    // so it only affects the pre-combat / idle facing.
+    if (m.idleYaw) model.rotation.y += m.idleYaw;
 
     m.lookAtPlayer = (playerPos) => {
       model.lookAt(playerPos.x, model.position.y, playerPos.z);
@@ -2509,27 +2569,6 @@ export function updateMonsters(dt, playerCamera, scene) {
     // parent dies so the death-pose mushrooms stay as corpses on the tile.
     // Final cleanup happens at level transition via loadMonstersForLevel.
 
-    // Dormant monsters are hidden until the player enters their trigger bounds
-    if (m._dormant) {
-      if (m._rising) {
-        // Rise animation playing — update mixer but skip all combat logic
-        if (m.mesh) m.mesh.visible = true;
-        if (m.mixer) m.mixer.update(dt);
-        if (m.subMixers) for (const sm of m.subMixers) { if (sm) sm.update(dt); }
-      } else {
-        if (m.mesh) m.mesh.visible = false;
-        if (m._triggerBounds) {
-          const { minRow, maxRow, minCol, maxCol } = m._triggerBounds;
-          if (player.gridRow >= minRow && player.gridRow <= maxRow
-              && player.gridCol >= minCol && player.gridCol <= maxCol) {
-            if (!m._waitForCrowVideo || window._crowWizardVideoDone) {
-              _triggerSkeletonRise(m);
-            }
-          }
-        }
-      }
-      return;
-    }
 
     // Distance cull: skip full update for monsters beyond fog range
     if (m.mesh && playerPos && m.alive) {
@@ -2770,13 +2809,15 @@ export function updateMonsters(dt, playerCamera, scene) {
         if (isMoving && hasWalk) {
           if (member._animState !== 'walk') {
             member.actions.walk.reset().play();
-            member.actions.idle.crossFadeTo(member.actions.walk, 0.3, true);
+            // Fade from whichever idle is currently active (base or alt).
+            (member._activeIdle || member.actions.idle).crossFadeTo(member.actions.walk, 0.3, true);
             member._animState = 'walk';
           }
         } else if (member._animState === 'walk' && hasWalk) {
           member.actions.idle.reset().play();
           member.actions.walk.crossFadeTo(member.actions.idle, 0.3, true);
           member._animState = 'idle';
+          member._activeIdle = member.actions.idle;
         }
       }
     }
@@ -3589,10 +3630,11 @@ export function triggerMonsterAttack(monsterId) {
       variant = m.attackVariants.find(v => v && v.name === _forcedVariantName);
     }
     if (!variant) {
-      if (m.name === 'Ogre' && m.attackVariants.length >= 2) {
-        if (m._lastAttackIdx === undefined) m._lastAttackIdx = -1;
-        m._lastAttackIdx = (m._lastAttackIdx + 1) % m.attackVariants.length;
-        variant = m.attackVariants[m._lastAttackIdx];
+      if ((m.name === 'Ogre' || m.name === 'Summoned Crow') && m.attackVariants.length >= 2) {
+        // Cycle through the animations in turn. For a quartet this is sub 0 of
+        // the formation — seed 0 keeps it offset from the other front sub,
+        // which seeds off its own subSlot (see the quartet block below).
+        variant = _nextRotatingVariant(m, m.attackVariants, 0);
       } else {
         variant = _pickWeightedVariant(m.attackVariants);
       }
@@ -3754,8 +3796,12 @@ export function triggerMonsterAttack(monsterId) {
       const [mfl, mfr] = _quartetActiveFront(m);
       for (const swinger of [mfl, mfr]) {
         if (!swinger || swinger.subSlot === 0) continue; // sub 0 already handled
-        const act = swinger.actions?.attack;
+        // Pick this sub's own attack variant, seeded by its subSlot so it
+        // stays out of lock-step with the other front sub and with slot 0.
+        const subVariant = _nextRotatingVariant(swinger, swinger.attackVariants, swinger.subSlot);
+        const act = subVariant?.action || swinger.actions?.attack;
         if (!act) continue;
+        swinger.actions.attack = act; // keep isRunning() walk/idle guards valid
         act.reset();
         act.setEffectiveTimeScale(1);
         act.setEffectiveWeight(1);
