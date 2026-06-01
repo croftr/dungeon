@@ -93,6 +93,20 @@ export const MONSTER_BASE_ATTACK = RULES.monsterBaseAttack;
  */
 export const MITIGATION_K = RULES.mitigationK;
 
+/**
+ * Floor on how much of an incoming monster hit always lands, expressed as a
+ * fraction (0–1) of the post-VIT-curve damage. Flat DEF can shave a hit, but
+ * never below this fraction — so e.g. 0.25 means armour caps at 75% reduction.
+ *
+ * Without this floor, monster damage is a fixed constant while a party's flat
+ * DEF scales freely with gear, so every hit trends to the `max(1, …)` chip as
+ * you level — the main reason fights get *easier* over time. The floor keeps
+ * late-game hits meaningful no matter how stacked the tank is. Applied to the
+ * monster→player path only; the player→monster path keeps uncapped flat DEF on
+ * purpose so high-armour enemies (e.g. the DEF 180 wall) stay a real puzzle.
+ */
+export const MIN_INCOMING_DAMAGE_FRACTION = RULES.minIncomingDamageFraction;
+
 // ── On-hit status effect constants ───────────────────────────────────────────
 
 /**
@@ -396,7 +410,11 @@ export function calcMonsterDamage(monster, character, characterDefence = 0, elem
   const vit = character.stats?.vitality ?? 0;
   const afterCurve = Math.floor(raw * MITIGATION_K / (MITIGATION_K + vit));
   if (elementResistance >= 1) return 0;
-  let dmg = Math.max(1, afterCurve - characterDefence);
+  // Flat DEF subtracts, but can never erase more than (1 − MIN_INCOMING_DAMAGE_FRACTION)
+  // of the curve-reduced hit — keeps fixed monster damage from drifting to the chip
+  // floor as gear DEF scales. See MIN_INCOMING_DAMAGE_FRACTION.
+  const minThrough = afterCurve * MIN_INCOMING_DAMAGE_FRACTION;
+  let dmg = Math.max(1, Math.round(Math.max(minThrough, afterCurve - characterDefence)));
   if (elementResistance) dmg = Math.max(1, Math.round(dmg * (1 - elementResistance)));
   return window.easyMode ? Math.max(1, Math.floor(dmg * 0.5)) : dmg;
 }

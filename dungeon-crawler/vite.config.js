@@ -3,12 +3,30 @@ import path from 'path';
 
 export default defineConfig({
   resolve: {
-    alias: {
+    alias: [
       // Force three.proton.js (and any other bundled lib) to use the same
       // Three.js instance as the rest of the app, eliminating the
       // "Multiple instances of Three.js" warning.
-      'three': path.resolve('./node_modules/three'),
-    },
+      //
+      // Must point at the explicit ESM build file, NOT the package root:
+      // three's exports map resolves bare `import` to three.module.js but
+      // CommonJS `require("three")` (which three.proton.js uses) to a
+      // *separate* three.cjs file — a second full copy of Three.js. Aliasing
+      // straight to three.module.js short-circuits the exports map so the UMD
+      // require and the ESM imports collapse onto one file.
+      //
+      // Exact-match regex (^three$) so subpath imports like
+      // `three/examples/jsm/...` are left untouched.
+      { find: /^three$/, replacement: path.resolve('./node_modules/three/build/three.module.js') },
+    ],
+    // three.proton.js is a UMD bundle that pulls Three.js in via CommonJS
+    // `require("three")`, while the app and three.quarks use the ESM
+    // `import ... from 'three'` path. Without dedupe those resolve to two
+    // separate module instances — bundling a *second* full copy of Three.js
+    // into the particles chunk and triggering the runtime
+    // "Multiple instances of Three.js" warning. Dedupe collapses both paths
+    // onto the single installed copy.
+    dedupe: ['three'],
   },
   build: {
     // Modern browsers only -- skip syntax down-leveling

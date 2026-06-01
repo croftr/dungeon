@@ -8,7 +8,7 @@
 
 import LEVELING from './data/leveling.json';
 import SKILLS_DATA from './data/skills.json';
-import { party, refreshPartyCards } from './party.js';
+import { party, refreshPartyCards, drawPortrait } from './party.js';
 import { playLevelUpSound } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 
@@ -76,10 +76,7 @@ function showDramaticLevelUp(levelUps) {
     canvas.height = 120;
     canvas.className = 'dramatic-levelup-portrait';
 
-    // We must import drawPortrait from party.js to draw the face
-    import('./party.js').then(({ drawPortrait }) => {
-      drawPortrait(canvas, member);
-    });
+    drawPortrait(canvas, member);
 
     const text = document.createElement('div');
     text.className = 'dramatic-levelup-text';

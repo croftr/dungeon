@@ -73,7 +73,8 @@
       "Bash(npx vitest *)",
       "Bash(docker --version)",
       "Bash(docker compose *)",
-      "Bash(docker exec *)"
+      "Bash(docker exec *)",
+      "Bash(cd /c/Users/rob/projects/dungeon/dungeon-crawler/src && grep -rn '\"defence\"' data/monsters.json levels/level6/monsters.js levels/level4/monsters.js 2>/dev/null | head -40)"
     ]
   }
 }

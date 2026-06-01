@@ -11,6 +11,7 @@
     "critMultiplier": 3,
     "monsterBaseAttack": 4,
     "mitigationK": 100,
+    "minIncomingDamageFraction": 0.25,
     "shieldBashStunChance": 0.1,
     "shieldBashStunDurationMs": 5000,
     "backupPairs": {

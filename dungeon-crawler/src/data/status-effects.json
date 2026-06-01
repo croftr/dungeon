@@ -64,11 +64,11 @@
   "resist-poison": {
     "id": "resist-poison",
     "name": "Resist Poison",
-    "description": "Reduces chance of being poisoned by 50% for 60 seconds.",
+    "description": "Reduces chance of being poisoned by 50% for 90 seconds.",
     "type": "buff",
     "icon": "/icons/spells/resist-poison.webp",
     "color": "#80ff80",
-    "duration": 60,
+    "duration": 90,
     "statusResistances": {
       "poison": 0.5
     }
@@ -149,11 +149,11 @@
   "resist-fear": {
     "id": "resist-fear",
     "name": "Resist Fear",
-    "description": "Reduces chance of being feared by 50% for 60 seconds.",
+    "description": "Reduces chance of being feared by 50% for 90 seconds.",
     "type": "buff",
     "icon": "/icons/spells/resist-fear.webp",
     "color": "#4080ff",
-    "duration": 60,
+    "duration": 90,
     "statusResistances": {
       "fear": 0.5
     }
