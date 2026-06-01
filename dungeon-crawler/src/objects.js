@@ -425,21 +425,28 @@ let _mistPrevCol = null;
 let _mistCooldownUntil = 0;
 let _mistConfirmOpen = false;
 
-function _getPortalFlashOverlay() {
+function _getPortalFlashOverlay(theme = 'blue') {
     let el = document.getElementById('portal-flash');
-    if (el) return el;
-    el = document.createElement('div');
-    el.id = 'portal-flash';
-    Object.assign(el.style, {
-        position: 'fixed',
-        inset: '0',
-        background: 'radial-gradient(circle at center, rgba(120,200,255,0.95) 0%, rgba(20,40,90,0.98) 60%, rgba(0,0,0,1) 100%)',
-        opacity: '0',
-        transition: 'opacity 500ms ease',
-        pointerEvents: 'none',
-        zIndex: '10004',
-    });
-    document.body.appendChild(el);
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'portal-flash';
+        Object.assign(el.style, {
+            position: 'fixed',
+            inset: '0',
+            opacity: '0',
+            transition: 'opacity 500ms ease',
+            pointerEvents: 'none',
+            zIndex: '10004',
+        });
+        document.body.appendChild(el);
+    }
+    
+    if (theme === 'mist') {
+        el.style.background = 'radial-gradient(circle at center, rgba(40,15,60,0.98) 0%, rgba(10,0,20,0.99) 60%, rgba(0,0,0,1) 100%)';
+    } else {
+        el.style.background = 'radial-gradient(circle at center, rgba(120,200,255,0.95) 0%, rgba(20,40,90,0.98) 60%, rgba(0,0,0,1) 100%)';
+    }
+    
     return el;
 }
 
@@ -646,30 +653,65 @@ function showMistConfirm(obj) {
             background: 'rgba(20,16,34,0.55)', backdropFilter: 'blur(2px)',
         });
         overlay.innerHTML = `
-            <div style="
-                min-width:300px; max-width:420px; padding:26px 28px;
-                border:1px solid #6f5fa6; border-radius:12px; text-align:center;
-                background:radial-gradient(circle at 50% 0%, rgba(120,104,190,0.45), rgba(24,20,40,0.96));
-                box-shadow:0 0 40px rgba(150,130,230,0.5); color:#e8e2ff;
-                font-family:inherit;">
-                <div style="font-size:22px; font-weight:700; letter-spacing:0.5px; margin-bottom:10px;">
-                    A Wall of Mist
+            <style>
+                #mist-confirm-yes:hover {
+                    background: linear-gradient(180deg, #800000, #400000) !important;
+                    box-shadow: 0 0 15px rgba(200,0,0,0.6), inset 0 1px 0 rgba(255,150,150,0.4) !important;
+                    border-color: #7a0000 !important;
+                    color: #fff !important;
+                }
+                #mist-confirm-no:hover {
+                    background: linear-gradient(180deg, #3a3a3a, #1a1a1a) !important;
+                    color: #d0d0d0 !important;
+                    border-color: #555 !important;
+                }
+                .mist-modal-container {
+                    animation: mistPulse 4s infinite alternate;
+                }
+                @keyframes mistPulse {
+                    0% { box-shadow: 0 0 40px rgba(0,0,0,0.9), inset 0 0 40px rgba(0,0,0,0.9); }
+                    100% { box-shadow: 0 0 60px rgba(40,10,10,0.6), inset 0 0 60px rgba(0,0,0,1); }
+                }
+            </style>
+            <div class="mist-modal-container" style="
+                min-width: 560px; max-width: 720px; min-height: 500px; padding: 80px 50px;
+                display: flex; flex-direction: column; justify-content: center;
+                border: 2px solid #2b2b2b; border-radius: 8px; text-align: center;
+                background: linear-gradient(rgba(10, 10, 12, 0.60), rgba(0, 0, 0, 0.90)), url('/images/crow_mist_bg.webp') center/cover no-repeat;
+                color: #d0c8b8;
+                font-family: inherit;
+                position: relative; overflow: hidden;
+                box-shadow: 0 0 20px #000;">
+                
+                <div style="
+                    position: absolute; top: 0; left: 0; right: 0; height: 4px;
+                    background: linear-gradient(90deg, transparent, #600000, transparent);"></div>
+                <div style="
+                    position: absolute; bottom: 0; left: 0; right: 0; height: 4px;
+                    background: linear-gradient(90deg, transparent, #600000, transparent);"></div>
+
+                <div style="font-size: 28px; font-weight: 700; letter-spacing: 3px; margin-bottom: 16px; color: #bba078; text-transform: uppercase; text-shadow: 3px 3px 6px rgba(0,0,0,1);">
+                    The Crow Domain
                 </div>
-                <div style="font-size:15px; line-height:1.5; opacity:0.9; margin-bottom:22px;">
-                    A shifting curtain of pale mist bars the way. Something stirs beyond it.
+                <div style="font-size: 16px; line-height: 1.7; opacity: 0.95; margin-bottom: 32px; text-shadow: 2px 2px 4px rgba(0,0,0,1); font-style: italic; color: #a9a5a6;">
+                    A wall of thick, black mist pulsates with an unnatural chill. From within the suffocating darkness, the maddening caw of crows echoes. Dare you proceed?
                 </div>
-                <div style="display:flex; gap:12px; justify-content:center;">
+                <div style="display: flex; gap: 16px; justify-content: center;">
                     <button id="mist-confirm-yes" style="
-                        flex:1; padding:11px 14px; font-size:15px; cursor:pointer;
-                        border:none; border-radius:8px; color:#1a1430; font-weight:700;
-                        background:linear-gradient(180deg,#cdbcff,#9d86e6);">
-                        Proceed into the mist
+                        flex: 1; padding: 14px 16px; font-size: 16px; cursor: pointer;
+                        border: 1px solid #4a0000; border-radius: 4px; color: #e0e0e0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;
+                        background: linear-gradient(180deg, #500000, #200000);
+                        box-shadow: 0 4px 10px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,100,100,0.2);
+                        transition: all 0.3s ease; text-shadow: 1px 1px 2px black;">
+                        Embrace the Dark
                     </button>
                     <button id="mist-confirm-no" style="
-                        padding:11px 16px; font-size:15px; cursor:pointer;
-                        border:1px solid #6f5fa6; border-radius:8px; color:#d8d2f0;
-                        background:rgba(60,52,96,0.6);">
-                        Not yet
+                        padding: 14px 24px; font-size: 16px; cursor: pointer;
+                        border: 1px solid #333; border-radius: 4px; color: #999; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;
+                        background: linear-gradient(180deg, #222, #0a0a0a);
+                        box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+                        transition: all 0.3s ease; text-shadow: 1px 1px 2px black;">
+                        Turn Back
                     </button>
                 </div>
             </div>`;
@@ -729,7 +771,7 @@ function _warpThroughMist(obj) {
     player.moving = false;
     playFloorPortalSound();
 
-    const overlay = _getPortalFlashOverlay();
+    const overlay = _getPortalFlashOverlay('mist');
     overlay.offsetHeight; // force reflow so the opacity transition fires
     overlay.style.opacity = '1';
     setTimeout(() => {

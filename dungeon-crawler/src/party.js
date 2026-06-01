@@ -1369,7 +1369,11 @@ export function getEffectiveStats(member) {
 
 /** Returns the combined attack speed multiplier from active debuffs (>1 = slower). */
 export function getAttackSpeedMultiplier(member) {
-  let mult = 1.0;
+  // Global attack-pace knob. Multiplies every party attack delay, so values > 1
+  // make all party members attack SLOWER. Default 2 (half-speed swings) keeps
+  // combat readable and leaves headroom for haste skills/magic to feel impactful.
+  // Live-tweakable from the browser console: window.PARTY_ATTACK_DELAY_SCALE = 1.5
+  let mult = (typeof window !== 'undefined' && window.PARTY_ATTACK_DELAY_SCALE) || 2.0;
   const now = performance.now();
   (member.activeDebuffs ?? []).forEach(d => {
     if (now >= d.expiresAt) return;
@@ -1787,9 +1791,13 @@ function updateStatusBanners() {
 //  SAVE / RESTORE
 // ─────────────────────────────────────────────
 export function capturePartyState() {
+  // `activeDebuffs` carry an `expiresAt` measured against `performance.now()`,
+  // which resets to 0 on the page reload that loading performs. Persisting them
+  // leaves stale future timestamps that never expire (regen/poison/etc. appear
+  // stuck on). Transient status effects are intentionally dropped on save.
   return {
     members: party.map(m => JSON.parse(JSON.stringify(m, (k, v) =>
-      k === 'cooldownTimers' ? undefined : v))),
+      (k === 'cooldownTimers' || k === 'activeDebuffs') ? undefined : v))),
     gold: partyGold,
     autoAttack,
     autoRangeAttack,

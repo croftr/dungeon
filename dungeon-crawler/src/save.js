@@ -27,7 +27,7 @@ import { captureRecruits, restoreRecruits, RECRUITS } from './recruits.js';
 import { captureEssentiary, restoreEssentiary } from './essentiary.js';
 import { captureHelpState, restoreHelpState } from './help.js';
 import { LEVEL_NAMES } from './minimap.js';
-import { setAmbientLevel } from './audio.js';
+import { setAmbientLevel, isInCombat } from './audio.js';
 
 export const SAVE_VERSION = 1;
 const SAVE_PREFIX = 'dungeon-save-';
@@ -95,6 +95,12 @@ export function whyCantSave() {
   if (window.arenaState?.active) return 'Cannot save during an arena fight.';
   if (window.currentLevel === ARENA_LEVEL) return 'Cannot save during an arena fight.';
   if (window.currentLevel === SCHEMATIC_TRIALS_LEVEL) return 'Cannot save during the schematic trials.';
+  // Block saving in combat. Status effects (regen/poison/etc.) carry an
+  // `expiresAt` measured against performance.now(), which resets on the reload
+  // that loading performs — persisting them mid-fight leaves stale timers that
+  // never expire. isInCombat() stays true for a few seconds after the last
+  // combat action, so saving is allowed only once the fight has fully settled.
+  if (isInCombat()) return 'Cannot save during combat.';
   return null;
 }
 

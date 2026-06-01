@@ -4,21 +4,21 @@
     "name": "Summoned Crow",
     "family": "avian",
     "description": "Lesser corvids conjured from shadow to harry intruders. Frail on their own, they descend in shrieking flocks — pecking and clawing until driven off. Little more than feathered fodder for their wizard masters.",
-    "hp": 35,
-    "defence": 2,
-    "xp": 30,
+    "hp": 100,
+    "defence": 10,
+    "xp": 50,
     "attackSpeed": 1,
     "stats": {
-      "strength": 8,
-      "dexterity": 14,
-      "vitality": 5,
+      "strength": 18,
+      "dexterity": 20,
+      "vitality": 15,
       "intelligence": 4,
-      "resilience": 4
+      "resilience": 10
     },
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.2
+        "chance": 0.1
       }
     ]
   }
