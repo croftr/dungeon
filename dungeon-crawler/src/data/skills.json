@@ -125,7 +125,7 @@
     "Whirlwind": {
         "type": "buff",
         "icon": "/skills/whirlwind.webp",
-        "description": "Becomes a blur of motion, doubling attack speed and preventing stamina drain for 60s. Cooldown: 90s.",
+        "description": "Becomes a blur of motion, doubling attack speed for 60s. Cooldown: 90s.",
         "cooldownMs": 90000,
         "durationMs": 60000,
         "effectType": "attackSpeedMultiplier",
@@ -189,14 +189,12 @@
     "War Dance": {
         "type": "buff",
         "icon": "/skills/wardance.webp",
-        "description": "Inspires the party with a graceful dance, increasing attack speed and preventing stamina drain for 30s. Cooldown: 90s.",
+        "description": "Inspires the party with a graceful dance, preventing stamina drain for the whole party for 30s. Cooldown: 90s.",
         "cooldownMs": 90000,
         "durationMs": 30000,
-        "effectType": "attackSpeedMultiplier",
+        "effectType": "staminaPrevention",
         "effectTarget": "party",
-        "stateKey": "warDance",
-        "magnitude": 0.8,
-        "magnitudeBonusMode": "percent"
+        "stateKey": "warDance"
     },
     "Mace Master": {
         "isPassive": true,

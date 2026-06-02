@@ -145,9 +145,13 @@ function _downloadCsv() {
       result = `Level ${e.level}`;
     } else if (type === 'skill') {
       action = e.skillName || '';
-      damage = (e.finalDamage != null) ? Math.round(e.finalDamage) : '';
-      result = (e.finalDamage != null && e.finalDamage < 0) ? 'Heal' : 'Skill';
-      details = e.note || '';
+      if (e.subtype === 'expire') {
+        result = 'Expired';
+      } else {
+        damage = (e.finalDamage != null) ? Math.round(e.finalDamage) : '';
+        result = (e.finalDamage != null && e.finalDamage < 0) ? 'Heal' : 'Skill';
+        details = e.note || '';
+      }
     } else if (type === 'status-effect') {
       action = e.effectName || '';
       result = 'Afflicted';
@@ -331,6 +335,11 @@ function _buildRowHtml(e) {
 
   // ── Skill / spell ──────────────────────────────────────────────────────────
   if (e.type === 'skill') {
+    // Buff/debuff wearing off — "Lumni's War Dance fades"
+    if (e.subtype === 'expire') {
+      return `<span class="bl-badge">✦</span>` +
+        `<span class="bl-who" style="max-width: none; flex: 1;"><b>${e.actor}</b>'s <b>${e.skillName}</b> fades</span>`;
+    }
     const targetText = e.target ? ` → <b>${e.target}</b>` : '';
     const healText = (e.finalDamage != null && e.finalDamage < 0)
       ? ` <span class="bl-heal-amt">+${Math.round(Math.abs(e.finalDamage))}</span>` : '';

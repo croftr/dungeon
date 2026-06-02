@@ -316,7 +316,10 @@
             "viper",
             "ghost"
         ],
-        "startingSkills": [],
+        "startingSkills": [
+            "Whirlwind",
+            "War Dance"
+        ],
         "startingInventory": [
             "Cure Poison Potion",
             "Minor Rejuvenate Potion",

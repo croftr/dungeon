@@ -1340,11 +1340,11 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 1
+        "chance": 0.5
       },
       {
         "item": "Mana Berry",
-        "chance": 1
+        "chance": 0.5
       },
       {
         "item": "Crow Talon",
@@ -1352,6 +1352,10 @@
       },
       {
         "item": "Crow Essence",
+        "chance": 1
+      },
+      {
+        "item": "Crow Key",
         "chance": 1
       },
       {

@@ -1,4 +1,4 @@
-import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getAttackSpeedMultiplier, hasEffectFlag, breakPartyUnseen, showMemberHeal, showMemberSpHeal, getEffectiveStats, getEffectiveElementalResistances } from './party.js';
+import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getAttackSpeedMultiplier, getPartyAttackDelayScale, hasEffectFlag, breakPartyUnseen, showMemberHeal, showMemberSpHeal, getEffectiveStats, getEffectiveElementalResistances } from './party.js';
 import { ELEMENTS, ELEMENT_IDS, getPrimaryAttackElement } from './elements.js';
 import { showInlineHelp } from './help.js';
 import { getItemDef, canUseItemByJob, normalizeJob, isJewelry } from './items.js';
@@ -1678,7 +1678,8 @@ function populateTooltip(obj, showBuyPrice = false) {
     document.getElementById('item-detail-damage').textContent =
       def?.baseDamage != null ? def.baseDamage : '—';
     if (hasStaminaDrain) {
-      document.getElementById('item-detail-stamina').textContent = (def.staminaDrain * 5) + ' SP';
+      // Match the actual per-swing cost in useHand (scaled by the attack-delay knob).
+      document.getElementById('item-detail-stamina').textContent = (def.staminaDrain * 5 * getPartyAttackDelayScale()) + ' SP';
     }
     if (hasDelay) {
       document.getElementById('item-detail-delay').textContent = def.delay + 's';
@@ -5154,12 +5155,6 @@ export function useHand(memberIndex, hand, silent = false) {
     delaySec *= skillsState.whirlwind.magnitude;
   }
 
-  // War Dance buff: boost attack speed for the whole party
-  const wd = skillsState.warDance;
-  if (wd.active && performance.now() < wd.expiresAt) {
-    delaySec *= skillsState.warDance.magnitude;
-  }
-
   // Status effect attack speed penalty (e.g. Slow debuff)
   delaySec *= getAttackSpeedMultiplier(m);
 
@@ -5261,9 +5256,11 @@ export function useHand(memberIndex, hand, silent = false) {
     setMp(m.id, m.mp - mpCost);
   }
 
-  // Physical attacks cost 5 SP per staminaDrain level; spells and skills do not
+  // Physical attacks cost 5 SP per staminaDrain level; spells and skills do not.
+  // Scaled by the party attack-delay knob so SP drain *rate* stays constant
+  // regardless of attack-speed tuning (slower swings cost proportionally more).
   // Whirlwind / War Dance buff: also prevents SP drain
-  let spCost = 5 * (def?.staminaDrain ?? 1);
+  let spCost = 5 * (def?.staminaDrain ?? 1) * getPartyAttackDelayScale();
 
   // Apply Conservator passive reductions (15% per node, stacks additively up to 45%)
   if (!isSpell && def?.weaponType && m.skills?.length) {
@@ -5278,10 +5275,10 @@ export function useHand(memberIndex, hand, silent = false) {
     if (reduction > 0) spCost = Math.max(0, spCost * (1 - reduction));
   }
 
-  const wwActive = ww.active && ww.actorName === m.name && now < ww.expiresAt;
+  // War Dance: removes the whole party's stamina cost to attack while active.
   const wdActive = skillsState.warDance.active && now < skillsState.warDance.expiresAt;
 
-  if (wwActive || wdActive) {
+  if (wdActive) {
     spCost = 0;
   }
 
@@ -5495,8 +5492,6 @@ export function useWeaponSkill(memberIndex, hand) {
   let normalDelaySec = def.delay ?? 2;
   const ww = skillsState.whirlwind;
   if (ww.active && ww.actorName === m.name && now < ww.expiresAt) normalDelaySec *= ww.magnitude;
-  const wd = skillsState.warDance;
-  if (wd.active && now < wd.expiresAt) normalDelaySec *= wd.magnitude;
   normalDelaySec *= getAttackSpeedMultiplier(m);
   const normalKey = `${memberIndex}-${hand}`;
   if (lastAttackTimes[normalKey] && now - lastAttackTimes[normalKey] < normalDelaySec * 1000) {
@@ -5661,8 +5656,6 @@ function _tickAutoHand(memberIndex, hand, staggerOffsetMs) {
   let delaySec = def?.delay ?? 2;
   const ww = skillsState.whirlwind;
   if (ww.active && ww.actorName === m.name && now < ww.expiresAt) delaySec *= ww.magnitude;
-  const wd = skillsState.warDance;
-  if (wd.active && now < wd.expiresAt) delaySec *= wd.magnitude;
   delaySec *= getAttackSpeedMultiplier(m);
 
   const isSpellSlot = def?.slot === 'spell';
@@ -5733,8 +5726,6 @@ function _tickAutoRangeHand(memberIndex, hand, staggerOffsetMs) {
   let delaySec = def.delay ?? 2;
   const ww = skillsState.whirlwind;
   if (ww.active && ww.actorName === m.name && now < ww.expiresAt) delaySec *= ww.magnitude;
-  const wd = skillsState.warDance;
-  if (wd.active && now < wd.expiresAt) delaySec *= wd.magnitude;
   delaySec *= getAttackSpeedMultiplier(m);
 
   const baseKey = isBothHands ? `${memberIndex}-left` : `${memberIndex}-${hand}`;
@@ -6054,6 +6045,7 @@ function _useHuntersEye(member, memberIndex) {
   if (getHuntersEyeTargetId() !== null) {
     setHuntersEyeTarget(null);
     showMessage(`${member.name} lowers ${skillName}.`);
+    addLogEntry({ type: 'skill', subtype: 'expire', actor: member.name, skillName });
     return;
   }
 
@@ -6126,6 +6118,7 @@ function _useEntangle(member, memberIndex) {
     skillsState.entangle.targetId = null;
     if (entangleTarget?.entangleLabel) entangleTarget.entangleLabel.visible = false;
     showMessage(`<span style="color:#80ff80">Entangle</span> fades — the roots wither away.`, 2500);
+    addLogEntry({ type: 'skill', subtype: 'expire', actor: member.name, skillName: 'Entangle' });
     _entangleExpireTimer = null;
   }, entangleDurationMs);
 
@@ -6176,6 +6169,7 @@ function _useSunderArmor(member, memberIndex) {
     skillsState.sunderArmor.targetId = null;
     if (targetMonster?.sunderLabel) targetMonster.sunderLabel.visible = false;
     showMessage(`<span style="color:#ff8080">Sunder Armor</span> fades — the armor naturally mends.`, 2500);
+    addLogEntry({ type: 'skill', subtype: 'expire', actor: member.name, skillName: 'Sunder Armor' });
     _sunderArmorExpireTimer = null;
   }, sunderArmorDurationMs);
 
@@ -6220,6 +6214,7 @@ function _useBerserk(member, memberIndex) {
     skillsState.berserk.active = false;
     skillsState.berserk.actorName = null;
     showMessage(`<span style="color:#ff5050">Berserk</span> fades — the rage subsides.`, 2500);
+    addLogEntry({ type: 'skill', subtype: 'expire', actor: member.name, skillName: 'Berserk' });
     _berserkExpireTimer = null;
   }, berserkDurationMs);
 
@@ -6262,6 +6257,7 @@ function _useCombust(member, memberIndex) {
     skillsState.combust.active = false;
     skillsState.combust.actorName = null;
     showMessage(`<span style="color:#ff6a00">Combust</span> fades — the flames extinguish.`, 2500);
+    addLogEntry({ type: 'skill', subtype: 'expire', actor: member.name, skillName: 'Combust' });
     _combustExpireTimer = null;
   }, combustDurationMs);
 
@@ -6304,7 +6300,7 @@ function _useWarcry(member, memberIndex) {
   _warcryExpireTimer = setTimeout(() => {
     skillsState.warcry.active = false;
     showMessage(`<span style="color:#ffcc00">Warcry</span> fades — the inspiration passes.`, 2500);
-    addLogEntry({ type: 'skill', actor: 'System', skillName: 'Warcry fades' });
+    addLogEntry({ type: 'skill', subtype: 'expire', actor: member.name, skillName: 'Warcry' });
     _warcryExpireTimer = null;
   }, warcryDurationMs);
 
@@ -6344,6 +6340,7 @@ function _useSanctuary(member, memberIndex) {
   _sanctuaryExpireTimer = setTimeout(() => {
     skillsState.sanctuary.active = false;
     showMessage(`<span style="color:#f0d080">Sanctuary</span> fades — the shield dissipates.`, 2500);
+    addLogEntry({ type: 'skill', subtype: 'expire', actor: member.name, skillName: 'Sanctuary' });
     _sanctuaryExpireTimer = null;
   }, sanctuaryDurationMs);
 
@@ -6422,6 +6419,7 @@ function _useArcaneLantern(member, memberIndex) {
   _arcaneLanternExpireTimer = setTimeout(() => {
     skillsState.arcaneLight.active = false;
     showMessage(`<span style="color:#a0d8ff">Arcane Lantern</span> fades — darkness returns.`, 2500);
+    addLogEntry({ type: 'skill', subtype: 'expire', actor: member.name, skillName: 'Arcane Lantern' });
     _arcaneLanternExpireTimer = null;
   }, arcaneLanternDurationMs);
 
@@ -6462,6 +6460,7 @@ function _useMinersLight(member, memberIndex) {
     // Both skills share the same global light state
     skillsState.arcaneLight.active = false;
     showMessage(`<span style="color:#d8d8ff">Miners Light</span> fades — darkness returns.`, 2500);
+    addLogEntry({ type: 'skill', subtype: 'expire', actor: member.name, skillName: 'Miners Light' });
     _minersLightExpireTimer = null;
   }, minersLightDurationMs);
 
@@ -6487,15 +6486,13 @@ function _useWarDance(member, memberIndex) {
   const warDanceDurationMs = WAR_DANCE_DURATION_MS + (member.skillDurationBonusMs ?? 0);
   skillsState.warDance.active = true;
   skillsState.warDance.expiresAt = now + warDanceDurationMs;
-  skillsState.warDance.magnitude = resolveSkillMagnitude('War Dance', SKILLS_DATA['War Dance'], member);
   _warDanceCooldownEnd = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill-War Dance`] = now;
 
   playSkillSound('war-dance');
   triggerWarDanceEffect();
-  const warDanceDelayStr = skillsState.warDance.magnitude.toFixed(2);
   showMessage(
-    `<span style="color:#ff80c0">✦ War Dance</span> — ${member.name} inspires the party! Attack delay ×${warDanceDelayStr} for 30s.`,
+    `<span style="color:#ff80c0">✦ War Dance</span> — ${member.name} inspires the party! No stamina cost to attack for 30s.`,
     3000
   );
   addLogEntry({ type: 'skill', actor: member.name, skillName: 'War Dance' });
@@ -6504,7 +6501,7 @@ function _useWarDance(member, memberIndex) {
   _warDanceExpireTimer = setTimeout(() => {
     skillsState.warDance.active = false;
     showMessage(`<span style="color:#ff80c0">War Dance</span> fades — the rhythm ends.`, 2500);
-    addLogEntry({ type: 'skill', actor: 'System', skillName: 'War Dance fades' });
+    addLogEntry({ type: 'skill', subtype: 'expire', actor: member.name, skillName: 'War Dance' });
     _warDanceExpireTimer = null;
   }, warDanceDurationMs);
 
@@ -6539,7 +6536,7 @@ function _useWhirlwind(member, memberIndex) {
   triggerWhirlwindEffect();
   const whirlwindDelayStr = skillsState.whirlwind.magnitude.toFixed(2);
   showMessage(
-    `<span style="color:#a0f0ff">✦ Whirlwind</span> — ${member.name} becomes a blur! Attack delay ×${whirlwindDelayStr} for 30s.`,
+    `<span style="color:#a0f0ff">✦ Whirlwind</span> — ${member.name} becomes a blur! Attack delay ×${whirlwindDelayStr} for 60s.`,
     3000
   );
   addLogEntry({ type: 'skill', actor: member.name, skillName: 'Whirlwind' });
@@ -6549,6 +6546,7 @@ function _useWhirlwind(member, memberIndex) {
     skillsState.whirlwind.active = false;
     skillsState.whirlwind.actorName = null;
     showMessage(`<span style="color:#a0f0ff">Whirlwind</span> fades — movement returns to normal.`, 2500);
+    addLogEntry({ type: 'skill', subtype: 'expire', actor: member.name, skillName: 'Whirlwind' });
     _whirlwindExpireTimers[memberIndex] = null;
   }, whirlwindDurationMs);
 
@@ -6606,6 +6604,7 @@ function _useDoubleAttack(member, memberIndex) {
       skillsState.doubleAttack.active = false;
       skillsState.doubleAttack.actorName = null;
       showMessage(`<span style="color:#ff8080">Double Attack</span> fades — focus returns to normal.`, 2500);
+      addLogEntry({ type: 'skill', subtype: 'expire', actor: member.name, skillName: 'Double Attack' });
     }
     _doubleAttackExpireTimers[memberIndex] = null;
   }, durationMs);
@@ -6643,6 +6642,7 @@ function _useTrueShot(member, memberIndex) {
     skillsState.trueShot.active = false;
     skillsState.trueShot.actorName = null;
     showMessage(`<span style="color:#ffe080">True Shot</span> fades — focus returns to normal.`, 2500);
+    addLogEntry({ type: 'skill', subtype: 'expire', actor: member.name, skillName: 'True Shot' });
     _trueShotExpireTimers[memberIndex] = null;
   }, trueShotDurationMs);
 
@@ -6689,6 +6689,7 @@ function _useRampart(member, memberIndex) {
       skillsState.rampart.active = false;
       skillsState.rampart.actorName = null;
       showMessage(`<span style="color:#ffd700">Rampart</span> fades — the character lowers their guard.`, 2500);
+      addLogEntry({ type: 'skill', subtype: 'expire', actor: member.name, skillName: 'Rampart' });
     }
     _rampartExpireTimers[memberIndex] = null;
   }, rampartDurationMs);
@@ -6756,6 +6757,7 @@ function _useRunicScholar(member, memberIndex) {
     member.runicScholarActive = false;
     refreshPartyCards();
     showMessage(`<span style="color:#c080ff">Runic Scholar</span> — ${member.name} releases the charge.`, 2000);
+    addLogEntry({ type: 'skill', subtype: 'expire', actor: member.name, skillName: 'Runic Scholar' });
     return;
   }
 

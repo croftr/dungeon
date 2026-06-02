@@ -609,9 +609,6 @@ function refreshMember(m) {
     if (skillsState.whirlwind.active && skillsState.whirlwind.actorName === m.name && nowRef < skillsState.whirlwind.expiresAt) {
       lhDelaySec *= skillsState.whirlwind.magnitude;
     }
-    if (skillsState.warDance.active && nowRef < skillsState.warDance.expiresAt) {
-      lhDelaySec *= skillsState.warDance.magnitude;
-    }
     lhDelaySec *= getAttackSpeedMultiplier(m);
 
     const lhTimeKey = (lhDef?.slot === 'spell' && lhName) ? `${i}-spell-${lhName}` : `${i}-left`;
@@ -639,9 +636,6 @@ function refreshMember(m) {
     const nowRef2 = performance.now();
     if (skillsState.whirlwind.active && skillsState.whirlwind.actorName === m.name && nowRef2 < skillsState.whirlwind.expiresAt) {
       rhDelaySec *= skillsState.whirlwind.magnitude;
-    }
-    if (skillsState.warDance.active && nowRef2 < skillsState.warDance.expiresAt) {
-      rhDelaySec *= skillsState.warDance.magnitude;
     }
     rhDelaySec *= getAttackSpeedMultiplier(m);
 
@@ -1367,13 +1361,23 @@ export function getEffectiveStats(member) {
   return base;
 }
 
+/**
+ * Global attack-pace knob. Multiplies every party attack delay, so values > 1
+ * make all party members attack SLOWER. Default 2 (half-speed swings) keeps
+ * combat readable and leaves headroom for haste skills/magic to feel impactful.
+ * Live-tweakable from the browser console: window.PARTY_ATTACK_DELAY_SCALE = 1.5
+ *
+ * Single source of truth: this also scales per-swing stamina cost (in
+ * equipment.js) so the SP drain *rate* stays constant no matter how this is
+ * tuned — slower swings cost proportionally more SP each.
+ */
+export function getPartyAttackDelayScale() {
+  return (typeof window !== 'undefined' && window.PARTY_ATTACK_DELAY_SCALE) || 2.0;
+}
+
 /** Returns the combined attack speed multiplier from active debuffs (>1 = slower). */
 export function getAttackSpeedMultiplier(member) {
-  // Global attack-pace knob. Multiplies every party attack delay, so values > 1
-  // make all party members attack SLOWER. Default 2 (half-speed swings) keeps
-  // combat readable and leaves headroom for haste skills/magic to feel impactful.
-  // Live-tweakable from the browser console: window.PARTY_ATTACK_DELAY_SCALE = 1.5
-  let mult = (typeof window !== 'undefined' && window.PARTY_ATTACK_DELAY_SCALE) || 2.0;
+  let mult = getPartyAttackDelayScale();
   const now = performance.now();
   (member.activeDebuffs ?? []).forEach(d => {
     if (now >= d.expiresAt) return;

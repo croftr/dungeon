@@ -51,7 +51,7 @@
         "slot": "skill",
         "type": "buff",
         "icon": "/skills/whirlwind.webp",
-        "description": "Becomes a blur of motion, doubling attack speed and preventing stamina drain for 30s.",
+        "description": "Becomes a blur of motion, doubling attack speed for 60s.",
         "delay": 60,
         "value": 0,
         "weight": 0
