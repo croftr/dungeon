@@ -3,7 +3,7 @@ import { createBlobShadow } from './blob-shadow.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
 import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createIceCloud, createCrocodileSparkle, createHellSpawn, createBloodSplatter, createGreenBloodSplatter, createCrowWizardFireAoe, createCrowWizardCure, createCrowWizardFear, createElementalBurst } from './particles.js';
-import { ELEMENTS, getMonsterElementMultiplier } from './elements.js';
+import { ELEMENTS, getMonsterElementMultiplier, getMonsterAttackTypeMultiplier } from './elements.js';
 import MONSTER_FAMILIES from './data/monster-families.json';
 import { CELL, isPassable, elementFloorCellId, spawnElementFloorAt } from './map.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
@@ -192,6 +192,31 @@ function _renderHuntersEyeHud(m) {
       html += `<div class="hep-hud-resist-row">`;
       html += `<span style="color:${elemColor}">${iconHtml}${symbol} ${elemName}</span>`;
       html += `<span class="hep-hud-resist-badge" style="color:${conf.color}">${conf.label}</span>`;
+      html += `</div>`;
+    }
+  }
+
+  // Physical attack-type weakness / resistance (swipe / bash / shoot / punch).
+  // Merge family + monster-specific (monster overrides family), mirroring the
+  // elemental block above.
+  const allAtkTypes = { ...(familyDef?.attackTypeMultipliers ?? {}), ...(m.attackTypeMultipliers ?? {}) };
+  const atkEntries = Object.entries(allAtkTypes).filter(([, mult]) => mult !== 1);
+  if (atkEntries.length) {
+    const ATK_LABELS = { swipe: 'Swipe', bash: 'Bash', shoot: 'Shoot', punch: 'Punch' };
+    const atkBadge = (mult) => {
+      if (mult === 0) return { label: 'IMMUNE', color: '#9060ff' };
+      if (mult >= 2) return { label: 'VULNERABLE', color: '#ff5050' };
+      if (mult > 1) return { label: 'WEAK', color: '#ffb040' };
+      return { label: 'RESIST', color: '#60b0ff' };
+    };
+    html += `<div class="hep-hud-divider"></div>`;
+    html += `<div class="hep-hud-section-label">Physical</div>`;
+    for (const [atkType, mult] of atkEntries) {
+      const conf = atkBadge(mult);
+      const name = ATK_LABELS[atkType] ?? (atkType.charAt(0).toUpperCase() + atkType.slice(1));
+      html += `<div class="hep-hud-resist-row">`;
+      html += `<span style="color:#d8cba0">⚔ ${name}</span>`;
+      html += `<span class="hep-hud-resist-badge" style="color:${conf.color}">${conf.label} ×${mult}</span>`;
       html += `</div>`;
     }
   }
@@ -3496,6 +3521,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     berserkMultiplier: totalBerserkMult,
     warcryMultiplier: (skillsState.warcry?.active && now < skillsState.warcry.expiresAt) ? skillsState.warcry.magnitude : 1.0,
     ammoModifier: ammoDef?.damageModifier ?? null,
+    attackTypeMult: isMagic ? 1 : getMonsterAttackTypeMultiplier(m, attackType),
     damageReduction: m.damageReduction ?? 0,
     elementalBreakdown,
     spellElement,

@@ -46,6 +46,21 @@ export function getMonsterElementMultiplier(monster, element) {
   return 1;
 }
 
+// Physical attack-type (swipe / bash / shoot / punch) damage multipliers.
+// Like elemental resistances but keyed by the weapon's attackType and expressed
+// as a raw multiplier: 1 = neutral, >1 = weak (takes more), <1 = resists, 0 =
+// immune. Monster-specific overrides family. Applied to RAW damage BEFORE
+// mitigation (see calcPlayerPhysicalDamage) so a weakness can punch through flat
+// DEF instead of being eaten by the damage floor.
+export function getMonsterAttackTypeMultiplier(monster, attackType) {
+  if (!attackType) return 1;
+  const own = monster?.attackTypeMultipliers?.[attackType];
+  if (own != null) return own;
+  const fam = MONSTER_FAMILIES[monster?.family]?.attackTypeMultipliers?.[attackType];
+  if (fam != null) return fam;
+  return 1;
+}
+
 // Trap-specific variant — same lookup logic, softer multipliers.
 export function getMonsterTrapElementMultiplier(monster, element) {
   if (!element || element === 'physical') return 1;

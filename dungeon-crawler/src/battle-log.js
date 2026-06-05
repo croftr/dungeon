@@ -490,10 +490,15 @@ function _formula(e) {
     const stat = ['fireball', 'frostbolt', 'waterbolt', 'lightningbolt', 'holybolt', 'darkbolt', 'banishment', 'incinerate'].includes(e.attackType) ? 'INT' : (e.statLabel ?? 'STR');
     const ammoMod = e.ammoModifier && e.ammoModifier !== 1 ? e.ammoModifier : 1;
     const ammoLine = ammoMod !== 1 ? ` ×${ammoMod}ammo` : '';
+    // Attack-type weakness/resistance applied pre-mitigation (mirrors calc order:
+    // base → ammo → attack-type → dr → soak → def).
+    const atkMult = e.attackTypeMult && e.attackTypeMult !== 1 ? e.attackTypeMult : 1;
+    const atkLine = atkMult !== 1 ? ` ×${atkMult}${atkMult > 1 ? 'weak' : 'resist'}` : '';
     const drText = e.damageReduction ? ` ×${Math.round((1 - e.damageReduction) * 100)}%dr` : '';
     const baseSum = e.statBonus + e.weaponBase;
     const afterAmmo = ammoMod !== 1 ? Math.round(baseSum * ammoMod) : baseSum;
-    const rawBase = e.damageReduction ? Math.round(afterAmmo * (1 - e.damageReduction)) : afterAmmo;
+    const afterAtk = atkMult !== 1 ? Math.round(afterAmmo * atkMult) : afterAmmo;
+    const rawBase = e.damageReduction ? Math.round(afterAtk * (1 - e.damageReduction)) : afterAtk;
     // Multiplicative soak from VIT (physical) or RES (magic), then flat defence
     // (physical only; magic ignores defence).
     const soakLabel = e.statSoakLabel ?? 'vit';
@@ -507,7 +512,7 @@ function _formula(e) {
     const stunText = e.stunned ? ' (Stunned!)' : '';
     const poisonText = e.poisoned ? ' (Poisoned!)' : '';
     const sunderText = e.sundered ? ' (Sundered!)' : '';
-    return `(${stat}${e.statBonus}+base${e.weaponBase}${ammoLine}${drText} −${soakLabel}${soakPct}%${defStr}=${raw}${crit})${berserkText}${warcryText}${stunText}${poisonText}${sunderText}`;
+    return `(${stat}${e.statBonus}+base${e.weaponBase}${ammoLine}${atkLine}${drText} −${soakLabel}${soakPct}%${defStr}=${raw}${crit})${berserkText}${warcryText}${stunText}${poisonText}${sunderText}`;
   }
 
   // monster attack

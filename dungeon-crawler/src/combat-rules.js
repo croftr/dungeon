@@ -7,7 +7,7 @@ import RULES from './data/combat-rules.json';
 import SKILLS_DATA from './data/skills.json';
 import { getHqWeaponDamageBonus } from './crafting.js';
 import { getMonsterHitChanceReduction, getStanceDamageMultiplier, getMagicDamageMultiplier, getStanceCureHealBonus, getStanceRegenBonus, getStanceElementMultiplier } from './stance.js';
-import { getMonsterElementMultiplier } from './elements.js';
+import { getMonsterElementMultiplier, getMonsterAttackTypeMultiplier } from './elements.js';
 
 // ── Utility ───────────────────────────────────────────────────────────────────
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
@@ -269,6 +269,12 @@ export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef 
   if (ammoDef && ammoDef.damageModifier) {
     raw = Math.round(raw * ammoDef.damageModifier);
   }
+  // Attack-type weakness/resistance (swipe/bash/shoot/punch). Applied to RAW
+  // damage BEFORE all mitigation so a weakness can break through the flat-DEF
+  // floor rather than being swallowed by it (a ×1.5 on a hit already floored to
+  // 1 would do nothing). Monster-specific overrides family; default 1.0.
+  const atkTypeMult = getMonsterAttackTypeMultiplier(monster, weaponDef?.attackType);
+  if (atkTypeMult !== 1) raw = Math.round(raw * atkTypeMult);
   // damageReduction is physical-only — it represents armour plating that turns
   // blades and arrows aside, not magical wards. Magic attacks ignore it.
   const dr = monster.damageReduction ?? 0;
