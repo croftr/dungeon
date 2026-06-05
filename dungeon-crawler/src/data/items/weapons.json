@@ -498,7 +498,13 @@
         "icon": "/icons/weapons/dwarven_axe.webp",
         "description": "A mastercrafted battle axe of dwarven design. Its heavy iron head is engraved with ancient runes of power.",
         "value": 300,
-        "weight": 3.5
+        "weight": 3.5,
+        "weaponSkill": {
+            "name": "Sundering Rend",
+            "cooldownMs": 60000,
+            "guaranteedHit": true,
+            "guaranteedStun": true
+        }
     },
     {
         "name": "Ironpeak Battleaxe",
