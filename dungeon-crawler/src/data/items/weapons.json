@@ -282,7 +282,17 @@
         "icon": "/icons/weapons/flame_dagger.webp",
         "description": "A razor-sharp dagger forged in the heart of a volcano. It leaves a trail of embers with every strike.",
         "value": 450,
-        "weight": 0.5
+        "weight": 0.5,
+        "weaponSkill": {
+            "name": "Searing Flurry",
+            "cooldownMs": 60000,
+            "hits": 2,
+            "guaranteedCrit": true,
+            "vfx": "fire-line",
+            "elementalDamage": {
+                "fire": 12
+            }
+        }
     },
     {
         "name": "Ice Dagger",
@@ -303,7 +313,17 @@
         "icon": "/icons/weapons/ice_dagger.webp",
         "description": "A shard of magically hardened ice, sharpened to a lethal edge.",
         "value": 450,
-        "weight": 0.5
+        "weight": 0.5,
+        "weaponSkill": {
+            "name": "Frostbite Flurry",
+            "cooldownMs": 60000,
+            "hits": 2,
+            "guaranteedCrit": true,
+            "vfx": "ice-strike",
+            "elementalDamage": {
+                "ice": 12
+            }
+        }
     },
     {
         "name": "Lightning Dagger",
@@ -324,7 +344,17 @@
         "icon": "/icons/weapons/lightning_dagger.webp",
         "description": "A razor-sharp dagger crackling with electricity. It leaves a trail of sparks with every strike.",
         "value": 450,
-        "weight": 0.5
+        "weight": 0.5,
+        "weaponSkill": {
+            "name": "Storm Flurry",
+            "cooldownMs": 60000,
+            "hits": 2,
+            "guaranteedCrit": true,
+            "vfx": "lightning-strike",
+            "elementalDamage": {
+                "lightning": 12
+            }
+        }
     },
     {
         "name": "Water Dagger",
@@ -345,7 +375,17 @@
         "icon": "/icons/weapons/water_dagger.webp",
         "description": "A blade of condensed magical water, holding a flowing, lethal edge.",
         "value": 450,
-        "weight": 0.5
+        "weight": 0.5,
+        "weaponSkill": {
+            "name": "Torrent Flurry",
+            "cooldownMs": 60000,
+            "hits": 2,
+            "guaranteedCrit": true,
+            "vfx": "water-strike",
+            "elementalDamage": {
+                "water": 12
+            }
+        }
     },
     {
         "name": "Holy Dagger",
@@ -366,7 +406,17 @@
         "icon": "/icons/weapons/holy_dagger.webp",
         "description": "A razor-sharp dagger blessed with holy golden light, leaving a trail of sparks with every strike.",
         "value": 450,
-        "weight": 0.5
+        "weight": 0.5,
+        "weaponSkill": {
+            "name": "Radiant Flurry",
+            "cooldownMs": 60000,
+            "hits": 2,
+            "guaranteedCrit": true,
+            "vfx": "holy-strike",
+            "elementalDamage": {
+                "holy": 12
+            }
+        }
     },
     {
         "name": "Dark Dagger",
@@ -387,7 +437,17 @@
         "icon": "/icons/weapons/dark_dagger.webp",
         "description": "A blade of dark obsidian, wreathed in a sinister, shadowy shroud.",
         "value": 450,
-        "weight": 0.5
+        "weight": 0.5,
+        "weaponSkill": {
+            "name": "Shadow Flurry",
+            "cooldownMs": 60000,
+            "hits": 2,
+            "guaranteedCrit": true,
+            "vfx": "dark-strike",
+            "elementalDamage": {
+                "dark": 12
+            }
+        }
     },
     {
         "name": "Sword",
@@ -474,7 +534,17 @@
         "icon": "/icons/weapons/flame_axe.webp",
         "description": "A heavy battle axe that glows with internal heat. Its blade is perpetually wreathed in flames.",
         "value": 650,
-        "weight": 3
+        "weight": 3,
+        "weaponSkill": {
+            "name": "Molten Rend",
+            "cooldownMs": 60000,
+            "guaranteedHit": true,
+            "guaranteedStun": true,
+            "vfx": "fire-line",
+            "elementalDamage": {
+                "fire": 22
+            }
+        }
     },
     {
         "name": "Ice Axe",
@@ -495,7 +565,17 @@
         "icon": "/icons/weapons/ice_axe.webp",
         "description": "A battle axe forged from eternal ice. Its blade is freezing to the touch.",
         "value": 650,
-        "weight": 3
+        "weight": 3,
+        "weaponSkill": {
+            "name": "Glacial Rend",
+            "cooldownMs": 60000,
+            "guaranteedHit": true,
+            "guaranteedStun": true,
+            "vfx": "ice-strike",
+            "elementalDamage": {
+                "ice": 22
+            }
+        }
     },
     {
         "name": "Oak Staff",
@@ -833,7 +913,12 @@
         "icon": "/icons/weapons/greatsword.webp",
         "description": "A massive two-handed blade that cleaves through enemies in a single arc.",
         "value": 450,
-        "weight": 5.5
+        "weight": 5.5,
+        "weaponSkill": {
+            "name": "Twin Slash",
+            "cooldownMs": 60000,
+            "hits": 2
+        }
     },
     {
         "name": "Tridant",
@@ -892,7 +977,12 @@
         "icon": "/icons/weapons/war_hammer.webp",
         "description": "A two-handed war hammer. Slow to swing but crushes stone and bone alike.",
         "value": 390,
-        "weight": 7
+        "weight": 7,
+        "weaponSkill": {
+            "name": "Double Smash",
+            "cooldownMs": 60000,
+            "hits": 2
+        }
     },
     {
         "name": "Storm-Reaver Greataxe",
@@ -950,7 +1040,12 @@
         "icon": "/icons/weapons/flame_greataxe.webp",
         "description": "A massive two-handed axe that burns with an inextinguishable flame. Its heavy head is wreathed in fire.",
         "value": 1200,
-        "weight": 6.5
+        "weight": 6.5,
+        "weaponSkill": {
+            "name": "Flaming Rampage",
+            "cooldownMs": 60000,
+            "hits": 3
+        }
     },
     {
         "name": "Ice Greataxe",
@@ -971,6 +1066,11 @@
         "icon": "/icons/weapons/ice_greataxe.webp",
         "description": "A massive two-handed axe carved from a single block of magical ice. It emits a constant aura of frost.",
         "value": 1200,
-        "weight": 6.5
+        "weight": 6.5,
+        "weaponSkill": {
+            "name": "Frozen Rampage",
+            "cooldownMs": 60000,
+            "hits": 3
+        }
     }
 ]

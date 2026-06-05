@@ -167,6 +167,12 @@ function _dispatchWeaponSkillVFX(vfxId, target = null) {
     case 'water-strike':
       triggerWaterStrikeEffect(dist);
       break;
+    case 'ice-strike':
+      triggerFrostboltEffect(dist);
+      break;
+    case 'dark-strike':
+      triggerDarkboltEffect(dist);
+      break;
     case 'fire-line':
       triggerIncinerateEffect();
       break;
@@ -5561,8 +5567,8 @@ export function useWeaponSkill(memberIndex, hand) {
 
   breakPartyUnseen(`${m.name} unleashes ${ws.name} — the cloak of shadow disperses!`);
 
-  // Build the definition used for this single attack. Everything is sourced
-  // from the JSON so numbers/effects can be tweaked without code changes.
+  // Build the definition used for this attack. Everything is sourced from the
+  // JSON so numbers/effects can be tweaked without code changes.
   let skillDef;
   if (spellSource) {
     // Spell-based: cast the spell exactly as this member would, but free.
@@ -5571,7 +5577,7 @@ export function useWeaponSkill(memberIndex, hand) {
     skillDef = { ...spellSource, mpCost: 0 };
   } else {
     // Elemental-rider: the weapon's normal stats plus the skill's extra
-    // elemental damage and any guaranteed-stun flag.
+    // elemental damage and any guaranteed-stun / guaranteed-crit flags.
     const mergedElemental = { ...(def.elementalDamage ?? {}) };
     for (const [elemId, amount] of Object.entries(ws.elementalDamage ?? {})) {
       mergedElemental[elemId] = (mergedElemental[elemId] ?? 0) + amount;
@@ -5580,34 +5586,62 @@ export function useWeaponSkill(memberIndex, hand) {
       ...def,
       elementalDamage: mergedElemental,
       guaranteedStun: ws.guaranteedStun ?? def.guaranteedStun ?? false,
+      guaranteedCrit: ws.guaranteedCrit ?? def.guaranteedCrit ?? false,
+      guaranteedHit: ws.guaranteedHit ?? def.guaranteedHit ?? false,
     };
   }
 
-  // Play the swing/cast animation + sound, then the matching VFX. Spell-based
-  // skills reuse the spell's own VFX dispatcher; elemental skills use theirs.
   const ammoItem = m.equipment?.ammo;
   const ammoDef = ammoItem ? getItemDef(ammoItem.name) : null;
   const swipeElement = getPrimaryAttackElement(skillDef, ammoDef);
-  // `hideAttackAnim` lets a skill replace the weapon's normal swing/shoot
-  // animation entirely with its own VFX (e.g. a fire line instead of an arrow).
-  if (!ws.hideAttackAnim) playAction(attackType, hand, memberIndex, swipeElement);
   // Sound: an explicit `sound` always wins. Otherwise rider-style skills fall
   // back to the generic weapon-skill sting, while spell-based skills keep the
   // spell's own native sound (already played by playAction) — no default sting.
   const wsSound = ws.sound ?? (spellSource ? null : DEFAULT_WEAPON_SKILL_SOUND);
-  if (wsSound) playSoundByUrl(wsSound);
-  if (spellSource) {
-    _dispatchSpellVFX(attackType, target);
-  } else {
-    _dispatchWeaponSkillVFX(ws.vfx, target);
-  }
 
-  if (!target) {
+  // Spell-based skills are always a single cast — keep the original flow.
+  if (spellSource) {
+    if (!ws.hideAttackAnim) playAction(attackType, hand, memberIndex, swipeElement);
+    if (wsSound) playSoundByUrl(wsSound);
+    _dispatchSpellVFX(attackType, target);
+    if (!target) return;
+    const result = attackMonster(target.id, m, skillDef, attackType, ammoDef, !!item?.hq);
+    _logWeaponSkillHit(m, ws, attackType, result, target, false);
+    _logAppliedEffects(m.name, result.monsterName || target.name, result.stunned, result.appliedEffects);
     return;
   }
 
-  const result = attackMonster(target.id, m, skillDef, attackType, ammoDef, !!item?.hq);
+  // Rider-style skills fire one augmented swing per hit. `ws.hits` > 1 staggers
+  // additional swings (greataxe triple-attack, dagger flurry); each plays its
+  // own swing animation + sound + VFX and retargets if the current foe dies.
+  const performStrike = (strikeTarget) => {
+    // `hideAttackAnim` lets a skill replace the weapon's normal swing with its
+    // own VFX (e.g. a fire line instead of an arrow).
+    if (!ws.hideAttackAnim) playAction(attackType, hand, memberIndex, swipeElement);
+    if (wsSound) playSoundByUrl(wsSound);
+    _dispatchWeaponSkillVFX(ws.vfx, strikeTarget);
+    if (!strikeTarget) return;
+    const result = attackMonster(strikeTarget.id, m, skillDef, attackType, ammoDef, !!item?.hq);
+    _logWeaponSkillHit(m, ws, attackType, result, strikeTarget, true);
+    _logAppliedEffects(m.name, result.monsterName || strikeTarget.name, result.stunned, result.appliedEffects);
+  };
 
+  const hits = Math.max(1, ws.hits ?? 1);
+  // Match the double-attack stagger so each swing visually completes first.
+  const interHitDelay = attackType === ACTIONS.SHOOT ? 150 : 450;
+  performStrike(target);
+  for (let i = 1; i < hits; i++) {
+    setTimeout(() => {
+      let t = target;
+      if (!t || !t.alive) t = _closestMonsterInFront(isRanged ? 4 : 1);
+      performStrike(t);
+    }, interHitDelay * i);
+  }
+}
+
+// Emits the battle-log entry for a single weapon-skill hit. `isRider` tags the
+// hit as physical (Attacks filter); spell-based skills fall through to Magic.
+function _logWeaponSkillHit(m, ws, attackType, result, target, isRider) {
   addLogEntry({
     time: Date.now(),
     actor: 'player',
@@ -5635,15 +5669,9 @@ export function useWeaponSkill(memberIndex, hand) {
     warcryMultiplier: result.formula?.warcryMultiplier ?? 1.0,
     elementalBreakdown: result.formula?.elementalBreakdown ?? null,
     spellElement: result.formula?.spellElement ?? null,
-    // Show the skill name as the action label for both kinds. Rider-style skills
-    // are physical, so tag them to stay under the Attacks filter; spell-based
-    // skills (banishment/fireball) are INT-scaled magic and fall through to the
-    // Magic filter via their attackType.
     specialName: ws.name,
-    weaponSkill: !spellSource,
+    weaponSkill: isRider,
   });
-
-  _logAppliedEffects(m.name, result.monsterName || target.name, result.stunned, result.appliedEffects);
 }
 
 // ─────────────────────────────────────────────

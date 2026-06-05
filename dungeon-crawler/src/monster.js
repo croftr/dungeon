@@ -3380,6 +3380,10 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   if (ts?.active && ts.actorName === character.name && isRanged && now < ts.expiresAt) {
     hitChance = 1.0;
   }
+  // Weapon skills flagged guaranteedHit (e.g. axe Rend) never miss.
+  if (weaponDef?.guaranteedHit) {
+    hitChance = 1.0;
+  }
 
   if (Math.random() >= hitChance) {
     recordAttack(character.name, false);
@@ -3422,7 +3426,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     return CRIT_CHANCE + stanceCrit + dexCrit + spellCrit + equipCrit + equipCritBonus;
   }
 
-  const isCrit = Math.random() < getTotalCritChance(character, isMagic);
+  const isCrit = weaponDef?.guaranteedCrit ? true : Math.random() < getTotalCritChance(character, isMagic);
   let damage = isCrit ? Math.round(preCritDamage * CRIT_MULTIPLIER) : preCritDamage;
 
   // Runic Scholar — doubles final spell damage after ALL other modifiers (including crit)
