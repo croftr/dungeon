@@ -346,6 +346,10 @@
       {
         "item": "Iron Ore",
         "chance": 0.3
+      },
+      {
+        "item": "Ice Staff",
+        "chance": 0.01
       }
     ]
   },
@@ -970,6 +974,12 @@
       "intelligence": 8,
       "resilience": 35
     },
+    "elementalResistances": {
+      "fire": "resist",
+      "lightning": "resist",
+      "holy": "resist",
+      "dark": "resist"
+    },
     "drops": [
       {
         "item": "Life Essence",
@@ -1368,6 +1378,10 @@
       {
         "item": "Crow Key",
         "chance": 1
+      },
+      {
+        "item": "Flame Staff",
+        "chance": 0.5
       },
       {
         "item": {

@@ -234,6 +234,25 @@ function getWeaponStatBonus(character, weaponDef) {
 }
 
 export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef = null, weaponIsHQ = false) {
+  return calcPlayerPhysicalDamageBreakdown(character, weaponDef, monster, ammoDef, weaponIsHQ).final;
+}
+
+/**
+ * Full component breakdown of a physical attack. `calcPlayerPhysicalDamage` is a
+ * thin wrapper that returns `.final`. The battle log uses the rest so the
+ * displayed `=N` reconciles with the actual hit — historically the log
+ * re-derived the math from only baseDamage + stat bonus and silently dropped HQ,
+ * passive, family, and bow bonuses (and so showed `=1` on a hit that really
+ * landed for 18). Single source of truth: changing the formula here updates both
+ * the damage and its breakdown.
+ *
+ * @returns {{final:number, physicalFinal:number, elementalTotal:number,
+ *   weaponBase:number, statBonus:number, hqBonus:number, passiveBonus:number,
+ *   familyBonus:number, bowBonus:number, flatBonus:number, ammoModifier:number,
+ *   attackTypeMult:number, damageReduction:number, vitality:number,
+ *   defence:number, stanceMult:number}}
+ */
+export function calcPlayerPhysicalDamageBreakdown(character, weaponDef, monster, ammoDef = null, weaponIsHQ = false) {
   const statBonus = getWeaponStatBonus(character, weaponDef);
   let passiveBonus = 0;
   if (character.skills) {
@@ -265,26 +284,29 @@ export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef 
 
   const hqBonus = weaponIsHQ ? getHqWeaponDamageBonus(weaponDef) : 0;
   const bowBonus = (weaponDef?.weaponType === 'bow' || weaponDef?.weaponType === 'crossbow') ? (character.skillBonuses?.['bowDamage'] ?? 0) : 0;
-  let raw = (weaponDef?.baseDamage ?? 0) + hqBonus + statBonus + passiveBonus + familyBonus + bowBonus;
-  if (ammoDef && ammoDef.damageModifier) {
-    raw = Math.round(raw * ammoDef.damageModifier);
+  const weaponBase = weaponDef?.baseDamage ?? 0;
+  let raw = weaponBase + hqBonus + statBonus + passiveBonus + familyBonus + bowBonus;
+  const ammoModifier = (ammoDef && ammoDef.damageModifier) ? ammoDef.damageModifier : 1;
+  if (ammoModifier !== 1) {
+    raw = Math.round(raw * ammoModifier);
   }
   // Attack-type weakness/resistance (swipe/bash/shoot/punch). Applied to RAW
   // damage BEFORE all mitigation so a weakness can break through the flat-DEF
   // floor rather than being swallowed by it (a ×1.5 on a hit already floored to
   // 1 would do nothing). Monster-specific overrides family; default 1.0.
-  const atkTypeMult = getMonsterAttackTypeMultiplier(monster, weaponDef?.attackType);
-  if (atkTypeMult !== 1) raw = Math.round(raw * atkTypeMult);
+  const attackTypeMult = getMonsterAttackTypeMultiplier(monster, weaponDef?.attackType);
+  if (attackTypeMult !== 1) raw = Math.round(raw * attackTypeMult);
   // damageReduction is physical-only — it represents armour plating that turns
   // blades and arrows aside, not magical wards. Magic attacks ignore it.
-  const dr = monster.damageReduction ?? 0;
-  if (dr) raw = Math.round(raw * (1 - dr));
+  const damageReduction = monster.damageReduction ?? 0;
+  if (damageReduction) raw = Math.round(raw * (1 - damageReduction));
   // Physical mitigation: VITALITY soaks via the multiplicative curve
   // `K / (K + VIT)`. Resilience is reserved for magical wards (see
   // calcPlayerMagicDamage). Defence subtracts flat after the curve.
   const vit = monster.stats?.vitality ?? 0;
   const afterCurve = Math.round(raw * MITIGATION_K / (MITIGATION_K + vit));
-  const afterMit = Math.max(1, afterCurve - (monster.defence ?? 0));
+  const defence = monster.defence ?? 0;
+  const afterMit = Math.max(1, afterCurve - defence);
   const stanceMult = getStanceDamageMultiplier(character, monster);
   const physicalFinal = stanceMult === 1 ? afterMit : Math.max(1, Math.round(afterMit * stanceMult));
 
@@ -293,7 +315,28 @@ export function calcPlayerPhysicalDamage(character, weaponDef, monster, ammoDef 
   // (optionally) the attacker's stance element multiplier. Riders ignore physical
   // mitigation/defence — they're a separate damage stream.
   const { total: elementalTotal } = getElementalRiderBreakdown(character, monster, weaponDef, ammoDef);
-  return Math.max(1, physicalFinal + elementalTotal);
+
+  return {
+    final: Math.max(1, physicalFinal + elementalTotal),
+    physicalFinal,
+    elementalTotal,
+    weaponBase,
+    statBonus,
+    hqBonus,
+    passiveBonus,
+    familyBonus,
+    bowBonus,
+    // Flat additions to raw that the log used to ignore. familyBonus is broken
+    // out separately (it's the interesting "vs this monster" number); the rest
+    // are lumped as a single "+bns".
+    flatBonus: hqBonus + passiveBonus + bowBonus,
+    ammoModifier,
+    attackTypeMult,
+    damageReduction,
+    vitality: vit,
+    defence,
+    stanceMult,
+  };
 }
 
 /**

@@ -526,6 +526,62 @@
         }
     },
     {
+        "name": "Flame Staff",
+        "slot": "hand",
+        "rightHandOnly": true,
+        "attackType": "bash",
+        "weaponType": "staff",
+        "staminaDrain": 1,
+        "baseDamage": 1,
+        "delay": 4,
+        "statWeights": {
+            "intelligence": 1
+        },
+        "icon": "/icons/weapons/flame_staff.webp",
+        "description": "A gnarled wooden staff warm to the touch. It allows wizards to channel a Fireball.",
+        "value": 54,
+        "weight": 1.5,
+        "elementalDamage": {
+            "fire": 7
+        },
+        "statBonuses": {
+            "mp": 2
+        },
+        "weaponSkill": {
+            "name": "Fireball",
+            "cooldownMs": 60000,
+            "spell": "Fireball"
+        }
+    },
+    {
+        "name": "Ice Staff",
+        "slot": "hand",
+        "rightHandOnly": true,
+        "attackType": "bash",
+        "weaponType": "staff",
+        "staminaDrain": 1,
+        "baseDamage": 1,
+        "delay": 4,
+        "statWeights": {
+            "intelligence": 1
+        },
+        "icon": "/icons/weapons/ice_staff.webp",
+        "description": "A gnarled wooden staff cold to the touch. It allows wizards to channel a Frostbolt.",
+        "value": 54,
+        "weight": 1.5,
+        "elementalDamage": {
+            "ice": 7
+        },
+        "statBonuses": {
+            "mp": 2
+        },
+        "weaponSkill": {
+            "name": "Frostbolt",
+            "cooldownMs": 60000,
+            "spell": "Frostbolt"
+        }
+    },
+    {
         "name": "Aethelgard Grand Staff",
         "slot": "hand",
         "rightHandOnly": true,

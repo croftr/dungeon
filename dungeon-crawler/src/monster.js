@@ -3,7 +3,7 @@ import { createBlobShadow } from './blob-shadow.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
 import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createIceCloud, createCrocodileSparkle, createHellSpawn, createBloodSplatter, createGreenBloodSplatter, createCrowWizardFireAoe, createCrowWizardCure, createCrowWizardFear, createElementalBurst } from './particles.js';
-import { ELEMENTS, getMonsterElementMultiplier, getMonsterAttackTypeMultiplier } from './elements.js';
+import { ELEMENTS, getMonsterElementMultiplier } from './elements.js';
 import MONSTER_FAMILIES from './data/monster-families.json';
 import { CELL, isPassable, elementFloorCellId, spawnElementFloorAt } from './map.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
@@ -14,7 +14,7 @@ import { showMessage } from './minimap.js';
 import { getPoisonTickBonus, getReflectDamage, getCritChanceBonus, getStanceBerserkMultiplier, getStanceLifestealAmount } from './stance.js';
 import {
   playerHitChance, playerSpellHitChance, monsterHitChance,
-  calcPlayerPhysicalDamage, calcPlayerMagicDamage, calcMonsterDamage,
+  calcPlayerPhysicalDamage, calcPlayerPhysicalDamageBreakdown, calcPlayerMagicDamage, calcMonsterDamage,
   getElementalRiderBreakdown,
   calcOnHitChance,
   pickRandomFrontLineTarget, pickDirectionalTarget,
@@ -3403,9 +3403,12 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     stats: { ...m.stats, resilience: effectiveResilience }
   };
 
+  const physBreakdown = isMagic
+    ? null
+    : calcPlayerPhysicalDamageBreakdown(effChar, weaponDef, mSunder, ammoDef, weaponIsHQ);
   const preCritDamage = isMagic
     ? calcPlayerMagicDamage(effChar, weaponDef, mSunder, weaponIsHQ)
-    : calcPlayerPhysicalDamage(effChar, weaponDef, mSunder, ammoDef, weaponIsHQ);
+    : physBreakdown.final;
 
   // 5% base crit chance — triples the calculated damage. DEX over 10 chips in a
   // small additional bonus (capped). Spells additionally pick up any passive
@@ -3521,7 +3524,12 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     berserkMultiplier: totalBerserkMult,
     warcryMultiplier: (skillsState.warcry?.active && now < skillsState.warcry.expiresAt) ? skillsState.warcry.magnitude : 1.0,
     ammoModifier: ammoDef?.damageModifier ?? null,
-    attackTypeMult: isMagic ? 1 : getMonsterAttackTypeMultiplier(m, attackType),
+    attackTypeMult: isMagic ? 1 : (physBreakdown?.attackTypeMult ?? 1),
+    // Flat additions to raw damage the log used to omit (so it could show =1 on a
+    // hit that really landed for 18). familyBonus = "vs this monster family"
+    // bonus; flatBonus = HQ + weapon-passive + bow-damage bonuses lumped.
+    familyBonus: isMagic ? 0 : (physBreakdown?.familyBonus ?? 0),
+    flatBonus: isMagic ? 0 : (physBreakdown?.flatBonus ?? 0),
     damageReduction: m.damageReduction ?? 0,
     elementalBreakdown,
     spellElement,

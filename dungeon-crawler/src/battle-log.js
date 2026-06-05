@@ -23,6 +23,20 @@ function _elemBadge(elementId, value, signed = true) {
   return `<span class="bl-elem" style="color:${def.color};" title="${def.name}">${def.symbol}${num}</span>`;
 }
 
+// Plain-text version of a player attack's elemental rider breakdown, for the CSV
+// "Details" column. The live log shows these riders as coloured badges in the
+// damage cell, but the CSV only captures `_formula()` (the physical line), so a
+// physical hit floored to `=1` with a +17 water rider exported as a bare "=1" —
+// making elemental gear look like it dealt nothing. Appending this keeps the
+// export honest: "…=1 +17 Water". Player-only: monster riders are already inside
+// `_formula()` (as badge text), so appending there would double-count.
+function _elementalTextSuffix(e) {
+  if (!e.elementalBreakdown) return '';
+  const parts = Object.entries(e.elementalBreakdown).filter(([, v]) => v);
+  if (!parts.length) return '';
+  return ' ' + parts.map(([id, v]) => `+${Math.round(v)} ${ELEMENTS[id]?.name ?? id}`).join(' ');
+}
+
 const _log = [];
 let _activeFilter = 'all';
 
@@ -196,7 +210,8 @@ function _downloadCsv() {
         result = e.crit ? 'Crit' : 'Hit';
         damage = e.finalDamage != null ? Math.round(e.finalDamage) : '';
       }
-      details = _formula(e).replace(/<[^>]*>/g, '').replace(/"/g, '""');
+      const elemSuffix = e.actor === 'player' ? _elementalTextSuffix(e) : '';
+      details = (_formula(e) + elemSuffix).replace(/<[^>]*>/g, '').replace(/"/g, '""');
     }
 
     return [
@@ -495,7 +510,14 @@ function _formula(e) {
     const atkMult = e.attackTypeMult && e.attackTypeMult !== 1 ? e.attackTypeMult : 1;
     const atkLine = atkMult !== 1 ? ` ×${atkMult}${atkMult > 1 ? 'weak' : 'resist'}` : '';
     const drText = e.damageReduction ? ` ×${Math.round((1 - e.damageReduction) * 100)}%dr` : '';
-    const baseSum = e.statBonus + e.weaponBase;
+    // Flat additions to raw that used to be missing from this breakdown (caused
+    // "=1" on hits that really landed for much more). familyBonus shown as
+    // "+fam", the rest (HQ/passive/bow) lumped as "+bns".
+    const famBonus = e.familyBonus ?? 0;
+    const flatBonus = e.flatBonus ?? 0;
+    const famText = famBonus ? `+fam${famBonus}` : '';
+    const flatText = flatBonus ? `+bns${flatBonus}` : '';
+    const baseSum = e.statBonus + e.weaponBase + famBonus + flatBonus;
     const afterAmmo = ammoMod !== 1 ? Math.round(baseSum * ammoMod) : baseSum;
     const afterAtk = atkMult !== 1 ? Math.round(afterAmmo * atkMult) : afterAmmo;
     const rawBase = e.damageReduction ? Math.round(afterAtk * (1 - e.damageReduction)) : afterAtk;
@@ -512,7 +534,7 @@ function _formula(e) {
     const stunText = e.stunned ? ' (Stunned!)' : '';
     const poisonText = e.poisoned ? ' (Poisoned!)' : '';
     const sunderText = e.sundered ? ' (Sundered!)' : '';
-    return `(${stat}${e.statBonus}+base${e.weaponBase}${ammoLine}${atkLine}${drText} −${soakLabel}${soakPct}%${defStr}=${raw}${crit})${berserkText}${warcryText}${stunText}${poisonText}${sunderText}`;
+    return `(${stat}${e.statBonus}+base${e.weaponBase}${famText}${flatText}${ammoLine}${atkLine}${drText} −${soakLabel}${soakPct}%${defStr}=${raw}${crit})${berserkText}${warcryText}${stunText}${poisonText}${sunderText}`;
   }
 
   // monster attack

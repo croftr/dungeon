@@ -52,7 +52,8 @@ export function spawnLevel3Objects(ctx) {
     addChest(group, loader, 15, 12, -Math.PI / 2, 0.7, [
         "Flame Axe",
         "Flame Dagger",
-        "Flame Arrows"
+        "Flame Arrows",
+        "Flame Staff",
     ]);
 
     // Against the east wall of start chamber (row 27, col 12)

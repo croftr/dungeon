@@ -63,6 +63,7 @@ export function spawnLevel2Objects(ctx) {
         "Ice Dagger",
         "Ice Greataxe",
         "Ice Arrows",
+        "Ice Staff",
         "Trapper's Manual"
     ]);
 
