@@ -693,6 +693,11 @@
             "hp": 5,
             "mp": 2,
             "vitality": 1
+        },
+        "weaponSkill": {
+            "name": "Shell",
+            "cooldownMs": 60000,
+            "spell": "Shell"
         }
     },
     {

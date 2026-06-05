@@ -31,7 +31,7 @@ export function spawnLevel0Objects(ctx) {
     // ── Starter Stash in the starter room ─────────────────────────────────────────────
     addChest(group, loader, 13.4, 10, Math.PI / 2, -0.1, [
         { name: 'Gold Coins', quantity: 10000 },
-        'Potion of Unseen', 'Potion of Unseen', "Elixir of Rage", "Elixir of Rage",
+        'Potion of Unseen', 'Potion of Unseen', "Elixir of Rage", "Elixir of Rage", "Ogre Head Orb",
         "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Elixir of Enlightenment",
         "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence",
         "Tome of the Viperseeker", "Elven Dagger", "Warden's Shield", "Oak Staff", "Flame Staff", "Ice Staff", "Longbow", "Flame Arrows",

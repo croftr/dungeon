@@ -4677,13 +4677,15 @@ function _ptmOnContextmenu(e) {
 
 /** Dispatcher for party-wide spells — no target picker, applies to all living members. */
 function _executePartySpell(caster, casterIndex, hand, spellDef) {
-  if (caster.mp < spellDef.mpCost) {
-    showMessage(`${caster.name} does not have enough mana!`);
-    return;
+  const isWS = spellDef.isWeaponSkill;
+  if (!isWS) {
+    if (caster.mp < spellDef.mpCost) {
+      showMessage(`${caster.name} does not have enough mana!`);
+      return;
+    }
+    setMp(caster.id, caster.mp - spellDef.mpCost);
+    lastAttackTimes[`${casterIndex}-spell-${spellDef.name}`] = performance.now();
   }
-  setMp(caster.id, caster.mp - spellDef.mpCost);
-
-  lastAttackTimes[`${casterIndex}-spell-${spellDef.name}`] = performance.now();
 
   if (hand.startsWith('skill')) {
     const cd = (spellDef.delay ?? 15) * 1000 * getSpellCooldownMultiplier(caster);
@@ -4798,13 +4800,15 @@ function _executeResistPoison(caster, spellDef) {
  * resistance roll using spellDef.hitChance.
  */
 function _executeAoEDebuffSpell(caster, casterIndex, hand, spellDef) {
-  if (caster.mp < spellDef.mpCost) {
-    showMessage(`${caster.name} does not have enough mana!`);
-    return;
+  const isWS = spellDef.isWeaponSkill;
+  if (!isWS) {
+    if (caster.mp < spellDef.mpCost) {
+      showMessage(`${caster.name} does not have enough mana!`);
+      return;
+    }
+    setMp(caster.id, caster.mp - spellDef.mpCost);
+    lastAttackTimes[`${casterIndex}-spell-${spellDef.name}`] = performance.now();
   }
-  setMp(caster.id, caster.mp - spellDef.mpCost);
-
-  lastAttackTimes[`${casterIndex}-spell-${spellDef.name}`] = performance.now();
 
   if (hand.startsWith('skill')) {
     const cd = (spellDef.delay ?? 15) * 1000 * getSpellCooldownMultiplier(caster);
@@ -4859,13 +4863,15 @@ function _executeAoEDebuffSpell(caster, casterIndex, hand, spellDef) {
 
 /** Dispatcher for line-of-sight AoE spells (e.g. Incinerate). */
 function _executeLineSpell(caster, casterIndex, hand, spellDef) {
-  if (caster.mp < spellDef.mpCost) {
-    showMessage(`${caster.name} does not have enough mana!`);
-    return;
+  const isWS = spellDef.isWeaponSkill;
+  if (!isWS) {
+    if (caster.mp < spellDef.mpCost) {
+      showMessage(`${caster.name} does not have enough mana!`);
+      return;
+    }
+    setMp(caster.id, caster.mp - spellDef.mpCost);
+    lastAttackTimes[`${casterIndex}-spell-${spellDef.name}`] = performance.now();
   }
-  setMp(caster.id, caster.mp - spellDef.mpCost);
-
-  lastAttackTimes[`${casterIndex}-spell-${spellDef.name}`] = performance.now();
 
   if (hand.startsWith('skill')) {
     const cd = (spellDef.delay ?? 15) * 1000 * getSpellCooldownMultiplier(caster);
@@ -4918,16 +4924,19 @@ function _executeLineSpell(caster, casterIndex, hand, spellDef) {
 
 /** Dispatcher for party-member targeted spells — routes to the correct handler. */
 function _executePartyMemberSpell(caster, casterIndex, hand, spellDef, target) {
-  // MP check (deducted here, after the player has confirmed their target choice)
-  if (caster.mp < spellDef.mpCost) {
-    showMessage(`${caster.name} does not have enough mana!`);
-    return;
-  }
-  setMp(caster.id, caster.mp - spellDef.mpCost);
+  const isWS = spellDef.isWeaponSkill;
+  if (!isWS) {
+    // MP check (deducted here, after the player has confirmed their target choice)
+    if (caster.mp < spellDef.mpCost) {
+      showMessage(`${caster.name} does not have enough mana!`);
+      return;
+    }
+    setMp(caster.id, caster.mp - spellDef.mpCost);
 
-  // Record cooldown so the slot greys out normally.
-  // Use a per-member, per-spell-name key so the same spell on cooldown blocks all slots it's in.
-  lastAttackTimes[`${casterIndex}-spell-${spellDef.name}`] = performance.now();
+    // Record cooldown so the slot greys out normally.
+    // Use a per-member, per-spell-name key so the same spell on cooldown blocks all slots it's in.
+    lastAttackTimes[`${casterIndex}-spell-${spellDef.name}`] = performance.now();
+  }
 
   if (hand.startsWith('skill')) {
     const cd = (spellDef.delay ?? 15) * 1000 * getSpellCooldownMultiplier(caster);
@@ -5502,6 +5511,43 @@ export function useWeaponSkill(memberIndex, hand) {
   // Ranged attack types (incl. damage spells) reach the back rows; melee skills
   // require a front-row position (or a stepped-up back-row member).
   const isRanged = attackType === ACTIONS.SHOOT || attackType === ACTIONS.FIREBALL || attackType === ACTIONS.FROSTBOLT || attackType === ACTIONS.WATERBOLT || attackType === ACTIONS.LIGHTNINGBOLT || attackType === ACTIONS.HOLYBOLT || attackType === ACTIONS.DARKBOLT || attackType === ACTIONS.BANISHMENT || attackType === 'incinerate';
+  
+  if (spellSource) {
+    const skillDef = { ...spellSource, mpCost: 0, isWeaponSkill: true };
+
+    if (spellSource.target === 'party') {
+      lastAttackTimes[cdKey] = now;
+      refreshPartyCards();
+      breakPartyUnseen(`${m.name} unleashes ${ws.name} — the cloak of shadow disperses!`);
+      _executePartySpell(m, memberIndex, hand, skillDef);
+      return;
+    }
+
+    if (spellSource.target === 'party-member') {
+      lastAttackTimes[cdKey] = now;
+      refreshPartyCards();
+      breakPartyUnseen(`${m.name} unleashes ${ws.name} — the cloak of shadow disperses!`);
+      _enterPartyTargetMode(m, memberIndex, hand, skillDef);
+      return;
+    }
+
+    if (spellSource.target === 'monsters-aoe') {
+      lastAttackTimes[cdKey] = now;
+      refreshPartyCards();
+      breakPartyUnseen(`${m.name} unleashes ${ws.name} — the cloak of shadow disperses!`);
+      _executeAoEDebuffSpell(m, memberIndex, hand, skillDef);
+      return;
+    }
+
+    if (spellSource.target === 'monsters-line') {
+      lastAttackTimes[cdKey] = now;
+      refreshPartyCards();
+      breakPartyUnseen(`${m.name} unleashes ${ws.name} — the cloak of shadow disperses!`);
+      _executeLineSpell(m, memberIndex, hand, skillDef);
+      return;
+    }
+  }
+
   if (!isRanged && !canMelee(party, memberIndex)) {
     showMessage(`${m.name} is in the back row — can't reach the enemy!`);
     return;
