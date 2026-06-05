@@ -21,6 +21,7 @@ import SHIELDS_DATA from './data/items/shields.json';
 import AMMO_DATA from './data/items/ammo.json';
 import { triggerMummyAmbush, monsters, hitMonster, recordLightningFloorSpawn } from './monster.js';
 import { getMonsterElementMultiplier, getMonsterTrapElementMultiplier, getElementColorHex } from './elements.js';
+import { MITIGATION_K } from './combat-rules.js';
 import TRAPS_DATA from './data/traps.json';
 import * as equip from './equipment.js';
 import { showInlineHelp } from './help.js';
@@ -2581,6 +2582,32 @@ function _rollTrapDamage(def, trapObj = null) {
     return Math.max(1, Math.round(base * dmgMult) + flatBonus);
 }
 
+// ── Trap mitigation vs monsters ─────────────────────────────────────────────
+// Traps used to deal their full rolled damage to monsters, bypassing the
+// VIT/DEF mitigation that weapons and spells respect. That let traps trivialise
+// high-mitigation "wall" monsters (every weapon floored to 1, but a trap landed
+// full). Traps now obey a *share* of the target's physical mitigation, so the
+// tankier the monster the more it shrugs off a trap, while low-VIT/DEF trash
+// mobs feel almost nothing — keeping normal combat pacing intact. All tunable:
+const TRAP_VIT_MITIGATION = 0.5;        // fraction of the weapon-strength VIT soak curve traps obey (0 = ignore VIT, 1 = full)
+const TRAP_DEF_MITIGATION = 1.0;        // fraction of the monster's flat DEF subtracted from a trap hit
+const TRAP_MIN_DAMAGE_FRACTION = 0.25;  // a trap always lands at least this share of its raw roll, so no wall fully nullifies it
+
+// Reduce a raw trap roll by a portion of the monster's physical mitigation.
+// Mirrors the weapon path (VIT soak curve, then flat DEF), but softened by the
+// constants above so traps stay the strongest answer to a wall without being a
+// free win. damageReduction (armour plating that deflects blades/arrows) is
+// intentionally ignored — spikes strike from below, they aren't turned aside.
+function _applyTrapMitigation(rawDmg, monster) {
+    const vit = monster?.stats?.vitality ?? 0;
+    const def = monster?.defence ?? 0;
+    const fullCurve = MITIGATION_K / (MITIGATION_K + vit);          // weapon-strength VIT soak (0..1)
+    const vitFactor = 1 - (1 - fullCurve) * TRAP_VIT_MITIGATION;    // softened toward 1
+    const afterDef = rawDmg * vitFactor - def * TRAP_DEF_MITIGATION;
+    const floor = rawDmg * TRAP_MIN_DAMAGE_FRACTION;
+    return Math.max(1, Math.round(Math.max(floor, afterDef)));
+}
+
 function _getTrapFreezeMs(def, trapObj) {
     const base = def.freezeMs ?? 10000;
     const laid = trapObj ? _getLaidTrapRecord(trapObj) : null;
@@ -2747,6 +2774,9 @@ function _fireTrapOnMonster(trapObj, monster) {
 
     const element = _getTrapElement(trapObj);
     let dmg = _rollTrapDamage(def, trapObj);
+    // Tough monsters resist traps — apply a share of their physical mitigation
+    // to the raw roll before any elemental scaling (see _applyTrapMitigation).
+    dmg = _applyTrapMitigation(dmg, monster);
     if (element) {
         // Elemental traps are weaker than non-elemental by default (0.75× base)
         // so non-elemental traps win against normal/resistant mobs. The higher

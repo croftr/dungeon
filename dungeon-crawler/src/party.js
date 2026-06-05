@@ -609,7 +609,7 @@ function refreshMember(m) {
     if (skillsState.whirlwind.active && skillsState.whirlwind.actorName === m.name && nowRef < skillsState.whirlwind.expiresAt) {
       lhDelaySec *= skillsState.whirlwind.magnitude;
     }
-    lhDelaySec *= getAttackSpeedMultiplier(m);
+    lhDelaySec *= getActionDelayMultiplier(m, lhDef);
 
     const lhTimeKey = (lhDef?.slot === 'spell' && lhName) ? `${i}-spell-${lhName}` : `${i}-left`;
     const lastUsed = lastAttackTimes[lhTimeKey];
@@ -637,7 +637,7 @@ function refreshMember(m) {
     if (skillsState.whirlwind.active && skillsState.whirlwind.actorName === m.name && nowRef2 < skillsState.whirlwind.expiresAt) {
       rhDelaySec *= skillsState.whirlwind.magnitude;
     }
-    rhDelaySec *= getAttackSpeedMultiplier(m);
+    rhDelaySec *= getActionDelayMultiplier(m, rhActualDef);
 
     const rhCurName = lhBothHands ? lhName : rhName;
     const rhCurDef = lhBothHands ? lhDef : rhDef;
@@ -1366,18 +1366,29 @@ export function getEffectiveStats(member) {
  * make all party members attack SLOWER. Default 2 (half-speed swings) keeps
  * combat readable and leaves headroom for haste skills/magic to feel impactful.
  * Live-tweakable from the browser console: window.PARTY_ATTACK_DELAY_SCALE = 1.5
- *
- * Single source of truth: this also scales per-swing stamina cost (in
- * equipment.js) so the SP drain *rate* stays constant no matter how this is
- * tuned — slower swings cost proportionally more SP each.
  */
 export function getPartyAttackDelayScale() {
   return (typeof window !== 'undefined' && window.PARTY_ATTACK_DELAY_SCALE) || 2.0;
 }
 
-/** Returns the combined attack speed multiplier from active debuffs (>1 = slower). */
+/**
+ * Per-swing stamina-cost multiplier (used in equipment.js). Kept SEPARATE from
+ * the attack-delay scale on purpose: at 1.5 against the 2x slowdown, SP drains
+ * at ~0.75x the original per-second rate — gentler than a full rate-restore,
+ * which felt too punishing once fights also run longer. Values > 1 drain more.
+ * Live-tweakable from the browser console: window.PARTY_STAMINA_DRAIN_SCALE = 1.5
+ */
+export function getPartyStaminaDrainScale() {
+  return (typeof window !== 'undefined' && window.PARTY_STAMINA_DRAIN_SCALE) || 1.5;
+}
+
+/**
+ * Combined attack-speed multiplier from active debuffs + stance (>1 = slower).
+ * NOTE: this does NOT include the global attack-pace scale — that is applied
+ * per-action by getActionDelayMultiplier so it can be limited to weapon swings.
+ */
 export function getAttackSpeedMultiplier(member) {
-  let mult = getPartyAttackDelayScale();
+  let mult = 1.0;
   const now = performance.now();
   (member.activeDebuffs ?? []).forEach(d => {
     if (now >= d.expiresAt) return;
@@ -1392,6 +1403,19 @@ export function getAttackSpeedMultiplier(member) {
     }
   }
 
+  return mult;
+}
+
+/**
+ * Full per-action delay multiplier for a hand slot's swing/cast cooldown.
+ * Combines debuff/stance effects with the global attack-pace scale — but the
+ * global scale applies to WEAPON attacks only. Spells (slot === 'spell') keep
+ * their own cadence and are exempt, so slowing weapon swings for readability
+ * never drags spell cooldowns along with it.
+ */
+export function getActionDelayMultiplier(member, def) {
+  let mult = getAttackSpeedMultiplier(member);
+  if (def?.slot !== 'spell') mult *= getPartyAttackDelayScale();
   return mult;
 }
 

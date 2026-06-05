@@ -1191,6 +1191,7 @@ _applyMultiAttacks('Swamp Monster', [
     specialOnHitEffects: [
       { effectId: 'slow',   chance: 0.75, durationSec: 10 },
       { effectId: 'poison', chance: 0.55, durationSec: 12 },
+      { effectId: 'rot',    chance: 0.55 },
     ],
   },
 ]);

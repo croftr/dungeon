@@ -555,6 +555,7 @@ const SKILL_SOUND_MAP = {
   'hunters-eye': { url: asset('/sounds/actions/skills/hunters-eye.mp3'), offset: 0.0 },
   'magic': { url: asset('/sounds/actions/skills/magic.mp3'), offset: 0.0 },
   'render': { url: asset('/sounds/actions/skills/render.mp3'), offset: 0.0 },
+  'whirlwind': { url: asset('/sounds/actions/skills/haste.mp3'), offset: 0.0 },
   'war-dance': { url: asset('/skills/war-dance.mp3'), offset: 0.0 },
   'heal': { url: asset('/sounds/actions/life-crystal.mp3'), offset: 0.0 },
   'alchemy': { url: asset('/sounds/items/alchemy-bubbles.mp3'), offset: 0.0 },
@@ -864,13 +865,14 @@ export async function playCraftHqSound() {
   }
 }
 
-export async function playSoundByUrl(url, volume = 0.8) {
+export async function playSoundByUrl(url, volume = 0.8, playbackRate = 1) {
   const buffer = await getBuffer(asset(url));
   if (!buffer) return;
   try {
     const ctx = getCtx();
     const source = ctx.createBufferSource();
     source.buffer = buffer;
+    source.playbackRate.value = playbackRate;
     const gainNode = ctx.createGain();
     gainNode.gain.value = volume;
     source.connect(gainNode);

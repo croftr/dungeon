@@ -37,8 +37,7 @@
             "Minor Rejuvenate Potion"
         ],
         "startingSkills": [
-            "Hunter's Eye",
-            "Lay Trap"
+            "Hunter's Eye"
         ],
         "image": "/heros/elf_ranger_head.jpg",
         "leftHand": "Torch",
@@ -316,10 +315,7 @@
             "viper",
             "ghost"
         ],
-        "startingSkills": [
-            "Whirlwind",
-            "War Dance"
-        ],
+        "startingSkills": [],
         "startingInventory": [
             "Cure Poison Potion",
             "Minor Rejuvenate Potion",

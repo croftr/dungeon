@@ -1368,6 +1368,28 @@
     ],
     "uniqueArenaItem": "Crow Talon"
   },
+  "summoned_crow": {
+    "name": "Summoned Crow",
+    "family": "avian",
+    "description": "Lesser corvids conjured from shadow to harry intruders. Frail on their own, they descend in shrieking flocks — pecking and clawing until driven off. Little more than feathered fodder for their wizard masters.",
+    "hp": 100,
+    "defence": 10,
+    "xp": 50,
+    "attackSpeed": 1,
+    "stats": {
+      "strength": 18,
+      "dexterity": 20,
+      "vitality": 15,
+      "intelligence": 4,
+      "resilience": 10
+    },
+    "drops": [
+      {
+        "item": "Life Essence",
+        "chance": 0.1
+      }
+    ]
+  },
   "swamp_monster": {
     "name": "Swamp Monster",
     "family": "aquatic",
@@ -1396,7 +1418,7 @@
       {
         "name": "swampToxicBite",
         "displayName": "Slime Spit",
-        "description": "Launches a glob of corrosive slime at one target — the toxic ooze clings on impact, slowing movement and poisoning the wound.",
+        "description": "Launches a glob of corrosive slime at one target — the toxic ooze clings on impact, slowing movement, poisoning the wound, and rotting the flesh.",
         "aoe": false,
         "damageMultiplier": 1.3,
         "onHitEffects": [

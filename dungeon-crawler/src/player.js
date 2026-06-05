@@ -17,6 +17,13 @@ const FLOOR_ZONE_DEFS = {
   },
 };
 
+// Default footstep played on every move where the destination cell isn't in a
+// floor zone with its own sound. One short clip per step, allowed to ring out
+// naturally (not cut on arrival) with a slight random pitch so repeated steps
+// don't sound identical.
+const DEFAULT_MOVE_SOUND = '/sounds/actions/footstep.mp3';
+const DEFAULT_MOVE_VOLUME = 0.85;
+
 // ─────────────────────────────────────────────
 //  CONSTANTS
 // ─────────────────────────────────────────────
@@ -43,21 +50,31 @@ function currentMoveMs(destRow, destCol) {
   return def ? ms * def.speedFactor : ms;
 }
 
-let _floorZoneSource = null;
+// Only holds zone sounds (e.g. the swamp ambient) that should be cut when the
+// move tween finishes. The default footstep is fire-and-forget — it isn't
+// tracked here, so stopMoveSound() leaves it alone to ring out.
+let _moveSoundSource = null;
 
-function stopFloorZoneSound() {
-  if (_floorZoneSource) {
-    try { _floorZoneSource.stop(); } catch (_) {}
-    _floorZoneSource = null;
+function stopMoveSound() {
+  if (_moveSoundSource) {
+    try { _moveSoundSource.stop(); } catch (_) {}
+    _moveSoundSource = null;
   }
 }
 
-async function playFloorZoneSound(row, col) {
-  stopFloorZoneSound();
+// Plays the move sound for a step into (row, col). Floor zones with their own
+// sound (swamp) play it for the slowed duration of the move and get cut on
+// arrival; every other cell plays a single short footstep that rings out.
+async function playMoveSound(row, col) {
+  stopMoveSound();
   const zone = getFloorZoneAtCell(row, col);
   const def = zone ? FLOOR_ZONE_DEFS[zone] : null;
-  if (!def?.sound) return;
-  _floorZoneSource = await playSoundByUrl(asset(def.sound), def.soundVolume ?? 0.6) ?? null;
+  if (def?.sound) {
+    _moveSoundSource = await playSoundByUrl(asset(def.sound), def.soundVolume ?? 0.6) ?? null;
+  } else {
+    const pitch = 0.9 + Math.random() * 0.2; // ±10% so steps don't sound robotic
+    playSoundByUrl(asset(DEFAULT_MOVE_SOUND), DEFAULT_MOVE_VOLUME, pitch);
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -150,7 +167,7 @@ export function moveForward(camera, sign = 1) {
   player.gridRow = newRow;
   player.gridCol = newCol;
 
-  playFloorZoneSound(newRow, newCol);
+  playMoveSound(newRow, newCol);
 
   const target = cellToWorld(newRow, newCol);
 
@@ -158,7 +175,7 @@ export function moveForward(camera, sign = 1) {
     .to({ x: target.x, z: target.z }, moveMs)
     .easing(Easing.Quadratic.InOut)
     .onComplete(() => {
-      stopFloorZoneSound();
+      stopMoveSound();
       player.moving = false;
       onMoved();
       if (dungeonMap[newRow][newCol] === CELL_EXIT) onReached();
@@ -231,7 +248,7 @@ export function strafePlayer(camera, sign = 1) {
   player.gridRow = newRow;
   player.gridCol = newCol;
 
-  playFloorZoneSound(newRow, newCol);
+  playMoveSound(newRow, newCol);
 
   const target = cellToWorld(newRow, newCol);
 
@@ -239,7 +256,7 @@ export function strafePlayer(camera, sign = 1) {
     .to({ x: target.x, z: target.z }, moveMs)
     .easing(Easing.Quadratic.InOut)
     .onComplete(() => {
-      stopFloorZoneSound();
+      stopMoveSound();
       player.moving = false;
       onMoved();
       if (dungeonMap[newRow][newCol] === CELL_EXIT) onReached();

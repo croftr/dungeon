@@ -1,4 +1,4 @@
-import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getAttackSpeedMultiplier, getPartyAttackDelayScale, hasEffectFlag, breakPartyUnseen, showMemberHeal, showMemberSpHeal, getEffectiveStats, getEffectiveElementalResistances } from './party.js';
+import { party, refreshPartyCards, lastAttackTimes, setHp, setMp, setSp, drawPortrait, applyStatusEffect, addGold, getActionDelayMultiplier, getPartyStaminaDrainScale, hasEffectFlag, breakPartyUnseen, showMemberHeal, showMemberSpHeal, getEffectiveStats, getEffectiveElementalResistances } from './party.js';
 import { ELEMENTS, ELEMENT_IDS, getPrimaryAttackElement } from './elements.js';
 import { showInlineHelp } from './help.js';
 import { getItemDef, canUseItemByJob, normalizeJob, isJewelry } from './items.js';
@@ -1678,8 +1678,8 @@ function populateTooltip(obj, showBuyPrice = false) {
     document.getElementById('item-detail-damage').textContent =
       def?.baseDamage != null ? def.baseDamage : '—';
     if (hasStaminaDrain) {
-      // Match the actual per-swing cost in useHand (scaled by the attack-delay knob).
-      document.getElementById('item-detail-stamina').textContent = (def.staminaDrain * 5 * getPartyAttackDelayScale()) + ' SP';
+      // Match the actual per-swing cost in useHand (scaled by the stamina-drain knob).
+      document.getElementById('item-detail-stamina').textContent = (def.staminaDrain * 5 * getPartyStaminaDrainScale()) + ' SP';
     }
     if (hasDelay) {
       document.getElementById('item-detail-delay').textContent = def.delay + 's';
@@ -5156,7 +5156,7 @@ export function useHand(memberIndex, hand, silent = false) {
   }
 
   // Status effect attack speed penalty (e.g. Slow debuff)
-  delaySec *= getAttackSpeedMultiplier(m);
+  delaySec *= getActionDelayMultiplier(m, def);
 
   // SpellSurge stance: reduce cooldown for any spell (mana cost > 0)
   if ((def?.mpCost ?? 0) > 0) {
@@ -5257,10 +5257,10 @@ export function useHand(memberIndex, hand, silent = false) {
   }
 
   // Physical attacks cost 5 SP per staminaDrain level; spells and skills do not.
-  // Scaled by the party attack-delay knob so SP drain *rate* stays constant
-  // regardless of attack-speed tuning (slower swings cost proportionally more).
+  // Scaled by the stamina-drain knob (separate from attack speed) so SP pressure
+  // can be tuned independently of swing pace.
   // Whirlwind / War Dance buff: also prevents SP drain
-  let spCost = 5 * (def?.staminaDrain ?? 1) * getPartyAttackDelayScale();
+  let spCost = 5 * (def?.staminaDrain ?? 1) * getPartyStaminaDrainScale();
 
   // Apply Conservator passive reductions (15% per node, stacks additively up to 45%)
   if (!isSpell && def?.weaponType && m.skills?.length) {
@@ -5492,7 +5492,7 @@ export function useWeaponSkill(memberIndex, hand) {
   let normalDelaySec = def.delay ?? 2;
   const ww = skillsState.whirlwind;
   if (ww.active && ww.actorName === m.name && now < ww.expiresAt) normalDelaySec *= ww.magnitude;
-  normalDelaySec *= getAttackSpeedMultiplier(m);
+  normalDelaySec *= getActionDelayMultiplier(m, def);
   const normalKey = `${memberIndex}-${hand}`;
   if (lastAttackTimes[normalKey] && now - lastAttackTimes[normalKey] < normalDelaySec * 1000) {
     showMessage(`${def.name} is still recovering from its last attack!`);
@@ -5656,7 +5656,7 @@ function _tickAutoHand(memberIndex, hand, staggerOffsetMs) {
   let delaySec = def?.delay ?? 2;
   const ww = skillsState.whirlwind;
   if (ww.active && ww.actorName === m.name && now < ww.expiresAt) delaySec *= ww.magnitude;
-  delaySec *= getAttackSpeedMultiplier(m);
+  delaySec *= getActionDelayMultiplier(m, def);
 
   const isSpellSlot = def?.slot === 'spell';
   const baseKey = isBothHands ? `${memberIndex}-left` : `${memberIndex}-${hand}`;
@@ -5726,7 +5726,7 @@ function _tickAutoRangeHand(memberIndex, hand, staggerOffsetMs) {
   let delaySec = def.delay ?? 2;
   const ww = skillsState.whirlwind;
   if (ww.active && ww.actorName === m.name && now < ww.expiresAt) delaySec *= ww.magnitude;
-  delaySec *= getAttackSpeedMultiplier(m);
+  delaySec *= getActionDelayMultiplier(m, def);
 
   const baseKey = isBothHands ? `${memberIndex}-left` : `${memberIndex}-${hand}`;
   const lastFire = lastAttackTimes[baseKey] ?? 0;
@@ -6532,7 +6532,7 @@ function _useWhirlwind(member, memberIndex) {
   _whirlwindCooldownEnds[memberIndex] = now + delayMs;
   lastAttackTimes[`${memberIndex}-skill-Whirlwind`] = now;
 
-  playSkillSound('berserk');
+  playSkillSound('whirlwind');
   triggerWhirlwindEffect();
   const whirlwindDelayStr = skillsState.whirlwind.magnitude.toFixed(2);
   showMessage(

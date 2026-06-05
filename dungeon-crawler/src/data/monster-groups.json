@@ -1,25 +1,3 @@
 {
-  "_comment": "Formations are now created per-instance via instQuartet() in monster-factory.js — pass any solo def from monsters.json and the system handles per-sub HP/XP/drops automatically. This file is reserved for bespoke group defs (e.g. monsters that should only ever spawn as a fixed-size group).",
-  "summoned_crow": {
-    "name": "Summoned Crow",
-    "family": "avian",
-    "description": "Lesser corvids conjured from shadow to harry intruders. Frail on their own, they descend in shrieking flocks — pecking and clawing until driven off. Little more than feathered fodder for their wizard masters.",
-    "hp": 100,
-    "defence": 10,
-    "xp": 50,
-    "attackSpeed": 1,
-    "stats": {
-      "strength": 18,
-      "dexterity": 20,
-      "vitality": 15,
-      "intelligence": 4,
-      "resilience": 10
-    },
-    "drops": [
-      {
-        "item": "Life Essence",
-        "chance": 0.1
-      }
-    ]
-  }
+  "_comment": "Formations are now created per-instance via instQuartet() in monster-factory.js — pass any solo def from monsters.json and the system handles per-sub HP/XP/drops automatically. This file is reserved for bespoke group defs (e.g. monsters that should only ever spawn as a fixed-size group)."
 }
