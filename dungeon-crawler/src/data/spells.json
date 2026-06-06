@@ -149,7 +149,7 @@
         "delay": 4,
         "mpCost": 8,
         "icon": "/icons/spells/resist-poison.webp",
-        "description": "A warding incantation that halves the chance of the entire party being afflicted by poison for 90 seconds.",
+        "description": "A warding incantation that reduces the chance of the entire party being afflicted by poison by 70% for 90 seconds.",
         "value": 0,
         "weight": 0
     },
@@ -253,7 +253,7 @@
         "delay": 4,
         "mpCost": 8,
         "icon": "/icons/spells/resist-fear.webp",
-        "description": "A warding incantation that halves the chance of the entire party being afflicted by fear for 90 seconds.",
+        "description": "A warding incantation that reduces the chance of the entire party being afflicted by fear by 70% for 90 seconds.",
         "value": 0,
         "weight": 0
     },

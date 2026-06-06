@@ -28,7 +28,7 @@ export function getMonsterTier(monsterId) {
 
 export function recordArenaVictory(monsterId, tierDefeated) {
   const currentMax = getMonsterTier(monsterId);
-  if (tierDefeated >= currentMax) {
+  if (tierDefeated === undefined || tierDefeated >= currentMax) {
     _arenaMonsterTiers[monsterId] = currentMax + 1;
   }
 }
