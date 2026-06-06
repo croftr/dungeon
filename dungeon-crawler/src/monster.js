@@ -1765,17 +1765,28 @@ function _spawnQuartetSubMeshes(m, scene, glbUrl, offsets) {
   }
 }
 
-// Plays the death animation on a single quartet sub. The mesh stays visible
-// in its final clamped frame so the formation tile reads as "some mushrooms
-// dead, some alive" instead of teleport-poof.
+// Plays the death animation on a single quartet sub, then clears that sub's
+// mesh so it doesn't linger as a corpse while its groupmates are still alive.
+// Previously dead subs stayed visible until the whole group was wiped (or a
+// back-row partner stepped over a front-row corpse), so back-row deaths and
+// fully-dead columns left bodies on the tile until all four had fallen.
 function _playQuartetSubDeath(m, member) {
-  if (!member || !member.actions) return;
+  if (!member || !member.actions) {
+    if (member) member._hideMesh = true;
+    return;
+  }
   // Stop idle/walk so the death anim takes over cleanly.
   if (member.actions.idle) member.actions.idle.stop();
   if (member.actions.walk) member.actions.walk.stop();
   if (member.actions.death) {
     member.actions.death.reset().play();
     member._animState = 'dead';
+    // Let the death anim play out, then hide this sub's mesh. The per-frame
+    // visibility loop unions _hideMesh, so flag-hiding is enough; the meshes
+    // are physically disposed together at group death / level transition.
+    setTimeout(() => {
+      if (!member.alive) member._hideMesh = true;
+    }, 1500);
   } else {
     // No death anim available — fall back to hiding the mesh. Use the
     // formation visibility flag so the per-frame visibility loop respects it.
@@ -3051,7 +3062,7 @@ const MAGIC_ATTACK_TYPES = new Set([
  *
  *   trap / *-trap        → trap
  *   *-dot (poison only)  → poison   (poison + deadly_poison are the only damaging DoTs)
- *   weapon-skill swing   → elemental rider portion → elemental, remainder → weaponSkill
+ *   weapon-skill swing   → ALL to weaponSkill (incl. its elemental rider portion)
  *   spell                → magic
  *   normal weapon swing  → elemental rider portion → elemental, remainder → physical
  */
@@ -3070,8 +3081,10 @@ function _categorizeDamageOut(damage, attackType, elementalBreakdown, isWeaponSk
   elem = Math.max(0, Math.min(Math.round(elem), damage));
 
   if (isWeaponSkill) {
-    cats.elemental = elem;
-    cats.weaponSkill = damage - elem;
+    // The whole triggered weapon-skill hit counts as Weapon Skill — including any
+    // elemental rider portion. Elemental rider damage from weapon skills is
+    // deliberately NOT split into the Elemental bucket.
+    cats.weaponSkill = damage;
     return cats;
   }
   if (MAGIC_ATTACK_TYPES.has(at)) { cats.magic = damage; return cats; }
