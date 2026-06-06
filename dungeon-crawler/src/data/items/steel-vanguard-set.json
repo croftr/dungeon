@@ -6,7 +6,7 @@
         "description": "A heavy, closed steel helm with a slit visor. Part of the Steel Vanguard set.",
         "defence": 4,
         "value": 300,
-        "weight": 5.0,
+        "weight": 4.0,
         "set": "steel-vanguard",
         "job": [
             "Paladin",
@@ -20,7 +20,7 @@
         "description": "A thick, bulky steel breastplate over chainmail. Part of the Steel Vanguard set.",
         "defence": 6,
         "value": 500,
-        "weight": 12.0,
+        "weight": 10.0,
         "set": "steel-vanguard",
         "job": [
             "Paladin",
@@ -34,7 +34,7 @@
         "description": "Heavy steel gauntlets. Part of the Steel Vanguard set.",
         "defence": 3,
         "value": 200,
-        "weight": 3.0,
+        "weight": 2.0,
         "set": "steel-vanguard",
         "job": [
             "Paladin",
@@ -48,7 +48,7 @@
         "description": "Heavy steel plate leg armor. Part of the Steel Vanguard set.",
         "defence": 4,
         "value": 300,
-        "weight": 6.0,
+        "weight": 5.0,
         "set": "steel-vanguard",
         "job": [
             "Paladin",
@@ -62,7 +62,7 @@
         "description": "Heavy steel sabatons. Part of the Steel Vanguard set.",
         "defence": 3,
         "value": 200,
-        "weight": 4.0,
+        "weight": 3.0,
         "set": "steel-vanguard",
         "job": [
             "Paladin",

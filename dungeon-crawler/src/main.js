@@ -355,10 +355,15 @@ setCallbacks({
         if (window.playMinotaurVideo) window.playMinotaurVideo();
       }
 
+      // Once the Minotaur boss is slain, level 3 falls completely silent —
+      // no ambient backing music anywhere.
+      const minotaur = monsters.find(m => m.name === 'Minotaur' && (m.level ?? 1) === 3 && m.id === 300);
+      const minotaurDead = minotaur && !minotaur.alive;
+
       // Swamp room — silence all background music while inside
       const inSwampRoom = player.gridRow >= 1 && player.gridRow <= 5
         && player.gridCol >= 1 && player.gridCol <= 18;
-      setZoneSilence(inSwampRoom);
+      setZoneSilence(minotaurDead || inSwampRoom);
     } else if (window.currentLevel === 4) {
       setZoneMusic(null);
     } else if (window.currentLevel === 5) {

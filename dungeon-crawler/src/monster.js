@@ -22,7 +22,7 @@ import {
   MONSTER_BASE_ATTACK,
   SHIELD_BASH_STUN_CHANCE, SHIELD_BASH_STUN_DURATION_MS,
 } from './combat-rules.js';
-import { setInCombat, clearCombat, playCritSound, playActionSound, playHitSound, playPartyHitSound, playShieldBlockSound, isInCombat, playSoundByUrl, setZoneMusic } from './audio.js';
+import { setInCombat, clearCombat, playCritSound, playActionSound, playHitSound, playPartyHitSound, playShieldBlockSound, isInCombat, playSoundByUrl, setZoneMusic, setZoneSilence } from './audio.js';
 import { addLogEntry } from './battle-log.js';
 import { resetBattleStats, recordDamageDealt, recordDamageTaken, recordAttack, showBattleStatsIcon } from './battle-stats.js';
 import { getItemDef } from './items.js';
@@ -3363,6 +3363,9 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
           window.videoFlags.hasSeenMinotaurDeathVideo = true;
           if (window.playMinotaurDeathVideo) window.playMinotaurDeathVideo();
         }
+        // The Minotaur's death silences level 3 for good — kill the ambient
+        // backing track immediately rather than waiting for the next move.
+        setZoneSilence(true);
       }
 
       // Store the 25-slot corpse-contents array on the monster so the same

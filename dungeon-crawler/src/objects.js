@@ -206,6 +206,10 @@ for (const it of POTION_MERCHANT_STOCK) {
   POTION_MERCHANT_INITIAL_COUNTS.set(k, (POTION_MERCHANT_INITIAL_COUNTS.get(k) ?? 0) + 1);
 }
 
+// Items that restock an extra +2 (above their initial count) on every restock trigger
+const POTION_MERCHANT_PRIORITY_RESTOCK = new Set(['Mana Berry', 'Life Berry', 'Fermented Sugar']);
+const POTION_MERCHANT_PRIORITY_BONUS = 2;
+
 // Level-gated stock unlocks — items added to the pool when the player reaches a dungeon level
 const POTION_LEVEL_UNLOCKS = (POTION_MERCHANT_DATA.levelUnlocks ?? [])
   .map(u => ({ minLevel: u.minLevel, stock: u.stock.map(_normStock).filter(Boolean) }))
@@ -6789,6 +6793,19 @@ export function replenishPotionMerchant(units = 2) {
   for (const it of _potionMerchantAvailable) {
     const k = `${it.name}|${it.hq ? 1 : 0}`;
     cur.set(k, (cur.get(k) ?? 0) + 1);
+  }
+  // Priority items refill an extra +2 (toward initial + bonus) every trigger,
+  // independent of the shared `units` budget below.
+  for (const [k, init] of POTION_MERCHANT_INITIAL_COUNTS) {
+    const [name, hqFlag] = k.split('|');
+    if (!POTION_MERCHANT_PRIORITY_RESTOCK.has(name)) continue;
+    const target = init + POTION_MERCHANT_PRIORITY_BONUS;
+    const have = cur.get(k) ?? 0;
+    const add = Math.min(POTION_MERCHANT_PRIORITY_BONUS, target - have);
+    for (let i = 0; i < add; i++) {
+      _potionMerchantAvailable.push({ name, hq: hqFlag === '1' });
+      cur.set(k, (cur.get(k) ?? 0) + 1);
+    }
   }
   const deficits = [];
   for (const [k, init] of POTION_MERCHANT_INITIAL_COUNTS) {
