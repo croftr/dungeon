@@ -950,22 +950,25 @@ function buildTacticsOverlay() {
         <button id="tactics-close" aria-label="Close">&times;</button>
       </div>
       <div id="tactics-body">
-        <span id="tactics-gold"></span>
-        <div class="tactics-row-label">Front Row &mdash; Melee &amp; Ranged</div>
-        <div class="tactics-row" id="tactics-front"></div>
-        <button id="tactics-swap-rows">&#8597; Swap Rows</button>
-        <div class="tactics-row-label tactics-row-label--back">Back Row &mdash; Ranged only</div>
-        <div class="tactics-row" id="tactics-back"></div>
-        <p class="tactics-hint">Click a character to select &bull; Click another slot to move them</p>
-        <label class="tactics-toggle" id="tactics-auto-attack-label">
-          <input type="checkbox" id="tactics-auto-attack">
-          Auto Attack <span class="tactics-toggle-hint">(front row attacks automatically)</span>
-        </label>
-        <label class="tactics-toggle" id="tactics-auto-range-attack-label">
-          <input type="checkbox" id="tactics-auto-range-attack">
-          Auto Range Attack <span class="tactics-toggle-hint">(bow/crossbow users attack automatically)</span>
-        </label>
-        <button id="tactics-export-btn" title="Export Party State for AI Analysis">Export Party</button>
+        <div id="tactics-slots-grid"></div>
+        <div id="tactics-controls">
+          <div class="tactics-toggles-row">
+            <label class="tactics-toggle">
+              <input type="checkbox" id="tactics-auto-attack">
+              <span>Auto Attack</span>
+            </label>
+            <label class="tactics-toggle">
+              <input type="checkbox" id="tactics-auto-range-attack">
+              <span>Auto Range</span>
+            </label>
+          </div>
+          <div class="tactics-gold-row">
+            <div id="tactics-gold-wrap">
+              <span id="tactics-gold"></span>
+            </div>
+            <button id="tactics-export-btn" title="Export Party State for AI Analysis">📤</button>
+          </div>
+        </div>
       </div>
     </div>
   `;
@@ -980,28 +983,16 @@ function buildTacticsOverlay() {
     autoRangeAttack = e.target.checked;
     if (!autoRangeAttack) clearAutoRangeAttackTimers();
   });
-  document.getElementById('tactics-swap-rows').addEventListener('click', () => {
-    tacticsSel = null;
-    swapSlots(0, 2);
-    swapSlots(1, 3);
-    renderTacticsSlots();
-  });
   const exportBtn = document.getElementById('tactics-export-btn');
   if (exportBtn) {
     exportBtn.addEventListener('click', exportPartyData);
   }
-  // Close on backdrop click
-  tacticsOverlay.addEventListener('click', (e) => {
-    if (e.target === tacticsOverlay) closeTacticsModal();
-  });
 }
 
 function renderTacticsSlots() {
-  const frontEl = document.getElementById('tactics-front');
-  const backEl = document.getElementById('tactics-back');
-  if (!frontEl || !backEl) return;
-
-  [frontEl, backEl].forEach(el => (el.innerHTML = ''));
+  const gridEl = document.getElementById('tactics-slots-grid');
+  if (!gridEl) return;
+  gridEl.innerHTML = '';
 
   party.forEach((m, i) => {
     const cell = document.createElement('div');
@@ -1014,8 +1005,8 @@ function renderTacticsSlots() {
     } else {
       const canvas = document.createElement('canvas');
       canvas.className = 'tactics-portrait';
-      canvas.width = 96;
-      canvas.height = 96;
+      canvas.width = 76;
+      canvas.height = 76;
       cell.appendChild(canvas);
       drawPortrait(canvas, m);
 
@@ -1030,24 +1021,23 @@ function renderTacticsSlots() {
         jobEl.textContent = m.job;
         cell.appendChild(jobEl);
       }
-
-      cell.addEventListener('click', () => handleTacticsSlotClick(i));
     }
 
-    (i < 2 ? frontEl : backEl).appendChild(cell);
+    cell.addEventListener('click', () => handleTacticsSlotClick(i));
+    gridEl.appendChild(cell);
   });
 }
 
 function handleTacticsSlotClick(index) {
-  if (party[index].isEmpty) return;
-
   if (tacticsSel === null) {
+    if (party[index].isEmpty) return; // can't select an empty slot as the source
     tacticsSel = index;
     renderTacticsSlots();
   } else if (tacticsSel === index) {
     tacticsSel = null;
     renderTacticsSlots();
   } else {
+    // Swaps selected slot with target (works even if target is empty)
     swapSlots(tacticsSel, index);
     tacticsSel = null;
     renderTacticsSlots();
@@ -1062,7 +1052,7 @@ export function openTacticsModal() {
   if (cb) cb.checked = autoAttack;
   const cbRange = document.getElementById('tactics-auto-range-attack');
   if (cbRange) cbRange.checked = autoRangeAttack;
-  tacticsOverlay.style.display = 'flex';
+  tacticsOverlay.style.display = 'block';
 }
 
 function closeTacticsModal() {
