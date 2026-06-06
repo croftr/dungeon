@@ -11608,6 +11608,125 @@ body.cursor-interact #renderer-canvas {
   padding: 8px 0;
 }
 
+/* ── DMG-OUT source breakdown ── */
+.bsp-member {
+  border-bottom: 1px solid rgba(50, 40, 25, 0.5);
+}
+
+.bsp-member:last-of-type {
+  border-bottom: none;
+}
+
+.bsp-member .bsp-row {
+  border-bottom: none;
+  cursor: pointer;
+}
+
+.bsp-member--open {
+  background: rgba(200, 168, 74, 0.05);
+}
+
+.bsp-caret {
+  display: inline-block;
+  width: 11px;
+  color: #8a7a50;
+  font-size: 9px;
+}
+
+/* Per-member breakdown panel (revealed when a row is expanded) */
+.bsp-breakdown {
+  padding: 2px 0 8px 11px;
+}
+
+/* Horizontal stacked bar of damage sources */
+.bsp-bar {
+  display: flex;
+  height: 9px;
+  width: 100%;
+  border-radius: 3px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(90, 74, 48, 0.4);
+  margin: 4px 0 6px;
+}
+
+.bsp-seg {
+  height: 100%;
+  min-width: 1px;
+}
+
+.bsp-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bsp-legend--grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 14px;
+}
+
+.bsp-leg-item {
+  display: grid;
+  grid-template-columns: 10px 1fr auto auto;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+}
+
+.bsp-leg-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.bsp-leg-label {
+  color: #b8a878;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bsp-leg-val {
+  color: #e0d0a0;
+  text-align: right;
+  font-weight: bold;
+}
+
+.bsp-leg-pct {
+  color: #8a7a50;
+  text-align: right;
+  min-width: 30px;
+}
+
+.bsp-leg-empty {
+  color: #664;
+  font-style: italic;
+  font-size: 10px;
+}
+
+/* Party-wide "Damage out by source" footer */
+.bsp-sources {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(90, 74, 48, 0.5);
+}
+
+.bsp-sources-title {
+  display: flex;
+  justify-content: space-between;
+  color: #8a7a50;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bsp-sources-total {
+  color: #e07050;
+  font-weight: bold;
+}
+
 /* ── SARCOPHAGUS MODAL ── */
 #sarcophagus-overlay {
   position: fixed;
@@ -12818,6 +12937,29 @@ body.cursor-interact #renderer-canvas {
   text-align: right;
 }
 
+.tc-select {
+  flex: 1;
+  background: #2a2a4a;
+  border: 1px solid #555;
+  color: #ddd;
+  padding: 3px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-family: inherit;
+}
+
+.tc-select:hover {
+  border-color: #e94560;
+}
+
+.tc-hint {
+  font-size: 0.72rem;
+  color: #888;
+  margin: 0 0 6px;
+  line-height: 1.3;
+}
+
 .tc-presets {
   gap: 6px;
   justify-content: flex-start;
@@ -13434,4 +13576,37 @@ body.cursor-interact #renderer-canvas {
 #teleport-menu .tm-cancel:hover {
   background: rgba(100, 100, 100, 0.15);
   color: #aaa;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TACTICS EXPORT PARTY BUTTON
+   ───────────────────────────────────────────────────────────────────────────── */
+#tactics-export-btn {
+  /* Premium Medieval Theme Styling */
+  background: rgba(10, 7, 4, 0.90);
+  border: 1px solid #5a4a30;
+  border-radius: 5px;
+  color: #c8a84a;
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 10px 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.85);
+  transition: border-color 0.15s, color 0.15s, box-shadow 0.15s, background 0.15s;
+  margin-top: 10px;
+}
+
+#tactics-export-btn:hover {
+  background: rgba(22, 17, 10, 0.95);
+  border-color: #c8a84a;
+  color: #ffe88a;
+  box-shadow: 0 0 14px rgba(200, 168, 74, 0.45);
+}
+
+#tactics-export-btn:active {
+  background: rgba(30, 24, 15, 0.98);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
 }

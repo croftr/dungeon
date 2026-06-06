@@ -2615,10 +2615,11 @@ function _showArenaResult(text, className) {
   }, 2000);
 }
 
-window._arenaEnter = function (monsterId) {
+window._arenaEnter = function (monsterId, selectedTier) {
   const def = MONSTER_DEFS[monsterId];
   if (!def) { console.warn('Arena: unknown monster key', monsterId); return; }
-  const tier = getMonsterTier(monsterId);
+  const maxTier = getMonsterTier(monsterId);
+  const tier = selectedTier ?? maxTier;
   const scaledDef = applyTierScaling(def, tier);
 
   // Save state to restore after the fight
@@ -2630,6 +2631,7 @@ window._arenaEnter = function (monsterId) {
   };
   window.arenaState.active = true;
   window.arenaState.tier = tier;
+  window.arenaState.monsterId = monsterId;
 
   // Pre-load the party-hit sound buffer so it's ready instantly on first hit
   prefetchBuffer(asset('/sounds/actions/party-hit.mp3'));
@@ -2742,7 +2744,7 @@ window._arenaEnter = function (monsterId) {
 
   // Callbacks fired by monster.js (victory) and party.js (defeat)
   window._arenaVictory = (row, col) => {
-    recordArenaVictory(monsterId);
+    recordArenaVictory(monsterId, tier);
     _showArenaResult('Victory!', 'result-victory');
     // Spawn a blue portal at the arena start location (7, 4) so it doesn't overlap loot.
     if (spawnArenaPortal) spawnArenaPortal(7, 4);

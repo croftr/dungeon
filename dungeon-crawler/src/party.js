@@ -143,6 +143,61 @@ function _memberCardHTML(i) {
       </div>`;
 }
 
+export function exportPartyData() {
+  const exportData = {
+    timestamp: new Date().toISOString(),
+    partyGold: partyGold,
+    party: party.filter(m => !m.isEmpty).map(m => {
+      const equipmentDetails = {};
+      if (m.equipment) {
+        for (const [slot, item] of Object.entries(m.equipment)) {
+          if (item) {
+            const def = getItemDef(item.name);
+            equipmentDetails[slot] = {
+              name: item.name,
+              hq: !!item.hq,
+              slot: def?.slot || item.slot,
+              weaponType: def?.weaponType || undefined,
+              attackType: def?.attackType || undefined,
+              baseDamage: def?.baseDamage || undefined,
+              defence: def?.defence || undefined,
+              delay: def?.delay || undefined,
+              statBonuses: def?.statBonuses || undefined,
+              elementalDamage: def?.elementalDamage || undefined,
+              elementalResistances: def?.elementalResistances || undefined,
+              statusResistances: def?.statusResistances || undefined,
+              weaponSkill: def?.weaponSkill?.name || undefined
+            };
+          } else {
+            equipmentDetails[slot] = null;
+          }
+        }
+      }
+
+      return {
+        name: m.name,
+        job: m.job,
+        level: m.level,
+        xp: m.xp,
+        stats: m.stats,
+        baseStats: m.baseStats,
+        skills: (m.skills || []).map(s => s.name),
+        spells: (m.spells || []).map(s => s.name),
+        equipment: equipmentDetails
+      };
+    })
+  };
+
+  const jsonStr = JSON.stringify(exportData, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'party-export.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export function buildPartyPanel() {
   const panel = document.getElementById('party-panel');
   if (!panel) return;
@@ -910,6 +965,7 @@ function buildTacticsOverlay() {
           <input type="checkbox" id="tactics-auto-range-attack">
           Auto Range Attack <span class="tactics-toggle-hint">(bow/crossbow users attack automatically)</span>
         </label>
+        <button id="tactics-export-btn" title="Export Party State for AI Analysis">Export Party</button>
       </div>
     </div>
   `;
@@ -930,6 +986,10 @@ function buildTacticsOverlay() {
     swapSlots(1, 3);
     renderTacticsSlots();
   });
+  const exportBtn = document.getElementById('tactics-export-btn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', exportPartyData);
+  }
   // Close on backdrop click
   tacticsOverlay.addEventListener('click', (e) => {
     if (e.target === tacticsOverlay) closeTacticsModal();

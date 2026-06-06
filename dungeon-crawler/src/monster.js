@@ -3039,7 +3039,49 @@ export function showCritIndicator(monsterId, damage) {
   }, 1400);
 }
 
-export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, killer = null, elementalBreakdown = null, spellElement = null, subSlot = null, aoe = false) {
+/** Spell attack types — all damage from these is filed under the "magic" source. */
+const MAGIC_ATTACK_TYPES = new Set([
+  'fireball', 'frostbolt', 'waterbolt', 'lightningbolt', 'holybolt', 'darkbolt', 'banishment', 'incinerate',
+]);
+
+/**
+ * Split a single hit's damage into balance-tracking sources that sum back to
+ * `damage` (see battle-stats DAMAGE_CATEGORIES). Used only for the battle-stats
+ * breakdown — it has no effect on combat.
+ *
+ *   trap / *-trap        → trap
+ *   *-dot (poison only)  → poison   (poison + deadly_poison are the only damaging DoTs)
+ *   weapon-skill swing   → elemental rider portion → elemental, remainder → weaponSkill
+ *   spell                → magic
+ *   normal weapon swing  → elemental rider portion → elemental, remainder → physical
+ */
+function _categorizeDamageOut(damage, attackType, elementalBreakdown, isWeaponSkill) {
+  const cats = { physical: 0, weaponSkill: 0, elemental: 0, magic: 0, trap: 0, poison: 0 };
+  const at = typeof attackType === 'string' ? attackType : '';
+  if (at === 'trap' || at.endsWith('-trap')) { cats.trap = damage; return cats; }
+  if (at.endsWith('-dot')) { cats.poison = damage; return cats; }
+
+  // Elemental weapon riders expose a per-element breakdown (already crit-scaled).
+  // Clamp to the actual landed damage so a bucket can never exceed the total.
+  let elem = 0;
+  if (elementalBreakdown) {
+    for (const v of Object.values(elementalBreakdown)) elem += (v || 0);
+  }
+  elem = Math.max(0, Math.min(Math.round(elem), damage));
+
+  if (isWeaponSkill) {
+    cats.elemental = elem;
+    cats.weaponSkill = damage - elem;
+    return cats;
+  }
+  if (MAGIC_ATTACK_TYPES.has(at)) { cats.magic = damage; return cats; }
+
+  cats.elemental = elem;
+  cats.physical = damage - elem;
+  return cats;
+}
+
+export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, killer = null, elementalBreakdown = null, spellElement = null, subSlot = null, aoe = false, isWeaponSkill = false) {
   const m = monsters.find((x) => x.id === monsterId && x.alive);
   if (!m) return { hit: false, damage: 0, killed: false, monsterHp: 0 };
 
@@ -3053,7 +3095,7 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
     let totalDamage = 0;
     let monsterKilled = false;
     for (const sub of alive) {
-      const r = hitMonster(monsterId, finalDamage, attackType, isCrit, killer, elementalBreakdown, spellElement, sub.subSlot, false);
+      const r = hitMonster(monsterId, finalDamage, attackType, isCrit, killer, elementalBreakdown, spellElement, sub.subSlot, false, isWeaponSkill);
       totalDamage += r.damage;
       if (r.killed) monsterKilled = true;
     }
@@ -3172,9 +3214,9 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
     }
   }
 
-  // Track damage dealt for battle summary
+  // Track damage dealt for battle summary, split by source for balance analysis.
   if (killer) {
-    recordDamageDealt(killer, damage);
+    recordDamageDealt(killer, damage, _categorizeDamageOut(damage, attackType, elementalBreakdown, isWeaponSkill));
   }
 
   // Sync visual/audio feedback with the action animation
@@ -3558,7 +3600,7 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
     }
   }
 
-  const result = hitMonster(monsterId, damage, attackType, isCrit, character.name, elementalBreakdown, spellElement, subSlot, quartetAoe);
+  const result = hitMonster(monsterId, damage, attackType, isCrit, character.name, elementalBreakdown, spellElement, subSlot, quartetAoe, !!weaponDef?.isWeaponSkill);
 
   let stunned = false;
   if (attackType === 'shield-bash' && result.hit && !result.killed) {

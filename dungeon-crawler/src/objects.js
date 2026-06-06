@@ -20,7 +20,7 @@ import WEAPONS_DATA from './data/items/weapons.json';
 import SHIELDS_DATA from './data/items/shields.json';
 import AMMO_DATA from './data/items/ammo.json';
 import { triggerMummyAmbush, monsters, hitMonster, recordLightningFloorSpawn } from './monster.js';
-import { getMonsterElementMultiplier, getMonsterTrapElementMultiplier, getElementColorHex } from './elements.js';
+import { getMonsterElementMultiplier, getMonsterTrapElementMultiplier, getElementColorHex, ELEMENTS } from './elements.js';
 import { MITIGATION_K } from './combat-rules.js';
 import TRAPS_DATA from './data/traps.json';
 import * as equip from './equipment.js';
@@ -662,58 +662,75 @@ function showMistConfirm(obj) {
                     color: #fff !important;
                 }
                 #mist-confirm-no:hover {
-                    background: linear-gradient(180deg, #3a3a3a, #1a1a1a) !important;
-                    color: #d0d0d0 !important;
-                    border-color: #555 !important;
+                    background: #5a4628 !important;
+                    border-color: #e8c87a !important;
+                    box-shadow: 0 0 15px rgba(232, 200, 122, 0.4) !important;
+                    color: #fff !important;
                 }
                 .mist-modal-container {
                     animation: mistPulse 4s infinite alternate;
                 }
                 @keyframes mistPulse {
-                    0% { box-shadow: 0 0 40px rgba(0,0,0,0.9), inset 0 0 40px rgba(0,0,0,0.9); }
-                    100% { box-shadow: 0 0 60px rgba(40,10,10,0.6), inset 0 0 60px rgba(0,0,0,1); }
+                    0% { box-shadow: 0 0 40px rgba(0,0,0,0.95); }
+                    100% { box-shadow: 0 0 60px rgba(40,10,10,0.8); }
                 }
             </style>
             <div class="mist-modal-container" style="
-                min-width: 560px; max-width: 720px; min-height: 500px; padding: 80px 50px;
-                display: flex; flex-direction: column; justify-content: center;
-                border: 2px solid #2b2b2b; border-radius: 8px; text-align: center;
-                background: linear-gradient(rgba(10, 10, 12, 0.60), rgba(0, 0, 0, 0.90)), url('/images/crow_mist_bg.webp') center/cover no-repeat;
-                color: #d0c8b8;
-                font-family: inherit;
+                width: 650px;
+                display: flex; flex-direction: column;
+                border: 3px solid #5a4a3a; border-radius: 8px; text-align: center;
+                background: #181410;
+                color: #e0d0b0;
+                font-family: 'Georgia', serif;
                 position: relative; overflow: hidden;
-                box-shadow: 0 0 20px #000;">
+                box-shadow: 0 0 40px rgba(0,0,0,0.95);">
                 
                 <div style="
-                    position: absolute; top: 0; left: 0; right: 0; height: 4px;
-                    background: linear-gradient(90deg, transparent, #600000, transparent);"></div>
-                <div style="
-                    position: absolute; bottom: 0; left: 0; right: 0; height: 4px;
-                    background: linear-gradient(90deg, transparent, #600000, transparent);"></div>
-
-                <div style="font-size: 28px; font-weight: 700; letter-spacing: 3px; margin-bottom: 16px; color: #bba078; text-transform: uppercase; text-shadow: 3px 3px 6px rgba(0,0,0,1);">
+                    background: rgba(0, 0, 0, 0.4);
+                    padding: 15px;
+                    border-bottom: 2px solid #3a2e18;
+                    color: #f0d8a0;
+                    text-transform: uppercase;
+                    letter-spacing: 2px;
+                    font-size: 20px;
+                    font-weight: bold;
+                    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
                     The Crow Domain
                 </div>
-                <div style="font-size: 16px; line-height: 1.7; opacity: 0.95; margin-bottom: 32px; text-shadow: 2px 2px 4px rgba(0,0,0,1); font-style: italic; color: #a9a5a6;">
-                    A wall of thick, black mist pulsates with an unnatural chill. From within the suffocating darkness, the maddening caw of crows echoes. Dare you proceed?
+
+                <div style="
+                    width: 100%;
+                    height: 280px;
+                    background: url('/images/crow_mist_bg.webp') no-repeat center center;
+                    background-size: cover;
+                    border-bottom: 2px solid #3a2e18;
+                    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8);">
                 </div>
-                <div style="display: flex; gap: 16px; justify-content: center;">
-                    <button id="mist-confirm-yes" style="
-                        flex: 1; padding: 14px 16px; font-size: 16px; cursor: pointer;
-                        border: 1px solid #4a0000; border-radius: 4px; color: #e0e0e0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;
-                        background: linear-gradient(180deg, #500000, #200000);
-                        box-shadow: 0 4px 10px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,100,100,0.2);
-                        transition: all 0.3s ease; text-shadow: 1px 1px 2px black;">
-                        Embrace the Dark
-                    </button>
-                    <button id="mist-confirm-no" style="
-                        padding: 14px 24px; font-size: 16px; cursor: pointer;
-                        border: 1px solid #333; border-radius: 4px; color: #999; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;
-                        background: linear-gradient(180deg, #222, #0a0a0a);
-                        box-shadow: 0 4px 10px rgba(0,0,0,0.8);
-                        transition: all 0.3s ease; text-shadow: 1px 1px 2px black;">
-                        Turn Back
-                    </button>
+
+                <div style="padding: 30px 40px; background: transparent;">
+                    <p style="
+                        font-size: 16px; line-height: 1.6; margin: 0 0 25px 0;
+                        color: #e0d0b0; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">
+                        A wall of thick, black mist pulsates with an unnatural chill. From within the suffocating darkness, the maddening caw of crows echoes. Dare you proceed?
+                    </p>
+                    <div style="display: flex; gap: 20px; justify-content: center; margin-top: 20px;">
+                        <button id="mist-confirm-yes" style="
+                            padding: 12px 30px; font-size: 16px; cursor: pointer;
+                            border: 1px solid #7a0000; border-radius: 4px; color: #e8c87a; font-family: 'Georgia', serif; text-transform: uppercase; letter-spacing: 1px;
+                            background: linear-gradient(180deg, #500000, #200000);
+                            box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+                            transition: all 0.2s;">
+                            Embrace the Dark
+                        </button>
+                        <button id="mist-confirm-no" style="
+                            padding: 12px 30px; font-size: 16px; cursor: pointer;
+                            border: 1px solid #7a6030; border-radius: 4px; color: #e8c87a; font-family: 'Georgia', serif; text-transform: uppercase; letter-spacing: 1px;
+                            background: #3a2e18;
+                            box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+                            transition: all 0.2s;">
+                            Turn Back
+                        </button>
+                    </div>
                 </div>
             </div>`;
         // Swallow background clicks so they don't fall through to the 3D
@@ -2245,6 +2262,9 @@ export function initObjects(scene, camera) {
             dummy.stats = { ...(dummy.originalStats ?? { strength: 0, dexterity: 0, vitality: 10, intelligence: 0, resilience: 10 }) };
             dummy.attackSpeed = dummy.originalAttackSpeed ?? 1;
             dummy.onHitEffects = [];
+            dummy.elementalResistances = {};
+            dummy.attackTypeMultipliers = {};
+            dummy.damageType = null;
             dummy.combatMode = false;
             dummy.drainStamina = false;
             dummy.engaged = false;
@@ -2790,7 +2810,9 @@ function _fireTrapOnMonster(trapObj, monster) {
     }
     const freezeMs = _getTrapFreezeMs(def, trapObj);
     monster.trappedUntil = performance.now() + freezeMs;
-    if (dmg > 0) hitMonster(monster.id, dmg, element ? `${element}-trap` : 'trap');
+    // Attribute to a synthetic "Traps" actor so trap damage shows up in the
+    // battle-stats DMG OUT source breakdown (traps have no owning party member).
+    if (dmg > 0) hitMonster(monster.id, dmg, element ? `${element}-trap` : 'trap', false, 'Traps');
     addLogEntry({
         type: 'trap',
         target: monster.name,
@@ -4010,6 +4032,121 @@ const _TC_PRESETS = {
     boss: { strength: 45, dexterity: 30, attackSpeed: 2.5, effects: [{ effectId: 'poison', chance: 0.5 }, { effectId: 'frozen', chance: 0.15 }, { effectId: 'stun', chance: 0.1 }] },
 };
 
+// Training Console — elemental / attack-type config options.
+const _TC_ELEMENTS = ['fire', 'ice', 'lightning', 'water', 'holy', 'dark'];
+const _TC_RESIST_CATEGORIES = ['normal', 'weak', 'vulnerable', 'resist', 'immune'];
+const _TC_ATTACK_TYPES = ['swipe', 'bash', 'shoot', 'punch'];
+
+// Builds the elemental-resistance selects, attack-type multiplier steppers and
+// the elemental-attack dropdown once. The rows are generated rather than hand-
+// authored in HTML so the element/attack-type lists stay single-sourced.
+let _tcDynamicBuilt = false;
+function _tcInitDynamicControls() {
+    if (_tcDynamicBuilt) return;
+
+    // ── Elemental resistance: one categorical <select> per element ──────────
+    const resistContainer = document.getElementById('tc-resist-rows');
+    if (resistContainer) {
+        resistContainer.innerHTML = '';
+        for (const el of _TC_ELEMENTS) {
+            const row = document.createElement('div');
+            row.className = 'tc-row';
+            const label = document.createElement('label');
+            label.textContent = ELEMENTS[el]?.name ?? el;
+            const controls = document.createElement('div');
+            controls.className = 'tc-controls';
+            const select = document.createElement('select');
+            select.className = 'tc-select';
+            select.dataset.element = el;
+            for (const cat of _TC_RESIST_CATEGORIES) {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+                select.appendChild(opt);
+            }
+            select.onchange = () => {
+                const dummy = _getDummy();
+                if (!dummy) return;
+                if (!dummy.elementalResistances) dummy.elementalResistances = {};
+                if (select.value === 'normal') delete dummy.elementalResistances[el];
+                else dummy.elementalResistances[el] = select.value;
+            };
+            controls.appendChild(select);
+            row.appendChild(label);
+            row.appendChild(controls);
+            resistContainer.appendChild(row);
+        }
+    }
+
+    // ── Physical attack-type multipliers: ± steppers per attack type ────────
+    const atkContainer = document.getElementById('tc-atktype-rows');
+    if (atkContainer) {
+        atkContainer.innerHTML = '';
+        for (const type of _TC_ATTACK_TYPES) {
+            const row = document.createElement('div');
+            row.className = 'tc-row';
+            const label = document.createElement('label');
+            label.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+            const controls = document.createElement('div');
+            controls.className = 'tc-controls';
+            const mkBtn = (delta, text) => {
+                const b = document.createElement('button');
+                b.className = 'tc-btn';
+                b.textContent = text;
+                b.onclick = () => _tcAdjustAtkType(type, delta);
+                return b;
+            };
+            const val = document.createElement('span');
+            val.className = 'tc-value';
+            val.id = `tc-atktype-${type}`;
+            val.textContent = '1.0';
+            controls.appendChild(mkBtn(-0.5, '-0.5'));
+            controls.appendChild(mkBtn(-0.1, '-0.1'));
+            controls.appendChild(val);
+            controls.appendChild(mkBtn(0.1, '+0.1'));
+            controls.appendChild(mkBtn(0.5, '+0.5'));
+            row.appendChild(label);
+            row.appendChild(controls);
+            atkContainer.appendChild(row);
+        }
+    }
+
+    // ── Elemental attack: single dropdown (none → 100% of one element) ──────
+    const elAttack = document.getElementById('tc-element-attack');
+    if (elAttack) {
+        elAttack.innerHTML = '';
+        const none = document.createElement('option');
+        none.value = '';
+        none.textContent = 'Physical (none)';
+        elAttack.appendChild(none);
+        for (const el of _TC_ELEMENTS) {
+            const opt = document.createElement('option');
+            opt.value = el;
+            opt.textContent = ELEMENTS[el]?.name ?? el;
+            elAttack.appendChild(opt);
+        }
+        elAttack.onchange = () => {
+            const dummy = _getDummy();
+            if (!dummy) return;
+            dummy.damageType = elAttack.value || null;
+        };
+    }
+
+    _tcDynamicBuilt = true;
+}
+
+function _tcAdjustAtkType(type, delta) {
+    const dummy = _getDummy();
+    if (!dummy) return;
+    if (!dummy.attackTypeMultipliers) dummy.attackTypeMultipliers = {};
+    const cur = dummy.attackTypeMultipliers[type] ?? 1;
+    const next = Math.max(0, Math.min(3, Math.round((cur + delta) * 10) / 10));
+    // 1.0 is neutral — drop the key so it falls back to family/default.
+    if (next === 1) delete dummy.attackTypeMultipliers[type];
+    else dummy.attackTypeMultipliers[type] = next;
+    _tcSyncUI();
+}
+
 function addTrainingConsole(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
     loader.load(asset('/items/dummy-controller.glb'), (gltf) => {
         const model = gltf.scene;
@@ -4084,6 +4221,21 @@ function _tcSyncUI() {
         if (range && eff) range.value = Math.round(eff.chance * 100);
         if (valSpan) valSpan.textContent = (eff ? Math.round(eff.chance * 100) : range ? range.value : 30) + '%';
     }
+
+    // Sync elemental resistance selects
+    for (const el of _TC_ELEMENTS) {
+        const sel = document.querySelector(`#tc-resist-rows select[data-element="${el}"]`);
+        if (sel) sel.value = dummy.elementalResistances?.[el] ?? 'normal';
+    }
+    // Sync attack-type multiplier values
+    for (const type of _TC_ATTACK_TYPES) {
+        const span = document.getElementById(`tc-atktype-${type}`);
+        if (span) span.textContent = (dummy.attackTypeMultipliers?.[type] ?? 1).toFixed(1);
+    }
+    // Sync elemental-attack dropdown
+    const elAttack = document.getElementById('tc-element-attack');
+    if (elAttack) elAttack.value = dummy.damageType ?? '';
+
     _tcUpdatePreview();
 }
 
@@ -4105,6 +4257,7 @@ function openTrainingConsole() {
     _trainingConsoleOpen = true;
     const overlay = document.getElementById('training-console-overlay');
     overlay.classList.remove('tc-hidden');
+    _tcInitDynamicControls();
     _tcSyncUI();
 }
 

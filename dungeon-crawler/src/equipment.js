@@ -5574,7 +5574,7 @@ export function useWeaponSkill(memberIndex, hand) {
     // Spell-based: cast the spell exactly as this member would, but free.
     // mpCost 0 means no mana is drained while the magnitude formula (e.g.
     // intelligence) still resolves against the caster's own stats.
-    skillDef = { ...spellSource, mpCost: 0 };
+    skillDef = { ...spellSource, mpCost: 0, isWeaponSkill: true };
   } else {
     // Elemental-rider: the weapon's normal stats plus the skill's extra
     // elemental damage and any guaranteed-stun / guaranteed-crit flags.
@@ -5588,6 +5588,7 @@ export function useWeaponSkill(memberIndex, hand) {
       guaranteedStun: ws.guaranteedStun ?? def.guaranteedStun ?? false,
       guaranteedCrit: ws.guaranteedCrit ?? def.guaranteedCrit ?? false,
       guaranteedHit: ws.guaranteedHit ?? def.guaranteedHit ?? false,
+      isWeaponSkill: true,
     };
   }
 

@@ -204,4 +204,9 @@ describe('round-trip: party.js', () => {
     const snap1 = jsonRoundTrip(mod.capturePartyState());
     expect(snap1.members[0].cooldownTimers).toBeUndefined();
   });
+
+  it('exportPartyData function is defined and exported', async () => {
+    const mod = await freshImport('src/party.js');
+    expect(typeof mod.exportPartyData).toBe('function');
+  });
 });

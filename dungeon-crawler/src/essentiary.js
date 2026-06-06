@@ -26,8 +26,11 @@ export function getMonsterTier(monsterId) {
   return _arenaMonsterTiers[monsterId] ?? 1;
 }
 
-export function recordArenaVictory(monsterId) {
-  _arenaMonsterTiers[monsterId] = getMonsterTier(monsterId) + 1;
+export function recordArenaVictory(monsterId, tierDefeated) {
+  const currentMax = getMonsterTier(monsterId);
+  if (tierDefeated >= currentMax) {
+    _arenaMonsterTiers[monsterId] = currentMax + 1;
+  }
 }
 
 /**
@@ -121,8 +124,19 @@ export function initEssentiary() {
     challengeBtn.addEventListener('click', () => {
       if (_currentMonsterKey) {
         const key = _currentMonsterKey; // capture before closeEssentiary resets it
+        const select = document.getElementById('essentiary-tier-select');
+        const selectedTier = select ? parseInt(select.value, 10) : getMonsterTier(key);
         closeEssentiary();
-        window._arenaEnter?.(key);
+        window._arenaEnter?.(key, selectedTier);
+      }
+    });
+  }
+
+  const tierSelect = document.getElementById('essentiary-tier-select');
+  if (tierSelect) {
+    tierSelect.addEventListener('change', () => {
+      if (_currentMonsterKey) {
+        _renderStats(MONSTERS_DATA[_currentMonsterKey], parseInt(tierSelect.value, 10));
       }
     });
   }
@@ -153,6 +167,27 @@ export function closeEssentiary() {
 }
 
 // ── Internal ──────────────────────────────────────────────────────────────────
+
+function _renderStats(baseDef, tier) {
+  const def = applyTierScaling(baseDef, tier);
+  const statsEl = document.getElementById('essentiary-detail-stats');
+  if (!statsEl) return;
+  statsEl.innerHTML = `
+    <table class="essentiary-stats-table">
+      <tbody>
+        <tr><td class="stat-label">HP</td><td class="stat-val">${def.hp}</td></tr>
+        <tr><td class="stat-label">Defence</td><td class="stat-val">${def.defence}</td></tr>
+        <tr><td class="stat-label">XP</td><td class="stat-val">${def.xp}</td></tr>
+        <tr><td class="stat-label">Atk Speed</td><td class="stat-val">${def.attackSpeed}×</td></tr>
+        <tr><td class="stat-label">Strength</td><td class="stat-val">${def.stats?.strength ?? '—'}</td></tr>
+        <tr><td class="stat-label">Dexterity</td><td class="stat-val">${def.stats?.dexterity ?? '—'}</td></tr>
+        <tr><td class="stat-label">Vitality</td><td class="stat-val">${def.stats?.vitality ?? '—'}</td></tr>
+        <tr><td class="stat-label">Intelligence</td><td class="stat-val">${def.stats?.intelligence ?? '—'}</td></tr>
+        <tr><td class="stat-label">Resilience</td><td class="stat-val">${def.stats?.resilience ?? '—'}</td></tr>
+      </tbody>
+    </table>
+  `;
+}
 
 function _showListScreen() {
   document.getElementById('essentiary-list').style.display = '';
@@ -314,22 +349,27 @@ function _openDetail(key) {
   document.getElementById('essentiary-detail-desc').textContent = def.description ?? '';
 
   // Stats
-  const statsEl = document.getElementById('essentiary-detail-stats');
-  statsEl.innerHTML = `
-    <table class="essentiary-stats-table">
-      <tbody>
-        <tr><td class="stat-label">HP</td><td class="stat-val">${def.hp}</td></tr>
-        <tr><td class="stat-label">Defence</td><td class="stat-val">${def.defence}</td></tr>
-        <tr><td class="stat-label">XP</td><td class="stat-val">${def.xp}</td></tr>
-        <tr><td class="stat-label">Atk Speed</td><td class="stat-val">${def.attackSpeed}×</td></tr>
-        <tr><td class="stat-label">Strength</td><td class="stat-val">${def.stats?.strength ?? '—'}</td></tr>
-        <tr><td class="stat-label">Dexterity</td><td class="stat-val">${def.stats?.dexterity ?? '—'}</td></tr>
-        <tr><td class="stat-label">Vitality</td><td class="stat-val">${def.stats?.vitality ?? '—'}</td></tr>
-        <tr><td class="stat-label">Intelligence</td><td class="stat-val">${def.stats?.intelligence ?? '—'}</td></tr>
-        <tr><td class="stat-label">Resilience</td><td class="stat-val">${def.stats?.resilience ?? '—'}</td></tr>
-      </tbody>
-    </table>
-  `;
+  _renderStats(def, tier);
+
+  // Update tier dropdown
+  const selectWrap = document.getElementById('essentiary-tier-select-wrap');
+  const select = document.getElementById('essentiary-tier-select');
+  if (selectWrap && select) {
+    select.innerHTML = '';
+    for (let i = 1; i <= tier; i++) {
+      const option = document.createElement('option');
+      option.value = i;
+      option.textContent = `Tier ${i}`;
+      if (i === tier) option.selected = true;
+      select.appendChild(option);
+    }
+    // Only show dropdown if they have unlocked at least tier 1 victory (so max tier > 1)
+    if (tier > 1) {
+      selectWrap.style.display = 'flex';
+    } else {
+      selectWrap.style.display = 'none';
+    }
+  }
 
   // Column 3 — on-hit effects + special attacks
   const abilitiesCol = document.getElementById('essentiary-col-abilities');

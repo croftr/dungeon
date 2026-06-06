@@ -2648,7 +2648,14 @@
           <div id="essentiary-detail-tier" style="display:none"></div>
           <div id="essentiary-detail-desc"></div>
           <div id="essentiary-detail-stats"></div>
-          <button id="essentiary-challenge">
+          
+          <div id="essentiary-tier-select-wrap" style="display:none; margin-top: 16px; margin-bottom: 8px; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 8px 12px; border: 1px solid #4a3010; border-radius: 4px;">
+            <label for="essentiary-tier-select" style="color: #c8aa70; font-family: 'Georgia', serif; font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em;">Fight at Tier:</label>
+            <select id="essentiary-tier-select" style="background: #1e0c04; color: #d4a017; border: 1px solid #8b3010; padding: 4px 12px; font-family: 'Georgia', serif; font-weight: bold; border-radius: 2px; outline: none; cursor: pointer; font-size: 14px;">
+            </select>
+          </div>
+
+          <button id="essentiary-challenge" style="margin-top: 12px;">
             <span class="challenge-icon">&#9876;</span>
             <span class="challenge-text">Challenge in Arena</span>
           </button>
@@ -2925,6 +2932,23 @@
             <button class="tc-btn" data-stat="attackSpeed" data-delta="-0.5">-0.5</button>
             <span class="tc-value" id="tc-attackSpeed">1</span>
             <button class="tc-btn" data-stat="attackSpeed" data-delta="0.5">+0.5</button>
+          </div>
+        </div>
+        <div class="tc-divider"></div>
+        <div class="tc-section-label">Elemental Resistance</div>
+        <div class="tc-hint">How the dummy reacts to your elemental attacks.</div>
+        <div id="tc-resist-rows"></div>
+        <div class="tc-divider"></div>
+        <div class="tc-section-label">Physical Attack-Type Multiplier</div>
+        <div class="tc-hint">Damage taken from swipe / bash / shoot / punch. 1.0 = normal, &gt;1 weak, &lt;1 resists, 0 immune.</div>
+        <div id="tc-atktype-rows"></div>
+        <div class="tc-divider"></div>
+        <div class="tc-section-label">Elemental Attack</div>
+        <div class="tc-hint">Makes 100% of the dummy's attack damage the chosen element.</div>
+        <div class="tc-row">
+          <label>Damage Element</label>
+          <div class="tc-controls">
+            <select id="tc-element-attack" class="tc-select"></select>
           </div>
         </div>
         <div class="tc-divider"></div>
