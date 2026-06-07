@@ -18,12 +18,12 @@
                 "mp": 10
             },
             "elementalResistances": {
-                "fire": 0.05,
-                "ice": 0.05,
-                "lightning": 0.05,
-                "water": 0.05,
-                "holy": 0.05,
-                "dark": 0.05
+                "fire": 5,
+                "ice": 5,
+                "lightning": 5,
+                "water": 5,
+                "holy": 5,
+                "dark": 5
             }
         }
     },
@@ -206,12 +206,12 @@
                 "shieldBlock": 1
             },
             "elementalResistances": {
-                "fire": 0.05,
-                "ice": 0.05,
-                "lightning": 0.05,
-                "water": 0.05,
-                "holy": 0.05,
-                "dark": 0.05
+                "fire": 5,
+                "ice": 5,
+                "lightning": 5,
+                "water": 5,
+                "holy": 5,
+                "dark": 5
             }
         }
     },
@@ -236,12 +236,12 @@
                 "trapDamage": 1
             },
             "elementalResistances": {
-                "fire": 0.05,
-                "ice": 0.05,
-                "lightning": 0.05,
-                "water": 0.05,
-                "holy": 0.05,
-                "dark": 0.05
+                "fire": 5,
+                "ice": 5,
+                "lightning": 5,
+                "water": 5,
+                "holy": 5,
+                "dark": 5
             }
         }
     },
@@ -266,12 +266,12 @@
                 "critChanceBonus": 0.01
             },
             "elementalResistances": {
-                "fire": 0.05,
-                "ice": 0.05,
-                "lightning": 0.05,
-                "water": 0.05,
-                "holy": 0.05,
-                "dark": 0.05
+                "fire": 5,
+                "ice": 5,
+                "lightning": 5,
+                "water": 5,
+                "holy": 5,
+                "dark": 5
             }
         }
     }

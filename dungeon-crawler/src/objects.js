@@ -19,8 +19,8 @@ import BARNABY_DATA from './data/barnaby.json';
 import WEAPONS_DATA from './data/items/weapons.json';
 import SHIELDS_DATA from './data/items/shields.json';
 import AMMO_DATA from './data/items/ammo.json';
-import { triggerMummyAmbush, monsters, hitMonster, recordLightningFloorSpawn } from './monster.js';
-import { getMonsterElementMultiplier, getMonsterTrapElementMultiplier, getElementColorHex, ELEMENTS } from './elements.js';
+import { triggerMummyAmbush, monsters, hitMonster, healMonster, recordLightningFloorSpawn } from './monster.js';
+import { getMonsterElementMultiplier, getMonsterTrapElementMultiplier, getElementColorHex, ELEMENTS, resolveElementalAmount } from './elements.js';
 import { MITIGATION_K } from './combat-rules.js';
 import TRAPS_DATA from './data/traps.json';
 import * as equip from './equipment.js';
@@ -2741,22 +2741,36 @@ function _fireTrap(trapObj) {
     party.forEach((m, i) => {
         if (m.isEmpty || m.isDead) return;
         let dmg = _rollTrapDamage(def, trapObj);
+        let heal = 0;
         if (element) {
             const resist = m.elementalResistances?.[element] ?? 0;
-            dmg = Math.max(1, Math.round(dmg * (1 - resist)));
+            const resolved = resolveElementalAmount(dmg, resist);
+            dmg = resolved.damage;
+            heal = resolved.heal;
+            if (dmg === 0 && heal === 0) return; // immune — unaffected
         }
-        setHp(i, m.hp - dmg);
-        showMemberDamage(i, dmg, false, element);
-        flashPortraitHit(i);
-        addLogEntry({
-            type: 'trap',
-            target: m.name,
-            amount: dmg,
-            element: element ?? null,
-            trapLabel: def.label ?? 'Trap',
-            time: Date.now(),
-        });
-        damageMessage += `${m.name} takes ${dmg} damage. `;
+        if (heal > 0) {
+            // Absorption: same element popup/flash, but HP is restored.
+            setHp(i, m.hp + heal);
+            showMemberDamage(i, heal, false, element, true);
+            flashPortraitHit(i);
+            addLogEntry({
+                type: 'trap', target: m.name, amount: heal,
+                element: element ?? null, trapLabel: def.label ?? 'Trap',
+                time: Date.now(), absorbed: true,
+            });
+            damageMessage += `${m.name} absorbs ${heal} HP. `;
+        } else {
+            setHp(i, m.hp - dmg);
+            showMemberDamage(i, dmg, false, element);
+            flashPortraitHit(i);
+            addLogEntry({
+                type: 'trap', target: m.name, amount: dmg,
+                element: element ?? null, trapLabel: def.label ?? 'Trap',
+                time: Date.now(),
+            });
+            damageMessage += `${m.name} takes ${dmg} damage. `;
+        }
         anyHit = true;
     });
     if (anyHit) playPartyHitSound();
@@ -2798,32 +2812,42 @@ function _fireTrapOnMonster(trapObj, monster) {
 
     const element = _getTrapElement(trapObj);
     let dmg = _rollTrapDamage(def, trapObj);
+    let absorbHeal = 0;
     // Tough monsters resist traps — apply a share of their physical mitigation
     // to the raw roll before any elemental scaling (see _applyTrapMitigation).
     dmg = _applyTrapMitigation(dmg, monster);
     if (element) {
         // Elemental traps are weaker than non-elemental by default (0.75× base)
-        // so non-elemental traps win against normal/resistant mobs. The higher
-        // weak/vulnerable multipliers in TRAP_CATEGORY_MULT make elemental traps
-        // pay off only when the monster actually has the weakness.
+        // so non-elemental traps win against normal/resistant mobs. The unified
+        // weak/vulnerable multipliers (resistance < 0 → >1× damage) make elemental
+        // traps pay off only when the monster actually has the weakness.
         const ELEMENTAL_TRAP_BASE_PENALTY = 0.75;
         dmg = Math.max(1, Math.round(dmg * ELEMENTAL_TRAP_BASE_PENALTY));
         const mult = getMonsterTrapElementMultiplier(monster, element);
-        if (mult <= 0) dmg = 0;
-        else dmg = Math.max(1, Math.round(dmg * mult));
+        if (mult < 0) {
+            // Absorption (resistance > 100): the trap's element heals the monster.
+            absorbHeal = Math.max(1, Math.round(dmg * -mult));
+            dmg = 0;
+        } else if (mult === 0) {
+            dmg = 0; // immune
+        } else {
+            dmg = Math.max(1, Math.round(dmg * mult));
+        }
     }
     const freezeMs = _getTrapFreezeMs(def, trapObj);
     monster.trappedUntil = performance.now() + freezeMs;
     // Attribute to a synthetic "Traps" actor so trap damage shows up in the
     // battle-stats DMG OUT source breakdown (traps have no owning party member).
     if (dmg > 0) hitMonster(monster.id, dmg, element ? `${element}-trap` : 'trap', false, 'Traps');
+    if (absorbHeal > 0) healMonster(monster.id, absorbHeal, element, 'Traps');
     addLogEntry({
         type: 'trap',
         target: monster.name,
-        amount: dmg,
+        amount: absorbHeal > 0 ? absorbHeal : dmg,
         element: element ?? null,
         trapLabel: def.label ?? 'Trap',
         time: Date.now(),
+        absorbed: absorbHeal > 0 || undefined,
     });
 
     if (def.consumeOnTrigger !== false) _consumeTrap(trapObj, freezeMs);
@@ -4038,7 +4062,6 @@ const _TC_PRESETS = {
 
 // Training Console — elemental / attack-type config options.
 const _TC_ELEMENTS = ['fire', 'ice', 'lightning', 'water', 'holy', 'dark'];
-const _TC_RESIST_CATEGORIES = ['normal', 'weak', 'vulnerable', 'resist', 'immune'];
 const _TC_ATTACK_TYPES = ['swipe', 'bash', 'shoot', 'punch'];
 
 // Builds the elemental-resistance selects, attack-type multiplier steppers and
@@ -4048,7 +4071,7 @@ let _tcDynamicBuilt = false;
 function _tcInitDynamicControls() {
     if (_tcDynamicBuilt) return;
 
-    // ── Elemental resistance: one categorical <select> per element ──────────
+    // ── Elemental resistance: one numeric input per element (-100..+200) ────
     const resistContainer = document.getElementById('tc-resist-rows');
     if (resistContainer) {
         resistContainer.innerHTML = '';
@@ -4059,23 +4082,23 @@ function _tcInitDynamicControls() {
             label.textContent = ELEMENTS[el]?.name ?? el;
             const controls = document.createElement('div');
             controls.className = 'tc-controls';
-            const select = document.createElement('select');
-            select.className = 'tc-select';
-            select.dataset.element = el;
-            for (const cat of _TC_RESIST_CATEGORIES) {
-                const opt = document.createElement('option');
-                opt.value = cat;
-                opt.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
-                select.appendChild(opt);
-            }
-            select.onchange = () => {
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.className = 'tc-select';
+            input.dataset.element = el;
+            input.min = '-100';
+            input.max = '200';
+            input.step = '10';
+            input.title = '-100 vulnerable · 0 none · 50 resist · 100 immune · 200 absorb';
+            input.oninput = () => {
                 const dummy = _getDummy();
                 if (!dummy) return;
                 if (!dummy.elementalResistances) dummy.elementalResistances = {};
-                if (select.value === 'normal') delete dummy.elementalResistances[el];
-                else dummy.elementalResistances[el] = select.value;
+                const v = parseInt(input.value, 10);
+                if (!v) delete dummy.elementalResistances[el]; // 0 / blank → neutral
+                else dummy.elementalResistances[el] = v;
             };
-            controls.appendChild(select);
+            controls.appendChild(input);
             row.appendChild(label);
             row.appendChild(controls);
             resistContainer.appendChild(row);
@@ -4226,10 +4249,13 @@ function _tcSyncUI() {
         if (valSpan) valSpan.textContent = (eff ? Math.round(eff.chance * 100) : range ? range.value : 30) + '%';
     }
 
-    // Sync elemental resistance selects
+    // Sync elemental resistance inputs (unified -100..+200 scale)
     for (const el of _TC_ELEMENTS) {
-        const sel = document.querySelector(`#tc-resist-rows select[data-element="${el}"]`);
-        if (sel) sel.value = dummy.elementalResistances?.[el] ?? 'normal';
+        const inp = document.querySelector(`#tc-resist-rows input[data-element="${el}"]`);
+        if (inp) {
+            const rv = dummy.elementalResistances?.[el];
+            inp.value = (typeof rv === 'number') ? rv : 0;
+        }
     }
     // Sync attack-type multiplier values
     for (const type of _TC_ATTACK_TYPES) {

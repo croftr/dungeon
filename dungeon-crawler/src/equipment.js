@@ -312,11 +312,11 @@ export function formatSetBonusText(setDef) {
     if (entries.length > 0) {
       const allEqual = entries.every(([, v]) => v === entries[0][1]);
       if (allEqual && entries.length >= 4) {
-        parts.push(`+${Math.round(entries[0][1] * 100)}% all elemental resist`);
+        parts.push(`+${Math.round(entries[0][1])}% all elemental resist`);
       } else {
         entries.forEach(([elem, val]) => {
           const sign = val >= 0 ? '+' : '';
-          parts.push(`${sign}${Math.round(val * 100)}% ${elem} resist`);
+          parts.push(`${sign}${Math.round(val)}% ${elem} resist`);
         });
       }
     }
@@ -367,8 +367,7 @@ export function updateEffectiveStats(m) {
   const recruitData = RECRUITS_DATA.find(r => r.name === m.name);
   if (recruitData?.baseElementalResistances) {
     Object.entries(recruitData.baseElementalResistances).forEach(([elem, val]) => {
-      const sum = (newElementalResistances[elem] ?? 0) + val;
-      newElementalResistances[elem] = sum > 0.9 ? 0.9 : sum;
+      newElementalResistances[elem] = (newElementalResistances[elem] ?? 0) + val;
     });
   }
 
@@ -376,8 +375,7 @@ export function updateEffectiveStats(m) {
   // equipment so they appear in the inventory display and survive save/load.
   if (m.elementalResistanceBonuses) {
     Object.entries(m.elementalResistanceBonuses).forEach(([elem, val]) => {
-      const sum = (newElementalResistances[elem] ?? 0) + val;
-      newElementalResistances[elem] = sum > 0.9 ? 0.9 : sum;
+      newElementalResistances[elem] = (newElementalResistances[elem] ?? 0) + val;
     });
   }
 
@@ -424,13 +422,12 @@ export function updateEffectiveStats(m) {
         });
       }
 
-      // elementalResistances: percentage reduction of incoming elemental damage.
-      // Additive across pieces; upper-capped at 0.9 (90%). Negative values
-      // (vulnerabilities) pass through unbounded.
+      // elementalResistances: unified -100..+200 scale (see elements.js).
+      // Additive across pieces, uncapped. Negatives = vulnerability (take more),
+      // values > 100 = absorption (the element heals instead of hurting).
       if (def.elementalResistances) {
         Object.entries(def.elementalResistances).forEach(([elem, resistance]) => {
-          const sum = (newElementalResistances[elem] ?? 0) + resistance;
-          newElementalResistances[elem] = sum > 0.9 ? 0.9 : sum;
+          newElementalResistances[elem] = (newElementalResistances[elem] ?? 0) + resistance;
         });
       }
     }
@@ -1037,7 +1034,7 @@ function renderModal(memberIndex) {
     ELEMENT_IDS.forEach(id => {
       const def = ELEMENTS[id];
       const value = elemResist[id] ?? 0;
-      const pct = Math.round(value * 100);
+      const pct = Math.round(value);
       const row = document.createElement('div');
       row.className = 'stat-row';
       // Color the value when non-zero so the eye picks up active resistances/vulnerabilities.
@@ -1301,7 +1298,7 @@ function _renderElementalResistancesHtml(resistances) {
     const symbol = elemDef?.symbol ?? '';
     const name = elemDef?.name ?? elem;
     const sign = val >= 0 ? '+' : '';
-    const pct = Math.round(val * 100);
+    const pct = Math.round(val);
     return `<div class="detail-onhit-item" style="--onhit-color:${color}">
         <span><span style="color:${color};">${symbol}</span> ${name} Res</span>
         <span>${sign}${pct}%</span>

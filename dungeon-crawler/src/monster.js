@@ -3,7 +3,7 @@ import { createBlobShadow } from './blob-shadow.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
 import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createIceCloud, createCrocodileSparkle, createHellSpawn, createBloodSplatter, createGreenBloodSplatter, createCrowWizardFireAoe, createCrowWizardCure, createCrowWizardFear, createElementalBurst } from './particles.js';
-import { ELEMENTS, getMonsterElementMultiplier } from './elements.js';
+import { ELEMENTS, getMonsterElementMultiplier, resolveElementalAmount } from './elements.js';
 import MONSTER_FAMILIES from './data/monster-families.json';
 import { CELL, isPassable, elementFloorCellId, spawnElementFloorAt } from './map.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
@@ -2924,7 +2924,12 @@ export function tickMonsterElementFloorDamage(dt) {
       const cell = dungeonMap[m.gridRow]?.[m.gridCol];
       if (cell !== def.cell) return;
       const mult = getMonsterElementMultiplier(m, def.element);
-      if (mult <= 0) return;
+      if (mult === 0) return; // immune — no tick
+      if (mult < 0) {
+        // Absorption (resistance > 100): the floor heals the monster instead.
+        healMonster(m.id, Math.max(1, Math.round(def.dps * -mult)), def.element);
+        return;
+      }
       const dmg = Math.max(1, Math.round(def.dps * mult));
       hitMonster(m.id, dmg, `${def.element}-floor`);
     });
@@ -3027,6 +3032,80 @@ export function showMonsterDamage(monsterId, damage, isCrit, attackType = '', su
   setTimeout(() => {
     if (anchor.parent) anchor.remove(label);
   }, 850);
+}
+
+// Float an element-tinted "+N" above a monster when it absorbs an element.
+// Mirrors showMonsterDamage but renders a heal (green fallback, element colour
+// and symbol when known).
+export function showMonsterHeal(monsterId, amount, element = null, subSlot = null) {
+  const m = monsters.find(x => x.id === monsterId);
+  if (!m) return;
+  const anchor = (subSlot != null && m.formation === 'quartet')
+    ? (_quartetSubMesh(m, subSlot) || m.mesh)
+    : m.mesh;
+  if (!anchor) return;
+  const wrapper = document.createElement('div');
+  wrapper.className = 'monster-damage-wrapper';
+  const inner = document.createElement('div');
+  inner.className = 'monster-damage-popup damage-popup--absorb';
+  const elemDef = element ? ELEMENTS[element] : null;
+  if (elemDef) {
+    inner.style.color = elemDef.color;
+    if (elemDef.symbol) {
+      const sym = document.createElement('span');
+      sym.className = 'monster-damage-symbol';
+      sym.textContent = elemDef.symbol;
+      inner.appendChild(sym);
+    }
+  }
+  const text = document.createElement('span');
+  text.textContent = '+' + amount;
+  inner.appendChild(text);
+  wrapper.appendChild(inner);
+  const label = new CSS2DObject(wrapper);
+  label.position.set(0, 1.5, 0);
+  anchor.add(label);
+  setTimeout(() => { if (anchor.parent) anchor.remove(label); }, 850);
+}
+
+// Heal a monster (elemental absorption). Mirrors hitMonster's HP-bar update and
+// quartet handling; plays the element's own sound (no separate heal cue) and
+// logs the gain as a heal tick so it reads "[fire absorbed] +N HP".
+export function healMonster(monsterId, amount, element = null, healer = null, subSlot = null) {
+  const m = monsters.find(x => x.id === monsterId && x.alive);
+  if (!m || amount <= 0) return;
+  let member = null;
+  if (m.formation === 'quartet' && Array.isArray(m.members)) {
+    member = (subSlot != null && m.members[subSlot]?.alive)
+      ? m.members[subSlot]
+      : m.members.find(s => s.alive) || null;
+    if (!member) return;
+  }
+  if (member) {
+    member.hp = Math.min(member.hpMax, member.hp + amount);
+    m.hp = m.members.reduce((sum, s) => sum + s.hp, 0);
+    if (member.hpBarFill) {
+      const pct = member.hpMax > 0 ? (member.hp / member.hpMax) * 100 : 0;
+      member.hpBarFill.style.width = `${pct}%`;
+    }
+  } else {
+    m.hp = Math.min(m.hpMax, m.hp + amount);
+    if (m.hpBarFill) {
+      const pct = m.hpMax > 0 ? (m.hp / m.hpMax) * 100 : 0;
+      m.hpBarFill.style.width = `${pct}%`;
+    }
+  }
+  if (_huntersEyeTargetId === m.id) _renderHuntersEyeHud(m);
+  setTimeout(() => {
+    if (!m.mesh) return;
+    const elemDef = element ? ELEMENTS[element] : null;
+    if (elemDef?.sound) playSoundByUrl(asset(elemDef.sound), 0.7);
+    showMonsterHeal(monsterId, amount, element, member?.subSlot ?? subSlot);
+  }, 250);
+  addLogEntry({
+    time: Date.now(), type: 'tick', actor: 'player', attacker: healer || 'Player',
+    target: m.name, effectId: 'absorb', effectName: `${element ?? 'element'} absorbed`, amount: -amount,
+  });
 }
 
 export function showCritIndicator(monsterId, damage) {
@@ -3468,9 +3547,19 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   const physBreakdown = isMagic
     ? null
     : calcPlayerPhysicalDamageBreakdown(effChar, weaponDef, mSunder, ammoDef, weaponIsHQ);
-  const preCritDamage = isMagic
-    ? calcPlayerMagicDamage(effChar, weaponDef, mSunder, weaponIsHQ)
-    : physBreakdown.final;
+  // Elemental absorption: a monster whose resistance for the attack's element is
+  // > 100 heals instead of taking that element's damage. Accumulated here and
+  // applied after the hit lands (see healMonster below).
+  let monsterAbsorbHeal = 0;
+  let monsterAbsorbElement = null;
+  let preCritDamage;
+  if (isMagic) {
+    const magic = calcPlayerMagicDamage(effChar, weaponDef, mSunder, weaponIsHQ);
+    preCritDamage = magic.damage;
+    if (magic.heal > 0) { monsterAbsorbHeal += magic.heal; monsterAbsorbElement = weaponDef?.element ?? null; }
+  } else {
+    preCritDamage = physBreakdown.final;
+  }
 
   // 5% base crit chance — triples the calculated damage. DEX over 10 chips in a
   // small additional bonus (capped). Spells additionally pick up any passive
@@ -3543,9 +3632,15 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   // Riders are folded into preCritDamage and crit along with the physical
   // portion, so on a crit the displayed per-element numbers must be scaled too
   // for the totals to add up.
-  let elementalBreakdown = isMagic
-    ? null
-    : getElementalRiderBreakdown(effChar, mSunder, weaponDef, ammoDef).breakdown;
+  let elementalBreakdown = null;
+  if (!isMagic) {
+    const rb = getElementalRiderBreakdown(effChar, mSunder, weaponDef, ammoDef);
+    elementalBreakdown = rb.breakdown;
+    if (rb.absorbed > 0) {
+      monsterAbsorbHeal += rb.absorbed;
+      if (!monsterAbsorbElement) monsterAbsorbElement = rb.absorbedElement;
+    }
+  }
   if (isCrit && elementalBreakdown) {
     for (const k of Object.keys(elementalBreakdown)) {
       elementalBreakdown[k] = Math.round(elementalBreakdown[k] * CRIT_MULTIPLIER);
@@ -3617,6 +3712,16 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   }
 
   const result = hitMonster(monsterId, damage, attackType, isCrit, character.name, elementalBreakdown, spellElement, subSlot, quartetAoe, !!weaponDef?.isWeaponSkill);
+
+  // Apply elemental absorption healing after the hit lands. For AoE on a quartet,
+  // every alive sub absorbed the element, so each heals.
+  if (monsterAbsorbHeal > 0 && result.hit !== false && m.alive) {
+    if (quartetAoe && Array.isArray(m.members)) {
+      m.members.filter(s => s.alive).forEach(s => healMonster(monsterId, monsterAbsorbHeal, monsterAbsorbElement, character.name, s.subSlot));
+    } else {
+      healMonster(monsterId, monsterAbsorbHeal, monsterAbsorbElement, character.name, subSlot);
+    }
+  }
 
   let stunned = false;
   if (attackType === 'shield-bash' && result.hit && !result.killed) {
@@ -4173,10 +4278,20 @@ function _applyMonsterDamage(monster, opts = {}) {
   // generic special (e.g. ogre slam) doesn't accidentally pick up a monster's
   // basic-attack element.
   const attackElement = damageType ?? (isSpecial ? null : monster.damageType) ?? null;
+  // Unified resistance for the main hit's element (numeric -100..+200; 0 if none).
   const elementResistance = (attackElement && attackElement !== 'physical')
     ? (getEffectiveElementalResistances(target)[attackElement] ?? 0)
     : 0;
-  const baseDamage = calcMonsterDamage(monster, effTarget, charDefence, elementResistance);
+  // Physical magnitude, then apply the element multiplier here so absorption
+  // (resistance > 100) can convert the hit into healing (absorbHeal).
+  const physicalBase = calcMonsterDamage(monster, effTarget, charDefence);
+  let absorbHeal = 0;
+  let baseDamage = physicalBase;
+  if (attackElement && attackElement !== 'physical') {
+    const resolved = resolveElementalAmount(physicalBase, elementResistance);
+    baseDamage = resolved.damage;
+    absorbHeal = resolved.heal;
+  }
   const preCritDamage = damageMultiplier ? Math.round(baseDamage * damageMultiplier) : baseDamage;
   // Physical mitigation is VIT-only via the multiplicative curve
   // K/(K+VIT). Display the soaked percentage so the battle-log formula matches
@@ -4202,10 +4317,12 @@ function _applyMonsterDamage(monster, opts = {}) {
     for (const [element, value] of Object.entries(incomingRiders)) {
       if (!value) continue;
       const resist = playerResists[element] ?? 0;
-      const rider = Math.max(0, Math.round(value * (1 - resist)));
-      if (rider === 0) continue;
-      incomingBreakdown[element] = rider;
-      damage += rider;
+      const { damage: rDmg, heal: rHeal } = resolveElementalAmount(value, resist, { floorOne: false });
+      if (rDmg > 0) {
+        incomingBreakdown[element] = rDmg;
+        damage += rDmg;
+      }
+      if (rHeal > 0) absorbHeal += rHeal; // absorbed rider → healing
     }
   }
 
@@ -4232,7 +4349,9 @@ function _applyMonsterDamage(monster, opts = {}) {
     return;
   }
 
-  setHp(target.id, target.hp - damage, monster.name);
+  // Net HP change: damage out, absorbed elemental damage healed back in. The
+  // same flash + hit sound play either way (no separate heal cue).
+  setHp(target.id, target.hp - damage + absorbHeal, monster.name);
   flashPortraitHit(target.id);
   playPartyHitSound();
   if (isCrit) playCritSound('bash');
@@ -4256,8 +4375,10 @@ function _applyMonsterDamage(monster, opts = {}) {
   // Track damage taken for battle summary
   recordDamageTaken(target.name, damage);
 
-  // Float the damage number above the character's portrait
-  showMemberDamage(target.id, damage, isCrit);
+  // Float the damage number above the character's portrait; if any of the
+  // attack was absorbed, also float an element-tinted heal number.
+  if (damage > 0) showMemberDamage(target.id, damage, isCrit);
+  if (absorbHeal > 0) showMemberDamage(target.id, absorbHeal, false, attackElement, true);
 
   addLogEntry({
     time: Date.now(), actor: 'monster',
@@ -4275,6 +4396,7 @@ function _applyMonsterDamage(monster, opts = {}) {
     isAoe: isAoe ?? false,
     attackElement: (attackElement && attackElement !== 'physical') ? attackElement : null,
     elementResistance: elementResistance || 0,
+    absorbedHeal: absorbHeal || null,
     elementalBreakdown: Object.keys(incomingBreakdown).length > 0 ? incomingBreakdown : null,
     sanctuaryReduction: sanctuaryReduction || null,
   });

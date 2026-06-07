@@ -355,6 +355,9 @@ export function calcPlayerPhysicalDamageBreakdown(character, weaponDef, monster,
 export function getElementalRiderBreakdown(character, monster, weaponDef, ammoDef) {
   const breakdown = {};
   let total = 0;
+  let absorbed = 0;          // sum of riders the monster absorbs (resistance > 100)
+  let absorbedElement = null; // dominant absorbed element, for the heal popup
+  let bestAbsorb = 0;
   // Aggregate flat damage per element first, then apply the weapon's stat
   // scaling once per element (not once per source) so weapon + ammo riders of
   // the same element don't double-count the stat bonus.
@@ -375,14 +378,21 @@ export function getElementalRiderBreakdown(character, monster, weaponDef, ammoDe
   }
   for (const [element, flat] of Object.entries(flatByElement)) {
     const monMult = getMonsterElementMultiplier(monster, element);
-    if (monMult === 0) continue;
+    if (monMult === 0) continue; // immune — no damage, no heal
     const stanceMult = getStanceElementMultiplier(character, element);
     const rider = Math.round((flat + statBonus) * monMult * stanceMult);
-    if (rider <= 0) continue;
+    if (rider < 0) {
+      // Monster absorbs this element (resistance > 100) → it heals instead.
+      const h = -rider;
+      absorbed += h;
+      if (h > bestAbsorb) { bestAbsorb = h; absorbedElement = element; }
+      continue;
+    }
+    if (rider === 0) continue;
     breakdown[element] = rider;
     total += rider;
   }
-  return { breakdown, total };
+  return { breakdown, total, absorbed, absorbedElement };
 }
 
 /**
@@ -395,7 +405,7 @@ export function getElementalRiderBreakdown(character, monster, weaponDef, ammoDe
  * @param {object} character  Party member (needs stats.intelligence)
  * @param {object|null} weaponDef  Item definition (needs baseDamage)
  * @param {object} monster    Monster (needs stats.resilience)
- * @returns {number}          Final damage (minimum 1)
+ * @returns {{damage:number, heal:number}} Final damage, or heal if the monster absorbs the element
  */
 export function calcPlayerMagicDamage(character, weaponDef, monster, weaponIsHQ = false) {
   const hqBonus = weaponIsHQ ? getHqWeaponDamageBonus(weaponDef) : 0;
@@ -431,40 +441,42 @@ export function calcPlayerMagicDamage(character, weaponDef, monster, weaponIsHQ 
   if (element) {
     const monMult = getMonsterElementMultiplier(monster, element);
     const stanceElemMult = getStanceElementMultiplier(character, element);
-    if (monMult === 0) return 0; // immune — no damage at all
+    if (monMult === 0) return { damage: 0, heal: 0 }; // immune — no damage at all
+    if (monMult < 0) {
+      // Monster absorbs this element (resistance > 100) → it heals instead of taking damage.
+      return { damage: 0, heal: Math.max(1, Math.round(afterMit * -monMult * stanceElemMult)) };
+    }
     afterMit = Math.max(1, Math.round(afterMit * monMult * stanceElemMult));
   }
 
   const stanceMult = getStanceDamageMultiplier(character, monster) * getMagicDamageMultiplier(character);
-  return stanceMult === 1 ? afterMit : Math.max(1, Math.round(afterMit * stanceMult));
+  const finalDamage = stanceMult === 1 ? afterMit : Math.max(1, Math.round(afterMit * stanceMult));
+  return { damage: finalDamage, heal: 0 };
 }
 
 /**
- * Damage dealt by a monster's attack on a party member.
+ * Physical magnitude of a monster's attack on a party member.
  * Scales with monster STR; soaked by the character's VITALITY via the
- * multiplicative `K / (K + VIT)` curve, then DEF subtracts flat. If the attack
- * carries an element, the caller passes a pre-resolved `elementResistance`
- * (0..1) which is applied as a final multiplicative reduction.
+ * multiplicative `K / (K + VIT)` curve, then DEF subtracts flat. The attack's
+ * element multiplier (resist/weak/immune/absorb) is applied by the caller so
+ * that absorption can turn the hit into healing.
  *
  * @param {object} monster              Monster (needs stats.strength)
  * @param {object} character            Party member (needs stats.vitality)
  * @param {number} [characterDefence=0] Total physical defence from equipment
- * @param {number} [elementResistance=0] Pre-resolved player resistance (0..0.9) for the attack's element. Caller passes 0 for non-elemental.
- * @returns {number}                    Final damage (minimum 1)
+ * @returns {number}                    Physical damage (minimum 1)
  */
-export function calcMonsterDamage(monster, character, characterDefence = 0, elementResistance = 0) {
+export function calcMonsterDamage(monster, character, characterDefence = 0) {
   const raw = (monster.stats?.strength ?? 10) + MONSTER_BASE_ATTACK;
   // Physical mitigation: VITALITY only via the multiplicative curve. Mirrors
   // the player→monster path; RES is reserved for magic and afflictions.
   const vit = character.stats?.vitality ?? 0;
   const afterCurve = Math.floor(raw * MITIGATION_K / (MITIGATION_K + vit));
-  if (elementResistance >= 1) return 0;
   // Flat DEF subtracts, but can never erase more than (1 − MIN_INCOMING_DAMAGE_FRACTION)
   // of the curve-reduced hit — keeps fixed monster damage from drifting to the chip
   // floor as gear DEF scales. See MIN_INCOMING_DAMAGE_FRACTION.
   const minThrough = afterCurve * MIN_INCOMING_DAMAGE_FRACTION;
   let dmg = Math.max(1, Math.round(Math.max(minThrough, afterCurve - characterDefence)));
-  if (elementResistance) dmg = Math.max(1, Math.round(dmg * (1 - elementResistance)));
   return window.easyMode ? Math.max(1, Math.floor(dmg * 0.5)) : dmg;
 }
 

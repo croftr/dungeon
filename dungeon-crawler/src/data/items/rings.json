@@ -72,12 +72,12 @@
         "icon": "/icons/rings/ring_of_balance.webp",
         "description": "A harmonious prism that grants protection against a wide array of elemental forces.",
         "elementalResistances": {
-            "holy": 0.1,
-            "dark": 0.1,
-            "fire": 0.1,
-            "ice": 0.1,
-            "lightning": 0.1,
-            "water": 0.1
+            "holy": 10,
+            "dark": 10,
+            "fire": 10,
+            "ice": 10,
+            "lightning": 10,
+            "water": 10
         },
         "value": 360,
         "weight": 0.05
@@ -90,7 +90,7 @@
         "icon": "/icons/rings/storm_ring.webp",
         "description": "A copper band set with a crackling sapphire stone. Protects the wearer against electrical forces.",
         "elementalResistances": {
-            "lightning": 0.2
+            "lightning": 20
         },
         "value": 360,
         "weight": 0.05

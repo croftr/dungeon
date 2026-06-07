@@ -7910,6 +7910,14 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   font-size: 16px;
 }
 
+/* Elemental absorption (resistance > 100): HP gained from an element. Uses the
+   element's own colour inline when available; this is the no-element fallback. */
+.damage-popup--absorb {
+  color: #6bd66b;
+  font-weight: 700;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.9);
+}
+
 /* ── Game Over overlay ───────────────────────────────────────────────────── */
 #game-over {
   display: none;

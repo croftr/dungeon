@@ -196,7 +196,7 @@ function _downloadCsv() {
       details = e.description || '';
     } else if (type === 'trap') {
       action = e.trapLabel || 'Trap';
-      result = e.amount > 0 ? 'Hit' : 'Miss';
+      result = e.absorbed ? 'Absorbed' : (e.amount > 0 ? 'Hit' : 'Miss');
       damage = e.amount > 0 ? Math.round(e.amount) : '';
       details = e.element || '';
     } else {
@@ -387,7 +387,9 @@ function _buildRowHtml(e) {
   if (e.type === 'trap') {
     const trapLabel = e.trapLabel || 'Trap';
     const elem = e.element ? ` (${e.element})` : '';
-    const dmgStr = e.amount > 0 ? `<b>${Math.round(e.amount)}</b> dmg` : `<b>no</b> dmg`;
+    const dmgStr = e.absorbed
+      ? `<b>+${Math.round(e.amount)}</b> HP absorbed`
+      : (e.amount > 0 ? `<b>${Math.round(e.amount)}</b> dmg` : `<b>no</b> dmg`);
     return `<span class="bl-badge">🪤</span>` +
       `<span class="bl-who" style="max-width: none; flex: 1;">${trapLabel}${elem} → <b>${e.target}</b> ${dmgStr}</span>`;
   }
@@ -475,12 +477,21 @@ function _buildRowHtml(e) {
     // Monster attack with an element (e.g. fire elemental) — same prefix shape,
     // plus a "(resN%)" suffix when the player's gear soaked some of it.
     const monsterElemPrefix = (e.actor === 'monster' && e.attackElement) ? `${_elemBadge(e.attackElement, null)} ` : '';
-    const monsterResistTrail = (e.actor === 'monster' && e.attackElement && e.elementResistance > 0)
-      ? ` <span class="bl-elem-resist">(res ${Math.round(e.elementResistance * 100)}%)</span>` : '';
-    if (e.crit) {
-      dmgPart = `${elemPrefix}${monsterElemPrefix}<b>CRIT! ${Math.round(e.finalDamage)}</b><span style="font-size:10px;">dmg</span>${elemTrail}${monsterResistTrail}`;
+    // Unified -100..+200 resistance: positive = resisted, negative = weakness.
+    let monsterResistTrail = '';
+    if (e.actor === 'monster' && e.attackElement) {
+      const R = e.elementResistance || 0;
+      if (R > 0) monsterResistTrail = ` <span class="bl-elem-resist">(res ${R}%)</span>`;
+      else if (R < 0) monsterResistTrail = ` <span class="bl-elem-resist">(weak ${-R}%)</span>`;
+    }
+    const absorbTrail = e.absorbedHeal ? ` <span class="bl-elem-resist">+${e.absorbedHeal} HP absorbed</span>` : '';
+    if (e.finalDamage <= 0 && e.absorbedHeal) {
+      // Whole attack absorbed — restored HP instead of dealing damage.
+      dmgPart = `${elemPrefix}${monsterElemPrefix}<b>+${e.absorbedHeal}</b> HP absorbed`;
+    } else if (e.crit) {
+      dmgPart = `${elemPrefix}${monsterElemPrefix}<b>CRIT! ${Math.round(e.finalDamage)}</b><span style="font-size:10px;">dmg</span>${elemTrail}${monsterResistTrail}${absorbTrail}`;
     } else {
-      dmgPart = `${elemPrefix}${monsterElemPrefix}<b>${Math.round(e.finalDamage)}</b> dmg${elemTrail}${monsterResistTrail}`;
+      dmgPart = `${elemPrefix}${monsterElemPrefix}<b>${Math.round(e.finalDamage)}</b> dmg${elemTrail}${monsterResistTrail}${absorbTrail}`;
     }
   }
   const formula = _formula(e);

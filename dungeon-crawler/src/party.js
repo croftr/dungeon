@@ -1193,18 +1193,20 @@ export function flashPortraitCrit(index) {
 }
 
 /** Float a red damage number above the member's portrait when they are hit. */
-export function showMemberDamage(memberIndex, damage, isCrit, element = null) {
+export function showMemberDamage(memberIndex, damage, isCrit, element = null, isHeal = false) {
   const memberTop = document.querySelector(`#member-${memberIndex} .member-main`);
   if (!memberTop) return;
   const popup = document.createElement('span');
   popup.className = 'damage-popup damage-popup--incoming' +
-    (isCrit ? ' damage-popup--crit' : '');
+    (isCrit ? ' damage-popup--crit' : '') +
+    (isHeal ? ' damage-popup--absorb' : '');
   const elemDef = element ? ELEMENTS[element] : null;
+  const sign = isHeal ? '+' : '';
   if (elemDef) {
     popup.style.color = elemDef.color;
-    popup.textContent = `${elemDef.symbol ?? ''} ${damage}`.trim();
+    popup.textContent = `${elemDef.symbol ?? ''} ${sign}${damage}`.trim();
   } else {
-    popup.textContent = damage;
+    popup.textContent = `${sign}${damage}`;
   }
   memberTop.appendChild(popup);
   setTimeout(() => popup.remove(), 900);
@@ -1339,13 +1341,13 @@ export function applyRegeneration() {
  *   1. Equipment + skill-node grants (m.elementalResistances, built by updateEffectiveStats)
  *   2. Active buff/debuff status effects with elementalResistances on the def
  *   3. The current stance's elementalResistances effect
- * Positive values capped at 0.9; negatives (vulnerabilities) pass through.
+ * Unified -100..+200 scale (see elements.js); summed, uncapped. Negatives =
+ * vulnerability, values > 100 = absorption (element heals the member).
  */
 export function getEffectiveElementalResistances(member) {
   const combined = { ...(member.elementalResistances ?? {}) };
   const add = (elem, val) => {
-    const sum = (combined[elem] ?? 0) + val;
-    combined[elem] = sum > 0.9 ? 0.9 : sum;
+    combined[elem] = (combined[elem] ?? 0) + val;
   };
   const now = performance.now();
   (member.activeDebuffs ?? []).forEach(d => {
@@ -1363,7 +1365,7 @@ export function getEffectiveElementalResistances(member) {
     }
   }
   if (skillsState.combust?.active && skillsState.combust?.actorName === member.name && now < skillsState.combust.expiresAt) {
-    add('fire', 0.5);
+    add('fire', 50);
   }
   return combined;
 }

@@ -36,7 +36,7 @@
             "fire": 1
         },
         "elementalResistances": {
-            "fire": 0.2
+            "fire": 20
         }
     }
 ]

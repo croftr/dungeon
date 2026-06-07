@@ -42,8 +42,8 @@
             "resilience": 1
         },
         "elementalResistances": {
-            "fire": 0.1,
-            "ice": 0.1
+            "fire": 10,
+            "ice": 10
         }
     },
     {
@@ -59,8 +59,8 @@
             "resilience": 1
         },
         "elementalResistances": {
-            "lightning": 0.1,
-            "water": 0.1
+            "lightning": 10,
+            "water": 10
         }
     }
 ]

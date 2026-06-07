@@ -321,8 +321,8 @@
       "ice": 5
     },
     "elementalResistances": {
-      "ice": "immune",
-      "fire": "weak"
+      "ice": 150,
+      "fire": -50
     },
     "onHitEffects": [
       {
@@ -363,7 +363,7 @@
     "xp": 245,
     "attackSpeed": 1,
     "elementalResistances": {
-      "fire": "weak"
+      "fire": -50
     },
     "stats": {
       "strength": 18,
@@ -412,7 +412,7 @@
       }
     ],
     "elementalResistances": {
-      "fire": "weak"
+      "fire": -50
     },
     "hp": 400,
     "defence": 12,
@@ -468,7 +468,7 @@
     "description": "Massive and brute-brained, Ogres compensate for their low cunning with overwhelming ferocity. A single blow from their knotted fists can cave iron armour and shatter stone columns.",
     "image": "/monster-images/ogre.webp",
     "elementalResistances": {
-      "ice": "weak"
+      "ice": -50
     },
     "specialAttacks": [
       {
@@ -859,12 +859,12 @@
       "resilience": 6
     },
     "elementalResistances": {
-      "fire": "resist",
-      "ice": "resist",
-      "lightning": "resist",
-      "water": "resist",
-      "holy": "resist",
-      "dark": "resist"
+      "fire": 50,
+      "ice": 50,
+      "lightning": 50,
+      "water": 50,
+      "holy": 50,
+      "dark": 50
     },
     "drops": [
       {
@@ -916,12 +916,12 @@
       "ice": 4
     },
     "elementalResistances": {
-      "fire": "weak",
-      "ice": "immune",
-      "lightning": "resist",
-      "water": "resist",
-      "holy": "resist",
-      "dark": "resist"
+      "fire": -50,
+      "ice": 150,
+      "lightning": 50,
+      "water": 50,
+      "holy": 50,
+      "dark": 50
     },
     "drops": [
       {
@@ -975,10 +975,10 @@
       "resilience": 35
     },
     "elementalResistances": {
-      "fire": "resist",
-      "lightning": "resist",
-      "holy": "resist",
-      "dark": "resist"
+      "fire": 50,
+      "lightning": 50,
+      "holy": 50,
+      "dark": 50
     },
     "drops": [
       {
@@ -1228,12 +1228,12 @@
       "lightning": 45
     },
     "elementalResistances": {
-      "fire": "weak",
-      "ice": "weak",
-      "lightning": "immune",
-      "water": "vulnerable",
-      "holy": "weak",
-      "dark": "weak"
+      "fire": -50,
+      "ice": -50,
+      "lightning": 100,
+      "water": -100,
+      "holy": -50,
+      "dark": -50
     },
     "specialAttacks": [
       {
@@ -1312,12 +1312,12 @@
       "resilience": 38
     },
     "elementalResistances": {
-      "ice": "weak",
-      "water": "weak",
-      "fire": "immune",
-      "holy": "resist",
-      "lightning": "resist",
-      "dark": "resist"
+      "ice": -50,
+      "water": -50,
+      "fire": 200,
+      "holy": 50,
+      "lightning": 50,
+      "dark": 50
     },
     "specialAttacks": [
       {
@@ -1437,12 +1437,12 @@
       "resilience": 25
     },
     "elementalResistances": {
-      "fire": "immune",
-      "ice": "immune",
-      "holy": "immune",
-      "dark": "immune",
-      "lightning": "immune",
-      "water": "immune"
+      "fire": 100,
+      "ice": 100,
+      "holy": 100,
+      "dark": 100,
+      "lightning": 100,
+      "water": 100
     },
     "specialAttacks": [
       {

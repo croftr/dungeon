@@ -77,11 +77,11 @@
             "Sanctuary": 5
         },
         "elementalResistances": {
-            "dark": 0.1,
-            "fire": 0.1,
-            "ice": 0.1,
-            "lightning": 0.1,
-            "water": 0.1
+            "dark": 10,
+            "fire": 10,
+            "ice": 10,
+            "lightning": 10,
+            "water": 10
         },
         "icon": "/icons/shields/wardens_shield.webp",
         "description": "A heavy, reinforced shield used by the keepers of the deep. Provides exceptional protection.",
@@ -112,12 +112,12 @@
         "value": 1400,
         "weight": 4.0,
         "elementalResistances": {
-            "holy": 0.1,
-            "dark": 0.1,
-            "fire": 0.1,
-            "ice": 0.1,
-            "lightning": 0.1,
-            "water": 0.1
+            "holy": 10,
+            "dark": 10,
+            "fire": 10,
+            "ice": 10,
+            "lightning": 10,
+            "water": 10
         },
         "statBonuses": {
             "resilience": 2

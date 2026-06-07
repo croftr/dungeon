@@ -9,8 +9,8 @@
         "weight": 0.3,
         "set": "wizard",
         "elementalResistances": {
-            "fire": 0.02,
-            "ice": 0.02
+            "fire": 2,
+            "ice": 2
         },
         "job": [
             "Wizard",
@@ -27,8 +27,8 @@
         "weight": 0.6,
         "set": "wizard",
         "elementalResistances": {
-            "fire": 0.02,
-            "ice": 0.02
+            "fire": 2,
+            "ice": 2
         },
         "job": [
             "Wizard",
@@ -45,8 +45,8 @@
         "weight": 0.02,
         "set": "wizard",
         "elementalResistances": {
-            "fire": 0.02,
-            "ice": 0.02
+            "fire": 2,
+            "ice": 2
         },
         "job": [
             "Wizard",
@@ -63,8 +63,8 @@
         "weight": 0.4,
         "set": "wizard",
         "elementalResistances": {
-            "fire": 0.02,
-            "ice": 0.02
+            "fire": 2,
+            "ice": 2
         },
         "job": [
             "Wizard",
@@ -81,8 +81,8 @@
         "weight": 0.3,
         "set": "wizard",
         "elementalResistances": {
-            "fire": 0.02,
-            "ice": 0.02
+            "fire": 2,
+            "ice": 2
         },
         "job": [
             "Wizard",

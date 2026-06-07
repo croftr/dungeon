@@ -69,8 +69,8 @@
         "value": 500,
         "weight": 8,
         "elementalResistances": {
-            "dark": 0.1,
-            "fire": 0.1
+            "dark": 10,
+            "fire": 10
         },
         "statBonuses": {
             "dexterity": 1,
@@ -99,12 +99,12 @@
             "mp": 2
         },
         "elementalResistances": {
-            "holy": 0.1,
-            "dark": 0.1,
-            "fire": 0.2,
-            "ice": 0.1,
-            "lightning": 0.1,
-            "water": 0.1
+            "holy": 10,
+            "dark": 10,
+            "fire": 20,
+            "ice": 10,
+            "lightning": 10,
+            "water": 10
         },
         "job": [
             "White Mage",

@@ -12,10 +12,10 @@
     "description": "Restless souls bound by fell sorcery, haunting ancient tombs and forgotten ruins.",
     "icon": "/icons/family/undead.webp",
     "elementalResistances": {
-      "holy": "vulnerable",
-      "dark": "resist",
-      "ice": "resist",
-      "fire": "weak"
+      "holy": -100,
+      "dark": 50,
+      "ice": 50,
+      "fire": -50
     }
   },
   "aquatic": {
@@ -24,10 +24,10 @@
     "description": "Cold-blooded predators of the deep caves and dark swamps, masters of scale and tooth.",
     "icon": "/icons/family/aquatic.webp",
     "elementalResistances": {
-      "ice": "resist",
-      "water": "immune",
-      "lightning": "vulnerable",
-      "fire": "weak"
+      "ice": 50,
+      "water": 100,
+      "lightning": -100,
+      "fire": -50
     }
   },
   "elemental": {
@@ -64,9 +64,9 @@
     "description": "Malicious horrors from infernal planes that warp reality with their mere presence.",
     "icon": "/icons/family/demon.webp",
     "elementalResistances": {
-      "holy": "weak",
-      "fire": "resist",
-      "dark": "immune"
+      "holy": -50,
+      "fire": 50,
+      "dark": 100
     }
   },
   "celestial": {
@@ -75,9 +75,9 @@
     "description": "Radiant beings bound by oaths of light, harbingers of judgement against the unjust.",
     "icon": "/icons/family/celestial.webp",
     "elementalResistances": {
-      "dark": "vulnerable",
-      "holy": "immune",
-      "lightning": "resist"
+      "dark": -100,
+      "holy": 100,
+      "lightning": 50
     }
   },
   "misc": {

@@ -23,8 +23,8 @@
             "dexterity": 1
         },
         "elementalResistances": {
-            "ice": 0.1,
-            "water": 0.1
+            "ice": 10,
+            "water": 10
         }
     },
     {
@@ -37,7 +37,7 @@
             "vitality": 1
         },
         "elementalResistances": {
-            "water": 0.1
+            "water": 10
         },
         "value": 750,
         "weight": 1.5
@@ -51,7 +51,7 @@
         "value": 100,
         "weight": 2.5,
         "elementalResistances": {
-            "fire": 0.1
+            "fire": 10
         }
     },
     {
@@ -63,7 +63,7 @@
         "value": 100,
         "weight": 2.5,
         "elementalResistances": {
-            "ice": 0.1
+            "ice": 10
         }
     }
 ]

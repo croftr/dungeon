@@ -1,12 +1,21 @@
 // Element registry + helpers for the elemental damage system.
 //
-// Elements are loaded from data/elements.json. Resistance authoring uses two
-// shapes that don't mix:
-//   - Monsters/families: categorical strings → CATEGORY_MULT (immune/resist/normal/weak/vulnerable)
-//   - Armor/buffs/stances: 0..1 percentages, summed and capped at 0.9 in the aggregator
+// Elements are loaded from data/elements.json. ONE unified resistance model is
+// shared by party members AND monsters. Resistance is authored as an integer on
+// a -100..+200 scale (m.elementalResistances / monster.elementalResistances):
 //
-// Combat code calls getMonsterElementMultiplier() for outgoing damage and reads
-// the player's aggregated elementalResistances map for incoming damage.
+//   R = -100 → vulnerable, take 2.0× damage
+//   R =  -50 → weak,       take 1.5× damage
+//   R =    0 → neutral,    take full damage
+//   R =  +50 → resist,     take 0.5× damage
+//   R = +100 → immune,     take 0 damage
+//   R = +150 → absorb 50%  → HEAL for half the would-be damage
+//   R = +200 → absorb 100% → HEAL for the full would-be damage
+//
+// Incoming elemental damage is multiplied by resistanceMultiplier(R) = 1 - R/100.
+// A NEGATIVE product means the element heals the target instead of hurting it.
+// Combat code calls getMonsterElementMultiplier() for player→monster damage and
+// resistanceMultiplier() with the player's aggregated resistance for incoming.
 
 import ELEMENTS from './data/elements.json';
 import MONSTER_FAMILIES from './data/monster-families.json';
@@ -14,35 +23,40 @@ import MONSTER_FAMILIES from './data/monster-families.json';
 export { ELEMENTS };
 export const ELEMENT_IDS = Object.keys(ELEMENTS);
 
-export const CATEGORY_MULT = {
-  immune: 0,
-  resist: 0.5,
-  normal: 1,
-  weak: 1.5,
-  vulnerable: 2.0,
-};
+// The whole system in one line: a resistance value → an incoming-damage multiplier.
+// >1 = takes extra, <0 = absorbs (heals). Shared by party and monsters.
+export function resistanceMultiplier(resistance) {
+  return 1 - (resistance ?? 0) / 100;
+}
 
-// Elemental trap multipliers. Elemental traps apply a base penalty (see
-// ELEMENTAL_TRAP_BASE_PENALTY in objects.js) so they deal less than non-elemental
-// by default. Full weak/vulnerable multipliers here ensure they pay off when the
-// monster actually has the weakness. Net effective ratios vs a non-elemental trap:
-//   normal → 0.75×  resist → 0.375×  weak → 1.125×  vulnerable → 1.5×
-export const TRAP_CATEGORY_MULT = {
-  immune: 0,
-  resist: 0.5,
-  normal: 1,
-  weak: 1.5,
-  vulnerable: 2.0,
-};
+// Back-compat: monsters/families used to author categorical strings. Map any
+// legacy string to its numeric equivalent so old data and old saves keep working.
+const LEGACY_CATEGORY_R = { immune: 100, resist: 50, normal: 0, weak: -50, vulnerable: -100 };
+export function toResistanceValue(v) {
+  if (typeof v === 'number') return v;
+  if (typeof v === 'string') return LEGACY_CATEGORY_R[v] ?? 0;
+  return 0;
+}
 
-const PLAYER_RESIST_CAP = 0.9;
+// Resolve a would-be elemental `amount` against a resistance value into a final
+// outcome: exactly one of { damage, heal } is > 0 (both 0 = immune / fully
+// resisted). A resistance > 100 yields a negative multiplier → the element
+// absorbs into healing. `floorOne` keeps genuine hits from rounding away to 0
+// (chip-damage floor); pass false for stacked riders that may legitimately be 0.
+export function resolveElementalAmount(amount, resistance, { floorOne = true } = {}) {
+  const signed = amount * resistanceMultiplier(resistance);
+  if (signed < 0) return { damage: 0, heal: Math.round(-signed) };
+  const rounded = Math.round(signed);
+  if (rounded <= 0) return { damage: 0, heal: 0 };
+  return { damage: floorOne ? Math.max(1, rounded) : rounded, heal: 0 };
+}
 
 export function getMonsterElementMultiplier(monster, element) {
   if (!element || element === 'physical') return 1;
   const own = monster?.elementalResistances?.[element];
-  if (own != null) return CATEGORY_MULT[own] ?? 1;
+  if (own != null) return resistanceMultiplier(toResistanceValue(own));
   const fam = MONSTER_FAMILIES[monster?.family]?.elementalResistances?.[element];
-  if (fam != null) return CATEGORY_MULT[fam] ?? 1;
+  if (fam != null) return resistanceMultiplier(toResistanceValue(fam));
   return 1;
 }
 
@@ -61,21 +75,10 @@ export function getMonsterAttackTypeMultiplier(monster, attackType) {
   return 1;
 }
 
-// Trap-specific variant — same lookup logic, softer multipliers.
+// Trap-specific variant — identical to the monster lookup under the unified
+// model (elemental traps apply their base penalty separately in objects.js).
 export function getMonsterTrapElementMultiplier(monster, element) {
-  if (!element || element === 'physical') return 1;
-  const own = monster?.elementalResistances?.[element];
-  if (own != null) return TRAP_CATEGORY_MULT[own] ?? 1;
-  const fam = MONSTER_FAMILIES[monster?.family]?.elementalResistances?.[element];
-  if (fam != null) return TRAP_CATEGORY_MULT[fam] ?? 1;
-  return 1;
-}
-
-// Cap the upper end at 0.9 (90% reduction) — matches the existing
-// statusResistances pattern. Negative values pass through unchanged so a
-// vulnerable wearer can take >100% incoming damage.
-export function capPlayerResistance(value) {
-  return Math.min(PLAYER_RESIST_CAP, value);
+  return getMonsterElementMultiplier(monster, element);
 }
 
 // Returns the dominant element id for an attack, or null if non-elemental.

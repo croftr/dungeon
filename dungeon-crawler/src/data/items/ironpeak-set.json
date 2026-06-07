@@ -62,7 +62,7 @@
         "defence": 2,
         "value": 750,
         "weight": 1.5,
-        "elementalResistances": { "ice": 0.25 },
+        "elementalResistances": { "ice": 25 },
         "set": "ironpeak",
         "job": ["Warrior"]
     }

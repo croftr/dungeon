@@ -53,7 +53,7 @@
             "vitality": 1
         },
         "elementalResistances": {
-            "water": 0.1
+            "water": 10
         }
     }
 ]

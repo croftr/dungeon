@@ -107,12 +107,12 @@
         },
         "trapDisarmBonus": 0.2,
         "elementalResistances": {
-            "holy": 0.5,
-            "dark": 0.5,
-            "fire": 0.5,
-            "ice": 0.5,
-            "lightning": 0.5,
-            "water": 0.5
+            "holy": 50,
+            "dark": 50,
+            "fire": 50,
+            "ice": 50,
+            "lightning": 50,
+            "water": 50
         }
     },
     {

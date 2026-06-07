@@ -168,12 +168,12 @@
     "color": "#a0c8ff",
     "duration": 60,
     "elementalResistances": {
-      "holy": 0.1,
-      "dark": 0.1,
-      "fire": 0.1,
-      "ice": 0.1,
-      "lightning": 0.1,
-      "water": 0.1
+      "holy": 10,
+      "dark": 10,
+      "fire": 10,
+      "ice": 10,
+      "lightning": 10,
+      "water": 10
     }
   },
   "resist-fire": {
@@ -185,7 +185,7 @@
     "color": "#ff4040",
     "duration": 30,
     "elementalResistances": {
-      "fire": 0.3
+      "fire": 30
     }
   },
   "resist-ice": {
@@ -197,7 +197,7 @@
     "color": "#40ffff",
     "duration": 30,
     "elementalResistances": {
-      "ice": 0.3
+      "ice": 30
     }
   },
   "resist-lightning": {
@@ -209,7 +209,7 @@
     "color": "#ffff00",
     "duration": 30,
     "elementalResistances": {
-      "lightning": 0.3
+      "lightning": 30
     }
   },
   "resist-water": {
@@ -221,7 +221,7 @@
     "color": "#4080ff",
     "duration": 30,
     "elementalResistances": {
-      "water": 0.3
+      "water": 30
     }
   },
   "encumbered": {

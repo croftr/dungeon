@@ -74,7 +74,7 @@
         "weight": 1.0,
         "statBonuses": { "intelligence": 2 },
         "skillBonuses": { "fire": 2 },
-        "elementalResistances": { "fire": 0.2 },
+        "elementalResistances": { "fire": 20 },
         "set": "aethelgard",
         "job": ["Wizard"]
     }

@@ -32,12 +32,12 @@
         "attackType": null,
         "baseDamage": null,
         "elementalResistances": {
-            "holy": 0.1,
-            "dark": 0.1,
-            "fire": 0.2,
-            "ice": 0.1,
-            "lightning": 0.1,
-            "water": 0.1
+            "holy": 10,
+            "dark": 10,
+            "fire": 20,
+            "ice": 10,
+            "lightning": 10,
+            "water": 10
         },
         "icon": "/icons/neck/balance_pendant.webp",
         "description": "A harmonious prism that grants protection against a wide array of elemental forces.",
@@ -51,7 +51,7 @@
         "attackType": null,
         "baseDamage": null,
         "elementalResistances": {
-            "lightning": 0.3
+            "lightning": 30
         },
         "icon": "/icons/neck/storm_pendant.webp",
         "description": "A copper pendant set with an amber gemstone that draws away static charge. Provides significant lightning resistance.",

@@ -3,6 +3,7 @@ import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import { buildLevel, buildTextureZone, buildInnerTextureZone, buildFloorZone, buildCeilingZone, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures, CROW_REALM_LEVEL } from './map.js';
 import ELEMENT_FLOORS from './data/element-floors.json';
+import { resolveElementalAmount } from './elements.js';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
 import { initLighting, updateLighting, applyLevelTheme } from './lighting.js';
 import { initParticles, updateParticles, invalidateParticleTextures } from './particles.js';
@@ -625,12 +626,20 @@ function tickElementFloorDamage(dt) {
     party.forEach((m, i) => {
       if (!m || m.isEmpty || m.isDead) return;
       const resistance = getEffectiveElementalResistances(m)[def.element] ?? 0;
-      if (resistance >= 1) return;
-      const dmg = Math.max(1, Math.round(def.dps * (1 - resistance)));
-      setHp(i, m.hp - dmg, floorLabel);
-      showMemberDamage(i, dmg, false);
-      flashPortraitHit(i);
-      addLogEntry({ time: Date.now(), type: 'tick', target: m.name, effectId: id, effectName: floorLabel, amount: dmg });
+      const { damage, heal } = resolveElementalAmount(def.dps, resistance);
+      if (damage === 0 && heal === 0) return; // immune — no tick
+      if (heal > 0) {
+        // Absorption: the same element sound + flash play, but HP is restored.
+        setHp(i, m.hp + heal, floorLabel);
+        showMemberDamage(i, heal, false, def.element, true);
+        flashPortraitHit(i);
+        addLogEntry({ time: Date.now(), type: 'tick', target: m.name, effectId: id, effectName: floorLabel, amount: -heal, element: def.element });
+      } else {
+        setHp(i, m.hp - damage, floorLabel);
+        showMemberDamage(i, damage, false, def.element);
+        flashPortraitHit(i);
+        addLogEntry({ time: Date.now(), type: 'tick', target: m.name, effectId: id, effectName: floorLabel, amount: damage, element: def.element });
+      }
       anyHit = true;
     });
     if (anyHit) playPartyHitSound();
