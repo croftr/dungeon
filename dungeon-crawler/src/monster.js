@@ -2927,7 +2927,7 @@ export function tickMonsterElementFloorDamage(dt) {
       if (mult === 0) return; // immune — no tick
       if (mult < 0) {
         // Absorption (resistance > 100): the floor heals the monster instead.
-        healMonster(m.id, Math.max(1, Math.round(def.dps * -mult)), def.element);
+        healMonster(m.id, Math.max(1, Math.round(def.dps * -mult)), def.element, null, null, { proximityGated: true });
         return;
       }
       const dmg = Math.max(1, Math.round(def.dps * mult));
@@ -3071,7 +3071,7 @@ export function showMonsterHeal(monsterId, amount, element = null, subSlot = nul
 // Heal a monster (elemental absorption). Mirrors hitMonster's HP-bar update and
 // quartet handling; plays the element's own sound (no separate heal cue) and
 // logs the gain as a heal tick so it reads "[fire absorbed] +N HP".
-export function healMonster(monsterId, amount, element = null, healer = null, subSlot = null) {
+export function healMonster(monsterId, amount, element = null, healer = null, subSlot = null, { proximityGated = false } = {}) {
   const m = monsters.find(x => x.id === monsterId && x.alive);
   if (!m || amount <= 0) return;
   let member = null;
@@ -3081,30 +3081,48 @@ export function healMonster(monsterId, amount, element = null, healer = null, su
       : m.members.find(s => s.alive) || null;
     if (!member) return;
   }
+  // Absorption only restores HP up to the cap — track the amount actually
+  // gained (which is 0 when already at full health) so feedback reflects reality.
+  let healed = 0;
   if (member) {
+    const before = member.hp;
     member.hp = Math.min(member.hpMax, member.hp + amount);
+    healed = member.hp - before;
     m.hp = m.members.reduce((sum, s) => sum + s.hp, 0);
     if (member.hpBarFill) {
       const pct = member.hpMax > 0 ? (member.hp / member.hpMax) * 100 : 0;
       member.hpBarFill.style.width = `${pct}%`;
     }
   } else {
+    const before = m.hp;
     m.hp = Math.min(m.hpMax, m.hp + amount);
+    healed = m.hp - before;
     if (m.hpBarFill) {
       const pct = m.hpMax > 0 ? (m.hp / m.hpMax) * 100 : 0;
       m.hpBarFill.style.width = `${pct}%`;
     }
   }
+  // Nothing was actually absorbed (already full) — no number, no sound, no log.
+  if (healed <= 0) return;
   if (_huntersEyeTargetId === m.id) _renderHuntersEyeHud(m);
   setTimeout(() => {
     if (!m.mesh) return;
     const elemDef = element ? ELEMENTS[element] : null;
+    // A monster absorbing an elemental floor (e.g. an iceman on ice) heals every
+    // tick. Without gating, the sound and floating number would carry across the
+    // whole level and through walls — only surface them when the party is
+    // standing right next to the monster.
+    const _audible = !proximityGated || Math.max(
+      Math.abs(m.gridRow - player.gridRow),
+      Math.abs(m.gridCol - player.gridCol),
+    ) <= 1;
+    if (!_audible) return;
     if (elemDef?.sound) playSoundByUrl(asset(elemDef.sound), 0.7);
-    showMonsterHeal(monsterId, amount, element, member?.subSlot ?? subSlot);
+    showMonsterHeal(monsterId, healed, element, member?.subSlot ?? subSlot);
   }, 250);
   addLogEntry({
     time: Date.now(), type: 'tick', actor: 'player', attacker: healer || 'Player',
-    target: m.name, effectId: 'absorb', effectName: `${element ?? 'element'} absorbed`, amount: -amount,
+    target: m.name, effectId: 'absorb', effectName: `${element ?? 'element'} absorbed`, amount: -healed,
   });
 }
 
@@ -3322,7 +3340,14 @@ export function hitMonster(monsterId, finalDamage, attackType, isCrit = false, k
       : null;
     const _floorElemDef = _floorElem ? ELEMENTS[_floorElem] : null;
     if (_floorElemDef?.sound) {
-      playSoundByUrl(asset(_floorElemDef.sound), 0.7);
+      // A monster sizzling on an elemental floor is only audible to the party
+      // when they're standing right next to it — otherwise distant floor tiles
+      // would chirp across the whole level. Gate on Chebyshev adjacency.
+      const _floorAudible = Math.max(
+        Math.abs(m.gridRow - player.gridRow),
+        Math.abs(m.gridCol - player.gridCol),
+      ) <= 1;
+      if (_floorAudible) playSoundByUrl(asset(_floorElemDef.sound), 0.7);
     } else if (!attackType.includes('poison')) {
       playHitSound();
     }

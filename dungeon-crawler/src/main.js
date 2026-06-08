@@ -629,11 +629,15 @@ function tickElementFloorDamage(dt) {
       const { damage, heal } = resolveElementalAmount(def.dps, resistance);
       if (damage === 0 && heal === 0) return; // immune — no tick
       if (heal > 0) {
-        // Absorption: the same element sound + flash play, but HP is restored.
+        // Absorption: the same element sound + flash play, but HP is restored —
+        // only up to the cap, so a full-health member gains (and shows) nothing.
+        const before = m.hp;
         setHp(i, m.hp + heal, floorLabel);
-        showMemberDamage(i, heal, false, def.element, true);
+        const gained = m.hp - before;
+        if (gained <= 0) return; // already full — no number, no flash, no tick
+        showMemberDamage(i, gained, false, def.element, true);
         flashPortraitHit(i);
-        addLogEntry({ time: Date.now(), type: 'tick', target: m.name, effectId: id, effectName: floorLabel, amount: -heal, element: def.element });
+        addLogEntry({ time: Date.now(), type: 'tick', target: m.name, effectId: id, effectName: floorLabel, amount: -gained, element: def.element });
       } else {
         setHp(i, m.hp - damage, floorLabel);
         showMemberDamage(i, damage, false, def.element);

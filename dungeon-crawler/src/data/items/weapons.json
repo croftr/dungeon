@@ -883,7 +883,13 @@
         "icon": "/icons/weapons/dwarf_crossbow.webp",
         "description": "A heavy, short-limbed mechanical crossbow made of dark iron and reinforced with brass dwarven runes. Robust and deadly.",
         "value": 480,
-        "weight": 4.2
+        "weight": 4.2,
+        "weaponSkill": {
+            "name": "Piercing Bolt",
+            "cooldownMs": 60000,
+            "guaranteedHit": true,
+            "guaranteedCrit": true
+        }
     },
     {
         "name": "Mountain Stalker Crossbow",
@@ -902,7 +908,12 @@
         "icon": "/icons/weapons/mountain_crossbow.webp",
         "description": "A high-tension crossbow made of reinforced steel and dark oak, capable of piercing dragon scales.",
         "value": 2400,
-        "weight": 5
+        "weight": 5,
+        "weaponSkill": {
+            "name": "Repeating Bolts",
+            "cooldownMs": 60000,
+            "hits": 3
+        }
     },
     {
         "name": "Greatsword",

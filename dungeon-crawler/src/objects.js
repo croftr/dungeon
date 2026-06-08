@@ -2750,16 +2750,20 @@ function _fireTrap(trapObj) {
             if (dmg === 0 && heal === 0) return; // immune — unaffected
         }
         if (heal > 0) {
-            // Absorption: same element popup/flash, but HP is restored.
+            // Absorption: same element popup/flash, but HP is restored — only up
+            // to the cap, so a full-health member gains (and shows) nothing.
+            const before = m.hp;
             setHp(i, m.hp + heal);
-            showMemberDamage(i, heal, false, element, true);
+            const gained = m.hp - before;
+            if (gained <= 0) return; // already full — no absorb to show
+            showMemberDamage(i, gained, false, element, true);
             flashPortraitHit(i);
             addLogEntry({
-                type: 'trap', target: m.name, amount: heal,
+                type: 'trap', target: m.name, amount: gained,
                 element: element ?? null, trapLabel: def.label ?? 'Trap',
                 time: Date.now(), absorbed: true,
             });
-            damageMessage += `${m.name} absorbs ${heal} HP. `;
+            damageMessage += `${m.name} absorbs ${gained} HP. `;
         } else {
             setHp(i, m.hp - dmg);
             showMemberDamage(i, dmg, false, element);
