@@ -847,7 +847,12 @@
         "icon": "/icons/weapons/sylvan_bow.webp",
         "description": "A legendary longbow carved from the heartwood of an ancient magical tree. It hums with immense power.",
         "value": 2200,
-        "weight": 1.5
+        "weight": 1.5,
+        "weaponSkill": {
+            "name": "Hail of Thorns",
+            "cooldownMs": 60000,
+            "hits": 3
+        }
     },
     {
         "name": "Crossbow",
