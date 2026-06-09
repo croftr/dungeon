@@ -37,7 +37,8 @@ export function spawnLevel3Objects(ctx) {
         "Rune Pendant",
         "Silver Bolts",
         'Poison Arrows',
-        "Tracker's Medallion"
+        "Tracker's Medallion",
+        "Plate Cloak"
     ]);
 
     // South-East room (row 24, col 19)
@@ -45,7 +46,8 @@ export function spawnLevel3Objects(ctx) {
         "Sun Pendant",
         "Greatsword",
         'Balance Pendant',
-        "Crescent Moon Charm"
+        "Crescent Moon Charm",
+        "Chain Cloak"
     ]);
 
     // Secret Room (row 12, col 15)
@@ -54,6 +56,8 @@ export function spawnLevel3Objects(ctx) {
         "Flame Dagger",
         "Flame Arrows",
         "Flame Staff",
+        "Flame Bolts",
+        "Flame Greataxe"
     ]);
 
     // Against the east wall of start chamber (row 27, col 12)

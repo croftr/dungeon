@@ -65,5 +65,24 @@
         "elementalResistances": {
             "ice": 10
         }
+    },
+    {
+        "name": "Chain Cloak",
+        "slot": "cloak",
+        "icon": "/icons/cloak/chain_cloak.webp",
+        "description": "A heavy cloak reinforced with interlocking steel rings, offering sturdy protection at the cost of mobility.",
+        "defence": 2,
+        "value": 250,
+        "weight": 4.5
+    },
+    {
+        "name": "Plate Cloak",
+        "slot": "cloak",
+        "icon": "/icons/cloak/plate_cloak.webp",
+        "description": "A massive cloak layered with heavy steel plates, granting unparalleled protection at the cost of extreme weight.",
+        "defence": 3,
+        "value": 600,
+        "weight": 7.5
     }
 ]
+
