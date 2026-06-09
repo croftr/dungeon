@@ -41,5 +41,45 @@
             "ice": 10,
             "water": 10
         }
+    },
+    {
+        "name": "Crocodile Hide Belt",
+        "slot": "belt",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/belt/crocodile_hide_belt.webp",
+        "description": "A broad belt cut from the armoured hide of a crocodile warrior, its scutes still hard as iron. The relentless vigour of the swamp-stalker keeps the wearer wading on through any mire.",
+        "defence": 2,
+        "value": 950,
+        "weight": 0.6,
+        "statBonuses": {
+            "vitality": 1,
+            "resilience": 1
+        },
+        "elementalResistances": {
+            "ice": 10,
+            "water": 15
+        },
+        "statusResistances": {
+            "slow": 0.3
+        }
+    },
+    {
+        "name": "Colossus Girdle",
+        "slot": "belt",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/belt/colossus_girdle.webp",
+        "description": "A massive girdle reinforced with iron bands torn from a giant's own war-club. Braced about the waist, it lends the strength of mountains and an unshakable nerve.",
+        "defence": 2,
+        "value": 1050,
+        "weight": 0.9,
+        "statBonuses": {
+            "strength": 2
+        },
+        "statusResistances": {
+            "fear": 0.25,
+            "stun": 0.2
+        }
     }
 ]

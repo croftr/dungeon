@@ -72,5 +72,46 @@
         "statBonuses": {
             "hp": 1
         }
+    },
+    {
+        "name": "Labyrinth Horn Pendant",
+        "slot": "neck",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/neck/labyrinth_horn_pendant.webp",
+        "description": "A pendant carved from the splintered horn of the minotaur. It floods the wearer with brute resolve, quieting both fear and the ringing daze of heavy blows.",
+        "defence": 0,
+        "value": 1150,
+        "weight": 0.2,
+        "statBonuses": {
+            "strength": 2,
+            "vitality": 1
+        },
+        "statusResistances": {
+            "fear": 0.3,
+            "stun": 0.25
+        }
+    },
+    {
+        "name": "Infernal Pendant",
+        "slot": "neck",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/neck/infernal_pendant.webp",
+        "description": "A blackened amulet set with a smouldering ember plucked from a demon. It burns with infernal spite, shielding the bearer from fire and shadow.",
+        "defence": 0,
+        "value": 1150,
+        "weight": 0.2,
+        "statBonuses": {
+            "intelligence": 1,
+            "resilience": 1
+        },
+        "elementalResistances": {
+            "fire": 20,
+            "dark": 10
+        },
+        "statusResistances": {
+            "fear": 0.3
+        }
     }
 ]

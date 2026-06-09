@@ -35,7 +35,12 @@ export function spawnLevel0Objects(ctx) {
         "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Elixir of Enlightenment",
         "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence",
         "Tome of the Viperseeker", "War Hammer", "Greatsword", "Flame Greataxe", "Flame Dagger", "Flame Axe",
-        "Iron Ore", "Iron Ore", "Crow Key"
+        "Iron Ore", "Iron Ore", "Crow Key",
+        "Crocodile Hide Belt", "Snapjaw Maul", "Heartwood Charm", "Bramblewood Buckler",
+        "Labyrinth Horn Pendant", "Gorehorn Greataxe", "Tidecaller Band", "Deepwater Trident",
+        "Venomscale Ring", "Coldblood Kris", "Giantweave Mantle", "Colossus Girdle",
+        "Eye of Malice", "Infernal Pendant", "Hellforged Warmace", "Demonhide Drape",
+        "Lodestone Greatshield", "Stormcore Relic", "Corvid Talon Ring", "Nightcaw Staff"
     ], asset('/items/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in the east room (center) ────────────────────────────────────

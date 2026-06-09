@@ -107,5 +107,64 @@
         "statBonuses": {
             "hp": 1
         }
+    },
+    {
+        "name": "Tidecaller Band",
+        "slot": "ring1",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/rings/tidecaller_band.webp",
+        "description": "A ring of polished abyssal pearl set in coral. It hums with the pull of the deep, sharpening the mind and turning aside the cold of the sea.",
+        "value": 950,
+        "weight": 0.05,
+        "statBonuses": {
+            "intelligence": 1,
+            "dexterity": 1
+        },
+        "elementalResistances": {
+            "water": 20,
+            "ice": 10
+        },
+        "skillBonuses": {
+            "Waterbolt": 2
+        }
+    },
+    {
+        "name": "Venomscale Ring",
+        "slot": "ring1",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/rings/venomscale_ring.webp",
+        "description": "A band fashioned from a single iridescent lizard scale. The cold blood of its former owner runs in the wearer, shrugging off venom that would fell lesser folk.",
+        "value": 900,
+        "weight": 0.05,
+        "statBonuses": {
+            "dexterity": 1
+        },
+        "elementalResistances": {
+            "ice": 10
+        },
+        "statusResistances": {
+            "poison": 0.5,
+            "deadly_poison": 0.5
+        }
+    },
+    {
+        "name": "Corvid Talon Ring",
+        "slot": "ring1",
+        "attackType": null,
+        "baseDamage": null,
+        "icon": "/icons/rings/corvid_talon_ring.webp",
+        "description": "A clawed ring wrought from a crow wizard's talon, clutching a sliver of obsidian. It whispers fragments of fire and shadow magic to the wearer.",
+        "value": 950,
+        "weight": 0.05,
+        "statBonuses": {
+            "intelligence": 1,
+            "dexterity": 1
+        },
+        "elementalResistances": {
+            "fire": 10,
+            "dark": 10
+        }
     }
 ]

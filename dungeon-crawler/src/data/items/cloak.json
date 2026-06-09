@@ -71,7 +71,7 @@
         "slot": "cloak",
         "icon": "/icons/cloak/chain_cloak.webp",
         "description": "A heavy cloak reinforced with interlocking steel rings, offering sturdy protection at the cost of mobility.",
-        "defence": 2,
+        "defence": 3,
         "value": 250,
         "weight": 4.5
     },
@@ -80,9 +80,47 @@
         "slot": "cloak",
         "icon": "/icons/cloak/plate_cloak.webp",
         "description": "A massive cloak layered with heavy steel plates, granting unparalleled protection at the cost of extreme weight.",
-        "defence": 3,
+        "defence": 4,
         "value": 600,
         "weight": 7.5
+    },
+    {
+        "name": "Giantweave Mantle",
+        "slot": "cloak",
+        "icon": "/icons/cloak/giantweave_mantle.webp",
+        "description": "A heavy mantle woven from the coarse cloth of a giant, thick enough to turn aside a blizzard and broad enough to shrug off a stunning blow.",
+        "defence": 1,
+        "value": 1100,
+        "weight": 2.0,
+        "statBonuses": {
+            "strength": 1,
+            "vitality": 1
+        },
+        "elementalResistances": {
+            "ice": 15
+        },
+        "statusResistances": {
+            "stun": 0.25
+        }
+    },
+    {
+        "name": "Demonhide Drape",
+        "slot": "cloak",
+        "icon": "/icons/cloak/demonhide_drape.webp",
+        "description": "A sinister drape flayed from the fused flesh of a demon ogre. It radiates a low infernal heat that wards off flame and shadow alike, and steels the heart against terror.",
+        "defence": 1,
+        "value": 1250,
+        "weight": 2.0,
+        "statBonuses": {
+            "strength": 1,
+            "resilience": 1
+        },
+        "elementalResistances": {
+            "fire": 15,
+            "dark": 15
+        },
+        "statusResistances": {
+            "fear": 0.3
+        }
     }
 ]
-

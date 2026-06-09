@@ -122,5 +122,71 @@
         "statBonuses": {
             "resilience": 2
         }
+    },
+    {
+        "name": "Bramblewood Buckler",
+        "blockChance": 22,
+        "slot": "hand",
+        "leftHandOnly": true,
+        "attackType": "shield-bash",
+        "weaponType": "shield",
+        "staminaDrain": 1,
+        "baseDamage": 4,
+        "statWeights": {
+            "str": 1,
+            "dex": 0
+        },
+        "statBonuses": {
+            "vitality": 1
+        },
+        "elementalResistances": {
+            "fire": 10,
+            "ice": 10,
+            "lightning": 10
+        },
+        "icon": "/icons/shields/bramblewood_buckler.webp",
+        "description": "A living shield grown from ancient heartwood, its surface a snarl of bark and thorn that lashes out at any who strike it.",
+        "defence": 2,
+        "value": 1300,
+        "weight": 4.0,
+        "weaponSkill": {
+            "name": "Entangling Roots",
+            "cooldownMs": 60000,
+            "guaranteedStun": true
+        }
+    },
+    {
+        "name": "Lodestone Greatshield",
+        "blockChance": 28,
+        "slot": "hand",
+        "leftHandOnly": true,
+        "attackType": "shield-bash",
+        "weaponType": "shield",
+        "staminaDrain": 1,
+        "baseDamage": 4,
+        "statWeights": {
+            "str": 1.5,
+            "dex": 0
+        },
+        "statBonuses": {
+            "resilience": 2
+        },
+        "elementalResistances": {
+            "lightning": 20
+        },
+        "icon": "/icons/shields/lodestone_greatshield.webp",
+        "description": "A towering shield forged around the charged lodestone heart of an iron warden. It drinks in lightning and discharges it into any foe foolish enough to close.",
+        "defence": 3,
+        "value": 1500,
+        "weight": 4.5,
+        "weaponSkill": {
+            "name": "Static Bash",
+            "cooldownMs": 60000,
+            "vfx": "lightning-strike",
+            "elementalDamage": {
+                "lightning": 20
+            },
+            "guaranteedStun": true
+        }
     }
 ]

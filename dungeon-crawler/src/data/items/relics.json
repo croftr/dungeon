@@ -132,5 +132,62 @@
         "skillBonuses": {
             "dodgeChance": 0.10
         }
+    },
+    {
+        "name": "Heartwood Charm",
+        "slot": "relic",
+        "icon": "/icons/relic/heartwood_charm.webp",
+        "description": "A knot of ancient living heartwood, still faintly green at its core. It slowly knits the bearer's wounds and steadies both body and mind (+1 VIT, +1 INT, regen 2 HP every 5s).",
+        "value": 950,
+        "weight": 0.3,
+        "statBonuses": {
+            "vitality": 1,
+            "intelligence": 1
+        },
+        "hpRegen": {
+            "amount": 2,
+            "interval": 5
+        }
+    },
+    {
+        "name": "Eye of Malice",
+        "slot": "relic",
+        "icon": "/icons/relic/eye_of_malice.webp",
+        "description": "A demon's eye sealed in dark crystal, forever open and forever hateful. It lends its bearer infernal insight and a cruel edge to their spellcraft (+2 INT, +5% Critical Hit Chance, fire & dark resistance).",
+        "value": 1100,
+        "weight": 0.2,
+        "job": [
+            "Wizard",
+            "White Mage"
+        ],
+        "statBonuses": {
+            "intelligence": 2
+        },
+        "elementalResistances": {
+            "fire": 10,
+            "dark": 10
+        },
+        "skillBonuses": {
+            "critChance": 0.05
+        }
+    },
+    {
+        "name": "Stormcore Relic",
+        "slot": "relic",
+        "icon": "/icons/relic/stormcore_relic.webp",
+        "description": "The humming magnetic core of an iron warden, bound in copper wire. It crackles with caged lightning, grounding harmful currents away from the bearer (+1 RES, +1 INT, regen 1 HP every 5s).",
+        "value": 1050,
+        "weight": 0.4,
+        "statBonuses": {
+            "resilience": 1,
+            "intelligence": 1
+        },
+        "elementalResistances": {
+            "lightning": 20
+        },
+        "hpRegen": {
+            "amount": 1,
+            "interval": 5
+        }
     }
 ]

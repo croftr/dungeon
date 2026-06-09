@@ -1094,5 +1094,198 @@
             "cooldownMs": 60000,
             "hits": 3
         }
+    },
+    {
+        "name": "Snapjaw Maul",
+        "slot": "hand",
+        "attackType": "bash",
+        "weaponType": "mace",
+        "staminaDrain": 1,
+        "baseDamage": 17,
+        "delay": 2,
+        "statWeights": {
+            "str": 1,
+            "dex": 0
+        },
+        "statBonuses": {
+            "strength": 1
+        },
+        "onHitEffects": [
+            {
+                "effectId": "slow",
+                "chance": 0.25
+            }
+        ],
+        "icon": "/icons/weapons/snapjaw_maul.webp",
+        "description": "A brutal maul tipped with the iron-shearing jaws of a crocodile warrior. Each blow clamps and drags, slowing the prey for the kill.",
+        "value": 1300,
+        "weight": 2.5,
+        "weaponSkill": {
+            "name": "Death Roll",
+            "cooldownMs": 60000,
+            "hits": 2
+        }
+    },
+    {
+        "name": "Gorehorn Greataxe",
+        "slot": "bothHands",
+        "attackType": "swipe",
+        "weaponType": "twoHanded",
+        "staminaDrain": 2,
+        "baseDamage": 30,
+        "delay": 5,
+        "statWeights": {
+            "str": 0.8,
+            "dex": 0.2
+        },
+        "statBonuses": {
+            "strength": 2
+        },
+        "icon": "/icons/weapons/gorehorn_greataxe.webp",
+        "description": "A colossal axe crowned with the goring horn of the minotaur. It carries the unstoppable momentum of a labyrinth charge.",
+        "value": 1600,
+        "weight": 6.5,
+        "weaponSkill": {
+            "name": "Goring Charge",
+            "cooldownMs": 60000,
+            "guaranteedCrit": true,
+            "hits": 2
+        }
+    },
+    {
+        "name": "Deepwater Trident",
+        "slot": "bothHands",
+        "attackType": "swipe",
+        "weaponType": "twoHanded",
+        "staminaDrain": 1,
+        "baseDamage": 24,
+        "damageType": "water",
+        "elementalDamage": {
+            "water": 10
+        },
+        "delay": 4,
+        "statWeights": {
+            "str": 0.7,
+            "dex": 0.3
+        },
+        "statBonuses": {
+            "dexterity": 1
+        },
+        "icon": "/icons/weapons/deepwater_trident.webp",
+        "description": "The barbed trident of an aqua man, dripping with the chill of the abyss. It calls the crushing weight of the deep down upon its quarry.",
+        "value": 1700,
+        "weight": 6.5,
+        "weaponSkill": {
+            "name": "Maelstrom",
+            "cooldownMs": 60000,
+            "vfx": "water-strike",
+            "elementalDamage": {
+                "water": 40
+            }
+        }
+    },
+    {
+        "name": "Coldblood Kris",
+        "slot": "hand",
+        "attackType": "swipe",
+        "weaponType": "dagger",
+        "staminaDrain": 1,
+        "baseDamage": 9,
+        "damageType": "poison",
+        "delay": 2,
+        "statWeights": {
+            "str": 0.1,
+            "dex": 0.9
+        },
+        "statBonuses": {
+            "dexterity": 1
+        },
+        "onHitEffects": [
+            {
+                "effectId": "deadly_poison",
+                "chance": 0.4
+            }
+        ],
+        "icon": "/icons/weapons/coldblood_kris.webp",
+        "description": "A wavy-bladed dagger ground from a lizard man's scale and steeped in its venom. Cold, patient, and utterly lethal.",
+        "value": 1250,
+        "weight": 0.4,
+        "weaponSkill": {
+            "name": "Venom Flurry",
+            "cooldownMs": 60000,
+            "hits": 3
+        }
+    },
+    {
+        "name": "Hellforged Warmace",
+        "slot": "hand",
+        "attackType": "bash",
+        "weaponType": "mace",
+        "staminaDrain": 1,
+        "baseDamage": 18,
+        "damageType": "fire",
+        "elementalDamage": {
+            "fire": 10
+        },
+        "delay": 2,
+        "statWeights": {
+            "str": 1,
+            "dex": 0
+        },
+        "statBonuses": {
+            "strength": 1
+        },
+        "familyBonus": [
+            {
+                "family": "demon",
+                "bonus": 3
+            }
+        ],
+        "icon": "/icons/weapons/hellforged_warmace.webp",
+        "description": "A glowering mace forged in demon-ogre fire, its head a fist of blackened iron wreathed in flame. It crushes the unholy with savage glee.",
+        "value": 1500,
+        "weight": 2.5,
+        "weaponSkill": {
+            "name": "Infernal Crush",
+            "cooldownMs": 60000,
+            "vfx": "fire-line",
+            "elementalDamage": {
+                "fire": 30
+            },
+            "guaranteedStun": true
+        }
+    },
+    {
+        "name": "Nightcaw Staff",
+        "slot": "hand",
+        "rightHandOnly": true,
+        "attackType": "bash",
+        "weaponType": "staff",
+        "staminaDrain": 1,
+        "baseDamage": 2,
+        "delay": 3.5,
+        "statWeights": {
+            "intelligence": 1
+        },
+        "elementalDamage": {
+            "dark": 20
+        },
+        "icon": "/icons/weapons/nightcaw_staff.webp",
+        "description": "A twisted staff fledged with crow feathers and capped with a shrieking obsidian beak. It channels the crow wizard's mastery of fire and shadow.",
+        "value": 2000,
+        "weight": 1.8,
+        "statBonuses": {
+            "intelligence": 3,
+            "mp": 2
+        },
+        "skillBonuses": {
+            "dark": 2,
+            "fire": 2
+        },
+        "weaponSkill": {
+            "name": "Darkbolt",
+            "cooldownMs": 60000,
+            "spell": "Darkbolt"
+        }
     }
 ]
