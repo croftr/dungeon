@@ -179,9 +179,10 @@ export function spawnLevel2Objects(ctx) {
     addInteractiveCauldron(group, loader, 4, 17.5, 0, 0.5, 0.1, 0, 0, 17, 4);
 
     // Empty chest in the hidden chest room (rows 8-10, cols 2-4) revealed behind
-    // the cauldron passage — TODO: add loot. offsetZ -1.3 tucks it a full grid
-    // square north against the back wall; rotY 0 faces it into the room.
-    addChest(group, loader, 3, 8, 0, -1.3, [], asset('/items/magic-chest.glb'), true, 0, 'Chest', 0.22);
+    // the cauldron passage — TODO: add loot. offsetZ -0.5 sits it against the north
+    // back wall while staying in front of it (the wall face is at -1.0); rotY 0
+    // faces it into the room.
+    addChest(group, loader, 3, 8, 0, -0.5, [], asset('/items/magic-chest.glb'), true, 0, 'Chest', 0.44);
     // Spell cabinet against the west wall (col 1) and weapon rack against the east
     // wall (col 5) of the same room — both empty for now.
     addSpellCabinet(group, loader, 2, 9, Math.PI / 2, -0.7, 0, []);
