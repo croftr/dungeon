@@ -13,6 +13,28 @@
 //  Cell codes: 0 = floor, 1 = wall, 2 = start.
 // ─────────────────────────────────────────────────────────────────────────────
 
+// North wing (new): reached by punching a doorway in Small Room 1's north wall
+// ([6,41]). A row-5 corridor runs west→east feeding four small rooms (rows 1–3);
+// two of them hold chests. The wing lives in rows 0–5, cols 38–53 — solid wall in
+// both this map and Level 2's grid, so Level 2's crow wall-off stays a no-op here.
+const CROW_NORTH_WING_FLOORS = [
+  // doorway up out of Small Room 1
+  [6, 41],
+  // north corridor (row 5)
+  [5, 38], [5, 39], [5, 40], [5, 41], [5, 42], [5, 43], [5, 44],
+  [5, 45], [5, 46], [5, 47], [5, 48], [5, 49], [5, 50], [5, 51],
+  // room doorways (row 4)
+  [4, 39], [4, 43], [4, 47], [4, 51],
+  // Room A (cols 38–40)
+  [1, 38], [1, 39], [1, 40], [2, 38], [2, 39], [2, 40], [3, 38], [3, 39], [3, 40],
+  // Room B (cols 42–44)  ← chest
+  [1, 42], [1, 43], [1, 44], [2, 42], [2, 43], [2, 44], [3, 42], [3, 43], [3, 44],
+  // Room C (cols 46–48)
+  [1, 46], [1, 47], [1, 48], [2, 46], [2, 47], [2, 48], [3, 46], [3, 47], [3, 48],
+  // Room D (cols 50–52)  ← chest
+  [1, 50], [1, 51], [1, 52], [2, 50], [2, 51], [2, 52], [3, 50], [3, 51], [3, 52],
+];
+
 // Walkable cells of the crow region.
 export const CROW_FLOOR_CELLS = [
   // Stance NPC room (annex)
@@ -47,6 +69,8 @@ export const CROW_FLOOR_CELLS = [
   [8, 52], [8, 53], [8, 54], [8, 55], [8, 56], [8, 57],
   [9, 52], [9, 53], [9, 54], [9, 55], [9, 56], [9, 57],
   [10, 52], [10, 53], [10, 54], [10, 55], [10, 56], [10, 57],
+  // North wing floors (corridor + four rooms) — see CROW_NORTH_WING_FLOORS above.
+  ...CROW_NORTH_WING_FLOORS,
 ];
 
 // Perimeter / inner wall cells that take the crow-wall texture.
@@ -69,7 +93,7 @@ export const CROW_WALL_CELLS = [
   // extended east passages & rooms walls
   [7, 37], [7, 38], [7, 39],
   [9, 37], [9, 38], [9, 39],
-  [6, 40], [6, 41], [6, 42],
+  [6, 40], [6, 42],   // [6,41] opened as the north-wing doorway
   [10, 40], [10, 41], [10, 42],
   [7, 43], [7, 44], [7, 45],
   [9, 43], [9, 44], [9, 45],
@@ -92,6 +116,26 @@ export const CROW_RETURN_MIST = { row: 8, col: 25 };      // west dead-end of th
 // Build the grid: all walls, then carve the floor cells and drop the start tile.
 const ROWS = 12;   // rows 0–11 cover the whole region (max floor row 10, wall row 11)
 const COLS = 58;   // cols 0–57 (col-58 east wall is added by the texture zone)
+
+// Auto-texture the north wing's surrounding walls so they pick up the crow-wall
+// texture like the hand-listed perimeter above. Any wall cell touching a wing
+// floor (8-neighbour) that isn't itself a floor gets added to CROW_WALL_CELLS.
+{
+  const floorKeys = new Set(CROW_FLOOR_CELLS.map(([r, c]) => `${r},${c}`));
+  const wallKeys = new Set(CROW_WALL_CELLS.map(([r, c]) => `${r},${c}`));
+  for (const [r, c] of CROW_NORTH_WING_FLOORS) {
+    for (let dr = -1; dr <= 1; dr++) {
+      for (let dc = -1; dc <= 1; dc++) {
+        if (!dr && !dc) continue;
+        const nr = r + dr, nc = c + dc, k = `${nr},${nc}`;
+        if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
+        if (floorKeys.has(k) || wallKeys.has(k)) continue;
+        CROW_WALL_CELLS.push([nr, nc]);
+        wallKeys.add(k);
+      }
+    }
+  }
+}
 
 function _buildCrowRealmMap() {
   const grid = Array.from({ length: ROWS }, () => new Array(COLS).fill(1));

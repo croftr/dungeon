@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { CELL } from '../../map.js';
+import { asset } from '../../assets.js';
 import { playNpcDialogue } from '../../audio.js';
 import { showDramaticUnlock } from '../../dramatic-banner.js';
 import { addMistPortal } from '../mist-portal.js';
@@ -12,6 +13,7 @@ import { addMistPortal } from '../mist-portal.js';
 export function spawnCrowRealmObjects(ctx) {
     const {
         group, loader,
+        addChest,
         addPortcullis, addKeyhole, addCustomNPC,
         stanceNpcDeparted,
         setStanceNpcDeparted,
@@ -31,6 +33,19 @@ export function spawnCrowRealmObjects(ctx) {
         enterFacing: 3,        // West
         offsetX: -CELL / 2,    // flush against the west wall
     });
+
+    // ── North-wing chests ─────────────────────────────────────────────────────
+    // Two of the four new rooms (reached via the doorway in Small Room 1's north
+    // wall) hold the green chest. Player enters each room from the south, so the
+    // chests sit at the back (row 1) facing south. Both EMPTY for now — TODO: loot.
+    // Room B (cols 42–44)
+    addChest(group, loader, 43, 1, 0, -0.6, [
+        // TODO: crow north-wing chest B loot goes here
+    ], asset('/items/green-chest.glb'));
+    // Room D (cols 50–52)
+    addChest(group, loader, 51, 1, 0, -0.6, [
+        // TODO: crow north-wing chest D loot goes here
+    ], asset('/items/green-chest.glb'));
 
     // ── Crow-annex corridor portcullis & keyhole ──────────────────────────────
     addPortcullis(group, loader, 34, 4, 0, crowRealmPortcullisOpened);

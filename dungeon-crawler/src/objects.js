@@ -50,6 +50,7 @@ export function partyHasItem(itemName) {
 }
 
 export function getCrystalShrineState() { return _state.crystalShrineState; }
+export function getCauldronSapCount() { return _state.level2CauldronSapCount; }
 export function getSeenEssences() { return _collections.seenEssences; }
 
 const _clickRaycaster = new THREE.Raycaster();
@@ -115,6 +116,8 @@ const _state = {
   level2GiantPortcullisOpened: false,
   level2WardenGateOpened: false,
   level2HoleClosed: false,
+  level2CauldronSapCount: 0,      // Ancient Tree Sap fed to the west-annex cauldron (0-3)
+  level2CauldronWallOpened: false, // true once 3 saps open the hidden passage at (17,3)
   level1HoleRoomSpawned: false,
   monsterNpcSaved: false,
   stanceNpcDeparted: false,
@@ -1692,6 +1695,48 @@ export function initObjects(scene, camera) {
                     showMessage("It looks like it needs some crystals to activate it.");
                 }
                 break;
+            } else if (obj.userData.isCauldron) {
+                const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
+                const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
+                if (distRow > 2 || distCol > 2) {
+                    showMessage("An ancient cauldron rests in the alcove, just out of reach.");
+                    break;
+                }
+                if (_state.level2CauldronWallOpened) {
+                    showMessage("The cauldron sits spent and quiet. A dark passage gapes open in the wall to the west.");
+                    break;
+                }
+                // Look for a party member carrying Ancient Tree Sap.
+                let sapIdx = -1, sapMember = null;
+                for (let i = 0; i < party.length; i++) {
+                    if (party[i] && !party[i].isEmpty && party[i].inventory) {
+                        const idx = party[i].inventory.findIndex(item => item && item.name === 'Ancient Tree Sap');
+                        if (idx !== -1) { sapIdx = idx; sapMember = party[i]; break; }
+                    }
+                }
+                if (sapMember) {
+                    sapMember.inventory[sapIdx] = null;
+                    _state.level2CauldronSapCount++;
+                    _applyCauldronGlow(obj.userData.cauldronModel, _state.level2CauldronSapCount);
+                    playItemSound('Ancient Tree Sap');
+                    if (_state.level2CauldronSapCount >= 3) {
+                        // Third offering — knock out the rear (west) wall grid at (17,3)
+                        // and rebuild Level 2 geometry in place so the passage opens.
+                        _state.level2CauldronWallOpened = true;
+                        dungeonMap[17][3] = CELL_FLOOR;
+                        level2Map[17][3] = CELL_FLOOR;
+                        if (window.rebuildLevel2Geometry) window.rebuildLevel2Geometry();
+                        playSoundByUrl(asset('/items/crystal-shrine/crystal-portal.mp3'), 0.9);
+                        showMessage("The third offering melts into the brew. The cauldron seethes — and with a grinding roar the western wall crumbles away, baring a hidden passage!");
+                    } else {
+                        showMessage(`The sap dissolves into the seething brew. It hungers for more... (${_state.level2CauldronSapCount}/3)`);
+                    }
+                } else if (_state.level2CauldronSapCount > 0) {
+                    showMessage(`The brew bubbles expectantly, awaiting more sap. (${_state.level2CauldronSapCount}/3)`);
+                } else {
+                    showMessage("An ancient cauldron etched with forest runes. The brew within hungers for something — an offering, perhaps.");
+                }
+                break;
             } else if (obj.userData.isJester) {
                 const distRow = Math.abs(player.gridRow - obj.userData.gridRow);
                 const distCol = Math.abs(player.gridCol - obj.userData.gridCol);
@@ -2413,6 +2458,68 @@ export function addDecoration(scene, loader, col, row, rotY = 0, modelPath, scal
             }
         });
         scene.add(model);
+    });
+}
+
+// Interactive cauldron (Level 2 west annex). Behaves like a decoration but is
+// clickable: feeding it 3 Ancient Tree Sap (see the isCauldron branch in the
+// click handler) opens the hidden passage behind it. Intentionally does NOT block
+// its grid cell — the revealed door at (17,3) sits directly behind it, so the
+// party must be able to step through this cell to reach the passage.
+function addInteractiveCauldron(scene, loader, col, row, rotY = 0, scale = 0.5, offsetX = 0, offsetZ = 0, offsetY = 0, gridRow = Math.round(row), gridCol = Math.round(col)) {
+    const _spawnGen = _spawnGeneration;
+    loader.load(asset('/items/cauldron.glb'), (gltf) => {
+        if (_spawnGen !== _spawnGeneration) return;
+        const model = gltf.scene;
+        model.scale.setScalar(scale);
+        model.position.set(col * CELL + offsetX, offsetY, row * CELL + offsetZ);
+        model.rotation.y = rotY;
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                child.userData.isCauldron = true;
+                child.userData.gridRow = gridRow;
+                child.userData.gridCol = gridCol;
+                child.userData.cauldronModel = model;
+                interactables.push(child);
+                if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(mat => {
+                        ['map', 'emissiveMap', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap'].forEach(mapName => {
+                            if (mat[mapName]) {
+                                mat[mapName].magFilter = THREE.LinearFilter;
+                                mat[mapName].minFilter = THREE.LinearMipmapLinearFilter;
+                                mat[mapName].anisotropy = 16;
+                            }
+                        });
+                    });
+                }
+            }
+        });
+        _applyCauldronGlow(model, _state.level2CauldronSapCount);
+        scene.add(model);
+    });
+}
+
+// Amber glow that brightens with each Ancient Tree Sap fed to the cauldron.
+function _applyCauldronGlow(model, sapCount) {
+    if (!model) return;
+    const intensity = Math.min(sapCount, 3) * 0.35; // 0 → 0.7
+    const color = new THREE.Color(1.0, 0.55, 0.12);
+    model.traverse(child => {
+        if (!child.isMesh || !child.material) return;
+        const mats = Array.isArray(child.material) ? child.material : [child.material];
+        mats.forEach(m => {
+            if (!('emissive' in m)) return;
+            if (intensity > 0) {
+                m.emissive.copy(color);
+                m.emissiveIntensity = intensity;
+            } else {
+                m.emissive.set(0, 0, 0);
+                m.emissiveIntensity = 0;
+            }
+        });
     });
 }
 
@@ -3184,7 +3291,7 @@ export function spawnObjectsForLevel() {
         loader: _gltfLoader,
         // Spawn helpers
         addChest, addWeaponRack, addSpellCabinet, addShop,
-        addCrystals, addBonePile, addDecoration, addCrystalShrine, addHeroDoor,
+        addCrystals, addBonePile, addDecoration, addInteractiveCauldron, addCrystalShrine, addHeroDoor,
         addPortal, addDisabledPortal, addPortcullis, addKeyhole,
         addStatue, addPortalActivatorStatue, addPartyConfirmNPC, addDialogueNPC, addCustomNPC,
         addAnvil, addAlchemyWorkshop, addDroppedTorch, addEtherealEgg, addStairs,
@@ -6756,6 +6863,9 @@ export function setWorldFlags(flags) {
     // flag must mutate that cell so the pit stops swallowing the party after a
     // save+refresh. (Shifted to col 33 from col 23 due to column shift).
     if (_state.level2HoleClosed) level2Map[32][33] = CELL_FLOOR;
+    // The west-annex cauldron's hidden passage: opening it knocks out the wall
+    // grid at (17,3). Re-apply on restore so the passage stays walkable.
+    if (_state.level2CauldronWallOpened) level2Map[17][3] = CELL_FLOOR;
     if (_state.level1HoleRoomSpawned) {
         for (let r = 24; r <= 26; r++) {
             for (let c = 1; c <= 3; c++) {

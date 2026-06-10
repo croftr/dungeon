@@ -13,7 +13,7 @@ import { getItemDef } from './items.js';
 import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt, tickMonsterElementFloorDamage } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
-import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems, replenishPotionMerchant, checkFloorPortalStep, checkMistPortalStep } from './objects.js';
+import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, getCauldronSapCount, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems, replenishPotionMerchant, checkFloorPortalStep, checkMistPortalStep } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, setZoneSilence, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound, prefetchActionSounds, checkNpcDialogueProximity, setElementFloorSound } from './audio.js';
 import { initBattleLog, addLogEntry } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
@@ -311,8 +311,15 @@ setCallbacks({
       // Demon room: south section of the passage
       const inDemonRoom = player.gridRow >= 31 && player.gridRow <= 34
         && player.gridCol >= 13 && player.gridCol <= 18;
-      // Aqua man pit arrival area
-      const inAquaManRoom = player.gridCol === 13 && player.gridRow >= 37 && player.gridRow <= 41;
+      // Aqua man pit arrival area — the whole drop-in space shares the water
+      // ambience: the arrival corridor (col 13, rows 37–41), the back-passage
+      // spine (row 36, cols 13–32) and the two chest rooms behind it.
+      const r = player.gridRow, c = player.gridCol;
+      const inArrivalCorridor = c === 13 && r >= 37 && r <= 41;
+      const inBackSpine = r === 36 && c >= 13 && c <= 32;
+      const inBranchOrRooms = (r >= 37 && r <= 40)
+        && ((c >= 22 && c <= 24) || (c >= 29 && c <= 31));
+      const inAquaManRoom = inArrivalCorridor || inBackSpine || inBranchOrRooms;
 
       if (inAquaManRoom) {
         setZoneMusic(asset('/sounds/water.mp3'));
@@ -2246,6 +2253,67 @@ function handleFirstInteraction() {
 // overlay shown, so we don't show it repeatedly on re-entry within a single session.
 let _portalVisitedLevels = new Set();
 
+// Level 2 special texture zones (pit, warden swamp, ice gauntlet, demon alcove).
+// Extracted so a runtime map change (e.g. the cauldron wall opening) can rebuild
+// the base instanced geometry AND re-apply these overlays without a full level
+// reload (which would reset the party position and respawn monsters).
+function applyLevel2Textures(scene) {
+  // The pit drop-in area — wet-wall walls + black-stone floor. ONE continuous
+  // space: the arrival corridor (col 13, rows 37–41) plus the back-passage
+  // (row 36, cols 13–32), two south stubs (col 23 & 30) and the two chest rooms
+  // (rows 38–40, cols 22–24 / 29–31). buildInnerTextureZone only paints the
+  // corridor-facing side of each border wall, so the row-35 buffer wall keeps
+  // its default face on the demon-room side above (no texture bleed).
+  const pitFloors = [
+    [37, 13], [38, 13], [39, 13], [40, 13], [41, 13],
+    ...Array.from({ length: 20 }, (_, i) => [36, 13 + i]),
+    [37, 23], [37, 30],
+    [38, 22], [38, 23], [38, 24], [39, 22], [39, 23], [39, 24], [40, 22], [40, 23], [40, 24],
+    [38, 29], [38, 30], [38, 31], [39, 29], [39, 30], [39, 31], [40, 29], [40, 30], [40, 31],
+  ];
+  buildFloorZone(scene, pitFloors, asset('/textures/black-stone2.webp'));
+  buildInnerTextureZone(scene, pitFloors, asset('/textures/wet-wall.webp'));
+
+  // Iron Warden room (cols 7-9, rows 3-5) + chest room behind portcullis (cols 3-5, rows 3-5)
+  buildFloorZone(
+    scene,
+    [
+      [3, 3], [3, 4], [3, 5], [3, 7], [3, 8], [3, 9],
+      [4, 3], [4, 4], [4, 5], [4, 6], [4, 7], [4, 8], [4, 9],
+      [5, 3], [5, 4], [5, 5], [5, 7], [5, 8], [5, 9],
+    ],
+    asset('/textures/swamp-floor.webp'),
+    'swamp'
+  );
+
+  // Ice area (inner walls only)
+  const iceFloors = [
+    [7, 12], [7, 13], [7, 14], [7, 19], [7, 20], [7, 21], [7, 22], [7, 23], [7, 24],
+    [8, 12], [8, 13], [8, 14], [8, 15], [8, 16], [8, 17], [8, 18], [8, 19], [8, 20], [8, 21], [8, 22], [8, 23], [8, 24],
+    [9, 12], [9, 13], [9, 14], [9, 19], [9, 20], [9, 21], [9, 22], [9, 23], [9, 24],
+    [10, 13], [11, 13], [12, 13], [13, 13],
+    [14, 12], [14, 13], [14, 14]
+  ];
+  buildFloorZone(scene, iceFloors, asset('/textures/dungeon-ice-floor.webp'));
+  buildInnerTextureZone(scene, iceFloors, asset('/textures/ice-wall.webp'));
+
+  // West annex demon alcove (rows 17-18, cols 4-5): the recessed walls at the
+  // west end of the small room take the wood-demon-wall texture. Inner-face only,
+  // so the open (east) side facing the room keeps the default stone.
+  buildInnerTextureZone(
+    scene,
+    [[17, 4], [17, 5], [18, 4], [18, 5]],
+    asset('/textures/wood-demon-wall.png')
+  );
+}
+
+// Rebuild Level 2's base geometry and re-apply its texture overlays in place.
+// Called after a runtime map mutation (the cauldron's hidden-passage wall).
+window.rebuildLevel2Geometry = function () {
+  buildLevel(scene);
+  applyLevel2Textures(scene);
+};
+
 window.loadLevel = function (levelNum) {
   // Lazily load videos needed for this level
   loadVideosForLevel(levelNum);
@@ -2359,57 +2427,10 @@ window.loadLevel = function (levelNum) {
     );
   }
 
-  // Level 2: overlay pit-corridor (rows 37–41, col 3) with wet-wall / black-stone textures
-  if (levelNum === 2) {
-    buildTextureZone(
-      scene,
-      // Wall cells: left col (2) and right col (4) flanking the corridor, plus north cap
-      [
-        [36, 12], [37, 12], [38, 12], [39, 12], [40, 12], [41, 12],
-        [36, 14], [37, 14], [38, 14], [39, 14], [40, 14], [41, 14],
-        [36, 13],
-      ],
-      // Floor cells: the walkable corridor column
-      [[37, 13], [38, 13], [39, 13], [40, 13], [41, 13]],
-      asset('/textures/wet-wall.webp'),
-      asset('/textures/black-stone2.webp')
-    );
-
-    // (The crow region's textures moved to the Crow Realm build below — that
-    // whole area is now an on-demand level reached via the mist portal.)
-
-    // Level 2: Iron Warden room (cols 7-9, rows 3-5) + chest room behind portcullis (cols 3-5, rows 3-5)
-    buildFloorZone(
-      scene,
-      [
-        [3, 3], [3, 4], [3, 5], [3, 7], [3, 8], [3, 9],
-        [4, 3], [4, 4], [4, 5], [4, 6], [4, 7], [4, 8], [4, 9],
-        [5, 3], [5, 4], [5, 5], [5, 7], [5, 8], [5, 9],
-      ],
-      asset('/textures/swamp-floor.webp'),
-      'swamp'
-    );
-
-    // Level 2: Ice area (inner walls only)
-    const iceFloors = [
-      [7, 12], [7, 13], [7, 14], [7, 19], [7, 20], [7, 21], [7, 22], [7, 23], [7, 24],
-      [8, 12], [8, 13], [8, 14], [8, 15], [8, 16], [8, 17], [8, 18], [8, 19], [8, 20], [8, 21], [8, 22], [8, 23], [8, 24],
-      [9, 12], [9, 13], [9, 14], [9, 19], [9, 20], [9, 21], [9, 22], [9, 23], [9, 24],
-      // Ice gauntlet: corridor south of mushroom room and reward room with chest
-      [10, 13], [11, 13], [12, 13], [13, 13],
-      [14, 12], [14, 13], [14, 14]
-    ];
-    buildFloorZone(
-      scene,
-      iceFloors,
-      asset('/textures/dungeon-ice-floor.webp')
-    );
-    buildInnerTextureZone(
-      scene,
-      iceFloors,
-      asset('/textures/ice-wall.webp')
-    );
-  }
+  // Level 2 special texture zones (pit / warden swamp / ice / demon alcove) —
+  // extracted into applyLevel2Textures so the cauldron's hidden-passage wall can
+  // rebuild geometry in place via window.rebuildLevel2Geometry().
+  if (levelNum === 2) applyLevel2Textures(scene);
 
   // Crow Realm (on-demand level): crow wall/floor/ceiling textures over the
   // whole region. Cell lists live in crow-realm/map.js (shared with the Level 2
@@ -2868,7 +2889,7 @@ window.addEventListener('mousemove', (e) => {
   let keyItemIcon = null;
   for (let hit of intersects) {
     const ud = hit.object.userData;
-    if (ud && (ud.isButton || ud.isChest || ud.isArmorStand || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDialogueNPC || ud.isDamageTrap || ud.isEgg || ud.isTeleportTorch || ud.isAlchemyWorkshop || ud.isAnvil || ud.isShop || ud.isDroppedItem || ud.isHeroDoor || ud.isCrystalShrine || ud.isPortalActivatorStatue || ud.isKeyhole || ud.isPitLadder || ud.isStatue)) {
+    if (ud && (ud.isButton || ud.isChest || ud.isArmorStand || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDialogueNPC || ud.isDamageTrap || ud.isEgg || ud.isTeleportTorch || ud.isAlchemyWorkshop || ud.isAnvil || ud.isShop || ud.isDroppedItem || ud.isHeroDoor || ud.isCrystalShrine || ud.isCauldron || ud.isPortalActivatorStatue || ud.isKeyhole || ud.isPitLadder || ud.isStatue)) {
       if (hit.object.visible) {
         isHoveringInteractable = true;
         if (ud.isButton) hoveredBtn = hit.object;
@@ -2884,6 +2905,11 @@ window.addEventListener('mousemove', (e) => {
             if (def?.icon) keyItemIcon = asset(def.icon);
           } else if (state === 1 && partyHasItem('Blue Crystal')) {
             const def = getItemDef('Blue Crystal');
+            if (def?.icon) keyItemIcon = asset(def.icon);
+          }
+        } else if (ud.isCauldron) {
+          if (getCauldronSapCount() < 3 && partyHasItem('Ancient Tree Sap')) {
+            const def = getItemDef('Ancient Tree Sap');
             if (def?.icon) keyItemIcon = asset(def.icon);
           }
         } else if (ud.isStatue) {

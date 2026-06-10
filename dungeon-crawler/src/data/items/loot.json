@@ -213,6 +213,15 @@
         "sellable": false
     },
     {
+        "name": "Ancient Tree Sap",
+        "slot": "loot",
+        "icon": "/icons/key/ancient_tree_sap.svg",
+        "description": "A glob of amber sap weeping from the heartwood of an ancient tree. Thick, golden and unnaturally warm, it thrums faintly with primordial forest energy. Some old mechanisms hunger for its essence.",
+        "value": 250,
+        "weight": 0.5,
+        "sellable": false
+    },
+    {
         "name": "Savage Schematics",
         "slot": "loot",
         "icon": "/icons/key/savage_schematics.webp",
