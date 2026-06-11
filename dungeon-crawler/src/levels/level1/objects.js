@@ -76,7 +76,7 @@ export function spawnLevel1Objects(ctx) {
     // Chest in the Northwest room — far northeast corner
     addChest(group, loader, 5, 1, 0, -0.65, [
         "Steel Arrows", "Elven Dagger", "Leather Belt", "Adventurer's Belt",
-        "Dwarf Crossbow", { name: 'Gold Coins', quantity: 10 }
+        "Dwarf Crossbow"
     ], undefined, true, -0.35);
 
     // 2nd Chest in the Northwest room
@@ -84,7 +84,7 @@ export function spawnLevel1Objects(ctx) {
         "Travelling Cloak", "Iron Helm", "Trapper's Manual"
     ], undefined, true, 0.35);
 
-    // Empty Treasure Pile beside the two Northwest-room chests (north wall)
+    // Treasure Pile beside the two Northwest-room chests (north wall)
     addTreasurePile(group, loader, 4, 1, 0, -0.65, [
         { name: 'Gold Coins', quantity: 50 },
         "Ring of Vigour",

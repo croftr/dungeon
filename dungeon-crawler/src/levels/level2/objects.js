@@ -107,12 +107,10 @@ export function spawnLevel2Objects(ctx) {
     // ── Chests ────────────────────────────────────────────────────────────────
     // Two chests in the chest vault (shifted col 0.7 / 1.3 -> 10.7 / 11.3)
     addChest(group, loader, 10.7, 34, Math.PI, 0.7, [
-        { name: 'Gold Coins', quantity: 20 },
         "Trapper's Manual", 'Scroll of Incinerate',
         "Talisman of the Wind"
     ]);
     addChest(group, loader, 11.3, 34, Math.PI, 0.7, [
-        { name: 'Gold Coins', quantity: 10 },
         'Ring of Strength',
         "Bulwark of the Ancestors"
     ]);
@@ -122,9 +120,7 @@ export function spawnLevel2Objects(ctx) {
 
     // Chest at col 38 north side (shifted from col 28 -> 38)
     addChest(group, loader, 38, 32, -Math.PI / 2, -0.5, [
-        { name: 'Gold Coins', quantity: 50 },
-        'Mana Potion',
-        "Bloodstone Amulet", "Schematic Key"
+        "Bloodstone Amulet"
     ], asset('/items/containers/treasure-chest.glb'), true, 0.5);
 
     // Ethereal Egg at col 38 south side (shifted from col 28 -> 38)

@@ -222,6 +222,15 @@
         "sellable": false
     },
     {
+        "name": "Ancient Bog Core",
+        "slot": "loot",
+        "icon": "/icons/key/ancient_bog_core.svg",
+        "description": "A dense, dripping nodule dredged from the heart of a primordial bog. Cold, dark green and slick with peat, it pulses with a slow swamp-born sorcery. Some old mechanisms hunger for its essence.",
+        "value": 250,
+        "weight": 0.5,
+        "sellable": false
+    },
+    {
         "name": "Savage Schematics",
         "slot": "loot",
         "icon": "/icons/key/savage_schematics.webp",

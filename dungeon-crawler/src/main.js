@@ -13,7 +13,7 @@ import { getItemDef } from './items.js';
 import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt, tickMonsterElementFloorDamage } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
-import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, getCauldronSapCount, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems, replenishPotionMerchant, checkFloorPortalStep, checkMistPortalStep } from './objects.js';
+import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, getCauldronSapCount, getCauldronCoreCount, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems, replenishPotionMerchant, checkFloorPortalStep, checkMistPortalStep } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, setZoneSilence, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound, prefetchActionSounds, checkNpcDialogueProximity, setElementFloorSound } from './audio.js';
 import { initBattleLog, addLogEntry } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
@@ -2326,6 +2326,56 @@ window.rebuildLevel2Geometry = function () {
   applyLevel2Textures(scene);
 };
 
+// Level 3 special texture zones (swamp room + the cauldron alcove/passage/treasure
+// room). Extracted so the swamp cauldron's hidden-passage wall can rebuild geometry
+// in place via window.rebuildLevel3Geometry() without a full level reload.
+function applyLevel3Textures(scene) {
+  // Swamp room proper (rows 1-5, cols 1-18): swamp floor + wet-wall.
+  const swampFloors = [
+    [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7], [1, 8], [1, 9], [1,10], [1,11], [1,12], [1,13], [1,14], [1,15], [1,16], [1,17], [1,18],
+    [2, 1], [2, 2], [2, 3], [2, 4], [2, 5], [2, 6], [2, 7], [2, 8], [2, 9], [2,10], [2,11], [2,12], [2,13], [2,14], [2,15], [2,16], [2,17], [2,18],
+    [3, 1], [3, 2], [3, 3], [3, 4], [3, 5], [3, 6], [3, 7], [3, 8], [3, 9], [3,10], [3,11], [3,12], [3,13], [3,14], [3,15], [3,16], [3,17], [3,18],
+    [4, 1], [4, 2], [4, 3], [4, 4], [4, 5], [4, 6], [4, 7], [4, 8], [4, 9], [4,10], [4,11], [4,12], [4,13], [4,14], [4,15], [4,16], [4,17], [4,18],
+    [5, 1], [5, 2], [5, 3], [5, 4], [5, 5], [5, 6], [5, 7], [5, 8], [5, 9], [5,10], [5,11], [5,12], [5,13], [5,14], [5,15], [5,16], [5,17], [5,18],
+  ];
+  // Cauldron alcove recess (col 19, rows 2-4) — swamp FLOOR + its own distinct
+  // swamp-demon-wall texture on the recess walls (the framing (1,19)/(5,19) and the
+  // rear (2,20)/(3,20)/(4,20) faces) so the cauldron nook reads apart from the room.
+  const alcoveFloors = [[2, 19], [3, 19], [4, 19]];
+  // Sealed grid (3,20): floor tile is hidden under the wall until the cauldron is
+  // fed, then it shows swamp floor matching the passage beyond. Wet-wall on its
+  // corridor-facing side walls so the opened passage matches the swamp room.
+  const openedCell = [[3, 20]];
+  // Hidden east passage (row 3, cols 21-22) + treasure room (rows 2-4, cols 23-25)
+  // — these reuse the swamp room's floor + wall textures (per design).
+  const passageRoomFloors = [
+    [3, 21], [3, 22],
+    [2, 23], [2, 24], [2, 25],
+    [3, 23], [3, 24], [3, 25],
+    [4, 23], [4, 24], [4, 25],
+  ];
+  buildFloorZone(
+    scene,
+    [...swampFloors, ...alcoveFloors, ...openedCell, ...passageRoomFloors],
+    asset('/textures/swamp-floor.webp'),
+    'swamp'
+  );
+  // Wet-wall on the room + passage + treasure room + the opened-grid corridor faces.
+  buildInnerTextureZone(scene, swampFloors, asset('/textures/wet-wall.webp'));
+  buildInnerTextureZone(scene, passageRoomFloors, asset('/textures/wet-wall.webp'));
+  buildInnerTextureZone(scene, openedCell, asset('/textures/wet-wall.webp'));
+  // Distinct alcove wall texture (painted last so its faces win over any shared
+  // corner walls with the swamp room's wet-wall zone).
+  buildInnerTextureZone(scene, alcoveFloors, asset('/textures/swamp-demon-wall.png'));
+}
+
+// Rebuild Level 3's base geometry + texture overlays in place after the swamp
+// cauldron opens its hidden-passage wall at (3,20).
+window.rebuildLevel3Geometry = function () {
+  buildLevel(scene);
+  applyLevel3Textures(scene);
+};
+
 window.loadLevel = function (levelNum) {
   // Lazily load videos needed for this level
   loadVideosForLevel(levelNum);
@@ -2462,27 +2512,10 @@ window.loadLevel = function (levelNum) {
     );
   }
 
-  // Level 3: swamp room (rows 1-5, cols 1-18) — reached via 2-cell passage north of the NW corner room
-  if (levelNum === 3) {
-    const swampFloors = [
-      [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7], [1, 8], [1, 9], [1,10], [1,11], [1,12], [1,13], [1,14], [1,15], [1,16], [1,17], [1,18],
-      [2, 1], [2, 2], [2, 3], [2, 4], [2, 5], [2, 6], [2, 7], [2, 8], [2, 9], [2,10], [2,11], [2,12], [2,13], [2,14], [2,15], [2,16], [2,17], [2,18],
-      [3, 1], [3, 2], [3, 3], [3, 4], [3, 5], [3, 6], [3, 7], [3, 8], [3, 9], [3,10], [3,11], [3,12], [3,13], [3,14], [3,15], [3,16], [3,17], [3,18],
-      [4, 1], [4, 2], [4, 3], [4, 4], [4, 5], [4, 6], [4, 7], [4, 8], [4, 9], [4,10], [4,11], [4,12], [4,13], [4,14], [4,15], [4,16], [4,17], [4,18],
-      [5, 1], [5, 2], [5, 3], [5, 4], [5, 5], [5, 6], [5, 7], [5, 8], [5, 9], [5,10], [5,11], [5,12], [5,13], [5,14], [5,15], [5,16], [5,17], [5,18],
-    ];
-    buildFloorZone(
-      scene,
-      swampFloors,
-      asset('/textures/swamp-floor.webp'),
-      'swamp'
-    );
-    buildInnerTextureZone(
-      scene,
-      swampFloors,
-      asset('/textures/wet-wall.webp')
-    );
-  }
+  // Level 3: swamp room + cauldron alcove/passage/treasure room — extracted into
+  // applyLevel3Textures so the cauldron's hidden-passage wall can rebuild geometry
+  // in place via window.rebuildLevel3Geometry().
+  if (levelNum === 3) applyLevel3Textures(scene);
 
   // Level 4: demon-wall / black-stone2 textures cover all areas EXCEPT the
   // entry room (rows 12–15, cols 6–14) which uses default stone/floor textures.
@@ -2920,8 +2953,10 @@ window.addEventListener('mousemove', (e) => {
             if (def?.icon) keyItemIcon = asset(def.icon);
           }
         } else if (ud.isCauldron) {
-          if (getCauldronSapCount() < 4 && partyHasItem('Ancient Tree Sap')) {
-            const def = getItemDef('Ancient Tree Sap');
+          const cItem = ud.cauldronLevel === 3 ? 'Ancient Bog Core' : 'Ancient Tree Sap';
+          const cCount = ud.cauldronLevel === 3 ? getCauldronCoreCount() : getCauldronSapCount();
+          if (cCount < 4 && partyHasItem(cItem)) {
+            const def = getItemDef(cItem);
             if (def?.icon) keyItemIcon = asset(def.icon);
           }
         } else if (ud.isStatue) {
