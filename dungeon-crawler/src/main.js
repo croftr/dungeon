@@ -321,7 +321,17 @@ setCallbacks({
         && ((c >= 22 && c <= 24) || (c >= 29 && c <= 31));
       const inAquaManRoom = inArrivalCorridor || inBackSpine || inBranchOrRooms;
 
-      if (inAquaManRoom) {
+      // West-annex cauldron room + the hidden passage/chest room behind it stay
+      // completely silent — no level-2 backing music while inside.
+      const inCauldronArea =
+        (r >= 17 && r <= 19 && c >= 4 && c <= 9) ||  // small room + demon alcove
+        (r >= 8 && r <= 10 && c >= 2 && c <= 4) ||    // hidden chest room
+        (c >= 2 && c <= 3 && r >= 11 && r <= 18);     // hidden passage + jog + door
+      setZoneSilence(inCauldronArea);
+
+      if (inCauldronArea) {
+        // silent — _zoneSilence keeps any prior zone track quiet
+      } else if (inAquaManRoom) {
         setZoneMusic(asset('/sounds/water.mp3'));
       } else {
         const demon = monsters.find(m => m.name === 'Demon' && (m.level ?? 1) === 2);
@@ -2297,12 +2307,14 @@ function applyLevel2Textures(scene) {
   buildFloorZone(scene, iceFloors, asset('/textures/dungeon-ice-floor.webp'));
   buildInnerTextureZone(scene, iceFloors, asset('/textures/ice-wall.webp'));
 
-  // West annex demon alcove (rows 17-18, cols 4-5): the recessed walls at the
+  // West annex demon alcove (rows 17-19, cols 4-5): the recessed walls at the
   // west end of the small room take the wood-demon-wall texture. Inner-face only,
-  // so the open (east) side facing the room keeps the default stone.
+  // so the open (east) side facing the room keeps the default stone. Once the
+  // centre rear-wall grid (18,3) opens, that face is no longer a wall and is left
+  // unpainted automatically.
   buildInnerTextureZone(
     scene,
-    [[17, 4], [17, 5], [18, 4], [18, 5]],
+    [[17, 4], [17, 5], [18, 4], [18, 5], [19, 4], [19, 5]],
     asset('/textures/wood-demon-wall.png')
   );
 }
@@ -2908,7 +2920,7 @@ window.addEventListener('mousemove', (e) => {
             if (def?.icon) keyItemIcon = asset(def.icon);
           }
         } else if (ud.isCauldron) {
-          if (getCauldronSapCount() < 3 && partyHasItem('Ancient Tree Sap')) {
+          if (getCauldronSapCount() < 4 && partyHasItem('Ancient Tree Sap')) {
             const def = getItemDef('Ancient Tree Sap');
             if (def?.icon) keyItemIcon = asset(def.icon);
           }

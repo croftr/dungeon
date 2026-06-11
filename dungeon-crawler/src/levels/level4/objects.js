@@ -10,7 +10,7 @@ import { asset } from '../../assets.js';
 export function spawnLevel4Objects(ctx) {
     const {
         group, loader,
-        addPortal, addTrap1, addChest, addCustomNPC
+        addPortal, addTrap1, addChest, addCustomNPC, addSpellCabinet
     } = ctx;
 
     // ── Blue Portal ───────────────────────────────────────────────────────────
@@ -29,6 +29,12 @@ export function spawnLevel4Objects(ctx) {
     // ── Chest ─────────────────────────────────────────────────────────────────
     // North-east corner of the vault room — contains Aether-Glass Silt.
     addChest(group, loader, 13, 3, 0, -0.8, ['Aether-Glass Silt', "Trapper's Manual", "Trapper's Manual"]);
+
+    // ── Spell Cabinet ─────────────────────────────────────────────────────────
+    // In the Demon Ogre room (vault guardian lair), against the East wall
+    addSpellCabinet(group, loader, 32, 5, -Math.PI / 2, 0.7, 0, [
+        "Scroll of Holybolt", "Scroll of Darkbolt"
+    ]);
 
     // ── Decorations ───────────────────────────────────────────────────────────
     if (ctx.addDecoration) {

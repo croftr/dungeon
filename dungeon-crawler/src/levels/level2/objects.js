@@ -115,7 +115,7 @@ export function spawnLevel2Objects(ctx) {
     ]);
     addChest(group, loader, 11.3, 34, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 10 },
-        'Ring of Strength', 'Ring of Wisdom', 'Ring of Balance',
+        'Ring of Strength', 'Ring of Balance',
         "Bulwark of the Ancestors"
     ]);
 
@@ -144,11 +144,11 @@ export function spawnLevel2Objects(ctx) {
     // south into small chest rooms. Both chests are EMPTY for now — TODO: add loot.
     // Room A — rows 38-40, cols 22-24 (branch off the corridor at col 23)
     addChest(group, loader, 23, 40, Math.PI, 0.7, [
-        // TODO: chest A loot goes here (pit back-passage, west room)
+        "Ancient Tree Sap", "Ice Bolts"
     ], asset('/items/green-chest.glb'));
     // Room B — rows 38-40, cols 29-31 (branch off the corridor at col 30)
     addChest(group, loader, 30, 40, Math.PI, 0.7, [
-        // TODO: chest B loot goes here (pit back-passage, east room)
+        "Ancient Tree Sap", " Water Bolts"
     ], asset('/items/green-chest.glb'));
 
     // ── Stairs ────────────────────────────────────────────────────────────────
@@ -170,23 +170,31 @@ export function spawnLevel2Objects(ctx) {
     // ── West annex demon alcove ───────────────────────────────────────────────
     // Off the west wall of the treeman main room (passage at row 18, cols 10-12)
     // sits a small room (rows 17-19, cols 6-9) ending in a 2x2 demon-wall alcove
-    // (rows 17-18, cols 4-5). Two torches stand against the alcove's back (west)
-    // wall with an interactive cauldron between them. Feeding the cauldron 3
-    // Ancient Tree Sap opens the hidden passage at (17,3) — see the isCauldron
-    // handler in objects.js. The cauldron's interaction cell is (17,4).
+    // (rows 17-19, cols 4-5). Two torches stand against the alcove's back (west)
+    // wall flanking an interactive cauldron in front of the central grid. Feeding
+    // the cauldron 3 Ancient Tree Sap opens the centre rear-wall grid at (18,3) —
+    // see the isCauldron handler in objects.js. The cauldron's interaction cell
+    // is (18,4).
     addDroppedTorch(group, loader, 4, 17, Math.PI / 2, -0.6, 0);
-    addDroppedTorch(group, loader, 4, 18, Math.PI / 2, -0.6, 0);
-    addInteractiveCauldron(group, loader, 4, 17.5, 0, 0.5, 0.1, 0, 0, 17, 4);
+    addDroppedTorch(group, loader, 4, 19, Math.PI / 2, -0.6, 0);
+    addInteractiveCauldron(group, loader, 4, 18, 0, 0.5, 0.1, 0, 0, 18, 4);
 
     // Empty chest in the hidden chest room (rows 8-10, cols 2-4) revealed behind
     // the cauldron passage — TODO: add loot. offsetZ -0.5 sits it against the north
     // back wall while staying in front of it (the wall face is at -1.0); rotY 0
     // faces it into the room.
-    addChest(group, loader, 3, 8, 0, -0.5, [], asset('/items/magic-chest.glb'), true, 0, 'Chest', 0.44);
+    addChest(group, loader, 3, 8, 0, -0.5, [
+        "Schematic Key", "Ring of Resilience", "Plate Cuirass", { name: 'Gold Coins', quantity: 100 },
+    ], asset('/items/magic-chest.glb'), true, 0, 'Chest', 0.44);
     // Spell cabinet against the west wall (col 1) and weapon rack against the east
     // wall (col 5) of the same room — both empty for now.
-    addSpellCabinet(group, loader, 2, 9, Math.PI / 2, -0.7, 0, []);
-    addWeaponRack(group, loader, 4, 9, -Math.PI / 2, 0.7, 0, []);
+    addSpellCabinet(group, loader, 2, 9, Math.PI / 2, -0.7, 0, [
+        "Trapper's Manual", "Shell", "Resist Water", "Resist Lightning"
+    ]);
+
+    addWeaponRack(group, loader, 4, 9, -Math.PI / 2, 0.7, 0, [
+        "Life Staff", "Lightning Dagger", "Lightning Arrows", "Lightning Bolts"
+    ]);
 
     // ── Mist portal into the Crow Realm ───────────────────────────────────────
     // The mist sits in a one-cell alcove at the east end of Room B (row 8,

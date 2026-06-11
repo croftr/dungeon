@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { createBlobShadow } from './blob-shadow.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
-import { CELL, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld, buildLevel, level1Map, level2Map, isPassable, spawnElementFloorAt, elementFloorCellId, CROW_REALM_LEVEL } from './map.js';
+import { CELL, WALL_H, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld, buildLevel, level1Map, level2Map, isPassable, spawnElementFloorAt, elementFloorCellId, CROW_REALM_LEVEL } from './map.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, isInFrontOfPlayer, player, FACING_ANGLES, setPlayerFrozen, setPlayerTrapped } from './player.js';
 import { showMessage, drawMinimap, updateStatus } from './minimap.js';
@@ -116,7 +116,7 @@ const _state = {
   level2GiantPortcullisOpened: false,
   level2WardenGateOpened: false,
   level2HoleClosed: false,
-  level2CauldronSapCount: 0,      // Ancient Tree Sap fed to the west-annex cauldron (0-3)
+  level2CauldronSapCount: 0,      // Ancient Tree Sap fed to the west-annex cauldron (0-4)
   level2CauldronWallOpened: false, // true once 3 saps open the hidden passage at (17,3)
   level1HoleRoomSpawned: false,
   monsterNpcSaved: false,
@@ -1719,20 +1719,21 @@ export function initObjects(scene, camera) {
                     _state.level2CauldronSapCount++;
                     _applyCauldronGlow(obj.userData.cauldronModel, _state.level2CauldronSapCount);
                     playItemSound('Ancient Tree Sap');
-                    if (_state.level2CauldronSapCount >= 3) {
-                        // Third offering — knock out the rear (west) wall grid at (17,3)
-                        // and rebuild Level 2 geometry in place so the passage opens.
+                    if (_state.level2CauldronSapCount >= 4) {
+                        // Fourth offering — knock out the centre rear (west) wall grid at
+                        // (18,3) and rebuild Level 2 geometry in place so the passage opens.
                         _state.level2CauldronWallOpened = true;
-                        dungeonMap[17][3] = CELL_FLOOR;
-                        level2Map[17][3] = CELL_FLOOR;
+                        dungeonMap[18][3] = CELL_FLOOR;
+                        level2Map[18][3] = CELL_FLOOR;
                         if (window.rebuildLevel2Geometry) window.rebuildLevel2Geometry();
-                        playSoundByUrl(asset('/items/crystal-shrine/crystal-portal.mp3'), 0.9);
-                        showMessage("The third offering melts into the brew. The cauldron seethes — and with a grinding roar the western wall crumbles away, baring a hidden passage!");
+                        playSoundByUrl(asset('/sounds/actions/tomb-door.mp3'), 0.9);
+                        _animateCauldronWallOpen(objectsGroup.parent);
+                        showMessage("The fourth offering melts into the brew. The cauldron seethes — and with a slow grinding roar the central wall grinds down into the floor, baring a hidden passage!");
                     } else {
-                        showMessage(`The sap dissolves into the seething brew. It hungers for more... (${_state.level2CauldronSapCount}/3)`);
+                        showMessage(`The sap dissolves into the seething brew. It hungers for more... (${_state.level2CauldronSapCount}/4)`);
                     }
                 } else if (_state.level2CauldronSapCount > 0) {
-                    showMessage(`The brew bubbles expectantly, awaiting more sap. (${_state.level2CauldronSapCount}/3)`);
+                    showMessage(`The brew bubbles expectantly, awaiting more sap. (${_state.level2CauldronSapCount}/4)`);
                 } else {
                     showMessage("An ancient cauldron etched with forest runes. The brew within hungers for something — an offering, perhaps.");
                 }
@@ -2502,10 +2503,46 @@ function addInteractiveCauldron(scene, loader, col, row, rotY = 0, scale = 0.5, 
     });
 }
 
+// Cosmetic: grind the cauldron's centre rear-wall grid (18,3) down into the floor
+// over ~7s to match the 7-second tomb-door sound. The map cell is already floor by
+// the time this runs (rebuildLevel2Geometry removed the instanced wall), so this is
+// purely a visual slab and never affects movement or saved state. If the player
+// saves mid-animation, the wall is already flagged open and reloads open.
+function _animateCauldronWallOpen(scene) {
+    if (!scene) return;
+    const col = 3, row = 18;
+    const geo = new THREE.BoxGeometry(CELL, WALL_H, CELL);
+    const tex = new THREE.TextureLoader().load(asset('/textures/wood-demon-wall.png'));
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.anisotropy = 16;
+    const mat = new THREE.MeshLambertMaterial({ map: tex });
+    const slab = new THREE.Mesh(geo, mat);
+    const startY = WALL_H / 2, endY = -WALL_H / 2; // sink until the top reaches floor level
+    slab.position.set(col * CELL, startY, row * CELL);
+    scene.add(slab);
+
+    const duration = 7000;
+    const t0 = performance.now();
+    function step(now) {
+        const t = Math.min((now - t0) / duration, 1);
+        const e = t * t * (3 - 2 * t); // smoothstep — heavy, mechanical grind
+        slab.position.y = startY + (endY - startY) * e;
+        if (t < 1) {
+            requestAnimationFrame(step);
+        } else {
+            scene.remove(slab);
+            geo.dispose();
+            mat.dispose();
+            tex.dispose();
+        }
+    }
+    requestAnimationFrame(step);
+}
+
 // Amber glow that brightens with each Ancient Tree Sap fed to the cauldron.
 function _applyCauldronGlow(model, sapCount) {
     if (!model) return;
-    const intensity = Math.min(sapCount, 3) * 0.35; // 0 → 0.7
+    const intensity = Math.min(sapCount, 4) * 0.2; // 0 → 0.8 over 4 saps
     const color = new THREE.Color(1.0, 0.55, 0.12);
     model.traverse(child => {
         if (!child.isMesh || !child.material) return;
@@ -6863,9 +6900,9 @@ export function setWorldFlags(flags) {
     // flag must mutate that cell so the pit stops swallowing the party after a
     // save+refresh. (Shifted to col 33 from col 23 due to column shift).
     if (_state.level2HoleClosed) level2Map[32][33] = CELL_FLOOR;
-    // The west-annex cauldron's hidden passage: opening it knocks out the wall
-    // grid at (17,3). Re-apply on restore so the passage stays walkable.
-    if (_state.level2CauldronWallOpened) level2Map[17][3] = CELL_FLOOR;
+    // The west-annex cauldron's hidden passage: opening it knocks out the centre
+    // rear-wall grid at (18,3). Re-apply on restore so the passage stays walkable.
+    if (_state.level2CauldronWallOpened) level2Map[18][3] = CELL_FLOOR;
     if (_state.level1HoleRoomSpawned) {
         for (let r = 24; r <= 26; r++) {
             for (let c = 1; c <= 3; c++) {

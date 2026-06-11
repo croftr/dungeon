@@ -17,14 +17,15 @@
 // EXISTING (shifted +15 from original, and +10 from column expansion):
 // Main room cols 13-18, rows 16-20. Passage at col 17, rows 21-28.
 // WEST ANNEX off the treeman main room: a passage runs west from the room (row 18,
-//   cols 10-12) into a small room (rows 17-19, cols 6-9). At its west end is a 2x2
-//   alcove (rows 17-18, cols 4-5) whose walls take the wood-demon-wall texture and
-//   which holds 2 torches with a cauldron between them — see spawnLevel2Objects.
-// HIDDEN PASSAGE: placing 3 Ancient Tree Sap in the cauldron opens a wall grid at
-//   (17,3) — the rear/west wall of the alcove. Behind it a passage runs north up
-//   col 3 (rows 11-16) into a small chest room (rows 8-10, cols 2-4). The passage
-//   and room are pre-carved as floor here but sealed: (17,3) stays a wall until the
-//   cauldron is fed (level2CauldronWallOpened flips it to floor — see objects.js).
+//   cols 10-12) into a small room (rows 17-19, cols 6-9). At its west end is a 3x2
+//   alcove (rows 17-19, cols 4-5) whose walls take the wood-demon-wall texture and
+//   which holds 2 torches flanking a cauldron in front of the central grid — see
+//   spawnLevel2Objects.
+// HIDDEN PASSAGE: placing 3 Ancient Tree Sap in the cauldron opens the CENTRE grid
+//   of the alcove's 3-wide rear/west wall at (18,3). A short connector jogs west then
+//   north (col 2, rows 16-18 → col 3, rows 11-16) into a small chest room (rows 8-10,
+//   cols 2-4). The connector and room are pre-carved as floor but sealed: (18,3) stays
+//   a wall until the cauldron is fed (level2CauldronWallOpened flips it — objects.js).
 // Giant room: NE corner — enter via portcullis on east wall of main room (col 19, row 30),
 //   east passage (row 30, cols 20–28), turns north (col 28, rows 20–29),
 //   opens into a large room (rows 17–19, cols 23–34).
@@ -53,10 +54,10 @@ export const level2Map = [
   [1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 9, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 13 ← hidden passage (col 3); Room C south (chest here); ice passage col 13 (step 4)
   [1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 14 ← hidden passage (col 3); passage south to treeman area (col 17); ice gauntlet reward room (cols 12-14)
   [1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 15 ← hidden passage (col 3); bridge (was old row 0, col 7 opened)
-  [1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 16 ← hidden passage north end (col 3); main room entry (was old row 1, col 7 changed 2→0)
-  [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 17 ← west small room (cols 6-9) + demon alcove (cols 4-5); giant room (cols 23-34)
-  [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 18 ← west passage (cols 10-12) from treeman room into small room (cols 4-9); giant room
-  [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 19 ← west small room south (cols 6-9); giant room south edge
+  [1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 16 ← hidden passage jog (cols 2-3); main room entry (was old row 1, col 7 changed 2→0)
+  [1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 17 ← hidden passage jog (col 2); demon alcove (cols 4-5; col 3 is solid back wall) + west small room (cols 6-9); giant room
+  [1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 18 ← hidden passage jog (col 2); cauldron door opens at (18,3); west passage (cols 10-12) into small room (cols 4-9); giant room
+  [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 19 ← demon alcove south (cols 4-5) + west small room south (cols 6-9); giant room south edge
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 20 ← north passage at col 28
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 21 ← north passage
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // row 22 ← north passage (treeman patrols up to here)
