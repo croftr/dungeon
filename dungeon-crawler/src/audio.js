@@ -745,6 +745,26 @@ export async function playChestOpenSound() {
 }
 
 /**
+ * Play the treasure pile opening sound (distinct from the chest sound).
+ */
+export async function playTreasurePileOpenSound() {
+  const buffer = await getBuffer(asset('/sounds/actions/treasure-pile.mp3'));
+  if (!buffer) return;
+  try {
+    const ctx = getCtx();
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 1.8;
+    source.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    source.start(0);
+  } catch (err) {
+    console.warn('[audio] playTreasurePileOpenSound failed:', err);
+  }
+}
+
+/**
  * Play the weapon rack interaction sound.
  */
 export async function playWeaponRackSound() {

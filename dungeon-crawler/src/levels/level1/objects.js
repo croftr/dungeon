@@ -12,7 +12,7 @@ import { addSwirlPortal } from '../swirl-portal.js';
 export function spawnLevel1Objects(ctx) {
     const {
         group, loader,
-        addChest, addWeaponRack, addSpellCabinet,
+        addChest, addTreasurePile, addWeaponRack, addSpellCabinet,
         addBonePile, addDecoration,
         addPortal, addPortcullis, addKeyhole,
         addStatue, addPortalActivatorStatue,
@@ -75,15 +75,21 @@ export function spawnLevel1Objects(ctx) {
 
     // Chest in the Northwest room — far northeast corner
     addChest(group, loader, 5, 1, 0, -0.65, [
-        "Ring of Dexterity", "Steel Arrows", "Elven Dagger", "Leather Belt", "Adventurer's Belt",
+        "Steel Arrows", "Elven Dagger", "Leather Belt", "Adventurer's Belt",
         "Dwarf Crossbow", { name: 'Gold Coins', quantity: 10 }
     ], undefined, true, -0.35);
 
     // 2nd Chest in the Northwest room
     addChest(group, loader, 5, 1, 0, -0.65, [
-        { name: 'Gold Coins', quantity: 10 },
-        "Ring of Vigour", "Travelling Cloak", "Iron Helm", "Trapper's Manual"
+        "Travelling Cloak", "Iron Helm", "Trapper's Manual"
     ], undefined, true, 0.35);
+
+    // Empty Treasure Pile beside the two Northwest-room chests (north wall)
+    addTreasurePile(group, loader, 4, 1, 0, -0.65, [
+        { name: 'Gold Coins', quantity: 10 },
+        "Ring of Vigour",
+        "Ring of Dexterity"
+    ]);
 
     // Chest in the mummy room (secret east chamber)
     addChest(group, loader, 19, 1, 0, -0.7, [

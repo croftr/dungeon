@@ -8153,6 +8153,144 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   position: relative;
 }
 
+/* ════════════════════════════════════════════════════════════════════════
+   TREASURE PILE — bespoke "dragon's hoard" skin.
+   All scoped to a modal that contains .treasure-pile-header, so the regular
+   chest modal is completely unaffected. The transfer mechanism (left grid →
+   right party slots) is untouched; this is pure styling.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── The vault panel: warm glow, thick gold-on-bronze frame ── */
+#chest-modal:has(.treasure-pile-header) {
+  position: relative;
+  overflow: visible;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 0%, rgba(180, 120, 36, 0.45) 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 120%, rgba(120, 80, 24, 0.30) 0%, transparent 55%),
+    linear-gradient(180deg, #2a1c09 0%, #1a1206 55%, #0c0703 100%);
+  border: none;
+  border-radius: 14px;
+  box-shadow:
+    0 0 42px 4px rgba(255, 176, 48, 0.20),
+    0 26px 80px rgba(0, 0, 0, 0.96),
+    inset 0 1px 0 rgba(255, 226, 150, 0.10);
+}
+
+/* ── Banner image crowning the top and bottom of the modal ── */
+#chest-modal:has(.treasure-pile-header)::before,
+#chest-modal:has(.treasure-pile-header)::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* height ≈ width / image-aspect (2752/399 ≈ 6.9) for no vertical squish.
+     At the 820px modal width that's ~119px; lower it for a slimmer band. */
+  height: 110px;
+  background-image: url('/images/treasure-pile-header.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  z-index: 6;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.75));
+}
+
+/* Top banner — sits above the modal, a few px overlapping to hide the seam */
+#chest-modal:has(.treasure-pile-header)::before {
+  top: -104px;
+}
+
+/* Bottom banner — mirrored vertically so the frame is symmetrical */
+#chest-modal:has(.treasure-pile-header)::after {
+  bottom: -104px;
+  transform: scaleY(-1);
+}
+
+/* ── Top bar: slim, holds only the close button ── */
+#chest-header.treasure-pile-header {
+  background-image: none;
+  background: linear-gradient(180deg, rgba(74, 52, 20, 0.85) 0%, rgba(34, 23, 9, 0.95) 100%);
+  border-bottom: 1px solid #6e4c18;
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+  padding: 7px 12px;
+  justify-content: flex-end;
+}
+
+/* Hide the sort button and the "sent" label for the treasure pile */
+#chest-modal:has(.treasure-pile-header) #chest-sort-btn,
+#chest-modal:has(.treasure-pile-header) #chest-sent-label {
+  display: none;
+}
+
+/* Round gold close button */
+#chest-modal:has(.treasure-pile-header) #chest-close {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #fff3c4 0%, #ecc04a 45%, #b6831f 75%, #6e4912 100%);
+  border: 1px solid #ffe9a0;
+  outline: none;
+  color: #3a2408;
+  font-weight: 700;
+  text-shadow: 0 1px 0 rgba(255, 240, 190, 0.6);
+}
+#chest-modal:has(.treasure-pile-header) #chest-close:hover {
+  background: radial-gradient(circle at 38% 32%, #fffbe8 0%, #ffd25a 45%, #cf9526 75%, #7e560f 100%);
+  border-color: #fff8e0;
+  box-shadow: 0 0 14px rgba(255, 200, 70, 0.7);
+  color: #2a1a04;
+}
+
+/* ── Section headers (TREASURE / INVENTORY) ── */
+#chest-modal:has(.treasure-pile-header) #chest-body-header,
+#chest-modal:has(.treasure-pile-header) #chest-party-inv-header {
+  background: linear-gradient(180deg, rgba(60, 42, 16, 0.55) 0%, rgba(16, 11, 5, 0.95) 100%);
+  border-bottom: 1px solid #5a3f16;
+}
+#chest-modal:has(.treasure-pile-header) #chest-title,
+#chest-modal:has(.treasure-pile-header) #chest-party-inv-label {
+  color: #ffd76a;
+  text-shadow: 0 0 9px rgba(255, 178, 44, 0.55), 0 1px 2px #000;
+}
+#chest-modal:has(.treasure-pile-header) #chest-body {
+  border-right: 1px solid #5a3f16;
+}
+
+/* ── Treasure slots: warm gem-lit wells (left grid only) ── */
+#chest-modal:has(.treasure-pile-header) .chest-slot {
+  border-color: #1a0f05 #4a3212 #4a3212 #1a0f05;
+  background:
+    radial-gradient(circle 2px at 3px 3px, rgba(255, 196, 80, 0.7) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) 3px, rgba(255, 196, 80, 0.7) 40%, transparent 65%),
+    radial-gradient(circle 2px at 3px calc(100% - 3px), rgba(255, 196, 80, 0.7) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) calc(100% - 3px), rgba(255, 196, 80, 0.7) 40%, transparent 65%),
+    radial-gradient(ellipse at 40% 32%, rgba(74, 48, 16, 0.95) 0%, rgba(14, 8, 3, 1) 82%);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 214, 110, 0.12),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.5),
+    inset 0 2px 10px rgba(0, 0, 0, 0.85);
+}
+#chest-modal:has(.treasure-pile-header) .chest-slot:hover {
+  border-color: #8a5c1e #c89234 #a87826 #6e4814;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 200, 80, 0.3),
+    inset 0 2px 4px rgba(0, 0, 0, 0.55),
+    0 0 14px rgba(255, 176, 40, 0.45);
+}
+
+/* Fixed height — the treasure grid is locked to 4 rows (20 slots), and the
+   party inventory is clamped to the same height (it scrolls past row 4). Uses
+   max-height (not height) because #chest-main-content is flex:1, which makes a
+   plain `height` get ignored. ~380px ≈ a section header + 4 rows. */
+#chest-modal:has(.treasure-pile-header) #chest-main-content {
+  max-height: min(380px, calc(100vh - 140px));
+}
+
+/* Match the party grid's gap to the treasure grid so 4 rows line up exactly */
+#chest-modal:has(.treasure-pile-header) #chest-party-inv-grid {
+  gap: 8px;
+}
+
 
 #chest-sent-label {
   flex: 1;

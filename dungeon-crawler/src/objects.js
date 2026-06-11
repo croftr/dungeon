@@ -8,7 +8,7 @@ import { showMessage, drawMinimap, updateStatus } from './minimap.js';
 import { getItemDef, ITEMS } from './items.js';
 import { party, drawPortrait, resurrectAll, partyGold, removeGold, addGold, refreshPartyCards, setHp, applyStatusEffect, showMemberDamage, flashPortraitHit } from './party.js';
 import { addLogEntry } from './battle-log.js';
-import { setPortalIdleLoop, playHealSound, playBoneSound, playPortalSound, playFloorPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playLearntSound, playSoundByUrl, playQuestAudio, fadeOutQuestAudio, playPartyHitSound, playInventorySortSound, playCraftFailSound, playCraftHqSound, playNpcDialogue, isNpcDialoguePlaying } from './audio.js';
+import { setPortalIdleLoop, playHealSound, playBoneSound, playPortalSound, playFloorPortalSound, playShopkeeperSound, playAlchemySound, playAlchemyFailSound, playAnvilSound, playKeyLockSound, playGateOpeningSound, playItemSound, playChestOpenSound, playTreasurePileOpenSound, playWeaponRackSound, playSpellCabinetSound, playButtonClickSound, playTrapSound, playSuccessSound, playLearntSound, playSoundByUrl, playQuestAudio, fadeOutQuestAudio, playPartyHitSound, playInventorySortSound, playCraftFailSound, playCraftHqSound, playNpcDialogue, isNpcDialoguePlaying } from './audio.js';
 import MERCHANT_DATA from './data/merchant.json';
 import POTION_MERCHANT_DATA from './data/potion-merchant.json';
 import STANCE_MERCHANT_DATA from './data/stance-npc-merchant.json';
@@ -2332,14 +2332,16 @@ export function initObjects(scene, camera) {
 
 }
 
-export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = [], modelPath = asset('/items/containers/treasure-chest.glb'), interactive = true, offsetX = 0, title = 'Chest', scale = 0.3) {
+export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = [], modelPath = asset('/items/containers/treasure-chest.glb'), interactive = true, offsetX = 0, title = 'Chest', scale = 0.3, isTreasurePile = false) {
     const isStarterStash = title === 'Stash';
     // Type-prefixed so different container kinds at the same grid cell never
     // collide. offsetX is included when non-zero so two chests can share a
     // cell with different visual offsets (e.g. the paired chests in the L1
-    // ogre room) without colliding either.
+    // ogre room) without colliding either. Treasure piles get their own prefix
+    // so a pile and a chest can co-exist at the same cell.
     const offsetSuffix = offsetX ? `,${offsetX}` : '';
-    const persistenceKey = `chest:${window.currentLevel},${col},${row}${offsetSuffix}`;
+    const keyPrefix = isTreasurePile ? 'treasure-pile' : 'chest';
+    const persistenceKey = `${keyPrefix}:${window.currentLevel},${col},${row}${offsetSuffix}`;
 
     if (interactive) {
         if (isStarterStash && _persistedStarterStashItems !== null) {
@@ -2382,6 +2384,7 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
                     child.userData.persistenceKey = persistenceKey;
                     child.userData.title = title;
                     if (isStarterStash) child.userData.isStarterStash = true;
+                    if (isTreasurePile) child.userData.isTreasurePile = true;
                     interactables.push(child);
                 }
 
@@ -2402,6 +2405,19 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
 
         scene.add(model);
     });
+}
+
+// Treasure Pile — a chest-style container with its own model, header banner and
+// open sound. Thin wrapper over addChest that bakes in the treasure-pile model,
+// the `isTreasurePile` flag, interactive=true and sensible defaults, so levels
+// can drop one in with just a position + contents:
+//   addTreasurePile(group, loader, col, row, rotY, offsetZ, [contents])
+export function addTreasurePile(scene, loader, col, row, rotY, offsetZ = 0, contents = [], offsetX = 0, scale = 0.6, title = 'Treasure Pile') {
+    return addChest(
+        scene, loader, col, row, rotY, offsetZ, contents,
+        asset('/items/containers/treasure-pile.glb'),
+        true, offsetX, title, scale, true
+    );
 }
 
 function addStatue(scene, loader, col, row, rotY = 0, offsetX = 0, offsetZ = 0) {
@@ -3334,7 +3350,7 @@ export function spawnObjectsForLevel() {
         group: objectsGroup,
         loader: _gltfLoader,
         // Spawn helpers
-        addChest, addWeaponRack, addSpellCabinet, addShop,
+        addChest, addTreasurePile, addWeaponRack, addSpellCabinet, addShop,
         addCrystals, addBonePile, addDecoration, addInteractiveCauldron, addCrystalShrine, addHeroDoor,
         addPortal, addDisabledPortal, addPortcullis, addKeyhole,
         addStatue, addPortalActivatorStatue, addPartyConfirmNPC, addDialogueNPC, addCustomNPC,
@@ -4939,10 +4955,17 @@ function _renderArmorStandPartyInv() {
 
 export function openChestModal(chestObj) {
     _activeShrineLootObj = chestObj;
-    playChestOpenSound();
+    const isTreasurePile = !!chestObj.userData.isTreasurePile;
+    if (isTreasurePile) {
+        playTreasurePileOpenSound();
+    } else {
+        playChestOpenSound();
+    }
     _activeSentLabelId = 'chest-sent-label';
     const overlay = document.getElementById('chest-overlay');
     overlay.classList.remove('chest-hidden');
+    // Swap the header banner art for treasure piles.
+    document.getElementById('chest-header').classList.toggle('treasure-pile-header', isTreasurePile);
     document.getElementById('chest-sent-label').textContent = '';
     document.getElementById('chest-title').textContent = chestObj.userData.title || 'Chest';
 
@@ -4957,7 +4980,11 @@ export function openChestModal(chestObj) {
 
     const grid = document.getElementById('chest-grid');
     const contents = chestObj.userData.contents || [];
-    const targetSlots = Math.max(partyInvLen, contents.length);
+    // Treasure piles always show a fixed 4 rows (5 cols × 4 = 20 slots) so the
+    // modal stays a constant height; chests size to the party inventory.
+    const targetSlots = isTreasurePile
+        ? Math.max(20, contents.length)
+        : Math.max(partyInvLen, contents.length);
     
     let slots = grid.querySelectorAll('.chest-slot');
     // Dynamically adjust slots to match targetSlots exactly
