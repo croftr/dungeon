@@ -6,15 +6,20 @@ import { asset } from '../../assets.js';
 //  LEVEL 3 – The Abyssal Crypts
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SWAMP_PATROL = { bounds: { minRow: 1, maxRow: 5, minCol: 1, maxCol: 18 }, speed: 0.35, waitTime: 2.5 };
+// Two swamp monsters share the room but patrol opposite halves, with a neutral
+// gap (cols 8-11) between their zones so the party can pull and fight one at a
+// time. An aggroed monster chases freely (ignores these bounds), so kiting one
+// across the gap — or fighting near the middle — risks waking the other.
+const SWAMP_PATROL_WEST = { bounds: { minRow: 1, maxRow: 5, minCol: 1, maxCol: 7 }, speed: 0.35, waitTime: 2.5 };
+const SWAMP_PATROL_EAST = { bounds: { minRow: 1, maxRow: 5, minCol: 12, maxCol: 18 }, speed: 0.35, waitTime: 2.5 };
 
-function _makeSwampMonster(id, row, col) {
+function _makeSwampMonster(id, row, col, patrol) {
   const m = inst(D.swamp_monster, id, row, col,
     asset('/monsters/swamp-monster/walking.glb'),
     asset('/monsters/swamp-monster/attack.glb'),
     asset('/monsters/swamp-monster/attack.mp3'),
     0.5, 0, 0, 3,
-    SWAMP_PATROL,
+    patrol,
     asset('/monsters/swamp-monster/dead.glb'),
     null,
     asset('/monsters/swamp-monster/walking.glb'),
@@ -39,8 +44,12 @@ export const level3Monsters = [
     asset('/monsters/minotaur/Meshy_AI_Animation_Walking_withSkin.glb'),
     asset('/monsters/minotaur/Meshy_AI_Animation_Alert_withSkin.glb')),
 
-  // ── Swamp Room (1 Swamp Monster) ────────────────────────────────────────
-  _makeSwampMonster(361, 3, 9),
+  // ── Swamp Room (2 Swamp Monsters — west & east, kept far apart) ──────────
+  // The party enters from the south passage (col 3) into the west monster's
+  // zone; the east monster guards the far side near the cauldron alcove. Each
+  // can be isolated, but pulling both at once is a serious fight.
+  _makeSwampMonster(361, 3, 3, SWAMP_PATROL_WEST),
+  _makeSwampMonster(362, 3, 16, SWAMP_PATROL_EAST),
 
   // ── North-West Room (4 Skeletons, 1 Demon) ──────────────────────────────
   inst(D.skeletonWarrior, 311, 8, 2,

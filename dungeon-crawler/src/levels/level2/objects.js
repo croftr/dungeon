@@ -120,7 +120,7 @@ export function spawnLevel2Objects(ctx) {
 
     // Chest at col 38 north side (shifted from col 28 -> 38)
     addChest(group, loader, 38, 32, -Math.PI / 2, -0.5, [
-        "Bloodstone Amulet"
+        "Bloodstone Amulet", "Plate Cuirass"
     ], asset('/items/containers/treasure-chest.glb'), true, 0.5);
 
     // Ethereal Egg at col 38 south side (shifted from col 28 -> 38)
@@ -147,7 +147,7 @@ export function spawnLevel2Objects(ctx) {
     ], asset('/items/containers/green-chest.glb'));
     // Room B — rows 38-40, cols 29-31 (branch off the corridor at col 30)
     addChest(group, loader, 30, 40, Math.PI, 0.7, [
-        "Ancient Tree Sap", " Water Bolts"
+        "Ancient Tree Sap", "Water Bolts"
     ], asset('/items/containers/green-chest.glb'));
 
     // ── Stairs ────────────────────────────────────────────────────────────────
@@ -185,7 +185,7 @@ export function spawnLevel2Objects(ctx) {
     // Magic chest shifted west (offsetX -0.5) to make room for a treasure pile
     // alongside it against the north wall.
     addChest(group, loader, 3, 8, 0, -0.5, [
-        "Schematic Key", "Plate Cuirass"
+        "Schematic Key"
     ], asset('/items/containers/magic-chest.glb'), true, -0.5, 'Chest', 0.44);
 
     // Empty Treasure Pile beside the magic chest (east of it, north wall)
@@ -196,7 +196,7 @@ export function spawnLevel2Objects(ctx) {
     // Spell cabinet against the west wall (col 1) and weapon rack against the east
     // wall (col 5) of the same room — both empty for now.
     addSpellCabinet(group, loader, 2, 9, Math.PI / 2, -0.7, 0, [
-        "Trapper's Manual", "Shell", "Resist Water", "Resist Lightning"
+        "Trapper's Manual", "Scroll of Shell", "Scroll of Resist Water", "Scroll of Resist Lightning"
     ]);
 
     addWeaponRack(group, loader, 4, 9, -Math.PI / 2, 0.7, 0, [

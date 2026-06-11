@@ -65,25 +65,21 @@ export function spawnSchematicTrialsObjects(ctx) {
     // ── Four reward chests, one per alcove ────────────────────────────────────
     // North alcove — Savage Fury (orc tribal armour)
     addChest(group, loader, 7, 1, 0, -0.7, [
-        "Savage Schematics",
-        { name: 'Gold Coins', quantity: 40 },
+        "Savage Schematics"
     ]);
 
     // South alcove — Steel Vanguard (heavy plate)
     addChest(group, loader, 7, 12, Math.PI, 0.7, [
-        "Steel Schematics",
-        { name: 'Gold Coins', quantity: 40 },
+        "Steel Schematics"
     ]);
 
     // West alcove — Tracker's Guise (ranger leather)
     addChest(group, loader, 1, 6, Math.PI / 2, -0.7, [
-        "Trackers Schematics",
-        { name: 'Gold Coins', quantity: 40 },
+        "Trackers Schematics"
     ]);
 
     // East alcove — Wizard's Regalia (mage robes)
     addChest(group, loader, 13, 6, -Math.PI / 2, 0.7, [
-        "Wizard Schematics",
-        { name: 'Gold Coins', quantity: 40 },
+        "Wizard Schematics"
     ]);
 }

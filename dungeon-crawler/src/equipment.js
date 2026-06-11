@@ -261,6 +261,7 @@ const SLOT_LABELS = {
   cloak: 'Cloak',
   neck: 'Neck',
   chest: 'Chest',
+  hand: 'Hand',
   leftHand: 'Left Hand',
   rightHand: 'Right Hand',
   bothHands: 'Both Hands',
@@ -1656,7 +1657,9 @@ function populateTooltip(obj, showBuyPrice = false) {
     slotEl.textContent = 'Party Potion';
     slotEl.style.color = '#ffd700';
   } else {
-    slotEl.textContent = (isSpellbook || isMainSpellbook) ? 'Type: Spellbook' : ('Slot: ' + (SLOT_LABELS[def?.slot ?? obj.slot] ?? obj.slot));
+    const slotKey = def?.slot ?? obj.slot;
+    const slotLabel = SLOT_LABELS[slotKey] ?? (slotKey ? slotKey.charAt(0).toUpperCase() + slotKey.slice(1) : 'Item');
+    slotEl.textContent = (isSpellbook || isMainSpellbook) ? 'Type: Spellbook' : ('Slot: ' + slotLabel);
   }
 
   if (isSpellbook) {

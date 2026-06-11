@@ -179,6 +179,13 @@ export function toggleFullscreen() {
 
 export function drawMinimap() {
   if (!mmCtx) return;
+  // Resize the canvas/cell to the *current* map bounds. ROWS/COLS are live
+  // bindings that change on every level swap (changeMapArray), but nothing else
+  // recomputes MM_CELL on a level change — without this, entering a map with
+  // very different dimensions (e.g. the Crow Realm's 12×58 grid) leaves the
+  // canvas sized for the previous level and the visible region clips away the
+  // whole walkable area, so the minimap renders blank.
+  _updateCellSize();
   const canvas = mmCtx.canvas;
   mmCtx.clearRect(0, 0, canvas.width, canvas.height);
 
