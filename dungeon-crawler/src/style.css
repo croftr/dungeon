@@ -2664,9 +2664,9 @@ label.mm-setting-label {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.9), 
-              inset 0 1px 0 rgba(255, 220, 120, 0.15), 
-              0 6px 16px rgba(0, 0, 0, 0.8);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 220, 120, 0.15),
+    0 6px 16px rgba(0, 0, 0, 0.8);
   position: relative;
   min-height: 94px;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
@@ -3021,6 +3021,7 @@ label.mm-setting-label {
 [id^="slot-sk"].slot-no-mp {
   pointer-events: auto;
 }
+
 [id^="slot-sk"].slot-inactive::after,
 [id^="slot-sk"].slot-cooling-down::after,
 [id^="slot-sk"].slot-no-mp::after {
@@ -3082,25 +3083,30 @@ label.mm-setting-label {
   background-size: 50%;
   opacity: 0.18;
 }
+
 [id^="slot-sk"].slot-empty[data-slot-type="skill"]::before {
   /* Reuse the star but a bit more visible */
   opacity: 0.18;
 }
+
 [id^="slot-sk"].slot-empty[data-slot-type="direct-damage"]::before {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='12' y='18' font-size='20' text-anchor='middle' fill='%23e05050'%3E%E2%9A%94%3C/text%3E%3C/svg%3E");
   background-size: 60%;
   opacity: 0.3;
 }
+
 [id^="slot-sk"].slot-empty[data-slot-type="healing"]::before {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='12' y='18' font-size='20' text-anchor='middle' fill='%2360c060'%3E%E2%9C%9A%3C/text%3E%3C/svg%3E");
   background-size: 60%;
   opacity: 0.3;
 }
+
 [id^="slot-sk"].slot-empty[data-slot-type="buff"]::before {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='12' y='18' font-size='20' text-anchor='middle' fill='%2360c0ff'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E");
   background-size: 60%;
   opacity: 0.3;
 }
+
 [id^="slot-sk"].slot-empty[data-slot-type="debuff"]::before {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='12' y='18' font-size='20' text-anchor='middle' fill='%23c080e0'%3E%E2%97%8E%3C/text%3E%3C/svg%3E");
   background-size: 60%;
@@ -6198,9 +6204,12 @@ label.mm-setting-label {
 }
 
 @keyframes weaponSkillReadyPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 3px 1px rgba(255, 210, 74, 0.6);
   }
+
   50% {
     box-shadow: 0 0 6px 2px rgba(255, 210, 74, 1);
   }
@@ -6212,6 +6221,7 @@ label.mm-setting-label {
 .equip-slot.slot-has-wskill.slot-cooling-down {
   pointer-events: auto;
 }
+
 .equip-slot.slot-has-wskill.slot-cooling-down::after {
   pointer-events: none;
 }
@@ -7025,6 +7035,7 @@ label.mm-setting-label {
 .asp-type-selector {
   padding: 8px 14px 10px;
 }
+
 .asp-type-selector-label {
   font-size: 0.65rem;
   color: #806840;
@@ -7032,11 +7043,13 @@ label.mm-setting-label {
   letter-spacing: 0.1em;
   margin-bottom: 6px;
 }
+
 .asp-type-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
 }
+
 .asp-type-chip {
   background: rgba(20, 14, 6, 0.7);
   border: 1px solid #3a2e18;
@@ -7048,11 +7061,13 @@ label.mm-setting-label {
   font-family: inherit;
   transition: background 0.1s ease, border-color 0.1s ease, color 0.1s ease;
 }
+
 .asp-type-chip:hover {
   background: rgba(60, 44, 16, 0.9);
   color: #d8b870;
   border-color: #6a4e20;
 }
+
 .asp-type-chip.active {
   background: rgba(120, 90, 30, 0.55);
   color: #ffe08a;
@@ -8186,7 +8201,7 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   /* height ≈ width / image-aspect (2752/399 ≈ 6.9) for no vertical squish.
      At the 820px modal width that's ~119px; lower it for a slimmer band. */
   height: 110px;
-  background-image: url('/images/treasure-pile-header.png');
+  background-image: url('/images/treasure-pile-header.webp');
   background-size: 100% 100%;
   background-repeat: no-repeat;
   z-index: 6;
@@ -8234,6 +8249,7 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   font-weight: 700;
   text-shadow: 0 1px 0 rgba(255, 240, 190, 0.6);
 }
+
 #chest-modal:has(.treasure-pile-header) #chest-close:hover {
   background: radial-gradient(circle at 38% 32%, #fffbe8 0%, #ffd25a 45%, #cf9526 75%, #7e560f 100%);
   border-color: #fff8e0;
@@ -8247,11 +8263,13 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   background: linear-gradient(180deg, rgba(60, 42, 16, 0.55) 0%, rgba(16, 11, 5, 0.95) 100%);
   border-bottom: 1px solid #5a3f16;
 }
+
 #chest-modal:has(.treasure-pile-header) #chest-title,
 #chest-modal:has(.treasure-pile-header) #chest-party-inv-label {
   color: #ffd76a;
   text-shadow: 0 0 9px rgba(255, 178, 44, 0.55), 0 1px 2px #000;
 }
+
 #chest-modal:has(.treasure-pile-header) #chest-body {
   border-right: 1px solid #5a3f16;
 }
@@ -8270,6 +8288,7 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
     inset -1px -1px 0 rgba(0, 0, 0, 0.5),
     inset 0 2px 10px rgba(0, 0, 0, 0.85);
 }
+
 #chest-modal:has(.treasure-pile-header) .chest-slot:hover {
   border-color: #8a5c1e #c89234 #a87826 #6e4814;
   box-shadow:

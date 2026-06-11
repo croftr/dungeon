@@ -2366,7 +2366,7 @@ function applyLevel3Textures(scene) {
   buildInnerTextureZone(scene, openedCell, asset('/textures/wet-wall.webp'));
   // Distinct alcove wall texture (painted last so its faces win over any shared
   // corner walls with the swamp room's wet-wall zone).
-  buildInnerTextureZone(scene, alcoveFloors, asset('/textures/swamp-demon-wall.png'));
+  buildInnerTextureZone(scene, alcoveFloors, asset('/textures/swamp-demon-wall.webp'));
 }
 
 // Rebuild Level 3's base geometry + texture overlays in place after the swamp
@@ -2377,7 +2377,7 @@ window.rebuildLevel3Geometry = function () {
 };
 
 // Level 4 special texture zones (demon-wall / black-stone2 over everything except
-// the entry room) + the distinct demon-wall.png on the cauldron alcove recess.
+// the entry room) + the distinct demon-wall-alcove on the cauldron alcove recess.
 // Extracted so the demon-room cauldron's hidden-passage wall can rebuild geometry
 // in place via window.rebuildLevel4Geometry() without a full level reload.
 function applyLevel4Textures(scene) {
@@ -2402,10 +2402,11 @@ function applyLevel4Textures(scene) {
     asset('/textures/demon-wall.webp'),
     asset('/textures/black-stone2.webp')
   );
-  // Distinct demon-wall.png on the cauldron alcove recess walls only (row 10, cols
-  // 29-31): the rear (11,29-31) faces + the (10,28)/(10,32) side faces. Painted
-  // after the base zone so its inner-face planes win over the demon-wall.webp boxes.
-  buildInnerTextureZone(scene, [[10, 29], [10, 30], [10, 31]], asset('/textures/demon-wall.png'));
+  // Distinct demon-wall-alcove texture on the cauldron alcove recess walls only
+  // (row 10, cols 29-31): the rear (11,29-31) faces + the (10,28)/(10,32) side
+  // faces. Painted after the base zone so its inner-face planes win over the
+  // demon-wall.webp boxes.
+  buildInnerTextureZone(scene, [[10, 29], [10, 30], [10, 31]], asset('/textures/demon-wall-alcove.webp'));
 }
 
 // Rebuild Level 4's base geometry + texture overlays in place after the demon-room

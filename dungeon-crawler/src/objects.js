@@ -1744,7 +1744,7 @@ export function initObjects(scene, camera) {
                         openedKey: 'level4CauldronWallOpened',
                         map: level4Map, openRow: 11, openCol: 30,
                         rebuild: 'rebuildLevel4Geometry',
-                        wallTex: '/textures/demon-wall.png',
+                        wallTex: '/textures/demon-wall-alcove.webp',
                         openedMsg: "The cauldron sits spent and quiet. A dark passage gapes open in the wall to the south.",
                         idleMsg: "An ancient cauldron slick with infernal runes. The brew within hungers for something — an offering, perhaps.",
                         feedMsg: "The blood hisses into the seething brew. It hungers for more...",
