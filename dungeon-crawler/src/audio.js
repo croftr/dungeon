@@ -57,6 +57,7 @@ const ITEM_SOUNDS = {
   'Blue Crystal': asset('/sounds/items/crystal.mp3'),
   'Ancient Tree Sap': asset('/sounds/items/ancient-sap.mp3'),
   'Ancient Bog Core': asset('/sounds/items/ancient-sap.mp3'),
+  'Ancient Demon Blood': asset('/sounds/items/ancient-sap.mp3'),
   'spell-assigned': asset('/sounds/actions/spell-assinged.mp3'),
   'berry': asset('/sounds/actions/inventory-item.mp3'),
   'fungus': asset('/sounds/actions/fungus.mp3'),

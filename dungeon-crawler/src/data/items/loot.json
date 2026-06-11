@@ -231,6 +231,15 @@
         "sellable": false
     },
     {
+        "name": "Ancient Demon Blood",
+        "slot": "loot",
+        "icon": "/icons/key/ancient_demon_blood.svg",
+        "description": "A clot of black-crimson ichor drawn from the heart of an ancient demon. Hot, thick and reeking of sulfur, it seethes with an infernal hunger that never cools. Some old mechanisms hunger for its essence.",
+        "value": 250,
+        "weight": 0.5,
+        "sellable": false
+    },
+    {
         "name": "Savage Schematics",
         "slot": "loot",
         "icon": "/icons/key/savage_schematics.webp",

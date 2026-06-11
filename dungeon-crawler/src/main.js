@@ -13,7 +13,7 @@ import { getItemDef } from './items.js';
 import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt, tickMonsterElementFloorDamage } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
-import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, getCauldronSapCount, getCauldronCoreCount, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems, replenishPotionMerchant, checkFloorPortalStep, checkMistPortalStep } from './objects.js';
+import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, getCauldronSapCount, getCauldronCoreCount, getCauldronBloodCount, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems, replenishPotionMerchant, checkFloorPortalStep, checkMistPortalStep } from './objects.js';
 import { startMusic, updateAudio, setAmbientLevel, setZoneMusic, setZoneSilence, playFallSequence, prefetchBuffer, fadeOutQuestAudio, playThemeTune, fadeOutThemeTune, playSoundByUrl, playPartyHitSound, prefetchActionSounds, checkNpcDialogueProximity, setElementFloorSound } from './audio.js';
 import { initBattleLog, addLogEntry } from './battle-log.js';
 import { initBattleStats } from './battle-stats.js';
@@ -2376,6 +2376,45 @@ window.rebuildLevel3Geometry = function () {
   applyLevel3Textures(scene);
 };
 
+// Level 4 special texture zones (demon-wall / black-stone2 over everything except
+// the entry room) + the distinct demon-wall.png on the cauldron alcove recess.
+// Extracted so the demon-room cauldron's hidden-passage wall can rebuild geometry
+// in place via window.rebuildLevel4Geometry() without a full level reload.
+function applyLevel4Textures(scene) {
+  // Zones covered:
+  //   rows  0–11  all cols          — vault, passage, east boss room, east connector
+  //   rows 12–16  cols 0–2          — west connector corridor (narrow south tunnel)
+  //   rows 17–26  cols 0–11         — west boss room (Lizard Man lair) + its perimeter walls
+  //   all rows    cols 15+          — eastern walls + the new cauldron alcove/passage/reward room
+  const wallCells = [];
+  const floorCells = [];
+  level4Map.forEach((row, r) => row.forEach((cell, c) => {
+    const inNorthZone = r <= 11;
+    const inWestConnector = r >= 12 && r <= 16 && c <= 2;
+    const inWestBossRoom = r >= 17 && r <= 26 && c <= 11;
+    const inEastZone = c >= 15;
+    if (inNorthZone || inWestConnector || inWestBossRoom || inEastZone) {
+      if (cell === 1 || cell === 7) wallCells.push([r, c]);
+      else if (cell !== CELL_HOLE) floorCells.push([r, c]);
+    }
+  }));
+  buildTextureZone(scene, wallCells, floorCells,
+    asset('/textures/demon-wall.webp'),
+    asset('/textures/black-stone2.webp')
+  );
+  // Distinct demon-wall.png on the cauldron alcove recess walls only (row 10, cols
+  // 29-31): the rear (11,29-31) faces + the (10,28)/(10,32) side faces. Painted
+  // after the base zone so its inner-face planes win over the demon-wall.webp boxes.
+  buildInnerTextureZone(scene, [[10, 29], [10, 30], [10, 31]], asset('/textures/demon-wall.png'));
+}
+
+// Rebuild Level 4's base geometry + texture overlays in place after the demon-room
+// cauldron opens its hidden-passage wall at (11,30).
+window.rebuildLevel4Geometry = function () {
+  buildLevel(scene);
+  applyLevel4Textures(scene);
+};
+
 window.loadLevel = function (levelNum) {
   // Lazily load videos needed for this level
   loadVideosForLevel(levelNum);
@@ -2525,24 +2564,10 @@ window.loadLevel = function (levelNum) {
   //   rows 12–16  cols 0–2          — west connector corridor (narrow south tunnel)
   //   rows 17–26  cols 0–11         — west boss room (Lizard Man lair) + its perimeter walls
   //   all rows    cols 15+          — eastern walls and extended boundary walls
-  if (levelNum === 4) {
-    const wallCells = [];
-    const floorCells = [];
-    level4Map.forEach((row, r) => row.forEach((cell, c) => {
-      const inNorthZone = r <= 11;
-      const inWestConnector = r >= 12 && r <= 16 && c <= 2;
-      const inWestBossRoom = r >= 17 && r <= 26 && c <= 11;
-      const inEastZone = c >= 15;
-      if (inNorthZone || inWestConnector || inWestBossRoom || inEastZone) {
-        if (cell === 1 || cell === 7) wallCells.push([r, c]);
-        else if (cell !== CELL_HOLE) floorCells.push([r, c]);
-      }
-    }));
-    buildTextureZone(scene, wallCells, floorCells,
-      asset('/textures/demon-wall.webp'),
-      asset('/textures/black-stone2.webp')
-    );
-  }
+  // Level 4 special texture zones — extracted into applyLevel4Textures so the
+  // cauldron's hidden-passage wall can rebuild geometry in place via
+  // window.rebuildLevel4Geometry().
+  if (levelNum === 4) applyLevel4Textures(scene);
 
   // 3. Clear and respawn level objects
   clearObjects(scene);
@@ -2953,8 +2978,10 @@ window.addEventListener('mousemove', (e) => {
             if (def?.icon) keyItemIcon = asset(def.icon);
           }
         } else if (ud.isCauldron) {
-          const cItem = ud.cauldronLevel === 3 ? 'Ancient Bog Core' : 'Ancient Tree Sap';
-          const cCount = ud.cauldronLevel === 3 ? getCauldronCoreCount() : getCauldronSapCount();
+          const cItem = ud.cauldronLevel === 4 ? 'Ancient Demon Blood'
+            : ud.cauldronLevel === 3 ? 'Ancient Bog Core' : 'Ancient Tree Sap';
+          const cCount = ud.cauldronLevel === 4 ? getCauldronBloodCount()
+            : ud.cauldronLevel === 3 ? getCauldronCoreCount() : getCauldronSapCount();
           if (cCount < 4 && partyHasItem(cItem)) {
             const def = getItemDef(cItem);
             if (def?.icon) keyItemIcon = asset(def.icon);
