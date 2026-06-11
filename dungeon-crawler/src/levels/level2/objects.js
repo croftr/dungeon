@@ -13,7 +13,7 @@ import { CROW_ENTRY } from '../crow-realm/map.js';
 export function spawnLevel2Objects(ctx) {
     const {
         group, loader,
-        addChest, addStairs, addTrap1,
+        addChest, addTreasurePile, addStairs, addTrap1,
         addPortal, addPortcullis, addKeyhole,
         addSpellCabinet, addWeaponRack, addPortalActivatorStatue,
         createWallButton, addCustomNPC,
@@ -72,12 +72,10 @@ export function spawnLevel2Objects(ctx) {
     addChest(group, loader, 19, 13, Math.PI, 0.7, [
         'Poison Dagger', 'Life Orb',
         "Three Eyed Familiar",
-        { name: 'Gold Coins', quantity: 30 }
     ]);
 
     // Ice gauntlet reward chest (shifted from col 3, row 14 to col 13, row 14)
     addChest(group, loader, 13, 14, Math.PI, 0.7, [
-        { name: 'Gold Coins', quantity: 150 },
         "Hoarfrost Mantle",
         "Padded Vest",
         "Testament of Faith",
@@ -115,7 +113,7 @@ export function spawnLevel2Objects(ctx) {
     ]);
     addChest(group, loader, 11.3, 34, Math.PI, 0.7, [
         { name: 'Gold Coins', quantity: 10 },
-        'Ring of Strength', 'Ring of Balance',
+        'Ring of Strength',
         "Bulwark of the Ancestors"
     ]);
 
@@ -134,9 +132,14 @@ export function spawnLevel2Objects(ctx) {
 
     // Chest in the NE corner of the giant room (shifted from col 24 -> 34)
     addChest(group, loader, 34, 17, -Math.PI / 2, 0.7, [
-        { name: 'Gold Coins', quantity: 50 },
         'Starlight Nectar'
     ], asset('/items/containers/treasure-chest.glb'), true, -0.5);
+
+    // Empty Treasure Pile beside that chest, one cell south along the east wall
+    addTreasurePile(group, loader, 34, 18, -Math.PI / 2, 0.7, [
+        'Ring of Balance',
+        { name: 'Gold Coins', quantity: 150 },
+    ], -0.5);
 
     // ── Pit back-passage chest rooms ──────────────────────────────────────────
     // Behind the pit landing (party lands at row 37, col 13 facing south), the back
@@ -183,9 +186,17 @@ export function spawnLevel2Objects(ctx) {
     // the cauldron passage — TODO: add loot. offsetZ -0.5 sits it against the north
     // back wall while staying in front of it (the wall face is at -1.0); rotY 0
     // faces it into the room.
+    // Magic chest shifted west (offsetX -0.5) to make room for a treasure pile
+    // alongside it against the north wall.
     addChest(group, loader, 3, 8, 0, -0.5, [
-        "Schematic Key", "Ring of Resilience", "Plate Cuirass", { name: 'Gold Coins', quantity: 100 },
-    ], asset('/items/containers/magic-chest.glb'), true, 0, 'Chest', 0.44);
+        "Schematic Key", "Plate Cuirass"
+    ], asset('/items/containers/magic-chest.glb'), true, -0.5, 'Chest', 0.44);
+
+    // Empty Treasure Pile beside the magic chest (east of it, north wall)
+    addTreasurePile(group, loader, 3, 8, 0, -0.5, [
+        "Ring of Resilience",
+        { name: 'Gold Coins', quantity: 200 },
+    ], 0.5);
     // Spell cabinet against the west wall (col 1) and weapon rack against the east
     // wall (col 5) of the same room — both empty for now.
     addSpellCabinet(group, loader, 2, 9, Math.PI / 2, -0.7, 0, [

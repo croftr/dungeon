@@ -86,7 +86,7 @@ export function spawnLevel1Objects(ctx) {
 
     // Empty Treasure Pile beside the two Northwest-room chests (north wall)
     addTreasurePile(group, loader, 4, 1, 0, -0.65, [
-        { name: 'Gold Coins', quantity: 10 },
+        { name: 'Gold Coins', quantity: 50 },
         "Ring of Vigour",
         "Ring of Dexterity"
     ]);
