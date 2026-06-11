@@ -66,7 +66,7 @@ export function spawnLevel2Objects(ctx) {
         "Ice Arrows",
         "Ice Staff",
         "Trapper's Manual"
-    ]);
+    ], asset('/items/containers/dark-red-chest.glb'));
 
     // Shifted from col 9, row 13 to col 19, row 13
     addChest(group, loader, 19, 13, Math.PI, 0.7, [
@@ -127,7 +127,7 @@ export function spawnLevel2Objects(ctx) {
         { name: 'Gold Coins', quantity: 50 },
         'Mana Potion',
         "Bloodstone Amulet", "Schematic Key"
-    ], asset('/items/chest1.glb'), true, 0.5);
+    ], asset('/items/containers/treasure-chest.glb'), true, 0.5);
 
     // Ethereal Egg at col 38 south side (shifted from col 28 -> 38)
     addPortalActivatorStatue(group, loader, 38, 32, Math.PI / 2, 0.45, ['Blue Crystal'], 0, 0.5);
@@ -136,7 +136,7 @@ export function spawnLevel2Objects(ctx) {
     addChest(group, loader, 34, 17, -Math.PI / 2, 0.7, [
         { name: 'Gold Coins', quantity: 50 },
         'Starlight Nectar'
-    ], asset('/items/chest1.glb'), true, -0.5);
+    ], asset('/items/containers/treasure-chest.glb'), true, -0.5);
 
     // ── Pit back-passage chest rooms ──────────────────────────────────────────
     // Behind the pit landing (party lands at row 37, col 13 facing south), the back
@@ -145,11 +145,11 @@ export function spawnLevel2Objects(ctx) {
     // Room A — rows 38-40, cols 22-24 (branch off the corridor at col 23)
     addChest(group, loader, 23, 40, Math.PI, 0.7, [
         "Ancient Tree Sap", "Ice Bolts"
-    ], asset('/items/green-chest.glb'));
+    ], asset('/items/containers/green-chest.glb'));
     // Room B — rows 38-40, cols 29-31 (branch off the corridor at col 30)
     addChest(group, loader, 30, 40, Math.PI, 0.7, [
         "Ancient Tree Sap", " Water Bolts"
-    ], asset('/items/green-chest.glb'));
+    ], asset('/items/containers/green-chest.glb'));
 
     // ── Stairs ────────────────────────────────────────────────────────────────
     // Shifted from col 3, row 41 to col 13, row 41
@@ -185,7 +185,7 @@ export function spawnLevel2Objects(ctx) {
     // faces it into the room.
     addChest(group, loader, 3, 8, 0, -0.5, [
         "Schematic Key", "Ring of Resilience", "Plate Cuirass", { name: 'Gold Coins', quantity: 100 },
-    ], asset('/items/magic-chest.glb'), true, 0, 'Chest', 0.44);
+    ], asset('/items/containers/magic-chest.glb'), true, 0, 'Chest', 0.44);
     // Spell cabinet against the west wall (col 1) and weapon rack against the east
     // wall (col 5) of the same room — both empty for now.
     addSpellCabinet(group, loader, 2, 9, Math.PI / 2, -0.7, 0, [

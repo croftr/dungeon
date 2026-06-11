@@ -39,7 +39,7 @@ export function spawnLevel3Objects(ctx) {
         'Poison Arrows',
         "Tracker's Medallion",
         "Plate Cloak"
-    ]);
+    ], asset('/items/containers/dark-red-chest.glb'));
 
     // South-East room (row 24, col 19)
     addChest(group, loader, 19, 24, 0, -0.8, [

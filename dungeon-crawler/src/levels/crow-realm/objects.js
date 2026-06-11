@@ -41,11 +41,11 @@ export function spawnCrowRealmObjects(ctx) {
     // Room B (cols 42–44)
     addChest(group, loader, 43, 1, 0, -0.6, [
         "Ancient Tree Sap", "Water Dagger"
-    ], asset('/items/green-chest.glb'));
+    ], asset('/items/containers/green-chest.glb'));
     // Room D (cols 50–52)
     addChest(group, loader, 51, 1, 0, -0.6, [
         "Ancient Tree Sap", "Water Arrows"
-    ], asset('/items/green-chest.glb'));
+    ], asset('/items/containers/green-chest.glb'));
 
     // ── Crow-annex corridor portcullis & keyhole ──────────────────────────────
     addPortcullis(group, loader, 34, 4, 0, crowRealmPortcullisOpened);

@@ -2332,7 +2332,7 @@ export function initObjects(scene, camera) {
 
 }
 
-export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = [], modelPath = asset('/items/Meshy_AI_Treasure_Chest_0221184131_texture.glb'), interactive = true, offsetX = 0, title = 'Chest', scale = 0.3) {
+export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = [], modelPath = asset('/items/containers/treasure-chest.glb'), interactive = true, offsetX = 0, title = 'Chest', scale = 0.3) {
     const isStarterStash = title === 'Stash';
     // Type-prefixed so different container kinds at the same grid cell never
     // collide. offsetX is included when non-zero so two chests can share a
@@ -2362,6 +2362,13 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
         model.scale.setScalar(scale);
         model.position.set(col * CELL + offsetX, 0.0, row * CELL + offsetZ);
         model.rotation.y = rotY;
+
+        // Auto-align dark-red-chest.glb since its pivot is at its center
+        if (modelPath && modelPath.includes('dark-red-chest.glb')) {
+            model.updateMatrixWorld(true);
+            const box = new THREE.Box3().setFromObject(model);
+            model.position.y = -box.min.y;
+        }
 
         model.traverse((child) => {
             if (child.isMesh) {
@@ -3840,7 +3847,7 @@ function addPortalActivatorStatue(scene, loader, col, row, rotY = 0, scale = 0.4
     }
     _containerContentsPersistence[persistenceKey] = contents;
     const _spawnGen = _spawnGeneration;
-    loader.load(asset('/items/ethereal_egg.glb'), (gltf) => {
+    loader.load(asset('/items/containers/ethereal_egg.glb'), (gltf) => {
         if (_spawnGen !== _spawnGeneration) return;
         const model = gltf.scene;
         model.scale.setScalar(scale);
@@ -4097,7 +4104,7 @@ function addCrystals(scene, loader, col, row, rotY, offsetX = 0) {
 
 function addEtherealEgg(scene, loader, col, row, rotY = 0, isActive = false, targetLevel = 4, targetRow = null, targetCol = null, decorative = false, targetFacing = null) {
     _statueGridCells.add(`${row},${col}`);
-    loader.load(asset('/items/ethereal_egg.glb'), (gltf) => {
+    loader.load(asset('/items/containers/ethereal_egg.glb'), (gltf) => {
         const model = gltf.scene;
         model.scale.setScalar(0.5);
         // Put it on the floor

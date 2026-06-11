@@ -31,18 +31,8 @@ export function spawnLevel0Objects(ctx) {
     // ── Starter Stash in the starter room ─────────────────────────────────────────────
     addChest(group, loader, 13.4, 10, Math.PI / 2, -0.1, [
         { name: 'Gold Coins', quantity: 10000 },
-        'Potion of Unseen', 'Potion of Unseen', "Elixir of Rage", "Elixir of Rage", "Ogre Head Orb",
-        "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Red Crystal", "Blue Crystal", "Elixir of Enlightenment",
-        "Ancient Tree Sap", "Ancient Tree Sap", "Ancient Tree Sap", "Ancient Tree Sap",
-        "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence", "Life Essence",
-        "Tome of the Viperseeker", "War Hammer", "Greatsword", "Flame Greataxe", "Flame Dagger", "Flame Axe",
-        "Iron Ore", "Iron Ore", "Crow Key",
-        "Crocodile Hide Belt", "Snapjaw Maul", "Heartwood Charm", "Bramblewood Buckler",
-        "Labyrinth Horn Pendant", "Gorehorn Greataxe", "Tidecaller Band", "Deepwater Trident",
-        "Venomscale Ring", "Coldblood Kris", "Giantweave Mantle", "Colossus Girdle",
-        "Eye of Malice", "Infernal Pendant", "Hellforged Warmace", "Demonhide Drape",
-        "Lodestone Greatshield", "Stormcore Relic", "Corvid Talon Ring", "Nightcaw Staff"
-    ], asset('/items/stash.glb'), true, 0, 'Stash');
+        'Potion of Unseen', 'Potion of Unseen', 'Potion of Unseen'
+    ], asset('/items/containers/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in the east room (center) ────────────────────────────────────
     addCrystals(group, loader, 19, 11, 0);
@@ -91,13 +81,13 @@ export function spawnLevel0Objects(ctx) {
     });
 
     // ── Decorative chest beside the weapons merchant ───────────────────────────
-    addChest(group, loader, 23, 10, -Math.PI / 2, -1.0, [], asset('/items/chest1.glb'), false);
+    addChest(group, loader, 23, 10, -Math.PI / 2, -1.0, [], asset('/items/containers/treasure-chest.glb'), false);
 
     // ── Dropped torch beside the weapons merchant ──────────────────────────────
     addDroppedTorch(group, loader, 23, 11, -Math.PI / 2, 0.8, -0.7);
 
     // ── Magic chest beside the apothecary ─────────────────────────────────────
-    addChest(group, loader, 16, 14, Math.PI, -0.1, [], asset('/items/magic-chest.glb'), true, 1.5, 'Chest', 0.22);
+    addChest(group, loader, 16, 14, Math.PI, -0.1, [], asset('/items/containers/magic-chest.glb'), true, 1.5, 'Chest', 0.22);
 
     // ── Apothecary (SW corner of east room) — potions, scrolls & ingredients ──
     addShop(group, loader, 17, 14, Math.PI, 0, 0, 'potions',

@@ -71,7 +71,7 @@ export function spawnLevel1Objects(ctx) {
         { name: 'Gold Coins', quantity: 10 },
         'Leather Gloves', 'Cloth Trousers', 'Worn Boots', "Iron Pendant",
         "Iron Ring"
-    ]);
+    ], asset('/items/containers/dark-red-chest.glb'));
 
     // Chest in the Northwest room — far northeast corner
     addChest(group, loader, 5, 1, 0, -0.65, [
