@@ -5590,6 +5590,7 @@ export function useWeaponSkill(memberIndex, hand) {
       guaranteedStun: ws.guaranteedStun ?? def.guaranteedStun ?? false,
       guaranteedCrit: ws.guaranteedCrit ?? def.guaranteedCrit ?? false,
       guaranteedHit: ws.guaranteedHit ?? def.guaranteedHit ?? false,
+      lifeSteal: ws.lifeSteal ?? 0,
       isWeaponSkill: true,
     };
   }

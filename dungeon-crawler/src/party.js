@@ -1,7 +1,8 @@
 import { getItemDef } from './items.js';
 import { renderItemIcon, attachTooltipListeners, hideTooltip, rotateAmmo, clearAutoAttackTimers, clearAutoRangeAttackTimers, updateEffectiveStats, refreshEquipmentModal, getMemberEncumbranceLevel, getMemberCarryWeight, getMemberMaxCarry, formatSetBonusText, _formatSkillPotency } from './equipment.js';
 import SETS_DATA from './data/sets.json';
-import { addLogEntry } from './battle-log.js';
+import { addLogEntry, closeBattleLogReview } from './battle-log.js';
+import { closeBattleStats } from './battle-stats.js';
 import { isInCombat, playGoldSound, playPartyHitSound, playActionSound } from './audio.js';
 import { showMessage } from './minimap.js';
 import { skillsState } from './skills-state.js';
@@ -1169,6 +1170,9 @@ function _showGameOver() {
   const el = document.getElementById('game-over');
   if (!el) return;
   el.classList.add('active');
+  // Raise the battle log / stats panels (and the stats icon) above the death
+  // overlay so the player can open them via B / ⚔ to see how the party died.
+  document.body.classList.add('game-over-active');
   import('./save.js').then(({ renderSavesList }) => {
     renderSavesList('#game-over-saves', { requireConfirmOnLoad: false });
   });
@@ -1272,6 +1276,9 @@ export function resurrectAll() {
   // Hide Game Over if it was showing
   const el = document.getElementById('game-over');
   if (el) el.classList.remove('active');
+  document.body.classList.remove('game-over-active');
+  closeBattleLogReview();
+  closeBattleStats();
 }
 
 let mpRegenTimers = {};    // out-of-combat MP regen: per-member accumulators

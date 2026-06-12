@@ -82,6 +82,11 @@ export function recordAttack(characterName, didHit) {
 /** No-op kept for call-site compatibility — icon is now always visible. */
 export function showBattleStatsIcon() {}
 
+/** Force the battle stats panel closed (e.g. on resurrect / load). */
+export function closeBattleStats() {
+  _closePanel();
+}
+
 // ── Internals ─────────────────────────────────────────────────────────────────
 
 function _getOrCreate(name) {

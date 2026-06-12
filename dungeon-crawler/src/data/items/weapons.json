@@ -219,7 +219,15 @@
         "icon": "/icons/weapons/vampiric_dagger.webp",
         "description": "A black blade dripping with blood. Restores 1 HP on every successful hit.",
         "value": 200,
-        "weight": 0.4
+        "weight": 0.4,
+        "weaponSkill": {
+            "name": "Crimson Drain",
+            "cooldownMs": 60000,
+            "guaranteedHit": true,
+            "guaranteedCrit": true,
+            "lifeSteal": 1,
+            "vfx": "dark-strike"
+        }
     },
     {
         "name": "Poison Dagger",

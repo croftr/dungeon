@@ -8060,6 +8060,15 @@ body:has(#battle-log-panel.bl--visible:not(.bl--expanded)) #hunters-eye-panel {
   pointer-events: auto;
 }
 
+/* While the death overlay is up, lift the battle log / stats panels and the
+   stats icon above it (overlay is z-index 9999) so the player can open them via
+   B / ⚔ to browse how the fight went before loading a save. */
+body.game-over-active #battle-log-panel,
+body.game-over-active #battle-stats-panel,
+body.game-over-active #battle-stats-btn {
+  z-index: 10001;
+}
+
 /* ═══════════════════════════════════════════════
    SHRINE LOOT MODAL
 ═══════════════════════════════════════════════ */

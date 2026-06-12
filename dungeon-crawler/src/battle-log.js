@@ -120,6 +120,12 @@ function _togglePanel() {
   panel.classList.toggle('bl--visible');
 }
 
+/** Force the battle log panel closed (e.g. on resurrect / load). */
+export function closeBattleLogReview() {
+  const panel = document.getElementById('battle-log-panel');
+  if (panel) panel.classList.remove('bl--visible', 'bl--expanded');
+}
+
 function _toggleExpand() {
   const panel = document.getElementById('battle-log-panel');
   const btn = document.getElementById('bl-expand-btn');

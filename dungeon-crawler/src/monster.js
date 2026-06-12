@@ -3804,6 +3804,24 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
       }
     }
   }
+
+  // Weapon-skill life drain (e.g. Vampiric Dagger's "Crimson Drain"): restore HP
+  // to the wielder equal to a share of the damage this swing dealt. Driven by
+  // weaponDef.lifeSteal (fraction of final damage) set in useWeaponSkill. Works
+  // even on a killing blow — the blade drinks the slain foe's life.
+  if (result.hit && weaponDef?.lifeSteal > 0 && (result.damage ?? 0) > 0) {
+    const pIndex = party.findIndex(p => p.name === character.name);
+    if (pIndex !== -1) {
+      const p = party[pIndex];
+      if (p && !p.isDead && p.hp < p.hpMax) {
+        const heal = Math.round(result.damage * weaponDef.lifeSteal);
+        if (heal > 0) {
+          setHp(pIndex, p.hp + heal);
+          showMemberHeal(pIndex, heal);
+        }
+      }
+    }
+  }
   const poisoned = appliedEffects.includes('poison');
 
   recordAttack(character.name, true);
