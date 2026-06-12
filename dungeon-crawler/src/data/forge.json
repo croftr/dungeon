@@ -486,201 +486,489 @@
     {
         "name": "Crocodile Hide Belt",
         "ingredients": [
-            { "name": "Life Essence", "quantity": 1 },
-            { "name": "Iron Ore", "quantity": 1 },
-            { "name": "Leather Belt", "quantity": 1 },
-            { "name": "Crocodile Hide", "quantity": 1 },
-            { "name": "Crocodile Warrior Essence", "quantity": 1 }
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Leather Belt",
+                "quantity": 1
+            },
+            {
+                "name": "Crocodile Hide",
+                "quantity": 1
+            },
+            {
+                "name": "Crocodile Warrior Essence",
+                "quantity": 1
+            }
         ]
     },
     {
         "name": "Snapjaw Maul",
         "ingredients": [
-            { "name": "Life Essence", "quantity": 1 },
-            { "name": "Iron Ore", "quantity": 1 },
-            { "name": "Mace", "quantity": 1 },
-            { "name": "Crocodile Hide", "quantity": 1 },
-            { "name": "Crocodile Warrior Essence", "quantity": 1 }
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Mace",
+                "quantity": 1
+            },
+            {
+                "name": "Crocodile Hide",
+                "quantity": 1
+            },
+            {
+                "name": "Crocodile Warrior Essence",
+                "quantity": 1
+            }
         ]
     },
     {
         "name": "Heartwood Charm",
         "ingredients": [
-            { "name": "Life Essence", "quantity": 1 },
-            { "name": "Iron Ore", "quantity": 1 },
-            { "name": "Blue Crystal", "quantity": 1 },
-            { "name": "Ancient Heartwood", "quantity": 1 },
-            { "name": "Tree Man Essence", "quantity": 1 }
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 2
+            },
+            {
+                "name": "Ancient Heartwood",
+                "quantity": 1
+            },
+            {
+                "name": "Tree Man Essence",
+                "quantity": 1
+            }
         ]
     },
     {
         "name": "Bramblewood Buckler",
         "ingredients": [
-            { "name": "Life Essence", "quantity": 1 },
-            { "name": "Iron Ore", "quantity": 1 },
-            { "name": "Bronze Shield", "quantity": 1 },
-            { "name": "Ancient Heartwood", "quantity": 1 },
-            { "name": "Tree Man Essence", "quantity": 1 }
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Bronze Shield",
+                "quantity": 1
+            },
+            {
+                "name": "Ancient Heartwood",
+                "quantity": 1
+            },
+            {
+                "name": "Tree Man Essence",
+                "quantity": 1
+            }
         ]
     },
     {
         "name": "Labyrinth Horn Pendant",
         "ingredients": [
-            { "name": "Life Essence", "quantity": 1 },
-            { "name": "Iron Ore", "quantity": 1 },
-            { "name": "Iron Pendant", "quantity": 1 },
-            { "name": "Minotaur Horn", "quantity": 1 },
-            { "name": "Minotaur Essence", "quantity": 1 }
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Pendant",
+                "quantity": 1
+            },
+            {
+                "name": "Minotaur Horn",
+                "quantity": 1
+            },
+            {
+                "name": "Minotaur Essence",
+                "quantity": 1
+            }
         ]
     },
     {
         "name": "Gorehorn Greataxe",
         "ingredients": [
-            { "name": "Life Essence", "quantity": 1 },
-            { "name": "Iron Ore", "quantity": 1 },
-            { "name": "Greataxe", "quantity": 1 },
-            { "name": "Minotaur Horn", "quantity": 1 },
-            { "name": "Minotaur Essence", "quantity": 1 }
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Greataxe",
+                "quantity": 1
+            },
+            {
+                "name": "Minotaur Horn",
+                "quantity": 1
+            },
+            {
+                "name": "Minotaur Essence",
+                "quantity": 1
+            }
         ]
     },
     {
         "name": "Tidecaller Band",
         "ingredients": [
-            { "name": "Life Essence", "quantity": 1 },
-            { "name": "Iron Ore", "quantity": 1 },
-            { "name": "Iron Ring", "quantity": 1 },
-            { "name": "Aqua Man Flipper", "quantity": 1 },
-            { "name": "Aqua Man Essence", "quantity": 1 }
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ring",
+                "quantity": 1
+            },
+            {
+                "name": "Aqua Man Flipper",
+                "quantity": 1
+            },
+            {
+                "name": "Aqua Man Essence",
+                "quantity": 1
+            }
         ]
     },
     {
         "name": "Deepwater Trident",
         "ingredients": [
-            { "name": "Life Essence", "quantity": 1 },
-            { "name": "Iron Ore", "quantity": 1 },
-            { "name": "Tridant", "quantity": 1 },
-            { "name": "Aqua Man Flipper", "quantity": 1 },
-            { "name": "Aqua Man Essence", "quantity": 1 }
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Tridant",
+                "quantity": 1
+            },
+            {
+                "name": "Aqua Man Flipper",
+                "quantity": 1
+            },
+            {
+                "name": "Aqua Man Essence",
+                "quantity": 1
+            }
         ]
     },
     {
         "name": "Venomscale Ring",
         "ingredients": [
-            { "name": "Life Essence", "quantity": 1 },
-            { "name": "Iron Ore", "quantity": 1 },
-            { "name": "Iron Ring", "quantity": 1 },
-            { "name": "Lizard Scale", "quantity": 1 },
-            { "name": "Lizard Man Essence", "quantity": 1 }
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ring",
+                "quantity": 1
+            },
+            {
+                "name": "Lizard Scale",
+                "quantity": 1
+            },
+            {
+                "name": "Lizard Man Essence",
+                "quantity": 1
+            }
         ]
     },
     {
         "name": "Coldblood Kris",
         "ingredients": [
-            { "name": "Life Essence", "quantity": 1 },
-            { "name": "Iron Ore", "quantity": 1 },
-            { "name": "Dagger", "quantity": 1 },
-            { "name": "Lizard Scale", "quantity": 1 },
-            { "name": "Lizard Man Essence", "quantity": 1 }
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Dagger",
+                "quantity": 1
+            },
+            {
+                "name": "Lizard Scale",
+                "quantity": 1
+            },
+            {
+                "name": "Lizard Man Essence",
+                "quantity": 1
+            }
         ]
     },
     {
         "name": "Giantweave Mantle",
         "ingredients": [
-            { "name": "Life Essence", "quantity": 1 },
-            { "name": "Iron Ore", "quantity": 1 },
-            { "name": "Travelling Cloak", "quantity": 1 },
-            { "name": "Giant's Loin Cloth", "quantity": 1 },
-            { "name": "Giant Essence", "quantity": 1 }
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Travelling Cloak",
+                "quantity": 1
+            },
+            {
+                "name": "Giant's Loin Cloth",
+                "quantity": 1
+            },
+            {
+                "name": "Giant Essence",
+                "quantity": 1
+            }
         ]
     },
     {
         "name": "Colossus Girdle",
         "ingredients": [
-            { "name": "Life Essence", "quantity": 1 },
-            { "name": "Iron Ore", "quantity": 1 },
-            { "name": "Leather Belt", "quantity": 1 },
-            { "name": "Giant's Club", "quantity": 1 },
-            { "name": "Giant Essence", "quantity": 1 }
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Leather Belt",
+                "quantity": 1
+            },
+            {
+                "name": "Giant's Club",
+                "quantity": 1
+            },
+            {
+                "name": "Giant Essence",
+                "quantity": 1
+            }
         ]
     },
     {
         "name": "Eye of Malice",
         "ingredients": [
-            { "name": "Life Essence", "quantity": 1 },
-            { "name": "Iron Ore", "quantity": 1 },
-            { "name": "Red Crystal", "quantity": 1 },
-            { "name": "Demon's Eyes", "quantity": 1 },
-            { "name": "Demon Essence", "quantity": 1 }
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Demon's Eyes",
+                "quantity": 2
+            },
+            {
+                "name": "Demon Essence",
+                "quantity": 1
+            }
         ]
     },
     {
         "name": "Infernal Pendant",
         "ingredients": [
-            { "name": "Life Essence", "quantity": 1 },
-            { "name": "Iron Ore", "quantity": 1 },
-            { "name": "Iron Pendant", "quantity": 1 },
-            { "name": "Demon's Eyes", "quantity": 1 },
-            { "name": "Demon Essence", "quantity": 1 }
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Pendant",
+                "quantity": 1
+            },
+            {
+                "name": "Demon's Eyes",
+                "quantity": 1
+            },
+            {
+                "name": "Demon Essence",
+                "quantity": 1
+            }
         ]
     },
     {
         "name": "Hellforged Warmace",
         "ingredients": [
-            { "name": "Life Essence", "quantity": 1 },
-            { "name": "Iron Ore", "quantity": 1 },
-            { "name": "Mace", "quantity": 1 },
-            { "name": "Demon's Eyes", "quantity": 1 },
-            { "name": "Demon Ogre Essence", "quantity": 1 }
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Mace",
+                "quantity": 1
+            },
+            {
+                "name": "Demon's Eyes",
+                "quantity": 1
+            },
+            {
+                "name": "Demon Ogre Essence",
+                "quantity": 1
+            }
         ]
     },
     {
         "name": "Demonhide Drape",
         "ingredients": [
-            { "name": "Life Essence", "quantity": 1 },
-            { "name": "Iron Ore", "quantity": 1 },
-            { "name": "Travelling Cloak", "quantity": 1 },
-            { "name": "Demon's Eyes", "quantity": 1 },
-            { "name": "Demon Ogre Essence", "quantity": 1 }
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Travelling Cloak",
+                "quantity": 1
+            },
+            {
+                "name": "Demon's Eyes",
+                "quantity": 1
+            },
+            {
+                "name": "Demon Ogre Essence",
+                "quantity": 1
+            }
         ]
     },
     {
         "name": "Lodestone Greatshield",
         "ingredients": [
-            { "name": "Life Essence", "quantity": 1 },
-            { "name": "Iron Ore", "quantity": 2 },
-            { "name": "Bronze Shield", "quantity": 1 },
-            { "name": "Charged Lodestone", "quantity": 1 },
-            { "name": "Iron Warden Essence", "quantity": 1 }
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 2
+            },
+            {
+                "name": "Bronze Shield",
+                "quantity": 1
+            },
+            {
+                "name": "Charged Lodestone",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Warden Essence",
+                "quantity": 1
+            }
         ]
     },
     {
         "name": "Stormcore Relic",
         "ingredients": [
-            { "name": "Life Essence", "quantity": 1 },
-            { "name": "Iron Ore", "quantity": 1 },
-            { "name": "Blue Crystal", "quantity": 1 },
-            { "name": "Charged Lodestone", "quantity": 1 },
-            { "name": "Iron Warden Essence", "quantity": 1 }
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 2
+            },
+            {
+                "name": "Charged Lodestone",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Warden Essence",
+                "quantity": 1
+            }
         ]
     },
     {
         "name": "Corvid Talon Ring",
         "ingredients": [
-            { "name": "Life Essence", "quantity": 1 },
-            { "name": "Iron Ore", "quantity": 1 },
-            { "name": "Iron Ring", "quantity": 1 },
-            { "name": "Crow Talon", "quantity": 1 },
-            { "name": "Crow Essence", "quantity": 1 }
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ring",
+                "quantity": 1
+            },
+            {
+                "name": "Crow Talon",
+                "quantity": 1
+            },
+            {
+                "name": "Crow Essence",
+                "quantity": 1
+            }
         ]
     },
     {
         "name": "Nightcaw Staff",
         "ingredients": [
-            { "name": "Life Essence", "quantity": 1 },
-            { "name": "Iron Ore", "quantity": 1 },
-            { "name": "Oak Staff", "quantity": 1 },
-            { "name": "Crow Talon", "quantity": 1 },
-            { "name": "Crow Essence", "quantity": 1 }
+            {
+                "name": "Life Essence",
+                "quantity": 1
+            },
+            {
+                "name": "Iron Ore",
+                "quantity": 1
+            },
+            {
+                "name": "Oak Staff",
+                "quantity": 1
+            },
+            {
+                "name": "Crow Talon",
+                "quantity": 1
+            },
+            {
+                "name": "Crow Essence",
+                "quantity": 1
+            }
         ]
     }
 ]

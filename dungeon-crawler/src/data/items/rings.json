@@ -159,8 +159,7 @@
         "value": 950,
         "weight": 0.05,
         "statBonuses": {
-            "intelligence": 1,
-            "dexterity": 1
+            "intelligence": 1
         },
         "elementalResistances": {
             "fire": 10,

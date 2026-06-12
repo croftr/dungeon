@@ -364,7 +364,10 @@ export function getElementalRiderBreakdown(character, monster, weaponDef, ammoDe
   const weaponBase = weaponDef?.baseDamage ?? 0;
   const statBonus = getWeaponStatBonus(character, weaponDef);
   const flatByElement = {};
-  const maps = [weaponDef?.elementalDamage, ammoDef?.elementalDamage];
+  // Relic-granted elemental damage (e.g. Stormcore Relic) rides on every attack,
+  // stacking on top of any elemental damage the weapon/ammo already deal.
+  const relicDef = character?.equipment?.relic;
+  const maps = [weaponDef?.elementalDamage, ammoDef?.elementalDamage, relicDef?.elementalDamage];
   for (const map of maps) {
     if (!map) continue;
     for (const [key, value] of Object.entries(map)) {
@@ -826,9 +829,19 @@ export function resolveSpellMagnitude(spellName, spellDef, caster) {
     bonus += getStanceCureHealBonus(caster);
   }
 
-  if (bonus === 0) return base;
+  let result = (bonus === 0)
+    ? base
+    : _applyBonus(base, bonus, spellDef.magnitudeBonusMode ?? 'flat');
 
-  const result = _applyBonus(base, bonus, spellDef.magnitudeBonusMode ?? 'flat');
-  console.log(`[${spellName}] base=${base} bonus=${bonus} mode=${spellDef.magnitudeBonusMode ?? 'flat'} → ${result}`);
+  // Elemental spell damage bonus (e.g. Eye of Malice +10%): a multiplicative
+  // boost applied to direct-damage spells that deal a specific element
+  // (Fireball, Frostbolt, etc.). Stored as a fraction in skillBonuses.
+  const elementalMult = caster?.skillBonuses?.['elementalSpellDamage'] ?? 0;
+  if (elementalMult && spellDef.type === 'direct-damage' && spellDef.element) {
+    result *= (1 + elementalMult);
+  }
+
+  if (result === base) return base;
+  console.log(`[${spellName}] base=${base} bonus=${bonus} mode=${spellDef.magnitudeBonusMode ?? 'flat'} elementalMult=${elementalMult} → ${result}`);
   return result;
 }

@@ -1702,7 +1702,7 @@ function populateTooltip(obj, showBuyPrice = false) {
     }
 
     if (hasBonusList) {
-      const BONUS_LABELS = { all: 'All Skills', healing: 'Healing', buff: 'Buff', debuff: 'Debuff', fire: 'Fire Magic' };
+      const BONUS_LABELS = { all: 'All Skills', healing: 'Healing', buff: 'Buff', debuff: 'Debuff', fire: 'Fire Magic', elementalSpellDamage: 'Elemental Spell Dmg' };
       const listEl = document.getElementById('detail-row-skillbonus');
       let html = '';
 
@@ -1723,7 +1723,8 @@ function populateTooltip(obj, showBuyPrice = false) {
       if (hasSkillBonus) {
         html += Object.entries(def.skillBonuses).map(([key, val]) => {
           const label = BONUS_LABELS[key] ?? key;
-          return `<div class="detail-skillbonus-item"><span>${label}</span><span>+${val}</span></div>`;
+          const valStr = key === 'elementalSpellDamage' ? `+${Math.round(val * 100)}%` : `+${val}`;
+          return `<div class="detail-skillbonus-item"><span>${label}</span><span>${valStr}</span></div>`;
         }).join('');
       }
 
@@ -3664,13 +3665,14 @@ function _renderStatsTab(m, _memberIndex) {
     critChance: 'Crit Chance', critChanceBonus: 'Crit Chance',
     dodgeChance: 'Dodge Chance', blockChance: 'Block Chance',
     'direct-damage': 'Direct Damage Spells',
+    elementalSpellDamage: 'Elemental Spell Dmg',
   };
   const SB_EXCLUDE = new Set(['shieldBlock', 'trapDamage', 'bowDamage', 'critChance', 'critChanceBonus', 'dodgeChance', 'blockChance']);
   const sbEntries = Object.entries(m.skillBonuses ?? {}).filter(([k, v]) => v && !SB_EXCLUDE.has(k));
   const sbRows = sbEntries.length
     ? sbEntries.map(([key, val]) => {
         const label = SB_LABELS[key] ?? key;
-        const valStr = (key === 'critChance' || key === 'critChanceBonus' || key === 'dodgeChance')
+        const valStr = (key === 'critChance' || key === 'critChanceBonus' || key === 'dodgeChance' || key === 'elementalSpellDamage')
           ? `${sign(val)}${Math.round(val * 100)}%`
           : `${sign(val)}${val}`;
         return `<div class="stat-row"><span class="stat-name">${label}</span><span class="stat-value">${valStr}</span></div>`;

@@ -153,7 +153,7 @@
         "name": "Eye of Malice",
         "slot": "relic",
         "icon": "/icons/relic/eye_of_malice.webp",
-        "description": "A demon's eye sealed in dark crystal, forever open and forever hateful. It lends its bearer infernal insight and a cruel edge to their spellcraft (+2 INT, +5% Critical Hit Chance, fire & dark resistance).",
+        "description": "A demon's eye sealed in dark crystal, forever open and forever hateful. It lends its bearer infernal insight and a cruel edge to their spellcraft (+2 INT, +10% elemental spell damage, fire & dark resistance).",
         "value": 1100,
         "weight": 0.2,
         "job": [
@@ -168,22 +168,21 @@
             "dark": 10
         },
         "skillBonuses": {
-            "critChance": 0.05
+            "elementalSpellDamage": 0.10
         }
     },
     {
         "name": "Stormcore Relic",
         "slot": "relic",
         "icon": "/icons/relic/stormcore_relic.webp",
-        "description": "The humming magnetic core of an iron warden, bound in copper wire. It crackles with caged lightning, grounding harmful currents away from the bearer (+1 RES, +1 INT, regen 1 HP every 5s).",
+        "description": "The humming magnetic core of an iron warden, bound in copper wire. It crackles with caged lightning, channelling that current into the bearer's strikes (+5 lightning damage to every attack) while grounding harmful currents away (lightning resistance, regen 1 HP every 5s).",
         "value": 1050,
         "weight": 0.4,
-        "statBonuses": {
-            "resilience": 1,
-            "intelligence": 1
-        },
         "elementalResistances": {
             "lightning": 20
+        },
+        "elementalDamage": {
+            "lightning": 5
         },
         "hpRegen": {
             "amount": 1,

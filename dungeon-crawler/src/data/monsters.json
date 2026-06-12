@@ -957,7 +957,7 @@
         ]
       }
     ],
-    "hp": 550,
+    "hp": 650,
     "defence": 16,
     "damageReduction": 0.18,
     "attackTypeMultipliers": {
@@ -969,7 +969,7 @@
     "attackSpeed": 1.3,
     "stats": {
       "strength": 42,
-      "dexterity": 14,
+      "dexterity": 28,
       "vitality": 65,
       "intelligence": 8,
       "resilience": 35
