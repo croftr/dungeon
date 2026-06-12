@@ -951,31 +951,6 @@
         }
     },
     {
-        "name": "Tridant",
-        "slot": "bothHands",
-        "attackType": "swipe",
-        "weaponType": "twoHanded",
-        "staminaDrain": 1,
-        "baseDamage": 20,
-        "delay": 4,
-        "statWeights": {
-            "str": 0.8,
-            "dex": 0.2
-        },
-        "icon": "/icons/weapons/tridant.webp",
-        "description": "A two-handed tridant. Slow to swing but crushes stone and bone alike.",
-        "value": 390,
-        "weight": 7,
-        "weaponSkill": {
-            "name": "Tidal Wave",
-            "cooldownMs": 60000,
-            "vfx": "water-strike",
-            "elementalDamage": {
-                "water": 40
-            }
-        }
-    },
-    {
         "name": "Greataxe",
         "slot": "bothHands",
         "attackType": "swipe",
@@ -1161,12 +1136,37 @@
         }
     },
     {
+        "name": "Tridant",
+        "slot": "bothHands",
+        "attackType": "swipe",
+        "weaponType": "twoHanded",
+        "staminaDrain": 1,
+        "baseDamage": 20,
+        "delay": 4,
+        "statWeights": {
+            "str": 0.7,
+            "dex": 0.3
+        },
+        "icon": "/icons/weapons/tridant.webp",
+        "description": "A two-handed tridant. Slow to swing but crushes stone and bone alike.",
+        "value": 390,
+        "weight": 7,
+        "weaponSkill": {
+            "name": "Tidal Wave",
+            "cooldownMs": 60000,
+            "vfx": "water-strike",
+            "elementalDamage": {
+                "water": 40
+            }
+        }
+    },
+    {
         "name": "Deepwater Trident",
         "slot": "bothHands",
         "attackType": "swipe",
         "weaponType": "twoHanded",
         "staminaDrain": 1,
-        "baseDamage": 24,
+        "baseDamage": 22,
         "damageType": "water",
         "elementalDamage": {
             "water": 10
