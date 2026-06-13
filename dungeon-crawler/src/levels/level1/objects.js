@@ -69,19 +69,18 @@ export function spawnLevel1Objects(ctx) {
     // Chest at the end of the long north passage
     addChest(group, loader, 7, 1, 0, -0.7, [
         { name: 'Gold Coins', quantity: 10 },
-        'Leather Gloves', 'Cloth Trousers', 'Worn Boots', "Iron Pendant",
-        "Iron Ring"
+        'Leather Gloves', 'Cloth Trousers', 'Worn Boots',
     ], asset('/items/containers/dark-red-chest.glb'));
 
     // Chest in the Northwest room — far northeast corner
     addChest(group, loader, 5, 1, 0, -0.65, [
-        "Steel Arrows", "Elven Dagger", "Leather Belt", "Adventurer's Belt",
-        "Dwarf Crossbow"
+        "Leather Belt", "Adventurer's Belt",
+        "Dwarf Crossbow", 'Steel Bolts'
     ], undefined, true, -0.35);
 
     // 2nd Chest in the Northwest room
     addChest(group, loader, 5, 1, 0, -0.65, [
-        "Travelling Cloak", "Iron Helm", "Trapper's Manual"
+        "Trapper's Manual", "Elven Dagger"
     ], undefined, true, 0.35);
 
     // Treasure Pile beside the two Northwest-room chests (north wall)
@@ -112,12 +111,12 @@ export function spawnLevel1Objects(ctx) {
     // ── Weapon Racks ─────────────────────────────────────────────────────────
     // Mummy room dead-end passage
     addWeaponRack(group, loader, 22, 4, Math.PI / 2, 0.65, 0, [
-        'Goblin Shiv', 'Mace', 'Dagger', 'Dwarven Axe', 'Spiked Shield'
+        'Goblin Shiv', 'Mace', 'Dwarven Axe', 'Spiked Shield'
     ]);
 
     // South corridor
     addWeaponRack(group, loader, 21, 21, Math.PI / 2, 0.65, 0, [
-        'War Hammer', 'Longbow', 'Steel Bolts'
+        'War Hammer', 'Longbow', "Steel Arrows",
     ]);
 
     // ── Spell Cabinet ────────────────────────────────────────────────────────

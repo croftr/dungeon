@@ -5603,15 +5603,31 @@ export function useWeaponSkill(memberIndex, hand) {
   // spell's own native sound (already played by playAction) — no default sting.
   const wsSound = ws.sound ?? (spellSource ? null : DEFAULT_WEAPON_SKILL_SOUND);
 
-  // Spell-based skills are always a single cast — keep the original flow.
+  // Spell-based skills cast the spell `ws.hits` times (default 1). Extra casts
+  // are staggered by `ws.interHitDelayMs` so each beam visibly fires one after
+  // another (each replays the cast animation + sound + VFX), retargeting if the
+  // current foe dies mid-volley.
   if (spellSource) {
-    if (!ws.hideAttackAnim) playAction(attackType, hand, memberIndex, swipeElement);
-    if (wsSound) playSoundByUrl(wsSound);
-    _dispatchSpellVFX(attackType, target);
-    if (!target) return;
-    const result = attackMonster(target.id, m, skillDef, attackType, ammoDef, !!item?.hq);
-    _logWeaponSkillHit(m, ws, attackType, result, target, false);
-    _logAppliedEffects(m.name, result.monsterName || target.name, result.stunned, result.appliedEffects);
+    const performCast = (castTarget) => {
+      if (!ws.hideAttackAnim) playAction(attackType, hand, memberIndex, swipeElement);
+      if (wsSound) playSoundByUrl(wsSound);
+      _dispatchSpellVFX(attackType, castTarget);
+      if (!castTarget) return;
+      const result = attackMonster(castTarget.id, m, skillDef, attackType, ammoDef, !!item?.hq);
+      _logWeaponSkillHit(m, ws, attackType, result, castTarget, false);
+      _logAppliedEffects(m.name, result.monsterName || castTarget.name, result.stunned, result.appliedEffects);
+    };
+
+    const casts = Math.max(1, ws.hits ?? 1);
+    const interCastDelay = ws.interHitDelayMs ?? 350;
+    performCast(target);
+    for (let i = 1; i < casts; i++) {
+      setTimeout(() => {
+        let t = target;
+        if (!t || !t.alive) t = _closestMonsterInFront(isRanged ? 4 : 1);
+        performCast(t);
+      }, interCastDelay * i);
+    }
     return;
   }
 

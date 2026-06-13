@@ -226,6 +226,14 @@
       {
         "item": "Goblin Shiv",
         "chance": 0.02
+      },
+      {
+        "item": "Iron Pendant",
+        "chance": 0.02
+      },
+      {
+        "item": "Iron Ring",
+        "chance": 0.02
       }
     ]
   },
@@ -1408,6 +1416,14 @@
       {
         "item": "Life Essence",
         "chance": 0.1
+      },
+      {
+        "item": "Iron Pendant",
+        "chance": 0.05
+      },
+      {
+        "item": "Iron Ring",
+        "chance": 0.05
       }
     ]
   },
@@ -1488,7 +1504,7 @@
       },
       {
         "item": "Congealed Slime",
-        "chance": 1
+        "chance": 0.2
       },
       {
         "item": {
@@ -1548,6 +1564,14 @@
       {
         "item": "Life Berry",
         "chance": 0.2
+      },
+      {
+        "item": "Iron Pendant",
+        "chance": 0.02
+      },
+      {
+        "item": "Iron Ring",
+        "chance": 0.02
       }
     ]
   },
@@ -1607,6 +1631,14 @@
           "quantity": 40
         },
         "chance": 0.5
+      },
+      {
+        "item": "Iron Pendant",
+        "chance": 0.02
+      },
+      {
+        "item": "Iron Ring",
+        "chance": 0.02
       }
     ]
   }

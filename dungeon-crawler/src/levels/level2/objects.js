@@ -60,11 +60,6 @@ export function spawnLevel2Objects(ctx) {
     // Chest behind the Warden gate (col 3, row 4)
     addChest(group, loader, 3, 4, Math.PI / 2, 0.7, [
         "Schematic Key",
-        "Ice Axe",
-        "Ice Dagger",
-        "Ice Greataxe",
-        "Ice Arrows",
-        "Ice Staff",
         "Trapper's Manual"
     ], asset('/items/containers/dark-red-chest.glb'));
 
@@ -107,7 +102,7 @@ export function spawnLevel2Objects(ctx) {
     // ── Chests ────────────────────────────────────────────────────────────────
     // Two chests in the chest vault (shifted col 0.7 / 1.3 -> 10.7 / 11.3)
     addChest(group, loader, 10.7, 34, Math.PI, 0.7, [
-        "Trapper's Manual", 'Scroll of Incinerate',
+        "Trapper's Manual",
         "Talisman of the Wind"
     ]);
     addChest(group, loader, 11.3, 34, Math.PI, 0.7, [
@@ -126,12 +121,12 @@ export function spawnLevel2Objects(ctx) {
     // Ethereal Egg at col 38 south side (shifted from col 28 -> 38)
     addPortalActivatorStatue(group, loader, 38, 32, Math.PI / 2, 0.45, ['Blue Crystal'], 0, 0.5);
 
-    // Chest in the NE corner of the giant room (shifted from col 24 -> 34)
+    // Chest in the giant room (shifted from col 24 -> 34)
     addChest(group, loader, 34, 17, -Math.PI / 2, 0.7, [
         'Starlight Nectar'
     ], asset('/items/containers/treasure-chest.glb'), true, -0.5);
 
-    // Empty Treasure Pile beside that chest, one cell south along the east wall
+    // Treasure Pile beside that chest in the giant room
     addTreasurePile(group, loader, 34, 18, -Math.PI / 2, 0.7, [
         'Ring of Balance',
         { name: 'Gold Coins', quantity: 150 },

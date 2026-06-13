@@ -734,7 +734,9 @@
         "weaponSkill": {
             "name": "Banishment",
             "cooldownMs": 60000,
-            "spell": "Banishment"
+            "spell": "Banishment",
+            "hits": 2,
+            "interHitDelayMs": 350
         }
     },
     {

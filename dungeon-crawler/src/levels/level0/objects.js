@@ -31,7 +31,7 @@ export function spawnLevel0Objects(ctx) {
     // ── Starter Stash in the starter room ─────────────────────────────────────────────
     addChest(group, loader, 13.4, 10, Math.PI / 2, -0.1, [
         { name: 'Gold Coins', quantity: 10000 },
-        'Potion of Unseen', 'Potion of Unseen', 'Potion of Unseen', "Ancient Bog Core", "Ancient Bog Core", "Ancient Bog Core", "Ancient Bog Core"
+        'Potion of Unseen', 'Potion of Unseen', 'Potion of Unseen'
     ], asset('/items/containers/stash.glb'), true, 0, 'Stash');
 
     // ── Crystals in the east room (center) ────────────────────────────────────

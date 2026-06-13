@@ -51,7 +51,7 @@ export function spawnLevel3Objects(ctx) {
         "Ancient Bog Core"
     ]);
 
-    // Secret Room (row 12, col 15)
+    // Water Room with crocodles (row 12, col 15)
     addChest(group, loader, 15, 12, -Math.PI / 2, 0.7, [
         "Water Dagger",
         "Scroll of Waterbolt",
@@ -91,6 +91,7 @@ export function spawnLevel3Objects(ctx) {
         "Plate Cloak",
         "Schematic Key"
     ], asset('/items/containers/dark-red-chest.glb'), true, -0.45);
+
     addTreasurePile(group, loader, 24, 2, 0, -0.6, [
         "Balance Pendant",
         "Rune Pendant",

@@ -46,11 +46,11 @@ export function spawnFlameZoneObjects(ctx) {
     const FIRE_CHEST = asset('/items/containers/fire-chest.glb');
     // West corner of the inner sanctum.
     addChest(group, loader, 5, 1, 0, -0.7, [
-        "Flame Axe", "Flame Greataxe"
+        "Flame Axe", "Flame Greataxe", "Flame Dagger",
     ], FIRE_CHEST, true, 0, 'Fire Chest');
     // East corner of the inner sanctum.
     addChest(group, loader, 9, 1, 0, -0.7, [
-        "Flame Staff", "Flame Dagger",
+        "Flame Staff", 'Scroll of Incinerate',
     ], FIRE_CHEST, true, 0, 'Fire Chest');
 
     // ── Torches (light + show off the flame textures) ─────────────────────────
