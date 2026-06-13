@@ -3736,27 +3736,27 @@ function _memberHasLayTrap(m) {
 }
 
 function _canUseSpikeTrap(m) {
-  return (m?.trapConfig?.progression ?? 0) >= 1;
+  return (m?.trapConfig?.progression ?? 0) >= 3;
 }
 function _canUseElementalTrap(m) {
-  return (m?.trapConfig?.progression ?? 0) >= 2;
+  return (m?.trapConfig?.progression ?? 0) >= 4;
 }
 function _canUseTriggerDelay(m) {
-  return (m?.trapConfig?.progression ?? 0) >= 4;
+  return (m?.trapConfig?.progression ?? 0) >= 6;
 }
 
 // 10-node progression sequence. Each node bumps either damage, freeze, or unlocks a feature.
 // D = +20% damage, F = +25% freeze duration.
 const TRAP_PROGRESSION_NODES = [
-  { kind: 'unlock-spike'   }, // 1
-  { kind: 'unlock-element' }, // 2
-  { kind: 'damage' },         // 3
-  { kind: 'trigger-delay' },  // 4
+  { kind: 'freeze' },         // 1
+  { kind: 'damage' },         // 2
+  { kind: 'unlock-spike'   }, // 3
+  { kind: 'unlock-element' }, // 4
   { kind: 'damage' },         // 5
-  { kind: 'freeze' },         // 6
+  { kind: 'trigger-delay' },  // 6
   { kind: 'damage' },         // 7
-  { kind: 'damage' },         // 8
-  { kind: 'freeze' },         // 9
+  { kind: 'freeze' },         // 8
+  { kind: 'damage' },         // 9
   { kind: 'damage' },         // 10
 ];
 const TRAP_DAMAGE_PER_NODE = 0.20;
@@ -3870,7 +3870,7 @@ function _renderTrapConfigTab(m, memberIndex, force = false) {
     const lockHtml = locked
       ? `<div style="position:absolute;top:4px;right:6px;font-size:11px;color:#aaa;">🔒</div>`
       : '';
-    const title = locked ? 'Requires Trap Mastery L2 (Elemental Trapper)' : opt.label;
+    const title = locked ? 'Requires Trap Mastery L4 (Elemental Trapper)' : opt.label;
     return `
       <button class="trapconfig-tile" data-element="${opt.id}" ${locked ? 'data-locked="1"' : ''} title="${title}" style="
         position:relative;
@@ -3890,7 +3890,7 @@ function _renderTrapConfigTab(m, memberIndex, force = false) {
   const currentDelay = m.trapConfig.delay ?? false;
 
   const TYPE_REQUIRES = { spike: m => _canUseSpikeTrap(m) };
-  const TYPE_LOCK_REASON = { spike: 'Requires Trap Mastery L1 (Spike Trap)' };
+  const TYPE_LOCK_REASON = { spike: 'Requires Trap Mastery L3 (Spike Trap)' };
   const trapTypes = Object.entries(TRAPS_DATA);
   const typeTiles = trapTypes.map(([id, def]) => {
     const requires = TYPE_REQUIRES[id];
@@ -3917,7 +3917,7 @@ function _renderTrapConfigTab(m, memberIndex, force = false) {
     const toggleBg = toggleActive ? '#50c08022' : 'transparent';
     const toggleColor = toggleActive ? '#50c080' : '#888';
     const toggleIcon = currentDelay ? '⏱ 2s' : '⚡ Inst';
-    const toggleTitle = delayUnlocked ? 'Toggle 2s arming delay' : 'Requires Trap Mastery L4 (Trigger Delay)';
+    const toggleTitle = delayUnlocked ? 'Toggle 2s arming delay' : 'Requires Trap Mastery L6 (Trigger Delay)';
 
     const delayToggleHtml = `
       <button class="trapconfig-delay-toggle" data-locked="${(!delayUnlocked || locked) ? '1' : ''}" title="${toggleTitle}" style="

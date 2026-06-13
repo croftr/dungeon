@@ -52,7 +52,7 @@
         "description": "Heavy forged steel chest plate. Near impenetrable — if you can move in it.",
         "defence": 4,
         "value": 750,
-        "weight": 12,
+        "weight": 10,
         "job": [
             "Paladin",
             "Warrior"

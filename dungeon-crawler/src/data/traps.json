@@ -24,7 +24,7 @@
       "2": { "min": 36, "max": 56 },
       "3": { "min": 64, "max": 90 }
     },
-    "freezeMs": 5000,
+    "freezeMs": 1000,
     "disarmable": true,
     "consumeOnTrigger": true,
     "triggerSound": true,

@@ -152,7 +152,8 @@ export const level2Monsters = [
     asset('/monsters/demon/Meshy_AI_Animation_Triple_Combo_Attack_withSkin.glb'),
     asset('/monsters/demon/no-mercy.mp3'), 0.70, 0, 0, 2, null,
     asset('/monsters/demon/Meshy_AI_Animation_Fall_Dead_from_Abdominal_Injury_withSkin.glb'),
-    asset('/monsters/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb')),
+    asset('/monsters/demon/Meshy_AI_Animation_Slap_Reaction_withSkin.glb'),
+    asset('/monsters/demon/Meshy_AI_Animation_Walking_withSkin.glb')),
 
   // Aqua Man guards the passage to the stairs after falling through the pit
   // Shifted from col 3 to col 13

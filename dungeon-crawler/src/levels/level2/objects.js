@@ -52,9 +52,9 @@ export function spawnLevel2Objects(ctx) {
 
     // ── Spell Cabinets ────────────────────────────────────────────────────────
     // Shifted from col 5, row 3 to col 15, row 3
-    addSpellCabinet(group, loader, 15, 3, 0, 0, -0.7, ["Scroll of Resist Ice", "Scroll of Resist Fire", "Trapper's Manual"]);
+    addSpellCabinet(group, loader, 15, 3, 0, 0, -0.7, ["Scroll of Resist Ice", "Scroll of Resist Fire"]);
     // Shifted from col 2, row 8 to col 12, row 8
-    addSpellCabinet(group, loader, 12, 8, Math.PI / 2, -0.7, 0, ['Scroll of Lightningbolt', 'Scroll of Fireball']);
+    addSpellCabinet(group, loader, 12, 8, Math.PI / 2, -0.7, 0, ['Scroll of Frostbolt', 'Scroll of Fireball']);
 
     // ── Chests ────────────────────────────────────────────────────────────────
     // Chest behind the Warden gate (col 3, row 4)
@@ -191,7 +191,7 @@ export function spawnLevel2Objects(ctx) {
     // Spell cabinet against the west wall (col 1) and weapon rack against the east
     // wall (col 5) of the same room — both empty for now.
     addSpellCabinet(group, loader, 2, 9, Math.PI / 2, -0.7, 0, [
-        "Trapper's Manual", "Scroll of Shell", "Scroll of Resist Water", "Scroll of Resist Lightning"
+        "Trapper's Manual", "Scroll of Shell", "Scroll of Resist Water"
     ]);
 
     addWeaponRack(group, loader, 4, 9, -Math.PI / 2, 0.7, 0, [
