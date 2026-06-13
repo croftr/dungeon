@@ -61,14 +61,12 @@ describe('captureSave() — bundle shape', () => {
     expect(new Date(bundle.savedAt).toString()).not.toBe('Invalid Date');
   });
 
-  it('party section contains members array, gold, autoAttack, autoRangeAttack', async () => {
+  it('party section contains members array and gold', async () => {
     const mod = await freshImport('src/save.js');
     const bundle = mod.captureSave();
     expect(Array.isArray(bundle.party.members)).toBe(true);
     expect(bundle.party.members).toHaveLength(4);
     expect(typeof bundle.party.gold).toBe('number');
-    expect(typeof bundle.party.autoAttack).toBe('boolean');
-    expect(typeof bundle.party.autoRangeAttack).toBe('boolean');
   });
 
   it('player section contains gridRow, gridCol, facing', async () => {

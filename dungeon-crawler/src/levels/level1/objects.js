@@ -75,7 +75,7 @@ export function spawnLevel1Objects(ctx) {
     // Chest in the Northwest room — far northeast corner
     addChest(group, loader, 5, 1, 0, -0.65, [
         "Leather Belt", "Adventurer's Belt",
-        "Dwarf Crossbow", 'Steel Bolts'
+        "Dwarf Crossbow", "Steel Arrows",
     ], undefined, true, -0.35);
 
     // 2nd Chest in the Northwest room
@@ -116,7 +116,7 @@ export function spawnLevel1Objects(ctx) {
 
     // South corridor
     addWeaponRack(group, loader, 21, 21, Math.PI / 2, 0.65, 0, [
-        'War Hammer', 'Longbow', "Steel Arrows",
+        'War Hammer', 'Longbow', 'Steel Bolts'
     ]);
 
     // ── Spell Cabinet ────────────────────────────────────────────────────────

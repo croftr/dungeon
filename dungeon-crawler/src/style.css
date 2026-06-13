@@ -2783,6 +2783,49 @@ label.mm-setting-label {
   display: block;
 }
 
+/* Per-member auto-attack toggle — small "A" button at the card's top-left,
+   sharing the level-up indicator's corner (hidden while a level-up pick is due). */
+.auto-toggle {
+  position: absolute;
+  top: -7px;
+  left: -7px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: sans-serif;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 6;
+  /* Inactive (off) — recessed dark brass */
+  background: radial-gradient(circle at 30% 30%, #4a4036 0%, #2a2118 70%, #160f08 100%);
+  border: 1.5px solid #5a4a2a;
+  color: #8a7a55;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.auto-toggle:hover {
+  border-color: #c8a84a;
+  color: #d8c084;
+}
+
+.auto-toggle.is-on {
+  background: radial-gradient(circle at 30% 30%, #b8f5a0 0%, #4fc542 55%, #1a7a1a 100%);
+  border-color: #c8ffb0;
+  color: #0a3a00;
+  box-shadow: 0 0 8px rgba(80, 220, 80, 0.85), 0 0 14px rgba(40, 180, 40, 0.5);
+}
+
+.member-card--dead .auto-toggle {
+  display: none;
+}
+
 @keyframes levelup-pulse {
 
   0%,

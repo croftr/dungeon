@@ -8,9 +8,9 @@ import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES,
 import { initLighting, updateLighting, applyLevelTheme } from './lighting.js';
 import { initParticles, updateParticles, invalidateParticleTextures } from './particles.js';
 import { initMinimap, drawMinimap, updateStatus, showMessage, LEVEL_NAMES } from './minimap.js';
-import { initParty, updateParty, party, refreshPartyCards, autoAttack, autoRangeAttack, setHp, flashPortraitHit, showMemberDamage, isPartyUnseen, resurrectAll, getEffectiveElementalResistances, buildPartyPanel } from './party.js';
+import { initParty, updateParty, party, refreshPartyCards, isMemberAutoAttack, setHp, flashPortraitHit, showMemberDamage, isPartyUnseen, resurrectAll, getEffectiveElementalResistances, buildPartyPanel } from './party.js';
 import { getItemDef } from './items.js';
-import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers } from './equipment.js';
+import { initEquipment, tickAutoAttack, clearAutoAttackTimers, tickAutoRangeAttack, clearAutoRangeAttackTimers, memberHasRangedWeapon } from './equipment.js';
 import { initMonsters, loadMonstersForLevel, updateMonsters, triggerMonsterAttack, monsters, isMonsterAt, tickMonsterElementFloorDamage } from './monster.js';
 import { initRecruits, updateRecruitsMeshState, RECRUITS, recruitCharacter } from './recruits.js';
 import { initObjects, clearObjects, spawnObjectsForLevel, isShopAt, isStatueAt, updateObjects, interactables, checkTrapAtPosition, partyHasItem, getCrystalShrineState, getCauldronSapCount, getCauldronCoreCount, getCauldronBloodCount, setLevel1HoleRoomSpawned, getWorldFlags, spawnArenaPortal, snapshotStarterStash, captureWorldState, restoreWorldState, getPersistedStarterStashItems, replenishPotionMerchant, checkFloorPortalStep, checkMistPortalStep } from './objects.js';
@@ -694,50 +694,40 @@ function animate(now) {
   tickElementFloorDamage(dt);
   tickMonsterElementFloorDamage(dt);
 
-  // Auto-attack: front row members attack automatically when a monster is in melee range
-  if (autoAttack) {
+  // Per-member auto-attack: each member whose HUD "A" toggle is on attacks
+  // automatically. A member with a bow/crossbow shoots when a monster is within
+  // ranged range (regardless of row); a front-row member with a melee weapon
+  // attacks when a monster is in melee range; a back-row member without a ranged
+  // weapon does nothing. Magic is intentionally not auto-cast.
+  if (party.some(isMemberAutoAttack)) {
     const currentLevel = window.currentLevel ?? 0;
-    const hasTarget = monsters.some(t =>
+    const playerPassable = isPassable(player.gridRow, player.gridCol);
+    const meleeTarget = playerPassable && monsters.some(t =>
       t.alive && !t._frozen &&
       (t.level ?? 1) === currentLevel &&
       isInFrontOfPlayer(t.gridRow, t.gridCol, 1) &&
-      isPassable(t.gridRow, t.gridCol) &&
-      isPassable(player.gridRow, player.gridCol)
+      isPassable(t.gridRow, t.gridCol)
     );
-    if (hasTarget) {
-      for (const i of [0, 1]) {
-        const m = party[i];
-        if (!m || m.isEmpty || m.isDead) continue;
-        tickAutoAttack(i);
-      }
-    } else {
-      // Monster stepped away — clear any pending fire timers so they don't
-      // fire the instant combat resumes, giving the player a fresh 1-second window
-      clearAutoAttackTimers();
-    }
-  }
-
-  // Auto-range-attack: any party member with a bow or crossbow shoots automatically
-  // when a monster is within ranged range (3 cells).  The 1-second human-feel delay
-  // is baked into tickAutoRangeAttack via AUTO_EXTRA_DELAY_MS.
-  if (autoRangeAttack) {
-    const currentLevel = window.currentLevel ?? 0;
-    const hasRangedTarget = monsters.some(t =>
+    const rangedTarget = playerPassable && monsters.some(t =>
       t.alive && !t._frozen &&
       (t.level ?? 1) === currentLevel &&
       isInFrontOfPlayer(t.gridRow, t.gridCol, 4) &&
-      isPassable(t.gridRow, t.gridCol) &&
-      isPassable(player.gridRow, player.gridCol)
+      isPassable(t.gridRow, t.gridCol)
     );
-    if (hasRangedTarget) {
-      for (const i of [0, 1, 2, 3]) {
-        const m = party[i];
-        if (!m || m.isEmpty || m.isDead) continue;
-        tickAutoRangeAttack(i);
+
+    // When no valid target of a given type exists, clear pending fire timers so
+    // attacks don't fire the instant combat resumes — gives a fresh 1s window.
+    if (!meleeTarget) clearAutoAttackTimers();
+    if (!rangedTarget) clearAutoRangeAttackTimers();
+
+    for (const i of [0, 1, 2, 3]) {
+      if (!isMemberAutoAttack(party[i])) continue;
+      if (memberHasRangedWeapon(i)) {
+        if (rangedTarget) tickAutoRangeAttack(i);
+      } else if (i === 0 || i === 1) {
+        // Front-row melee. Back-row members without a ranged weapon do nothing.
+        if (meleeTarget) tickAutoAttack(i);
       }
-    } else {
-      // No target in range — reset pending timers for a clean start next encounter
-      clearAutoRangeAttackTimers();
     }
   }
 

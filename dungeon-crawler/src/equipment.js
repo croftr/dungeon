@@ -5788,6 +5788,21 @@ export function clearAutoRangeAttackTimers() {
   for (const k of Object.keys(autoRangeNextFireAt)) delete autoRangeNextFireAt[k];
 }
 
+// True when either active hand holds a bow or crossbow. Used by the main loop to
+// decide whether a member's auto-attack should fire ranged (any row) or melee
+// (front row only).
+export function memberHasRangedWeapon(memberIndex) {
+  const m = party[memberIndex];
+  if (!m || m.isEmpty || m.isDead) return false;
+  for (const slotKey of ['leftHand', 'rightHand']) {
+    const item = m.equipment?.[slotKey];
+    if (!item) continue;
+    const def = getItemDef(item.name);
+    if (def && (def.weaponType === 'bow' || def.weaponType === 'crossbow')) return true;
+  }
+  return false;
+}
+
 function _tickAutoRangeHand(memberIndex, hand, staggerOffsetMs) {
   const key = `${memberIndex}-${hand}`;
   const now = performance.now();

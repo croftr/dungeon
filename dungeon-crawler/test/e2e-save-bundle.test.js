@@ -145,9 +145,8 @@ describe('e2e: full save bundle round-trip', () => {
     // Gold
     sys1.party.setPartyGold(2500);
 
-    // Auto-combat flags
-    sys1.party.setAutoAttack(true);
-    sys1.party.setAutoRangeAttack(false);
+    // Per-member auto-attack flag (opt-in, default off)
+    sys1.party.party[0].autoAttack = true;
 
     // Player position
     sys1.player.player.gridRow = 12;
@@ -240,9 +239,8 @@ describe('e2e: full save bundle round-trip', () => {
     // Gold
     expect(bundle2.party.gold).toBe(2500);
 
-    // Auto-combat flags
-    expect(bundle2.party.autoAttack).toBe(true);
-    expect(bundle2.party.autoRangeAttack).toBe(false);
+    // Per-member auto-attack flag
+    expect(bundle2.party.members[0].autoAttack).toBe(true);
 
     // Player position
     expect(bundle2.player.gridRow).toBe(12);
@@ -289,8 +287,7 @@ describe('e2e: full save bundle round-trip', () => {
     expect(bundle3.quests).toEqual(bundle2.quests);
     expect(bundle3.help.seenKeys.sort()).toEqual(bundle2.help.seenKeys.sort());
     expect(bundle3.party.gold).toBe(bundle2.party.gold);
-    expect(bundle3.party.autoAttack).toBe(bundle2.party.autoAttack);
-    expect(bundle3.party.autoRangeAttack).toBe(bundle2.party.autoRangeAttack);
+    expect(bundle3.party.members[0].autoAttack).toBe(bundle2.party.members[0].autoAttack);
     expect(bundle3.player).toEqual(bundle2.player);
     expect(bundle3.essentiary).toEqual(bundle2.essentiary);
     expect(bundle3.recruits).toEqual(bundle2.recruits);

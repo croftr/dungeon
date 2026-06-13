@@ -4,8 +4,8 @@
  * Round-trip tests for party.js: capturePartyState / restorePartyState.
  *
  * party.js is the most complex module in the save system. It deep-clones the
- * 4-slot party[] array (stripping cooldownTimers), plus gold, autoAttack, and
- * autoRangeAttack flags.
+ * 4-slot party[] array (stripping cooldownTimers) plus gold. Per-member flags
+ * such as autoAttack ride along inside each member object.
  *
  * DESIGN NOTE: restorePartyState calls updateEffectiveStats(m) for non-empty
  * members, which adds derived fields (activeSets, baseStats, elementalResistances,
@@ -140,10 +140,10 @@ describe('round-trip: party.js', () => {
     expect(snap2.gold).toBe(1234);
   });
 
-  it('autoAttack and autoRangeAttack flags survive round-trip', async () => {
+  it('per-member autoAttack flag survives round-trip', async () => {
     const mod = await freshImport('src/party.js');
-    mod.setAutoAttack(false);
-    mod.setAutoRangeAttack(false);
+    Object.assign(mod.party[0], makeMember(0, { autoAttack: false }));
+    Object.assign(mod.party[1], makeMember(1, { autoAttack: true }));
 
     const snap1 = jsonRoundTrip(mod.capturePartyState());
 
@@ -151,8 +151,8 @@ describe('round-trip: party.js', () => {
     mod2.restorePartyState(snap1);
     const snap2 = jsonRoundTrip(mod2.capturePartyState());
 
-    expect(snap2.autoAttack).toBe(false);
-    expect(snap2.autoRangeAttack).toBe(false);
+    expect(snap2.members[0].autoAttack).toBe(false);
+    expect(snap2.members[1].autoAttack).toBe(true);
   });
 
   it('member equipment.leftHand survives round-trip (stable after two restores)', async () => {

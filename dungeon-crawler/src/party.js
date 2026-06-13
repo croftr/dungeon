@@ -1,5 +1,5 @@
 import { getItemDef } from './items.js';
-import { renderItemIcon, attachTooltipListeners, hideTooltip, rotateAmmo, clearAutoAttackTimers, clearAutoRangeAttackTimers, updateEffectiveStats, refreshEquipmentModal, getMemberEncumbranceLevel, getMemberCarryWeight, getMemberMaxCarry, formatSetBonusText, _formatSkillPotency } from './equipment.js';
+import { renderItemIcon, attachTooltipListeners, hideTooltip, rotateAmmo, updateEffectiveStats, refreshEquipmentModal, getMemberEncumbranceLevel, getMemberCarryWeight, getMemberMaxCarry, formatSetBonusText, _formatSkillPotency } from './equipment.js';
 import SETS_DATA from './data/sets.json';
 import { addLogEntry, closeBattleLogReview } from './battle-log.js';
 import { closeBattleStats } from './battle-stats.js';
@@ -141,6 +141,7 @@ function _memberCardHTML(i) {
             <div class="equip-slot" id="slot-sk6-${i}"><span class="slot-label">A</span><span class="slot-item" id="item-sk6-${i}"></span></div>
           </div>
         </div>
+        <button class="auto-toggle" id="auto-toggle-${i}" data-member="${i}" title="Auto-attack: shoots an equipped bow/crossbow, or melees from the front row" aria-label="Toggle auto-attack">A</button>
       </div>`;
 }
 
@@ -205,11 +206,13 @@ export function buildPartyPanel() {
   panel.innerHTML = [0, 1, 2, 3].map(_memberCardHTML).join('');
 }
 
-export let autoAttack = true;
-export function setAutoAttack(val) { autoAttack = val; }
-
-export let autoRangeAttack = true;
-export function setAutoRangeAttack(val) { autoRangeAttack = val; }
+// Per-member auto-attack is opt-in (default off). A member counts as "auto" only
+// when m.autoAttack === true. The per-member toggle on each HUD card flips this;
+// behaviour (ranged vs melee vs nothing) is decided in the main animation loop
+// based on equipped weapon + row.
+export function isMemberAutoAttack(m) {
+  return !!m && !m.isEmpty && !m.isDead && m.autoAttack === true;
+}
 
 export function addGold(amount) {
   partyGold += amount;
@@ -525,10 +528,16 @@ function refreshMember(m) {
   if (card) card.classList.toggle('member-card--invincible', hasInvincible && !m.isDead);
   if (card) card.classList.toggle('member-card--unseen', hasUnseen && !m.isDead);
 
+  const hasPick = !m.isDead && (m.pendingNodePicks ?? 0) > 0;
   const levelupEl = document.getElementById(`levelup-${i}`);
-  if (levelupEl) {
-    const hasPick = !m.isDead && (m.pendingNodePicks ?? 0) > 0;
-    levelupEl.classList.toggle('is-active', hasPick);
+  if (levelupEl) levelupEl.classList.toggle('is-active', hasPick);
+
+  // The auto-attack toggle shares the level-up indicator's corner; yield to the
+  // indicator while a level-up pick is pending (you won't toggle auto then).
+  const autoToggleEl = document.getElementById(`auto-toggle-${i}`);
+  if (autoToggleEl) {
+    autoToggleEl.style.display = hasPick ? 'none' : '';
+    autoToggleEl.classList.toggle('is-on', m.autoAttack === true);
   }
 
   const nameEl = document.getElementById(`name-${i}`);
@@ -953,16 +962,6 @@ function buildTacticsOverlay() {
       <div id="tactics-body">
         <div id="tactics-slots-grid"></div>
         <div id="tactics-controls">
-          <div class="tactics-toggles-row">
-            <label class="tactics-toggle">
-              <input type="checkbox" id="tactics-auto-attack">
-              <span>Auto Attack</span>
-            </label>
-            <label class="tactics-toggle">
-              <input type="checkbox" id="tactics-auto-range-attack">
-              <span>Auto Range</span>
-            </label>
-          </div>
           <div class="tactics-gold-row">
             <div id="tactics-gold-wrap">
               <span id="tactics-gold"></span>
@@ -976,14 +975,6 @@ function buildTacticsOverlay() {
   document.body.appendChild(tacticsOverlay);
 
   document.getElementById('tactics-close').addEventListener('click', closeTacticsModal);
-  document.getElementById('tactics-auto-attack').addEventListener('change', (e) => {
-    autoAttack = e.target.checked;
-    if (!autoAttack) clearAutoAttackTimers();
-  });
-  document.getElementById('tactics-auto-range-attack').addEventListener('change', (e) => {
-    autoRangeAttack = e.target.checked;
-    if (!autoRangeAttack) clearAutoRangeAttackTimers();
-  });
   const exportBtn = document.getElementById('tactics-export-btn');
   if (exportBtn) {
     exportBtn.addEventListener('click', exportPartyData);
@@ -1049,10 +1040,6 @@ export function openTacticsModal() {
   tacticsSel = null;
   renderTacticsSlots();
   updateGoldDisplay();
-  const cb = document.getElementById('tactics-auto-attack');
-  if (cb) cb.checked = autoAttack;
-  const cbRange = document.getElementById('tactics-auto-range-attack');
-  if (cbRange) cbRange.checked = autoRangeAttack;
   tacticsOverlay.style.display = 'block';
 }
 
@@ -1073,6 +1060,22 @@ export function initParty() {
 
   buildTacticsOverlay();
   updateGoldDisplay();
+
+  // Per-member auto-attack toggle (the small "A" button on each HUD card).
+  // Delegated on the panel so it survives buildPartyPanel() innerHTML rebuilds.
+  const partyPanelEl = document.getElementById('party-panel');
+  if (partyPanelEl) {
+    partyPanelEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('.auto-toggle');
+      if (!btn) return;
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.member, 10);
+      const m = party[idx];
+      if (!m || m.isEmpty || m.isDead) return;
+      m.autoAttack = !m.autoAttack; // flip; default-off → on on first click
+      refreshMember(m);
+    });
+  }
 
   // Global listener for gold icon clicks
   document.addEventListener('click', (e) => {
@@ -1886,8 +1889,6 @@ export function capturePartyState() {
     members: party.map(m => JSON.parse(JSON.stringify(m, (k, v) =>
       (k === 'cooldownTimers' || k === 'activeDebuffs') ? undefined : v))),
     gold: partyGold,
-    autoAttack,
-    autoRangeAttack,
   };
 }
 
@@ -1918,6 +1919,4 @@ export function restorePartyState(data) {
     }
   }
   setPartyGold(data.gold ?? 0);
-  if (data.autoAttack !== undefined) setAutoAttack(data.autoAttack);
-  if (data.autoRangeAttack !== undefined) setAutoRangeAttack(data.autoRangeAttack);
 }
