@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import { buildLevel, buildTextureZone, buildInnerTextureZone, buildFloorZone, buildCeilingZone, findCell, CELL_START, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures, CROW_REALM_LEVEL } from './map.js';
+import { buildLevel, buildTextureZone, buildInnerTextureZone, buildFloorZone, buildCeilingZone, findCell, CELL_START, CELL_FLOOR, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures, CROW_REALM_LEVEL, FLAME_ZONE_LEVEL } from './map.js';
 import ELEMENT_FLOORS from './data/element-floors.json';
 import { resolveElementalAmount } from './elements.js';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
@@ -30,6 +30,7 @@ import { MONSTER_DEFS } from './monster-defs.js';
 import { inst } from './monster-factory.js';
 import { schematicTrialsMap } from './levels/schematic-trials/map.js';
 import { crowRealmMap, CROW_FLOOR_CELLS, CROW_WALL_CELLS } from './levels/crow-realm/map.js';
+import { flameZoneMap, FLAME_ZONE_FLOORS } from './levels/flame-zone/map.js';
 
 import './style.css';
 
@@ -2367,6 +2368,14 @@ function applyLevel3Textures(scene) {
   // Distinct alcove wall texture (painted last so its faces win over any shared
   // corner walls with the swamp room's wet-wall zone).
   buildInnerTextureZone(scene, alcoveFloors, asset('/textures/swamp-demon-wall.webp'));
+
+  // Hidden flame alcove at (25,20), east tip of the bottom corridor. Its 3 inner
+  // faces (north/south/east) carry the flame-wall texture, plus a flame ceiling.
+  // Painted unconditionally: while the cell is sealed (a wall until the button is
+  // pressed) these sit inside the solid wall box and are invisible; once the wall
+  // sinks they show.
+  buildInnerTextureZone(scene, [[25, 20]], asset('/textures/flame-wall.png'));
+  buildCeilingZone(scene, [[25, 20]], asset('/textures/flame-ceiling.png'));
 }
 
 // Rebuild Level 3's base geometry + texture overlays in place after the swamp
@@ -2480,6 +2489,7 @@ window.loadLevel = function (levelNum) {
   const maps = [level0Map, level1Map, level2Map, level3Map, level4Map, level5Map];
   maps[SCHEMATIC_TRIALS_LEVEL] = schematicTrialsMap;
   maps[CROW_REALM_LEVEL] = crowRealmMap;
+  maps[FLAME_ZONE_LEVEL] = flameZoneMap;
   changeMapArray(maps[levelNum] ?? level0Map);
 
   // 2. Rebuild map meshes for walls/floors
@@ -2570,6 +2580,19 @@ window.loadLevel = function (levelNum) {
   // window.rebuildLevel4Geometry().
   if (levelNum === 4) applyLevel4Textures(scene);
 
+  // Flame Zone (on-demand test area): flame-wall texture on every inner wall
+  // face + flame ceiling. Built only while the party is inside, so Level 3 never
+  // loads it.
+  if (levelNum === FLAME_ZONE_LEVEL) {
+    // The gate cell (6,7) is mutated to CELL_PORTCULLIS by addPortcullis on each
+    // visit; reset it to floor so inner-face texturing treats it as open floor
+    // (no stray flame planes across the gate). The portcullis re-closes it during
+    // spawnObjectsForLevel.
+    flameZoneMap[6][7] = CELL_FLOOR;
+    buildInnerTextureZone(scene, FLAME_ZONE_FLOORS, asset('/textures/flame-wall.png'));
+    buildCeilingZone(scene, FLAME_ZONE_FLOORS, asset('/textures/flame-ceiling.png'));
+  }
+
   // 3. Clear and respawn level objects
   clearObjects(scene);
   spawnObjectsForLevel();
@@ -2639,6 +2662,12 @@ window.loadLevel = function (levelNum) {
     // Crow Realm — face east down the entry corridor (the mist warp also sets
     // this, but keep a sane default if the level is ever loaded directly).
     player.facing = 1;
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = FACING_ANGLES[player.facing];
+  } else if (levelNum === FLAME_ZONE_LEVEL) {
+    // Flame Zone — face north into the room (the entry swirl also sets this via
+    // its targetFacing, but keep a sane default if loaded directly).
+    player.facing = 0;
     camera.rotation.order = 'YXZ';
     camera.rotation.y = FACING_ANGLES[player.facing];
   } else if (levelNum === 0 && oldLevel === 5) {

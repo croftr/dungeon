@@ -40,7 +40,7 @@ export function spawnCrowRealmObjects(ctx) {
     // chests sit at the back (row 1) facing south. Both EMPTY for now — TODO: loot.
     // Room B (cols 42–44)
     addChest(group, loader, 43, 1, 0, -0.6, [
-        "Ancient Tree Sap", "Water Dagger"
+        "Ancient Tree Sap", "Sun Pendant"
     ], asset('/items/containers/green-chest.glb'));
     // Room D (cols 50–52)
     addChest(group, loader, 51, 1, 0, -0.6, [

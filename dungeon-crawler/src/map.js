@@ -48,6 +48,11 @@ export const WALL_H = 2;    // wall height
 // portal on level 2 and is fully torn down again on return.
 export const CROW_REALM_LEVEL = 60;
 
+// Flame Zone — a self-contained test area reached via the swirl portal in the
+// Level 3 flame alcove (25,20). Built on entry, torn down on return, so Level 3
+// never carries its geometry/objects.
+export const FLAME_ZONE_LEVEL = 70;
+
 /** Seeded pseudo-random — same seed → same map every time. */
 function mulberry32(seed) {
   return function () {

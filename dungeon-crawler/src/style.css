@@ -8319,6 +8319,116 @@ body.game-over-active #battle-stats-btn {
   gap: 8px;
 }
 
+/* ════════════════════════════════════════════════════════════════════════
+   FIRE CHEST — molten-forge skin for any chest using the fire-chest model.
+   Scoped to a modal containing .fire-chest-header (toggled in openChestModal
+   from userData.isFireChest), so the regular chest modal is untouched. Pure
+   styling — the transfer mechanism is unchanged. Generic: every fire chest,
+   present and future, shares this look.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── The forge panel: charred frame with a banked-ember glow ── */
+#chest-modal:has(.fire-chest-header) {
+  background:
+    radial-gradient(ellipse 75% 55% at 50% 0%, rgba(255, 118, 28, 0.42) 0%, transparent 62%),
+    radial-gradient(ellipse at 50% 122%, rgba(184, 42, 16, 0.34) 0%, transparent 58%),
+    linear-gradient(180deg, #2a0d06 0%, #190805 55%, #0a0302 100%);
+  border: 1px solid #6e2a10;
+  border-radius: 10px;
+  box-shadow:
+    0 0 40px 4px rgba(255, 120, 30, 0.24),
+    0 24px 78px rgba(0, 0, 0, 0.96),
+    inset 0 1px 0 rgba(255, 190, 100, 0.12);
+  animation: fireChestEmber 2.6s ease-in-out infinite;
+}
+
+/* Slow ember breathe on the outer glow */
+@keyframes fireChestEmber {
+  0%, 100% {
+    box-shadow:
+      0 0 38px 4px rgba(255, 118, 28, 0.22),
+      0 24px 78px rgba(0, 0, 0, 0.96),
+      inset 0 1px 0 rgba(255, 185, 95, 0.12);
+  }
+  50% {
+    box-shadow:
+      0 0 56px 8px rgba(255, 142, 42, 0.34),
+      0 24px 78px rgba(0, 0, 0, 0.96),
+      inset 0 1px 0 rgba(255, 205, 120, 0.17);
+  }
+}
+
+/* ── Top bar: charred ember header ── */
+#chest-header.fire-chest-header {
+  background-image: none;
+  background: linear-gradient(180deg, rgba(120, 40, 14, 0.92) 0%, rgba(40, 14, 7, 0.96) 100%);
+  border-bottom: 1px solid #7a3012;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+/* Round ember close button */
+#chest-modal:has(.fire-chest-header) #chest-close {
+  background: linear-gradient(180deg, rgba(150, 52, 18, 0.97) 0%, rgba(48, 16, 6, 0.99) 100%);
+  border: 1px solid rgba(255, 150, 70, 0.9);
+  color: #ffcf8a;
+}
+
+#chest-modal:has(.fire-chest-header) #chest-close:hover {
+  background: linear-gradient(180deg, rgba(200, 76, 24, 1) 0%, rgba(70, 24, 8, 1) 100%);
+  border-color: #ffd9a0;
+  color: #fff4e2;
+  box-shadow: 0 0 14px rgba(255, 130, 40, 0.7);
+}
+
+/* Sort button tinted to match */
+#chest-modal:has(.fire-chest-header) #chest-sort-btn {
+  background: linear-gradient(180deg, rgba(120, 44, 16, 0.95) 0%, rgba(44, 16, 7, 0.97) 100%);
+  border-color: rgba(255, 140, 60, 0.7);
+  color: #ffc98a;
+}
+
+/* ── Section headers (FIRE CHEST / INVENTORY) ── */
+#chest-modal:has(.fire-chest-header) #chest-body-header,
+#chest-modal:has(.fire-chest-header) #chest-party-inv-header {
+  background: linear-gradient(180deg, rgba(90, 32, 12, 0.6) 0%, rgba(16, 7, 4, 0.96) 100%);
+  border-bottom: 1px solid #6e2a10;
+}
+
+#chest-modal:has(.fire-chest-header) #chest-title,
+#chest-modal:has(.fire-chest-header) #chest-party-inv-label {
+  color: #ff9a3a;
+  text-shadow: 0 0 10px rgba(255, 110, 28, 0.6), 0 1px 2px #000;
+}
+
+#chest-modal:has(.fire-chest-header) #chest-body {
+  border-right: 1px solid #6e2a10;
+}
+
+/* ── Fire slots: ember-lit wells (left grid only) ── */
+#chest-modal:has(.fire-chest-header) .chest-slot {
+  border-color: #2a0d05 #6a2c12 #6a2c12 #2a0d05;
+  background:
+    radial-gradient(circle 2px at 3px 3px, rgba(255, 150, 60, 0.7) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) 3px, rgba(255, 150, 60, 0.7) 40%, transparent 65%),
+    radial-gradient(circle 2px at 3px calc(100% - 3px), rgba(255, 150, 60, 0.7) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) calc(100% - 3px), rgba(255, 150, 60, 0.7) 40%, transparent 65%),
+    radial-gradient(ellipse at 40% 30%, rgba(96, 32, 12, 0.95) 0%, rgba(12, 5, 2, 1) 84%);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 170, 90, 0.12),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.5),
+    inset 0 2px 10px rgba(0, 0, 0, 0.85);
+  color: #ffb070;
+}
+
+#chest-modal:has(.fire-chest-header) .chest-slot:hover {
+  border-color: #b5481c #e07628 #c25e1e #8a3414;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 150, 50, 0.32),
+    inset 0 2px 4px rgba(0, 0, 0, 0.55),
+    0 0 16px rgba(255, 120, 30, 0.5);
+}
+
 
 #chest-sent-label {
   flex: 1;

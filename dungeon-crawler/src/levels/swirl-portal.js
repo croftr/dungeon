@@ -13,7 +13,15 @@ import { CELL } from '../map.js';
 //  is needed.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function addSwirlPortal(scene, interactables, col, row, targetLevel, targetRow, targetCol, targetFacing) {
+// Colour variants. The portal-flash overlay theme (see _getPortalFlashOverlay in
+// objects.js) is carried on the hit's userData so the warp transition matches.
+const SWIRL_VARIANTS = {
+    blue: { glow: 0x3a9bff, outerRing: 0x9be8ff, innerRing: 0xffd27a, light: 0x4aa8ff, flashTheme: 'blue' },
+    red:  { glow: 0xff2a1a, outerRing: 0xffae8a, innerRing: 0xffd27a, light: 0xff4a2a, flashTheme: 'red' },
+};
+
+export function addSwirlPortal(scene, interactables, col, row, targetLevel, targetRow, targetCol, targetFacing, opts = {}) {
+    const v = SWIRL_VARIANTS[opts.variant] ?? SWIRL_VARIANTS.blue;
     const x = col * CELL;
     const z = row * CELL;
     const swirl = new THREE.Group();
@@ -23,7 +31,7 @@ export function addSwirlPortal(scene, interactables, col, row, targetLevel, targ
     const glow = new THREE.Mesh(
         new THREE.CircleGeometry(0.95, 48),
         new THREE.MeshBasicMaterial({
-            color: 0x3a9bff,
+            color: v.glow,
             transparent: true,
             opacity: 0.55,
             depthWrite: false,
@@ -34,10 +42,10 @@ export function addSwirlPortal(scene, interactables, col, row, targetLevel, targ
     swirl.add(glow);
 
     // Two rune rings, drawn as procedural canvas textures
-    const outerRing = _buildRingMesh(0.95, 0x9be8ff, 12);
+    const outerRing = _buildRingMesh(0.95, v.outerRing, 12);
     swirl.add(outerRing);
 
-    const innerRing = _buildRingMesh(0.65, 0xffd27a, 8);
+    const innerRing = _buildRingMesh(0.65, v.innerRing, 8);
     innerRing.position.y = 0.01; // avoid z-fight with outer ring
     swirl.add(innerRing);
 
@@ -51,6 +59,7 @@ export function addSwirlPortal(scene, interactables, col, row, targetLevel, targ
     hit.userData = {
         isPortal: true,
         isFloorPortal: true,
+        portalTheme: v.flashTheme,
         targetLevel,
         targetRow,
         targetCol,
@@ -65,8 +74,8 @@ export function addSwirlPortal(scene, interactables, col, row, targetLevel, targ
     outerRing.onBeforeRender = () => { outerRing.rotation.z += 0.012; };
     innerRing.onBeforeRender = () => { innerRing.rotation.z -= 0.02; };
 
-    // Gentle blue point light pulsing above the swirl
-    const light = new THREE.PointLight(0x4aa8ff, 2.5, 4);
+    // Gentle point light pulsing above the swirl
+    const light = new THREE.PointLight(v.light, 2.5, 4);
     light.position.set(0, 0.8, 0);
     swirl.add(light);
     glow.onBeforeRender = () => {

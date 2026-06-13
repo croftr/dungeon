@@ -1380,10 +1380,6 @@
         "chance": 1
       },
       {
-        "item": "Flame Staff",
-        "chance": 0.5
-      },
-      {
         "item": {
           "name": "Gold Coins",
           "quantity": 30
@@ -1500,6 +1496,117 @@
           "quantity": 8
         },
         "chance": 0.4
+      }
+    ]
+  },
+  "flame_spawn": {
+    "name": "Flame Spawn",
+    "family": "elemental",
+    "description": "A writhing core of living fire birthed in the deep flame. It lashes with searing claws — once in a flurry of two — and, when roused, conjures a roaring fireball that engulfs the whole party in pure flame.",
+    "hp": 240,
+    "defence": 12,
+    "damageReduction": 0.08,
+    "xp": 180,
+    "attackSpeed": 1.5,
+    "stats": {
+      "strength": 22,
+      "dexterity": 16,
+      "vitality": 24,
+      "intelligence": 20,
+      "resilience": 16
+    },
+    "elementalResistances": {
+      "fire": 200,
+      "ice": -75,
+      "water": -100,
+      "lightning": 0,
+      "holy": -25,
+      "dark": 25
+    },
+    "elementalDamage": {
+      "fire": 16
+    },
+    "specialAttacks": [
+      {
+        "name": "flameSpawnFireball",
+        "displayName": "Fireball",
+        "description": "Conjures a roaring ball of flame and hurls it at the entire party, scorching every member with pure fire.",
+        "aoe": true,
+        "damageMultiplier": 0.6,
+        "damageType": "fire"
+      }
+    ],
+    "drops": [
+      {
+        "item": "Life Essence",
+        "chance": 0.5
+      },
+      {
+        "item": "Mana Berry",
+        "chance": 0.3
+      },
+      {
+        "item": "Life Berry",
+        "chance": 0.2
+      }
+    ]
+  },
+  "inferno_warlord": {
+    "name": "Inferno Warlord",
+    "family": "elemental",
+    "description": "A towering general of the deep flame, wreathed in molten armour. Where a Flame Spawn merely burns, the Warlord commands the fire — its twin blades carve searing arcs and its fireball detonates among the whole party with the force of a collapsing forge.",
+    "hp": 420,
+    "defence": 18,
+    "damageReduction": 0.12,
+    "xp": 320,
+    "attackSpeed": 1.5,
+    "stats": {
+      "strength": 30,
+      "dexterity": 18,
+      "vitality": 34,
+      "intelligence": 26,
+      "resilience": 24
+    },
+    "elementalResistances": {
+      "fire": 200,
+      "ice": -75,
+      "water": -100,
+      "lightning": 0,
+      "holy": -25,
+      "dark": 50
+    },
+    "elementalDamage": {
+      "fire": 28
+    },
+    "specialAttacks": [
+      {
+        "name": "infernoFireball",
+        "displayName": "Fireball",
+        "description": "Conjures a massive ball of flame and hurls it at the entire party, detonating among them for heavy pure fire damage.",
+        "aoe": true,
+        "damageMultiplier": 0.8,
+        "damageType": "fire"
+      }
+    ],
+    "drops": [
+      {
+        "item": "Life Essence",
+        "chance": 0.6
+      },
+      {
+        "item": "Mana Berry",
+        "chance": 0.4
+      },
+      {
+        "item": "Life Berry",
+        "chance": 0.3
+      },
+      {
+        "item": {
+          "name": "Gold Coins",
+          "quantity": 40
+        },
+        "chance": 0.5
       }
     ]
   }

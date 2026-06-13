@@ -305,6 +305,7 @@ export const LEVEL_NAMES = {
   4: 'Level 4',
   5: 'Hall of Heroes',
   60: 'The Crow Realm',
+  70: 'Flame Zone',
   99: 'The Arena'
 };
 

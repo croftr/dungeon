@@ -38,10 +38,10 @@ export function spawnLevel4Objects(ctx) {
     addChest(group, loader, 13, 3, 0, -0.8, ['Aether-Glass Silt', "Trapper's Manual", "Trapper's Manual", "Ancient Demon Blood"]);
 
     // West boss room (Lizard Man lair) — against the north wall.
-    addChest(group, loader, 5, 17, 0, -0.8, ["Ancient Demon Blood", { name: 'Gold Coins', quantity: 200 }]);
+    addChest(group, loader, 5, 17, 0, -0.8, ["Ancient Demon Blood", "Crescent Moon Charm"]);
 
     // East room — against the north wall.
-    addChest(group, loader, 22, 3, 0, -0.8, ["Ancient Demon Blood", { name: 'Gold Coins', quantity: 150 }]);
+    addChest(group, loader, 22, 3, 0, -0.8, ["Ancient Demon Blood"]);
 
     // ── Spell Cabinet ─────────────────────────────────────────────────────────
     // In the Demon Ogre room (vault guardian lair), against the East wall

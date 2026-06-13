@@ -6,12 +6,16 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { asset } from '../../assets.js';
+import { CELL, FLAME_ZONE_LEVEL } from '../../map.js';
+import { addSwirlPortal } from '../swirl-portal.js';
+import { FLAME_ZONE_ARRIVAL } from '../flame-zone/map.js';
 
 export function spawnLevel3Objects(ctx) {
     const {
         group, loader,
         addChest, addTreasurePile, addWeaponRack, addSpellCabinet, addPortalActivatorStatue,
         addPortal, addTrap1, addDroppedTorch, addInteractiveCauldron,
+        createWallButton, level3FlameAlcoveOpened, interactables,
     } = ctx;
 
     // ── Portals ───────────────────────────────────────────────────────────────
@@ -42,21 +46,15 @@ export function spawnLevel3Objects(ctx) {
 
     // South-East room (row 24, col 19)
     addChest(group, loader, 19, 24, 0, -0.8, [
-        "Sun Pendant",
         "Greatsword",
-        "Crescent Moon Charm",
         "Chain Cloak",
         "Ancient Bog Core"
     ]);
 
     // Secret Room (row 12, col 15)
     addChest(group, loader, 15, 12, -Math.PI / 2, 0.7, [
-        "Flame Axe",
-        "Flame Dagger",
-        "Flame Arrows",
-        "Flame Staff",
-        "Flame Bolts",
-        "Flame Greataxe",
+        "Water Dagger",
+        "Scroll of Waterbolt",
         "Ancient Bog Core"
     ]);
 
@@ -103,4 +101,23 @@ export function spawnLevel3Objects(ctx) {
     // ── Trap ──────────────────────────────────────────────────────────────────
     // Guards the entry corridor to the central minotaur room
     addTrap1(group, loader, 22, 10);
+
+    // ── Hidden flame alcove (bottom corridor) ──────────────────────────────────
+    // The east tip of the bottom corridor at (25,20) is sealed as a normal-looking
+    // wall (level3Map). A button on its west face lets the player at (25,19) facing
+    // east sink the wall (same animation + sound as the cauldron demon-walls),
+    // revealing a 1-cell alcove with flame-wall faces. Skip the button once opened
+    // so it doesn't respawn floating in the open passage after a save/reload.
+    if (!level3FlameAlcoveOpened) {
+        const { group: flameAlcoveBtn, btn: flameAlcoveHit } = createWallButton(-1, { target: 'flame_alcove' });
+        flameAlcoveBtn.position.set(20 * CELL - 1.0, 1.25, 25 * CELL);
+        flameAlcoveHit.userData.buttonGroup = flameAlcoveBtn;
+        group.add(flameAlcoveBtn);
+    } else {
+        // Alcove already opened in a prior visit / save — the wall is gone, so
+        // spawn the blue swirl portal that warps the party to the Flame Zone.
+        // (When it's opened live by the button press, objects.js spawns this.)
+        addSwirlPortal(group, interactables, 20, 25, FLAME_ZONE_LEVEL,
+            FLAME_ZONE_ARRIVAL.row, FLAME_ZONE_ARRIVAL.col, FLAME_ZONE_ARRIVAL.facing, { variant: 'red' });
+    }
 }

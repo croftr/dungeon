@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { createBlobShadow } from './blob-shadow.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
-import { CELL, WALL_H, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld, buildLevel, level1Map, level2Map, level3Map, level4Map, isPassable, spawnElementFloorAt, elementFloorCellId, CROW_REALM_LEVEL } from './map.js';
+import { CELL, WALL_H, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld, buildLevel, level1Map, level2Map, level3Map, level4Map, isPassable, spawnElementFloorAt, elementFloorCellId, CROW_REALM_LEVEL, FLAME_ZONE_LEVEL } from './map.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, isInFrontOfPlayer, player, FACING_ANGLES, setPlayerFrozen, setPlayerTrapped } from './player.js';
 import { showMessage, drawMinimap, updateStatus } from './minimap.js';
@@ -34,6 +34,9 @@ import { spawnLevel4Objects } from './levels/level4/objects.js';
 import { spawnLevel5Objects } from './levels/level5/objects.js';
 import { spawnSchematicTrialsObjects } from './levels/schematic-trials/objects.js';
 import { spawnCrowRealmObjects } from './levels/crow-realm/objects.js';
+import { spawnFlameZoneObjects } from './levels/flame-zone/objects.js';
+import { addSwirlPortal } from './levels/swirl-portal.js';
+import { FLAME_ZONE_ARRIVAL } from './levels/flame-zone/map.js';
 import { showNpcChoice, openQuestDialog, renderMerchantQuestPanel } from './quest.js';
 import { saveToAutoSlot } from './save.js';
 
@@ -122,6 +125,7 @@ const _state = {
   level2CauldronWallOpened: false, // true once 3 saps open the hidden passage at (17,3)
   level3CauldronCoreCount: 0,      // Ancient Bog Core fed to the swamp-room cauldron (0-4)
   level3CauldronWallOpened: false, // true once 4 cores open the passage at (3,20)
+  level3FlameAlcoveOpened: false,  // true once the bottom-corridor button sinks the sealed wall at (25,20)
   level4CauldronBloodCount: 0,     // Ancient Demon Blood fed to the demon-room cauldron (0-4)
   level4CauldronWallOpened: false, // true once 4 bloods open the passage at (11,30)
   level1HoleRoomSpawned: false,
@@ -457,6 +461,8 @@ function _getPortalFlashOverlay(theme = 'blue') {
     
     if (theme === 'mist') {
         el.style.background = 'radial-gradient(circle at center, rgba(40,15,60,0.98) 0%, rgba(10,0,20,0.99) 60%, rgba(0,0,0,1) 100%)';
+    } else if (theme === 'red') {
+        el.style.background = 'radial-gradient(circle at center, rgba(200,40,25,0.96) 0%, rgba(70,8,8,0.99) 60%, rgba(0,0,0,1) 100%)';
     } else {
         el.style.background = 'radial-gradient(circle at center, rgba(120,200,255,0.95) 0%, rgba(20,40,90,0.98) 60%, rgba(0,0,0,1) 100%)';
     }
@@ -528,7 +534,7 @@ export function triggerPortal(obj) {
     if (obj.userData.isFloorPortal) {
         setPlayerFrozen(true);
         _portalCooldownUntil = Date.now() + 2500;
-        const overlay = _getPortalFlashOverlay();
+        const overlay = _getPortalFlashOverlay(obj.userData.portalTheme ?? 'blue');
         // Force reflow so the transition triggers
         overlay.offsetHeight;
         overlay.style.opacity = '1';
@@ -969,6 +975,40 @@ export function initObjects(scene, camera) {
                             showMessage("You hear mechanisms grinding. The pit is closed.");
                         } else {
                             showMessage("The hole is already closed.");
+                        }
+                    } else {
+                        showMessage("You can't reach that from here.");
+                    }
+                } else if (obj.userData.target === 'flame_alcove') {
+                    // Level 3 bottom corridor: sealed wall at (25,20) carrying a
+                    // button. Player at (25,19) facing east presses it; the wall
+                    // grinds down into the floor (same animation + sound as the
+                    // cauldron demon-walls) to reveal a flame-walled alcove.
+                    if (isInFrontOfPlayer(25, 20, 1)) {
+                        playButtonClickSound();
+                        if (!_state.level3FlameAlcoveOpened) {
+                            _animateButtonPress(obj);
+                            _state.level3FlameAlcoveOpened = true;
+                            dungeonMap[25][20] = CELL_FLOOR;
+                            level3Map[25][20] = CELL_FLOOR;
+                            if (window.rebuildLevel3Geometry) window.rebuildLevel3Geometry();
+                            playSoundByUrl(asset('/sounds/actions/tomb-door.mp3'), 0.9);
+                            _animateCauldronWallOpen(objectsGroup.parent, 20, 25, '/textures/wall.webp');
+                            // The button is mounted on the wall that just sank —
+                            // remove it so it doesn't float in the open passage.
+                            const bg = obj.userData.buttonGroup;
+                            if (bg && bg.parent) bg.parent.remove(bg);
+                            const bIdx = interactables.indexOf(obj);
+                            if (bIdx !== -1) interactables.splice(bIdx, 1);
+                            // Reveal the blue swirl portal on the alcove floor that
+                            // warps the party to the Flame Zone. (On a fresh level
+                            // load with the alcove already open, spawnLevel3Objects
+                            // adds this instead — see level3/objects.js.)
+                            addSwirlPortal(objectsGroup, interactables, 20, 25, FLAME_ZONE_LEVEL,
+                                FLAME_ZONE_ARRIVAL.row, FLAME_ZONE_ARRIVAL.col, FLAME_ZONE_ARRIVAL.facing, { variant: 'red' });
+                            showMessage("With a slow grinding roar the wall grinds down into the floor, baring a hidden alcove with a glowing red rune-circle set into the floor!");
+                        } else {
+                            showMessage("The alcove already stands open.");
                         }
                     } else {
                         showMessage("You can't reach that from here.");
@@ -2385,6 +2425,10 @@ export function initObjects(scene, camera) {
 
 export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = [], modelPath = asset('/items/containers/treasure-chest.glb'), interactive = true, offsetX = 0, title = 'Chest', scale = 0.3, isTreasurePile = false) {
     const isStarterStash = title === 'Stash';
+    // Any chest using the fire-chest model gets the fiery opened-inventory skin
+    // (see openChestModal + the .fire-chest-header styles). Generic by model, so
+    // future fire chests share the look automatically.
+    const isFireChest = !!(modelPath && modelPath.includes('fire-chest.glb'));
     // Type-prefixed so different container kinds at the same grid cell never
     // collide. offsetX is included when non-zero so two chests can share a
     // cell with different visual offsets (e.g. the paired chests in the L1
@@ -2416,8 +2460,9 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
         model.position.set(col * CELL + offsetX, 0.0, row * CELL + offsetZ);
         model.rotation.y = rotY;
 
-        // Auto-align dark-red-chest.glb since its pivot is at its center
-        if (modelPath && modelPath.includes('dark-red-chest.glb')) {
+        // Auto-align chests whose pivot is at their center (dark-red-chest,
+        // fire-chest) so they sit on the floor rather than half-sunk.
+        if (modelPath && (modelPath.includes('dark-red-chest.glb') || modelPath.includes('fire-chest.glb'))) {
             model.updateMatrixWorld(true);
             const box = new THREE.Box3().setFromObject(model);
             model.position.y = -box.min.y;
@@ -2436,6 +2481,7 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
                     child.userData.title = title;
                     if (isStarterStash) child.userData.isStarterStash = true;
                     if (isTreasurePile) child.userData.isTreasurePile = true;
+                    if (isFireChest) child.userData.isFireChest = true;
                     interactables.push(child);
                 }
 
@@ -3433,6 +3479,7 @@ export function spawnObjectsForLevel() {
         level2HoleClosed: _state.level2HoleClosed,
         // Level 3 state flags
         level3PortalEnabled: _state.level3PortalEnabled,
+        level3FlameAlcoveOpened: _state.level3FlameAlcoveOpened,
         // Level 4 state flags
         level4PortalEnabled: _state.level4PortalEnabled,
         minotaurDead,
@@ -3453,6 +3500,7 @@ export function spawnObjectsForLevel() {
     else if (level === 5) spawnLevel5Objects(ctx);
     else if (level === 50) spawnSchematicTrialsObjects(ctx);
     else if (level === CROW_REALM_LEVEL) spawnCrowRealmObjects(ctx);
+    else if (level === FLAME_ZONE_LEVEL) spawnFlameZoneObjects(ctx);
     else if (level === 99) {
         // Arena – place 4 torches evenly around the edge
         addDroppedTorch(objectsGroup, _gltfLoader, 1, 1, 0);
@@ -5018,8 +5066,9 @@ export function openChestModal(chestObj) {
     _activeSentLabelId = 'chest-sent-label';
     const overlay = document.getElementById('chest-overlay');
     overlay.classList.remove('chest-hidden');
-    // Swap the header banner art for treasure piles.
+    // Swap the header banner art for treasure piles / fire chests.
     document.getElementById('chest-header').classList.toggle('treasure-pile-header', isTreasurePile);
+    document.getElementById('chest-header').classList.toggle('fire-chest-header', !!chestObj.userData.isFireChest);
     document.getElementById('chest-sent-label').textContent = '';
     document.getElementById('chest-title').textContent = chestObj.userData.title || 'Chest';
 
@@ -6994,6 +7043,9 @@ export function setWorldFlags(flags) {
     // The swamp-room cauldron's hidden passage on Level 3: opening it knocks out
     // the centre rear-wall grid at (3,20). Re-apply on restore so it stays walkable.
     if (_state.level3CauldronWallOpened) level3Map[3][20] = CELL_FLOOR;
+    // The bottom-corridor flame alcove on Level 3: pressing the wall button sinks
+    // the sealed wall at (25,20). Re-apply on restore so it stays walkable.
+    if (_state.level3FlameAlcoveOpened) level3Map[25][20] = CELL_FLOOR;
     // The demon-room cauldron's hidden passage on Level 4: opening it knocks out
     // the rear-wall grid at (11,30). Re-apply on restore so it stays walkable.
     if (_state.level4CauldronWallOpened) level4Map[11][30] = CELL_FLOOR;

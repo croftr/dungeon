@@ -18,6 +18,13 @@
 //   The alcove recess walls are left UNtextured (default) on purpose — a distinct
 //   wall texture is planned there. The passage + room reuse the swamp floor/wall
 //   textures (see applyLevel3Textures in main.js).
+//
+// FLAME ALCOVE (bottom outer loop): the east tip of the bottom corridor at (25,20)
+//   is sealed as a normal-looking wall carrying a wall button. Player at (25,19)
+//   facing east presses it; the wall grinds down into the floor (same animation +
+//   sound as the cauldron demon-walls) to reveal a 1-cell alcove whose 3 inner
+//   faces (N/S/E) are textured with flame-wall.png. (25,20) stays a wall until the
+//   button is pressed (level3FlameAlcoveOpened flips it — objects.js).
 // cols:  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26
 export const level3Map = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 0  Border
@@ -45,7 +52,7 @@ export const level3Map = [
   [1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1], // 22
   [1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1], // 23
   [1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1], // 24
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1], // 25 Outer Loop (Bottom)
+  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1], // 25 Outer Loop (Bottom); (25,20) SEALED flame alcove — opens via wall button
   [1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1], // 26
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 27 Start Chamber
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 28

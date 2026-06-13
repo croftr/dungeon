@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { createBlobShadow } from './blob-shadow.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
-import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createIceCloud, createCrocodileSparkle, createHellSpawn, createBloodSplatter, createGreenBloodSplatter, createCrowWizardFireAoe, createCrowWizardCure, createCrowWizardFear, createElementalBurst } from './particles.js';
+import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createIceCloud, createCrocodileSparkle, createHellSpawn, createBloodSplatter, createGreenBloodSplatter, createCrowWizardFireAoe, createCrowWizardCure, createCrowWizardFear, createElementalBurst, createFlameSpawnFireball } from './particles.js';
 import { ELEMENTS, getMonsterElementMultiplier, resolveElementalAmount } from './elements.js';
 import MONSTER_FAMILIES from './data/monster-families.json';
 import { CELL, isPassable, elementFloorCellId, spawnElementFloorAt } from './map.js';
@@ -37,6 +37,7 @@ import { level2Monsters } from './levels/level2/monsters.js';
 import { level3Monsters } from './levels/level3/monsters.js';
 import { level4Monsters } from './levels/level4/monsters.js';
 import { crowRealmMonsters } from './levels/crow-realm/monsters.js';
+import { flameZoneMonsters } from './levels/flame-zone/monsters.js';
 import { skillsState } from './skills-state.js';
 import SKILLS_DATA from './data/skills.json';
 import { awardXP } from './leveling.js';
@@ -384,6 +385,7 @@ export const monsters = [
   ...level3Monsters,
   ...level4Monsters,
   ...crowRealmMonsters,
+  ...flameZoneMonsters,
 ];
 
 // ── Assign Block Animations ─────────────────────────────────────────────────
@@ -1087,6 +1089,75 @@ _applyMultiAttacks('Crow Wizard', [
     // the per-variant block in triggerMonsterAttack.
     specialAttack: true,
     damageMultiplier: 0,
+  },
+]);
+
+// Flame Spawn — a fire elemental. Single + double melee strikes both carry a
+// fire rider on top of physical (inherited from the def's top-level
+// `elementalDamage`, applied to every basic hit). The double strike lands two
+// hits via two damage timings. The fireball is a party-wide AoE of pure fire
+// (damageType 'fire'), with a fireball VFX hooked in triggerMonsterAttack.
+_applyMultiAttacks('Flame Spawn', [
+  {
+    name: 'flameStrike',
+    glb: asset('/monsters/flame-spawn/attack.glb'),
+    sound: asset('/monsters/flame-spawn/attack.mp3'),
+    soundTimings: [0.4],
+    damageTimings: [0.4],
+    weight: 5,
+  },
+  {
+    name: 'flameDoubleStrike',
+    glb: asset('/monsters/flame-spawn/double-attack.glb'),
+    sound: asset('/monsters/flame-spawn/attack.mp3'),
+    soundTimings: [0.35, 0.6],
+    damageTimings: [0.35, 0.6], // two hits, each physical + fire rider
+    weight: 3,
+  },
+  {
+    name: 'flameSpawnFireball',
+    glb: asset('/monsters/flame-spawn/fireball-attack.glb'),
+    sound: asset('/sounds/elements/fireball.mp3'),
+    soundTimings: [0.5],
+    damageTimings: [0.5],
+    weight: 2,
+    specialAttack: true,
+    displayName: 'Fireball',
+    // damageType + damageMultiplier resolve from the JSON specialAttacks entry
+    // of the same name (pure fire, party-wide AoE).
+  },
+]);
+
+// Inferno Warlord — a stronger cousin of the Flame Spawn (see above). Same kit:
+// single + double fire-laced melee plus a party-wide pure-fire fireball; only
+// the stats (monsters.json) and the separate out-of-combat idle differ. The
+// fireball anim is named fireball.glb here (vs fireball-attack.glb on the spawn).
+_applyMultiAttacks('Inferno Warlord', [
+  {
+    name: 'infernoStrike',
+    glb: asset('/monsters/inferno-warlord/attack.glb'),
+    sound: asset('/monsters/inferno-warlord/attack.mp3'),
+    soundTimings: [0.4],
+    damageTimings: [0.4],
+    weight: 5,
+  },
+  {
+    name: 'infernoDoubleStrike',
+    glb: asset('/monsters/inferno-warlord/double-attack.glb'),
+    sound: asset('/monsters/inferno-warlord/attack.mp3'),
+    soundTimings: [0.35, 0.6],
+    damageTimings: [0.35, 0.6], // two hits, each physical + fire rider
+    weight: 3,
+  },
+  {
+    name: 'infernoFireball',
+    glb: asset('/monsters/inferno-warlord/fireball.glb'),
+    sound: asset('/sounds/elements/fireball.mp3'),
+    soundTimings: [0.5],
+    damageTimings: [0.5],
+    weight: 2,
+    specialAttack: true,
+    displayName: 'Fireball',
   },
 ]);
 
@@ -2869,6 +2940,25 @@ export function updateMonsters(dt, playerCamera, scene) {
       setTimeout(() => { m._demonSoundCooldown = false; }, 8000);
     }
 
+    // Flame Spawn idle crackle — plays when the party is within 1 grid square
+    if (m.name === 'Flame Spawn' && m.alive && inRange && !m._flameSoundCooldown) {
+      m._flameSoundCooldown = true;
+      const audio = new Audio(asset('/monsters/flame-spawn/fire-demon.mp3'));
+      audio.volume = 0.5;
+      audio.play().catch(() => { });
+      // Cooldown so it doesn't spam every frame
+      setTimeout(() => { m._flameSoundCooldown = false; }, 7000);
+    }
+
+    // Inferno Warlord idle roar — plays when the party is within 1 grid square
+    if (m.name === 'Inferno Warlord' && m.alive && inRange && !m._flameSoundCooldown) {
+      m._flameSoundCooldown = true;
+      const audio = new Audio(asset('/monsters/inferno-warlord/fire-demon.mp3'));
+      audio.volume = 0.55;
+      audio.play().catch(() => { });
+      setTimeout(() => { m._flameSoundCooldown = false; }, 7000);
+    }
+
     // Proximity attack logic: if player is adjacent, attack them periodically.
     // Suppressed (sleeping) monsters cannot attack but still mark combat engaged.
     // Unseen cloaks the party — monsters cannot detect or engage even at proximity.
@@ -3968,6 +4058,12 @@ export function triggerMonsterAttack(monsterId) {
         const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
         setTimeout(() => { if (m.alive) createCrowWizardFireAoe(m.mesh.position); }, duration * pts * 1000);
         showMessage(`<b>${m.name}</b> unleashes an Inferno Blast!`, 2000);
+      }
+      if ((variant.name === 'flameSpawnFireball' || variant.name === 'infernoFireball') && m.mesh) {
+        const duration = attackAction.getClip().duration;
+        const pts = (damageTimings && damageTimings.length > 0) ? damageTimings[0] : 0.5;
+        setTimeout(() => { if (m.alive) createFlameSpawnFireball(m.mesh.position); }, duration * pts * 1000);
+        showMessage(`<b>${m.name}</b> hurls a roaring fireball that engulfs the party!`, 2000);
       }
       if (variant.name === 'crowSpecial' && m.mesh) {
         const duration = attackAction.getClip().duration;

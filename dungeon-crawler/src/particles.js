@@ -1049,6 +1049,62 @@ export function createCrowWizardFireAoe(position) {
     }, 700);
 }
 
+// Flame Spawn "Fireball" — a compact fire burst that flares up around the
+// caster (NOT a screen-filling explosion). Two layers: a tight fireball core and
+// a small ember scatter, both kept close to the monster with low velocity and
+// drift. Sized similarly to the crow's contained fire column.
+export function createFlameSpawnFireball(position) {
+    if (!proton) return;
+
+    const px = position ? position.x : 0;
+    const py = position ? position.y : 0;
+    const pz = position ? position.z : 0;
+
+    // Tight fireball core — flares around the caster, fading white-hot to red.
+    const ball = new Proton.Emitter();
+    ball.rate = new Proton.Rate(new Proton.Span(14, 20), new Proton.Span(0.02));
+    ball.addInitialize(new Proton.Mass(1));
+    ball.addInitialize(new Proton.Radius(0.25, 0.6));
+    ball.addInitialize(new Proton.Life(0.4, 0.8));
+    ball.addInitialize(new Proton.V(1.0, new Proton.Vector3D(0, 1, 0), 150));
+    ball.addInitialize(new Proton.Body(new THREE.Sprite(
+        new THREE.SpriteMaterial({ map: sparkTexture, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })
+    )));
+    ball.addInitialize(new Proton.Position(new Proton.PointZone(px, py + 0.7, pz)));
+    ball.addBehaviour(new Proton.Alpha(1.0, 0.0));
+    ball.addBehaviour(new Proton.Scale(1.1, 0.2));
+    ball.addBehaviour(new Proton.Color('#fff2b0', '#cc2200'));
+    ball.addBehaviour(new Proton.RandomDrift(0.6, 0.5, 0.6, 0.05));
+
+    // Small ember scatter — short-lived sparks kept close to the monster.
+    const embers = new Proton.Emitter();
+    embers.rate = new Proton.Rate(new Proton.Span(12, 18), new Proton.Span(0.025));
+    embers.addInitialize(new Proton.Mass(1));
+    embers.addInitialize(new Proton.Radius(0.1, 0.22));
+    embers.addInitialize(new Proton.Life(0.3, 0.6));
+    embers.addInitialize(new Proton.V(1.6, new Proton.Vector3D(0, 0.4, 1), 170));
+    embers.addInitialize(new Proton.Body(new THREE.Sprite(
+        new THREE.SpriteMaterial({ map: sparkTexture, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })
+    )));
+    embers.addInitialize(new Proton.Position(new Proton.PointZone(px, py + 0.6, pz)));
+    embers.addBehaviour(new Proton.Alpha(0.9, 0.0));
+    embers.addBehaviour(new Proton.Scale(0.5, 0.05));
+    embers.addBehaviour(new Proton.Color('#ffd23a', '#ff3300'));
+    embers.addBehaviour(new Proton.RandomDrift(0.9, 0.4, 0.9, 0.05));
+
+    ball.emit();   proton.addEmitter(ball);
+    embers.emit(); proton.addEmitter(embers);
+
+    setTimeout(() => { ball.stopEmit(); }, 420);
+    setTimeout(() => {
+        embers.stopEmit();
+        setTimeout(() => {
+            proton.removeEmitter(ball);
+            proton.removeEmitter(embers);
+        }, 1600);
+    }, 600);
+}
+
 export function createCrowWizardCure(position) {
     if (!proton) return;
 
