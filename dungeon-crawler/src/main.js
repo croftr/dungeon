@@ -2298,6 +2298,7 @@ function applyLevel2Textures(scene) {
   ];
   buildFloorZone(scene, iceFloors, asset('/textures/dungeon-ice-floor.webp'));
   buildInnerTextureZone(scene, iceFloors, asset('/textures/ice-wall.webp'));
+  buildCeilingZone(scene, iceFloors, asset('/textures/ice-ceiling.webp'));
 
   // West annex demon alcove (rows 17-19, cols 4-5): the recessed walls at the
   // west end of the small room take the wood-demon-wall texture. Inner-face only,
@@ -2307,7 +2308,7 @@ function applyLevel2Textures(scene) {
   buildInnerTextureZone(
     scene,
     [[17, 4], [17, 5], [18, 4], [18, 5], [19, 4], [19, 5]],
-    asset('/textures/wood-demon-wall.png')
+    asset('/textures/wood-demon-wall.webp')
   );
 }
 
@@ -2365,14 +2366,14 @@ function applyLevel3Textures(scene) {
   // Painted unconditionally: while the cell is sealed (a wall until the button is
   // pressed) these sit inside the solid wall box and are invisible; once the wall
   // sinks they show.
-  buildInnerTextureZone(scene, [[25, 20]], asset('/textures/flame-wall.png'));
-  buildCeilingZone(scene, [[25, 20]], asset('/textures/flame-ceiling.png'));
+  buildInnerTextureZone(scene, [[25, 20]], asset('/textures/flame-wall.webp'));
+  buildCeilingZone(scene, [[25, 20]], asset('/textures/flame-ceiling.webp'));
 
   // Hidden ice alcove at (19,19), east corridor. Same trick: ice-wall faces +
-  // icy ceiling, painted unconditionally (hidden inside the sealed wall box until
+  // ice ceiling, painted unconditionally (hidden inside the sealed wall box until
   // the button sinks it).
   buildInnerTextureZone(scene, [[19, 19]], asset('/textures/ice-wall.webp'));
-  buildCeilingZone(scene, [[19, 19]], asset('/textures/ice-wall.webp'));
+  buildCeilingZone(scene, [[19, 19]], asset('/textures/ice-ceiling.webp'));
 }
 
 // Rebuild Level 3's base geometry + texture overlays in place after the swamp
@@ -2587,8 +2588,8 @@ window.loadLevel = function (levelNum) {
     // (no stray flame planes across the gate). The portcullis re-closes it during
     // spawnObjectsForLevel.
     flameZoneMap[6][7] = CELL_FLOOR;
-    buildInnerTextureZone(scene, FLAME_ZONE_FLOORS, asset('/textures/flame-wall.png'));
-    buildCeilingZone(scene, FLAME_ZONE_FLOORS, asset('/textures/flame-ceiling.png'));
+    buildInnerTextureZone(scene, FLAME_ZONE_FLOORS, asset('/textures/flame-wall.webp'));
+    buildCeilingZone(scene, FLAME_ZONE_FLOORS, asset('/textures/flame-ceiling.webp'));
   }
 
   // Ice Zone (on-demand): ice-wall walls, dungeon-ice floor, and an icy ceiling.
@@ -2600,7 +2601,7 @@ window.loadLevel = function (levelNum) {
     iceZoneMap[3][7] = CELL_FLOOR;
     buildFloorZone(scene, ICE_ZONE_FLOORS, asset('/textures/dungeon-ice-floor.webp'));
     buildInnerTextureZone(scene, ICE_ZONE_FLOORS, asset('/textures/ice-wall.webp'));
-    buildCeilingZone(scene, ICE_ZONE_FLOORS, asset('/textures/ice-wall.webp'));
+    buildCeilingZone(scene, ICE_ZONE_FLOORS, asset('/textures/ice-ceiling.webp'));
   }
 
   // 3. Clear and respawn level objects

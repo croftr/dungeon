@@ -1795,7 +1795,7 @@ export function initObjects(scene, camera) {
                         openedKey: 'level2CauldronWallOpened',
                         map: level2Map, openRow: 18, openCol: 3,
                         rebuild: 'rebuildLevel2Geometry',
-                        wallTex: '/textures/wood-demon-wall.png',
+                        wallTex: '/textures/wood-demon-wall.webp',
                         openedMsg: "The cauldron sits spent and quiet. A dark passage gapes open in the wall to the west.",
                         idleMsg: "An ancient cauldron etched with forest runes. The brew within hungers for something — an offering, perhaps.",
                         feedMsg: "The sap dissolves into the seething brew. It hungers for more...",
@@ -2669,7 +2669,7 @@ function addInteractiveCauldron(scene, loader, col, row, rotY = 0, scale = 0.5, 
 // time this runs (the rebuild removed the instanced wall), so this is purely a
 // visual slab and never affects movement or saved state. If the player saves
 // mid-animation, the wall is already flagged open and reloads open.
-function _animateCauldronWallOpen(scene, col = 3, row = 18, texUrl = '/textures/wood-demon-wall.png') {
+function _animateCauldronWallOpen(scene, col = 3, row = 18, texUrl = '/textures/wood-demon-wall.webp') {
     if (!scene) return;
     const geo = new THREE.BoxGeometry(CELL, WALL_H, CELL);
     const tex = new THREE.TextureLoader().load(asset(texUrl));
