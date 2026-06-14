@@ -2413,6 +2413,16 @@ function applyLevel3Textures(scene) {
   // the button sinks it).
   buildInnerTextureZone(scene, [[19, 19]], asset('/textures/ice-wall.webp'));
   buildCeilingZone(scene, [[19, 19]], asset('/textures/ice-ceiling.webp'));
+
+  // East crystal bridge (row 16, cols 19-21): open-air walkway over the chasm to
+  // the egg room. CELL_BRIDGE renders a floor but no ceiling; overlay the bridge
+  // texture and register the 'bridge' floor zone so steps play the creak sound.
+  buildFloorZone(
+    scene,
+    [[16, 19], [16, 20], [16, 21]],
+    asset('/textures/bridge-floor.png'),
+    'bridge'
+  );
 }
 
 // Rebuild Level 3's base geometry + texture overlays in place after the swamp

@@ -29,7 +29,7 @@ export function spawnLevel3Objects(ctx) {
     // ── Weapon Rack ───────────────────────────────────────────────────────────
     // South-West room (row 25, col 1 against west wall)
     addWeaponRack(group, loader, 1, 25, -Math.PI / 2, -0.75, 0, [
-        "Vampiric Dagger", "Silver Mace", "Warden's Shield"
+        "Vampiric Dagger", "Silver Mace"
     ]);
 
     // ── Spell Cabinet ─────────────────────────────────────────────────────────
@@ -61,8 +61,15 @@ export function spawnLevel3Objects(ctx) {
     // Inside the hidden NE cauldron passage treasure room — contains Blue Crystal
     addPortalActivatorStatue(group, loader, 24, 4, 0, 0.45, ['Blue Crystal']);
 
-    // End of elemental corridor (col 18, row 16) — contains Red Crystal
-    addPortalActivatorStatue(group, loader, 18, 16, 0, 0.45, ['Red Crystal']);
+    // Across the east crystal bridge, centre of the far room (col 24, row 16) —
+    // contains Red Crystal. Reached by crossing the bridge from the shrine's end.
+    addPortalActivatorStatue(group, loader, 24, 16, 0, 0.45, ['Red Crystal']);
+
+    // Weapon rack next to the egg, against the east wall (col 25, row 16), facing
+    // west into the room — holds a Warden's Shield.
+    addWeaponRack(group, loader, 25, 16, Math.PI / 2, 0.75, 0, [
+        "Warden's Shield"
+    ]);
 
     // ── Swamp-room cauldron (far NE corner) ───────────────────────────────────
     // Mirrors the Level 2 west-annex cauldron. An alcove is recessed into the east

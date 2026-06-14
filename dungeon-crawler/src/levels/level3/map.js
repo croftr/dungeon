@@ -57,3 +57,25 @@ export const level3Map = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 27 Start Chamber
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 28
 ];
+
+// ── East Crystal Bridge ──────────────────────────────────────────────────────
+// A thin open-air bridge heads east out of the elemental-shrine corridor's end
+// (the old Red Crystal egg spot at col 18, row 16) across a black chasm into a
+// small room that now holds the egg. Bridge = CELL_BRIDGE (15, floor + creak,
+// no ceiling); chasm = CELL_CHASM (14, lethal void — step off and the party
+// falls to its death). (17,19) is left a wall lip so the 2-wide shrine's south
+// row doesn't open straight onto the void. Cell ids mirror map.js: 0 = floor.
+{
+  const FLOOR = 0, CHASM = 14, BRIDGE = 15;
+  // Bridge (row 16, cols 19-21).
+  for (let c = 19; c <= 21; c++) level3Map[16][c] = BRIDGE;
+  // Chasm flanking the bridge: north (row 15, cols 19-21) + south (row 17, cols 20-21).
+  for (let c = 19; c <= 21; c++) level3Map[15][c] = CHASM;
+  level3Map[17][20] = CHASM;
+  level3Map[17][21] = CHASM;
+  // Door (row 16, col 22) into the far room (rows 15-17, cols 23-25).
+  level3Map[16][22] = FLOOR;
+  for (let r = 15; r <= 17; r++) {
+    for (let c = 23; c <= 25; c++) level3Map[r][c] = FLOOR;
+  }
+}
