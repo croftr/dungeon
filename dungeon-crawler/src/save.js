@@ -87,6 +87,7 @@ export function captureSave() {
 const ARENA_LEVEL = 99;
 const SCHEMATIC_TRIALS_LEVEL = 50;
 const FLAME_ZONE_LEVEL = 70;
+const ICE_ZONE_LEVEL = 71;
 
 /**
  * Returns null if saving is currently allowed; otherwise a short reason
@@ -97,6 +98,7 @@ export function whyCantSave() {
   if (window.currentLevel === ARENA_LEVEL) return 'Cannot save during an arena fight.';
   if (window.currentLevel === SCHEMATIC_TRIALS_LEVEL) return 'Cannot save during the schematic trials.';
   if (window.currentLevel === FLAME_ZONE_LEVEL) return 'Cannot save inside the flame zone.';
+  if (window.currentLevel === ICE_ZONE_LEVEL) return 'Cannot save inside the ice zone.';
   // Block saving in combat. Status effects (regen/poison/etc.) carry an
   // `expiresAt` measured against performance.now(), which resets on the reload
   // that loading performs — persisting them mid-fight leaves stale timers that

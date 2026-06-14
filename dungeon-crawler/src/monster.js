@@ -38,6 +38,7 @@ import { level3Monsters } from './levels/level3/monsters.js';
 import { level4Monsters } from './levels/level4/monsters.js';
 import { crowRealmMonsters } from './levels/crow-realm/monsters.js';
 import { flameZoneMonsters } from './levels/flame-zone/monsters.js';
+import { iceZoneMonsters } from './levels/ice-zone/monsters.js';
 import { skillsState } from './skills-state.js';
 import SKILLS_DATA from './data/skills.json';
 import { awardXP } from './leveling.js';
@@ -386,6 +387,7 @@ export const monsters = [
   ...level4Monsters,
   ...crowRealmMonsters,
   ...flameZoneMonsters,
+  ...iceZoneMonsters,
 ];
 
 // ── Assign Block Animations ─────────────────────────────────────────────────
@@ -1897,7 +1899,18 @@ function _loadMonster(m, scene) {
   // Load the idle/walking GLB as the base mesh (fall back to hit or attack GLB for mesh-only monsters like the dummy)
   const baseGlb = m.glbIdle || m.glbHit || m.glbAttack;
   if (!baseGlb) return;
+  // Guard against a duplicate load while a previous one is still in flight. The
+  // GLB load is async, so `m.mesh` stays null until the callback fires. Without
+  // this flag a second _loadMonster call (e.g. initMonsters' load + a save-restore
+  // loadLevel(0), both running at level 0 before either resolves) kicks off a
+  // second load. Both callbacks then set m.mesh + scene.add, and the first model
+  // is orphaned in the scene — m.mesh only references the second, so
+  // loadMonstersForLevel's level-transition cleanup can never remove the first.
+  // That orphan was the Training Dummy showing up on Level 2 at its level-0 tile.
+  if (m.mesh || m._loadingMesh) return;
+  m._loadingMesh = true;
   _gltfLoader.load(baseGlb, (gltf) => {
+    m._loadingMesh = false;
     // If monster was killed (e.g. save restore) before model finished loading, discard
     if (!m.alive) return;
     // Level changed before this async callback fired — don't add a stale mesh to the wrong scene
@@ -2372,7 +2385,7 @@ function _loadMonster(m, scene) {
         }
       });
     }
-  });
+  }, undefined, () => { m._loadingMesh = false; }); // reset on load error so a retry isn't blocked
 }
 
 let _sceneRef = null;

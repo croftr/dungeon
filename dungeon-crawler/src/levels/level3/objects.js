@@ -6,16 +6,17 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { asset } from '../../assets.js';
-import { CELL, FLAME_ZONE_LEVEL } from '../../map.js';
+import { CELL, FLAME_ZONE_LEVEL, ICE_ZONE_LEVEL } from '../../map.js';
 import { addSwirlPortal } from '../swirl-portal.js';
 import { FLAME_ZONE_ARRIVAL } from '../flame-zone/map.js';
+import { ICE_ZONE_ARRIVAL } from '../ice-zone/map.js';
 
 export function spawnLevel3Objects(ctx) {
     const {
         group, loader,
         addChest, addTreasurePile, addWeaponRack, addSpellCabinet, addPortalActivatorStatue,
         addPortal, addTrap1, addDroppedTorch, addInteractiveCauldron,
-        createWallButton, level3FlameAlcoveOpened, interactables,
+        createWallButton, level3FlameAlcoveOpened, level3IceAlcoveOpened, interactables,
     } = ctx;
 
     // ── Portals ───────────────────────────────────────────────────────────────
@@ -34,7 +35,7 @@ export function spawnLevel3Objects(ctx) {
     // ── Spell Cabinet ─────────────────────────────────────────────────────────
     // North-East room (row 8, col 19)
     addSpellCabinet(group, loader, 19, 8, 0, 0.45, -1.0, [
-        "Scroll of Sleep", "Trapper's Manual", "Ancient Bog Core"
+        "Scroll of Sleep", "Trapper's Manual"
     ]);
 
     // ── Chests ────────────────────────────────────────────────────────────────
@@ -48,24 +49,17 @@ export function spawnLevel3Objects(ctx) {
     addChest(group, loader, 19, 24, 0, -0.8, [
         "Greatsword",
         "Chain Cloak",
-        "Ancient Bog Core"
     ]);
 
     // Water Room with crocodles (row 12, col 15)
     addChest(group, loader, 15, 12, -Math.PI / 2, 0.7, [
         "Water Dagger",
         "Scroll of Waterbolt",
-        "Ancient Bog Core"
     ]);
 
-    // Against the east wall of start chamber (row 27, col 12)
-    addChest(group, loader, 12, 27, -Math.PI / 2, 0.3, [
-        "Ancient Bog Core"
-    ], undefined, true, 0.5);
-
     // ── Portal Activator Eggs ───────────────────────────────────────────────────────────
-    // Minotaur room centre — contains Blue Crystal
-    addPortalActivatorStatue(group, loader, 9, 17, 0, 0.45, ['Blue Crystal']);
+    // Inside the hidden NE cauldron passage treasure room — contains Blue Crystal
+    addPortalActivatorStatue(group, loader, 24, 4, 0, 0.45, ['Blue Crystal']);
 
     // End of elemental corridor (col 18, row 16) — contains Red Crystal
     addPortalActivatorStatue(group, loader, 18, 16, 0, 0.45, ['Red Crystal']);
@@ -120,5 +114,21 @@ export function spawnLevel3Objects(ctx) {
         // (When it's opened live by the button press, objects.js spawns this.)
         addSwirlPortal(group, interactables, 20, 25, FLAME_ZONE_LEVEL,
             FLAME_ZONE_ARRIVAL.row, FLAME_ZONE_ARRIVAL.col, FLAME_ZONE_ARRIVAL.facing, { variant: 'red' });
+    }
+
+    // ── Hidden ice alcove (east corridor) ──────────────────────────────────────
+    // (19,19) is sealed (already a wall in level3Map). A button on its west face
+    // lets the player at (19,18) facing east sink the wall, revealing a 1-cell
+    // alcove with ice-wall faces + a white swirl portal to the Ice Zone. Quite
+    // close to the flame alcove. Skip the button once opened.
+    if (!level3IceAlcoveOpened) {
+        const { group: iceAlcoveBtn, btn: iceAlcoveHit } = createWallButton(-1, { target: 'ice_alcove' });
+        iceAlcoveBtn.position.set(19 * CELL - 1.0, 1.25, 19 * CELL);
+        iceAlcoveHit.userData.buttonGroup = iceAlcoveBtn;
+        group.add(iceAlcoveBtn);
+    } else {
+        // Alcove already opened — spawn the white swirl portal to the Ice Zone.
+        addSwirlPortal(group, interactables, 19, 19, ICE_ZONE_LEVEL,
+            ICE_ZONE_ARRIVAL.row, ICE_ZONE_ARRIVAL.col, ICE_ZONE_ARRIVAL.facing, { variant: 'ice' });
     }
 }

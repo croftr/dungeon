@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { createBlobShadow } from './blob-shadow.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
-import { CELL, WALL_H, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld, buildLevel, level1Map, level2Map, level3Map, level4Map, isPassable, spawnElementFloorAt, elementFloorCellId, CROW_REALM_LEVEL, FLAME_ZONE_LEVEL } from './map.js';
+import { CELL, WALL_H, dungeonMap, CELL_FLOOR, CELL_PORTCULLIS, cellToWorld, buildLevel, level1Map, level2Map, level3Map, level4Map, isPassable, spawnElementFloorAt, elementFloorCellId, CROW_REALM_LEVEL, FLAME_ZONE_LEVEL, ICE_ZONE_LEVEL } from './map.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, isInFrontOfPlayer, player, FACING_ANGLES, setPlayerFrozen, setPlayerTrapped } from './player.js';
 import { showMessage, drawMinimap, updateStatus } from './minimap.js';
@@ -35,8 +35,10 @@ import { spawnLevel5Objects } from './levels/level5/objects.js';
 import { spawnSchematicTrialsObjects } from './levels/schematic-trials/objects.js';
 import { spawnCrowRealmObjects } from './levels/crow-realm/objects.js';
 import { spawnFlameZoneObjects } from './levels/flame-zone/objects.js';
+import { spawnIceZoneObjects } from './levels/ice-zone/objects.js';
 import { addSwirlPortal } from './levels/swirl-portal.js';
 import { FLAME_ZONE_ARRIVAL } from './levels/flame-zone/map.js';
+import { ICE_ZONE_ARRIVAL } from './levels/ice-zone/map.js';
 import { showNpcChoice, openQuestDialog, renderMerchantQuestPanel } from './quest.js';
 import { saveToAutoSlot } from './save.js';
 
@@ -126,6 +128,7 @@ const _state = {
   level3CauldronCoreCount: 0,      // Ancient Bog Core fed to the swamp-room cauldron (0-4)
   level3CauldronWallOpened: false, // true once 4 cores open the passage at (3,20)
   level3FlameAlcoveOpened: false,  // true once the bottom-corridor button sinks the sealed wall at (25,20)
+  level3IceAlcoveOpened: false,    // true once the east-corridor button sinks the sealed wall at (19,19)
   level4CauldronBloodCount: 0,     // Ancient Demon Blood fed to the demon-room cauldron (0-4)
   level4CauldronWallOpened: false, // true once 4 bloods open the passage at (11,30)
   level1HoleRoomSpawned: false,
@@ -463,6 +466,8 @@ function _getPortalFlashOverlay(theme = 'blue') {
         el.style.background = 'radial-gradient(circle at center, rgba(40,15,60,0.98) 0%, rgba(10,0,20,0.99) 60%, rgba(0,0,0,1) 100%)';
     } else if (theme === 'red') {
         el.style.background = 'radial-gradient(circle at center, rgba(200,40,25,0.96) 0%, rgba(70,8,8,0.99) 60%, rgba(0,0,0,1) 100%)';
+    } else if (theme === 'ice') {
+        el.style.background = 'radial-gradient(circle at center, rgba(235,248,255,0.96) 0%, rgba(150,190,225,0.98) 55%, rgba(0,0,0,1) 100%)';
     } else {
         el.style.background = 'radial-gradient(circle at center, rgba(120,200,255,0.95) 0%, rgba(20,40,90,0.98) 60%, rgba(0,0,0,1) 100%)';
     }
@@ -1007,6 +1012,38 @@ export function initObjects(scene, camera) {
                             addSwirlPortal(objectsGroup, interactables, 20, 25, FLAME_ZONE_LEVEL,
                                 FLAME_ZONE_ARRIVAL.row, FLAME_ZONE_ARRIVAL.col, FLAME_ZONE_ARRIVAL.facing, { variant: 'red' });
                             showMessage("With a slow grinding roar the wall grinds down into the floor, baring a hidden alcove with a glowing red rune-circle set into the floor!");
+                        } else {
+                            showMessage("The alcove already stands open.");
+                        }
+                    } else {
+                        showMessage("You can't reach that from here.");
+                    }
+                } else if (obj.userData.target === 'ice_alcove') {
+                    // Level 3 east corridor: sealed wall at (19,19) carrying a
+                    // button. Player at (19,18) facing east presses it; the wall
+                    // grinds down into the floor to reveal an ice-walled alcove
+                    // with a swirl portal to the Ice Zone.
+                    if (isInFrontOfPlayer(19, 19, 1)) {
+                        playButtonClickSound();
+                        if (!_state.level3IceAlcoveOpened) {
+                            _animateButtonPress(obj);
+                            _state.level3IceAlcoveOpened = true;
+                            dungeonMap[19][19] = CELL_FLOOR;
+                            level3Map[19][19] = CELL_FLOOR;
+                            if (window.rebuildLevel3Geometry) window.rebuildLevel3Geometry();
+                            playSoundByUrl(asset('/sounds/actions/tomb-door.mp3'), 0.9);
+                            _animateCauldronWallOpen(objectsGroup.parent, 19, 19, '/textures/wall.webp');
+                            const bg = obj.userData.buttonGroup;
+                            if (bg && bg.parent) bg.parent.remove(bg);
+                            const bIdx = interactables.indexOf(obj);
+                            if (bIdx !== -1) interactables.splice(bIdx, 1);
+                            // Reveal the white swirl portal on the alcove floor that
+                            // warps the party to the Ice Zone. (On a fresh level load
+                            // with the alcove already open, spawnLevel3Objects adds
+                            // this instead — see level3/objects.js.)
+                            addSwirlPortal(objectsGroup, interactables, 19, 19, ICE_ZONE_LEVEL,
+                                ICE_ZONE_ARRIVAL.row, ICE_ZONE_ARRIVAL.col, ICE_ZONE_ARRIVAL.facing, { variant: 'ice' });
+                            showMessage("With a slow grinding roar the wall grinds down into the floor, baring a frost-rimed alcove with a glowing white rune-circle set into the floor!");
                         } else {
                             showMessage("The alcove already stands open.");
                         }
@@ -2461,8 +2498,8 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
         model.rotation.y = rotY;
 
         // Auto-align chests whose pivot is at their center (dark-red-chest,
-        // fire-chest) so they sit on the floor rather than half-sunk.
-        if (modelPath && (modelPath.includes('dark-red-chest.glb') || modelPath.includes('fire-chest.glb'))) {
+        // fire-chest, ice-chest) so they sit on the floor rather than half-sunk.
+        if (modelPath && (modelPath.includes('dark-red-chest.glb') || modelPath.includes('fire-chest.glb') || modelPath.includes('ice-chest.glb'))) {
             model.updateMatrixWorld(true);
             const box = new THREE.Box3().setFromObject(model);
             model.position.y = -box.min.y;
@@ -3480,6 +3517,7 @@ export function spawnObjectsForLevel() {
         // Level 3 state flags
         level3PortalEnabled: _state.level3PortalEnabled,
         level3FlameAlcoveOpened: _state.level3FlameAlcoveOpened,
+        level3IceAlcoveOpened: _state.level3IceAlcoveOpened,
         // Level 4 state flags
         level4PortalEnabled: _state.level4PortalEnabled,
         minotaurDead,
@@ -3501,6 +3539,7 @@ export function spawnObjectsForLevel() {
     else if (level === 50) spawnSchematicTrialsObjects(ctx);
     else if (level === CROW_REALM_LEVEL) spawnCrowRealmObjects(ctx);
     else if (level === FLAME_ZONE_LEVEL) spawnFlameZoneObjects(ctx);
+    else if (level === ICE_ZONE_LEVEL) spawnIceZoneObjects(ctx);
     else if (level === 99) {
         // Arena – place 4 torches evenly around the edge
         addDroppedTorch(objectsGroup, _gltfLoader, 1, 1, 0);
@@ -7046,6 +7085,9 @@ export function setWorldFlags(flags) {
     // The bottom-corridor flame alcove on Level 3: pressing the wall button sinks
     // the sealed wall at (25,20). Re-apply on restore so it stays walkable.
     if (_state.level3FlameAlcoveOpened) level3Map[25][20] = CELL_FLOOR;
+    // The east-corridor ice alcove on Level 3: opening it knocks out the sealed
+    // wall at (19,19). Re-apply on restore so it stays walkable.
+    if (_state.level3IceAlcoveOpened) level3Map[19][19] = CELL_FLOOR;
     // The demon-room cauldron's hidden passage on Level 4: opening it knocks out
     // the rear-wall grid at (11,30). Re-apply on restore so it stays walkable.
     if (_state.level4CauldronWallOpened) level4Map[11][30] = CELL_FLOOR;

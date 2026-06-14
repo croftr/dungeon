@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import { buildLevel, buildTextureZone, buildInnerTextureZone, buildFloorZone, buildCeilingZone, findCell, CELL_START, CELL_FLOOR, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures, CROW_REALM_LEVEL, FLAME_ZONE_LEVEL } from './map.js';
+import { buildLevel, buildTextureZone, buildInnerTextureZone, buildFloorZone, buildCeilingZone, findCell, CELL_START, CELL_FLOOR, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures, CROW_REALM_LEVEL, FLAME_ZONE_LEVEL, ICE_ZONE_LEVEL } from './map.js';
 import ELEMENT_FLOORS from './data/element-floors.json';
 import { resolveElementalAmount } from './elements.js';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
@@ -31,6 +31,7 @@ import { inst } from './monster-factory.js';
 import { schematicTrialsMap } from './levels/schematic-trials/map.js';
 import { crowRealmMap, CROW_FLOOR_CELLS, CROW_WALL_CELLS } from './levels/crow-realm/map.js';
 import { flameZoneMap, FLAME_ZONE_FLOORS } from './levels/flame-zone/map.js';
+import { iceZoneMap, ICE_ZONE_FLOORS } from './levels/ice-zone/map.js';
 
 import './style.css';
 
@@ -2366,6 +2367,12 @@ function applyLevel3Textures(scene) {
   // sinks they show.
   buildInnerTextureZone(scene, [[25, 20]], asset('/textures/flame-wall.png'));
   buildCeilingZone(scene, [[25, 20]], asset('/textures/flame-ceiling.png'));
+
+  // Hidden ice alcove at (19,19), east corridor. Same trick: ice-wall faces +
+  // icy ceiling, painted unconditionally (hidden inside the sealed wall box until
+  // the button sinks it).
+  buildInnerTextureZone(scene, [[19, 19]], asset('/textures/ice-wall.webp'));
+  buildCeilingZone(scene, [[19, 19]], asset('/textures/ice-wall.webp'));
 }
 
 // Rebuild Level 3's base geometry + texture overlays in place after the swamp
@@ -2480,6 +2487,7 @@ window.loadLevel = function (levelNum) {
   maps[SCHEMATIC_TRIALS_LEVEL] = schematicTrialsMap;
   maps[CROW_REALM_LEVEL] = crowRealmMap;
   maps[FLAME_ZONE_LEVEL] = flameZoneMap;
+  maps[ICE_ZONE_LEVEL] = iceZoneMap;
   changeMapArray(maps[levelNum] ?? level0Map);
 
   // 2. Rebuild map meshes for walls/floors
@@ -2583,6 +2591,18 @@ window.loadLevel = function (levelNum) {
     buildCeilingZone(scene, FLAME_ZONE_FLOORS, asset('/textures/flame-ceiling.png'));
   }
 
+  // Ice Zone (on-demand): ice-wall walls, dungeon-ice floor, and an icy ceiling.
+  // Built only while the party is inside, so Level 3 never loads it.
+  if (levelNum === ICE_ZONE_LEVEL) {
+    // Reset the gate cell (3,7) (mutated to CELL_PORTCULLIS by addPortcullis each
+    // visit) to floor so inner-face texturing treats it as open floor. The
+    // portcullis re-closes it during spawnObjectsForLevel.
+    iceZoneMap[3][7] = CELL_FLOOR;
+    buildFloorZone(scene, ICE_ZONE_FLOORS, asset('/textures/dungeon-ice-floor.webp'));
+    buildInnerTextureZone(scene, ICE_ZONE_FLOORS, asset('/textures/ice-wall.webp'));
+    buildCeilingZone(scene, ICE_ZONE_FLOORS, asset('/textures/ice-wall.webp'));
+  }
+
   // 3. Clear and respawn level objects
   clearObjects(scene);
   spawnObjectsForLevel();
@@ -2657,6 +2677,11 @@ window.loadLevel = function (levelNum) {
   } else if (levelNum === FLAME_ZONE_LEVEL) {
     // Flame Zone — face north into the room (the entry swirl also sets this via
     // its targetFacing, but keep a sane default if loaded directly).
+    player.facing = 0;
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = FACING_ANGLES[player.facing];
+  } else if (levelNum === ICE_ZONE_LEVEL) {
+    // Ice Zone — face north up the spine (entry swirl also sets this).
     player.facing = 0;
     camera.rotation.order = 'YXZ';
     camera.rotation.y = FACING_ANGLES[player.facing];

@@ -18,6 +18,7 @@ import { CELL } from '../map.js';
 const SWIRL_VARIANTS = {
     blue: { glow: 0x3a9bff, outerRing: 0x9be8ff, innerRing: 0xffd27a, light: 0x4aa8ff, flashTheme: 'blue' },
     red:  { glow: 0xff2a1a, outerRing: 0xffae8a, innerRing: 0xffd27a, light: 0xff4a2a, flashTheme: 'red' },
+    ice:  { glow: 0xdff2ff, outerRing: 0xffffff, innerRing: 0xbfe6ff, light: 0xcfe8ff, flashTheme: 'ice' },
 };
 
 export function addSwirlPortal(scene, interactables, col, row, targetLevel, targetRow, targetCol, targetFacing, opts = {}) {

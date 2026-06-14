@@ -1495,23 +1495,12 @@
         "chance": 0.2
       },
       {
-        "item": "Mana Berry",
-        "chance": 0.15
-      },
-      {
-        "item": "Congealed Slime",
+        "item": "Ancient Bog Core",
         "chance": 1
       },
       {
         "item": "Congealed Slime",
         "chance": 0.2
-      },
-      {
-        "item": {
-          "name": "Gold Coins",
-          "quantity": 8
-        },
-        "chance": 0.4
       }
     ]
   },

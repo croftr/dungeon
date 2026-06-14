@@ -53,6 +53,10 @@ export const CROW_REALM_LEVEL = 60;
 // never carries its geometry/objects.
 export const FLAME_ZONE_LEVEL = 70;
 
+// Ice Zone — sibling of the Flame Zone, reached via the swirl portal in the
+// Level 3 ice alcove (19,19). Same on-demand build/teardown pattern.
+export const ICE_ZONE_LEVEL = 71;
+
 /** Seeded pseudo-random — same seed → same map every time. */
 function mulberry32(seed) {
   return function () {

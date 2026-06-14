@@ -11,6 +11,8 @@
 //     (cols 11-13) opening off it.
 //   • A portcullis at (6,7) gates the north spine; a button in the hall opens it.
 //   • Inner sanctum (N, rows 1-3, cols 5-9) lies behind the gate.
+//   • Five lava/fire-element floor tiles (cell id 8) form a hazard patch across
+//     the central hall + south spine (rows 8-10, around col 7).
 //
 // Deliberately item-free for now — this is a layout/architecture pass.
 export const flameZoneMap = [
@@ -22,9 +24,9 @@ export const flameZoneMap = [
   [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1], // row 5
   [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1], // row 6  ← PORTCULLIS gate (6,7)
   [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1], // row 7  W chamber + central hall + E chamber
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], // row 8  connecting band
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], // row 9  connecting band
-  [1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1], // row 10 corridors (cols 4 / 7 / 10)
+  [1, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 1], // row 8  connecting band + lava floor (8)
+  [1, 0, 0, 0, 0, 0, 8, 8, 8, 0, 0, 0, 0, 0, 1], // row 9  connecting band + lava floor across hall
+  [1, 1, 1, 1, 0, 1, 1, 8, 1, 1, 0, 1, 1, 1, 1], // row 10 corridors (cols 4 / 7 / 10) + lava on spine
   [1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1], // row 11
   [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1], // row 12 entry hall (cols 4-10)
   [1, 1, 1, 1, 0, 0, 0, 2, 0, 0, 0, 1, 1, 1, 1], // row 13 entry hall + arrival/start (col 7)
