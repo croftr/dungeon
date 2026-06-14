@@ -2335,7 +2335,7 @@ function applyLevel2Textures(scene) {
   buildFloorZone(
     scene,
     [[12, 25], [12, 26], [12, 27], [12, 28], [12, 29], [12, 30]],
-    asset('/textures/bridge-floor.png'),
+    asset('/textures/bridge-floor.webp'),
     'bridge' // floor zone → plays the creak sound while walking (see FLOOR_ZONE_DEFS)
   );
 
@@ -2420,7 +2420,7 @@ function applyLevel3Textures(scene) {
   buildFloorZone(
     scene,
     [[16, 19], [16, 20], [16, 21]],
-    asset('/textures/bridge-floor.png'),
+    asset('/textures/bridge-floor.webp'),
     'bridge'
   );
 }
