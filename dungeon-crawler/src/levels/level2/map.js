@@ -94,3 +94,29 @@ for (const [r, c] of CROW_FLOOR_CELLS) {
     level2Map[r][c] = 1;
   }
 }
+
+// ── East Chasm Bridge ───────────────────────────────────────────────────────
+// A thin passage leads east out of the Room C (orc) east edge at (row 12, col 21)
+// onto a narrow open-air bridge spanning a black chasm. The bridge cells render a
+// floor (with a custom texture, applied in applyLevel2Textures) but no walls or
+// ceiling; the surrounding void renders nothing at all. Stepping off the bridge
+// onto the void is lethal — the whole party falls to its death (moved() handler
+// in main.js). The far side is an empty room. Carved AFTER the crow walling above
+// so these cells win. Cell ids mirror map.js: 0 = floor, 14 = chasm, 15 = bridge.
+{
+  const FLOOR = 0, CHASM = 14, BRIDGE = 15;
+  // Thin enclosed passage out of Room C (row 12, cols 22-24).
+  for (let c = 22; c <= 24; c++) level2Map[12][c] = FLOOR;
+  // Open-air bridge (row 12, cols 25-30).
+  for (let c = 25; c <= 30; c++) level2Map[12][c] = BRIDGE;
+  // Chasm void flanking the bridge (rows 10-15, cols 25-30, skipping the bridge row).
+  for (let r = 10; r <= 15; r++) {
+    if (r === 12) continue;
+    for (let c = 25; c <= 30; c++) level2Map[r][c] = CHASM;
+  }
+  // Door into the far room (row 12, col 31), then the empty room (rows 10-14, cols 32-36).
+  level2Map[12][31] = FLOOR;
+  for (let r = 10; r <= 14; r++) {
+    for (let c = 32; c <= 36; c++) level2Map[r][c] = FLOOR;
+  }
+}

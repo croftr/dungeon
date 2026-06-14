@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
-import { buildLevel, buildTextureZone, buildInnerTextureZone, buildFloorZone, buildCeilingZone, findCell, CELL_START, CELL_FLOOR, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, dungeonMap, invalidateWallTextures, CROW_REALM_LEVEL, FLAME_ZONE_LEVEL, ICE_ZONE_LEVEL } from './map.js';
+import { buildLevel, buildTextureZone, buildInnerTextureZone, buildFloorZone, buildCeilingZone, findCell, CELL_START, CELL_FLOOR, changeMapArray, level0Map, level1Map, level2Map, level3Map, level4Map, level5Map, cellToWorld, isPassable, CELL_HOLE, CELL_STAIRS_UP, CELL_CHASM, dungeonMap, invalidateWallTextures, CROW_REALM_LEVEL, FLAME_ZONE_LEVEL, ICE_ZONE_LEVEL } from './map.js';
 import ELEMENT_FLOORS from './data/element-floors.json';
 import { resolveElementalAmount } from './elements.js';
 import { initPlayer, initInput, setCallbacks, tweenGroup, player, FACING_ANGLES, isInFrontOfPlayer } from './player.js';
@@ -392,6 +392,34 @@ setCallbacks({
 
     // --- Special Grid Logic (Teleports) ---
     const cell = dungeonMap[player.gridRow][player.gridCol];
+
+    // Stepping off a bridge onto the open chasm void is fatal — the whole party
+    // plunges into the dark and falls to its death.
+    if (cell === CELL_CHASM) {
+      tweenGroup.removeAll();
+      player.moving = false;
+
+      // NOTE: deliberately no fall-blackout overlay here — it sits at a higher
+      // z-index than #game-over and would hide the death screen (and block its
+      // load-game buttons). Let the normal game-over screen animate in instead,
+      // exactly like a combat party-wipe.
+      playFallSequence();
+      showMessage("Aaaaaah! You plunge into the chasm!");
+
+      // Lethal: drop every living member to 0 HP. The last death triggers the
+      // normal game-over screen (with load-game options) via setHp's wipe check.
+      party.forEach((m, i) => {
+        if (m.isEmpty || m.isDead) return;
+        const dmg = m.hp;
+        setHp(i, 0, 'The Chasm');
+        showMemberDamage(i, dmg, false);
+        flashPortraitHit(i);
+        addLogEntry({ time: Date.now(), type: 'tick', target: m.name, effectId: 'fall', effectName: 'The Chasm', amount: dmg });
+      });
+      playPartyHitSound();
+      return;
+    }
+
     if (window.currentLevel === 1 && player.gridRow === 1 && player.gridCol === 15) {
       tweenGroup.removeAll();
       player.moving = false;
@@ -2299,6 +2327,17 @@ function applyLevel2Textures(scene) {
   buildFloorZone(scene, iceFloors, asset('/textures/dungeon-ice-floor.webp'));
   buildInnerTextureZone(scene, iceFloors, asset('/textures/ice-wall.webp'));
   buildCeilingZone(scene, iceFloors, asset('/textures/ice-ceiling.webp'));
+
+  // East chasm bridge (row 12, cols 25-30): the open-air walkway over the void
+  // east of Room C. The CELL_BRIDGE cells render a floor but no ceiling/walls;
+  // overlay the custom bridge texture on top. The flanking CELL_CHASM cells
+  // render nothing (black) and are lethal to step onto (moved() in this file).
+  buildFloorZone(
+    scene,
+    [[12, 25], [12, 26], [12, 27], [12, 28], [12, 29], [12, 30]],
+    asset('/textures/bridge-floor.png'),
+    'bridge' // floor zone → plays the creak sound while walking (see FLOOR_ZONE_DEFS)
+  );
 
   // West annex demon alcove (rows 17-19, cols 4-5): the recessed walls at the
   // west end of the small room take the wood-demon-wall texture. Inner-face only,

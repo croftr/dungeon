@@ -12,6 +12,8 @@ const CELL_COLORS = {
   5: 'rgba(0, 0, 0, 0)',      // hole (fully transparent)
   6: '#5a5040',               // stairs
   8: 'rgba(200, 60, 30, 0.8)', // lava
+  14: 'rgba(0, 0, 0, 0)',     // chasm void (fully transparent)
+  15: 'rgba(150, 120, 80, 0.7)', // bridge (warm planks)
 };
 
 let mmCtx = null;
@@ -193,7 +195,7 @@ export function drawMinimap() {
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       const cell = dungeonMap[r][c];
-      if (cell === 5) continue; // Skip holes
+      if (cell === 5 || cell === 14) continue; // Skip holes and chasm void
 
       // Fill passable areas with dark translucent grey
       if (cell !== 1) {

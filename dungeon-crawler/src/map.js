@@ -20,6 +20,13 @@ export const CELL_HOLY = 10;
 export const CELL_DARK = 11;
 export const CELL_LIGHTNING = 12;
 export const CELL_WATER = 13;
+// Open-air chasm void: passable but lethal (the party falls to its death — see
+// the moved() handler in main.js). Renders nothing — no floor, ceiling, wall or
+// boundary wall — so it reads as pure black.
+export const CELL_CHASM = 14;
+// Open-air walkway across a chasm: renders a floor (overlaid with a custom
+// bridge texture) but NO ceiling. Passable and safe.
+export const CELL_BRIDGE = 15;
 
 import { level0Map } from './levels/level0/map.js';
 import { level1Map } from './levels/level1/map.js';
@@ -300,6 +307,8 @@ export function isPassable(row, col) {
   if (row < 0 || row >= ROWS || col < 0 || col >= COLS) return false;
   const cell = dungeonMap[row][col];
   if (cell === CELL_FLOOR || cell === CELL_START || cell === CELL_EXIT || cell === CELL_HOLE || cell === CELL_STAIRS_UP) return true;
+  // Bridge is walkable; chasm is walkable too so the party can step off and fall.
+  if (cell === CELL_BRIDGE || cell === CELL_CHASM) return true;
   return _elementFloorMatByCell[cell] !== undefined;
 }
 
@@ -379,8 +388,10 @@ export function buildLevel(scene) {
       const cell = dungeonMap[row][col];
       if (cell === CELL_WALL) wallCount++;
       else if (cell === CELL_BLACK_WALL) blackWallCount++;
-      else if (cell !== CELL_HOLE) { floorCount++; ceilCount++; }
-      else ceilCount++;
+      else if (cell === CELL_CHASM) { /* void — no floor, ceiling or wall */ }
+      else if (cell === CELL_BRIDGE) floorCount++;     // open-air walkway: floor, no ceiling
+      else if (cell === CELL_HOLE) ceilCount++;        // hole: ceiling, no floor
+      else { floorCount++; ceilCount++; }
     }
   }
   // Count extra boundary walls needed — one for each direction a floor/non-wall
@@ -389,7 +400,8 @@ export function buildLevel(scene) {
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
       const cell = dungeonMap[row][col];
-      if (cell === CELL_WALL || cell === CELL_BLACK_WALL) continue;
+      // Chasm void gets no boundary wall — its edge should read as open black.
+      if (cell === CELL_WALL || cell === CELL_BLACK_WALL || cell === CELL_CHASM) continue;
       if (col === 0) boundaryWallCount++;
       if (col === COLS - 1) boundaryWallCount++;
       if (row === 0) boundaryWallCount++;
@@ -473,9 +485,14 @@ export function buildLevel(scene) {
       } else if (cell === CELL_BLACK_WALL) {
         dummy.position.set(wx, WALL_H / 2, wz); dummy.updateMatrix();
         blackWallIM.setMatrixAt(bwI++, dummy.matrix);
+      } else if (cell === CELL_CHASM) {
+        // Open void — render nothing so the surroundings read as black.
       } else {
-        dummy.position.set(wx, WALL_H, wz); dummy.rotation.set(Math.PI / 2, 0, 0); dummy.updateMatrix();
-        ceilIM.setMatrixAt(cI++, dummy.matrix);
+        // Ceiling for everything except the open-air bridge.
+        if (cell !== CELL_BRIDGE) {
+          dummy.position.set(wx, WALL_H, wz); dummy.rotation.set(Math.PI / 2, 0, 0); dummy.updateMatrix();
+          ceilIM.setMatrixAt(cI++, dummy.matrix);
+        }
         if (cell !== CELL_HOLE) {
           dummy.position.set(wx, 0, wz); dummy.rotation.set(-Math.PI / 2, 0, 0); dummy.updateMatrix();
           floorIM.setMatrixAt(fI++, dummy.matrix);
@@ -497,7 +514,7 @@ export function buildLevel(scene) {
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       const cell = dungeonMap[r][c];
-      if (cell === CELL_WALL || cell === CELL_BLACK_WALL) continue;
+      if (cell === CELL_WALL || cell === CELL_BLACK_WALL || cell === CELL_CHASM) continue;
       if (c === 0) {
         dummy.position.set(-CELL, WALL_H / 2, r * CELL); dummy.updateMatrix();
         wallIM.setMatrixAt(wI++, dummy.matrix);

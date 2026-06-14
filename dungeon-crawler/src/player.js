@@ -15,6 +15,13 @@ const FLOOR_ZONE_DEFS = {
     soundVolume: 0.6,
     speedFactor: 4, // multiplies move duration (4 = quarter speed / 75% reduction)
   },
+  bridge: {
+    sound: '/sounds/floor-creak.mp3',
+    soundVolume: 0.7,
+    speedFactor: 1, // normal walking speed (must be set — currentMoveMs multiplies by it)
+    ringOut: true,  // play once per step and let it ring out (not cut on arrival)
+    minInterval: 2000, // ms — min gap before the creak can play again (throttle)
+  },
 };
 
 // Default footstep played on every move where the destination cell isn't in a
@@ -55,6 +62,10 @@ function currentMoveMs(destRow, destCol) {
 // tracked here, so stopMoveSound() leaves it alone to ring out.
 let _moveSoundSource = null;
 
+// Timestamp of the last ringOut zone sound (e.g. bridge creak), used to throttle
+// it via a zone's minInterval so it doesn't retrigger on every single step.
+let _lastRingOutAt = 0;
+
 function stopMoveSound() {
   if (_moveSoundSource) {
     try { _moveSoundSource.stop(); } catch (_) {}
@@ -70,7 +81,18 @@ async function playMoveSound(row, col) {
   const zone = getFloorZoneAtCell(row, col);
   const def = zone ? FLOOR_ZONE_DEFS[zone] : null;
   if (def?.sound) {
-    _moveSoundSource = await playSoundByUrl(asset(def.sound), def.soundVolume ?? 0.6) ?? null;
+    if (def.ringOut) {
+      // Fire-and-forget: play once per step and let it ring out naturally,
+      // like a footstep — don't track it as the cut-on-arrival move sound.
+      // Throttle by minInterval so it doesn't retrigger on every step.
+      const now = performance.now();
+      if (now - _lastRingOutAt >= (def.minInterval ?? 0)) {
+        _lastRingOutAt = now;
+        playSoundByUrl(asset(def.sound), def.soundVolume ?? 0.6);
+      }
+    } else {
+      _moveSoundSource = await playSoundByUrl(asset(def.sound), def.soundVolume ?? 0.6) ?? null;
+    }
   } else {
     const pitch = 0.9 + Math.random() * 0.2; // ±10% so steps don't sound robotic
     playSoundByUrl(asset(DEFAULT_MOVE_SOUND), DEFAULT_MOVE_VOLUME, pitch);

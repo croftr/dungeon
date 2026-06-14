@@ -65,7 +65,7 @@ export function spawnLevel2Objects(ctx) {
 
     // Shifted from col 9, row 13 to col 19, row 13
     addChest(group, loader, 19, 13, Math.PI, 0.7, [
-        'Poison Dagger', 'Life Orb',
+        'Life Orb',
         "Three Eyed Familiar",
     ]);
 
@@ -73,8 +73,6 @@ export function spawnLevel2Objects(ctx) {
     addChest(group, loader, 13, 14, Math.PI, 0.7, [
         "Hoarfrost Mantle",
         "Padded Vest",
-        "Testament of Faith",
-        "Schematic Key"
     ]);
 
     // ── Portcullises & Keys ───────────────────────────────────────────────────
@@ -129,7 +127,7 @@ export function spawnLevel2Objects(ctx) {
     // Treasure Pile beside that chest in the giant room
     addTreasurePile(group, loader, 34, 18, -Math.PI / 2, 0.7, [
         'Ring of Balance',
-        { name: 'Gold Coins', quantity: 150 },
+        { name: 'Gold Coins', quantity: 200 },
     ], -0.5);
 
     // ── Pit back-passage chest rooms ──────────────────────────────────────────
@@ -144,6 +142,23 @@ export function spawnLevel2Objects(ctx) {
     addChest(group, loader, 30, 40, Math.PI, 0.7, [
         "Ancient Tree Sap", "Water Bolts"
     ], asset('/items/containers/green-chest.glb'));
+
+    // ── East chasm-bridge far room ────────────────────────────────────────────
+    // The empty room across the chasm bridge (rows 10-14, cols 32-36). An empty
+    // magic chest sits against the east wall (col 36, easternmost floor; wall at
+    // col 37), facing west into the room. offsetX +0.5 pushes it east, flush to
+    // the wall; scale 0.4 matches the other level-2 magic chest.
+    addChest(group, loader, 36, 12, -Math.PI / 2, 0, [
+        "Testament of Faith",
+        "Schematic Key"
+    ], asset('/items/containers/magic-chest.glb'), true, 0.5, 'Chest', 0.4);
+
+    // Weapon rack against the same east wall, one cell north of the chest
+    // (col 36, row 11), facing west into the room — empty for now. Matches the
+    // warden-room east-wall rack (rotY -Math.PI/2, offsetX 0.7 sits it flush).
+    addWeaponRack(group, loader, 36, 11, -Math.PI / 2, 0.7, 0, [
+        'Poison Dagger',
+    ]);
 
     // ── Stairs ────────────────────────────────────────────────────────────────
     // Shifted from col 3, row 41 to col 13, row 41
@@ -181,7 +196,7 @@ export function spawnLevel2Objects(ctx) {
     // alongside it against the north wall.
     addChest(group, loader, 3, 8, 0, -0.5, [
         "Schematic Key"
-    ], asset('/items/containers/magic-chest.glb'), true, -0.5, 'Chest', 0.44);
+    ], asset('/items/containers/magic-chest.glb'), true, -0.5, 'Chest', 0.4);
 
     // Empty Treasure Pile beside the magic chest (east of it, north wall)
     addTreasurePile(group, loader, 3, 8, 0, -0.5, [
