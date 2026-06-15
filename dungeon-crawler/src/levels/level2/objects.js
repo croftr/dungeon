@@ -158,6 +158,7 @@ export function spawnLevel2Objects(ctx) {
     // warden-room east-wall rack (rotY -Math.PI/2, offsetX 0.7 sits it flush).
     addWeaponRack(group, loader, 36, 11, -Math.PI / 2, 0.7, 0, [
         'Poison Dagger',
+        'Aegis Shard',
     ]);
 
     // ── Stairs ────────────────────────────────────────────────────────────────

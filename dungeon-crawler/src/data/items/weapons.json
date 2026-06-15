@@ -254,6 +254,31 @@
         "weight": 0.4
     },
     {
+        "name": "Aegis Shard",
+        "slot": "hand",
+        "attackType": "swipe",
+        "weaponType": "dagger",
+        "staminaDrain": 1,
+        "baseDamage": 5,
+        "delay": 2,
+        "statWeights": {
+            "str": 0.2,
+            "dex": 0.8
+        },
+        "elementalResistances": {
+            "holy": 10,
+            "dark": 10,
+            "fire": 10,
+            "ice": 10,
+            "lightning": 10,
+            "water": 10
+        },
+        "icon": "/icons/weapons/aegis_shard.webp",
+        "description": "A glowing crystal shard from an ancient shield, fashioned into a dagger. Grants resistance to all elements.",
+        "value": 60,
+        "weight": 0.4
+    },
+    {
         "name": "Amethyst Wardancer Dagger",
         "slot": "hand",
         "attackType": "swipe",

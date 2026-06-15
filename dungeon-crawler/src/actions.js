@@ -15,6 +15,7 @@ import { playSlashTrail, playShieldTrail } from './slash-trail.js';
 import { getElementColorHex, ELEMENTS } from './elements.js';
 
 // Default arrow/bolt fletching palette (the original "green feathers" look).
+// `elemental: false` → no tip glow (plain ammo keeps its original look).
 const DEFAULT_FLETCH = {
   fill: 'rgba(200,255,130,0.85)',
   stroke: '#90d060',
@@ -22,6 +23,8 @@ const DEFAULT_FLETCH = {
   ridgeStroke: '#a0f060',
   speedBright: '#d0ff80',
   speedDim: '#a0f060',
+  elemental: false,
+  glow: '200,255,130',
 };
 
 // Build an arrow-fletching palette from an element id. Returns the default
@@ -47,12 +50,31 @@ function getFletchPalette(elementId) {
     ridgeStroke: lighten(0.25),
     speedBright: lighten(0.55),
     speedDim: lighten(0.25),
+    elemental: true,
+    glow: `${r},${g},${b}`,
   };
 }
 
 // Build the SHOOT (arrow/bolt) SVG with the fletching tinted for `elementId`.
 function buildShootSvg(elementId) {
   const p = getFletchPalette(elementId);
+
+  // Mild pulsing aura around the arrowhead tip (~60,57) — only for elemental
+  // ammo, so it reads as "this arrow carries elemental damage". SMIL keeps the
+  // pulse self-contained inside the injected SVG.
+  const tipFx = p.elemental ? `
+        <radialGradient id="tipGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"  stop-color="rgba(${p.glow},0.9)" />
+          <stop offset="45%" stop-color="rgba(${p.glow},0.45)" />
+          <stop offset="100%" stop-color="rgba(${p.glow},0)" />
+        </radialGradient>` : '';
+  const tipAura = p.elemental ? `
+        <!-- Elemental tip aura: soft pulsing glow at the arrowhead -->
+        <circle cx="60" cy="57" fill="url(#tipGlow)" stroke="none">
+          <animate attributeName="r" values="6;11;6" dur="0.6s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.55;0.9;0.55" dur="0.6s" repeatCount="indefinite" />
+        </circle>` : '';
+
   return `
     <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"
          fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -65,9 +87,10 @@ function buildShootSvg(elementId) {
         <linearGradient id="arrowShaft" x1="0%" y1="100%" x2="0%" y2="0%">
           <stop offset="0%" stop-color="#302010" />
           <stop offset="100%" stop-color="#906030" />
-        </linearGradient>
+        </linearGradient>${tipFx}
       </defs>
       <g filter="url(#glowShoot)">
+        ${tipAura}
         <!-- Tapered shaft: wide at nock (near), narrow near tip (far) -->
         <polygon points="55,96 65,96 62,66 58,66" fill="url(#arrowShaft)" stroke="#201005" stroke-width="0.5" />
 
