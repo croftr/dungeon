@@ -12,7 +12,88 @@
 import { ACTIONS } from './items.js';
 import { playActionSound } from './audio.js';
 import { playSlashTrail, playShieldTrail } from './slash-trail.js';
-import { getElementColorHex } from './elements.js';
+import { getElementColorHex, ELEMENTS } from './elements.js';
+
+// Default arrow/bolt fletching palette (the original "green feathers" look).
+const DEFAULT_FLETCH = {
+  fill: 'rgba(200,255,130,0.85)',
+  stroke: '#90d060',
+  ridge: '#ccff90',
+  ridgeStroke: '#a0f060',
+  speedBright: '#d0ff80',
+  speedDim: '#a0f060',
+};
+
+// Build an arrow-fletching palette from an element id. Returns the default
+// (green) palette when the element is unknown/null so non-elemental ammo keeps
+// its original look.
+function getFletchPalette(elementId) {
+  const hex = ELEMENTS[elementId]?.color;
+  if (!hex) return DEFAULT_FLETCH;
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  // Lighten toward white by `t` (0..1) for highlights/ridge.
+  const lighten = (t) => {
+    const lr = Math.round(r + (255 - r) * t);
+    const lg = Math.round(g + (255 - g) * t);
+    const lb = Math.round(b + (255 - b) * t);
+    return `rgb(${lr},${lg},${lb})`;
+  };
+  return {
+    fill: `rgba(${r},${g},${b},0.85)`,
+    stroke: hex,
+    ridge: lighten(0.55),
+    ridgeStroke: lighten(0.25),
+    speedBright: lighten(0.55),
+    speedDim: lighten(0.25),
+  };
+}
+
+// Build the SHOOT (arrow/bolt) SVG with the fletching tinted for `elementId`.
+function buildShootSvg(elementId) {
+  const p = getFletchPalette(elementId);
+  return `
+    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"
+         fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <defs>
+        <filter id="glowShoot" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="1.5" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
+        <!-- Gradient: dark near end (nock/bottom), lighter far end (tip/top) -->
+        <linearGradient id="arrowShaft" x1="0%" y1="100%" x2="0%" y2="0%">
+          <stop offset="0%" stop-color="#302010" />
+          <stop offset="100%" stop-color="#906030" />
+        </linearGradient>
+      </defs>
+      <g filter="url(#glowShoot)">
+        <!-- Tapered shaft: wide at nock (near), narrow near tip (far) -->
+        <polygon points="55,96 65,96 62,66 58,66" fill="url(#arrowShaft)" stroke="#201005" stroke-width="0.5" />
+
+        <!-- Arrowhead: small, near centre of viewBox so scale() keeps it near screen centre -->
+        <polygon points="57,68 63,68 60,57" fill="#e0e0e0" stroke="#a0a0a0" stroke-width="1" />
+
+        <!-- Fletching Left — large, sweeps to bottom-left -->
+        <polygon points="56,88 14,118 58,72" fill="${p.fill}" stroke="${p.stroke}" stroke-width="1.5"/>
+
+        <!-- Fletching Right — mirrors left -->
+        <polygon points="64,88 106,118 62,72" fill="${p.fill}" stroke="${p.stroke}" stroke-width="1.5"/>
+
+        <!-- Centre ridge between fletchings -->
+        <polygon points="58,94 62,94 61,73 59,73" fill="${p.ridge}" opacity="0.9" stroke="${p.ridgeStroke}" stroke-width="0.8"/>
+
+        <!-- Nock (string notch) -->
+        <circle cx="60" cy="97" r="3.5" fill="#201005" stroke="#604020" stroke-width="1" />
+
+        <!-- Speed lines converging toward the tip -->
+        <line x1="25" y1="112" x2="52" y2="72" stroke-width="1.5" stroke="${p.speedBright}" opacity="0.4" stroke-dasharray="2 4"/>
+        <line x1="95" y1="112" x2="68" y2="72" stroke-width="1.5" stroke="${p.speedBright}" opacity="0.4" stroke-dasharray="2 4"/>
+        <line x1="5"  y1="92"  x2="44" y2="62" stroke-width="1"   stroke="${p.speedDim}" opacity="0.3" stroke-dasharray="2 6"/>
+        <line x1="115" y1="92" x2="76" y2="62" stroke-width="1"   stroke="${p.speedDim}" opacity="0.3" stroke-dasharray="2 6"/>
+      </g>
+    </svg>`;
+}
 
 const ACTION_SVG = {
 
@@ -92,49 +173,8 @@ const ACTION_SVG = {
       </g>
     </svg>`,
 
-  // Arrow in flight — viewed from behind, flying straight into the screen depth
-  // Tip is near the viewBox centre (60,57) so CSS scale() shrinks the arrow toward
-  // its own tip rather than toward the SVG midpoint, giving a straight-ahead flight path.
-  [ACTIONS.SHOOT]: `
-    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"
-         fill="none" stroke-linecap="round" stroke-linejoin="round">
-      <defs>
-        <filter id="glowShoot" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="1.5" result="blur" />
-          <feComposite in="SourceGraphic" in2="blur" operator="over" />
-        </filter>
-        <!-- Gradient: dark near end (nock/bottom), lighter far end (tip/top) -->
-        <linearGradient id="arrowShaft" x1="0%" y1="100%" x2="0%" y2="0%">
-          <stop offset="0%" stop-color="#302010" />
-          <stop offset="100%" stop-color="#906030" />
-        </linearGradient>
-      </defs>
-      <g filter="url(#glowShoot)">
-        <!-- Tapered shaft: wide at nock (near), narrow near tip (far) -->
-        <polygon points="55,96 65,96 62,66 58,66" fill="url(#arrowShaft)" stroke="#201005" stroke-width="0.5" />
-
-        <!-- Arrowhead: small, near centre of viewBox so scale() keeps it near screen centre -->
-        <polygon points="57,68 63,68 60,57" fill="#e0e0e0" stroke="#a0a0a0" stroke-width="1" />
-
-        <!-- Fletching Left — large, sweeps to bottom-left -->
-        <polygon points="56,88 14,118 58,72" fill="rgba(200,255,130,0.85)" stroke="#90d060" stroke-width="1.5"/>
-
-        <!-- Fletching Right — mirrors left -->
-        <polygon points="64,88 106,118 62,72" fill="rgba(200,255,130,0.85)" stroke="#90d060" stroke-width="1.5"/>
-
-        <!-- Centre ridge between fletchings -->
-        <polygon points="58,94 62,94 61,73 59,73" fill="#ccff90" opacity="0.9" stroke="#a0f060" stroke-width="0.8"/>
-
-        <!-- Nock (string notch) -->
-        <circle cx="60" cy="97" r="3.5" fill="#201005" stroke="#604020" stroke-width="1" />
-
-        <!-- Speed lines converging toward the tip -->
-        <line x1="25" y1="112" x2="52" y2="72" stroke-width="1.5" stroke="#d0ff80" opacity="0.4" stroke-dasharray="2 4"/>
-        <line x1="95" y1="112" x2="68" y2="72" stroke-width="1.5" stroke="#d0ff80" opacity="0.4" stroke-dasharray="2 4"/>
-        <line x1="5"  y1="92"  x2="44" y2="62" stroke-width="1"   stroke="#a0f060" opacity="0.3" stroke-dasharray="2 6"/>
-        <line x1="115" y1="92" x2="76" y2="62" stroke-width="1"   stroke="#a0f060" opacity="0.3" stroke-dasharray="2 6"/>
-      </g>
-    </svg>`,
+  // Arrow in flight — built dynamically by buildShootSvg() so the fletching can
+  // be tinted by element. See playAction / buildShootSvg below.
 
   // Bare-knuckle punch — bone-crunching fist with dynamic star burst
   [ACTIONS.PUNCH]: `
@@ -219,18 +259,21 @@ export function playAction(attackType, hand = 'left', memberIndex = 0, elementId
     return;
   }
 
-  // SHOOT and other types fall through to the original SVG overlay
+  // SHOOT and other types fall through to the SVG overlay
   const visualType = attackType;
 
   const existing = document.getElementById('action-anim');
   if (existing) existing.remove();
 
-  if (!ACTION_SVG[visualType]) return;
+  // SHOOT builds its SVG on the fly so the fletching can be tinted by element;
+  // other types use their static SVG.
+  const svg = visualType === ACTIONS.SHOOT ? buildShootSvg(elementId) : ACTION_SVG[visualType];
+  if (!svg) return;
 
   const el = document.createElement('div');
   el.id = 'action-anim';
   el.classList.add(`anim-${visualType}`);
-  el.innerHTML = ACTION_SVG[visualType];
+  el.innerHTML = svg;
 
   if (hand === 'right' && attackType === ACTIONS.SHOOT) {
     el.querySelector('svg').style.transform = 'scaleX(-1)';
