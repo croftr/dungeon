@@ -3,7 +3,7 @@
         "name": "Three Eyed Familiar",
         "slot": "relic",
         "icon": "/icons/relic/three-eyed-familiar.png",
-        "description": "A tiny chittering thing with three unblinking eyes. Whispers arcane secrets to its bearer (+1 INT) and slowly knits their wounds (regen 1 HP every 5s).",
+        "description": "A tiny chittering thing with three unblinking eyes. Whispers arcane secrets to its bearer (+1 INT) and slowly knits their wounds (regen 1 HP every 10s).",
         "value": 600,
         "weight": 0.3,
         "job": [
@@ -15,7 +15,7 @@
         },
         "hpRegen": {
             "amount": 1,
-            "interval": 5
+            "interval": 10
         }
     },
     {
@@ -27,7 +27,7 @@
         "weight": 0.4,
         "hpRegen": {
             "amount": 1,
-            "interval": 5
+            "interval": 10
         },
         "specialBonuses": [
             "Lights the way"
@@ -46,7 +46,7 @@
         ],
         "hpRegen": {
             "amount": 1,
-            "interval": 5
+            "interval": 10
         },
         "skillBonuses": {
             "bowDamage": 2
@@ -64,7 +64,7 @@
         ],
         "hpRegen": {
             "amount": 1,
-            "interval": 5
+            "interval": 10
         },
         "skillBonuses": {
             "blockChance": 10
@@ -82,7 +82,7 @@
         ],
         "hpRegen": {
             "amount": 1,
-            "interval": 5
+            "interval": 10
         },
         "skillBonuses": {
             "critChance": 0.01
@@ -103,7 +103,7 @@
         },
         "hpRegen": {
             "amount": 1,
-            "interval": 5
+            "interval": 10
         },
         "trapDisarmBonus": 0.2,
         "elementalResistances": {
@@ -127,7 +127,7 @@
         ],
         "hpRegen": {
             "amount": 1,
-            "interval": 5
+            "interval": 10
         },
         "skillBonuses": {
             "dodgeChance": 0.10
@@ -137,7 +137,7 @@
         "name": "Heartwood Charm",
         "slot": "relic",
         "icon": "/icons/relic/heartwood_charm.webp",
-        "description": "A knot of ancient living heartwood, still faintly green at its core. It slowly knits the bearer's wounds and steadies both body and mind (+1 VIT, +1 INT, regen 2 HP every 5s).",
+        "description": "A knot of ancient living heartwood, still faintly green at its core. It slowly knits the bearer's wounds and steadies both body and mind (+1 VIT, +1 INT, regen 2 HP every 10s).",
         "value": 950,
         "weight": 0.3,
         "statBonuses": {
@@ -146,7 +146,7 @@
         },
         "hpRegen": {
             "amount": 2,
-            "interval": 5
+            "interval": 10
         }
     },
     {
@@ -175,7 +175,7 @@
         "name": "Stormcore Relic",
         "slot": "relic",
         "icon": "/icons/relic/stormcore_relic.webp",
-        "description": "The humming magnetic core of an iron warden, bound in copper wire. It crackles with caged lightning, channelling that current into the bearer's strikes (+5 lightning damage to every attack) while grounding harmful currents away (lightning resistance, regen 1 HP every 5s).",
+        "description": "The humming magnetic core of an iron warden, bound in copper wire. It crackles with caged lightning, channelling that current into the bearer's strikes (+5 lightning damage to every attack) while grounding harmful currents away (lightning resistance, regen 1 HP every 10s).",
         "value": 1050,
         "weight": 0.4,
         "elementalResistances": {
@@ -186,7 +186,7 @@
         },
         "hpRegen": {
             "amount": 1,
-            "interval": 5
+            "interval": 10
         }
     }
 ]

@@ -465,9 +465,10 @@ export function updateEffectiveStats(m) {
       });
     }
     if (bonus.elementalResistances) {
+      // Same unified -100..+200 scale as the per-piece path above: additive and
+      // uncapped. (Do NOT clamp to 0.9 — that's the statusResistances scale.)
       Object.entries(bonus.elementalResistances).forEach(([elem, resistance]) => {
-        const sum = (newElementalResistances[elem] ?? 0) + resistance;
-        newElementalResistances[elem] = sum > 0.9 ? 0.9 : sum;
+        newElementalResistances[elem] = (newElementalResistances[elem] ?? 0) + resistance;
       });
     }
     if (bonus.statusResistances) {

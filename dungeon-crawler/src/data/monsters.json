@@ -1002,16 +1002,20 @@
         "chance": 0.6
       },
       {
+        "item": "Iron Ore",
+        "chance": 0.6
+      },
+      {
         "item": "Fermented Sugar",
         "chance": 0.5
       },
       {
         "item": "Giant's Club",
-        "chance": 1
+        "chance": 0.4
       },
       {
         "item": "Giant's Loin Cloth",
-        "chance": 1
+        "chance": 0.4
       },
       {
         "item": "Giant Essence",
