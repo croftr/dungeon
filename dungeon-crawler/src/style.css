@@ -8472,6 +8472,116 @@ body.game-over-active #battle-stats-btn {
     0 0 16px rgba(255, 120, 30, 0.5);
 }
 
+/* ════════════════════════════════════════════════════════════════════════
+   ICE CHEST — frosted-glacier skin for any chest using the ice-chest model.
+   Scoped to a modal containing .ice-chest-header (toggled in openChestModal
+   from userData.isIceChest), so the regular chest modal is untouched. Pure
+   styling — the transfer mechanism is unchanged. Generic: every ice chest,
+   present and future, shares this look. Mirrors the FIRE CHEST block above.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── The glacier panel: frosted frame with a cold inner shimmer ── */
+#chest-modal:has(.ice-chest-header) {
+  background:
+    radial-gradient(ellipse 75% 55% at 50% 0%, rgba(120, 210, 255, 0.40) 0%, transparent 62%),
+    radial-gradient(ellipse at 50% 122%, rgba(40, 110, 200, 0.32) 0%, transparent 58%),
+    linear-gradient(180deg, #07203a 0%, #051628 55%, #020a14 100%);
+  border: 1px solid #1f5f86;
+  border-radius: 10px;
+  box-shadow:
+    0 0 40px 4px rgba(120, 200, 255, 0.24),
+    0 24px 78px rgba(0, 0, 0, 0.96),
+    inset 0 1px 0 rgba(190, 230, 255, 0.14);
+  animation: iceChestShimmer 3.2s ease-in-out infinite;
+}
+
+/* Slow cold shimmer on the outer glow */
+@keyframes iceChestShimmer {
+  0%, 100% {
+    box-shadow:
+      0 0 38px 4px rgba(120, 200, 255, 0.22),
+      0 24px 78px rgba(0, 0, 0, 0.96),
+      inset 0 1px 0 rgba(190, 230, 255, 0.13);
+  }
+  50% {
+    box-shadow:
+      0 0 56px 8px rgba(160, 225, 255, 0.34),
+      0 24px 78px rgba(0, 0, 0, 0.96),
+      inset 0 1px 0 rgba(215, 245, 255, 0.18);
+  }
+}
+
+/* ── Top bar: frosted header ── */
+#chest-header.ice-chest-header {
+  background-image: none;
+  background: linear-gradient(180deg, rgba(34, 96, 140, 0.92) 0%, rgba(7, 26, 44, 0.96) 100%);
+  border-bottom: 1px solid #2a719c;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+/* Round frost close button */
+#chest-modal:has(.ice-chest-header) #chest-close {
+  background: linear-gradient(180deg, rgba(40, 110, 158, 0.97) 0%, rgba(8, 28, 48, 0.99) 100%);
+  border: 1px solid rgba(150, 215, 255, 0.9);
+  color: #cdeeff;
+}
+
+#chest-modal:has(.ice-chest-header) #chest-close:hover {
+  background: linear-gradient(180deg, rgba(58, 150, 206, 1) 0%, rgba(12, 40, 66, 1) 100%);
+  border-color: #d2efff;
+  color: #f0fbff;
+  box-shadow: 0 0 14px rgba(130, 205, 255, 0.7);
+}
+
+/* Sort button tinted to match */
+#chest-modal:has(.ice-chest-header) #chest-sort-btn {
+  background: linear-gradient(180deg, rgba(36, 104, 150, 0.95) 0%, rgba(8, 28, 48, 0.97) 100%);
+  border-color: rgba(140, 210, 255, 0.7);
+  color: #bfe6ff;
+}
+
+/* ── Section headers (ICE CHEST / INVENTORY) ── */
+#chest-modal:has(.ice-chest-header) #chest-body-header,
+#chest-modal:has(.ice-chest-header) #chest-party-inv-header {
+  background: linear-gradient(180deg, rgba(26, 80, 118, 0.6) 0%, rgba(4, 14, 26, 0.96) 100%);
+  border-bottom: 1px solid #1f5f86;
+}
+
+#chest-modal:has(.ice-chest-header) #chest-title,
+#chest-modal:has(.ice-chest-header) #chest-party-inv-label {
+  color: #7fd4ff;
+  text-shadow: 0 0 10px rgba(110, 195, 255, 0.6), 0 1px 2px #000;
+}
+
+#chest-modal:has(.ice-chest-header) #chest-body {
+  border-right: 1px solid #1f5f86;
+}
+
+/* ── Ice slots: frost-lit wells (left grid only) ── */
+#chest-modal:has(.ice-chest-header) .chest-slot {
+  border-color: #06203a #1f6a96 #1f6a96 #06203a;
+  background:
+    radial-gradient(circle 2px at 3px 3px, rgba(180, 230, 255, 0.7) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) 3px, rgba(180, 230, 255, 0.7) 40%, transparent 65%),
+    radial-gradient(circle 2px at 3px calc(100% - 3px), rgba(180, 230, 255, 0.7) 40%, transparent 65%),
+    radial-gradient(circle 2px at calc(100% - 3px) calc(100% - 3px), rgba(180, 230, 255, 0.7) 40%, transparent 65%),
+    radial-gradient(ellipse at 40% 30%, rgba(28, 84, 124, 0.95) 0%, rgba(4, 12, 22, 1) 84%);
+  box-shadow:
+    inset 1px 1px 0 rgba(200, 235, 255, 0.14),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.5),
+    inset 0 2px 10px rgba(0, 0, 0, 0.85);
+  color: #a7dcff;
+}
+
+#chest-modal:has(.ice-chest-header) .chest-slot:hover {
+  border-color: #1c82b5 #28a6e0 #1e8ec2 #14668a;
+  box-shadow:
+    inset 0 0 0 1px rgba(120, 200, 255, 0.32),
+    inset 0 2px 4px rgba(0, 0, 0, 0.55),
+    0 0 16px rgba(110, 195, 255, 0.5);
+}
+
 
 #chest-sent-label {
   flex: 1;

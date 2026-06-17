@@ -73,7 +73,7 @@ export function spawnLevel2Objects(ctx) {
     addChest(group, loader, 13, 14, Math.PI, 0.7, [
         "Hoarfrost Mantle",
         "Padded Vest",
-    ]);
+    ], asset('/items/containers/ice-chest.glb'));
 
     // ── Portcullises & Keys ───────────────────────────────────────────────────
     // Locked portcullis at the passage entrance (shifted from col 7, row 23 to col 17, row 23)

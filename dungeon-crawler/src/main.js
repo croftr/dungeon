@@ -3054,7 +3054,7 @@ window.addEventListener('mousemove', (e) => {
   let keyItemIcon = null;
   for (let hit of intersects) {
     const ud = hit.object.userData;
-    if (ud && (ud.isButton || ud.isChest || ud.isArmorStand || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDialogueNPC || ud.isDamageTrap || ud.isEgg || ud.isTeleportTorch || ud.isAlchemyWorkshop || ud.isAnvil || ud.isShop || ud.isDroppedItem || ud.isHeroDoor || ud.isCrystalShrine || ud.isCauldron || ud.isPortalActivatorStatue || ud.isKeyhole || ud.isPitLadder || ud.isStatue)) {
+    if (ud && (ud.isButton || ud.isChest || ud.isWeaponRack || ud.isSpellCabinet || ud.isArmorStand || ud.isCrystal || ud.isBonePile || ud.isRecruit || ud.isPartyConfirmNPC || ud.isDialogueNPC || ud.isDamageTrap || ud.isEgg || ud.isTeleportTorch || ud.isAlchemyWorkshop || ud.isAnvil || ud.isShop || ud.isDroppedItem || ud.isHeroDoor || ud.isCrystalShrine || ud.isCauldron || ud.isPortalActivatorStatue || ud.isKeyhole || ud.isPitLadder || ud.isStatue)) {
       if (hit.object.visible) {
         isHoveringInteractable = true;
         if (ud.isButton) hoveredBtn = hit.object;

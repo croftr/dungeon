@@ -1862,6 +1862,11 @@ function populateTooltip(obj, showBuyPrice = false) {
       lines.push(`<div class="detail-onhit-item" style="--onhit-color:#e8d24a"><span>Stun</span><span>guaranteed</span></div>`);
     }
 
+    // Life drain/steal rider
+    if (ws.lifeSteal) {
+      lines.push(`<div class="detail-onhit-item" style="--onhit-color:#c03040"><span>Life Drain</span><span>${Math.round(ws.lifeSteal * 100)}%</span></div>`);
+    }
+
     listEl.innerHTML = `
       <div class="detail-weaponskill-header">⚔ ${ws.name}</div>
       ${lines.join('')}

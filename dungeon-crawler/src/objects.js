@@ -2466,6 +2466,9 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
     // (see openChestModal + the .fire-chest-header styles). Generic by model, so
     // future fire chests share the look automatically.
     const isFireChest = !!(modelPath && modelPath.includes('fire-chest.glb'));
+    // Likewise, any chest using the ice-chest model gets the frosted skin
+    // (see openChestModal + the .ice-chest-header styles).
+    const isIceChest = !!(modelPath && modelPath.includes('ice-chest.glb'));
     // Type-prefixed so different container kinds at the same grid cell never
     // collide. offsetX is included when non-zero so two chests can share a
     // cell with different visual offsets (e.g. the paired chests in the L1
@@ -2519,6 +2522,7 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
                     if (isStarterStash) child.userData.isStarterStash = true;
                     if (isTreasurePile) child.userData.isTreasurePile = true;
                     if (isFireChest) child.userData.isFireChest = true;
+                    if (isIceChest) child.userData.isIceChest = true;
                     interactables.push(child);
                 }
 
@@ -5108,6 +5112,7 @@ export function openChestModal(chestObj) {
     // Swap the header banner art for treasure piles / fire chests.
     document.getElementById('chest-header').classList.toggle('treasure-pile-header', isTreasurePile);
     document.getElementById('chest-header').classList.toggle('fire-chest-header', !!chestObj.userData.isFireChest);
+    document.getElementById('chest-header').classList.toggle('ice-chest-header', !!chestObj.userData.isIceChest);
     document.getElementById('chest-sent-label').textContent = '';
     document.getElementById('chest-title').textContent = chestObj.userData.title || 'Chest';
 

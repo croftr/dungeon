@@ -225,7 +225,7 @@
             "cooldownMs": 60000,
             "guaranteedHit": true,
             "guaranteedCrit": true,
-            "lifeSteal": 1,
+            "lifeSteal": 2,
             "vfx": "dark-strike"
         }
     },
@@ -302,15 +302,16 @@
         "attackType": "swipe",
         "weaponType": "dagger",
         "staminaDrain": 1,
-        "baseDamage": 7,
+        "baseDamage": 6,
         "damageType": "fire",
         "elementalDamage": {
             "fire": 4
         },
-        "delay": 1.8,
+        "delay": 2.2,
         "statWeights": {
             "str": 0.2,
-            "dex": 0.8
+            "intelligence": 0.3,
+            "dex": 0.5
         },
         "icon": "/icons/weapons/flame_dagger.webp",
         "description": "A razor-sharp dagger forged in the heart of a volcano. It leaves a trail of embers with every strike.",
@@ -320,7 +321,6 @@
             "name": "Searing Flurry",
             "cooldownMs": 60000,
             "hits": 2,
-            "guaranteedCrit": true,
             "vfx": "fire-line",
             "elementalDamage": {
                 "fire": 12
@@ -333,15 +333,16 @@
         "attackType": "swipe",
         "weaponType": "dagger",
         "staminaDrain": 1,
-        "baseDamage": 7,
+        "baseDamage": 6,
         "damageType": "ice",
         "elementalDamage": {
             "ice": 4
         },
-        "delay": 1.8,
+        "delay": 2.2,
         "statWeights": {
             "str": 0.2,
-            "dex": 0.8
+            "intelligence": 0.3,
+            "dex": 0.5
         },
         "icon": "/icons/weapons/ice_dagger.webp",
         "description": "A shard of magically hardened ice, sharpened to a lethal edge.",
@@ -351,7 +352,6 @@
             "name": "Frostbite Flurry",
             "cooldownMs": 60000,
             "hits": 2,
-            "guaranteedCrit": true,
             "vfx": "ice-strike",
             "elementalDamage": {
                 "ice": 12
@@ -364,15 +364,16 @@
         "attackType": "swipe",
         "weaponType": "dagger",
         "staminaDrain": 1,
-        "baseDamage": 7,
+        "baseDamage": 6,
         "damageType": "lightning",
         "elementalDamage": {
             "lightning": 4
         },
-        "delay": 1.8,
+        "delay": 2.2,
         "statWeights": {
             "str": 0.2,
-            "dex": 0.8
+            "intelligence": 0.3,
+            "dex": 0.5
         },
         "icon": "/icons/weapons/lightning_dagger.webp",
         "description": "A razor-sharp dagger crackling with electricity. It leaves a trail of sparks with every strike.",
@@ -382,7 +383,6 @@
             "name": "Storm Flurry",
             "cooldownMs": 60000,
             "hits": 2,
-            "guaranteedCrit": true,
             "vfx": "lightning-strike",
             "elementalDamage": {
                 "lightning": 12
@@ -395,15 +395,16 @@
         "attackType": "swipe",
         "weaponType": "dagger",
         "staminaDrain": 1,
-        "baseDamage": 8,
+        "baseDamage": 7,
         "damageType": "water",
         "elementalDamage": {
             "water": 4
         },
-        "delay": 1.8,
+        "delay": 2.2,
         "statWeights": {
             "str": 0.2,
-            "dex": 0.8
+            "intelligence": 0.3,
+            "dex": 0.5
         },
         "icon": "/icons/weapons/water_dagger.webp",
         "description": "A blade of condensed magical water, holding a flowing, lethal edge.",
@@ -413,7 +414,6 @@
             "name": "Torrent Flurry",
             "cooldownMs": 60000,
             "hits": 2,
-            "guaranteedCrit": true,
             "vfx": "water-strike",
             "elementalDamage": {
                 "water": 12
@@ -426,15 +426,16 @@
         "attackType": "swipe",
         "weaponType": "dagger",
         "staminaDrain": 1,
-        "baseDamage": 7,
+        "baseDamage": 6,
         "damageType": "holy",
         "elementalDamage": {
             "holy": 4
         },
-        "delay": 1.8,
+        "delay": 2.2,
         "statWeights": {
             "str": 0.2,
-            "dex": 0.8
+            "intelligence": 0.3,
+            "dex": 0.5
         },
         "icon": "/icons/weapons/holy_dagger.webp",
         "description": "A razor-sharp dagger blessed with holy golden light, leaving a trail of sparks with every strike.",
@@ -444,7 +445,6 @@
             "name": "Radiant Flurry",
             "cooldownMs": 60000,
             "hits": 2,
-            "guaranteedCrit": true,
             "vfx": "holy-strike",
             "elementalDamage": {
                 "holy": 12
@@ -457,15 +457,16 @@
         "attackType": "swipe",
         "weaponType": "dagger",
         "staminaDrain": 1,
-        "baseDamage": 8,
+        "baseDamage": 7,
         "damageType": "dark",
         "elementalDamage": {
             "dark": 4
         },
-        "delay": 1.8,
+        "delay": 2.2,
         "statWeights": {
             "str": 0.2,
-            "dex": 0.8
+            "intelligence": 0.3,
+            "dex": 0.5
         },
         "icon": "/icons/weapons/dark_dagger.webp",
         "description": "A blade of dark obsidian, wreathed in a sinister, shadowy shroud.",
@@ -475,7 +476,6 @@
             "name": "Shadow Flurry",
             "cooldownMs": 60000,
             "hits": 2,
-            "guaranteedCrit": true,
             "vfx": "dark-strike",
             "elementalDamage": {
                 "dark": 12
@@ -560,14 +560,15 @@
         "attackType": "swipe",
         "weaponType": "axe",
         "staminaDrain": 1,
-        "baseDamage": 12,
+        "baseDamage": 11,
         "damageType": "fire",
         "elementalDamage": {
             "fire": 6
         },
-        "delay": 2,
+        "delay": 2.2,
         "statWeights": {
-            "str": 0.8,
+            "str": 0.5,
+            "intelligence": 0.3,
             "dex": 0.2
         },
         "icon": "/icons/weapons/flame_axe.webp",
@@ -591,14 +592,15 @@
         "attackType": "swipe",
         "weaponType": "axe",
         "staminaDrain": 1,
-        "baseDamage": 13,
+        "baseDamage": 12,
         "damageType": "ice",
         "elementalDamage": {
             "ice": 6
         },
-        "delay": 2,
+        "delay": 2.2,
         "statWeights": {
-            "str": 0.8,
+            "str": 0.5,
+            "intelligence": 0.3,
             "dex": 0.2
         },
         "icon": "/icons/weapons/ice_axe.webp",
@@ -1059,14 +1061,15 @@
         "attackType": "swipe",
         "weaponType": "twoHanded",
         "staminaDrain": 2,
-        "baseDamage": 25,
+        "baseDamage": 24,
         "damageType": "fire",
         "elementalDamage": {
             "fire": 10
         },
-        "delay": 5,
+        "delay": 5.5,
         "statWeights": {
-            "str": 0.8,
+            "str": 0.5,
+            "intelligence": 0.3,
             "dex": 0.2
         },
         "icon": "/icons/weapons/flame_greataxe.webp",
@@ -1085,14 +1088,15 @@
         "attackType": "swipe",
         "weaponType": "twoHanded",
         "staminaDrain": 2,
-        "baseDamage": 25,
+        "baseDamage": 24,
         "damageType": "ice",
         "elementalDamage": {
             "ice": 10
         },
-        "delay": 5,
+        "delay": 5.5,
         "statWeights": {
-            "str": 0.8,
+            "str": 0.5,
+            "intelligence": 0.3,
             "dex": 0.2
         },
         "icon": "/icons/weapons/ice_greataxe.webp",
@@ -1200,7 +1204,8 @@
         },
         "delay": 4,
         "statWeights": {
-            "str": 0.7,
+            "str": 0.4,
+            "intelligence": 0.3,
             "dex": 0.3
         },
         "statBonuses": {
@@ -1264,7 +1269,8 @@
         },
         "delay": 2,
         "statWeights": {
-            "str": 1,
+            "str": 0.7,
+            "intelligence": 0.3,
             "dex": 0
         },
         "statBonuses": {

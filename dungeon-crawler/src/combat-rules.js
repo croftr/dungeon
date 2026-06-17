@@ -81,6 +81,19 @@ export function getSpellCritChanceBonus(character) {
   return bonus;
 }
 
+// ── Elemental rider constants ─────────────────────────────────────────────────
+
+/**
+ * Fraction of the weapon's STAT bonus that carries into each elemental rider.
+ * The rider is `(flat + statBonus × this) × monMult`. At 1.0 the rider re-applied
+ * the full physical stat bonus a second time — the "double-dip" that made
+ * elemental weapons strictly better than plain ones. Lowering it shrinks the
+ * stat-scaled portion while leaving the weapon's flat `elementalDamage` value at
+ * full weight (so that flat number stays meaningful and sets the rider's floor).
+ * Tunable in data/combat-rules.json. Defaults to 1 for old data without the key.
+ */
+export const RIDER_STAT_BONUS_FACTOR = RULES.riderStatBonusFactor ?? 1;
+
 // ── Monster attack damage constants ──────────────────────────────────────────
 
 /** Flat bonus added to a monster's STR when calculating attack damage. */
@@ -383,7 +396,7 @@ export function getElementalRiderBreakdown(character, monster, weaponDef, ammoDe
     const monMult = getMonsterElementMultiplier(monster, element);
     if (monMult === 0) continue; // immune — no damage, no heal
     const stanceMult = getStanceElementMultiplier(character, element);
-    const rider = Math.round((flat + statBonus) * monMult * stanceMult);
+    const rider = Math.round((flat + statBonus * RIDER_STAT_BONUS_FACTOR) * monMult * stanceMult);
     if (rider < 0) {
       // Monster absorbs this element (resistance > 100) → it heals instead.
       const h = -rider;
