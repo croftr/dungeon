@@ -6,7 +6,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { asset } from '../../assets.js';
-import { CELL, FLAME_ZONE_LEVEL, ICE_ZONE_LEVEL } from '../../map.js';
+import { FLAME_ZONE_LEVEL, ICE_ZONE_LEVEL } from '../../map.js';
 import { addSwirlPortal } from '../swirl-portal.js';
 import { FLAME_ZONE_ARRIVAL } from '../flame-zone/map.js';
 import { ICE_ZONE_ARRIVAL } from '../ice-zone/map.js';
@@ -16,7 +16,7 @@ export function spawnLevel3Objects(ctx) {
         group, loader,
         addChest, addTreasurePile, addWeaponRack, addSpellCabinet, addPortalActivatorStatue,
         addPortal, addTrap1, addDroppedTorch, addInteractiveCauldron,
-        createWallButton, level3FlameAlcoveOpened, level3IceAlcoveOpened, interactables,
+        interactables,
     } = ctx;
 
     // ── Portals ───────────────────────────────────────────────────────────────
@@ -104,38 +104,16 @@ export function spawnLevel3Objects(ctx) {
     // Guards the entry corridor to the central minotaur room
     addTrap1(group, loader, 22, 10);
 
-    // ── Hidden flame alcove (bottom corridor) ──────────────────────────────────
-    // The east tip of the bottom corridor at (25,20) is sealed as a normal-looking
-    // wall (level3Map). A button on its west face lets the player at (25,19) facing
-    // east sink the wall (same animation + sound as the cauldron demon-walls),
-    // revealing a 1-cell alcove with flame-wall faces. Skip the button once opened
-    // so it doesn't respawn floating in the open passage after a save/reload.
-    if (!level3FlameAlcoveOpened) {
-        const { group: flameAlcoveBtn, btn: flameAlcoveHit } = createWallButton(-1, { target: 'flame_alcove' });
-        flameAlcoveBtn.position.set(20 * CELL - 1.0, 1.25, 25 * CELL);
-        flameAlcoveHit.userData.buttonGroup = flameAlcoveBtn;
-        group.add(flameAlcoveBtn);
-    } else {
-        // Alcove already opened in a prior visit / save — the wall is gone, so
-        // spawn the blue swirl portal that warps the party to the Flame Zone.
-        // (When it's opened live by the button press, objects.js spawns this.)
-        addSwirlPortal(group, interactables, 20, 25, FLAME_ZONE_LEVEL,
-            FLAME_ZONE_ARRIVAL.row, FLAME_ZONE_ARRIVAL.col, FLAME_ZONE_ARRIVAL.facing, { variant: 'red' });
-    }
+    // ── Flame alcove (bottom corridor) ─────────────────────────────────────────
+    // The east tip of the bottom corridor at (25,20) is an open 1-cell alcove with
+    // flame-wall faces (painted in applyLevel3Textures). Its blue swirl portal
+    // warps the party to the Flame Zone.
+    addSwirlPortal(group, interactables, 20, 25, FLAME_ZONE_LEVEL,
+        FLAME_ZONE_ARRIVAL.row, FLAME_ZONE_ARRIVAL.col, FLAME_ZONE_ARRIVAL.facing, { variant: 'red' });
 
-    // ── Hidden ice alcove (east corridor) ──────────────────────────────────────
-    // (19,19) is sealed (already a wall in level3Map). A button on its west face
-    // lets the player at (19,18) facing east sink the wall, revealing a 1-cell
-    // alcove with ice-wall faces + a white swirl portal to the Ice Zone. Quite
-    // close to the flame alcove. Skip the button once opened.
-    if (!level3IceAlcoveOpened) {
-        const { group: iceAlcoveBtn, btn: iceAlcoveHit } = createWallButton(-1, { target: 'ice_alcove' });
-        iceAlcoveBtn.position.set(19 * CELL - 1.0, 1.25, 19 * CELL);
-        iceAlcoveHit.userData.buttonGroup = iceAlcoveBtn;
-        group.add(iceAlcoveBtn);
-    } else {
-        // Alcove already opened — spawn the white swirl portal to the Ice Zone.
-        addSwirlPortal(group, interactables, 19, 19, ICE_ZONE_LEVEL,
-            ICE_ZONE_ARRIVAL.row, ICE_ZONE_ARRIVAL.col, ICE_ZONE_ARRIVAL.facing, { variant: 'ice' });
-    }
+    // ── Ice alcove (east corridor) ─────────────────────────────────────────────
+    // (19,19) is an open 1-cell alcove with ice-wall faces + a white swirl portal
+    // to the Ice Zone. Quite close to the flame alcove.
+    addSwirlPortal(group, interactables, 19, 19, ICE_ZONE_LEVEL,
+        ICE_ZONE_ARRIVAL.row, ICE_ZONE_ARRIVAL.col, ICE_ZONE_ARRIVAL.facing, { variant: 'ice' });
 }

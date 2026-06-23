@@ -1263,7 +1263,7 @@ export function setEquip(index, hand, itemName) {
   refreshMember(m);
 }
 
-export function resurrectAll() {
+export function resurrectAll(closeReviewModals = true) {
   party.forEach((m) => {
     if (m.isEmpty) return;
     m.hp = m.hpMax;
@@ -1280,8 +1280,13 @@ export function resurrectAll() {
   const el = document.getElementById('game-over');
   if (el) el.classList.remove('active');
   document.body.classList.remove('game-over-active');
-  closeBattleLogReview();
-  closeBattleStats();
+  // The crystal shrine heals mid-exploration and should leave any open review
+  // panels (battle stats / battle log) untouched. Only the game-over recovery
+  // path wants these dismissed.
+  if (closeReviewModals) {
+    closeBattleLogReview();
+    closeBattleStats();
+  }
 }
 
 let mpRegenTimers = {};    // out-of-combat MP regen: per-member accumulators

@@ -2400,17 +2400,14 @@ function applyLevel3Textures(scene) {
   // corner walls with the swamp room's wet-wall zone).
   buildInnerTextureZone(scene, alcoveFloors, asset('/textures/swamp-demon-wall.webp'));
 
-  // Hidden flame alcove at (25,20), east tip of the bottom corridor. Its 3 inner
-  // faces (north/south/east) carry the flame-wall texture, plus a flame ceiling.
-  // Painted unconditionally: while the cell is sealed (a wall until the button is
-  // pressed) these sit inside the solid wall box and are invisible; once the wall
-  // sinks they show.
+  // Flame alcove at (25,20), east tip of the bottom corridor. Its 3 inner faces
+  // (north/south/east) carry the flame-wall texture, plus a flame ceiling. The
+  // alcove stands open (no fronting wall) with a swirl portal to the Flame Zone.
   buildInnerTextureZone(scene, [[25, 20]], asset('/textures/flame-wall.webp'));
   buildCeilingZone(scene, [[25, 20]], asset('/textures/flame-ceiling.webp'));
 
-  // Hidden ice alcove at (19,19), east corridor. Same trick: ice-wall faces +
-  // ice ceiling, painted unconditionally (hidden inside the sealed wall box until
-  // the button sinks it).
+  // Ice alcove at (19,19), east corridor. Same treatment: ice-wall faces + ice
+  // ceiling, an open alcove with a swirl portal to the Ice Zone.
   buildInnerTextureZone(scene, [[19, 19]], asset('/textures/ice-wall.webp'));
   buildCeilingZone(scene, [[19, 19]], asset('/textures/ice-ceiling.webp'));
 

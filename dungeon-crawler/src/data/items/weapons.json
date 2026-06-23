@@ -265,6 +265,9 @@
             "str": 0.2,
             "dex": 0.8
         },
+        "elementalDamage": {
+            "ice": 1
+        },
         "elementalResistances": {
             "holy": 10,
             "dark": 10,

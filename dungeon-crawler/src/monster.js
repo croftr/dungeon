@@ -3,7 +3,7 @@ import { createBlobShadow } from './blob-shadow.js';
 import { Tween, Easing } from '@tweenjs/tween.js';
 import { tweenGroup, player } from './player.js';
 import { createHitSpark, createIceBurst, createNatureBurst, createOgreSlam, createMinotaurRage, createTreemanAwakening, createDemonCleave, createTidalWave, createLizardVenomSpit, createPoisonCloud, createIceCloud, createCrocodileSparkle, createHellSpawn, createBloodSplatter, createGreenBloodSplatter, createCrowWizardFireAoe, createCrowWizardCure, createCrowWizardFear, createElementalBurst, createFlameSpawnFireball } from './particles.js';
-import { ELEMENTS, getMonsterElementMultiplier, resolveElementalAmount } from './elements.js';
+import { ELEMENTS, getMonsterElementMultiplier, resolveElementalAmount, toResistanceValue } from './elements.js';
 import MONSTER_FAMILIES from './data/monster-families.json';
 import { CELL, isPassable, elementFloorCellId, spawnElementFloorAt } from './map.js';
 import { gltfLoader as _gltfLoader } from './gltf-loader.js';
@@ -173,20 +173,27 @@ function _renderHuntersEyeHud(m) {
   html += `<span class="hep-hud-stat">RES <b>${displayRes}</b></span>`;
   html += `</div>`;
 
-  // Elemental resistances
-  const RESIST_CONF = {
-    immune:     { label: 'IMMUNE',     color: '#9060ff' },
-    resist:     { label: 'RESIST',     color: '#60b0ff' },
-    weak:       { label: 'WEAK',       color: '#ffb040' },
-    vulnerable: { label: 'VULNERABLE', color: '#ff5050' },
+  // Elemental resistances.
+  // Values are integers on the unified -100..+200 scale (see elements.js); legacy
+  // category strings are coerced via toResistanceValue. Map the number to a badge.
+  const resistBadge = (r) => {
+    if (r >= 150) return { label: 'ABSORB',     color: '#60ff90' };
+    if (r >= 100) return { label: 'IMMUNE',     color: '#9060ff' };
+    if (r > 0)    return { label: 'RESIST',     color: '#60b0ff' };
+    if (r <= -100) return { label: 'VULNERABLE', color: '#ff5050' };
+    if (r < 0)    return { label: 'WEAK',       color: '#ffb040' };
+    return null; // neutral — skip
   };
-  const resistEntries = Object.entries(allResistances);
+  // Skip neutral (0) entries so the panel only lists meaningful resistances.
+  const resistEntries = Object.entries(allResistances)
+    .map(([elemId, v]) => [elemId, toResistanceValue(v)])
+    .filter(([, r]) => resistBadge(r) !== null);
   if (resistEntries.length) {
     html += `<div class="hep-hud-divider"></div>`;
     html += `<div class="hep-hud-section-label">Elemental</div>`;
-    for (const [elemId, category] of resistEntries) {
+    for (const [elemId, r] of resistEntries) {
       const elemDef = ELEMENTS[elemId];
-      const conf = RESIST_CONF[category] ?? { label: category.toUpperCase(), color: '#ddd0a0' };
+      const conf = resistBadge(r);
       const symbol = elemDef?.symbol ?? '';
       const elemName = elemDef?.name ?? elemId;
       const elemColor = elemDef?.color ?? '#ddd0a0';
