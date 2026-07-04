@@ -59,14 +59,13 @@ export function spawnLevel2Objects(ctx) {
     // ── Chests ────────────────────────────────────────────────────────────────
     // Chest behind the Warden gate (col 3, row 4)
     addChest(group, loader, 3, 4, Math.PI / 2, 0.7, [
-        "Schematic Key",
-        "Trapper's Manual"
+        "Trapper's Manual",
+        "Three Eyed Familiar",
     ], asset('/items/containers/dark-red-chest.glb'));
 
     // Shifted from col 9, row 13 to col 19, row 13
     addChest(group, loader, 19, 13, Math.PI, 0.7, [
-        'Life Orb',
-        "Three Eyed Familiar",
+        'Life Orb'
     ]);
 
     // Ice gauntlet reward chest (shifted from col 3, row 14 to col 13, row 14)
@@ -149,8 +148,7 @@ export function spawnLevel2Objects(ctx) {
     // col 37), facing west into the room. offsetX +0.5 pushes it east, flush to
     // the wall; scale 0.4 matches the other level-2 magic chest.
     addChest(group, loader, 36, 12, -Math.PI / 2, 0, [
-        "Testament of Faith",
-        "Schematic Key"
+        "Testament of Faith"
     ], asset('/items/containers/magic-chest.glb'), true, 0.5, 'Chest', 0.4);
 
     // Weapon rack against the same east wall, one cell north of the chest
@@ -190,11 +188,7 @@ export function spawnLevel2Objects(ctx) {
     addInteractiveCauldron(group, loader, 4, 18, 0, 0.5, 0.1, 0, 0, 18, 4);
 
     // Empty chest in the hidden chest room (rows 8-10, cols 2-4) revealed behind
-    // the cauldron passage — TODO: add loot. offsetZ -0.5 sits it against the north
-    // back wall while staying in front of it (the wall face is at -1.0); rotY 0
-    // faces it into the room.
-    // Magic chest shifted west (offsetX -0.5) to make room for a treasure pile
-    // alongside it against the north wall.
+    // the cauldron passage 
     addChest(group, loader, 3, 8, 0, -0.5, [
         "Schematic Key"
     ], asset('/items/containers/magic-chest.glb'), true, -0.5, 'Chest', 0.4);

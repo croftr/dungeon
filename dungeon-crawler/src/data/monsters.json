@@ -877,7 +877,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.4
+        "chance": 0.5
       },
       {
         "item": "Poison Vial",
@@ -934,7 +934,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.5
+        "chance": 0.6
       },
       {
         "item": "Poison Vial",
@@ -1288,6 +1288,10 @@
         "chance": 1
       },
       {
+        "item": "Life Essence",
+        "chance": 1
+      },
+      {
         "item": "Mana Berry",
         "chance": 0.3
       },
@@ -1419,7 +1423,7 @@
     "drops": [
       {
         "item": "Life Essence",
-        "chance": 0.1
+        "chance": 0.5
       },
       {
         "item": "Iron Pendant",

@@ -1863,7 +1863,22 @@ function populateTooltip(obj, showBuyPrice = false) {
       lines.push(`<div class="detail-onhit-item" style="--onhit-color:#e8d24a"><span>Stun</span><span>guaranteed</span></div>`);
     }
 
+    // Guaranteed affliction riders (e.g. Wyrmvenom Strike's amplified poison)
+    for (const inf of (ws.inflict ?? [])) {
+      const effDef = STATUS_EFFECT_DEFS[inf.effectId];
+      const color = effDef?.color ?? '#80ff80';
+      const baseTick = effDef?.tickDamage ?? 0;
+      const totalTick = baseTick + (inf.tickDamageBonus ?? 0);
+      const detail = (effDef?.tickInterval && totalTick)
+        ? `${totalTick}/${effDef.tickInterval}s`
+        : 'guaranteed';
+      lines.push(`<div class="detail-onhit-item" style="--onhit-color:${color}"><span>${effDef?.name ?? inf.effectId}</span><span>${detail}</span></div>`);
+    }
+
     // Life drain/steal rider
+    if (ws.lifeStealMaxHpPct) {
+      lines.push(`<div class="detail-onhit-item" style="--onhit-color:#c03040"><span>Life Drain</span><span>${Math.round(ws.lifeStealMaxHpPct * 100)}% max HP</span></div>`);
+    }
     if (ws.lifeSteal) {
       lines.push(`<div class="detail-onhit-item" style="--onhit-color:#c03040"><span>Life Drain</span><span>${Math.round(ws.lifeSteal * 100)}%</span></div>`);
     }
@@ -5597,6 +5612,8 @@ export function useWeaponSkill(memberIndex, hand) {
       guaranteedCrit: ws.guaranteedCrit ?? def.guaranteedCrit ?? false,
       guaranteedHit: ws.guaranteedHit ?? def.guaranteedHit ?? false,
       lifeSteal: ws.lifeSteal ?? 0,
+      lifeStealMaxHpPct: ws.lifeStealMaxHpPct ?? 0,
+      inflict: ws.inflict ?? null,
       isWeaponSkill: true,
     };
   }

@@ -225,7 +225,7 @@
             "cooldownMs": 60000,
             "guaranteedHit": true,
             "guaranteedCrit": true,
-            "lifeSteal": 2,
+            "lifeStealMaxHpPct": 0.3,
             "vfx": "dark-strike"
         }
     },
@@ -251,7 +251,17 @@
         "icon": "/icons/weapons/poison-dagger.webp",
         "description": "A short, double-edged blade coated in poison.",
         "value": 60,
-        "weight": 0.4
+        "weight": 0.4,
+        "weaponSkill": {
+            "name": "Wyrmvenom Strike",
+            "cooldownMs": 60000,
+            "guaranteedHit": true,
+            "guaranteedCrit": true,
+            "vfx": "dark-strike",
+            "inflict": [
+                { "effectId": "deadly_poison", "tickDamageBonus": 4 }
+            ]
+        }
     },
     {
         "name": "Aegis Shard",

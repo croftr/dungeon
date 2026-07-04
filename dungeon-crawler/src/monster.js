@@ -3896,6 +3896,23 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
       }
     });
 
+    // Weapon-skill guaranteed afflictions (e.g. Poison Dagger's "Wyrmvenom
+    // Strike"): force-apply each listed status at 100% chance, ignoring the
+    // target's resilience, with an optional tickDamageBonus that amplifies
+    // DoT ticks. Set via weaponDef.inflict in useWeaponSkill. Re-casting
+    // refreshes the effect and keeps the strongest stack.
+    (weaponDef?.inflict ?? []).forEach(effect => {
+      const isPoisonTick = effect.effectId === 'poison' || effect.effectId === 'deadly_poison';
+      const stanceBonus = isPoisonTick ? getPoisonTickBonus(character, weaponDef) : 0;
+      const tickBonus = (effect.tickDamageBonus ?? 0) + stanceBonus;
+      applyMonsterStatusEffect(monsterId, effect.effectId, character.name, null, tickBonus);
+      if (effect.effectId !== 'lifesteal') {
+        const def = STATUS_EFFECT_DEFS[effect.effectId];
+        showMessage(`${m.name} is afflicted with <b>${def?.name ?? effect.effectId}</b>!`);
+      }
+      appliedEffects.push(effect.effectId);
+    });
+
     // Lifesteal on-hit effects
     const lifestealEffects = [
       ...(weaponDef?.onHitEffects ?? []),
@@ -3916,15 +3933,23 @@ export function attackMonster(monsterId, character, weaponDef, attackType, ammoD
   }
 
   // Weapon-skill life drain (e.g. Vampiric Dagger's "Crimson Drain"): restore HP
-  // to the wielder equal to a share of the damage this swing dealt. Driven by
-  // weaponDef.lifeSteal (fraction of final damage) set in useWeaponSkill. Works
-  // even on a killing blow — the blade drinks the slain foe's life.
-  if (result.hit && weaponDef?.lifeSteal > 0 && (result.damage ?? 0) > 0) {
+  // to the wielder on a successful swing. Two flavours, both set in useWeaponSkill:
+  //   • weaponDef.lifeStealMaxHpPct — heal a fraction of the WIELDER's max HP.
+  //     Independent of damage dealt, so it stays impactful against tanky bosses.
+  //   • weaponDef.lifeSteal — legacy heal scaled off this swing's final damage.
+  // Either works even on a killing blow — the blade drinks the slain foe's life.
+  if (result.hit && (weaponDef?.lifeStealMaxHpPct > 0 || weaponDef?.lifeSteal > 0)) {
     const pIndex = party.findIndex(p => p.name === character.name);
     if (pIndex !== -1) {
       const p = party[pIndex];
       if (p && !p.isDead && p.hp < p.hpMax) {
-        const heal = Math.round(result.damage * weaponDef.lifeSteal);
+        let heal = 0;
+        if (weaponDef.lifeStealMaxHpPct > 0) {
+          heal += Math.round(p.hpMax * weaponDef.lifeStealMaxHpPct);
+        }
+        if (weaponDef.lifeSteal > 0 && (result.damage ?? 0) > 0) {
+          heal += Math.round(result.damage * weaponDef.lifeSteal);
+        }
         if (heal > 0) {
           setHp(pIndex, p.hp + heal);
           showMemberHeal(pIndex, heal);
