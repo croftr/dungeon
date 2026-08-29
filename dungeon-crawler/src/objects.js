@@ -723,7 +723,7 @@ function showMistConfirm(obj) {
                 <div style="
                     width: 100%;
                     height: 280px;
-                    background: url('/images/crow_mist_bg.webp') no-repeat center center;
+                    background: url('${asset('/images/crow_mist_bg.webp')}') no-repeat center center;
                     background-size: cover;
                     border-bottom: 2px solid #3a2e18;
                     box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8);">

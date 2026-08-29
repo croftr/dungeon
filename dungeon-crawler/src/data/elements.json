@@ -2,7 +2,6 @@
     "holy": {
         "id": "holy",
         "name": "Holy",
-        "icon": "/icons/element/holy.webp",
         "color": "#f5d96a",
         "symbol": "☀",
         "sound": "/sounds/actions/skills/holy.mp3"
@@ -10,7 +9,6 @@
     "dark": {
         "id": "dark",
         "name": "Dark",
-        "icon": "/icons/element/dark.webp",
         "color": "#a86bd6",
         "symbol": "☀",
         "sound": "/sounds/elements/dark.mp3"
@@ -18,7 +16,6 @@
     "fire": {
         "id": "fire",
         "name": "Fire",
-        "icon": "/icons/element/fire.webp",
         "color": "#e84a1f",
         "symbol": "🔥",
         "sound": "/sounds/elements/fireball.mp3"
@@ -26,7 +23,6 @@
     "ice": {
         "id": "ice",
         "name": "Ice",
-        "icon": "/icons/element/ice.webp",
         "color": "#5ec4e8",
         "symbol": "❄",
         "sound": "/sounds/elements/ice-attack.mp3"
@@ -34,7 +30,6 @@
     "lightning": {
         "id": "lightning",
         "name": "Lightning",
-        "icon": "/icons/element/lightning.webp",
         "color": "#e0d04a",
         "symbol": "⚡",
         "sound": "/sounds/elements/lightening.mp3"
@@ -42,7 +37,6 @@
     "water": {
         "id": "water",
         "name": "Water",
-        "icon": "/icons/element/water.webp",
         "color": "#2563eb",
         "symbol": "💧",
         "sound": "/sounds/elements/water.mp3"

@@ -197,7 +197,7 @@ function _renderHuntersEyeHud(m) {
       const symbol = elemDef?.symbol ?? '';
       const elemName = elemDef?.name ?? elemId;
       const elemColor = elemDef?.color ?? '#ddd0a0';
-      const iconHtml = elemDef?.icon ? `<img src="${elemDef.icon}" class="hep-hud-elem-icon" alt="">` : '';
+      const iconHtml = elemDef?.icon ? `<img src="${asset(elemDef.icon)}" class="hep-hud-elem-icon" alt="">` : '';
       html += `<div class="hep-hud-resist-row">`;
       html += `<span style="color:${elemColor}">${iconHtml}${symbol} ${elemName}</span>`;
       html += `<span class="hep-hud-resist-badge" style="color:${conf.color}">${conf.label}</span>`;
@@ -239,7 +239,7 @@ function _renderHuntersEyeHud(m) {
       const symbol = elemDef?.symbol ?? '';
       const elemName = elemDef?.name ?? elemId;
       const elemColor = elemDef?.color ?? '#ddd0a0';
-      const iconHtml = elemDef?.icon ? `<img src="${elemDef.icon}" class="hep-hud-elem-icon" alt="">` : '';
+      const iconHtml = elemDef?.icon ? `<img src="${asset(elemDef.icon)}" class="hep-hud-elem-icon" alt="">` : '';
       html += `<div class="hep-hud-row"><span style="color:${elemColor}">${iconHtml}${symbol} ${elemName}</span><span class="hep-hud-val">+${bonus}</span></div>`;
     }
   }
@@ -261,7 +261,7 @@ function _renderHuntersEyeHud(m) {
       if (sa.damageType) {
         const elemDef = ELEMENTS[sa.damageType];
         const elemColor = elemDef?.color ?? '#ddd0a0';
-        const iconHtml = elemDef?.icon ? `<img src="${elemDef.icon}" class="hep-hud-elem-icon" alt="">` : '';
+        const iconHtml = elemDef?.icon ? `<img src="${asset(elemDef.icon)}" class="hep-hud-elem-icon" alt="">` : '';
         const sym = elemDef?.symbol ?? '';
         const eName = elemDef?.name ?? sa.damageType;
         elemTagHtml = ` <span style="color:${elemColor};font-size:9px">${iconHtml}${sym} ${eName}</span>`;

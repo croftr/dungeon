@@ -1,3 +1,5 @@
+import { asset } from './assets.js';
+
 // Keys of help dialogs the player has already seen. Save-relevant: a loaded
 // game should not re-show help the player has already dismissed.
 const _seenKeys = new Set();
@@ -53,7 +55,7 @@ export function showHelpDialog({ text = '', image = null, onDismiss = null } = {
   const imgEl = document.getElementById('help-dialog-image');
 
   if (image) {
-    imgEl.src = image;
+    imgEl.src = asset(image);
     imgWrapper.style.display = 'block';
   } else {
     imgWrapper.style.display = 'none';
