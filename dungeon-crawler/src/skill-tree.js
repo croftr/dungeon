@@ -279,8 +279,8 @@ export function renderSkillTree(m, container, onNodeClick) {
       // Fallback: auto-derive stat icon from benefit keys
       const stats = Object.keys(node.benefit);
       const iconPath = stats.length > 1
-        ? '/skills/stats-increase/mixed_stat_increase.webp'
-        : `/skills/stats-increase/${stats[0]}_increase.webp`;
+        ? '/skills/mixed-stat-increase.webp'
+        : `/skills/${stats[0]}-increase.webp`;
       const img = document.createElement('img');
       img.src = asset(iconPath);
       icon.appendChild(img);

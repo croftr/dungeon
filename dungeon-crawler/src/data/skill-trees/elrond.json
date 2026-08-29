@@ -15,7 +15,7 @@
       "benefit": {
         "dexterity": 2
       },
-      "icon": "/skills/stats-increase/dexterity_increase.webp",
+      "icon": "/skills/dexterity-increase.webp",
       "edges": [
         "n3",
         "n27",
@@ -46,7 +46,7 @@
         "dexterity": 1,
         "resilience": 1
       },
-      "icon": "/skills/stats-increase/mixed_stat_increase.webp",
+      "icon": "/skills/mixed-stat-increase.webp",
       "edges": [
         "n8",
         "n9"
@@ -74,7 +74,7 @@
         "strength": 1,
         "vitality": 1
       },
-      "icon": "/skills/stats-increase/mixed_stat_increase.webp",
+      "icon": "/skills/mixed-stat-increase.webp",
       "edges": [
         "n9",
         "n10"
@@ -88,7 +88,7 @@
         "dexterity": 1,
         "vitality": 1
       },
-      "icon": "/skills/stats-increase/mixed_stat_increase.webp",
+      "icon": "/skills/mixed-stat-increase.webp",
       "edges": [
         "n12"
       ]
@@ -100,7 +100,7 @@
       "benefit": {
         "dexterity": 2
       },
-      "icon": "/skills/stats-increase/dexterity_increase.webp",
+      "icon": "/skills/dexterity-increase.webp",
       "edges": [
         "n12"
       ]
@@ -135,7 +135,7 @@
         "dexterity": 1,
         "vitality": 1
       },
-      "icon": "/skills/stats-increase/mixed_stat_increase.webp",
+      "icon": "/skills/mixed-stat-increase.webp",
       "edges": [
         "n14"
       ]
@@ -148,7 +148,7 @@
         "vitality": 1,
         "resilience": 1
       },
-      "icon": "/skills/stats-increase/mixed_stat_increase.webp",
+      "icon": "/skills/mixed-stat-increase.webp",
       "edges": [
         "n17"
       ]
@@ -160,7 +160,7 @@
       "benefit": {
         "dexterity": 2
       },
-      "icon": "/skills/stats-increase/dexterity_increase.webp",
+      "icon": "/skills/dexterity-increase.webp",
       "edges": []
     },
     {
