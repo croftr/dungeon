@@ -46,11 +46,11 @@ export function spawnIceZoneObjects(ctx) {
     // West corner — daggers & staves.
     addChest(group, loader, 5, 1, 0, -0.7, [
         "Ice Dagger", "Ice Staff", "Ancient Bog Core"
-    ], CHEST, true, 0, 'Chest');
+    ], CHEST, true, 0, 'Ice Chest');
     // East corner — axes.
     addChest(group, loader, 9, 1, 0, -0.7, [
         "Ice Axe", "Ice Greataxe"
-    ], CHEST, true, 0, 'Chest');
+    ], CHEST, true, 0, 'Ice Chest');
 
     // ── Torches (light + show off the ice textures) ───────────────────────────
     addDroppedTorch(group, loader, 5, 12, 0);  // entry chamber, west

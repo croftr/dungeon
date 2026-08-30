@@ -2401,6 +2401,10 @@ export function addChest(scene, loader, col, row, rotY, offsetZ = 0, contents = 
     // Likewise, any chest using the ice-chest model gets the frosted skin
     // (see openChestModal + the .ice-chest-header styles).
     const isIceChest = !!(modelPath && modelPath.includes('ice-chest.glb'));
+    if (title === 'Chest') {
+        if (isIceChest) title = 'Ice Chest';
+        else if (isFireChest) title = 'Fire Chest';
+    }
     // Type-prefixed so different container kinds at the same grid cell never
     // collide. offsetX is included when non-zero so two chests can share a
     // cell with different visual offsets (e.g. the paired chests in the L1
@@ -5044,7 +5048,12 @@ export function openChestModal(chestObj) {
     document.getElementById('chest-header').classList.toggle('fire-chest-header', !!chestObj.userData.isFireChest);
     document.getElementById('chest-header').classList.toggle('ice-chest-header', !!chestObj.userData.isIceChest);
     document.getElementById('chest-sent-label').textContent = '';
-    document.getElementById('chest-title').textContent = chestObj.userData.title || 'Chest';
+    let chestTitle = chestObj.userData.title || 'Chest';
+    if (chestTitle === 'Chest') {
+        if (chestObj.userData.isIceChest) chestTitle = 'Ice Chest';
+        else if (chestObj.userData.isFireChest) chestTitle = 'Fire Chest';
+    }
+    document.getElementById('chest-title').textContent = chestTitle;
 
     document.getElementById('chest-body').scrollTop = 0;
 

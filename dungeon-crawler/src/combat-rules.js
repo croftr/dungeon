@@ -5,6 +5,7 @@
 
 import RULES from './data/combat-rules.json';
 import SKILLS_DATA from './data/skills.json';
+import { getItemDef } from './items.js';
 import { getHqWeaponDamageBonus } from './crafting.js';
 import { getMonsterHitChanceReduction, getStanceDamageMultiplier, getMagicDamageMultiplier, getStanceCureHealBonus, getStanceRegenBonus, getStanceElementMultiplier } from './stance.js';
 import { getMonsterElementMultiplier, getMonsterAttackTypeMultiplier } from './elements.js';
@@ -379,8 +380,18 @@ export function getElementalRiderBreakdown(character, monster, weaponDef, ammoDe
   const flatByElement = {};
   // Relic-granted elemental damage (e.g. Stormcore Relic) rides on every attack,
   // stacking on top of any elemental damage the weapon/ammo already deal.
-  const relicDef = character?.equipment?.relic;
-  const maps = [weaponDef?.elementalDamage, ammoDef?.elementalDamage, relicDef?.elementalDamage];
+  // Resolve item definitions from equipped items (relics, accessories).
+  const maps = [weaponDef?.elementalDamage, ammoDef?.elementalDamage];
+  if (character?.equipment) {
+    for (const [slot, item] of Object.entries(character.equipment)) {
+      if (!item) continue;
+      if (slot === 'ammo' || slot === 'leftHand' || slot === 'rightHand' || slot === 'skill' || slot === 'spell') continue;
+      const def = item.elementalDamage ? item : getItemDef(item.name);
+      if (def?.elementalDamage) {
+        maps.push(def.elementalDamage);
+      }
+    }
+  }
   for (const map of maps) {
     if (!map) continue;
     for (const [key, value] of Object.entries(map)) {

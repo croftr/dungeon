@@ -8448,8 +8448,9 @@ body.game-over-active #battle-stats-btn {
   border-right: 1px solid #6e2a10;
 }
 
-/* ── Fire slots: ember-lit wells (left grid only) ── */
-#chest-modal:has(.fire-chest-header) .chest-slot {
+/* ── Fire slots: ember-lit wells (both chest and party inventory grids) ── */
+#chest-modal:has(.fire-chest-header) .chest-slot,
+#chest-modal:has(.fire-chest-header) .chest-inv-slot {
   border-color: #2a0d05 #6a2c12 #6a2c12 #2a0d05;
   background:
     radial-gradient(circle 2px at 3px 3px, rgba(255, 150, 60, 0.7) 40%, transparent 65%),
@@ -8464,12 +8465,40 @@ body.game-over-active #battle-stats-btn {
   color: #ffb070;
 }
 
-#chest-modal:has(.fire-chest-header) .chest-slot:hover {
+#chest-modal:has(.fire-chest-header) .chest-slot:hover,
+#chest-modal:has(.fire-chest-header) .chest-inv-slot.occupied:hover {
   border-color: #b5481c #e07628 #c25e1e #8a3414;
   box-shadow:
     inset 0 0 0 1px rgba(255, 150, 50, 0.32),
     inset 0 2px 4px rgba(0, 0, 0, 0.55),
     0 0 16px rgba(255, 120, 30, 0.5);
+  transform: translateY(-2px);
+}
+
+#chest-modal:has(.fire-chest-header) .chest-slot.occupied,
+#chest-modal:has(.fire-chest-header) .chest-inv-slot.occupied {
+  border-color: #9c3c12;
+  color: #ffd9a0;
+}
+
+#chest-modal:has(.fire-chest-header) .chest-party-tab {
+  border-color: #6e2a10;
+  background: rgba(16, 7, 4, 0.6);
+}
+
+#chest-modal:has(.fire-chest-header) .chest-party-tab:hover {
+  border-color: #ff9a3a;
+  background: rgba(90, 32, 12, 0.7);
+}
+
+#chest-modal:has(.fire-chest-header) .chest-party-tab.active {
+  border-color: #ff9a3a;
+  background: rgba(120, 44, 16, 0.5);
+  box-shadow: 0 0 12px rgba(255, 110, 28, 0.4), inset 0 0 8px rgba(255, 110, 28, 0.2);
+}
+
+#chest-modal:has(.fire-chest-header) #chest-sent-label {
+  color: #ff9a3a;
 }
 
 /* ════════════════════════════════════════════════════════════════════════
@@ -8558,8 +8587,9 @@ body.game-over-active #battle-stats-btn {
   border-right: 1px solid #1f5f86;
 }
 
-/* ── Ice slots: frost-lit wells (left grid only) ── */
-#chest-modal:has(.ice-chest-header) .chest-slot {
+/* ── Ice slots: frost-lit wells (both chest and party inventory grids) ── */
+#chest-modal:has(.ice-chest-header) .chest-slot,
+#chest-modal:has(.ice-chest-header) .chest-inv-slot {
   border-color: #06203a #1f6a96 #1f6a96 #06203a;
   background:
     radial-gradient(circle 2px at 3px 3px, rgba(180, 230, 255, 0.7) 40%, transparent 65%),
@@ -8574,12 +8604,40 @@ body.game-over-active #battle-stats-btn {
   color: #a7dcff;
 }
 
-#chest-modal:has(.ice-chest-header) .chest-slot:hover {
+#chest-modal:has(.ice-chest-header) .chest-slot:hover,
+#chest-modal:has(.ice-chest-header) .chest-inv-slot.occupied:hover {
   border-color: #1c82b5 #28a6e0 #1e8ec2 #14668a;
   box-shadow:
     inset 0 0 0 1px rgba(120, 200, 255, 0.32),
     inset 0 2px 4px rgba(0, 0, 0, 0.55),
     0 0 16px rgba(110, 195, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+#chest-modal:has(.ice-chest-header) .chest-slot.occupied,
+#chest-modal:has(.ice-chest-header) .chest-inv-slot.occupied {
+  border-color: #2a719c;
+  color: #cdeeff;
+}
+
+#chest-modal:has(.ice-chest-header) .chest-party-tab {
+  border-color: #1f5f86;
+  background: rgba(4, 14, 26, 0.6);
+}
+
+#chest-modal:has(.ice-chest-header) .chest-party-tab:hover {
+  border-color: #7fd4ff;
+  background: rgba(26, 80, 118, 0.7);
+}
+
+#chest-modal:has(.ice-chest-header) .chest-party-tab.active {
+  border-color: #7fd4ff;
+  background: rgba(30, 95, 140, 0.5);
+  box-shadow: 0 0 12px rgba(110, 195, 255, 0.4), inset 0 0 8px rgba(110, 195, 255, 0.2);
+}
+
+#chest-modal:has(.ice-chest-header) #chest-sent-label {
+  color: #7fd4ff;
 }
 
 

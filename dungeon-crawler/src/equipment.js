@@ -5336,7 +5336,9 @@ export function useHand(memberIndex, hand, silent = false) {
   // before the swing fires.
   const ammoItem = m.equipment?.ammo;
   const ammoDef = ammoItem ? getItemDef(ammoItem.name) : null;
-  const primaryElement = getPrimaryAttackElement(def, ammoDef);
+  const relicItem = m.equipment?.relic;
+  const relicDef = relicItem ? (relicItem.elementalDamage ? relicItem : getItemDef(relicItem.name)) : null;
+  const primaryElement = getPrimaryAttackElement(def, ammoDef, relicDef);
   const isCombusting = !isSpell && skillsState.combust?.active && skillsState.combust?.actorName === m.name && now < skillsState.combust.expiresAt;
   const swipeElement = isCombusting ? 'fire' : primaryElement;
 
@@ -5620,7 +5622,9 @@ export function useWeaponSkill(memberIndex, hand) {
 
   const ammoItem = m.equipment?.ammo;
   const ammoDef = ammoItem ? getItemDef(ammoItem.name) : null;
-  const swipeElement = getPrimaryAttackElement(skillDef, ammoDef);
+  const relicItem = m.equipment?.relic;
+  const relicDef = relicItem ? (relicItem.elementalDamage ? relicItem : getItemDef(relicItem.name)) : null;
+  const swipeElement = getPrimaryAttackElement(skillDef, ammoDef, relicDef);
   // Sound: an explicit `sound` always wins. Otherwise rider-style skills fall
   // back to the generic weapon-skill sting, while spell-based skills keep the
   // spell's own native sound (already played by playAction) — no default sting.
